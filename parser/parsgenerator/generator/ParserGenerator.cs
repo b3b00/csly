@@ -16,8 +16,15 @@ namespace parser.parsergenerator.generator
     {
 
 
-        static IParser<T> BuildParser<T>(Type parserClass, ParserType parserType, string rootRule)
+        static ISyntaxParser<T> BuildSyntaxParser<T>(Type parserClass, ParserType parserType, string rootRule)
         {
+            return null;
+        }
+
+        static object BuildParser<T>(Type parserClass, ParserType parserType, string rootRule) {
+            ISyntaxParser<T> syntaxParser = BuildSyntaxParser(parserClass,parserType,rootRule);                        
+            // todo build visitor
+            // todo build wrapper arround visitor and syntaxparser
             return null;
         }
 
