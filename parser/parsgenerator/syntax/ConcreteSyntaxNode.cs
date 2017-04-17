@@ -10,7 +10,7 @@ namespace parser.parsergenerator.syntax
 
         public List<ConcreteSyntaxNode<T>> Children {get; set;}
 
-        public bool IsTerminal() {
+        public virtual bool IsTerminal() {
             return false;
         }
 

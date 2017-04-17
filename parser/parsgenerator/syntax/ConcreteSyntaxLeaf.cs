@@ -1,5 +1,4 @@
-using System;
-using System.Collections.Generic;
+
 using lexer;
 
 namespace parser.parsergenerator.syntax
@@ -9,7 +8,7 @@ namespace parser.parsergenerator.syntax
 
         public Token<T> Token {get; set;}
 
-        public bool IsTerminal() {
+        public override bool IsTerminal() {
             return true;
         }
 
