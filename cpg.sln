@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cpg", "cpg\cpg.csproj", "{E10CD5E3-0049-45C1-BE38-5D0EF074881D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserExample", "ParserExample\ParserExample.csproj", "{2215D9FB-5B34-43C4-A359-BFD101F728DA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E10CD5E3-0049-45C1-BE38-5D0EF074881D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E10CD5E3-0049-45C1-BE38-5D0EF074881D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E10CD5E3-0049-45C1-BE38-5D0EF074881D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E10CD5E3-0049-45C1-BE38-5D0EF074881D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2215D9FB-5B34-43C4-A359-BFD101F728DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2215D9FB-5B34-43C4-A359-BFD101F728DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2215D9FB-5B34-43C4-A359-BFD101F728DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2215D9FB-5B34-43C4-A359-BFD101F728DA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
