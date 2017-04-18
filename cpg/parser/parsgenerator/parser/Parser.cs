@@ -1,4 +1,5 @@
-﻿using parser.parsergenerator.generator;
+﻿using lexer;
+using parser.parsergenerator.generator;
 using parser.parsergenerator.parser;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,10 @@ namespace cpg.parser.parsgenerator.parser
             SyntaxParser = syntaxParser;
             Visitor = visitor;
         }
-        public object Parse(IList<T> tokens)
+
+
+       
+        public object Parse(IList<Token<T>> tokens)
         {
             object result = null;
             SyntaxParseResult<T> syntaxResult =  SyntaxParser.Parse(tokens);
