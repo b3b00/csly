@@ -19,7 +19,7 @@ namespace parser.parsergenerator.generator
             this.Configuration = conf;
         }
 
-        public object VisitSyntaxTree(ConcreteSyntaxNode<T> root)
+        public object VisitSyntaxTree(IConcreteSyntaxNode<T> root)
         {
             return Visit(root);
         }
