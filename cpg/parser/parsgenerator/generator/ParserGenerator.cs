@@ -97,24 +97,28 @@ namespace parser.parsergenerator.generator
             parserClass.GetMethods();
             methods.ForEach(m =>
             {
-                ReductionAttribute attr = (ReductionAttribute)m.GetCustomAttributes(typeof(ReductionAttribute), true)[0];
-                Tuple<string, string> ntAndRule = ExtractNTAndRule(attr.RuleString);
-                string key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
-                var delegMethod = Delegate.CreateDelegate(typeof(Functions.ReductionFunction), m);
-                functions[key] = delegMethod as ReductionFunction;
+                ReductionAttribute[] attributes = (ReductionAttribute[])m.GetCustomAttributes(typeof(ReductionAttribute), true);
 
-                Rule<T> r = BuildNonTerminal<T>(ntAndRule);
-                NonTerminal<T> nonT = null;
-                if (!nonTerminals.ContainsKey(ntAndRule.Item1))
+                foreach (ReductionAttribute attr in attributes)
                 {
-                    nonT = new NonTerminal<T>(ntAndRule.Item1, new List<Rule<T>>());
+                    Tuple<string, string> ntAndRule = ExtractNTAndRule(attr.RuleString);
+                    string key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
+                    var delegMethod = Delegate.CreateDelegate(typeof(Functions.ReductionFunction), m);
+                    functions[key] = delegMethod as ReductionFunction;
+
+                    Rule<T> r = BuildNonTerminal<T>(ntAndRule);
+                    NonTerminal<T> nonT = null;
+                    if (!nonTerminals.ContainsKey(ntAndRule.Item1))
+                    {
+                        nonT = new NonTerminal<T>(ntAndRule.Item1, new List<Rule<T>>());
+                    }
+                    else
+                    {
+                        nonT = nonTerminals[ntAndRule.Item1];
+                    }
+                    nonT.Rules.Add(r);
+                    nonTerminals[ntAndRule.Item1] = nonT;
                 }
-                else
-                {
-                    nonT = nonTerminals[ntAndRule.Item1];
-                }
-                nonT.Rules.Add(r);
-                nonTerminals[ntAndRule.Item1] = nonT;
 
 
 
@@ -165,7 +169,7 @@ namespace parser.parsergenerator.generator
                 }
             }
             rule.Clauses = clauses;
-
+            rule.Key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
 
             return rule;
         }

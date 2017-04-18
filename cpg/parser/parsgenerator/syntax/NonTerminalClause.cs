@@ -8,9 +8,9 @@ namespace parser.parsergenerator.syntax
         {
             NonTerminalName = name;
         }
-        public object Check(T nextToken)
+        public bool Check(T nextToken)
         {
-            return null;
+            return true;
         }
 
     }

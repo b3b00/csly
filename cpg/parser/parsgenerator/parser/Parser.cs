@@ -1,6 +1,7 @@
 ﻿using lexer;
 using parser.parsergenerator.generator;
 using parser.parsergenerator.parser;
+using parser.parsergenerator.syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,16 +19,20 @@ namespace cpg.parser.parsgenerator.parser
         }
 
 
-       
+
         public object Parse(IList<Token<T>> tokens)
         {
-            object result = null;
-            SyntaxParseResult<T> syntaxResult =  SyntaxParser.Parse(tokens);
+            List<object> result = new List<object>();
+            SyntaxParseResult<T> syntaxResult = SyntaxParser.Parse(tokens);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
-                result = Visitor.VisitSyntaxTree(syntaxResult.Root);
+
+                var r = Visitor.VisitSyntaxTree(syntaxResult.Root);
+                result.Add(r);
             }
             return result;
         }
+
     }
 }
+

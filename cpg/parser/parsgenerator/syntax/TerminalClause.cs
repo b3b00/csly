@@ -10,8 +10,8 @@ namespace parser.parsergenerator.syntax
         public TerminalClause(T token) {
             ExpectedToken = token;
         }
-        public object Check(T nextToken) {
-            return null;
+        public bool Check(T nextToken) {
+            return nextToken.Equals(ExpectedToken);
         }
 
     }
