@@ -8,11 +8,13 @@ using cpg.parser.parsgenerator.generator;
 using static cpg.parser.parsgenerator.generator.Functions;
 using parser.parsergenerator.syntax;
 using cpg.parser.parsgenerator.parser.llparser;
+using cpg.parser.parsgenerator.parser;
 
 namespace parser.parsergenerator.generator
 {
 
-    public enum ParserType {
+    public enum ParserType
+    {
         LL = 1,
         LR = 2,
 
@@ -29,16 +31,15 @@ namespace parser.parsergenerator.generator
     public class ParserGenerator
     {
 
-
-        public static ISyntaxParser<T> BuildSyntaxParser<T>(Type parserClass, ParserType parserType, string rootRule)
+        #region API
+        public static ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType, string rootRule)
         {
             ISyntaxParser<T> parser = null;
-            ParserConfiguration<T> conf = ExtractParserInformation<T>(parserClass);
-            switch(parserType)
+            switch (parserType)
             {
                 case ParserType.LL:
                     {
-                        parser = new LLSyntaxParser<T>(conf,rootRule);
+                        parser = new LLSyntaxParser<T>(conf, rootRule);
                         break;
                     }
                 default:
@@ -50,16 +51,20 @@ namespace parser.parsergenerator.generator
             return parser;
         }
 
-        public static object BuildParser<T>(Type parserClass, ParserType parserType, string rootRule) {
-            ParserConfiguration<T> configuration = ExtractParserInformation<T>(parserClass);
-            ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(parserClass,parserType,rootRule);                        
-            // todo build visitor
-            // todo build wrapper arround visitor and syntaxparser
-            return null;
+        public static Parser<T> BuildParser<T>(Type parserClass, ParserType parserType, string rootRule)
+        {
+            ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserClass,rootRule);
+            ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
+            ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration);
+            Parser<T> parser = new Parser<T>(syntaxParser, visitor);
+            return parser;
         }
 
+        #endregion
 
-        static Tuple<string,string> ExtractNTAndRule(string ruleString)
+        #region CONFIGURATION
+
+        static Tuple<string, string> ExtractNTAndRule(string ruleString)
         {
             Tuple<string, string> result = null;
             string nt = "";
@@ -67,16 +72,16 @@ namespace parser.parsergenerator.generator
             int i = ruleString.IndexOf(":");
             if (i > 0)
             {
-                nt = ruleString.Substring(0, i);
+                nt = ruleString.Substring(0, i).Trim();
                 rule = ruleString.Substring(i + 1);
                 result = new Tuple<string, string>(nt, rule);
             }
-            
+
             return result;
         }
 
 
-        static private ParserConfiguration<T> ExtractParserInformation<T>(Type parserClass)
+        static private ParserConfiguration<T> ExtractParserConfiguration<T>(Type parserClass, string rootRule)
         {
             ParserConfiguration<T> conf = new ParserConfiguration<T>();
             Dictionary<string, Functions.ReductionFunction> functions = new Dictionary<string, ReductionFunction>();
@@ -88,7 +93,7 @@ namespace parser.parsergenerator.generator
                 Attribute attr = attributes.Find(a => a.GetType() == typeof(ReductionAttribute));
                 return attr != null;
             }).ToList<MethodInfo>();
-            
+
             parserClass.GetMethods();
             methods.ForEach(m =>
             {
@@ -114,18 +119,23 @@ namespace parser.parsergenerator.generator
 
 
             });
+
+           
+
             conf.Functions = functions;
             conf.NonTerminals = nonTerminals;
+
+            InitializeStartingTokens(conf, rootRule);
             return conf;
         }
 
         static private Rule<T> BuildNonTerminal<T>(Tuple<string, string> ntAndRule)
         {
-            Rule<T> rule = new Rule<T>(); 
-            
+            Rule<T> rule = new Rule<T>();
+
             List<Clause<T>> clauses = new List<Clause<T>>();
             string ruleString = ntAndRule.Item2;
-            string[] clausesString = ruleString.Split(new char[] { ' ' },StringSplitOptions.RemoveEmptyEntries);
+            string[] clausesString = ruleString.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string item in clausesString)
             {
                 Clause<T> clause = null;
@@ -156,9 +166,58 @@ namespace parser.parsergenerator.generator
             }
             rule.Clauses = clauses;
 
-           
+
             return rule;
         }
+
+        static private void InitializeStartingTokens<T>(ParserConfiguration<T> configuration, string root)
+        {
+            
+
+            Dictionary<string, NonTerminal<T>> nts = configuration.NonTerminals;
+
+
+            InitStartingTokensForNT(nts, root);
+        }
+
+        static private void InitStartingTokensForNT<T>(Dictionary<string, NonTerminal<T>> nonTerminals, string name)
+        {
+            if (nonTerminals.ContainsKey(name))
+            {
+                NonTerminal<T> nt = nonTerminals[name];
+                nt.Rules.ForEach(r => InitStartingTokensForRule<T>(nonTerminals, r));
+             }
+            return;
+        }
+
+        static private void InitStartingTokensForRule<T>(Dictionary<string, NonTerminal<T>> nonTerminals, Rule<T> rule)
+        {
+           if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
+            {
+                rule.PossibleLeadingTokens = new List<T>();
+                Clause<T> first = rule.Clauses[0];
+                if (first is TerminalClause<T>)
+                {
+                    TerminalClause<T> term = first as TerminalClause<T>;
+                    rule.PossibleLeadingTokens.Add(term.ExpectedToken);
+                }
+                else
+                {
+                    NonTerminalClause<T> nonterm = first as NonTerminalClause<T>;
+                    InitStartingTokensForNT<T>(nonTerminals, nonterm.NonTerminalName);
+                    NonTerminal<T> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
+                    firstNonTerminal.Rules.ForEach(r =>
+                    {
+                        rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
+                    });
+                }
+                
+            }
+        }
+
+        #endregion
+
+
 
     }
 }

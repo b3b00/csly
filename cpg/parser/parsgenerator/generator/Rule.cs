@@ -19,7 +19,7 @@ namespace cpg.parser.parsgenerator.generator
         public string Key { get; set; }
 
         public List<Clause<T>> Clauses { get; set; }
-        public List<Token<T>> PossibleLeadingTokens { get; set; }
+        public List<T> PossibleLeadingTokens { get; set; }
 
         public Functions.ReductionFunction Function { get; set; } 
 
