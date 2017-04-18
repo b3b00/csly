@@ -1,8 +1,9 @@
 ﻿using cpg.parser.parsgenerator;
+using cpg.parser.parsgenerator.parser;
 using lexer;
 using parser.parsergenerator.generator;
 using parser.parsergenerator.parser;
-using System;
+using System.Linq;
 using System.Collections.Generic;
 
 
@@ -28,6 +29,8 @@ namespace ParserExample.cs
             lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.WS, "[ \\t]+", true));
             lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.EOL, "[\\n\\r]+", true, true));
             lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.a, "a"));
+            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.b, "b"));
+            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.c, "c"));
             return lexer;
         }
 
@@ -44,8 +47,11 @@ namespace ParserExample.cs
         }
 
         static void Main(string[] args)
-        {            
-            object parser = ParserGenerator.BuildParser< TokenType>(typeof(Program), ParserType.LL, "R");
+        {
+            Parser<TokenType> parser = ParserGenerator.BuildParser<TokenType>(typeof(Program), ParserType.LL, "R");
+            Lexer<TokenType> lexer = BuildLexer();
+            List<Token<TokenType>> tokens = lexer.Tokenize("a b c").ToList<Token<TokenType>>();
+            parser.Parse(tokens)
             ;
         }
     }

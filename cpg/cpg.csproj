@@ -4,4 +4,6 @@
     <TargetFramework>net45</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
+
 </Project>
