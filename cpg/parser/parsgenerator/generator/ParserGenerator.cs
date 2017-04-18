@@ -7,6 +7,7 @@ using cpg.parser.parsgenerator.generator;
 
 using static cpg.parser.parsgenerator.generator.Functions;
 using parser.parsergenerator.syntax;
+using cpg.parser.parsgenerator.parser.llparser;
 
 namespace parser.parsergenerator.generator
 {
@@ -31,8 +32,22 @@ namespace parser.parsergenerator.generator
 
         public static ISyntaxParser<T> BuildSyntaxParser<T>(Type parserClass, ParserType parserType, string rootRule)
         {
-            
-            return null;
+            ISyntaxParser<T> parser = null;
+            ParserConfiguration<T> conf = ExtractParserInformation<T>(parserClass);
+            switch(parserType)
+            {
+                case ParserType.LL:
+                    {
+                        parser = new LLSyntaxParser<T>(conf,rootRule);
+                        break;
+                    }
+                default:
+                    {
+                        parser = null;
+                        break;
+                    }
+            }
+            return parser;
         }
 
         public static object BuildParser<T>(Type parserClass, ParserType parserType, string rootRule) {
