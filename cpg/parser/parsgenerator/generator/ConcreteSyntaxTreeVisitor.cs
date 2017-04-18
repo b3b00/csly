@@ -1,6 +1,7 @@
 using System;
 using parser.parsergenerator.syntax;
 using System.Collections.Generic;
+using cpg.parser.parsgenerator.syntax;
 
 namespace parser.parsergenerator.generator
 {
@@ -21,6 +22,18 @@ namespace parser.parsergenerator.generator
         public object VisitSyntaxTree(ConcreteSyntaxNode<T> root)
         {
             return Visit(root);
+        }
+
+        private object Visit(IConcreteSyntaxNode<T> n)
+        {
+            if (n.IsTerminal())
+            {
+                return Visit(n as ConcreteSyntaxLeaf<T>);
+            }
+            else
+            {
+                return Visit(n as ConcreteSyntaxNode<T>);
+            }
         }
 
         private object Visit(ConcreteSyntaxNode<T> node)
