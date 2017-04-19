@@ -9,5 +9,6 @@ namespace parser.parsergenerator.parser
 
         SyntaxParseResult<T> Parse(IList<Token<T>> tokens);
 
+
     }
 }

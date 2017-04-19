@@ -17,9 +17,7 @@ namespace cpg.parser.parsgenerator.parser
             SyntaxParser = syntaxParser;
             Visitor = visitor;
         }
-
-
-
+        
         public object Parse(IList<Token<T>> tokens)
         {
             List<object> result = new List<object>();

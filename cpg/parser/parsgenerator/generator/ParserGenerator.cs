@@ -9,6 +9,7 @@ using static cpg.parser.parsgenerator.generator.Functions;
 using parser.parsergenerator.syntax;
 using cpg.parser.parsgenerator.parser.llparser;
 using cpg.parser.parsgenerator.parser;
+using lexer;
 
 namespace parser.parsergenerator.generator
 {
@@ -30,6 +31,8 @@ namespace parser.parsergenerator.generator
 
     public class ParserGenerator
     {
+
+        
 
         #region API
         public static ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType, string rootRule)
@@ -54,6 +57,7 @@ namespace parser.parsergenerator.generator
         public static Parser<T> BuildParser<T>(Type parserClass, ParserType parserType, string rootRule)
         {
             ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserClass,rootRule);
+            //Lexer<T> lexer = BuildLexer<T>(parserClass);
             ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
             ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration);
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
@@ -80,6 +84,26 @@ namespace parser.parsergenerator.generator
             return result;
         }
 
+
+        static private Lexer<T> BuildLexer<T>(Type parserClass)
+        {
+            Lexer<T> lexer = null;
+            List < MethodInfo > methods = parserClass.GetMethods().ToList<MethodInfo>();
+            methods = methods.Where(m =>
+            {
+                List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>().ToList<Attribute>();
+                Attribute attr = attributes.Find(a => a.GetType() == typeof(LexerConfigurationAttribute));
+                return attr != null;
+            }).ToList<MethodInfo>();
+            if (methods.Count > 0)
+            {
+                MethodInfo lexerConfigurerMethod = methods[0];
+                lexer = new Lexer<T>();
+                object res = lexerConfigurerMethod.Invoke(null, new object[] { lexer });
+                //lexer = res as Lexer<T>;
+            }
+            return lexer;
+        }
 
         static private ParserConfiguration<T> ExtractParserConfiguration<T>(Type parserClass, string rootRule)
         {
@@ -199,21 +223,24 @@ namespace parser.parsergenerator.generator
            if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
             {
                 rule.PossibleLeadingTokens = new List<T>();
-                Clause<T> first = rule.Clauses[0];
-                if (first is TerminalClause<T>)
+                if (rule.Clauses.Count > 0)
                 {
-                    TerminalClause<T> term = first as TerminalClause<T>;
-                    rule.PossibleLeadingTokens.Add(term.ExpectedToken);
-                }
-                else
-                {
-                    NonTerminalClause<T> nonterm = first as NonTerminalClause<T>;
-                    InitStartingTokensForNT<T>(nonTerminals, nonterm.NonTerminalName);
-                    NonTerminal<T> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
-                    firstNonTerminal.Rules.ForEach(r =>
+                    Clause<T> first = rule.Clauses[0];
+                    if (first is TerminalClause<T>)
                     {
-                        rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
-                    });
+                        TerminalClause<T> term = first as TerminalClause<T>;
+                        rule.PossibleLeadingTokens.Add(term.ExpectedToken);
+                    }
+                    else
+                    {
+                        NonTerminalClause<T> nonterm = first as NonTerminalClause<T>;
+                        InitStartingTokensForNT<T>(nonTerminals, nonterm.NonTerminalName);
+                        NonTerminal<T> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
+                        firstNonTerminal.Rules.ForEach(r =>
+                        {
+                            rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
+                        });
+                    }
                 }
                 
             }

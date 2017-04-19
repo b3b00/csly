@@ -13,5 +13,7 @@ namespace parser.parsergenerator.parser
 
         public int EndingPosition { get; set; }
 
+        public bool IsEnded { get; set; }
+
     }
 }
