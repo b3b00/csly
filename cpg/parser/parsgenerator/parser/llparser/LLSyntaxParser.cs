@@ -38,13 +38,15 @@ namespace cpg.parser.parsgenerator.parser.llparser
 
         public string StartingNonTerminal { get; set; }
 
+      
         public LLSyntaxParser(ParserConfiguration<T> configuration, string startingNonTerminal)
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
         }
 
-        public SyntaxParseResult<T> Parse(IList<Token<T>> tokens)
+        
+            public SyntaxParseResult<T> Parse(IList<Token<T>> tokens)
         {
             Dictionary<string, NonTerminal<T>> NonTerminals = Configuration.NonTerminals;
 
@@ -56,17 +58,27 @@ namespace cpg.parser.parsgenerator.parser.llparser
 
             List<ParserState<T>> branches = rules.Select(r => new ParserState<T>(0, r, tokens)).ToList<ParserState<T>>();
             branches.Reverse();
-
+            List<SyntaxParseResult<T>> rs = new List<SyntaxParseResult<T>>();
             foreach (Rule<T> rule in rules)
             {
                 SyntaxParseResult<T> r = Parse(tokens, rule, 0);
-                if (!r.IsError)
+                if (!r.IsError) 
                 {
-                    return r;
+                    rs.Add(r);
                 }
             }
+            SyntaxParseResult<T> result = null;
 
-            return null;
+            // TODO choisir la solution qui a tout consommé !! ou ERROR
+            if (rs.Count > 0)
+            {
+                result = rs.Find(r => r.IsEnded && !r.IsError);
+            }
+            if (result == null) {             
+                result = new SyntaxParseResult<T>();
+                result.IsError = true;
+            }
+            return result;
 
         }
 
@@ -99,13 +111,19 @@ namespace cpg.parser.parsgenerator.parser.llparser
                             bool found = false;
                             int i = 0;
 
-                            List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList<Rule<T>>();
+                            bool eos = tokens[currentPosition].IsEndOfStream;
+                            List<T> allAcceptableTokens = new List<T>();
+                            nt.Rules.ForEach(r => allAcceptableTokens.AddRange(r.PossibleLeadingTokens));
+                            bool notInOthers = !allAcceptableTokens.Contains(tokens[currentPosition].TokenID);
+                            bool canAddEmptyRule = notInOthers || eos;
+                            ;
+                            List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.IsEmpty && canAddEmptyRule).ToList<Rule<T>>();
 
                             while (!found && i < rules.Count)
                             {
                                 Rule<T> innerrule = rules[i];
-                                SyntaxParseResult<T> innerRuleRes = Parse(tokens, innerrule, currentPosition);                                
-                                if(!innerRuleRes.IsError)
+                                SyntaxParseResult<T> innerRuleRes = Parse(tokens, innerrule, currentPosition);
+                                if (!innerRuleRes.IsError)
                                 {
                                     children.Add(innerRuleRes.Root);
                                 }
@@ -124,12 +142,14 @@ namespace cpg.parser.parsgenerator.parser.llparser
 
             SyntaxParseResult<T> result = new SyntaxParseResult<T>();
             result.IsError = isError;
-            if (!isError) {
+            if (!isError)
+            {                
                 ConcreteSyntaxNode<T> node = new ConcreteSyntaxNode<T>(rule.Key, children);
                 result.Root = node;
-                result.EndingPosition = currentPosition;                
+                result.EndingPosition = currentPosition;
+                result.IsEnded = currentPosition >= tokens.Count-1;
             }
-            
+
 
             return result;
         }

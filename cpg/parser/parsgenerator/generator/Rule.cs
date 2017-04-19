@@ -23,5 +23,12 @@ namespace cpg.parser.parsgenerator.generator
 
         public Functions.ReductionFunction Function { get; set; } 
 
+        public bool IsEmpty { get
+            {
+                return Clauses == null
+                    || Clauses.Count == 0
+                    || (Clauses.Count == 1 && Clauses[0] is EmptyClause<T>);
+            } }
+
     }
 }

@@ -19,6 +19,16 @@ namespace lexer
             TokenID = DefaultToken;
         }
 
+        public bool IsEndOfStream
+        {
+            get
+            {
+                return TokenID.Equals(DefaultToken);
+            }
+            private set {
+            }
+        }
+
         public TokenPosition Position { get; set; }
         public  T TokenID { get; set; }
         public string Value { get; set; }
