@@ -83,11 +83,23 @@ namespace cpg.parser.parsgenerator.parser.llparser
         }
 
 
+        private string UnexpectedToken<T>(Token<T> token, params T[] possibleTokens)
+        {
+            string msg = $"unexpected {token.TokenID}[{token.Value}] at {token.Position}. expecting ";
+            foreach (T t in possibleTokens)
+            {
+                msg += t.ToString() + ", ";
+            }
+            return msg;
+        }
+
         public SyntaxParseResult<T> Parse(IList<Token<T>> tokens, Rule<T> rule, int position)
         {
             int currentPosition = position;
+            List<string> errors = new List<string>();
             bool isError = false;
             List<IConcreteSyntaxNode<T>> children = new List<IConcreteSyntaxNode<T>>();
+            string leadingToken = tokens[position].Value;
             if (rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
             {
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
@@ -102,6 +114,11 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                 children.Add(termRes.Root);
                                 currentPosition = termRes.EndingPosition;
                             }
+                            else
+                            {
+                                Token<T> tok = tokens[currentPosition];
+                                errors.Add(UnexpectedToken<T>(tokens[currentPosition], ((TerminalClause<T>)clause).ExpectedToken));                                
+                            }
                             isError = isError && termRes.IsError;
                         }
                         else if (clause is NonTerminalClause<T>)
@@ -113,11 +130,26 @@ namespace cpg.parser.parsgenerator.parser.llparser
 
                             bool eos = tokens[currentPosition].IsEndOfStream;
                             List<T> allAcceptableTokens = new List<T>();
-                            nt.Rules.ForEach(r => allAcceptableTokens.AddRange(r.PossibleLeadingTokens));
+                            nt.Rules.ForEach(r =>
+                            {
+                                if (r != null && r.PossibleLeadingTokens != null) {
+                                    allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
+                                    }
+                                else
+                                {
+                                    ;
+                                }
+                                });
                             bool notInOthers = !allAcceptableTokens.Contains(tokens[currentPosition].TokenID);
                             bool canAddEmptyRule = notInOthers || eos;
                             ;
                             List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.IsEmpty && canAddEmptyRule).ToList<Rule<T>>();
+
+                            if (rules.Count == 0)
+                            {
+                                isError = true;
+                                errors.Add(UnexpectedToken<T>(tokens[currentPosition], allAcceptableTokens.ToArray()));
+                            }
 
                             while (!found && i < rules.Count)
                             {
@@ -126,15 +158,24 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                 if (!innerRuleRes.IsError)
                                 {
                                     children.Add(innerRuleRes.Root);
+                                    found = true;
                                 }
                                 isError = isError && innerRuleRes.IsError;
-                                currentPosition = innerRuleRes.EndingPosition;
+                                currentPosition = innerRuleRes.EndingPosition;                                
                                 i++;
                             }
                         }
+                        else
+                        {
+                            ;
+                        }                        
                         if (isError)
                         {
                             break;
+                        }
+                        else
+                        {
+                            ;
                         }
                     }
                 }
@@ -148,6 +189,10 @@ namespace cpg.parser.parsgenerator.parser.llparser
                 result.Root = node;
                 result.EndingPosition = currentPosition;
                 result.IsEnded = currentPosition >= tokens.Count-1;
+            }
+            else
+            {
+                result.Errors = errors;
             }
 
 

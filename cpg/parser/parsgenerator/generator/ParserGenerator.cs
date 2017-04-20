@@ -206,6 +206,16 @@ namespace parser.parsergenerator.generator
 
 
             InitStartingTokensForNT(nts, root);
+            foreach (NonTerminal<T> nt in nts.Values)
+            {
+                foreach (Rule<T> rule in nt.Rules)
+                {
+                    if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
+                    {
+                        InitStartingTokensForRule<T>(nts, rule);
+                    }
+                }
+            }
         }
 
         static private void InitStartingTokensForNT<T>(Dictionary<string, NonTerminal<T>> nonTerminals, string name)
@@ -214,7 +224,7 @@ namespace parser.parsergenerator.generator
             {
                 NonTerminal<T> nt = nonTerminals[name];
                 nt.Rules.ForEach(r => InitStartingTokensForRule<T>(nonTerminals, r));
-             }
+            }            
             return;
         }
 

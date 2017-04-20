@@ -18,6 +18,13 @@ namespace parser.parsergenerator.syntax
             this.Children = children;
         }
 
+        public override string ToString()
+        {
+            string r = Name+"(\n";
+            Children.ForEach(c => r += c.ToString() + ",\n");
+            return r+"\n)";
+        }
+
         public bool IsTerminal() {
             return false;
         }

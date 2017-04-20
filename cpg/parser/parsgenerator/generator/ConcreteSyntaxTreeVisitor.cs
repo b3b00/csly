@@ -26,14 +26,23 @@ namespace parser.parsergenerator.generator
 
         private object Visit(IConcreteSyntaxNode<T> n)
         {
-            if (n.IsTerminal())
+            IConcreteSyntaxNode<T> visited = null;
+            if (n is ConcreteSyntaxLeaf<T>)
             {
                 return Visit(n as ConcreteSyntaxLeaf<T>);
             }
-            else
+            else if (n is ConcreteSyntaxEpsilon<T>)
+            {
+                return Visit(n as ConcreteSyntaxEpsilon<T>);
+            }
+            else if (n is ConcreteSyntaxNode<T>)
             {
                 return Visit(n as ConcreteSyntaxNode<T>);
             }
+            else
+            {
+                return null;
+            }            
         }
 
         private object Visit(ConcreteSyntaxNode<T> node)
@@ -42,14 +51,21 @@ namespace parser.parsergenerator.generator
             if (Configuration.Functions.ContainsKey(node.Name))
             {
                 List<object> args = new List<object>();
-                node.Children.ForEach(n =>
+                int i = 0;
+                foreach (IConcreteSyntaxNode<T> n in node.Children)
                 {
                     object v = Visit(n);
                     if (v != null)
                     {
                         args.Add(v);
                     }
-                });
+                    else
+                    {
+                        ;
+                    }
+                    i++;
+
+                }
                 result = Configuration.Functions[node.Name].Invoke(args);
             }
             return result;

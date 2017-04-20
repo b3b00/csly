@@ -33,6 +33,19 @@ namespace lexer
         public  T TokenID { get; set; }
         public string Value { get; set; }
 
+        public int IntValue { get {
+                return int.Parse(Value);
+            } set { } }
+
+        public double DoubleValue
+        {
+            get
+            {
+                return double.Parse(Value.Replace(".",","));
+            }
+            set { }
+        }
+
         public bool End { get; set; }
 
         public override string ToString()
