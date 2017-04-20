@@ -85,17 +85,17 @@ namespace ParserExample
         public static object Properties(List<object> args)
         {
             Dictionary<string, object> r = new Dictionary<string, object>();
-            if (args.Count == 2 || args.Count == 3 || args.Count == 4) 
+            if (args.Count == 2 || args.Count == 3)// || args.Count == 4) 
             {
                 KeyValuePair<string, object> pair = (KeyValuePair<string, object>)args[0];
                 Dictionary<string, object> dico = (Dictionary<string, object>)args[args.Count-1];                
                 r[pair.Key] = pair.Value;
-
-                if (args.Count == 4)
-                {
-                    Dictionary<string, object> dico2 = (Dictionary<string, object>)args[args.Count - 2];
-                    r.Merge(dico2);
-                }
+                r.Merge(dico);
+                //if (args.Count == 4)
+                //{
+                //    Dictionary<string, object> dico2 = (Dictionary<string, object>)args[args.Count - 2];
+                //    r.Merge(dico2);
+                //}
             }           
             else 
             {

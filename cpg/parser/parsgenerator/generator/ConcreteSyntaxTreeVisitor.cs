@@ -51,7 +51,8 @@ namespace parser.parsergenerator.generator
             if (Configuration.Functions.ContainsKey(node.Name))
             {
                 List<object> args = new List<object>();
-                node.Children.ForEach(n =>
+                int i = 0;
+                foreach (IConcreteSyntaxNode<T> n in node.Children)
                 {
                     object v = Visit(n);
                     if (v != null)
@@ -62,7 +63,9 @@ namespace parser.parsergenerator.generator
                     {
                         ;
                     }
-                });
+                    i++;
+
+                }
                 result = Configuration.Functions[node.Name].Invoke(args);
             }
             return result;

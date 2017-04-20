@@ -99,6 +99,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
             List<string> errors = new List<string>();
             bool isError = false;
             List<IConcreteSyntaxNode<T>> children = new List<IConcreteSyntaxNode<T>>();
+            string leadingToken = tokens[position].Value;
             if (rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
             {
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
@@ -157,23 +158,24 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                 if (!innerRuleRes.IsError)
                                 {
                                     children.Add(innerRuleRes.Root);
-                                }
-                                else
-                                {
-                                    ;
+                                    found = true;
                                 }
                                 isError = isError && innerRuleRes.IsError;
-                                currentPosition = innerRuleRes.EndingPosition;
+                                currentPosition = innerRuleRes.EndingPosition;                                
                                 i++;
                             }
                         }
                         else
                         {
                             ;
-                        }
+                        }                        
                         if (isError)
                         {
                             break;
+                        }
+                        else
+                        {
+                            ;
                         }
                     }
                 }
