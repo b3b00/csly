@@ -157,10 +157,10 @@ namespace ParserExample
         public static object Values(List<object> args)
         {
             List<object> r = new List<object>();
-            if (args.Count == 3)
+            if (args.Count == 3 || args.Count == 2)
             {
                 r.Add(args[0]);
-                List<object> tail = args[2] as List<object>;
+                List<object> tail = args[args.Count-1] as List<object>;
                 if (tail != null) {
                     r.AddRange(tail);
                 }
