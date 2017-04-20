@@ -75,8 +75,7 @@ namespace ParserExample
 
         [Reduction("object : ACCG properties ACCD ")]
         public static object Object(List<object> args)
-        {
-            
+        {            
             return args[1];
         }
 
@@ -141,22 +140,30 @@ namespace ParserExample
         }
 
 
+        [Reduction("value : list")]
+        public static object ListProperty(List<object> args)
+        {
+            return args[0];
+        }
+
         [Reduction("list : CROG values CROD")]
         public static object List(List<object> args)
         {
             return (List<object>)args[1];
         }
 
-        [Reduction("values : value COMMA list")]
+        [Reduction("values : value COMMA values")]
         [Reduction("values :")]
         public static object Values(List<object> args)
         {
             List<object> r = new List<object>();
             if (args.Count == 3)
             {
-                r.Add((args[0] as Token<JsonToken>).Value);
-                List<string> tail = args[2] as List<string>;
-                r.AddRange(tail);
+                r.Add(args[0]);
+                List<object> tail = args[2] as List<object>;
+                if (tail != null) {
+                    r.AddRange(tail);
+                }
                 return r;
                 ;
             }

@@ -99,11 +99,30 @@ namespace ParserExample.cs
             //;
 
             string json = "{\"int\" :42,\"str\":\"hello\",\"dbl\":42.42,\"vrai\":true,\"faux\":false}";
-            json = "{\"int\" :42,\"str\":\"hello\",\"o\":{\"o1\":1,\"o2\":2,\"o3\":true}}";
-            Lexer < JsonToken > lexer = JSONParser.BuildJsonLexer();
+            Lexer<JsonToken> lexer = JSONParser.BuildJsonLexer();
             IList<Token<JsonToken>> tokens = lexer.Tokenize(json).ToList<Token<JsonToken>>();
             Parser<JsonToken> parser = ParserGenerator.BuildParser<JsonToken>(typeof(JSONParser), ParserType.LL, "root");
             var res = parser.Parse(tokens);
+            ;
+
+            json = "{\"int\" :42,\"str\":\"hello\",\"o\":{\"o1\":1,\"o2\":2,\"o3\":true}}";
+            tokens = lexer.Tokenize(json).ToList<Token<JsonToken>>();
+            res = parser.Parse(tokens);
+            ;
+
+            json = "{}";
+            tokens = lexer.Tokenize(json).ToList<Token<JsonToken>>();
+            res = parser.Parse(tokens);
+            ;
+
+            json = "{\"int\" :42,\"str\":\"hello\",\"o\":{\"o1\":1,\"o2\":2,\"o3\":true}}";
+            tokens = lexer.Tokenize(json).ToList<Token<JsonToken>>();
+            res = parser.Parse(tokens);
+            ;
+
+            json = "{\"lst\" :[1,2,true,{}]}";
+            tokens = lexer.Tokenize(json).ToList<Token<JsonToken>>();
+            res = parser.Parse(tokens);
             ;
         }
     }
