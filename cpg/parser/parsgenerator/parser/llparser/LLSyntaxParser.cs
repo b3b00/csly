@@ -226,9 +226,9 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                 {
                                     children.Add(innerRuleRes.Root);
                                     found = true;
+                                    currentPosition = innerRuleRes.EndingPosition;
                                 }
-                                isError = isError && innerRuleRes.IsError; // todo check ! : previously ||
-                                currentPosition = innerRuleRes.EndingPosition;
+                                isError = isError && innerRuleRes.IsError; // todo check ! : previously ||                                
                                 i++;
                             }
                         }

@@ -20,13 +20,12 @@ namespace cpg.parser.parsgenerator.parser
         
         public object Parse(IList<Token<T>> tokens)
         {
-            List<object> result = new List<object>();
+            object result = null;
             SyntaxParseResult<T> syntaxResult = SyntaxParser.Parse(tokens);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
 
-                var r = Visitor.VisitSyntaxTree(syntaxResult.Root);
-                result.Add(r);
+                result = Visitor.VisitSyntaxTree(syntaxResult.Root);                
             }
             return result;
         }
