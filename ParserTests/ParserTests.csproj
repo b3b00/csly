@@ -48,6 +48,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="JsonTests.cs" />
     <Compile Include="VisitorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -58,6 +59,10 @@
     <ProjectReference Include="..\cpg\cpg.csproj">
       <Project>{e10cd5e3-0049-45c1-be38-5d0ef074881d}</Project>
       <Name>cpg</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\jsonparser\jsonparser.csproj">
+      <Project>{a0a0a026-c902-4646-a22e-bd5bbcd4ab6a}</Project>
+      <Name>jsonparser</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
