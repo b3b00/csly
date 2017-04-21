@@ -91,6 +91,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                     {
                         TerminalClause<T> term = first as TerminalClause<T>;
                         rule.PossibleLeadingTokens.Add(term.ExpectedToken);
+                        rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<T>().ToList<T>();
                     }
                     else
                     {
@@ -101,6 +102,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                         {
                             rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
                         });
+                        rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<T>().ToList<T>();
                     }
                 }
 
@@ -114,15 +116,11 @@ namespace cpg.parser.parsgenerator.parser.llparser
         public SyntaxParseResult<T> Parse(IList<Token<T>> tokens)
         {
             Dictionary<string, NonTerminal<T>> NonTerminals = Configuration.NonTerminals;
-
-            Stack<ParserState<T>> stack = new Stack<ParserState<T>>();
-
+                        
             NonTerminal<T> nt = NonTerminals[StartingNonTerminal];
 
             List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList<Rule<T>>();
-
-            List<ParserState<T>> branches = rules.Select(r => new ParserState<T>(0, r, tokens)).ToList<ParserState<T>>();
-            branches.Reverse();
+            
             List<SyntaxParseResult<T>> rs = new List<SyntaxParseResult<T>>();
             foreach (Rule<T> rule in rules)
             {
@@ -186,7 +184,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                 Token<T> tok = tokens[currentPosition];
                                 errors.Add(UnexpectedToken<T>(tokens[currentPosition], ((TerminalClause<T>)clause).ExpectedToken));
                             }
-                            isError = isError && termRes.IsError;
+                            isError = isError || termRes.IsError;
                         }
                         else if (clause is NonTerminalClause<T>)
                         {
@@ -201,13 +199,14 @@ namespace cpg.parser.parsgenerator.parser.llparser
                             {
                                 if (r != null && r.PossibleLeadingTokens != null)
                                 {
-                                    allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
+                                    allAcceptableTokens.AddRange(r.PossibleLeadingTokens); 
                                 }
                                 else
                                 {
                                     ;
                                 }
-                            });
+                            }); // todo distinct 
+                            allAcceptableTokens = allAcceptableTokens.Distinct<T>().ToList<T>();
                             bool notInOthers = !allAcceptableTokens.Contains(tokens[currentPosition].TokenID);
                             bool canAddEmptyRule = notInOthers || eos;
                             ;
@@ -228,7 +227,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                     children.Add(innerRuleRes.Root);
                                     found = true;
                                 }
-                                isError = isError && innerRuleRes.IsError;
+                                isError = isError && innerRuleRes.IsError; // todo check ! : previously ||
                                 currentPosition = innerRuleRes.EndingPosition;
                                 i++;
                             }
