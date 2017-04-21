@@ -25,8 +25,8 @@ namespace jsonparser
         WS = 12,
         EOL = 13,
         NULL = 14
-        
-       
+
+
     }
 
 
@@ -49,7 +49,7 @@ namespace jsonparser
         [LexerConfigurationAttribute]
         public static Lexer<JsonToken> BuildJsonLexer(Lexer<JsonToken> lexer = null)
         {
-            if (lexer == null) { 
+            if (lexer == null) {
                 lexer = new Lexer<JsonToken>();
             }
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.DOUBLE, "[0-9]+\\.[0-9]+"));
@@ -86,7 +86,7 @@ namespace jsonparser
         [Reduction("value : STRING")]
         public static object StringValue(List<object> args)
         {
-            return (args[0] as Token<JsonToken>).Value;
+            return (args[0] as Token<JsonToken>).StringWithoutQuotes;
         }
 
         [Reduction("value : INT")]
@@ -132,7 +132,13 @@ namespace jsonparser
         [Reduction("object: ACCG ACCD")]
         public static object EmptyObjectValue(List<object> args)
         {
-            return new Dictionary<string,object>();
+            return new Dictionary<string, object>();
+        }
+
+        [Reduction("object: ACCG members ACCD")]
+        public static object AttributesObjectValue(List<object> args)
+        {
+            return args[1];
         }
 
 
@@ -148,7 +154,7 @@ namespace jsonparser
         [Reduction("list: CROG listElements CROD")]
         public static object List(List<object> args)
         {
-            return args[1];            
+            return args[1];
         }
 
 
@@ -166,10 +172,45 @@ namespace jsonparser
             return new List<object>() { args[0] };
         }
 
-        
-
 
         #endregion
+
+        #region PROPERTIES
+
+        [Reduction("property: STRING COLON value")]
+        public static object property(List<object> args)
+        {
+            string key = (args[0] as Token<JsonToken>).StringWithoutQuotes;
+            object value = args[2];
+            return new KeyValuePair<string, object>(key, value);
+        }
+
+       
+        //[Reduction("members : property COMMA members")]
+        public static object ManyMembers(List<object> args)
+        {
+            Dictionary<string, object> members = new Dictionary<string, object>();
+            KeyValuePair<string, object> pair = (KeyValuePair<string, object>)args[0];
+            members.Add(pair.Key, pair.Value);
+            Dictionary<string, object> tail = (Dictionary<string, object>)args[2];
+            foreach (string k in tail.Keys)
+            {
+                members.Add(k, tail[k]);
+            }
+            return members;
+        }
+
+        [Reduction("members : property")]
+        public static object SingleMember(List<object> args)
+        {
+            Dictionary<string, object> members = new Dictionary<string, object>();
+            KeyValuePair<string, object> pair = (KeyValuePair<string, object>)args[0];
+            members.Add(pair.Key, pair.Value);
+            return members;
+        }
+
+        #endregion
+
 
 
 
