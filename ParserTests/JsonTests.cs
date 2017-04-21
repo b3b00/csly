@@ -120,9 +120,24 @@ namespace ParserTests
             object r = Parse("[1,2]");
             Assert.IsNotNull(r);
             Assert.IsInstanceOfType(r, typeof(List<object>));
-            Assert.AreEqual(1, ((List<object>)r).Count);
+            Assert.AreEqual(2, ((List<object>)r).Count);
             Assert.AreEqual(1, ((List<object>)r)[0]);
+            Assert.AreEqual(2, ((List<object>)r)[1]);
+        }
 
+        [TestMethod]
+        public void TestManyMixedListValue()
+        {
+            object r = Parse("[1,null,{},true,42.58]");
+            Assert.IsNotNull(r);
+            Assert.IsInstanceOfType(r, typeof(List<object>));
+            Assert.AreEqual(5, ((List<object>)r).Count);
+            Assert.AreEqual(1, ((List<object>)r)[0]);
+            Assert.IsNull(((List<object>)r)[1]);
+            Assert.IsInstanceOfType(((List<object>)r)[2],typeof(Dictionary<string, object>));
+            Assert.AreEqual(0, ((Dictionary<string, object>)(((List<object>)r)[2])).Count);
+            Assert.AreEqual(true, ((List<object>)r)[3]);
+            Assert.AreEqual(42.58d, ((List<object>)r)[4]);
         }
     }
 }
