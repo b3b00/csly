@@ -42,7 +42,7 @@ namespace parser.parsergenerator.generator
             else
             {
                 return null;
-            }            
+            }
         }
 
         private object Visit(ConcreteSyntaxNode<T> node)
@@ -55,14 +55,9 @@ namespace parser.parsergenerator.generator
                 foreach (IConcreteSyntaxNode<T> n in node.Children)
                 {
                     object v = Visit(n);
-                    if (v != null)
-                    {
-                        args.Add(v);
-                    }
-                    else
-                    {
-                        ;
-                    }
+
+                    args.Add(v);
+
                     i++;
 
                 }
