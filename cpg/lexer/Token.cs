@@ -5,14 +5,14 @@ namespace lexer
     public class Token<T>
     {
 
-        private static T defTok; 
+        private static T defTok;
 
         public static T DefaultToken
         {
             get { return defTok; }
             set { defTok = value; }
         }
-        public Token(T token,  string value, TokenPosition position)
+        public Token(T token, string value, TokenPosition position)
         {
             TokenID = token;
             Value = value;
@@ -20,7 +20,7 @@ namespace lexer
         }
 
         public Token()
-        {   
+        {
             End = true;
             TokenID = DefaultToken;
         }
@@ -36,8 +36,26 @@ namespace lexer
         }
 
         public TokenPosition Position { get; set; }
-        public  T TokenID { get; set; }
+        public T TokenID { get; set; }
         public string Value { get; set; }
+
+        public string StringWithoutQuotes
+        {
+            get
+            {
+                string result = Value;
+                if (result.StartsWith("\""))
+                {
+                    result = result.Substring(1);
+                }
+                if (result.EndsWith("\""))
+                {
+                    result = result.Substring(0, result.Length - 1);
+                }
+                return result;
+            }
+            private set { }
+        }
 
         public int IntValue { get {
                 return int.Parse(Value);
