@@ -53,8 +53,8 @@ namespace ParserTests
         [TestMethod]
         public void TestStringValue()
         {
-            string val = "\"hello world!\"";            
-            object r = Parse(val);
+            string val = "hello world!";            
+            object r = Parse("\"" + val + "\"");
             Assert.IsNotNull(r);
             Assert.IsInstanceOfType(r, typeof(string));
             Assert.AreEqual(val, (string)r);
@@ -138,6 +138,33 @@ namespace ParserTests
             Assert.AreEqual(0, ((Dictionary<string, object>)(((List<object>)r)[2])).Count);
             Assert.AreEqual(true, ((List<object>)r)[3]);
             Assert.AreEqual(42.58d, ((List<object>)r)[4]);
+        }
+
+
+        [TestMethod]
+        public void TestSinglePropertyObjectValue()
+        {
+            object r = Parse("{\"prop\":\"value\"}");
+            Assert.IsNotNull(r);
+            Assert.IsInstanceOfType(r, typeof(Dictionary<string, object>));
+            Dictionary<string, object> values = (Dictionary<string, object>)r;
+            Assert.IsTrue(values.ContainsKey("prop"));
+            Assert.AreEqual("value", values["prop"]);
+        }
+
+        [TestMethod]
+        public void TestManyPropertyObjectValue()
+        {
+            string json = "{\"p1\":\"v1\",\"p2\":\"v2\"}";
+            json = "{\"p1\":\"v1\" , \"p2\":\"v2\" }";
+            object r = Parse(json);
+            Assert.IsNotNull(r);
+            Assert.IsInstanceOfType(r, typeof(Dictionary<string, object>));
+            Dictionary<string, object> values = (Dictionary<string, object>)r;
+            Assert.IsTrue(values.ContainsKey("p1"));
+            Assert.AreEqual("v1", values["p1"]);
+            Assert.IsTrue(values.ContainsKey("p2"));
+            Assert.AreEqual("v2", values["p2"]);
         }
     }
 }
