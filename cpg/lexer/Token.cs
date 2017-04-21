@@ -5,7 +5,13 @@ namespace lexer
     public class Token<T>
     {
 
-        public static T DefaultToken;
+        private static T defTok; 
+
+        public static T DefaultToken
+        {
+            get { return defTok; }
+            set { defTok = value; }
+        }
         public Token(T token,  string value, TokenPosition position)
         {
             TokenID = token;
