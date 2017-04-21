@@ -186,7 +186,7 @@ namespace jsonparser
         }
 
        
-        //[Reduction("members : property COMMA members")]
+        [Reduction("members : property COMMA members")]
         public static object ManyMembers(List<object> args)
         {
             Dictionary<string, object> members = new Dictionary<string, object>();
