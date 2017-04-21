@@ -152,8 +152,7 @@ namespace parser.parsergenerator.generator
 
             conf.Functions = functions;
             conf.NonTerminals = nonTerminals;
-
-            InitializeStartingTokens(conf, rootRule);
+            
             return conf;
         }
 
@@ -198,63 +197,7 @@ namespace parser.parsergenerator.generator
             return rule;
         }
 
-        static private void InitializeStartingTokens<T>(ParserConfiguration<T> configuration, string root)
-        {
-            
-
-            Dictionary<string, NonTerminal<T>> nts = configuration.NonTerminals;
-
-
-            InitStartingTokensForNT(nts, root);
-            foreach (NonTerminal<T> nt in nts.Values)
-            {
-                foreach (Rule<T> rule in nt.Rules)
-                {
-                    if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
-                    {
-                        InitStartingTokensForRule<T>(nts, rule);
-                    }
-                }
-            }
-        }
-
-        static private void InitStartingTokensForNT<T>(Dictionary<string, NonTerminal<T>> nonTerminals, string name)
-        {
-            if (nonTerminals.ContainsKey(name))
-            {
-                NonTerminal<T> nt = nonTerminals[name];
-                nt.Rules.ForEach(r => InitStartingTokensForRule<T>(nonTerminals, r));
-            }            
-            return;
-        }
-
-        static private void InitStartingTokensForRule<T>(Dictionary<string, NonTerminal<T>> nonTerminals, Rule<T> rule)
-        {
-           if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
-            {
-                rule.PossibleLeadingTokens = new List<T>();
-                if (rule.Clauses.Count > 0)
-                {
-                    Clause<T> first = rule.Clauses[0];
-                    if (first is TerminalClause<T>)
-                    {
-                        TerminalClause<T> term = first as TerminalClause<T>;
-                        rule.PossibleLeadingTokens.Add(term.ExpectedToken);
-                    }
-                    else
-                    {
-                        NonTerminalClause<T> nonterm = first as NonTerminalClause<T>;
-                        InitStartingTokensForNT<T>(nonTerminals, nonterm.NonTerminalName);
-                        NonTerminal<T> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
-                        firstNonTerminal.Rules.ForEach(r =>
-                        {
-                            rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
-                        });
-                    }
-                }
-                
-            }
-        }
+       
 
         #endregion
 

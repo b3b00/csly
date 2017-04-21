@@ -38,15 +38,80 @@ namespace cpg.parser.parsgenerator.parser.llparser
 
         public string StartingNonTerminal { get; set; }
 
-      
+
         public LLSyntaxParser(ParserConfiguration<T> configuration, string startingNonTerminal)
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
+            InitializeStartingTokens<T>(Configuration, startingNonTerminal);
         }
 
-        
-            public SyntaxParseResult<T> Parse(IList<Token<T>> tokens)
+        #region STARTING_TOKENS
+
+
+        static private void InitializeStartingTokens<T>(ParserConfiguration<T> configuration, string root)
+        {
+
+
+            Dictionary<string, NonTerminal<T>> nts = configuration.NonTerminals;
+
+
+            InitStartingTokensForNT(nts, root);
+            foreach (NonTerminal<T> nt in nts.Values)
+            {
+                foreach (Rule<T> rule in nt.Rules)
+                {
+                    if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
+                    {
+                        InitStartingTokensForRule<T>(nts, rule);
+                    }
+                }
+            }
+        }
+
+        static private void InitStartingTokensForNT<T>(Dictionary<string, NonTerminal<T>> nonTerminals, string name)
+        {
+            if (nonTerminals.ContainsKey(name))
+            {
+                NonTerminal<T> nt = nonTerminals[name];
+                nt.Rules.ForEach(r => InitStartingTokensForRule<T>(nonTerminals, r));
+            }
+            return;
+        }
+
+        static private void InitStartingTokensForRule<T>(Dictionary<string, NonTerminal<T>> nonTerminals, Rule<T> rule)
+        {
+            if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
+            {
+                rule.PossibleLeadingTokens = new List<T>();
+                if (rule.Clauses.Count > 0)
+                {
+                    Clause<T> first = rule.Clauses[0];
+                    if (first is TerminalClause<T>)
+                    {
+                        TerminalClause<T> term = first as TerminalClause<T>;
+                        rule.PossibleLeadingTokens.Add(term.ExpectedToken);
+                    }
+                    else
+                    {
+                        NonTerminalClause<T> nonterm = first as NonTerminalClause<T>;
+                        InitStartingTokensForNT<T>(nonTerminals, nonterm.NonTerminalName);
+                        NonTerminal<T> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
+                        firstNonTerminal.Rules.ForEach(r =>
+                        {
+                            rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
+                        });
+                    }
+                }
+
+            }
+        }
+
+        #endregion
+
+
+
+        public SyntaxParseResult<T> Parse(IList<Token<T>> tokens)
         {
             Dictionary<string, NonTerminal<T>> NonTerminals = Configuration.NonTerminals;
 
@@ -62,7 +127,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
             foreach (Rule<T> rule in rules)
             {
                 SyntaxParseResult<T> r = Parse(tokens, rule, 0);
-                if (!r.IsError) 
+                if (!r.IsError)
                 {
                     rs.Add(r);
                 }
@@ -74,7 +139,8 @@ namespace cpg.parser.parsgenerator.parser.llparser
             {
                 result = rs.Find(r => r.IsEnded && !r.IsError);
             }
-            if (result == null) {             
+            if (result == null)
+            {
                 result = new SyntaxParseResult<T>();
                 result.IsError = true;
             }
@@ -104,8 +170,9 @@ namespace cpg.parser.parsgenerator.parser.llparser
             {
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
+                    children = new List<IConcreteSyntaxNode<T>>();
                     foreach (Clause<T> clause in rule.Clauses)
-                    {
+                    {                        
                         if (clause is TerminalClause<T>)
                         {
                             SyntaxParseResult<T> termRes = ParseTerminal(tokens, clause as TerminalClause<T>, currentPosition);
@@ -117,7 +184,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                             else
                             {
                                 Token<T> tok = tokens[currentPosition];
-                                errors.Add(UnexpectedToken<T>(tokens[currentPosition], ((TerminalClause<T>)clause).ExpectedToken));                                
+                                errors.Add(UnexpectedToken<T>(tokens[currentPosition], ((TerminalClause<T>)clause).ExpectedToken));
                             }
                             isError = isError && termRes.IsError;
                         }
@@ -132,18 +199,19 @@ namespace cpg.parser.parsgenerator.parser.llparser
                             List<T> allAcceptableTokens = new List<T>();
                             nt.Rules.ForEach(r =>
                             {
-                                if (r != null && r.PossibleLeadingTokens != null) {
+                                if (r != null && r.PossibleLeadingTokens != null)
+                                {
                                     allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
-                                    }
+                                }
                                 else
                                 {
                                     ;
                                 }
-                                });
+                            });
                             bool notInOthers = !allAcceptableTokens.Contains(tokens[currentPosition].TokenID);
                             bool canAddEmptyRule = notInOthers || eos;
                             ;
-                            List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.IsEmpty && canAddEmptyRule).ToList<Rule<T>>();
+                            List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.IsEmpty ).ToList<Rule<T>>();
 
                             if (rules.Count == 0)
                             {
@@ -161,14 +229,14 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                     found = true;
                                 }
                                 isError = isError && innerRuleRes.IsError;
-                                currentPosition = innerRuleRes.EndingPosition;                                
+                                currentPosition = innerRuleRes.EndingPosition;
                                 i++;
                             }
                         }
                         else
                         {
                             ;
-                        }                        
+                        }
                         if (isError)
                         {
                             break;
@@ -184,11 +252,11 @@ namespace cpg.parser.parsgenerator.parser.llparser
             SyntaxParseResult<T> result = new SyntaxParseResult<T>();
             result.IsError = isError;
             if (!isError)
-            {                
+            {
                 ConcreteSyntaxNode<T> node = new ConcreteSyntaxNode<T>(rule.Key, children);
                 result.Root = node;
                 result.EndingPosition = currentPosition;
-                result.IsEnded = currentPosition >= tokens.Count-1;
+                result.IsEnded = currentPosition >= tokens.Count - 1;
             }
             else
             {
