@@ -32,6 +32,8 @@ namespace ParserTests
             return r;
         }
 
+
+#region VALUES
         [TestMethod]
         public void TestIntValue()
         {
@@ -85,6 +87,10 @@ namespace ParserTests
             Assert.IsNull(r);
         }
 
+        #endregion
+
+        #region OBJECT
+
         [TestMethod]
         public void TestEmptyObjectValue()
         {
@@ -94,6 +100,60 @@ namespace ParserTests
             Assert.AreEqual(0, ((Dictionary<string, object>)r).Count);
         }
 
+
+        [TestMethod]
+        public void TestSinglePropertyObjectValue()
+        {
+            object r = Parse("{\"prop\":\"value\"}");
+            Assert.IsNotNull(r);
+            Assert.IsInstanceOfType(r, typeof(Dictionary<string, object>));
+            Dictionary<string, object> values = (Dictionary<string, object>)r;
+            Assert.IsTrue(values.ContainsKey("prop"));
+            Assert.AreEqual("value", values["prop"]);
+        }
+
+        [TestMethod]
+        public void TestManyPropertyObjectValue()
+        {
+            string json = "{\"p1\":\"v1\",\"p2\":\"v2\"}";
+            json = "{\"p1\":\"v1\" , \"p2\":\"v2\" }";
+            object r = Parse(json);
+            Assert.IsNotNull(r);
+            Assert.IsInstanceOfType(r, typeof(Dictionary<string, object>));
+            Dictionary<string, object> values = (Dictionary<string, object>)r;
+            Assert.IsTrue(values.ContainsKey("p1"));
+            Assert.AreEqual("v1", values["p1"]);
+            Assert.IsTrue(values.ContainsKey("p2"));
+            Assert.AreEqual("v2", values["p2"]);
+        }
+
+        [TestMethod]
+        public void TestManyNestedPropertyObjectValue()
+        {
+            string json = "{\"p1\":\"v1\",\"p2\":\"v2\",\"p3\":{\"inner1\":1}}";
+            
+            object r = Parse(json);
+            Assert.IsNotNull(r);
+            Assert.IsInstanceOfType(r, typeof(Dictionary<string, object>));
+            Dictionary<string, object> values = (Dictionary<string, object>)r;
+            Assert.IsTrue(values.ContainsKey("p1"));
+            Assert.AreEqual("v1", values["p1"]);
+            Assert.IsTrue(values.ContainsKey("p2"));
+            Assert.AreEqual("v2", values["p2"]);
+
+            Assert.IsTrue(values.ContainsKey("p3"));
+            object inner = values["p3"];
+            Assert.IsInstanceOfType(inner, typeof(Dictionary<string, object>));
+            Dictionary<string, object> innerDic = (Dictionary<string, object>)inner;
+            Assert.AreEqual(1, innerDic.Count);
+            Assert.IsTrue(innerDic.ContainsKey("inner1"));
+            Assert.AreEqual(1, innerDic["inner1"]);
+        }
+
+        #endregion
+
+
+        #region LIST
         [TestMethod]
         public void TestEmptyListValue()
         {
@@ -140,31 +200,6 @@ namespace ParserTests
             Assert.AreEqual(42.58d, ((List<object>)r)[4]);
         }
 
-
-        [TestMethod]
-        public void TestSinglePropertyObjectValue()
-        {
-            object r = Parse("{\"prop\":\"value\"}");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(Dictionary<string, object>));
-            Dictionary<string, object> values = (Dictionary<string, object>)r;
-            Assert.IsTrue(values.ContainsKey("prop"));
-            Assert.AreEqual("value", values["prop"]);
-        }
-
-        [TestMethod]
-        public void TestManyPropertyObjectValue()
-        {
-            string json = "{\"p1\":\"v1\",\"p2\":\"v2\"}";
-            json = "{\"p1\":\"v1\" , \"p2\":\"v2\" }";
-            object r = Parse(json);
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(Dictionary<string, object>));
-            Dictionary<string, object> values = (Dictionary<string, object>)r;
-            Assert.IsTrue(values.ContainsKey("p1"));
-            Assert.AreEqual("v1", values["p1"]);
-            Assert.IsTrue(values.ContainsKey("p2"));
-            Assert.AreEqual("v2", values["p2"]);
-        }
+#endregion
     }
 }
