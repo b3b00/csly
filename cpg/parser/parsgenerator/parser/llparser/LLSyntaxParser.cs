@@ -32,14 +32,14 @@ namespace cpg.parser.parsgenerator.parser.llparser
 
     }
 
-    public class LLSyntaxParser<T> : ISyntaxParser<T>
+    public class RecursiveDescentSyntaxParser<T> : ISyntaxParser<T>
     {
         public ParserConfiguration<T> Configuration { get; set; }
 
         public string StartingNonTerminal { get; set; }
 
 
-        public LLSyntaxParser(ParserConfiguration<T> configuration, string startingNonTerminal)
+        public RecursiveDescentSyntaxParser(ParserConfiguration<T> configuration, string startingNonTerminal)
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;

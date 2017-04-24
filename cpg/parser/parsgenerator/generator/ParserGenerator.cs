@@ -16,10 +16,8 @@ namespace parser.parsergenerator.generator
 
     public enum ParserType
     {
-        LL = 1,
-        LR = 2,
+        RECURSIVE_DESCENT = 1        
 
-        COMBINATOR = 3
     }
 
 
@@ -40,9 +38,9 @@ namespace parser.parsergenerator.generator
             ISyntaxParser<T> parser = null;
             switch (parserType)
             {
-                case ParserType.LL:
+                case ParserType.RECURSIVE_DESCENT:
                     {
-                        parser = new LLSyntaxParser<T>(conf, rootRule);
+                        parser = new RecursiveDescentSyntaxParser<T>(conf, rootRule);
                         break;
                     }
                 default:

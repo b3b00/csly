@@ -20,7 +20,7 @@ namespace ParserTests
         public JsonTests()
         {
             Lexer = JSONParser.BuildJsonLexer(new Lexer<JsonToken>());
-            Parser = ParserGenerator.BuildParser<JsonToken>(typeof(JSONParser), ParserType.LL, "root");
+            Parser = ParserGenerator.BuildParser<JsonToken>(typeof(JSONParser), ParserType.RECURSIVE_DESCENT, "root");
         }
 
         private object Parse(string json )
