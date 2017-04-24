@@ -59,6 +59,7 @@ namespace parser.parsergenerator.generator
             ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
             ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration);
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
+            parser.Lexer = BuildLexer<T>(parserClass);
             return parser;
         }
 

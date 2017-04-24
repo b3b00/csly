@@ -1,4 +1,6 @@
-﻿using lexer;
+﻿using cpg.parser.parsgenerator.parser;
+using jsonparser;
+using lexer;
 using parser.parsergenerator.generator;
 using System;
 using System.Collections.Generic;
@@ -76,7 +78,10 @@ class Program
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Lexer<JsonToken>  lex = JSONParser.BuildJsonLexer(new Lexer<JsonToken>());
+            Parser<JsonToken> yacc = ParserGenerator.BuildParser<JsonToken>(typeof(JSONParser), ParserType.RECURSIVE_DESCENT, "root");
+            object result = yacc.Parse("[1,null,{},true,42.58]");
+            ;
         }
     }
 }
