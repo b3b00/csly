@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\cpg\cpg.csproj" />
+    <ProjectReference Include="..\jsonparser\jsonparser.csproj" />
   </ItemGroup>
 
 </Project>
