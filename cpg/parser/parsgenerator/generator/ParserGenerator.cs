@@ -16,10 +16,8 @@ namespace parser.parsergenerator.generator
 
     public enum ParserType
     {
-        LL = 1,
-        LR = 2,
+        RECURSIVE_DESCENT = 1        
 
-        COMBINATOR = 3
     }
 
 
@@ -40,9 +38,9 @@ namespace parser.parsergenerator.generator
             ISyntaxParser<T> parser = null;
             switch (parserType)
             {
-                case ParserType.LL:
+                case ParserType.RECURSIVE_DESCENT:
                     {
-                        parser = new LLSyntaxParser<T>(conf, rootRule);
+                        parser = new RecursiveDescentSyntaxParser<T>(conf, rootRule);
                         break;
                     }
                 default:
@@ -61,6 +59,7 @@ namespace parser.parsergenerator.generator
             ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
             ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration);
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
+            parser.Lexer = BuildLexer<T>(parserClass);
             return parser;
         }
 
@@ -87,8 +86,9 @@ namespace parser.parsergenerator.generator
 
         static private Lexer<T> BuildLexer<T>(Type parserClass)
         {
+            TypeInfo typeInfo = parserClass.GetTypeInfo();
             Lexer<T> lexer = null;
-            List < MethodInfo > methods = parserClass.GetMethods().ToList<MethodInfo>();
+            List < MethodInfo > methods = typeInfo.DeclaredMethods.ToList<MethodInfo>();
             methods = methods.Where(m =>
             {
                 List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>().ToList<Attribute>();
@@ -127,7 +127,8 @@ namespace parser.parsergenerator.generator
                 {
                     Tuple<string, string> ntAndRule = ExtractNTAndRule(attr.RuleString);
                     string key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
-                    var delegMethod = Delegate.CreateDelegate(typeof(Functions.ReductionFunction), m);
+                    var delegMethod = m.CreateDelegate(typeof(Functions.ReductionFunction));
+                    //var delegMethod = Delegate.CreateDelegate(typeof(Functions.ReductionFunction), m);
                     functions[key] = delegMethod as ReductionFunction;
 
                     Rule<T> r = BuildNonTerminal<T>(ntAndRule);

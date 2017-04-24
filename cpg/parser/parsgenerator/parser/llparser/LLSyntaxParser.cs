@@ -32,14 +32,14 @@ namespace cpg.parser.parsgenerator.parser.llparser
 
     }
 
-    public class LLSyntaxParser<T> : ISyntaxParser<T>
+    public class RecursiveDescentSyntaxParser<T> : ISyntaxParser<T>
     {
         public ParserConfiguration<T> Configuration { get; set; }
 
         public string StartingNonTerminal { get; set; }
 
 
-        public LLSyntaxParser(ParserConfiguration<T> configuration, string startingNonTerminal)
+        public RecursiveDescentSyntaxParser(ParserConfiguration<T> configuration, string startingNonTerminal)
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
@@ -228,7 +228,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                     found = true;
                                     currentPosition = innerRuleRes.EndingPosition;
                                 }
-                                isError = isError && innerRuleRes.IsError; // todo check ! : previously ||                                
+                                isError = isError && innerRuleRes.IsError; // todo check ! : previously ||         TODO : reelement en erreur si toutes les alternatives sont en erreur                        
                                 i++;
                             }
                         }
@@ -238,6 +238,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                         }
                         if (isError)
                         {
+                            // ici c'est pas cool
                             break;
                         }
                         else
