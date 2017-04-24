@@ -23,19 +23,14 @@ namespace ParserTests
             Parser = ParserGenerator.BuildParser<JsonToken>(typeof(JSONParser), ParserType.RECURSIVE_DESCENT, "root");
         }
 
-        private object Parse(string json )
-        {
-            List<Token<JsonToken>> tokens = Lexer.Tokenize(json).ToList<Token<JsonToken>>();
-            object r = Parser.Parse(tokens);
-            return r;
-        }
+        
 
 
 #region VALUES
         [Fact]
         public void TestIntValue()
         {
-            object r = Parse("1");
+            object r = Parser.Parse("1");
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(int), r);                
             Assert.Equal(1, (int)r);
@@ -44,7 +39,7 @@ namespace ParserTests
         [Fact]
         public void TestDoubleValue()
         {
-            object r = Parse("0.1");
+            object r = Parser.Parse("0.1");
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(double),r);
             Assert.Equal(0.1d, (double)r);
@@ -54,7 +49,7 @@ namespace ParserTests
         public void TestStringValue()
         {
             string val = "hello world!";            
-            object r = Parse("\"" + val + "\"");
+            object r = Parser.Parse("\"" + val + "\"");
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(string),r);
             Assert.Equal(val, (string)r);
@@ -63,7 +58,7 @@ namespace ParserTests
         [Fact]
         public void TestTrueBooleanValue()
         {   
-            object r = Parse("true");
+            object r = Parser.Parse("true");
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(bool),r);
             Assert.Equal(true, (bool)r);
@@ -72,7 +67,7 @@ namespace ParserTests
         [Fact]
         public void TestFalseBooleanValue()
         {
-            object r = Parse("false");
+            object r = Parser.Parse("false");
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(bool),r);
             Assert.Equal(false, (bool)r);
@@ -81,7 +76,7 @@ namespace ParserTests
         [Fact]
         public void TestNullValue()
         {
-            object r = Parse("null");            
+            object r = Parser.Parse("null");            
             Assert.Null(r);
         }
 
@@ -92,7 +87,7 @@ namespace ParserTests
         [Fact]
         public void TestEmptyObjectValue()
         {
-            object r = Parse("{}");
+            object r = Parser.Parse("{}");
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(Dictionary<string,object>),r);
             Assert.Equal(0, ((Dictionary<string, object>)r).Count);
@@ -102,7 +97,7 @@ namespace ParserTests
         [Fact]
         public void TestSinglePropertyObjectValue()
         {
-            object r = Parse("{\"prop\":\"value\"}");
+            object r = Parser.Parse("{\"prop\":\"value\"}");
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r);
             Dictionary<string, object> values = (Dictionary<string, object>)r;
@@ -115,7 +110,7 @@ namespace ParserTests
         {
             string json = "{\"p1\":\"v1\",\"p2\":\"v2\"}";
             json = "{\"p1\":\"v1\" , \"p2\":\"v2\" }";
-            object r = Parse(json);
+            object r = Parser.Parse(json);
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r);
             Dictionary<string, object> values = (Dictionary<string, object>)r;
@@ -130,7 +125,7 @@ namespace ParserTests
         {
             string json = "{\"p1\":\"v1\",\"p2\":\"v2\",\"p3\":{\"inner1\":1}}";
             
-            object r = Parse(json);
+            object r = Parser.Parse(json);
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r);
             Dictionary<string, object> values = (Dictionary<string, object>)r;
@@ -155,7 +150,7 @@ namespace ParserTests
         [Fact]
         public void TestEmptyListValue()
         {
-            object r = Parse("[]");
+            object r = Parser.Parse("[]");
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(List<object>),r);
             Assert.Equal(0, ((List<object>)r).Count);
@@ -164,7 +159,7 @@ namespace ParserTests
         [Fact]
         public void TestSingleListValue()
         {
-            object r = Parse("[1]");
+            object r = Parser.Parse("[1]");
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(List<object>),r);
             Assert.Equal(1, ((List<object>)r).Count);
@@ -175,7 +170,7 @@ namespace ParserTests
         [Fact]
         public void TestManyListValue()
         {
-            object r = Parse("[1,2]");
+            object r = Parser.Parse("[1,2]");
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(List<object>),r);
             Assert.Equal(2, ((List<object>)r).Count);
@@ -186,7 +181,7 @@ namespace ParserTests
         [Fact]
         public void TestManyMixedListValue()
         {
-            object r = Parse("[1,null,{},true,42.58]");
+            object r = Parser.Parse("[1,null,{},true,42.58]");
             Assert.NotNull(r);
             Assert.IsAssignableFrom(typeof(List<object>),r);
             Assert.Equal(5, ((List<object>)r).Count);
