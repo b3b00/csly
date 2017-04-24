@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\cpg\cpg.csproj" />
+    <ProjectReference Include="..\expressionParser\expressionParser.csproj" />
     <ProjectReference Include="..\jsonparser\jsonparser.csproj" />
   </ItemGroup>
 
