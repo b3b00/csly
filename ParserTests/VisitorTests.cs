@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using System.Collections.Generic;
 using parser.parsergenerator.generator;
 using cpg.parser.parsgenerator.parser;
@@ -19,7 +18,7 @@ namespace ParserTests
     }
 
 
-    [TestClass]
+   
     public class VisitorTests
     {
 
@@ -59,7 +58,7 @@ namespace ParserTests
             return n;
         }
 
-        [TestMethod]
+        [Fact]
         public void testVisitor()
         {
             Parser<TokenType> parser = ParserGenerator.BuildParser<TokenType>(typeof(VisitorTests), ParserType.LL, "R");
@@ -77,7 +76,7 @@ namespace ParserTests
 
             string r = visitor.VisitSyntaxTree(rN).ToString();
             ;
-            Assert.AreEqual("R(A(a),b,c)", r);
+            Assert.Equal("R(A(a),b,c)", r);            
 
 
         }

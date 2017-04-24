@@ -1,16 +1,14 @@
 ﻿using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using jsonparser;
+using Xunit;
 using cpg.parser.parsgenerator.parser;
 using lexer;
 using parser.parsergenerator.generator;
 using System.Collections.Generic;
+using jsonparser;
 
 namespace ParserTests
 {
-
-
-    [TestClass]
+    
     public class JsonTests
     {
 
@@ -18,8 +16,8 @@ namespace ParserTests
 
         private static Lexer<JsonToken> Lexer;
 
-        [ClassInitialize]
-        public static  void Init(TestContext context)
+      
+        public JsonTests()
         {
             Lexer = JSONParser.BuildJsonLexer(new Lexer<JsonToken>());
             Parser = ParserGenerator.BuildParser<JsonToken>(typeof(JSONParser), ParserType.LL, "root");
@@ -34,170 +32,170 @@ namespace ParserTests
 
 
 #region VALUES
-        [TestMethod]
+        [Fact]
         public void TestIntValue()
         {
             object r = Parse("1");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(int));
-            Assert.AreEqual(1, (int)r);
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(int), r);                
+            Assert.Equal(1, (int)r);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestDoubleValue()
         {
             object r = Parse("0.1");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(double));
-            Assert.AreEqual(0.1d, (double)r);
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(double),r);
+            Assert.Equal(0.1d, (double)r);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestStringValue()
         {
             string val = "hello world!";            
             object r = Parse("\"" + val + "\"");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(string));
-            Assert.AreEqual(val, (string)r);
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(string),r);
+            Assert.Equal(val, (string)r);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestTrueBooleanValue()
         {   
             object r = Parse("true");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(bool));
-            Assert.AreEqual(true, (bool)r);
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(bool),r);
+            Assert.Equal(true, (bool)r);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestFalseBooleanValue()
         {
             object r = Parse("false");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(bool));
-            Assert.AreEqual(false, (bool)r);
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(bool),r);
+            Assert.Equal(false, (bool)r);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestNullValue()
         {
             object r = Parse("null");            
-            Assert.IsNull(r);
+            Assert.Null(r);
         }
 
         #endregion
 
         #region OBJECT
 
-        [TestMethod]
+        [Fact]
         public void TestEmptyObjectValue()
         {
             object r = Parse("{}");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(Dictionary<string,object>));
-            Assert.AreEqual(0, ((Dictionary<string, object>)r).Count);
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(Dictionary<string,object>),r);
+            Assert.Equal(0, ((Dictionary<string, object>)r).Count);
         }
 
 
-        [TestMethod]
+        [Fact]
         public void TestSinglePropertyObjectValue()
         {
             object r = Parse("{\"prop\":\"value\"}");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(Dictionary<string, object>));
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r);
             Dictionary<string, object> values = (Dictionary<string, object>)r;
-            Assert.IsTrue(values.ContainsKey("prop"));
-            Assert.AreEqual("value", values["prop"]);
+            Assert.True(values.ContainsKey("prop"));
+            Assert.Equal("value", values["prop"]);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestManyPropertyObjectValue()
         {
             string json = "{\"p1\":\"v1\",\"p2\":\"v2\"}";
             json = "{\"p1\":\"v1\" , \"p2\":\"v2\" }";
             object r = Parse(json);
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(Dictionary<string, object>));
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r);
             Dictionary<string, object> values = (Dictionary<string, object>)r;
-            Assert.IsTrue(values.ContainsKey("p1"));
-            Assert.AreEqual("v1", values["p1"]);
-            Assert.IsTrue(values.ContainsKey("p2"));
-            Assert.AreEqual("v2", values["p2"]);
+            Assert.True(values.ContainsKey("p1"));
+            Assert.Equal("v1", values["p1"]);
+            Assert.True(values.ContainsKey("p2"));
+            Assert.Equal("v2", values["p2"]);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestManyNestedPropertyObjectValue()
         {
             string json = "{\"p1\":\"v1\",\"p2\":\"v2\",\"p3\":{\"inner1\":1}}";
             
             object r = Parse(json);
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(Dictionary<string, object>));
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r);
             Dictionary<string, object> values = (Dictionary<string, object>)r;
-            Assert.IsTrue(values.ContainsKey("p1"));
-            Assert.AreEqual("v1", values["p1"]);
-            Assert.IsTrue(values.ContainsKey("p2"));
-            Assert.AreEqual("v2", values["p2"]);
+            Assert.True(values.ContainsKey("p1"));
+            Assert.Equal("v1", values["p1"]);
+            Assert.True(values.ContainsKey("p2"));
+            Assert.Equal("v2", values["p2"]);
 
-            Assert.IsTrue(values.ContainsKey("p3"));
+            Assert.True(values.ContainsKey("p3"));
             object inner = values["p3"];
-            Assert.IsInstanceOfType(inner, typeof(Dictionary<string, object>));
+            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),inner);
             Dictionary<string, object> innerDic = (Dictionary<string, object>)inner;
-            Assert.AreEqual(1, innerDic.Count);
-            Assert.IsTrue(innerDic.ContainsKey("inner1"));
-            Assert.AreEqual(1, innerDic["inner1"]);
+            Assert.Equal(1, innerDic.Count);
+            Assert.True(innerDic.ContainsKey("inner1"));
+            Assert.Equal(1, innerDic["inner1"]);
         }
 
         #endregion
 
 
         #region LIST
-        [TestMethod]
+        [Fact]
         public void TestEmptyListValue()
         {
             object r = Parse("[]");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(List<object>));
-            Assert.AreEqual(0, ((List<object>)r).Count);
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(List<object>),r);
+            Assert.Equal(0, ((List<object>)r).Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestSingleListValue()
         {
             object r = Parse("[1]");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(List<object>));
-            Assert.AreEqual(1, ((List<object>)r).Count);
-            Assert.AreEqual(1, ((List<object>)r)[0]);
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(List<object>),r);
+            Assert.Equal(1, ((List<object>)r).Count);
+            Assert.Equal(1, ((List<object>)r)[0]);
 
         }
 
-        [TestMethod]
+        [Fact]
         public void TestManyListValue()
         {
             object r = Parse("[1,2]");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(List<object>));
-            Assert.AreEqual(2, ((List<object>)r).Count);
-            Assert.AreEqual(1, ((List<object>)r)[0]);
-            Assert.AreEqual(2, ((List<object>)r)[1]);
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(List<object>),r);
+            Assert.Equal(2, ((List<object>)r).Count);
+            Assert.Equal(1, ((List<object>)r)[0]);
+            Assert.Equal(2, ((List<object>)r)[1]);
         }
 
-        [TestMethod]
+        [Fact]
         public void TestManyMixedListValue()
         {
             object r = Parse("[1,null,{},true,42.58]");
-            Assert.IsNotNull(r);
-            Assert.IsInstanceOfType(r, typeof(List<object>));
-            Assert.AreEqual(5, ((List<object>)r).Count);
-            Assert.AreEqual(1, ((List<object>)r)[0]);
-            Assert.IsNull(((List<object>)r)[1]);
-            Assert.IsInstanceOfType(((List<object>)r)[2],typeof(Dictionary<string, object>));
-            Assert.AreEqual(0, ((Dictionary<string, object>)(((List<object>)r)[2])).Count);
-            Assert.AreEqual(true, ((List<object>)r)[3]);
-            Assert.AreEqual(42.58d, ((List<object>)r)[4]);
+            Assert.NotNull(r);
+            Assert.IsAssignableFrom(typeof(List<object>),r);
+            Assert.Equal(5, ((List<object>)r).Count);
+            Assert.Equal(1, ((List<object>)r)[0]);
+            Assert.Null(((List<object>)r)[1]);
+            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),((List<object>)r)[2]);
+            Assert.Equal(0, ((Dictionary<string, object>)(((List<object>)r)[2])).Count);
+            Assert.Equal(true, ((List<object>)r)[3]);
+            Assert.Equal(42.58d, ((List<object>)r)[4]);
         }
 
 #endregion

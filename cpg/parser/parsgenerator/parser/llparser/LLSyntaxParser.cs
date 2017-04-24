@@ -228,7 +228,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                     found = true;
                                     currentPosition = innerRuleRes.EndingPosition;
                                 }
-                                isError = isError && innerRuleRes.IsError; // todo check ! : previously ||                                
+                                isError = isError && innerRuleRes.IsError; // todo check ! : previously ||         TODO : reelement en erreur si toutes les alternatives sont en erreur                        
                                 i++;
                             }
                         }
@@ -238,6 +238,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                         }
                         if (isError)
                         {
+                            // ici c'est pas cool
                             break;
                         }
                         else

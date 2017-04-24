@@ -87,8 +87,9 @@ namespace parser.parsergenerator.generator
 
         static private Lexer<T> BuildLexer<T>(Type parserClass)
         {
+            TypeInfo typeInfo = parserClass.GetTypeInfo();
             Lexer<T> lexer = null;
-            List < MethodInfo > methods = parserClass.GetMethods().ToList<MethodInfo>();
+            List < MethodInfo > methods = typeInfo.DeclaredMethods.ToList<MethodInfo>();
             methods = methods.Where(m =>
             {
                 List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>().ToList<Attribute>();
@@ -127,7 +128,8 @@ namespace parser.parsergenerator.generator
                 {
                     Tuple<string, string> ntAndRule = ExtractNTAndRule(attr.RuleString);
                     string key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
-                    var delegMethod = Delegate.CreateDelegate(typeof(Functions.ReductionFunction), m);
+                    var delegMethod = m.CreateDelegate(typeof(Functions.ReductionFunction));
+                    //var delegMethod = Delegate.CreateDelegate(typeof(Functions.ReductionFunction), m);
                     functions[key] = delegMethod as ReductionFunction;
 
                     Rule<T> r = BuildNonTerminal<T>(ntAndRule);
