@@ -142,11 +142,11 @@ namespace cpg.parser.parsgenerator.parser.llparser
                     List<int> endingPositions = rs.Select(r => r.EndingPosition).ToList<int>();
                     int lastposition = endingPositions.Max();
                     string err = UnexpectedToken<T>(tokens[lastposition], null);
-                    errors.Add(err);
+                    errors.Add(err);                    
                     rs.ForEach(r =>
                     {
                         if (r.Errors != null)
-                        {
+                        {                            
                             errors.AddRange(r.Errors);
                         }
                     });
@@ -166,7 +166,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
 
         private string UnexpectedToken<T>(Token<T> token, params T[] possibleTokens)
         {
-            string msg = $"unexpected {token.TokenID}[{token.Value}] at {token.Position}.";
+            string msg = $"unexpected \"{token.Value}\" ({token.TokenID}) at {token.Position}.";
                 if (possibleTokens != null && possibleTokens.Count() > 0)
             {
                 msg += "expecting ";

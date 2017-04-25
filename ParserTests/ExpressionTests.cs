@@ -113,5 +113,20 @@ namespace ParserTests
             Assert.Equal(14, (int)r.Result);
         }
 
+
+        [Fact]
+        public void TestSyntaxError()
+        {
+            ParseResult<ExpressionToken> r = Parser.Parse(" 2 4 + + 2");
+            Assert.True(r.IsError);
+            Assert.Null(r.Result);
+            Assert.NotNull(r.Errors);
+            Assert.True(r.Errors.Count > 0);
+            Assert.Contains("unexpected", r.Errors[0]);
+            Assert.Contains("\"4\"", r.Errors[0]);
+            Assert.Contains("line 1", r.Errors[0]);
+            Assert.Contains("column 3", r.Errors[0]);
+
+        }
     }
 }
