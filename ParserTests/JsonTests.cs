@@ -20,7 +20,7 @@ namespace ParserTests
         public JsonTests()
         {
             Lexer = JSONParser.BuildJsonLexer(new Lexer<JsonToken>());
-            Parser = ParserGenerator.BuildParser<JsonToken>(typeof(JSONParser), ParserType.RECURSIVE_DESCENT, "root");
+            Parser = ParserBuilder.BuildParser<JsonToken>(typeof(JSONParser), ParserType.LL_RECURSIVE_DESCENT, "root");
         }
 
         
@@ -30,54 +30,61 @@ namespace ParserTests
         [Fact]
         public void TestIntValue()
         {
-            object r = Parser.Parse("1");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(int), r);                
-            Assert.Equal(1, (int)r);
+            ParseResult<JsonToken> r = Parser.Parse("1");
+            Assert.False(r.IsError);
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(int), r.Result);                
+            Assert.Equal(1, (int)r.Result);
         }
 
         [Fact]
         public void TestDoubleValue()
         {
-            object r = Parser.Parse("0.1");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(double),r);
-            Assert.Equal(0.1d, (double)r);
+            ParseResult<JsonToken> r = Parser.Parse("0.1");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(double),r.Result);
+            Assert.Equal(0.1d, (double)r.Result);
         }
 
         [Fact]
         public void TestStringValue()
         {
-            string val = "hello world!";            
-            object r = Parser.Parse("\"" + val + "\"");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(string),r);
-            Assert.Equal(val, (string)r);
+            string val = "hello world!";
+            ParseResult<JsonToken> r = Parser.Parse("\"" + val + "\"");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(string),r.Result);
+            Assert.Equal(val, (string)r.Result);
         }
 
         [Fact]
         public void TestTrueBooleanValue()
-        {   
-            object r = Parser.Parse("true");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(bool),r);
-            Assert.Equal(true, (bool)r);
+        {
+            ParseResult<JsonToken> r = Parser.Parse("true");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(bool),r.Result);
+            Assert.Equal(true, (bool)r.Result);
         }
 
         [Fact]
         public void TestFalseBooleanValue()
         {
-            object r = Parser.Parse("false");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(bool),r);
-            Assert.Equal(false, (bool)r);
+            ParseResult<JsonToken> r = Parser.Parse("false");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(bool),r.Result);
+            Assert.Equal(false, (bool)r.Result);
         }
 
         [Fact]
         public void TestNullValue()
         {
-            object r = Parser.Parse("null");            
-            Assert.Null(r);
+            ParseResult<JsonToken> r = Parser.Parse("null");            
+            Assert.False(r.IsError);
+            Assert.Null(r.Result);
         }
 
         #endregion
@@ -87,20 +94,22 @@ namespace ParserTests
         [Fact]
         public void TestEmptyObjectValue()
         {
-            object r = Parser.Parse("{}");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(Dictionary<string,object>),r);
-            Assert.Equal(0, ((Dictionary<string, object>)r).Count);
+            ParseResult<JsonToken> r = Parser.Parse("{}");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(Dictionary<string,object>),r.Result);
+            Assert.Equal(0, ((Dictionary<string, object>)r.Result).Count);
         }
 
 
         [Fact]
         public void TestSinglePropertyObjectValue()
         {
-            object r = Parser.Parse("{\"prop\":\"value\"}");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r);
-            Dictionary<string, object> values = (Dictionary<string, object>)r;
+            ParseResult<JsonToken> r = Parser.Parse("{\"prop\":\"value\"}");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r.Result);
+            Dictionary<string, object> values = (Dictionary<string, object>)r.Result;
             Assert.True(values.ContainsKey("prop"));
             Assert.Equal("value", values["prop"]);
         }
@@ -110,10 +119,11 @@ namespace ParserTests
         {
             string json = "{\"p1\":\"v1\",\"p2\":\"v2\"}";
             json = "{\"p1\":\"v1\" , \"p2\":\"v2\" }";
-            object r = Parser.Parse(json);
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r);
-            Dictionary<string, object> values = (Dictionary<string, object>)r;
+            ParseResult<JsonToken> r = Parser.Parse(json);
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r.Result);
+            Dictionary<string, object> values = (Dictionary<string, object>)r.Result;
             Assert.True(values.ContainsKey("p1"));
             Assert.Equal("v1", values["p1"]);
             Assert.True(values.ContainsKey("p2"));
@@ -124,11 +134,12 @@ namespace ParserTests
         public void TestManyNestedPropertyObjectValue()
         {
             string json = "{\"p1\":\"v1\",\"p2\":\"v2\",\"p3\":{\"inner1\":1}}";
-            
-            object r = Parser.Parse(json);
+
+            ParseResult<JsonToken> r = Parser.Parse(json);
+            Assert.False(r.IsError);
             Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r);
-            Dictionary<string, object> values = (Dictionary<string, object>)r;
+            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),r.Result);
+            Dictionary<string, object> values = (Dictionary<string, object>)r.Result;
             Assert.True(values.ContainsKey("p1"));
             Assert.Equal("v1", values["p1"]);
             Assert.True(values.ContainsKey("p2"));
@@ -150,47 +161,53 @@ namespace ParserTests
         [Fact]
         public void TestEmptyListValue()
         {
-            object r = Parser.Parse("[]");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(List<object>),r);
-            Assert.Equal(0, ((List<object>)r).Count);
+            ParseResult<JsonToken> r = Parser.Parse("[]");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(List<object>),r.Result);
+            Assert.Equal(0, ((List<object>)r.Result).Count);
         }
 
         [Fact]
         public void TestSingleListValue()
         {
-            object r = Parser.Parse("[1]");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(List<object>),r);
-            Assert.Equal(1, ((List<object>)r).Count);
-            Assert.Equal(1, ((List<object>)r)[0]);
+            ParseResult<JsonToken> r = Parser.Parse("[1]");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(List<object>),r.Result);
+            Assert.Equal(1, ((List<object>)r.Result).Count);
+            Assert.Equal(1, ((List<object>)r.Result)[0]);
 
         }
 
         [Fact]
         public void TestManyListValue()
         {
-            object r = Parser.Parse("[1,2]");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(List<object>),r);
-            Assert.Equal(2, ((List<object>)r).Count);
-            Assert.Equal(1, ((List<object>)r)[0]);
-            Assert.Equal(2, ((List<object>)r)[1]);
+            ParseResult<JsonToken> r = Parser.Parse("[1,2]");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(List<object>),r.Result);
+            Assert.Equal(2, ((List<object>)r.Result).Count);
+            Assert.Equal(1, ((List<object>)r.Result)[0]);
+            Assert.Equal(2, ((List<object>)r.Result)[1]);
         }
 
         [Fact]
         public void TestManyMixedListValue()
         {
-            object r = Parser.Parse("[1,null,{},true,42.58]");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(List<object>),r);
-            Assert.Equal(5, ((List<object>)r).Count);
-            Assert.Equal(1, ((List<object>)r)[0]);
-            Assert.Null(((List<object>)r)[1]);
-            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),((List<object>)r)[2]);
-            Assert.Equal(0, ((Dictionary<string, object>)(((List<object>)r)[2])).Count);
-            Assert.Equal(true, ((List<object>)r)[3]);
-            Assert.Equal(42.58d, ((List<object>)r)[4]);
+            ParseResult<JsonToken> r = Parser.Parse("[1,null,{},true,42.58]");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.NotNull(r.Result);
+            object val = r.Result;
+            Assert.IsAssignableFrom(typeof(List<object>), r.Result);
+            Assert.Equal(5, ((List<object>)r.Result).Count);
+            Assert.Equal(1, ((List<object>)r.Result)[0]);
+            Assert.Null(((List<object>)r.Result)[1]);
+            Assert.IsAssignableFrom(typeof(Dictionary<string, object>),((List<object>)r.Result)[2]);
+            Assert.Equal(0, ((Dictionary<string, object>)(((List<object>)r.Result)[2])).Count);
+            Assert.Equal(true, ((List<object>)r.Result)[3]);
+            Assert.Equal(42.58d, ((List<object>)r.Result)[4]);
         }
 
 #endregion

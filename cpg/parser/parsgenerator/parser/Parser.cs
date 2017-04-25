@@ -20,19 +20,26 @@ namespace cpg.parser.parsgenerator.parser
         }
         
 
-        public object Parse(string source)
+        public ParseResult<T> Parse(string source)
         {
             IList<Token<T>> tokens = Lexer.Tokenize(source).ToList<Token<T>>();
             return Parse(tokens);
         }
-        public object Parse(IList<Token<T>> tokens)
+        public ParseResult<T> Parse(IList<Token<T>> tokens)
         {
-            object result = null;
+            
+            ParseResult<T> result = new ParseResult<T>();
             SyntaxParseResult<T> syntaxResult = SyntaxParser.Parse(tokens);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
-
-                result = Visitor.VisitSyntaxTree(syntaxResult.Root);                
+                object r  = Visitor.VisitSyntaxTree(syntaxResult.Root);
+                result.Result = r;
+                result.IsError = false;
+            }
+            else
+            {
+                result.Errors = syntaxResult.Errors;
+                result.IsError = true;
             }
             return result;
         }
