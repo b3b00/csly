@@ -19,90 +19,114 @@ namespace ParserTests
       
         public ExpressionTests()
         {            
-            Parser = ParserGenerator.BuildParser<ExpressionToken>(typeof(ExpressionParser), ParserType.RECURSIVE_DESCENT, "expression");
+            Parser = ParserBuilder.BuildParser<ExpressionToken>(typeof(ExpressionParser), ParserType.LL_RECURSIVE_DESCENT, "expression");
         }
 
 
         [Fact]
         public void TestSingleValue()
         {
-            object r = Parser.Parse("1");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(int), r);
-            Assert.Equal(1, (int)r);
+            ParseResult<ExpressionToken> r = Parser.Parse("1");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(int), r.Result);
+            Assert.Equal(1, (int)r.Result);
         }
 
         [Fact]
         public void TestSingleNegativeValue()
         {
-            object r = Parser.Parse("-1");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(int), r);
-            Assert.Equal(-1, (int)r);
+            ParseResult <ExpressionToken> r = Parser.Parse("-1");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(int), r.Result);
+            Assert.Equal(-1, (int)r.Result);
         }
 
         [Fact]
         public void TestTermPlus()
         {
-            object r = Parser.Parse("1 + 1");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(int), r);
-            Assert.Equal(2, (int)r);
+            ParseResult<ExpressionToken> r = Parser.Parse("1 + 1");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(int), r.Result);
+            Assert.Equal(2, (int)r.Result);
         }
 
         [Fact]
         public void TestTermMinus()
         {
-            object r = Parser.Parse("1 - 1");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(int), r);
-            Assert.Equal(0, (int)r);
+            ParseResult<ExpressionToken> r = Parser.Parse("1 - 1");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(int), r.Result);
+            Assert.Equal(0, (int)r.Result);
         }
 
         [Fact]
         public void TestFactorTimes()
         {
-            object r = Parser.Parse("2*2");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(int), r);
-            Assert.Equal(4, (int)r);
+            ParseResult<ExpressionToken> r = Parser.Parse("2*2");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(int), r.Result);
+            Assert.Equal(4, (int)r.Result);
         }
 
         [Fact]
         public void TestFactorDivide()
         {
-            object r = Parser.Parse("42/2");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(int), r);
-            Assert.Equal(21, (int)r);
+            ParseResult<ExpressionToken> r = Parser.Parse("42/2");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(int), r.Result);
+            Assert.Equal(21, (int)r.Result);
         }
 
         [Fact]
         public void TestGroup()
         {
-            object r = Parser.Parse("(2 + 2)");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(int), r);
-            Assert.Equal(4, (int)r);
+            ParseResult<ExpressionToken> r = Parser.Parse("(2 + 2)");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(int), r.Result);
+            Assert.Equal(4, (int)r.Result);
         }
 
         [Fact]
         public void TestGroup2()
         {
-            object r = Parser.Parse("6 * (2 + 2)");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(int), r);
-            Assert.Equal(24, (int)r);
+            ParseResult<ExpressionToken> r = Parser.Parse("6 * (2 + 2)");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(int), r.Result);
+            Assert.Equal(24, (int)r.Result);
         }
 
         [Fact]
         public void TestPrecedence()
         {
-            object r = Parser.Parse("6 * 2 + 2");
-            Assert.NotNull(r);
-            Assert.IsAssignableFrom(typeof(int), r);
-            Assert.Equal(14, (int)r);
+            ParseResult<ExpressionToken> r = Parser.Parse("6 * 2 + 2");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.IsAssignableFrom(typeof(int), r.Result);
+            Assert.Equal(14, (int)r.Result);
         }
 
+
+        [Fact]
+        public void TestSyntaxError()
+        {
+            ParseResult<ExpressionToken> r = Parser.Parse(" 2 4 + + 2");
+            Assert.True(r.IsError);
+            Assert.Null(r.Result);
+            Assert.NotNull(r.Errors);
+            Assert.True(r.Errors.Count > 0);
+            Assert.Contains("unexpected", r.Errors[0]);
+            Assert.Contains("\"4\"", r.Errors[0]);
+            Assert.Contains("line 1", r.Errors[0]);
+            Assert.Contains("column 3", r.Errors[0]);
+
+        }
     }
 }

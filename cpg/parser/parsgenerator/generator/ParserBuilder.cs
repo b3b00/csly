@@ -16,7 +16,7 @@ namespace parser.parsergenerator.generator
 
     public enum ParserType
     {
-        RECURSIVE_DESCENT = 1        
+        LL_RECURSIVE_DESCENT = 1        
 
     }
 
@@ -27,7 +27,7 @@ namespace parser.parsergenerator.generator
         public Dictionary<string, NonTerminal<T>> NonTerminals { get; set; }
     }
 
-    public class ParserGenerator
+    public class ParserBuilder
     {
 
         
@@ -38,7 +38,7 @@ namespace parser.parsergenerator.generator
             ISyntaxParser<T> parser = null;
             switch (parserType)
             {
-                case ParserType.RECURSIVE_DESCENT:
+                case ParserType.LL_RECURSIVE_DESCENT:
                     {
                         parser = new RecursiveDescentSyntaxParser<T>(conf, rootRule);
                         break;

@@ -79,8 +79,11 @@ class Program
         static void Main(string[] args)
         {
             Lexer<JsonToken>  lex = JSONParser.BuildJsonLexer(new Lexer<JsonToken>());
-            Parser<JsonToken> yacc = ParserGenerator.BuildParser<JsonToken>(typeof(JSONParser), ParserType.RECURSIVE_DESCENT, "root");
+            Parser<JsonToken> yacc = ParserBuilder.BuildParser<JsonToken>(typeof(JSONParser), ParserType.LL_RECURSIVE_DESCENT, "root");
             object result = yacc.Parse("[1,null,{},true,42.58]");
+            ;
+
+            result = yacc.Parse("\"hello\" \"world!\"");
             ;
         }
     }

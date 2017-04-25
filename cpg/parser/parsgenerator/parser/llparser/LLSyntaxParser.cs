@@ -116,11 +116,11 @@ namespace cpg.parser.parsgenerator.parser.llparser
         public SyntaxParseResult<T> Parse(IList<Token<T>> tokens)
         {
             Dictionary<string, NonTerminal<T>> NonTerminals = Configuration.NonTerminals;
-                        
+            List<string> errors = new List<string>();
             NonTerminal<T> nt = NonTerminals[StartingNonTerminal];
 
             List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList<Rule<T>>();
-            
+
             List<SyntaxParseResult<T>> rs = new List<SyntaxParseResult<T>>();
             foreach (Rule<T> rule in rules)
             {
@@ -136,10 +136,27 @@ namespace cpg.parser.parsgenerator.parser.llparser
             if (rs.Count > 0)
             {
                 result = rs.Find(r => r.IsEnded && !r.IsError);
+
+                if (result == null)
+                {
+                    List<int> endingPositions = rs.Select(r => r.EndingPosition).ToList<int>();
+                    int lastposition = endingPositions.Max();
+                    string err = UnexpectedToken<T>(tokens[lastposition], null);
+                    errors.Add(err);                    
+                    rs.ForEach(r =>
+                    {
+                        if (r.Errors != null)
+                        {                            
+                            errors.AddRange(r.Errors);
+                        }
+                    });
+                }
+
             }
             if (result == null)
             {
                 result = new SyntaxParseResult<T>();
+                result.Errors = errors;
                 result.IsError = true;
             }
             return result;
@@ -149,10 +166,14 @@ namespace cpg.parser.parsgenerator.parser.llparser
 
         private string UnexpectedToken<T>(Token<T> token, params T[] possibleTokens)
         {
-            string msg = $"unexpected {token.TokenID}[{token.Value}] at {token.Position}. expecting ";
-            foreach (T t in possibleTokens)
+            string msg = $"unexpected \"{token.Value}\" ({token.TokenID}) at {token.Position}.";
+                if (possibleTokens != null && possibleTokens.Count() > 0)
             {
-                msg += t.ToString() + ", ";
+                msg += "expecting ";
+                foreach (T t in possibleTokens)
+                {
+                    msg += t.ToString() + ", ";
+                }
             }
             return msg;
         }
@@ -170,7 +191,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                 {
                     children = new List<IConcreteSyntaxNode<T>>();
                     foreach (Clause<T> clause in rule.Clauses)
-                    {                        
+                    {
                         if (clause is TerminalClause<T>)
                         {
                             SyntaxParseResult<T> termRes = ParseTerminal(tokens, clause as TerminalClause<T>, currentPosition);
@@ -199,7 +220,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                             {
                                 if (r != null && r.PossibleLeadingTokens != null)
                                 {
-                                    allAcceptableTokens.AddRange(r.PossibleLeadingTokens); 
+                                    allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
                                 }
                                 else
                                 {
@@ -210,7 +231,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                             bool notInOthers = !allAcceptableTokens.Contains(tokens[currentPosition].TokenID);
                             bool canAddEmptyRule = notInOthers || eos;
                             ;
-                            List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.IsEmpty ).ToList<Rule<T>>();
+                            List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.IsEmpty).ToList<Rule<T>>();
 
                             if (rules.Count == 0)
                             {
