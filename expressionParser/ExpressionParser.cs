@@ -168,8 +168,7 @@ namespace expressionparser
         }
 
         [Reduction("factor : primary")]
-        [Reduction("factor : MINUS factor")]
-        [Reduction("factor : PLUS factor")]
+        [Reduction("factor : MINUS factor")]        
         public static object Factor(List<object> args)
         {
             int result = 0;

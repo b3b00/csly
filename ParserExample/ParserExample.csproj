@@ -10,4 +10,10 @@
     <ProjectReference Include="..\jsonparser\jsonparser.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="test.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

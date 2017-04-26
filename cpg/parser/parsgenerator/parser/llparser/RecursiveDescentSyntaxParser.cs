@@ -116,7 +116,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
         public SyntaxParseResult<T> Parse(IList<Token<T>> tokens)
         {
             Dictionary<string, NonTerminal<T>> NonTerminals = Configuration.NonTerminals;
-            List<string> errors = new List<string>();
+            List<UnexpectedTokenSyntaxError<T>> errors = new List<UnexpectedTokenSyntaxError<T>>();
             NonTerminal<T> nt = NonTerminals[StartingNonTerminal];
 
             List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList<Rule<T>>();
@@ -141,9 +141,9 @@ namespace cpg.parser.parsgenerator.parser.llparser
                 {
                     List<int> endingPositions = rs.Select(r => r.EndingPosition).ToList<int>();
                     int lastposition = endingPositions.Max();
-                    string err = UnexpectedToken<T>(tokens[lastposition], null);
-                    errors.Add(err);                    
-                    rs.ForEach(r =>
+                    List<SyntaxParseResult<T>> furtherResults = rs.Where<SyntaxParseResult<T>>(r => r.EndingPosition == lastposition).ToList<SyntaxParseResult<T>>();
+                    errors.Add(new UnexpectedTokenSyntaxError<T>(tokens[lastposition], null));                    
+                    furtherResults.ForEach(r =>
                     {
                         if (r.Errors != null)
                         {                            
@@ -164,27 +164,12 @@ namespace cpg.parser.parsgenerator.parser.llparser
         }
 
 
-        private string UnexpectedToken<T>(Token<T> token, params T[] possibleTokens)
-        {
-            string msg = $"unexpected \"{token.Value}\" ({token.TokenID}) at {token.Position}.";
-                if (possibleTokens != null && possibleTokens.Count() > 0)
-            {
-                msg += "expecting ";
-                foreach (T t in possibleTokens)
-                {
-                    msg += t.ToString() + ", ";
-                }
-            }
-            return msg;
-        }
-
         public SyntaxParseResult<T> Parse(IList<Token<T>> tokens, Rule<T> rule, int position)
         {
             int currentPosition = position;
-            List<string> errors = new List<string>();
+            List<UnexpectedTokenSyntaxError<T>> errors = new List<UnexpectedTokenSyntaxError<T>>();
             bool isError = false;
             List<IConcreteSyntaxNode<T>> children = new List<IConcreteSyntaxNode<T>>();
-            string leadingToken = tokens[position].Value;
             if (rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
             {
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
@@ -203,7 +188,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                             else
                             {
                                 Token<T> tok = tokens[currentPosition];
-                                errors.Add(UnexpectedToken<T>(tokens[currentPosition], ((TerminalClause<T>)clause).ExpectedToken));
+                                errors.Add(new UnexpectedTokenSyntaxError<T>(tokens[currentPosition], ((TerminalClause<T>)clause).ExpectedToken));
                             }
                             isError = isError || termRes.IsError;
                         }
@@ -229,29 +214,41 @@ namespace cpg.parser.parsgenerator.parser.llparser
                             }); // todo distinct 
                             allAcceptableTokens = allAcceptableTokens.Distinct<T>().ToList<T>();
                             bool notInOthers = !allAcceptableTokens.Contains(tokens[currentPosition].TokenID);
-                            bool canAddEmptyRule = notInOthers || eos;
                             ;
                             List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.IsEmpty).ToList<Rule<T>>();
 
                             if (rules.Count == 0)
                             {
                                 isError = true;
-                                errors.Add(UnexpectedToken<T>(tokens[currentPosition], allAcceptableTokens.ToArray()));
+                                errors.Add(new UnexpectedTokenSyntaxError<T>(tokens[currentPosition], allAcceptableTokens.ToArray<T>()));
                             }
 
+                            List<UnexpectedTokenSyntaxError<T>> innerRuleErrors = new List<UnexpectedTokenSyntaxError<T>>();
+                            SyntaxParseResult<T> okResult = null;
+                            int greaterIndex = 0; 
                             while (!found && i < rules.Count)
                             {
                                 Rule<T> innerrule = rules[i];
                                 SyntaxParseResult<T> innerRuleRes = Parse(tokens, innerrule, currentPosition);
-                                if (!innerRuleRes.IsError)
+                                if (!innerRuleRes.IsError && okResult == null)
                                 {
+                                    okResult = innerRuleRes;
                                     children.Add(innerRuleRes.Root);
                                     found = true;
                                     currentPosition = innerRuleRes.EndingPosition;
                                 }
+
+                                if (innerRuleRes.EndingPosition > greaterIndex)
+                                {
+                                    greaterIndex = innerRuleRes.EndingPosition;
+                                    innerRuleErrors.Clear();
+                                    innerRuleErrors.AddRange(innerRuleRes.Errors);
+                                }
+                                
                                 isError = isError && innerRuleRes.IsError; // todo check ! : previously ||         TODO : reelement en erreur si toutes les alternatives sont en erreur                        
                                 i++;
                             }
+                            errors.AddRange(innerRuleErrors);
                         }
                         else
                         {
@@ -272,16 +269,17 @@ namespace cpg.parser.parsgenerator.parser.llparser
 
             SyntaxParseResult<T> result = new SyntaxParseResult<T>();
             result.IsError = isError;
+            result.Errors = errors;
             if (!isError)
             {
                 ConcreteSyntaxNode<T> node = new ConcreteSyntaxNode<T>(rule.Key, children);
-                result.Root = node;
+                result.Root = node;                
                 result.EndingPosition = currentPosition;
                 result.IsEnded = currentPosition >= tokens.Count - 1;
             }
             else
             {
-                result.Errors = errors;
+                
             }
 
 

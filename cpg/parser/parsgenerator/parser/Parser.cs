@@ -38,7 +38,7 @@ namespace cpg.parser.parsgenerator.parser
             }
             else
             {
-                result.Errors = syntaxResult.Errors;
+                result.Errors = syntaxResult.Errors.Select(error => error.ErrorMessage).ToList<string>();
                 result.IsError = true;
             }
             return result;

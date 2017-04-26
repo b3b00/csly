@@ -2,8 +2,10 @@
 using jsonparser;
 using lexer;
 using parser.parsergenerator.generator;
-using System;
+using System.Linq;
 using System.Collections.Generic;
+using System.IO;
+using System;
 
 namespace ParserExample
 {
@@ -80,10 +82,26 @@ class Program
         {
             Lexer<JsonToken>  lex = JSONParser.BuildJsonLexer(new Lexer<JsonToken>());
             Parser<JsonToken> yacc = ParserBuilder.BuildParser<JsonToken>(typeof(JSONParser), ParserType.LL_RECURSIVE_DESCENT, "root");
-            object result = yacc.Parse("[1,null,{},true,42.58]");
-            ;
+            
 
-            result = yacc.Parse("\"hello\" \"world!\"");
+            ParseResult<JsonToken> result = yacc.Parse("'hello' 'world!'");
+
+            if (result.IsError)
+            {
+                result.Errors.ForEach(e => Console.WriteLine(e));
+            }
+            ;
+            Console.WriteLine("====================");
+            Console.WriteLine();
+            result = yacc.Parse(@"{
+                'one': 1,
+                'bug':{,}
+            }");
+
+            if (result.IsError)
+            {
+                result.Errors.ForEach(e => Console.WriteLine(e));
+            }
             ;
         }
     }
