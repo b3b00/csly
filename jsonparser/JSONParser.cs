@@ -24,7 +24,8 @@ namespace jsonparser
         SEMICOLON = 11,
         WS = 12,
         EOL = 13,
-        NULL = 14
+        NULL = 14,
+        QUOTE = 99
 
 
     }
@@ -51,11 +52,10 @@ namespace jsonparser
         {
             if (lexer == null) {
                 lexer = new Lexer<JsonToken>();
-            }
+            }            
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.DOUBLE, "[0-9]+\\.[0-9]+"));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.INT, "[0-9]+"));
-            //lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.IDENTIFIER, "[A-Za-z0-9_àâéèêëîô][A-Za-z0-9\u0080-\u00FF_àâéèêëîô°]*"));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.STRING, "\\\"([^\\\"]*)\\\""));
+            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.INT, "[0-9]+"));            
+            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.STRING, "(\\\"|')([^(\\\"|')]*)(\\\"|')"));
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.BOOLEAN, "(true|false)"));
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.NULL, "(null)"));
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.ACCG, "{"));
