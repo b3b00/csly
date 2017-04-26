@@ -132,7 +132,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
             }
             SyntaxParseResult<T> result = null;
 
-            // TODO choisir la solution qui a tout consommé !! ou ERROR
+            
             if (rs.Count > 0)
             {
                 result = rs.Find(r => r.IsEnded && !r.IsError);
@@ -211,10 +211,9 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                 {
                                     ;
                                 }
-                            }); // todo distinct 
+                            }); 
                             allAcceptableTokens = allAcceptableTokens.Distinct<T>().ToList<T>();
-                            bool notInOthers = !allAcceptableTokens.Contains(tokens[currentPosition].TokenID);
-                            ;
+                                                        
                             List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.IsEmpty).ToList<Rule<T>>();
 
                             if (rules.Count == 0)
@@ -225,7 +224,8 @@ namespace cpg.parser.parsgenerator.parser.llparser
 
                             List<UnexpectedTokenSyntaxError<T>> innerRuleErrors = new List<UnexpectedTokenSyntaxError<T>>();
                             SyntaxParseResult<T> okResult = null;
-                            int greaterIndex = 0; 
+                            int greaterIndex = 0;
+                            bool allRulesInError = true;
                             while (!found && i < rules.Count)
                             {
                                 Rule<T> innerrule = rules[i];
@@ -238,16 +238,17 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                     currentPosition = innerRuleRes.EndingPosition;
                                 }
 
-                                if (innerRuleRes.EndingPosition > greaterIndex)
+                                if (innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null  && innerRuleRes.Errors.Any() )
                                 {
                                     greaterIndex = innerRuleRes.EndingPosition;
                                     innerRuleErrors.Clear();
                                     innerRuleErrors.AddRange(innerRuleRes.Errors);
                                 }
-                                
-                                isError = isError && innerRuleRes.IsError; // todo check ! : previously ||         TODO : reelement en erreur si toutes les alternatives sont en erreur                        
+                                allRulesInError = allRulesInError && innerRuleRes.IsError;
+                                //isError = isError && innerRuleRes.IsError; 
                                 i++;
                             }
+                            isError = isError || allRulesInError;
                             errors.AddRange(innerRuleErrors);
                         }
                         else
@@ -255,14 +256,9 @@ namespace cpg.parser.parsgenerator.parser.llparser
                             ;
                         }
                         if (isError)
-                        {
-                            // ici c'est pas cool
+                        {                            
                             break;
-                        }
-                        else
-                        {
-                            ;
-                        }
+                        }                        
                     }
                 }
             }
@@ -270,18 +266,13 @@ namespace cpg.parser.parsgenerator.parser.llparser
             SyntaxParseResult<T> result = new SyntaxParseResult<T>();
             result.IsError = isError;
             result.Errors = errors;
+            result.EndingPosition = currentPosition;
             if (!isError)
             {
                 ConcreteSyntaxNode<T> node = new ConcreteSyntaxNode<T>(rule.Key, children);
-                result.Root = node;                
-                result.EndingPosition = currentPosition;
+                result.Root = node;                                
                 result.IsEnded = currentPosition >= tokens.Count - 1;
             }
-            else
-            {
-                
-            }
-
 
             return result;
         }
