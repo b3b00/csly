@@ -1,11 +1,12 @@
 ﻿using lexer;
+using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
 namespace cpg.parser.parsgenerator.parser
 {
-    public class UnexpectedTokenSyntaxError<T>
+    public class UnexpectedTokenSyntaxError<T> : IComparable
     {
 
 
@@ -63,7 +64,29 @@ namespace cpg.parser.parsgenerator.parser
 
         }
 
-        
-
+        public int CompareTo(object obj)
+        {
+            int comparison = 0;
+            UnexpectedTokenSyntaxError<T> unexpectedError = obj as UnexpectedTokenSyntaxError<T>;
+            if (unexpectedError != null)
+            {
+                int lineComparison = Line.CompareTo(unexpectedError.Line);
+                int columnComparison = Column.CompareTo(unexpectedError.Column);
+                
+                if (lineComparison > 0)
+                {
+                    comparison = 1;
+                }
+                if (lineComparison == 0)
+                {
+                    comparison = columnComparison;
+                }
+                if (lineComparison < 0)
+                {
+                    comparison = -1;
+                }
+            }
+            return comparison;
+        }
     }
 }

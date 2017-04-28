@@ -210,6 +210,25 @@ namespace ParserTests
             Assert.Equal(42.58d, ((List<object>)r.Result)[4]);
         }
 
-#endregion
+        #endregion
+
+        [Fact]
+        public void TestSyntaxError()
+        {
+            string source = @"{
+                'one': 1,
+                'bug':{,}
+            }";
+            ParseResult<JsonToken> r = Parser.Parse(source);
+            Assert.True(r.IsError);
+            Assert.Null(r.Result);
+            Assert.NotNull(r.Errors);
+            Assert.True(r.Errors.Count > 0);            
+            Assert.Contains("unexpected", r.Errors[0]);
+            Assert.Contains("\",\"", r.Errors[0]);
+            Assert.Contains("line 3", r.Errors[0]);
+            Assert.Contains("column 25", r.Errors[0]);
+
+        }
     }
 }
