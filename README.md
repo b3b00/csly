@@ -3,6 +3,7 @@
  #LY is a parser generator halfway between parser combinators and parser generator like [ANTLR](http://www.antlr.org/) 
 
 It provides a way to build a full lexer and parser using only C# with no extra build step. The goal of this parser generator is not to build highly efficient parser but rather rapid prototyping or small DSL embedded in .Net solutions.   
+It is highly inspired by the python lex yacc library ([PLY](http://www.dabeaz.com/ply/))
 
 The parser implementation fully resides in a single static class.    
 
@@ -22,6 +23,12 @@ To configure a lexer 2 items has to be done :
 - a static method with special attribute [LexerConfigurationAttribute] that associates tokens from the above enum with matching regex.
  
 the configuration method takes a Lexer<T> (where T is the tokens <span style="color:blue">**enum**</span>  parameters and returns the same lexer after having added (token,regex) associations.
+
+The lexer can be used apart from the parser. It provides a method that returns an IEnumerable<Token<T>> (where T is the tokens <span style="color:blue">**enum**</span>) from a <span style="color:blue">**string**</span>
+
+```c#
+ IList<Token<T>> tokens = Lexer.Tokenize(source).ToList<Token<T>>();
+```
 
 ### full example, for a mathematical parser ###
 
@@ -80,6 +87,7 @@ public enum ExpressionToken
             lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.WS, "[ \\t]+", true));
             lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.EOL, "[\\n\\r]+", true, true));
             return lexer;
+		}
 ``` 
 
 
@@ -95,4 +103,8 @@ Each methods takes a List<object> as a parameters. This list contains the right 
 ### full example, for a mathematical parser ###
 
 
+```c#
 
+
+
+``` 
