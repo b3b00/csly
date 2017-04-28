@@ -74,8 +74,7 @@ public enum ExpressionToken
             }
 
             lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.DOUBLE, "[0-9]+\\.[0-9]+"));
-            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.INT, "[0-9]+"));
-            //lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.IDENTIFIER, "[A-Za-z0-9_àâéèêëîô][A-Za-z0-9\u0080-\u00FF_àâéèêëîô°]*"));
+            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.INT, "[0-9]+"));            
             lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.PLUS, "\\+"));
             lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.MINUS, "\\-"));
             lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.TIMES, "\\*"));
@@ -103,7 +102,7 @@ The values of the clauses are :
 - for a non terminal : the result of the evaluation of the non terminal, i.e the value returned by the matching static method. 
 
   
-### partial example for a mathematical parser ###
+### partial example for a mathematical expression evaluator ###
 
 a mathematical parser calculate a mathematical expression. It takes a string as input and return a numeric value. So each static method of the parser will return a numeric value (an int for simplicity concern)
 
@@ -111,12 +110,14 @@ a mathematical parser calculate a mathematical expression. It takes a string as 
 ```c#
 
 
+		// parsing an integer
         [Reduction("primary: INT")]
         public static object Primary(List<object> args)
         {
             return ((Token<ExpressionToken>)args[0]).IntValue;
         }
-		
+
+		// parsing a paranthsis group
         [Reduction("primary: LPAREN expression RPAREN")]
         public static object Group(List<object> args)
         {
@@ -124,10 +125,9 @@ a mathematical parser calculate a mathematical expression. It takes a string as 
         }
 
 
-
+		//parsing an addition or substraction
         [Reduction("expression : term PLUS expression")]
         [Reduction("expression : term MINUS expression")]
-
         public static object Expression(List<object> args)
         {
             object result = 0;
@@ -182,15 +182,20 @@ the parser returns a ParseResult instance containing the evaluation value or a l
 
 ```c#
 
- ParseResult<ExpressionToken> r = Parser.Parse("1 + 1");
+ 	ParseResult<ExpressionToken> r = Parser.Parse("1 + 1");
 
- Assert.False(r.IsError);
 
- Assert.NotNull(r.Result);
-
- Assert.IsAssignableFrom(typeof(int), r.Result);
-
- Assert.Equal(2, (int)r.Result);
+	if (!r.IsError && r.Result != null && r.Result is int)
+    {
+    	Console.WriteLine($"result is {(int)r.Result}");
+    }
+    else
+    {
+        if (r.Errors !=null && r.Errors.Any())
+        {
+            r.Errors.ForEach(error => Console.WriteLine(error.ErrorMessage));
+        }
+    }
 ```
 
 
