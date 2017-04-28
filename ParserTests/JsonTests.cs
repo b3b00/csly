@@ -212,25 +212,6 @@ namespace ParserTests
 
         #endregion
 
-        [Fact]
-        public void TestSyntaxError()
-        {
-            string source = @"{
-                'one': 1,
-                'bug':{,}
-            }";
-            ParseResult<JsonToken> r = Parser.Parse(source);
-            Assert.True(r.IsError);
-            Assert.Null(r.Result);
-            Assert.NotNull(r.Errors);
-            Assert.True(r.Errors.Count > 0);
-            Assert.IsAssignableFrom(typeof(UnexpectedTokenSyntaxError<JsonToken>), r.Errors[0]);
-            UnexpectedTokenSyntaxError<JsonToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
-            
-            Assert.Equal(JsonToken.COMMA, error.UnexpectedToken.TokenID);
-            Assert.Equal(3, error.Line);
-            Assert.Equal(25, error.Column);
-
-        }
+       
     }
 }

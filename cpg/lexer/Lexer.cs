@@ -1,4 +1,5 @@
-﻿using System;
+﻿using cpg.parser.parsgenerator.parser;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -48,7 +49,8 @@ namespace lexer
 
                 if (matchedDefinition == null)
                 {
-                    throw new Exception(string.Format("Unrecognized symbol '{0}' at index {1} (line {2}, column {3}).", source[currentIndex], currentIndex, currentLine, currentColumn));
+
+                    throw new LexerException<T>(new LexicalError(currentLine,currentColumn, source[currentIndex]));
                 }
                 else
                 {

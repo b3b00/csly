@@ -114,22 +114,7 @@ namespace ParserTests
         }
 
 
-        [Fact]
-        public void TestSyntaxError()
-        {
-            ParseResult<ExpressionToken> r = Parser.Parse(" 2 + 3 + + 2");
-            Assert.True(r.IsError);
-            Assert.Null(r.Result);
-            Assert.NotNull(r.Errors);
-            Assert.True(r.Errors.Count > 0);
-            Assert.IsAssignableFrom(typeof(UnexpectedTokenSyntaxError<ExpressionToken>), r.Errors[0]);
-            UnexpectedTokenSyntaxError<ExpressionToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<ExpressionToken>;
-            
-            Assert.Equal(ExpressionToken.PLUS, error.UnexpectedToken.TokenID);
-
-            Assert.Equal(1, error.Line);
-            Assert.Equal(9, error.Column);
-        }
+        
 
       
     }

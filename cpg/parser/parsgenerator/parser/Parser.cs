@@ -22,8 +22,20 @@ namespace cpg.parser.parsgenerator.parser
 
         public ParseResult<T> Parse(string source)
         {
-            IList<Token<T>> tokens = Lexer.Tokenize(source).ToList<Token<T>>();
-            return Parse(tokens);
+            ParseResult<T> result = null;
+            try
+            {
+                IList<Token<T>> tokens = Lexer.Tokenize(source).ToList<Token<T>>();
+                result = Parse(tokens);
+            }
+            catch(LexerException<T> e)
+            {
+                result = new ParseResult<T>();
+                result.IsError = true;
+                result.Errors = new List<ParseError>();
+                result.Errors.Add((e as LexerException<T>).Error);                
+            }
+            return result;            
         }
         public ParseResult<T> Parse(IList<Token<T>> tokens)
         {
