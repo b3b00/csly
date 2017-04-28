@@ -223,11 +223,13 @@ namespace ParserTests
             Assert.True(r.IsError);
             Assert.Null(r.Result);
             Assert.NotNull(r.Errors);
-            Assert.True(r.Errors.Count > 0);            
-            Assert.Contains("unexpected", r.Errors[0]);
-            Assert.Contains("\",\"", r.Errors[0]);
-            Assert.Contains("line 3", r.Errors[0]);
-            Assert.Contains("column 25", r.Errors[0]);
+            Assert.True(r.Errors.Count > 0);
+            Assert.IsAssignableFrom(typeof(UnexpectedTokenSyntaxError<JsonToken>), r.Errors[0]);
+            UnexpectedTokenSyntaxError<JsonToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
+            
+            Assert.Equal(JsonToken.COMMA, error.UnexpectedToken.TokenID);
+            Assert.Equal(3, error.Line);
+            Assert.Equal(25, error.Column);
 
         }
     }

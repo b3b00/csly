@@ -122,10 +122,13 @@ namespace ParserTests
             Assert.Null(r.Result);
             Assert.NotNull(r.Errors);
             Assert.True(r.Errors.Count > 0);
-            Assert.Contains("unexpected", r.Errors[0]);
-            Assert.Contains("\"+\"", r.Errors[0]);
-            Assert.Contains("line 1", r.Errors[0]);
-            Assert.Contains("column 9", r.Errors[0]);
+            Assert.IsAssignableFrom(typeof(UnexpectedTokenSyntaxError<ExpressionToken>), r.Errors[0]);
+            UnexpectedTokenSyntaxError<ExpressionToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<ExpressionToken>;
+            
+            Assert.Equal(ExpressionToken.PLUS, error.UnexpectedToken.TokenID);
+
+            Assert.Equal(1, error.Line);
+            Assert.Equal(9, error.Column);
         }
 
       

@@ -11,7 +11,7 @@ namespace cpg.parser.parsgenerator.parser
 
         public bool IsError { get; set; }
 
-        public List<string> Errors { get; set; }
+        public List<ParseError> Errors { get; set; }
 
         public int EndingPosition { get; set; }
 

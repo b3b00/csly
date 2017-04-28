@@ -6,25 +6,24 @@ using System.Text;
 
 namespace cpg.parser.parsgenerator.parser
 {
-    public class UnexpectedTokenSyntaxError<T> : IComparable
+    public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable
     {
-
-
+        
 
         public Token<T> UnexpectedToken { get; set; }
 
         public List<T> ExpectedTokens { get; set; }
 
-        public int Line {
+        public override int Line {
             get {
                 return UnexpectedToken.Position.Line;
             }
         }
-        public int Column
+        public override int Column
         {
             get {
                 return UnexpectedToken.Position.Column;
-            }
+            }            
         }
 
         public string ErrorMessage
@@ -49,7 +48,7 @@ namespace cpg.parser.parsgenerator.parser
             }
         }
 
-        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, params T[] expectedTokens)
+        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, params T[] expectedTokens) 
         {
             this.UnexpectedToken = unexpectedToken;
             if (expectedTokens != null)
@@ -64,29 +63,6 @@ namespace cpg.parser.parsgenerator.parser
 
         }
 
-        public int CompareTo(object obj)
-        {
-            int comparison = 0;
-            UnexpectedTokenSyntaxError<T> unexpectedError = obj as UnexpectedTokenSyntaxError<T>;
-            if (unexpectedError != null)
-            {
-                int lineComparison = Line.CompareTo(unexpectedError.Line);
-                int columnComparison = Column.CompareTo(unexpectedError.Column);
-                
-                if (lineComparison > 0)
-                {
-                    comparison = 1;
-                }
-                if (lineComparison == 0)
-                {
-                    comparison = columnComparison;
-                }
-                if (lineComparison < 0)
-                {
-                    comparison = -1;
-                }
-            }
-            return comparison;
-        }
+        
     }
 }
