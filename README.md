@@ -198,4 +198,8 @@ the parser returns a ParseResult instance containing the evaluation value or a l
     }
 ```
 
+## Full examples ##
 
+Full examples are available under :
+- jsonparser : a json parser (does not support comments)
+- expressionParser : a mathematical expression parser
