@@ -10,19 +10,16 @@ namespace expressionparser
 {
     public enum ExpressionToken
     {
-        INT = 2,
-        DOUBLE = 3,
-        PLUS = 4,
-        MINUS = 5,
-        TIMES = 6,
-        DIVIDE = 7,
-        LPAREN = 8,
-        RPAREN = 9,
-        WS = 12,
-        EOL = 13,
-        NULL = 14
-
-
+        INT = 2, // integer
+        DOUBLE = 3, // float number 
+        PLUS = 4, // the + operator
+        MINUS = 5, // the - operator
+        TIMES = 6, // the * operator
+        DIVIDE = 7, //  the  / operator
+        LPAREN = 8, // a left paranthesis (
+        RPAREN = 9,// a right paranthesis )
+        WS = 12, // a whitespace
+        EOL = 14
     }
 
 

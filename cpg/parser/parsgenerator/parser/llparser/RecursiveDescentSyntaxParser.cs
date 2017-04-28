@@ -12,25 +12,7 @@ using System.Threading.Tasks;
 
 namespace cpg.parser.parsgenerator.parser.llparser
 {
-
-    class ParserState<T>
-    {
-
-        int CurrentTokenPosition { get; set; }
-
-        IList<Token<T>> Tokens { get; set; }
-
-        Rule<T> Rule { get; set; }
-
-        public ParserState(int position, Rule<T> rule, IList<Token<T>> tokens)
-        {
-            this.CurrentTokenPosition = position;
-            this.Rule = rule;
-            this.Tokens = tokens;
-        }
-
-
-    }
+    
 
     public class RecursiveDescentSyntaxParser<T> : ISyntaxParser<T>
     {
