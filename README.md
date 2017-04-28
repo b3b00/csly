@@ -157,7 +157,7 @@ a mathematical parser calculate a mathematical expression. It takes a string as 
        
 
 ``` 
-## Building a parser ##
+## Building a parser and using it ##
 
 as we 've seen above a parser is declared on a single class with static methods that address :
 
@@ -175,6 +175,22 @@ the parser is typed according to the token type.
 
 ```c#
 Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(typeof(ExpressionParser), ParserType.LL_RECURSIVE_DESCENT, "expression");
+```
+
+then calling parser.Parse("some source code") will return the evaluation of the syntax tree.
+the parser returns a ParseResult instance containing the evaluation value or a list of errors.
+
+```c#
+
+ ParseResult<ExpressionToken> r = Parser.Parse("1 + 1");
+
+ Assert.False(r.IsError);
+
+ Assert.NotNull(r.Result);
+
+ Assert.IsAssignableFrom(typeof(int), r.Result);
+
+ Assert.Equal(2, (int)r.Result);
 ```
 
 
