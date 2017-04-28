@@ -67,44 +67,26 @@ namespace expressionparser
         }
 
 
-        
+
         [Reduction("expression : term PLUS expression")]
         [Reduction("expression : term MINUS expression")]
-        [Reduction("expression : term")]
+
         public static object Expression(List<object> args)
         {
-            int result = 0;
-            switch (args.Count)
+            object result = 0;
+            int left = (int)args[0];
+            int right = (int)args[2];
+            ExpressionToken token = ((Token<ExpressionToken>)args[1]).TokenID;
+            switch (token)
             {
-
-
-                case 1:
+                case ExpressionToken.PLUS:
                     {
-                        result = (int)args[0];
+                        result = left + right;
                         break;
                     }
-                case 3:
+                case ExpressionToken.MINUS:
                     {
-                        int left = (int)args[0];
-                        int right = (int)args[2];
-                        ExpressionToken token = ((Token<ExpressionToken>)args[1]).TokenID;
-                        switch (token)
-                        {
-                            case ExpressionToken.PLUS:
-                                {
-                                    result = left + right;
-                                    break;
-                                }
-                            case ExpressionToken.MINUS:
-                                {
-                                    result = left - right;
-                                    break;
-                                }
-                            default:
-                                {
-                                    break;
-                                }
-                        }
+                        result = left - right;
                         break;
                     }
                 default:
@@ -113,47 +95,34 @@ namespace expressionparser
                     }
             }
             return result;
-
         }
 
-        
+        [Reduction("expression : term")]
+        public static object Expression_Term(List<object> args)
+        {
+            object result = (int)args[0];
+            return result;
+        }
+
         [Reduction("term : factor TIMES term")]
         [Reduction("term : factor DIVIDE term")]
-        [Reduction("term : factor")]
         public static object Term(List<object> args)
         {
             int result = 0;
-            switch (args.Count)
+
+            int left = (int)args[0];
+            int right = (int)args[2];
+            ExpressionToken token = ((Token<ExpressionToken>)args[1]).TokenID;
+            switch (token)
             {
-
-
-                case 1:
+                case ExpressionToken.TIMES:
                     {
-                        result = (int)args[0];
+                        result = left * right;
                         break;
                     }
-                case 3:
+                case ExpressionToken.DIVIDE:
                     {
-                        int left = (int)args[0];
-                        int right = (int)args[2];
-                        ExpressionToken token = ((Token<ExpressionToken>)args[1]).TokenID;
-                        switch (token)
-                        {
-                            case ExpressionToken.TIMES:
-                                {
-                                    result = left * right;
-                                    break;
-                                }
-                            case ExpressionToken.DIVIDE:
-                                {
-                                    result = left / right;
-                                    break;
-                                }
-                            default:
-                                {
-                                    break;
-                                }
-                        }
+                        result = left / right;
                         break;
                     }
                 default:
@@ -161,11 +130,18 @@ namespace expressionparser
                         break;
                     }
             }
+            return result;
+        }
+
+        [Reduction("term : factor")]
+        public static object Term_Factor(List<object> args)
+        {
+            object result = (int)args[0];
             return result;
         }
 
         [Reduction("factor : primary")]
-        [Reduction("factor : MINUS factor")]        
+        [Reduction("factor : MINUS factor")]
         public static object Factor(List<object> args)
         {
             int result = 0;
