@@ -103,7 +103,9 @@ The values of the clauses are :
 - for a non terminal : the result of the evaluation of the non terminal, i.e the value returned by the matching static method. 
 
   
-### full example, for a mathematical parser ###
+### partial example for a mathematical parser ###
+
+a mathematical parser calculate a mathematical expression. It takes a string as input and return a numeric value. So each static method of the parser will return a numeric value (an int for simplicity concern)
 
 
 ```c#
@@ -114,7 +116,7 @@ The values of the clauses are :
         {
             return ((Token<ExpressionToken>)args[0]).IntValue;
         }
-
+		
         [Reduction("primary: LPAREN expression RPAREN")]
         public static object Group(List<object> args)
         {
@@ -152,75 +154,27 @@ The values of the clauses are :
             return result;
         }
 
-        [Reduction("expression : term")]
-        public static object Expression_Term(List<object> args)
-        {
-            object result = (int)args[0];
-            return result;
-        }
-
-        [Reduction("term : factor TIMES term")]
-        [Reduction("term : factor DIVIDE term")]
-        public static object Term(List<object> args)
-        {
-            int result = 0;
-
-            int left = (int)args[0];
-            int right = (int)args[2];
-            ExpressionToken token = ((Token<ExpressionToken>)args[1]).TokenID;
-            switch (token)
-            {
-                case ExpressionToken.TIMES:
-                    {
-                        result = left * right;
-                        break;
-                    }
-                case ExpressionToken.DIVIDE:
-                    {
-                        result = left / right;
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
-            }
-            return result;
-        }
-
-        [Reduction("term : factor")]
-        public static object Term_Factor(List<object> args)
-        {
-            object result = (int)args[0];
-            return result;
-        }
-
-        [Reduction("factor : primary")]
-        [Reduction("factor : MINUS factor")]
-        public static object Factor(List<object> args)
-        {
-            int result = 0;
-            switch (args.Count)
-            {
-                case 1:
-                    {
-                        result = (int)args[0];
-                        break;
-                    }
-                case 2:
-                    {
-                        ExpressionToken token = ((Token<ExpressionToken>)args[0]).TokenID;
-                        int val = (int)args[1];
-                        val = token == ExpressionToken.MINUS ? -val : val;
-                        result = val;
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
-            }
-            return result;
-        }
+       
 
 ``` 
+## Building a parser ##
+
+as we 've seen above a parser is declared on a single class with static methods that address :
+
+- lexer configuration (with the [LexerConfigurationAttribute] attribute )
+- grammar rules (with the [Reduction("")] attribute )
+
+Once the class with all its methods has been written, it can be used to build the effective parser instance calling ParserBuilder.BuildParser. the builder methods takes 3 parameters :
+
+
+1. the Type of the parser class
+2. the kind of parser. Currently only a recursive descent parser is available. this implementation is limited to LL grammar by construction.
+3. the root rule for the parser.   
+
+the parser is typed according to the token type.
+
+```c#
+Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(typeof(ExpressionParser), ParserType.LL_RECURSIVE_DESCENT, "expression");
+```
+
+
