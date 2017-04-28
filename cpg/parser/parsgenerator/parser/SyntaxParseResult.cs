@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using parser.parsergenerator.syntax;
 using cpg.parser.parsgenerator.syntax;
+using cpg.parser.parsgenerator.parser;
 
 namespace parser.parsergenerator.parser
 {
@@ -9,7 +10,7 @@ namespace parser.parsergenerator.parser
 
         public bool IsError{get; set;}
 
-        public List<string> Errors {get; set;}
+        public List<UnexpectedTokenSyntaxError<T>> Errors {get; set;}
 
         public int EndingPosition { get; set; }
 

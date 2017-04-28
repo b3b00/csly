@@ -1,0 +1,69 @@
+﻿using lexer;
+using System.Linq;
+using System.Collections.Generic;
+using System.Text;
+
+namespace cpg.parser.parsgenerator.parser
+{
+    public class UnexpectedTokenSyntaxError<T>
+    {
+
+
+
+        public Token<T> UnexpectedToken { get; set; }
+
+        public List<T> ExpectedTokens { get; set; }
+
+        public int Line {
+            get {
+                return UnexpectedToken.Position.Line;
+            }
+        }
+        public int Column
+        {
+            get {
+                return UnexpectedToken.Position.Column;
+            }
+        }
+
+        public string ErrorMessage
+        {
+            get
+            {
+                StringBuilder message = new StringBuilder();
+                message.Append($"unexpected \"{UnexpectedToken.Value}\" ({UnexpectedToken.TokenID}) at {UnexpectedToken.Position}.");
+                if (ExpectedTokens != null && ExpectedTokens.Any())
+                {
+                   
+                     message.Append("expecting ");
+
+                    foreach (T t in ExpectedTokens)
+                    {
+                        message.Append(t.ToString());
+                        message.Append(", ");
+                        
+                    }
+                }
+                return message.ToString();
+            }
+        }
+
+        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, params T[] expectedTokens)
+        {
+            this.UnexpectedToken = unexpectedToken;
+            if (expectedTokens != null)
+            {
+                this.ExpectedTokens = new List<T>();
+                this.ExpectedTokens.AddRange(expectedTokens);
+            }
+            else
+            {
+                this.ExpectedTokens = null;
+            }
+
+        }
+
+        
+
+    }
+}
