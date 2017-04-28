@@ -43,13 +43,13 @@ namespace cpg.parser.parsgenerator.parser.llparser
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
-            InitializeStartingTokens<T>(Configuration, startingNonTerminal);
+            InitializeStartingTokens(Configuration, startingNonTerminal);
         }
 
         #region STARTING_TOKENS
 
 
-        static private void InitializeStartingTokens<T>(ParserConfiguration<T> configuration, string root)
+        static private void InitializeStartingTokens(ParserConfiguration<T> configuration, string root)
         {
 
 
@@ -63,23 +63,23 @@ namespace cpg.parser.parsgenerator.parser.llparser
                 {
                     if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
                     {
-                        InitStartingTokensForRule<T>(nts, rule);
+                        InitStartingTokensForRule(nts, rule);
                     }
                 }
             }
         }
 
-        static private void InitStartingTokensForNT<T>(Dictionary<string, NonTerminal<T>> nonTerminals, string name)
+        static private void InitStartingTokensForNT(Dictionary<string, NonTerminal<T>> nonTerminals, string name)
         {
             if (nonTerminals.ContainsKey(name))
             {
                 NonTerminal<T> nt = nonTerminals[name];
-                nt.Rules.ForEach(r => InitStartingTokensForRule<T>(nonTerminals, r));
+                nt.Rules.ForEach(r => InitStartingTokensForRule(nonTerminals, r));
             }
             return;
         }
 
-        static private void InitStartingTokensForRule<T>(Dictionary<string, NonTerminal<T>> nonTerminals, Rule<T> rule)
+        static private void InitStartingTokensForRule(Dictionary<string, NonTerminal<T>> nonTerminals, Rule<T> rule)
         {
             if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
             {
@@ -96,7 +96,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                     else
                     {
                         NonTerminalClause<T> nonterm = first as NonTerminalClause<T>;
-                        InitStartingTokensForNT<T>(nonTerminals, nonterm.NonTerminalName);
+                        InitStartingTokensForNT(nonTerminals, nonterm.NonTerminalName);
                         NonTerminal<T> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
                         firstNonTerminal.Rules.ForEach(r =>
                         {
@@ -125,10 +125,11 @@ namespace cpg.parser.parsgenerator.parser.llparser
             foreach (Rule<T> rule in rules)
             {
                 SyntaxParseResult<T> r = Parse(tokens, rule, 0);
-                if (!r.IsError)
-                {
+
+                //if (!r.IsError)
+                //{
                     rs.Add(r);
-                }
+                //}
             }
             SyntaxParseResult<T> result = null;
 
@@ -156,7 +157,10 @@ namespace cpg.parser.parsgenerator.parser.llparser
             if (result == null)
             {
                 result = new SyntaxParseResult<T>();
+                errors.Sort();
+                List<UnexpectedTokenSyntaxError<T>> singleError = new List<UnexpectedTokenSyntaxError<T>>() { errors[errors.Count() - 1] };
                 result.Errors = errors;
+                result.Errors = singleError;
                 result.IsError = true;
             }
             return result;
@@ -188,7 +192,7 @@ namespace cpg.parser.parsgenerator.parser.llparser
                             else
                             {
                                 Token<T> tok = tokens[currentPosition];
-                                errors.Add(new UnexpectedTokenSyntaxError<T>(tokens[currentPosition], ((TerminalClause<T>)clause).ExpectedToken));
+                                errors.Add(new UnexpectedTokenSyntaxError<T>(tok, ((TerminalClause<T>)clause).ExpectedToken));
                             }
                             isError = isError || termRes.IsError;
                         }
@@ -199,7 +203,6 @@ namespace cpg.parser.parsgenerator.parser.llparser
                             bool found = false;
                             int i = 0;
 
-                            bool eos = tokens[currentPosition].IsEndOfStream;
                             List<T> allAcceptableTokens = new List<T>();
                             nt.Rules.ForEach(r =>
                             {
@@ -237,15 +240,22 @@ namespace cpg.parser.parsgenerator.parser.llparser
                                     found = true;
                                     currentPosition = innerRuleRes.EndingPosition;
                                 }
+                                // on ne modifie la position de fin que si on a réussi alors que si on échoue complétement sur un non terminal 
+                                // on a quand meme avancé le pointeur.
+                                // garder un pointer d'erreur max 
+                                // et si complétement en erreur => prendre pointeur d'erreur.
 
-                                if (innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null  && innerRuleRes.Errors.Any() )
+
+                                // si greaterIndex == 0 &&& innerRuleRes.EndingPosition == 0 c'est pas passant et pourtant
+                                // on peut avoir des erreurs dans innerRuleRes 
+                                bool other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
+                                if ((innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null  && innerRuleRes.Errors.Any() )|| other)
                                 {
                                     greaterIndex = innerRuleRes.EndingPosition;
                                     innerRuleErrors.Clear();
                                     innerRuleErrors.AddRange(innerRuleRes.Errors);
                                 }
                                 allRulesInError = allRulesInError && innerRuleRes.IsError;
-                                //isError = isError && innerRuleRes.IsError; 
                                 i++;
                             }
                             isError = isError || allRulesInError;

@@ -25,8 +25,7 @@ namespace parser.parsergenerator.generator
         }
 
         private object Visit(IConcreteSyntaxNode<T> n)
-        {
-            IConcreteSyntaxNode<T> visited = null;
+        {            
             if (n is ConcreteSyntaxLeaf<T>)
             {
                 return Visit(n as ConcreteSyntaxLeaf<T>);

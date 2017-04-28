@@ -125,8 +125,9 @@ namespace ParserTests
             Assert.Contains("unexpected", r.Errors[0]);
             Assert.Contains("\"+\"", r.Errors[0]);
             Assert.Contains("line 1", r.Errors[0]);
-            Assert.Contains("column 7", r.Errors[0]);
-
+            Assert.Contains("column 9", r.Errors[0]);
         }
+
+      
     }
 }
