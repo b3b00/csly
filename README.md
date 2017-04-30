@@ -162,6 +162,7 @@ a mathematical parser calculate a mathematical expression. It takes a string as 
 as we 've seen above a parser is declared on a single class with static methods that address :
 
 - lexer configuration (with the [LexerConfigurationAttribute] attribute )
+
 - grammar rules (with the [Reduction("")] attribute )
 
 Once the class with all its methods has been written, it can be used to build the effective parser instance calling ParserBuilder.BuildParser. the builder methods takes 3 parameters :
@@ -200,8 +201,11 @@ the parser returns a ParseResult instance containing the evaluation value or a l
 
 ### access lexer and parsers
 One build a parser expose :
+
 - a main API through the Parse(string content) method (chain lexical analysis, syntax parsing and finally call your parsing methods)
+
 - the lexer through the Lexer property
+
 - the syntax parser  through the SyntaxParser property (which type is ISyntaxParser)
 
 ## Full examples ##
