@@ -198,6 +198,12 @@ the parser returns a ParseResult instance containing the evaluation value or a l
     }
 ```
 
+### access lexer and parsers
+One build a parser expose :
+- a main API through the Parse(string content) method (chain lexical analysis, syntax parsing and finally call your parsing methods)
+- the lexer through the Lexer property
+- the syntax parser  through the SyntaxParser property (which type is ISyntaxParser)
+
 ## Full examples ##
 
 Full examples are available under :
