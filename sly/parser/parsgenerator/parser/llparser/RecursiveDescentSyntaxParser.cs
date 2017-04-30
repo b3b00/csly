@@ -230,10 +230,13 @@ namespace cpg.parser.parsgenerator.parser.llparser
         }
 
 
-        public SyntaxParseResult<T> ParseNonTerminal(IList<Token<T>> tokens, NonTerminalClause<T> nonTermClause,int position)
+        public SyntaxParseResult<T> ParseNonTerminal(IList<Token<T>> tokens, NonTerminalClause<T> nonTermClause,int currentPosition)
         {
             NonTerminal<T> nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
             bool found = false;
+            bool isError = false;
+            List<UnexpectedTokenSyntaxError<T>> errors = new List<UnexpectedTokenSyntaxError<T>>();
+
             int i = 0;
 
             List<T> allAcceptableTokens = new List<T>();
@@ -272,7 +275,6 @@ namespace cpg.parser.parsgenerator.parser.llparser
                 if (!innerRuleRes.IsError && okResult == null)
                 {
                     okResult = innerRuleRes;
-                    children.Add(innerRuleRes.Root);
                     found = true;
                     currentPosition = innerRuleRes.EndingPosition;
                 }
