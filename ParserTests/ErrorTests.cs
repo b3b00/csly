@@ -15,7 +15,7 @@ namespace ParserTests
 
 
         [Fact]
-        public void TestJSONSyntaxError()
+        public void TestJsonSyntaxError()
         {
             Lexer<JsonToken> lexer = JSONParser.BuildJsonLexer(new Lexer<JsonToken>());
             Parser<JsonToken> parser = ParserBuilder.BuildParser<JsonToken>(typeof(JSONParser), ParserType.LL_RECURSIVE_DESCENT, "root");
@@ -32,9 +32,9 @@ namespace ParserTests
             Assert.IsAssignableFrom(typeof(UnexpectedTokenSyntaxError<JsonToken>), r.Errors[0]);
             UnexpectedTokenSyntaxError<JsonToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
 
-            Assert.Equal(JsonToken.COMMA, error.UnexpectedToken.TokenID);
-            Assert.Equal(3, error.Line);
-            Assert.Equal(25, error.Column);
+            Assert.Equal(JsonToken.COMMA, error?.UnexpectedToken.TokenID);
+            Assert.Equal(3, error?.Line);
+            Assert.Equal(25, error?.Column);
 
         }
 
