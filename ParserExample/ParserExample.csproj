@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\cpg\cpg.csproj" />
+    <ProjectReference Include="..\sly\sly.csproj" />
     <ProjectReference Include="..\jsonparser\jsonparser.csproj" />
   </ItemGroup>
 

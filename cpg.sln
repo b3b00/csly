@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "cpg", "cpg\cpg.csproj", "{E10CD5E3-0049-45C1-BE38-5D0EF074881D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sly", "sly\sly.csproj", "{E10CD5E3-0049-45C1-BE38-5D0EF074881D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "jsonparser", "jsonparser\jsonparser.csproj", "{A0A0A026-C902-4646-A22E-BD5BBCD4AB6A}"
 EndProject
