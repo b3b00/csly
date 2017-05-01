@@ -18,7 +18,7 @@ namespace sly.parser.generator
 
     public class ParserConfiguration<T>
     {
-        public Dictionary<string, Functions.ReductionFunction> Functions { get; set; }
+        public Dictionary<string, MethodInfo> Functions { get; set; }
         public Dictionary<string, NonTerminal<T>> NonTerminals { get; set; }
     }
 
@@ -28,6 +28,10 @@ namespace sly.parser.generator
         
 
         #region API
+
+
+
+
         public static ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType, string rootRule)
         {
             ISyntaxParser<T> parser = null;
@@ -55,6 +59,18 @@ namespace sly.parser.generator
             ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration);
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
             parser.Lexer = BuildLexer<T>(parserClass);
+            return parser;
+        }
+
+        public static Parser<T> BuildParser<T>(object parserInstance, ParserType parserType, string rootRule)
+        {
+            ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType(),rootRule);
+            //Lexer<T> lexer = BuildLexer<T>(parserClass);
+            ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
+            ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration, parserInstance);
+            Parser<T> parser = new Parser<T>(syntaxParser, visitor);
+            parser.Lexer = BuildLexer<T>(parserInstance.GetType());
+            parser.Instance = parserInstance;
             return parser;
         }
 
@@ -103,7 +119,7 @@ namespace sly.parser.generator
         static private ParserConfiguration<T> ExtractParserConfiguration<T>(Type parserClass, string rootRule)
         {
             ParserConfiguration<T> conf = new ParserConfiguration<T>();
-            Dictionary<string, Functions.ReductionFunction> functions = new Dictionary<string, Functions.ReductionFunction>();
+            Dictionary<string, MethodInfo> functions = new Dictionary<string, MethodInfo>();
             Dictionary<string, NonTerminal<T>> nonTerminals = new Dictionary<string, NonTerminal<T>>();
             List<MethodInfo> methods = parserClass.GetMethods().ToList<MethodInfo>();
             methods = methods.Where(m =>
@@ -122,9 +138,8 @@ namespace sly.parser.generator
                 {
                     Tuple<string, string> ntAndRule = ExtractNTAndRule(attr.RuleString);
                     string key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
-                    var delegMethod = m.CreateDelegate(typeof(Functions.ReductionFunction));
-                    //var delegMethod = Delegate.CreateDelegate(typeof(Functions.ReductionFunction), m);
-                    functions[key] = delegMethod as Functions.ReductionFunction;
+
+                    functions[key] = m;
 
                     Rule<T> r = BuildNonTerminal<T>(ntAndRule);
                     NonTerminal<T> nonT = null;

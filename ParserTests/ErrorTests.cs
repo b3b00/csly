@@ -17,8 +17,8 @@ namespace ParserTests
         [Fact]
         public void TestJsonSyntaxError()
         {
-            Lexer<JsonToken> lexer = JSONParser.BuildJsonLexer(new Lexer<JsonToken>());
-            Parser<JsonToken> parser = ParserBuilder.BuildParser<JsonToken>(typeof(JSONParser), ParserType.LL_RECURSIVE_DESCENT, "root");
+            JSONParser jsonParser = new JSONParser();
+            Parser<JsonToken> parser = ParserBuilder.BuildParser<JsonToken>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
 
             string source = @"{
                 'one': 1,
