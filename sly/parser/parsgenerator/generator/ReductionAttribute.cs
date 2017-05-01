@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace parser.parsergenerator.generator
+namespace sly.parser.generator
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class ReductionAttribute : Attribute

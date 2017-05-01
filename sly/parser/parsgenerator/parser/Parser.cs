@@ -1,12 +1,12 @@
-﻿using lexer;
-using parser.parsergenerator.generator;
-using parser.parsergenerator.parser;
-using parser.parsergenerator.syntax;
+﻿using sly.lexer;
+using sly.parser;
+using sly.parser.generator;
+
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
-namespace cpg.parser.parsgenerator.parser
+namespace sly.parser
 {
     public class Parser<T>
     {

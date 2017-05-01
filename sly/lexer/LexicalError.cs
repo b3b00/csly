@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using sly.parser;
 
-namespace cpg.parser.parsgenerator.parser
+namespace sly.lexer
 {
     public class LexicalError : ParseError
     {

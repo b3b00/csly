@@ -1,7 +1,7 @@
-﻿using cpg.parser.parsgenerator.parser;
+﻿using sly.parser;
 using jsonparser;
-using lexer;
-using parser.parsergenerator.generator;
+using sly.lexer;
+using sly.parser.generator;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;

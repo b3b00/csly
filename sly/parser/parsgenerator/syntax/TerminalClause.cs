@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace parser.parsergenerator.syntax
+namespace sly.parser.syntax
 {
 
     public class TerminalClause<T> : Clause<T>

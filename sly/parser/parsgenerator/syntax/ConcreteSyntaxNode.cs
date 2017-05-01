@@ -1,8 +1,8 @@
-using cpg.parser.parsgenerator.syntax;
+using sly.parser.syntax;
 using System;
 using System.Collections.Generic;
 
-namespace parser.parsergenerator.syntax
+namespace sly.parser.syntax
 {
 
     public class ConcreteSyntaxNode<T> : IConcreteSyntaxNode<T>

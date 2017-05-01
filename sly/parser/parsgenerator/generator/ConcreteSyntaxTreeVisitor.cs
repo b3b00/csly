@@ -1,9 +1,8 @@
 using System;
-using parser.parsergenerator.syntax;
 using System.Collections.Generic;
-using cpg.parser.parsgenerator.syntax;
+using sly.parser.syntax;
 
-namespace parser.parsergenerator.generator
+namespace sly.parser.generator
 {
 
     public class ConcreteSyntaxTreeVisitor<T>

@@ -1,8 +1,8 @@
 
-using cpg.parser.parsgenerator.syntax;
-using lexer;
+using sly.parser.syntax;
+using sly.lexer;
 
-namespace parser.parsergenerator.syntax
+namespace sly.parser.syntax
 {
 
     public class ConcreteSyntaxLeaf<T> : IConcreteSyntaxNode<T> {

@@ -1,6 +1,6 @@
 
 
-namespace parser.parsergenerator.syntax
+namespace sly.parser.syntax
 {
 
     public interface Clause<T>

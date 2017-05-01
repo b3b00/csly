@@ -1,17 +1,12 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using parser.parsergenerator.parser;
 using System.Collections.Generic;
-using cpg.parser.parsgenerator.generator;
+using sly.parser.llparser;
+using sly.lexer;
+using sly.parser.syntax;
 
-using static cpg.parser.parsgenerator.generator.Functions;
-using parser.parsergenerator.syntax;
-using cpg.parser.parsgenerator.parser.llparser;
-using cpg.parser.parsgenerator.parser;
-using lexer;
-
-namespace parser.parsergenerator.generator
+namespace sly.parser.generator
 {
 
     public enum ParserType
@@ -23,7 +18,7 @@ namespace parser.parsergenerator.generator
 
     public class ParserConfiguration<T>
     {
-        public Dictionary<string, ReductionFunction> Functions { get; set; }
+        public Dictionary<string, Functions.ReductionFunction> Functions { get; set; }
         public Dictionary<string, NonTerminal<T>> NonTerminals { get; set; }
     }
 
@@ -108,7 +103,7 @@ namespace parser.parsergenerator.generator
         static private ParserConfiguration<T> ExtractParserConfiguration<T>(Type parserClass, string rootRule)
         {
             ParserConfiguration<T> conf = new ParserConfiguration<T>();
-            Dictionary<string, Functions.ReductionFunction> functions = new Dictionary<string, ReductionFunction>();
+            Dictionary<string, Functions.ReductionFunction> functions = new Dictionary<string, Functions.ReductionFunction>();
             Dictionary<string, NonTerminal<T>> nonTerminals = new Dictionary<string, NonTerminal<T>>();
             List<MethodInfo> methods = parserClass.GetMethods().ToList<MethodInfo>();
             methods = methods.Where(m =>
@@ -129,7 +124,7 @@ namespace parser.parsergenerator.generator
                     string key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
                     var delegMethod = m.CreateDelegate(typeof(Functions.ReductionFunction));
                     //var delegMethod = Delegate.CreateDelegate(typeof(Functions.ReductionFunction), m);
-                    functions[key] = delegMethod as ReductionFunction;
+                    functions[key] = delegMethod as Functions.ReductionFunction;
 
                     Rule<T> r = BuildNonTerminal<T>(ntAndRule);
                     NonTerminal<T> nonT = null;

@@ -1,11 +1,11 @@
-﻿using cpg.parser.parsgenerator.parser;
-using lexer;
+﻿using sly.parser;
+using sly.lexer;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace lexer
+namespace sly.lexer
 {
     public class LexerException<T> : Exception
     {

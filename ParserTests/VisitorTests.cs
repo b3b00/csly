@@ -1,10 +1,9 @@
 ﻿using Xunit;
 using System.Collections.Generic;
-using parser.parsergenerator.generator;
-using cpg.parser.parsgenerator.parser;
-using parser.parsergenerator.syntax;
-using lexer;
-using cpg.parser.parsgenerator.syntax;
+using sly.parser.generator;
+using sly.parser;
+using sly.parser.syntax;
+using sly.lexer;
 
 namespace ParserTests
 {

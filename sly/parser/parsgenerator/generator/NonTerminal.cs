@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace cpg.parser.parsgenerator.generator
+namespace sly.parser.generator
 {
     public class NonTerminal<T>
     {

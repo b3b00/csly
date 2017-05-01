@@ -1,4 +1,4 @@
-﻿namespace cpg.parser.parsgenerator.parser
+﻿namespace sly.parser
 {
     public class ParseError
     {

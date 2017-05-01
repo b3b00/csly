@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using Xunit;
-using cpg.parser.parsgenerator.parser;
-using lexer;
-using parser.parsergenerator.generator;
+using sly.parser;
+using sly.lexer;
+using sly.parser.generator;
 using System.Collections.Generic;
 using jsonparser;
 

@@ -1,7 +1,7 @@
-using lexer;
+using sly.lexer;
 using System.Collections.Generic;
 
-namespace parser.parsergenerator.parser
+namespace sly.parser
 {
 
     public interface ISyntaxParser<T>

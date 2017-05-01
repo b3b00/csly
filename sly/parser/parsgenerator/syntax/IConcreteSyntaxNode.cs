@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace cpg.parser.parsgenerator.syntax
+namespace sly.parser.syntax
 {
     public interface IConcreteSyntaxNode<T>
     {

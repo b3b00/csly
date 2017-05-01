@@ -1,10 +1,10 @@
-﻿using lexer;
+﻿using sly.lexer;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
-namespace cpg.parser.parsgenerator.parser
+namespace sly.parser
 {
     public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable
     {

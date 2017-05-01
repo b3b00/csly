@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace lexer
+namespace sly.lexer
 {
     public interface ILexer<T>
     {

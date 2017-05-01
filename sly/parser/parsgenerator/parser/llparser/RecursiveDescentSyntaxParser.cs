@@ -1,16 +1,12 @@
-﻿using cpg.parser.parsgenerator.generator;
-using cpg.parser.parsgenerator.syntax;
-using lexer;
-using parser.parsergenerator.generator;
-using parser.parsergenerator.parser;
-using parser.parsergenerator.syntax;
-using System;
+﻿using sly.parser.syntax;
+using sly.lexer;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using sly.parser;
+using sly.parser.generator;
+using sly.parser.syntax;
 
-namespace cpg.parser.parsgenerator.parser.llparser
+namespace sly.parser.llparser
 {
     
 

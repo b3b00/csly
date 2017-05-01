@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace cpg.parser.parsgenerator.parser
+namespace sly.parser
 {
     public class ParseResult<T>
     {

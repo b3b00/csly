@@ -1,9 +1,8 @@
-﻿using cpg.parser.parsgenerator.parser;
-using System;
+﻿
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
-namespace lexer
+
+namespace sly.lexer
 {
     /// <summary>
     /// T is the token type

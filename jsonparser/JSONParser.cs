@@ -1,6 +1,6 @@
-﻿using lexer;
+﻿using sly.lexer;
 using System.Linq;
-using parser.parsergenerator.generator;
+using sly.parser.generator;
 
 using System;
 using System.Collections.Generic;

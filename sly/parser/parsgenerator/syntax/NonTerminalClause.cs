@@ -1,4 +1,4 @@
-namespace parser.parsergenerator.syntax
+namespace sly.parser.syntax
 {
 
     public class NonTerminalClause<T> : Clause<T>

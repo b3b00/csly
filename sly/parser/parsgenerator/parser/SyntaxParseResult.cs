@@ -1,9 +1,7 @@
 using System.Collections.Generic;
-using parser.parsergenerator.syntax;
-using cpg.parser.parsgenerator.syntax;
-using cpg.parser.parsgenerator.parser;
+using sly.parser.syntax;
 
-namespace parser.parsergenerator.parser
+namespace sly.parser
 {
     public class SyntaxParseResult<T> {
         public IConcreteSyntaxNode<T> Root {get; set;}

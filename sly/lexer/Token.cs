@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace lexer
+namespace sly.lexer
 {
     public class Token<T>
     {
