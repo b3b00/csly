@@ -25,4 +25,4 @@ test_async:
 test_db:
   script:
    - npm install
-   - node ./specs/start.js ./specs/db-postgres.spec.
+   - node ./specs/start.js ./specs/db-pos
