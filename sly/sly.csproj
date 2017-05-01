@@ -3,4 +3,9 @@
     <TargetFramework>netcoreapp1.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
+  <ItemGroup>
+    <Folder Include="parser\generator" />
+    <Folder Include="parser\parser\llparser" />
+    <Folder Include="parser\syntax" />
+  </ItemGroup>
 </Project>
