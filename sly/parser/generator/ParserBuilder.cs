@@ -18,7 +18,7 @@ namespace sly.parser.generator
 
     public class ParserConfiguration<T>
     {
-        public Dictionary<string, Functions.ReductionFunction> Functions { get; set; }
+        public Dictionary<string, MethodInfo> Functions { get; set; }
         public Dictionary<string, NonTerminal<T>> NonTerminals { get; set; }
     }
 
@@ -28,6 +28,10 @@ namespace sly.parser.generator
         
 
         #region API
+
+
+
+
         public static ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType, string rootRule)
         {
             ISyntaxParser<T> parser = null;
@@ -50,11 +54,21 @@ namespace sly.parser.generator
         public static Parser<T> BuildParser<T>(Type parserClass, ParserType parserType, string rootRule)
         {
             ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserClass,rootRule);
-            //Lexer<T> lexer = BuildLexer<T>(parserClass);
             ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
             ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration);
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
-            parser.Lexer = BuildLexer<T>(parserClass);
+            parser.Lexer = BuildLexer<T>(parserClass,null);
+            return parser;
+        }
+
+        public static Parser<T> BuildParser<T>(object parserInstance, ParserType parserType, string rootRule)
+        {
+            ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType(),rootRule);
+            ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
+            ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration, parserInstance);
+            Parser<T> parser = new Parser<T>(syntaxParser, visitor);
+            parser.Lexer = BuildLexer<T>(parserInstance.GetType(),parserInstance);
+            parser.Instance = parserInstance;
             return parser;
         }
 
@@ -79,7 +93,7 @@ namespace sly.parser.generator
         }
 
 
-        static private Lexer<T> BuildLexer<T>(Type parserClass)
+        static private Lexer<T> BuildLexer<T>(Type parserClass, object parserInstance = null)
         {
             TypeInfo typeInfo = parserClass.GetTypeInfo();
             Lexer<T> lexer = null;
@@ -94,16 +108,17 @@ namespace sly.parser.generator
             {
                 MethodInfo lexerConfigurerMethod = methods[0];
                 lexer = new Lexer<T>();
-                object res = lexerConfigurerMethod.Invoke(null, new object[] { lexer });
-                //lexer = res as Lexer<T>;
+                object res = lexerConfigurerMethod.Invoke(parserInstance, new object[] { lexer });
             }
             return lexer;
         }
 
+       
+
         static private ParserConfiguration<T> ExtractParserConfiguration<T>(Type parserClass, string rootRule)
         {
             ParserConfiguration<T> conf = new ParserConfiguration<T>();
-            Dictionary<string, Functions.ReductionFunction> functions = new Dictionary<string, Functions.ReductionFunction>();
+            Dictionary<string, MethodInfo> functions = new Dictionary<string, MethodInfo>();
             Dictionary<string, NonTerminal<T>> nonTerminals = new Dictionary<string, NonTerminal<T>>();
             List<MethodInfo> methods = parserClass.GetMethods().ToList<MethodInfo>();
             methods = methods.Where(m =>
@@ -122,9 +137,8 @@ namespace sly.parser.generator
                 {
                     Tuple<string, string> ntAndRule = ExtractNTAndRule(attr.RuleString);
                     string key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
-                    var delegMethod = m.CreateDelegate(typeof(Functions.ReductionFunction));
-                    //var delegMethod = Delegate.CreateDelegate(typeof(Functions.ReductionFunction), m);
-                    functions[key] = delegMethod as Functions.ReductionFunction;
+
+                    functions[key] = m;
 
                     Rule<T> r = BuildNonTerminal<T>(ntAndRule);
                     NonTerminal<T> nonT = null;
@@ -163,11 +177,10 @@ namespace sly.parser.generator
             {
                 Clause<T> clause = null;
                 bool isTerminal = false;
-                T token = default(T);
-                //T token = Enum.Parse(typeof(T), item, out isTerminal);
+                T token = default(T);                              
                 try
                 {
-                    token = (T)Enum.Parse(typeof(T), item);
+                    token = (T)Enum.Parse(typeof(T) , item, true);
                     isTerminal = true;
                 }
                 catch (Exception e)

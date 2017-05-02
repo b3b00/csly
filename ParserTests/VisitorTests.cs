@@ -22,21 +22,21 @@ namespace ParserTests
     {
 
         [Reduction("R : A b c ")]
-        public static object R(List<object> args)
+        public  object R(string A, Token<TokenType> b, Token<TokenType> c)
         {
             string result = "R(";
-            result += args[0].ToString() + ",";
-            result += (args[1] as Token<TokenType>).Value+",";
-            result += (args[2] as Token<TokenType>).Value;
+            result += A + ",";
+            result += b.Value+",";
+            result += c.Value;
             result += ")";
             return result;
         }
 
         [Reduction("A : a ")]
-        public static object A(List<object> args)
+        public  object A(Token<TokenType> a)
         {
             string result = "A(";            
-            result += (args[0] as Token<TokenType>).Value;            
+            result += a.Value;            
             result += ")";
             return result;
         }
@@ -60,7 +60,8 @@ namespace ParserTests
         [Fact]
         public void testVisitor()
         {
-            Parser<TokenType> parser = ParserBuilder.BuildParser<TokenType>(typeof(VisitorTests), ParserType.LL_RECURSIVE_DESCENT, "R");
+            VisitorTests visitorInstance = new VisitorTests();
+            Parser<TokenType> parser = ParserBuilder.BuildParser<TokenType>(visitorInstance, ParserType.LL_RECURSIVE_DESCENT, "R");
             ConcreteSyntaxTreeVisitor<TokenType> visitor = parser.Visitor;
 
             // build a syntax tree

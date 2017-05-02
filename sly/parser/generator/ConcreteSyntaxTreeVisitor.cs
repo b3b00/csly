@@ -4,11 +4,11 @@ using sly.parser.syntax;
 
 namespace sly.parser.generator
 {
-
     public class ConcreteSyntaxTreeVisitor<T>
     {
-
         public Type ParserClass { get; set; }
+
+        public object ParserVsisitorInstance { get; set; }
 
         public ParserConfiguration<T> Configuration { get; set; }
 
@@ -16,6 +16,14 @@ namespace sly.parser.generator
         {
             this.ParserClass = ParserClass;
             this.Configuration = conf;
+            this.ParserVsisitorInstance = null;
+        }
+
+        public ConcreteSyntaxTreeVisitor(ParserConfiguration<T> conf, object parserInstance)
+        {
+            this.ParserClass = ParserClass;
+            this.Configuration = conf;
+            this.ParserVsisitorInstance = parserInstance;
         }
 
         public object VisitSyntaxTree(IConcreteSyntaxNode<T> root)
@@ -24,7 +32,7 @@ namespace sly.parser.generator
         }
 
         private object Visit(IConcreteSyntaxNode<T> n)
-        {            
+        {
             if (n is ConcreteSyntaxLeaf<T>)
             {
                 return Visit(n as ConcreteSyntaxLeaf<T>);
@@ -57,9 +65,10 @@ namespace sly.parser.generator
                     args.Add(v);
 
                     i++;
-
                 }
-                result = Configuration.Functions[node.Name].Invoke(args);
+
+                result = Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray());
+
             }
             return result;
         }

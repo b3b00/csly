@@ -80,8 +80,8 @@ class Program
 
         static void Main(string[] args)
         {
-            Lexer<JsonToken>  lex = JSONParser.BuildJsonLexer(new Lexer<JsonToken>());
-            Parser<JsonToken> yacc = ParserBuilder.BuildParser<JsonToken>(typeof(JSONParser), ParserType.LL_RECURSIVE_DESCENT, "root");
+           JSONParser jsonparser = new JSONParser();
+            Parser<JsonToken> yacc = ParserBuilder.BuildParser<JsonToken>(jsonparser, ParserType.LL_RECURSIVE_DESCENT, "root");
             
 
             ParseResult<JsonToken> result = yacc.Parse("'hello' 'world!'");

@@ -21,7 +21,7 @@ namespace sly.parser.generator
         public List<Clause<T>> Clauses { get; set; }
         public List<T> PossibleLeadingTokens { get; set; }
 
-        public Functions.ReductionFunction Function { get; set; } 
+        public Functions.ReductionFunction Function { get; set; }
 
         public bool IsEmpty { get
             {

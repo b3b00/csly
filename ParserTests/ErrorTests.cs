@@ -17,8 +17,8 @@ namespace ParserTests
         [Fact]
         public void TestJsonSyntaxError()
         {
-            Lexer<JsonToken> lexer = JSONParser.BuildJsonLexer(new Lexer<JsonToken>());
-            Parser<JsonToken> parser = ParserBuilder.BuildParser<JsonToken>(typeof(JSONParser), ParserType.LL_RECURSIVE_DESCENT, "root");
+            JSONParser jsonParser = new JSONParser();
+            Parser<JsonToken> parser = ParserBuilder.BuildParser<JsonToken>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
 
             string source = @"{
                 'one': 1,
@@ -33,16 +33,16 @@ namespace ParserTests
             UnexpectedTokenSyntaxError<JsonToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
 
             Assert.Equal(JsonToken.COMMA, error?.UnexpectedToken.TokenID);
-            Assert.Equal(3, error?.Line);
-            Assert.Equal(25, error?.Column);
+            Assert.Equal(2, error?.Line);
+            Assert.Equal(26, error?.Column);
 
         }
 
         [Fact]
         public void TestExpressionSyntaxError()
         {
-
-            Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(typeof(ExpressionParser), ParserType.LL_RECURSIVE_DESCENT, "expression");
+            ExpressionParser exprParser = new ExpressionParser();
+            Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
 
             ParseResult<ExpressionToken> r = Parser.Parse(" 2 + 3 + + 2");
             Assert.True(r.IsError);
@@ -55,14 +55,15 @@ namespace ParserTests
             Assert.Equal(ExpressionToken.PLUS, error.UnexpectedToken.TokenID);
 
             Assert.Equal(1, error.Line);
-            Assert.Equal(9, error.Column);
+            Assert.Equal(7, error.Column);
         }
 
         [Fact]
         public void TestLexicalError()
         {
+            ExpressionParser exprParser = new ExpressionParser();
 
-            Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(typeof(ExpressionParser), ParserType.LL_RECURSIVE_DESCENT, "root");
+            Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "root");
             ParseResult<ExpressionToken> r = Parser.Parse("2 @ 2");
             Assert.True(r.IsError);
             Assert.Null(r.Result);

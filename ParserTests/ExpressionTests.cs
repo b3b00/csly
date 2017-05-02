@@ -12,14 +12,12 @@ namespace ParserTests
     public class ExpressionTests
     {
 
-        private static Parser<ExpressionToken> Parser;
-
-        private static Lexer<ExpressionToken> Lexer;
-
+        private Parser<ExpressionToken> Parser;
       
         public ExpressionTests()
-        {            
-            Parser = ParserBuilder.BuildParser<ExpressionToken>(typeof(ExpressionParser), ParserType.LL_RECURSIVE_DESCENT, "expression");
+        {
+            ExpressionParser parserInstance = new ExpressionParser();
+            Parser = ParserBuilder.BuildParser<ExpressionToken>(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression");
         }
 
 
