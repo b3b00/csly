@@ -3,5 +3,5 @@ image: mono:4.4.0.182
 build:
 stage: build
   script:
-  - nuget restore
-  - MONO_IOMAP=case xbuild /t:Build /p:Configuration="Release" /p:Platform="Any CPU" sly.sln
+     - nuget restore
+     - MONO_IOMAP=case xbuild /t:Build /p:Configuration="Release" /p:Platform="Any CPU" sly.sln
