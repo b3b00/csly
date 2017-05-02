@@ -7,11 +7,6 @@ using sly.parser.syntax;
 namespace sly.parser.generator
 {
 
-    public class Functions
-    {
-        public delegate object ReductionFunction(List<object> reductedClauses);
-    }
-
     public class Rule<T>
     {
 
@@ -20,8 +15,7 @@ namespace sly.parser.generator
 
         public List<Clause<T>> Clauses { get; set; }
         public List<T> PossibleLeadingTokens { get; set; }
-
-        public Functions.ReductionFunction Function { get; set; }
+        
 
         public bool IsEmpty { get
             {

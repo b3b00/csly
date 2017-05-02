@@ -9,29 +9,15 @@ using sly.parser.syntax;
 namespace sly.parser.generator
 {
 
-    public enum ParserType
-    {
-        LL_RECURSIVE_DESCENT = 1        
-
-    }
+   
 
 
-    public class ParserConfiguration<T>
-    {
-        public Dictionary<string, MethodInfo> Functions { get; set; }
-        public Dictionary<string, NonTerminal<T>> NonTerminals { get; set; }
-    }
+  
 
     public class ParserBuilder
     {
-
-        
-
         #region API
-
-
-
-
+        
         public static ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType, string rootRule)
         {
             ISyntaxParser<T> parser = null;
