@@ -20,7 +20,7 @@ To configure a lexer 2 items has to be done :
 
 
 - an <span style="color:blue">**enum**</span>  listing all the possible tokens (no special constraint here except public visibility)
-- a static method with special attribute [LexerConfigurationAttribute] that associates tokens from the above enum with matching regex.
+- a method with special attribute [LexerConfigurationAttribute] that associates tokens from the above enum with matching regex.
  
 the configuration method takes a Lexer<T> (where T is the tokens <span style="color:blue">**enum**</span>  parameters and returns the same lexer after having added (token,regex) associations.
 
@@ -57,7 +57,7 @@ public enum ExpressionToken
 
         WS = 12, // a whitespace
 
-		EOL = 14 // an end of line
+        EOL = 14 // an end of line
 
     }
 
@@ -65,10 +65,10 @@ public enum ExpressionToken
 ####regular expressions
 ```c#
 
- 		[LexerConfigurationAttribute]
-        public static Lexer<ExpressionToken> BuildExpressionLexer(Lexer<ExpressionToken> lexer = null)
+        [LexerConfigurationAttribute]
+        public Lexer<ExpressionToken> BuildExpressionLexer(Lexer<ExpressionToken> lexer = null)
         {
- 			if (lexer == null)
+            if (lexer == null)
             {
                 lexer = new Lexer<ExpressionToken>();
             }
@@ -86,7 +86,7 @@ public enum ExpressionToken
             lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.WS, "[ \\t]+", true));
             lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.EOL, "[\\n\\r]+", true, true));
             return lexer;
-		}
+        }
 ``` 
 
 
@@ -96,8 +96,7 @@ The grammar defining the parser is defined using C# attribute [Reduction("some g
 The rules follow the classical BNF notation.
 A terminal notation must exactly matches (case sensitive) an enum value.
 Once build the methods of each rule will be used as a syntaxic tree visitor.
-Each methods takes a List<object> as a parameters. This list contains the values of the evalation of each clause of the right part of a rule.
-The values of the clauses are :
+Each methods takes as many parameters as rule clauses. Each parameter can be typed according to the return value of the clause :
 - for a terminal : the Token<T> corresponding to the token
 - for a non terminal : the result of the evaluation of the non terminal, i.e the value returned by the matching static method. 
 
@@ -110,31 +109,29 @@ a mathematical parser calculate a mathematical expression. It takes a string as 
 ```c#
 
 
-		// parsing an integer
-        [Reduction("primary: INT")]
-        public static object Primary(List<object> args)
+         [Reduction("primary: INT")]
+        public object Primary(Token<ExpressionToken> intToken)
         {
-            return ((Token<ExpressionToken>)args[0]).IntValue;
+            return intToken.IntValue;
         }
 
-		// parsing a paranthsis group
         [Reduction("primary: LPAREN expression RPAREN")]
-        public static object Group(List<object> args)
+        public object Group(object discaredLParen, int groupValue ,object discardedRParen)
         {
-            return args[1];
+            return groupValue;
         }
 
 
-		//parsing an addition or substraction
+
         [Reduction("expression : term PLUS expression")]
         [Reduction("expression : term MINUS expression")]
-        public static object Expression(List<object> args)
+
+        public object Expression(int left, Token<ExpressionToken> operatorToken, int  right)
         {
             object result = 0;
-            int left = (int)args[0];
-            int right = (int)args[2];
-            ExpressionToken token = ((Token<ExpressionToken>)args[1]).TokenID;
-            switch (token)
+            
+
+            switch (operatorToken.TokenID)
             {
                 case ExpressionToken.PLUS:
                     {
@@ -168,14 +165,17 @@ as we 've seen above a parser is declared on a single class with static methods 
 Once the class with all its methods has been written, it can be used to build the effective parser instance calling ParserBuilder.BuildParser. the builder methods takes 3 parameters :
 
 
-1. the Type of the parser class
-2. the kind of parser. Currently only a recursive descent parser is available. this implementation is limited to LL grammar by construction.
+1. an instance of the class containing the lexer and parser definition
+2. the kind of parser. Currently only a recursive descent parser is available. this implementation is limited to LL grammar by construction. i.e ParserType.LL_RECURSIVE_DESCENT
 3. the root rule for the parser.   
 
 the parser is typed according to the token type.
 
 ```c#
-Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(typeof(ExpressionParser), ParserType.LL_RECURSIVE_DESCENT, "expression");
+ExpressionParser expressionParserDefinition = new ExpressionParser()
+Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(expressionParserDefinition,
+                                                                            ParserType.LL_RECURSIVE_DESCENT,
+                                                                            "expression");
 ```
 
 then calling parser.Parse("some source code") will return the evaluation of the syntax tree.
@@ -183,12 +183,12 @@ the parser returns a ParseResult instance containing the evaluation value or a l
 
 ```c#
 
- 	ParseResult<ExpressionToken> r = Parser.Parse("1 + 1");
+    ParseResult<ExpressionToken> r = Parser.Parse("1 + 1");
 
 
-	if (!r.IsError && r.Result != null && r.Result is int)
+    if (!r.IsError && r.Result != null && r.Result is int)
     {
-    	Console.WriteLine($"result is {(int)r.Result}");
+        Console.WriteLine($"result is {(int)r.Result}");
     }
     else
     {
