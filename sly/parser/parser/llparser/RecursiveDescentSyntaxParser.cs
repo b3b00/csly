@@ -75,12 +75,19 @@ namespace sly.parser.llparser
                     {
                         NonTerminalClause<T> nonterm = first as NonTerminalClause<T>;
                         InitStartingTokensForNonTerminal(nonTerminals, nonterm.NonTerminalName);
-                        NonTerminal<T> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
-                        firstNonTerminal.Rules.ForEach(r =>
+                        if (nonTerminals.ContainsKey(nonterm.NonTerminalName))
                         {
-                            rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
-                        });
-                        rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<T>().ToList<T>();
+                            NonTerminal<T> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
+                            firstNonTerminal.Rules.ForEach(r =>
+                            {
+                                rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
+                            });
+                            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<T>().ToList<T>();
+                        }
+                        else
+                        {
+                            ;
+                        }
                     }
                 }
 

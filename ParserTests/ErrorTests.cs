@@ -41,8 +41,8 @@ namespace ParserTests
         [Fact]
         public void TestExpressionSyntaxError()
         {
-
-            Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(typeof(ExpressionParser), ParserType.LL_RECURSIVE_DESCENT, "expression");
+            ExpressionParser exprParser = new ExpressionParser();
+            Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
 
             ParseResult<ExpressionToken> r = Parser.Parse(" 2 + 3 + + 2");
             Assert.True(r.IsError);
@@ -61,8 +61,9 @@ namespace ParserTests
         [Fact]
         public void TestLexicalError()
         {
+            ExpressionParser exprParser = new ExpressionParser();
 
-            Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(typeof(ExpressionParser), ParserType.LL_RECURSIVE_DESCENT, "root");
+            Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "root");
             ParseResult<ExpressionToken> r = Parser.Parse("2 @ 2");
             Assert.True(r.IsError);
             Assert.Null(r.Result);

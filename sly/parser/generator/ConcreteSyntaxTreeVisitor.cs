@@ -68,6 +68,7 @@ namespace sly.parser.generator
                 }
 
                 result = Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray());
+
             }
             return result;
         }

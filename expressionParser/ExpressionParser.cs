@@ -1,7 +1,6 @@
 ﻿using sly.lexer;
 using sly.parser.generator;
-
-using System.Collections.Generic;
+using System;
 
 
 namespace expressionparser
@@ -27,7 +26,7 @@ namespace expressionparser
 
 
         [LexerConfigurationAttribute]
-        public static Lexer<ExpressionToken> BuildExpressionLexer(Lexer<ExpressionToken> lexer = null)
+        public Lexer<ExpressionToken> BuildExpressionLexer(Lexer<ExpressionToken> lexer = null)
         {
             if (lexer == null)
             {
@@ -52,15 +51,15 @@ namespace expressionparser
 
 
         [Reduction("primary: INT")]
-        public static object Primary(List<object> args)
+        public object Primary(Token<ExpressionToken> intToken)
         {
-            return ((Token<ExpressionToken>)args[0]).IntValue;
+            return intToken.IntValue;
         }
 
         [Reduction("primary: LPAREN expression RPAREN")]
-        public static object Group(List<object> args)
+        public object Group(object discaredLParen, int groupValue ,object discardedRParen)
         {
-            return args[1];
+            return groupValue;
         }
 
 
@@ -68,13 +67,12 @@ namespace expressionparser
         [Reduction("expression : term PLUS expression")]
         [Reduction("expression : term MINUS expression")]
 
-        public static object Expression(List<object> args)
+        public object Expression(int left, Token<ExpressionToken> operatorToken, int  right)
         {
             object result = 0;
-            int left = (int)args[0];
-            int right = (int)args[2];
-            ExpressionToken token = ((Token<ExpressionToken>)args[1]).TokenID;
-            switch (token)
+            
+
+            switch (operatorToken.TokenID)
             {
                 case ExpressionToken.PLUS:
                     {
@@ -95,22 +93,20 @@ namespace expressionparser
         }
 
         [Reduction("expression : term")]
-        public static object Expression_Term(List<object> args)
-        {
-            object result = (int)args[0];
-            return result;
+        public object Expression_Term(int termValue)
+        {           
+            return termValue;
         }
 
         [Reduction("term : factor TIMES term")]
         [Reduction("term : factor DIVIDE term")]
-        public static object Term(List<object> args)
+        public object Term(int left, Token<ExpressionToken> operatorToken, int right)
         {
             int result = 0;
 
-            int left = (int)args[0];
-            int right = (int)args[2];
-            ExpressionToken token = ((Token<ExpressionToken>)args[1]).TokenID;
-            switch (token)
+          
+          
+            switch (operatorToken.TokenID)
             {
                 case ExpressionToken.TIMES:
                     {
@@ -131,38 +127,20 @@ namespace expressionparser
         }
 
         [Reduction("term : factor")]
-        public static object Term_Factor(List<object> args)
+        public object Term_Factor(int factorValue)
         {
-            object result = (int)args[0];
-            return result;
+            return factorValue;
         }
 
         [Reduction("factor : primary")]
-        [Reduction("factor : MINUS factor")]
-        public static object Factor(List<object> args)
+        public object primaryFactor(int primValue)
         {
-            int result = 0;
-            switch (args.Count)
-            {
-                case 1:
-                    {
-                        result = (int)args[0];
-                        break;
-                    }
-                case 2:
-                    {
-                        ExpressionToken token = ((Token<ExpressionToken>)args[0]).TokenID;
-                        int val = (int)args[1];
-                        val = token == ExpressionToken.MINUS ? -val : val;
-                        result = val;
-                        break;
-                    }
-                default:
-                    {
-                        break;
-                    }
-            }
-            return result;
+            return primValue;
+        }
+        [Reduction("factor : MINUS factor")]
+        public object Factor(Token<ExpressionToken> discardedMinus, int factorValue)
+        {            
+            return -factorValue;
         }
 
 

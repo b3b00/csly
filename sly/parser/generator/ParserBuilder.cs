@@ -54,22 +54,20 @@ namespace sly.parser.generator
         public static Parser<T> BuildParser<T>(Type parserClass, ParserType parserType, string rootRule)
         {
             ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserClass,rootRule);
-            //Lexer<T> lexer = BuildLexer<T>(parserClass);
             ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
             ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration);
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
-            parser.Lexer = BuildLexer<T>(parserClass);
+            parser.Lexer = BuildLexer<T>(parserClass,null);
             return parser;
         }
 
         public static Parser<T> BuildParser<T>(object parserInstance, ParserType parserType, string rootRule)
         {
             ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType(),rootRule);
-            //Lexer<T> lexer = BuildLexer<T>(parserClass);
             ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
             ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration, parserInstance);
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
-            parser.Lexer = BuildLexer<T>(parserInstance.GetType());
+            parser.Lexer = BuildLexer<T>(parserInstance.GetType(),parserInstance);
             parser.Instance = parserInstance;
             return parser;
         }
@@ -95,7 +93,7 @@ namespace sly.parser.generator
         }
 
 
-        static private Lexer<T> BuildLexer<T>(Type parserClass)
+        static private Lexer<T> BuildLexer<T>(Type parserClass, object parserInstance = null)
         {
             TypeInfo typeInfo = parserClass.GetTypeInfo();
             Lexer<T> lexer = null;
@@ -110,11 +108,12 @@ namespace sly.parser.generator
             {
                 MethodInfo lexerConfigurerMethod = methods[0];
                 lexer = new Lexer<T>();
-                object res = lexerConfigurerMethod.Invoke(null, new object[] { lexer });
-                //lexer = res as Lexer<T>;
+                object res = lexerConfigurerMethod.Invoke(parserInstance, new object[] { lexer });
             }
             return lexer;
         }
+
+       
 
         static private ParserConfiguration<T> ExtractParserConfiguration<T>(Type parserClass, string rootRule)
         {
@@ -178,11 +177,10 @@ namespace sly.parser.generator
             {
                 Clause<T> clause = null;
                 bool isTerminal = false;
-                T token = default(T);
-                //T token = Enum.Parse(typeof(T), item, out isTerminal);
+                T token = default(T);                              
                 try
                 {
-                    token = (T)Enum.Parse(typeof(T), item);
+                    token = (T)Enum.Parse(typeof(T) , item, true);
                     isTerminal = true;
                 }
                 catch (Exception e)

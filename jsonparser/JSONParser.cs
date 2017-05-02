@@ -10,8 +10,7 @@ using System.Runtime.InteropServices.ComTypes;
 namespace jsonparser
 {
     public enum JsonToken
-    {
-        //IDENTIFIER,
+    {        
         STRING = 1,
         INT = 2,
         DOUBLE = 3,
@@ -137,7 +136,7 @@ namespace jsonparser
         }
 
         [Reduction("object: ACCG members ACCD")]
-        public  object AttributesObjectValue(object accg ,List<object> members, object accd)
+        public  object AttributesObjectValue(object accg ,Dictionary<string,object> members, object accd)
         {
             return members;
         }
