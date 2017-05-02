@@ -1,4 +1,3 @@
-
 image: mono:4.4.0.182
 
 
@@ -6,4 +5,5 @@ image: mono:4.4.0.182
 build:
   script:
    - nuget restore
+   - MONO_IOMAP=case xbuild /t:Build /p:Configuration="Release" /p:Platform="Any CPU" sly.sln
 #   - node ./specs/start.js ./specs/db-postgres.spec.js
