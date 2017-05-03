@@ -13,12 +13,35 @@ namespace sly.parser.generator
 
 
   
-
+    /// <summary>
+    /// this class provides API to build parser
+    /// </summary>
     public class ParserBuilder
     {
         #region API
-        
-        public static ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType, string rootRule)
+
+        /// <summary>
+        /// Builds a parser (lexer, syntax parser and syntax tree visitor) according to a parser definition instance
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="parserInstance"> a parser definition instance , containing 
+        /// [Reduction] methods for grammar rules 
+        /// [LexerConfigurationAttribute] method for token definition</param>
+        /// <param name="parserType"></param>
+        /// <param name="rootRule"></param>
+        /// <returns></returns>
+        public static Parser<T> BuildParser<T>(object parserInstance, ParserType parserType, string rootRule)
+        {
+            ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType(),rootRule);
+            ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
+            ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration, parserInstance);
+            Parser<T> parser = new Parser<T>(syntaxParser, visitor);
+            parser.Lexer = BuildLexer<T>(parserInstance.GetType(),parserInstance);
+            parser.Instance = parserInstance;
+            return parser;
+        }
+
+        private static ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType, string rootRule)
         {
             ISyntaxParser<T> parser = null;
             switch (parserType)
@@ -37,30 +60,14 @@ namespace sly.parser.generator
             return parser;
         }
 
-        public static Parser<T> BuildParser<T>(Type parserClass, ParserType parserType, string rootRule)
-        {
-            ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserClass,rootRule);
-            ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
-            ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration);
-            Parser<T> parser = new Parser<T>(syntaxParser, visitor);
-            parser.Lexer = BuildLexer<T>(parserClass,null);
-            return parser;
-        }
-
-        public static Parser<T> BuildParser<T>(object parserInstance, ParserType parserType, string rootRule)
-        {
-            ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType(),rootRule);
-            ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
-            ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration, parserInstance);
-            Parser<T> parser = new Parser<T>(syntaxParser, visitor);
-            parser.Lexer = BuildLexer<T>(parserInstance.GetType(),parserInstance);
-            parser.Instance = parserInstance;
-            return parser;
-        }
-
         #endregion
 
+
+
+
         #region CONFIGURATION
+
+
 
         static Tuple<string, string> ExtractNTAndRule(string ruleString)
         {
