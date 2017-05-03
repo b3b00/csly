@@ -1,4 +1,4 @@
-image : codedevote/dotnet-mono
+image : microsoft/dotnet:latest
 stages:
   - build
 before_script:
@@ -6,7 +6,7 @@ before_script:
 build:
  stage: build
  script:
-  - 'dotnet build -c Release -f netcoreapp1.0'
+  - 'dotnet build -c Release '
   - 'dotnet pack -c Release sly/sly.csproj'
  artifacts:
   paths:
