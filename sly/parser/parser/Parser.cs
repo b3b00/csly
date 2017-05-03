@@ -13,8 +13,8 @@ namespace sly.parser
         public Lexer<T> Lexer { get; set; }
         public object Instance { get; set; }
         public ISyntaxParser<T> SyntaxParser { get; set; }
-        public ConcreteSyntaxTreeVisitor<T> Visitor { get; set; }
-        public Parser(ISyntaxParser<T> syntaxParser, ConcreteSyntaxTreeVisitor<T> visitor)
+        public SyntaxTreeVisitor<T> Visitor { get; set; }
+        public Parser(ISyntaxParser<T> syntaxParser, SyntaxTreeVisitor<T> visitor)
         {
             SyntaxParser = syntaxParser;
             Visitor = visitor;

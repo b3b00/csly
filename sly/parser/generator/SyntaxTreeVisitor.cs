@@ -4,7 +4,7 @@ using sly.parser.syntax;
 
 namespace sly.parser.generator
 {
-    public class ConcreteSyntaxTreeVisitor<T>
+    public class SyntaxTreeVisitor<T>
     {
         public Type ParserClass { get; set; }
 
@@ -12,14 +12,14 @@ namespace sly.parser.generator
 
         public ParserConfiguration<T> Configuration { get; set; }
 
-        public ConcreteSyntaxTreeVisitor(ParserConfiguration<T> conf)
+        public SyntaxTreeVisitor(ParserConfiguration<T> conf)
         {
             this.ParserClass = ParserClass;
             this.Configuration = conf;
             this.ParserVsisitorInstance = null;
         }
 
-        public ConcreteSyntaxTreeVisitor(ParserConfiguration<T> conf, object parserInstance)
+        public SyntaxTreeVisitor(ParserConfiguration<T> conf, object parserInstance)
         {
             this.ParserClass = ParserClass;
             this.Configuration = conf;

@@ -34,7 +34,7 @@ namespace sly.parser.generator
         {
             ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType());
             ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
-            ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration, parserInstance);
+            SyntaxTreeVisitor<T> visitor = new SyntaxTreeVisitor<T>(configuration, parserInstance);
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
             parser.Lexer = BuildLexer<T>(parserInstance.GetType(),parserInstance);
             parser.Instance = parserInstance;
