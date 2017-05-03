@@ -1,7 +1,7 @@
 namespace sly.parser.syntax
 {
 
-    public class NonTerminalClause<T> : Clause<T>
+    public class NonTerminalClause<T> : IClause<T>
     {
         public string NonTerminalName { get; set; }
         public NonTerminalClause(string name)

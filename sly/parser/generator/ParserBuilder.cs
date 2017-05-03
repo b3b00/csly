@@ -27,12 +27,12 @@ namespace sly.parser.generator
         /// <param name="parserInstance"> a parser definition instance , containing 
         /// [Reduction] methods for grammar rules 
         /// [LexerConfigurationAttribute] method for token definition</param>
-        /// <param name="parserType"></param>
-        /// <param name="rootRule"></param>
+        /// <param name="parserType">a ParserType enum value stating the analyser type (LR, LL ...) for now only LL recurive descent parser available </param>
+        /// <param name="rootRule">the name of the root non terminal of the grammar</param>
         /// <returns></returns>
         public static Parser<T> BuildParser<T>(object parserInstance, ParserType parserType, string rootRule)
         {
-            ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType(),rootRule);
+            ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType());
             ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
             ConcreteSyntaxTreeVisitor<T> visitor = new ConcreteSyntaxTreeVisitor<T>(configuration, parserInstance);
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
@@ -72,16 +72,19 @@ namespace sly.parser.generator
         static Tuple<string, string> ExtractNTAndRule(string ruleString)
         {
             Tuple<string, string> result = null;
-            string nt = "";
-            string rule = "";
-            int i = ruleString.IndexOf(":");
-            if (i > 0)
+            if (ruleString != null)
             {
-                nt = ruleString.Substring(0, i).Trim();
-                rule = ruleString.Substring(i + 1);
-                result = new Tuple<string, string>(nt, rule);
-            }
+                string nt = "";
+                string rule = "";
+                int i = ruleString.IndexOf(":");
+                if (i > 0)
+                {
+                    nt = ruleString.Substring(0, i).Trim();
+                    rule = ruleString.Substring(i + 1);
+                    result = new Tuple<string, string>(nt, rule);
+                }
 
+            }
             return result;
         }
 
@@ -93,7 +96,7 @@ namespace sly.parser.generator
             List < MethodInfo > methods = typeInfo.DeclaredMethods.ToList<MethodInfo>();
             methods = methods.Where(m =>
             {
-                List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>().ToList<Attribute>();
+                List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>();
                 Attribute attr = attributes.Find(a => a.GetType() == typeof(LexerConfigurationAttribute));
                 return attr != null;
             }).ToList<MethodInfo>();
@@ -108,7 +111,7 @@ namespace sly.parser.generator
 
        
 
-        static private ParserConfiguration<T> ExtractParserConfiguration<T>(Type parserClass, string rootRule)
+        static private ParserConfiguration<T> ExtractParserConfiguration<T>(Type parserClass)
         {
             ParserConfiguration<T> conf = new ParserConfiguration<T>();
             Dictionary<string, MethodInfo> functions = new Dictionary<string, MethodInfo>();
@@ -116,7 +119,7 @@ namespace sly.parser.generator
             List<MethodInfo> methods = parserClass.GetMethods().ToList<MethodInfo>();
             methods = methods.Where(m =>
             {
-                List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>().ToList<Attribute>();
+                List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>();
                 Attribute attr = attributes.Find(a => a.GetType() == typeof(ReductionAttribute));
                 return attr != null;
             }).ToList<MethodInfo>();
@@ -163,12 +166,12 @@ namespace sly.parser.generator
         {
             Rule<T> rule = new Rule<T>();
 
-            List<Clause<T>> clauses = new List<Clause<T>>();
+            List<IClause<T>> clauses = new List<IClause<T>>();
             string ruleString = ntAndRule.Item2;
             string[] clausesString = ruleString.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string item in clausesString)
             {
-                Clause<T> clause = null;
+                IClause<T> clause = null;
                 bool isTerminal = false;
                 T token = default(T);                              
                 try
@@ -176,7 +179,7 @@ namespace sly.parser.generator
                     token = (T)Enum.Parse(typeof(T) , item, true);
                     isTerminal = true;
                 }
-                catch (Exception e)
+                catch 
                 {
                     isTerminal = false;
                 }

@@ -13,7 +13,7 @@ namespace sly.parser.generator
         public string RuleString { get; set; }
         public string Key { get; set; }
 
-        public List<Clause<T>> Clauses { get; set; }
+        public List<IClause<T>> Clauses { get; set; }
         public List<T> PossibleLeadingTokens { get; set; }
         
 
