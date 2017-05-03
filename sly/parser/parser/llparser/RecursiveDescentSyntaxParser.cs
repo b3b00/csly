@@ -64,7 +64,7 @@ namespace sly.parser.llparser
                 rule.PossibleLeadingTokens = new List<T>();
                 if (rule.Clauses.Count > 0)
                 {
-                    Clause<T> first = rule.Clauses[0];
+                    IClause<T> first = rule.Clauses[0];
                     if (first is TerminalClause<T>)
                     {
                         TerminalClause<T> term = first as TerminalClause<T>;
@@ -164,7 +164,7 @@ namespace sly.parser.llparser
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
                     children = new List<ISyntaxNode<T>>();
-                    foreach (Clause<T> clause in rule.Clauses)
+                    foreach (IClause<T> clause in rule.Clauses)
                     {
                         if (clause is TerminalClause<T>)
                         {
