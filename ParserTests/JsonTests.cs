@@ -1,7 +1,5 @@
-﻿using System.Linq;
-using Xunit;
+﻿using Xunit;
 using sly.parser;
-using sly.lexer;
 using sly.parser.generator;
 using System.Collections.Generic;
 using jsonparser;
@@ -13,9 +11,7 @@ namespace ParserTests
     {
 
         private static Parser<JsonToken> Parser;
-
-        private static Lexer<JsonToken> Lexer;
-
+        
       
         public JsonTests()
         {
