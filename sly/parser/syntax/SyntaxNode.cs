@@ -5,14 +5,14 @@ using System.Collections.Generic;
 namespace sly.parser.syntax
 {
 
-    public class ConcreteSyntaxNode<T> : IConcreteSyntaxNode<T>
+    public class SyntaxNode<T> : ISyntaxNode<T>
     {
 
         public string Name {get; set;} 
 
-        public List<IConcreteSyntaxNode<T>> Children {get; set;}
+        public List<ISyntaxNode<T>> Children {get; set;}
 
-        public ConcreteSyntaxNode(string name, List<IConcreteSyntaxNode<T>> children)
+        public SyntaxNode(string name, List<ISyntaxNode<T>> children)
         {
             this.Name = name;
             this.Children = children;

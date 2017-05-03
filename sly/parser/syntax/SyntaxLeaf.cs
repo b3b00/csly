@@ -5,11 +5,11 @@ using sly.lexer;
 namespace sly.parser.syntax
 {
 
-    public class ConcreteSyntaxLeaf<T> : IConcreteSyntaxNode<T> {
+    public class SyntaxLeaf<T> : ISyntaxNode<T> {
 
         public Token<T> Token {get; set;}
 
-        public ConcreteSyntaxLeaf(Token<T> token)
+        public SyntaxLeaf(Token<T> token)
         {
             this.Token = token;
         }

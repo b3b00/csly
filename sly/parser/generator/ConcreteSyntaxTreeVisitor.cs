@@ -26,24 +26,24 @@ namespace sly.parser.generator
             this.ParserVsisitorInstance = parserInstance;
         }
 
-        public object VisitSyntaxTree(IConcreteSyntaxNode<T> root)
+        public object VisitSyntaxTree(ISyntaxNode<T> root)
         {
             return Visit(root);
         }
 
-        private object Visit(IConcreteSyntaxNode<T> n)
+        private object Visit(ISyntaxNode<T> n)
         {
-            if (n is ConcreteSyntaxLeaf<T>)
+            if (n is SyntaxLeaf<T>)
             {
-                return Visit(n as ConcreteSyntaxLeaf<T>);
+                return Visit(n as SyntaxLeaf<T>);
             }
-            else if (n is ConcreteSyntaxEpsilon<T>)
+            else if (n is SyntaxEpsilon<T>)
             {
-                return Visit(n as ConcreteSyntaxEpsilon<T>);
+                return Visit(n as SyntaxEpsilon<T>);
             }
-            else if (n is ConcreteSyntaxNode<T>)
+            else if (n is SyntaxNode<T>)
             {
-                return Visit(n as ConcreteSyntaxNode<T>);
+                return Visit(n as SyntaxNode<T>);
             }
             else
             {
@@ -51,14 +51,14 @@ namespace sly.parser.generator
             }
         }
 
-        private object Visit(ConcreteSyntaxNode<T> node)
+        private object Visit(SyntaxNode<T> node)
         {
             object result = null;
             if (Configuration.Functions.ContainsKey(node.Name))
             {
                 List<object> args = new List<object>();
                 int i = 0;
-                foreach (IConcreteSyntaxNode<T> n in node.Children)
+                foreach (ISyntaxNode<T> n in node.Children)
                 {
                     object v = Visit(n);
 
@@ -73,7 +73,7 @@ namespace sly.parser.generator
             return result;
         }
 
-        private object Visit(ConcreteSyntaxLeaf<T> leaf)
+        private object Visit(SyntaxLeaf<T> leaf)
         {
             return leaf.Token;
         }

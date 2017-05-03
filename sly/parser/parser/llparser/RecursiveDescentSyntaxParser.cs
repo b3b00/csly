@@ -158,12 +158,12 @@ namespace sly.parser.llparser
             int currentPosition = position;
             List<UnexpectedTokenSyntaxError<T>> errors = new List<UnexpectedTokenSyntaxError<T>>();
             bool isError = false;
-            List<IConcreteSyntaxNode<T>> children = new List<IConcreteSyntaxNode<T>>();
+            List<ISyntaxNode<T>> children = new List<ISyntaxNode<T>>();
             if (rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
             {
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
-                    children = new List<IConcreteSyntaxNode<T>>();
+                    children = new List<ISyntaxNode<T>>();
                     foreach (Clause<T> clause in rule.Clauses)
                     {
                         if (clause is TerminalClause<T>)
@@ -215,7 +215,7 @@ namespace sly.parser.llparser
             result.EndingPosition = currentPosition;
             if (!isError)
             {
-                ConcreteSyntaxNode<T> node = new ConcreteSyntaxNode<T>(rule.Key, children);
+                SyntaxNode<T> node = new SyntaxNode<T>(rule.Key, children);
                 result.Root = node;                                
                 result.IsEnded = currentPosition >= tokens.Count - 1;
             }
@@ -228,7 +228,7 @@ namespace sly.parser.llparser
             SyntaxParseResult<T> result = new SyntaxParseResult<T>();
             result.IsError = !term.Check(tokens[position].TokenID);
             result.EndingPosition = !result.IsError ? position + 1 : position;
-            result.Root = new ConcreteSyntaxLeaf<T>(tokens[position]);
+            result.Root = new SyntaxLeaf<T>(tokens[position]);
             return result;
         }
 

@@ -4,7 +4,7 @@ using sly.parser.syntax;
 namespace sly.parser
 {
     public class SyntaxParseResult<T> {
-        public IConcreteSyntaxNode<T> Root {get; set;}
+        public ISyntaxNode<T> Root {get; set;}
 
         public bool IsError{get; set;}
 

@@ -41,19 +41,19 @@ namespace ParserTests
             return result;
         }
 
-        public ConcreteSyntaxLeaf<TokenType> leaf(TokenType typ, string value,TokenPosition position)
+        public SyntaxLeaf<TokenType> leaf(TokenType typ, string value,TokenPosition position)
         {
             Token<TokenType> tok = new Token<TokenType>(typ, value, position);
             tok.TokenID = typ;
             tok.Value = value;
-            return new ConcreteSyntaxLeaf<TokenType>(tok);
+            return new SyntaxLeaf<TokenType>(tok);
         }
 
-        public ConcreteSyntaxNode<TokenType> node(string name, params IConcreteSyntaxNode<TokenType>[] leaves)
+        public SyntaxNode<TokenType> node(string name, params ISyntaxNode<TokenType>[] leaves)
         {
-            List<IConcreteSyntaxNode<TokenType>> subNodes = new List<IConcreteSyntaxNode<TokenType>>();
+            List<ISyntaxNode<TokenType>> subNodes = new List<ISyntaxNode<TokenType>>();
             subNodes.AddRange(leaves);
-            ConcreteSyntaxNode<TokenType> n = new ConcreteSyntaxNode<TokenType>(name, subNodes);
+            SyntaxNode<TokenType> n = new SyntaxNode<TokenType>(name, subNodes);
             return n;
         }
 
@@ -67,12 +67,12 @@ namespace ParserTests
             // build a syntax tree
 
             TokenPosition position = new TokenPosition(0, 1, 1);
-            ConcreteSyntaxLeaf<TokenType> aT = leaf(TokenType.a, "a", position);
-            ConcreteSyntaxLeaf<TokenType> bT = leaf(TokenType.b, "b", position);
-            ConcreteSyntaxLeaf<TokenType> cT = leaf(TokenType.c, "c", position);
+            SyntaxLeaf<TokenType> aT = leaf(TokenType.a, "a", position);
+            SyntaxLeaf<TokenType> bT = leaf(TokenType.b, "b", position);
+            SyntaxLeaf<TokenType> cT = leaf(TokenType.c, "c", position);
 
-            ConcreteSyntaxNode<TokenType> aN = node("A__a_", aT);
-            ConcreteSyntaxNode<TokenType> rN = node("R__A_b_c_", aN,bT,cT);
+            SyntaxNode<TokenType> aN = node("A__a_", aT);
+            SyntaxNode<TokenType> rN = node("R__A_b_c_", aN,bT,cT);
 
             string r = visitor.VisitSyntaxTree(rN).ToString();
             ;

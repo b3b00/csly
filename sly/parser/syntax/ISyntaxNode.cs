@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace sly.parser.syntax
 {
-    public interface IConcreteSyntaxNode<T>
+    public interface ISyntaxNode<T>
     {
         bool IsTerminal();
     }

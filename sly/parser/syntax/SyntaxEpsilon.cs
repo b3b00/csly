@@ -5,7 +5,7 @@ using sly.lexer;
 namespace sly.parser.syntax
 {
 
-    public class ConcreteSyntaxEpsilon<T> : IConcreteSyntaxNode<T> {
+    public class SyntaxEpsilon<T> : ISyntaxNode<T> {
 
 
         public override string ToString()
