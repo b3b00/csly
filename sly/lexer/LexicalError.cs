@@ -7,7 +7,7 @@ namespace sly.lexer
 
         public char UnexpectedChar {get; set;}
 
-        public string ErrorMessage { get
+        public override string ErrorMessage { get
             {
                 return $"Lexical Error : Unrecognized symbol '{UnexpectedChar}' at  (line {Line}, column {Column}).";
             }
