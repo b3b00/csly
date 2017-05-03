@@ -7,10 +7,12 @@ build:
  stage: build
  script:
   - 'dotnet build -c Release'
+  - 'dotnet pack -c Release sly/sly.csproj'
  artifacts:
   paths:
   - sly/bin/Release/netcoreapp1.0/
   - expressionParser/bin/Release/netcoreapp1.0/
   - jsonparser/bin/Release/netcoreapp1.0/
+  - sly/bin/Release/*.nupkg
  only:
    - master
