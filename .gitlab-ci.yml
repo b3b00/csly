@@ -1,4 +1,4 @@
-image : microsoft/dotnet:latest
+image : codedevote/dotnet-mono
 stages:
   - build
 before_script:
