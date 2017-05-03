@@ -167,7 +167,7 @@ Once the class with all its methods has been written, it can be used to build th
 
 
 1. an instance of the class containing the lexer and parser definition
-2. the kind of parser. Currently only a recursive descent parser is available. this implementation is limited to LL grammar by construction. i.e ParserType.LL_RECURSIVE_DESCENT
+2. the kind of parser. Currently only a recursive descent parser is available. this implementation is limited to LL grammar by construction (no left recursion) : ParserType.LL_RECURSIVE_DESCENT
 3. the root rule for the parser.   
 
 the parser is typed according to the token type.
