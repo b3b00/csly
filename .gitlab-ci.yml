@@ -1,9 +1,11 @@
-image: mono:4.4.0.182
-
-
-
+image : microsoft/dotnet:latest
+stages:
+  - build
+before_script:
+  - 'dotnet restore'
 build:
-  script:
-   - nuget restore
-   - MONO_IOMAP=case xbuild /t:Build /p:Configuration="Release" /p:Platform="Any CPU" sly.sln
-#   - node ./specs/start.js ./specs/db-postgres.spec.js
+ stage: build
+ script:
+  - 'dotnet build'
+ only:
+   - master
