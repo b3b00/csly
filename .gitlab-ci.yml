@@ -7,7 +7,7 @@ build:
  stage: build
  script:
   - 'dotnet build -c Release'
- artefacts:
+ artifacts:
   paths:
   - sly/bin/Release/netcoreapp1.0/*.*
  only:
