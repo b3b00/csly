@@ -9,7 +9,8 @@ The parser implementation fully resides in a single static class.
 
 ## Lexer ##
 
-###presentation###
+### presentation ###
+
 For now the lexer is a poor man regex based lexer inspired by this [post](https://blogs.msdn.microsoft.com/drew/2009/12/31/a-simple-lexer-in-c-that-uses-regular-expressions/) 
 So it's not a very efficient lexer. Indeed this lexer is slow and is the bottleneck of the whole lexer/parser.  
 It could be improved in the future.
