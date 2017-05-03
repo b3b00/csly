@@ -26,7 +26,7 @@ namespace sly.parser
             }            
         }
 
-        public string ErrorMessage
+        public override string ErrorMessage
         {
             get
             {
