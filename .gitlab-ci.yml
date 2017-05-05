@@ -14,5 +14,4 @@ build:
   - expressionParser/bin/Release/netcoreapp1.0/
   - jsonparser/bin/Release/netcoreapp1.0/
   - sly/bin/Release/*.nupkg
- only:
-   - master
+ 
