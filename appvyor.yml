@@ -1,0 +1,11 @@
+version: 1.0.0{build}
+before_build:
+- cmd: nuget restore
+build:
+  project: Utility.CommandLine.Arguments.sln
+  verbosity: minimal
+test_script:
+- .\packages\OpenCover.4.6.519\tools\OpenCover.Console.exe -register:user -target:"%xunit20%\xunit.console.x86.exe" -targetargs:"C:\projects\Utility-CommandLine-Arguments\Utility.CommandLine.Arguments.Tests\bin\Debug\Utility.CommandLine.Arguments.Tests.dll -noshadow -appveyor" -returntargetcode -filter:"+[*]* -[*.Tests]*" -excludebyattribute:*.ExcludeFromCodeCoverage* -hideskipped:All -output:.\Utility.CommandLine.Arguments_coverage.xml
+- "SET PATH=C:\\Python34;C:\\Python34\\Scripts;%PATH%"
+- pip install codecov
+- codecov -f "Utility.CommandLine.Arguments_coverage.xml"
