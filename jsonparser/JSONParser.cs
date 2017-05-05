@@ -28,11 +28,8 @@ namespace jsonparser
 
 
         [LexerConfigurationAttribute]
-        public  Lexer<JsonToken> BuildJsonLexer(Lexer<JsonToken> lexer = null)
-        {
-            if (lexer == null) {
-                lexer = new Lexer<JsonToken>();
-            }            
+        public  ILexer<JsonToken> BuildJsonLexer(ILexer<JsonToken> lexer)
+        {                  
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.DOUBLE, "[0-9]+\\.[0-9]+"));
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.INT, "[0-9]+"));            
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.STRING, "(\\\")([^(\\\")]*)(\\\")"));

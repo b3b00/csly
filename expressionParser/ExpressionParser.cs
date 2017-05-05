@@ -14,12 +14,8 @@ namespace expressionparser
 
 
         [LexerConfigurationAttribute]
-        public Lexer<ExpressionToken> BuildExpressionLexer(Lexer<ExpressionToken> lexer = null)
-        {
-            if (lexer == null)
-            {
-                lexer = new Lexer<ExpressionToken>();
-            }
+        public ILexer<ExpressionToken> BuildExpressionLexer(ILexer<ExpressionToken> lexer)
+        {            
             lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.DOUBLE, "[0-9]+\\.[0-9]+"));
             lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.INT, "[0-9]+"));            
             lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.PLUS, "\\+"));
