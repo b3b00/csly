@@ -5,8 +5,7 @@
 	<Authors>b3b00</Authors>
 	<PackageProjectUrl>https://github.com/b3b00/sly</PackageProjectUrl>
 	<RepositoryUrl>https://github.com/b3b00/sly</RepositoryUrl>
-	<PackageLicenseUrl>https://github.com/b3b00/sly/blob/master/LICENSE</PackageLicenseUrl>
-    <TargetFrameworks>netcoreapp1.0</TargetFrameworks>
+	<PackageLicenseUrl>https://github.com/b3b00/sly/blob/master/LICENSE</PackageLicenseUrl>    
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

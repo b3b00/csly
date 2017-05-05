@@ -2,12 +2,19 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp1.0</TargetFramework>
+    <TargetFrameworks>netcoreapp1.0;net45</TargetFrameworks>
+	<Authors>b3b00</Authors>
   </PropertyGroup>
 
+
+
   <ItemGroup>
-    <ProjectReference Include="..\sly\sly.csproj" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\jsonparser\jsonparser.csproj" />
+    <ProjectReference Include="..\sly\sly.csproj" />
   </ItemGroup>
 
   <ItemGroup>
