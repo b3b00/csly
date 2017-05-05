@@ -6,7 +6,7 @@ before_script:
 build:
  stage: build
  script:
-  - 'dotnet build -c Release'
+  - 'dotnet build -c Release '
   - 'dotnet pack -c Release sly/sly.csproj'
  artifacts:
   paths:
