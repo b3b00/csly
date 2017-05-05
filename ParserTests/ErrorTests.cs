@@ -20,10 +20,11 @@ namespace ParserTests
             JSONParser jsonParser = new JSONParser();
             Parser<JsonToken> parser = ParserBuilder.BuildParser<JsonToken>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
 
+            
             string source = @"{
                 'one': 1,
                 'bug':{,}
-            }";
+            }".Replace("'","\"");
             ParseResult<JsonToken> r = parser.Parse(source);
             Assert.True(r.IsError);
             Assert.Null(r.Result);
