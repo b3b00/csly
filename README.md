@@ -212,5 +212,5 @@ One build a parser expose :
 ## Full examples ##
 
 Full examples are available under :
-- jsonparser : a [json parser](https://github.com/b3b00/sly/blob/master/jsonparser/JSONParser.cs) (does not support comments)
+- [jsonparser](https://github.com/b3b00/sly/blob/master/jsonparser/JSONParser.cs) : a json parser
 - [expressionParser](https://github.com/b3b00/sly/blob/master/expressionParser/ExpressionParser.cs) : a mathematical expression parser
