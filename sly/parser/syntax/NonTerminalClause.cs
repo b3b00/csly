@@ -13,5 +13,10 @@ namespace sly.parser.syntax
             return true;
         }
 
+        public override string ToString()
+        {
+            return NonTerminalName;
+        }
+
     }
 }

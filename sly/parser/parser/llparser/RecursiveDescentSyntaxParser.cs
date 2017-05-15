@@ -2,6 +2,7 @@
 using sly.lexer;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using sly.parser.generator;
 
 namespace sly.parser.llparser
@@ -107,7 +108,7 @@ namespace sly.parser.llparser
             List<SyntaxParseResult<T>> rs = new List<SyntaxParseResult<T>>();
             foreach (Rule<T> rule in rules)
             {
-                SyntaxParseResult<T> r = Parse(tokens, rule, 0);
+                SyntaxParseResult<T> r = Parse(tokens, rule, 0,StartingNonTerminal);
 
                 //if (!r.IsError)
                 //{
@@ -151,7 +152,7 @@ namespace sly.parser.llparser
         }
 
 
-        public SyntaxParseResult<T> Parse(IList<Token<T>> tokens, Rule<T> rule, int position)
+        public SyntaxParseResult<T> Parse(IList<Token<T>> tokens, Rule<T> rule, int position, string nonTerminalName)
         {
             int currentPosition = position;
             List<UnexpectedTokenSyntaxError<T>> errors = new List<UnexpectedTokenSyntaxError<T>>();
@@ -213,9 +214,10 @@ namespace sly.parser.llparser
             result.EndingPosition = currentPosition;
             if (!isError)
             {
-                SyntaxNode<T> node = new SyntaxNode<T>(rule.Key, children);
+                SyntaxNode<T> node = new SyntaxNode<T>(nonTerminalName+"__"+rule.Key, children);
                 result.Root = node;                                
-                result.IsEnded = currentPosition >= tokens.Count - 1;
+                result.IsEnded = currentPosition >= tokens.Count - 1
+                                || currentPosition == tokens.Count -2 && tokens[tokens.Count-1].TokenID.Equals(default(T));
             }
 
             return result;
@@ -272,7 +274,7 @@ namespace sly.parser.llparser
             while (!found && i < rules.Count)
             {
                 Rule<T> innerrule = rules[i];
-                SyntaxParseResult<T> innerRuleRes = Parse(tokens, innerrule, currentPosition);
+                SyntaxParseResult<T> innerRuleRes = Parse(tokens, innerrule, currentPosition, nonTermClause.NonTerminalName);
                 if (!innerRuleRes.IsError && okResult == null)
                 {
                     okResult = innerRuleRes;

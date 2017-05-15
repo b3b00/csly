@@ -3,15 +3,19 @@ namespace sly.parser.syntax
 
     public class ZeroOrMoreClause<T> : IClause<T>
     {
-        public string ClauseName { get; set; }
-        public ZeroOrMoreClause(string name)
+        public IClause<T> Clause { get; set; }
+        public ZeroOrMoreClause(IClause<T> clause)
         {
-            ClauseName = name;
+            Clause = clause;
         }
         public bool Check(T nextToken)
         {
             return true;
         }
 
+        public override string ToString()
+        {
+            return Clause.ToString() + "*";
+        }
     }
 }

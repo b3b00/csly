@@ -1,17 +1,24 @@
+using System.Runtime.InteropServices.ComTypes;
+
 namespace sly.parser.syntax
 {
 
     public class OneOrMoreClause<T> : IClause<T>
     {
-        public string ClauseName { get; set; }
-        public OneOrMoreClause(string name)
+        public IClause<T> Clause { get; set; }
+        public OneOrMoreClause(IClause<T> clause)
         {
-            ClauseName = name;
+            Clause = clause;
         }
         public bool Check(T nextToken)
         {
             return true;
         }
 
+
+        public override string ToString()
+        {
+            return Clause.ToString()+"+";
+        }
     }
 }
