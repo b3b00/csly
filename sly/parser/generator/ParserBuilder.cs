@@ -30,7 +30,7 @@ namespace sly.parser.generator
         /// <param name="parserType">a ParserType enum value stating the analyser type (LR, LL ...) for now only LL recurive descent parser available </param>
         /// <param name="rootRule">the name of the root non terminal of the grammar</param>
         /// <returns></returns>
-        public static Parser<T> BuildParser<T>(object parserInstance, ParserType parserType, string rootRule)
+        public virtual Parser<T> BuildParser<T>(object parserInstance, ParserType parserType, string rootRule)
         {
             ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType());
             ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
@@ -41,7 +41,7 @@ namespace sly.parser.generator
             return parser;
         }
 
-        private static ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType, string rootRule)
+        protected virtual  ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType, string rootRule)
         {
             ISyntaxParser<T> parser = null;
             switch (parserType)
@@ -69,7 +69,7 @@ namespace sly.parser.generator
 
 
 
-        static Tuple<string, string> ExtractNTAndRule(string ruleString)
+        private Tuple<string, string> ExtractNTAndRule(string ruleString)
         {
             Tuple<string, string> result = null;
             if (ruleString != null)
@@ -89,7 +89,7 @@ namespace sly.parser.generator
         }
 
 
-        static private Lexer<T> BuildLexer<T>(Type parserClass, object parserInstance = null)
+        protected Lexer<T> BuildLexer<T>(Type parserClass, object parserInstance = null)
         {
             TypeInfo typeInfo = parserClass.GetTypeInfo();
             Lexer<T> lexer = null;
@@ -111,7 +111,7 @@ namespace sly.parser.generator
 
        
 
-        static private ParserConfiguration<T> ExtractParserConfiguration<T>(Type parserClass)
+        protected virtual  ParserConfiguration<T> ExtractParserConfiguration<T>(Type parserClass)
         {
             ParserConfiguration<T> conf = new ParserConfiguration<T>();
             Dictionary<string, MethodInfo> functions = new Dictionary<string, MethodInfo>();
@@ -162,7 +162,7 @@ namespace sly.parser.generator
             return conf;
         }
 
-        static private Rule<T> BuildNonTerminal<T>(Tuple<string, string> ntAndRule)
+        private Rule<T> BuildNonTerminal<T>(Tuple<string, string> ntAndRule)
         {
             Rule<T> rule = new Rule<T>();
 
@@ -197,7 +197,7 @@ namespace sly.parser.generator
                 }
             }
             rule.Clauses = clauses;
-            rule.Key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
+            //rule.Key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
 
             return rule;
         }
