@@ -8,8 +8,8 @@ namespace sly.parser.generator
     {
         IDENTIFIER = 1,
         COLON = 2,
-        STAR = 3,
-        PLUS = 4,
+        ZEROORMORE = 3,
+        ONEORMORE = 4,
 
         WS = 5,
         EOL = 6
