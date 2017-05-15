@@ -78,7 +78,7 @@ namespace sly.parser.generator
             {
                 case ParserType.LL_RECURSIVE_DESCENT:
                     {
-                        parser = new RecursiveDescentSyntaxParser<T>(conf, rootRule);
+                        parser = new EBNFRecursiveDescentSyntaxParser<T>(conf, rootRule);
                         break;
                     }
                 default:
