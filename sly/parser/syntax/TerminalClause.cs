@@ -19,5 +19,10 @@ namespace sly.parser.syntax
             return ExpectedToken.ToString();
         }
 
+        public bool MayBeEmpty()
+        {
+            return true;
+        }
+
     }
 }

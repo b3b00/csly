@@ -18,6 +18,12 @@ namespace sly.parser.syntax
             this.Children = children;
         }
 
+        public SyntaxNode(string name)
+        {
+            this.Name = name;
+            this.Children = new List<ISyntaxNode<T>>();
+        }
+
         public override string ToString()
         {
             string r = Name+"(\n";

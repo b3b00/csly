@@ -35,12 +35,15 @@ namespace sly.parser.generator
         public List<T> PossibleLeadingTokens { get; set; }
         
 
-        public bool IsEmpty { get
+        public bool MayBeEmpty { get
             {
                 return Clauses == null
                     || Clauses.Count == 0
-                    || (Clauses.Count == 1 && Clauses[0] is EmptyClause<T>);
+                    || (Clauses.Count == 1 && Clauses[0] is EmptyClause<T>)
+                    || Clauses.Count == 0 && Clauses[0].MayBeEmpty();
             } }
+
+        
 
     }
 }

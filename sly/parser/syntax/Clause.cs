@@ -11,5 +11,7 @@ namespace sly.parser.syntax
     {
         bool Check(T nextToken);
 
+        bool MayBeEmpty();
+
     }
 }

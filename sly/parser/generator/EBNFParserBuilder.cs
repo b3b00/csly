@@ -48,6 +48,7 @@ namespace sly.parser.generator
 
             SyntaxTreeVisitor<T> visitor = new SyntaxTreeVisitor<T>(configuration, parserInstance);
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
+            parser.Configuration = configuration;
             parser.Lexer = BuildLexer<T>(parserInstance.GetType(), parserInstance);
             parser.Instance = parserInstance;
             return parser;
@@ -70,7 +71,7 @@ namespace sly.parser.generator
 
 
 
-        protected virtual ISyntaxParser<T> BuildSyntaxParser(ParserConfiguration<T> conf, ParserType parserType,
+        protected override ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType,
             string rootRule)
         {
             ISyntaxParser<T> parser = null;
@@ -78,9 +79,14 @@ namespace sly.parser.generator
             {
                 case ParserType.LL_RECURSIVE_DESCENT:
                     {
-                        parser = new EBNFRecursiveDescentSyntaxParser<T>(conf, rootRule);
+                        parser = (ISyntaxParser<T>)(new RecursiveDescentSyntaxParser<T>(conf, rootRule));
                         break;
                     }
+                case ParserType.EBNF_LL_RECURSIVE_DESCENT:
+                {
+                    parser = (ISyntaxParser<T>)(new EBNFRecursiveDescentSyntaxParser<T>(conf, rootRule));
+                    break;
+                }
                 default:
                     {
                         parser = null;

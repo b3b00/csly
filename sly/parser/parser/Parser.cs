@@ -14,6 +14,8 @@ namespace sly.parser
         public object Instance { get; set; }
         public ISyntaxParser<T> SyntaxParser { get; set; }
         public SyntaxTreeVisitor<T> Visitor { get; set; }
+        public ParserConfiguration<T> Configuration { get; set; }
+        
         public Parser(ISyntaxParser<T> syntaxParser, SyntaxTreeVisitor<T> visitor)
         {
             SyntaxParser = syntaxParser;

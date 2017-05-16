@@ -18,5 +18,10 @@ namespace sly.parser.syntax
             return NonTerminalName;
         }
 
+        public bool MayBeEmpty()
+        {
+            return false;
+        }
+
     }
 }

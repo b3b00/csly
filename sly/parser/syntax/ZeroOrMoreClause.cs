@@ -17,5 +17,10 @@ namespace sly.parser.syntax
         {
             return Clause.ToString() + "*";
         }
+
+        public bool MayBeEmpty()
+        {
+            return true;
+        }
     }
 }

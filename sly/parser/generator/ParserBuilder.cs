@@ -38,6 +38,7 @@ namespace sly.parser.generator
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
             parser.Lexer = BuildLexer<T>(parserInstance.GetType(),parserInstance);
             parser.Instance = parserInstance;
+            parser.Configuration = configuration;
             return parser;
         }
 
