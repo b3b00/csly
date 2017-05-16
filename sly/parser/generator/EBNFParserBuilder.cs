@@ -47,6 +47,10 @@ namespace sly.parser.generator
             ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
 
             SyntaxTreeVisitor<T> visitor = new SyntaxTreeVisitor<T>(configuration, parserInstance);
+            if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
+            {
+                visitor = new EBNFSyntaxTreeVisitor<T>(configuration, parserInstance);
+            }
             Parser<T> parser = new Parser<T>(syntaxParser, visitor);
             parser.Configuration = configuration;
             parser.Lexer = BuildLexer<T>(parserInstance.GetType(), parserInstance);
@@ -127,7 +131,9 @@ namespace sly.parser.generator
                     {
                         Rule<T> rule = (Rule<T>)parseResult.Result;
 
-                        functions[rule.Key] = m;
+                        
+                        
+                        functions[rule.NonTerminalName+"__"+rule.Key] = m;
 
 
                         NonTerminal<T> nonT = null;

@@ -253,7 +253,7 @@ namespace sly.parser.llparser
             }
 
 
-            result.EndingPosition = position;
+            result.EndingPosition = currentPosition;
             result.IsError = false;
             result.Root = manyNode;
             result.IsEnded = lastInnerResult != null && lastInnerResult.IsEnded;
