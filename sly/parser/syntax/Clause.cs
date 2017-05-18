@@ -1,5 +1,7 @@
 
 
+using System;
+
 namespace sly.parser.syntax
 {
 
@@ -10,6 +12,8 @@ namespace sly.parser.syntax
     public interface IClause<T>
     {
         bool Check(T nextToken);
+
+        bool MayBeEmpty();
 
     }
 }

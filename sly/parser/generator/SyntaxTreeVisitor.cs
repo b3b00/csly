@@ -31,7 +31,7 @@ namespace sly.parser.generator
             return Visit(root);
         }
 
-        private object Visit(ISyntaxNode<T> n)
+        protected virtual object Visit(ISyntaxNode<T> n)
         {
             if (n is SyntaxLeaf<T>)
             {
