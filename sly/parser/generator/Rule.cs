@@ -40,7 +40,7 @@ namespace sly.parser.generator
                 return Clauses == null
                     || Clauses.Count == 0
                     || (Clauses.Count == 1 && Clauses[0] is EmptyClause<T>)
-                    || Clauses.Count == 0 && Clauses[0].MayBeEmpty();
+                    || (Clauses.Count == 1 && Clauses[0].MayBeEmpty());
             } }
 
         

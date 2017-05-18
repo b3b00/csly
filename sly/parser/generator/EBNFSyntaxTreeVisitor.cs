@@ -7,16 +7,16 @@ namespace sly.parser.generator
 {
     public class EBNFSyntaxTreeVisitor<T> : SyntaxTreeVisitor<T>
     {
-        
+
         public EBNFSyntaxTreeVisitor(ParserConfiguration<T> conf) : base(conf)
         {
         }
 
-        public EBNFSyntaxTreeVisitor(ParserConfiguration<T> conf, object parserInstance) : base(conf,parserInstance)
+        public EBNFSyntaxTreeVisitor(ParserConfiguration<T> conf, object parserInstance) : base(conf, parserInstance)
         {
         }
 
-       
+
 
         protected override object Visit(ISyntaxNode<T> n)
         {
@@ -84,12 +84,15 @@ namespace sly.parser.generator
             {
                 foreach (object v in values)
                 {
-                    Token<T> t = (Token<T>) v;
+                    Token<T> t = (Token<T>)v;
                     tokenValues.Add(t);
 
                 }
             }
-
+            if (values.Count == 0)
+            {
+                return new List<Token<T>>();
+            }
             if (areTokens)
             {
                 return tokenValues;

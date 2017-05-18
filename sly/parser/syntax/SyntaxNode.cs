@@ -10,11 +10,11 @@ namespace sly.parser.syntax
 
         public string Name {get; set;} 
 
-        public List<ISyntaxNode<T>> Children {get; set;}
+        public List<ISyntaxNode<T>> Children { get; }
 
         public SyntaxNode(string name, List<ISyntaxNode<T>> children)
         {
-            this.Name = name;
+            this.Name = name;            
             this.Children = children;
         }
 
@@ -29,6 +29,16 @@ namespace sly.parser.syntax
             string r = Name+"(\n";
             Children.ForEach(c => r += c.ToString() + ",\n");
             return r+"\n)";
+        }
+
+        public void AddChildren(List<ISyntaxNode<T>> children)
+        {
+            this.Children.AddRange(children);
+        }
+
+        public void AddChild(ISyntaxNode<T> child)
+        {
+            this.Children.Add(child);
         }
 
         public bool IsTerminal() {

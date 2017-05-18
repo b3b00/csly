@@ -21,7 +21,7 @@ namespace sly.parser.syntax
 
         public bool MayBeEmpty()
         {
-            return true;
+            return false;
         }
 
     }

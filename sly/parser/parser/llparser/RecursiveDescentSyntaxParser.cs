@@ -142,9 +142,15 @@ namespace sly.parser.llparser
             {
                 result = new SyntaxParseResult<T>();
                 errors.Sort();
-                List<UnexpectedTokenSyntaxError<T>> singleError = new List<UnexpectedTokenSyntaxError<T>>() { errors[errors.Count() - 1] };
-                result.Errors = errors;
-                result.Errors = singleError;
+                if (errors.Count > 0)
+                {
+                    List<UnexpectedTokenSyntaxError<T>> singleError = new List<UnexpectedTokenSyntaxError<T>>() { errors[errors.Count() - 1] };
+                    result.Errors = singleError;
+                }
+                else
+                {
+                    result.Errors = errors;
+                }                
                 result.IsError = true;
             }
             return result;

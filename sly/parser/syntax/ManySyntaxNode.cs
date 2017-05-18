@@ -15,7 +15,7 @@ namespace sly.parser.syntax
         public ManySyntaxNode(string name, List<ISyntaxNode<T>> children) : base(name,children)
         {
             this.Name = name;
-            this.Children = children;
+            this.AddChildren(children);
         }
 
         public void Add(ISyntaxNode<T> child)

@@ -73,7 +73,7 @@ namespace ParserTests
             SyntaxLeaf<TokenType> cT = leaf(TokenType.c, "c", position);
 
             SyntaxNode<TokenType> aN = node("A__a_", aT);
-            SyntaxNode<TokenType> rN = node("R__A_b_c_", aN,bT,cT);
+            SyntaxNode<TokenType> rN = node("R__A_b_c", aN,bT,cT);
 
             string r = visitor.VisitSyntaxTree(rN).ToString();
             ;

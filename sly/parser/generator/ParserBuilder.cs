@@ -133,11 +133,13 @@ namespace sly.parser.generator
                 foreach (ReductionAttribute attr in attributes)
                 {
                     Tuple<string, string> ntAndRule = ExtractNTAndRule(attr.RuleString);
-                    string key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
+                    
 
-                    functions[key] = m;
+                    
 
                     Rule<T> r = BuildNonTerminal<T>(ntAndRule);
+                    string key = ntAndRule.Item1 + "__" + r.Key;
+                    functions[key] = m;
                     NonTerminal<T> nonT = null;
                     if (!nonTerminals.ContainsKey(ntAndRule.Item1))
                     {
