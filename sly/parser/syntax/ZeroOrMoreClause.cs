@@ -1,12 +1,12 @@
 namespace sly.parser.syntax
 {
 
-    public class NonTerminalClause<T> : IClause<T>
+    public class ZeroOrMoreClause<T> : IClause<T>
     {
-        public string NonTerminalName { get; set; }
-        public NonTerminalClause(string name)
+        public IClause<T> Clause { get; set; }
+        public ZeroOrMoreClause(IClause<T> clause)
         {
-            NonTerminalName = name;
+            Clause = clause;
         }
         public bool Check(T nextToken)
         {
@@ -15,13 +15,12 @@ namespace sly.parser.syntax
 
         public override string ToString()
         {
-            return NonTerminalName;
+            return Clause.ToString() + "*";
         }
 
         public bool MayBeEmpty()
         {
-            return false;
+            return true;
         }
-
     }
 }

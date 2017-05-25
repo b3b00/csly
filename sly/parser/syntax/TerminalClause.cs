@@ -14,5 +14,15 @@ namespace sly.parser.syntax
             return nextToken.Equals(ExpectedToken);
         }
 
+        public override string ToString()
+        {
+            return ExpectedToken.ToString();
+        }
+
+        public bool MayBeEmpty()
+        {
+            return false;
+        }
+
     }
 }

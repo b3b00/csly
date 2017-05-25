@@ -1,3 +1,5 @@
+using System;
+
 namespace sly.parser.syntax
 {
 
@@ -8,5 +10,9 @@ namespace sly.parser.syntax
             return true;
         }
 
+        public bool MayBeEmpty()
+        {
+            return true;
+        }
     }
 }
