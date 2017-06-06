@@ -14,31 +14,31 @@ namespace ParserTests
     {
 
 
-        [Fact]
-        public void TestJsonSyntaxError()
-        {
-            JSONParser jsonParser = new JSONParser();
-            ParserBuilder builder = new ParserBuilder();
-            Parser<JsonToken> parser = builder.BuildParser<JsonToken>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+        //[Fact]
+        //public void TestJsonSyntaxError()
+        //{
+        //    JSONParser jsonParser = new JSONParser();
+        //    ParserBuilder builder = new ParserBuilder();
+        //    Parser<JsonToken> parser = builder.BuildParser<JsonToken>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
 
             
-            string source = @"{
-                'one': 1,
-                'bug':{,}
-            }".Replace("'","\"");
-            ParseResult<JsonToken> r = parser.Parse(source);
-            Assert.True(r.IsError);
-            Assert.Null(r.Result);
-            Assert.NotNull(r.Errors);
-            Assert.True(r.Errors.Count > 0);
-            Assert.IsAssignableFrom(typeof(UnexpectedTokenSyntaxError<JsonToken>), r.Errors[0]);
-            UnexpectedTokenSyntaxError<JsonToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
+        //    string source = @"{
+        //        'one': 1,
+        //        'bug':{,}
+        //    }".Replace("'","\"");
+        //    ParseResult<JsonToken> r = parser.Parse(source);
+        //    Assert.True(r.IsError);
+        //    Assert.Null(r.Result);
+        //    Assert.NotNull(r.Errors);
+        //    Assert.True(r.Errors.Count > 0);
+        //    Assert.IsAssignableFrom(typeof(UnexpectedTokenSyntaxError<JsonToken>), r.Errors[0]);
+        //    UnexpectedTokenSyntaxError<JsonToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
 
-            Assert.Equal(JsonToken.COMMA, error?.UnexpectedToken.TokenID);
-            Assert.Equal(2, error?.Line);
-            Assert.Equal(26, error?.Column);
+        //    Assert.Equal(JsonToken.COMMA, error?.UnexpectedToken.TokenID);
+        //    Assert.Equal(2, error?.Line);
+        //    Assert.Equal(26, error?.Column);
 
-        }
+        //}
 
         [Fact]
         public void TestExpressionSyntaxError()
