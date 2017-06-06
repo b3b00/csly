@@ -1,0 +1,19 @@
+version: 1.0.{build}
+branches:
+  only:
+  - dev
+image: Previous Visual Studio 2017
+build_script:
+- cmd: >-
+    uname -a
+
+    dotnet restore
+
+    dotnet build -c Release
+
+    rem dotnet test -f netcoreapp1.0 ParserTests/ParserTests.csproj
+
+    dotnet pack -c Release
+artifacts:
+- path: sly/bin/release/*
+  name: sly
