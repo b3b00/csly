@@ -14,6 +14,7 @@ build_script:
     rem dotnet test -f netcoreapp1.0 ParserTests/ParserTests.csproj
 
     dotnet pack -c Release
+test: off
 artifacts:
 - path: sly/bin/release/*
   name: sly
