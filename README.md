@@ -214,3 +214,11 @@ One build a parser expose :
 Full examples are available under :
 - [jsonparser](https://github.com/b3b00/sly/blob/master/jsonparser/JSONParser.cs) : a json parser
 - [expressionParser](https://github.com/b3b00/sly/blob/master/expressionParser/ExpressionParser.cs) : a mathematical expression parser
+- You can also look at Tests
+
+
+## EBNF notation ##
+
+you can now use EBNF notation :
+ - '*' to repeat 0 or more the same terminal or non terminal
+ - '+' to repeat once or more the same terminal or non terminal
