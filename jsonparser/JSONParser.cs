@@ -73,9 +73,29 @@ namespace jsonparser
         }
 
         [Reduction("value : DOUBLE")]
-        public  object DoubleValue(Token<JsonToken> doubleToken)
+        public object DoubleValue(Token<JsonToken> doubleToken)
         {
-            return doubleToken.DoubleValue;
+            double dbl = double.MinValue;
+            try
+            {
+                string[] doubleParts = doubleToken.Value.Split('.');
+                dbl = double.Parse(doubleParts[0]);
+                if (doubleParts.Length > 1)
+                {
+                    double decimalPart = double.Parse(doubleParts[1]);
+                    for (int i = 0; i < doubleParts[1].Length; i++)
+                    {
+                        decimalPart = decimalPart / 10.0;
+                    }
+                    dbl += decimalPart;
+                }
+            }
+            catch (Exception e)
+            {
+                dbl = double.MinValue;
+            }
+
+            return dbl;
         }
 
         [Reduction("value : BOOLEAN")]
