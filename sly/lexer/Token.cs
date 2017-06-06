@@ -65,10 +65,10 @@ namespace sly.lexer
         {
             get
             {
-                return double.Parse(Value.Replace(".",","));
+                return double.Parse(Value);
             }
-            set { }
         }
+            
 
         public bool End { get; set; }
 
