@@ -9,7 +9,7 @@ namespace sly.lexer
     /// <summary>
     /// T is the token type
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">T is the enum Token type</typeparam>
     public class Lexer<T> : ILexer<T>
     {
 
@@ -44,11 +44,6 @@ namespace sly.lexer
 
         public IEnumerable<Token<T>> Tokenize(string source)
         {
-            if (GlobalRegex == null)
-            {
-                InitGlobalRegex();
-            }
-
             int currentIndex = 0;
             List<Token<T>> tokens = new List<Token<T>>();
             int currentLine = 1;
@@ -60,37 +55,10 @@ namespace sly.lexer
 
             while (currentIndex < source.Length)
             {
-                currentColumn = currentIndex - currentLineStartIndex;
+                currentColumn = currentIndex - currentLineStartIndex+1;
                 TokenDefinition<T> matchedDefinition = null;
                 int matchLength = 0;
-
-                T globTok =eol ;
-                var globMatch = GlobalRegex.Match(source,currentIndex);
-                bool globalFound = globMatch.Success;
-
-                if (globalFound)
-                {
-                    int index = -1;
-                    int i = 1;
-                    while (i < globMatch.Groups.Count && index < 0)
-                    {
-                        if (!string.IsNullOrEmpty(globMatch.Groups[i].Value))
-                        {
-                            index = i;
-                        }
-                        i++;
-                    }
-                    string tokenName = GlobalRegex.GroupNameFromNumber(index);
-                    globTok = (T)Enum.Parse(typeof(T), tokenName, false);
-                }
-                else
-                {
-                    ;
-                }
                 
-
-
-
                 foreach (var rule in tokenDefinitions)
                 {
                     var match = rule.Regex.Match(source, currentIndex);
@@ -104,33 +72,23 @@ namespace sly.lexer
                 }
 
                 if (matchedDefinition == null)
-                {
-                    if (globalFound)
-                    {
-                        // dommage
-                        ;
-                    }
+                {                    
                     throw new LexerException<T>(new LexicalError(currentLine,currentColumn, source[currentIndex]));
                 }
                 else
                 {
                     var value = source.Substring(currentIndex, matchLength);
 
-                    if (!matchedDefinition.IsIgnored)
-                    {
-                       
-                        if (!matchedDefinition.TokenID.Equals(globTok))
-                        {
-                            // dommage
-                            ;
-                        }                       
-                        yield return new Token<T>(matchedDefinition.TokenID, value, new TokenPosition(currentIndex - matchLength, currentLine, currentColumn));
-                    }
                     if (matchedDefinition.IsEndOfLine)
-                    {                        
-                        currentLineStartIndex = currentIndex;
+                    {
+                        currentLineStartIndex = currentIndex+matchLength;
                         currentLine++;
                     }
+                    if (!matchedDefinition.IsIgnored)
+                    {                      
+
+                        yield return new Token<T>(matchedDefinition.TokenID, value, new TokenPosition(currentIndex, currentLine, currentColumn));
+                    }                    
                     currentIndex += matchLength;
 
 

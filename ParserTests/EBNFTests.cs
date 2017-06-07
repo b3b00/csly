@@ -20,6 +20,8 @@ namespace ParserTests
             a = 1,
             b = 2,
             c = 3,
+            e = 4,
+            f = 5,
             WS = 100,
             EOL = 101
         }
@@ -31,7 +33,9 @@ namespace ParserTests
             lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.a, "a"));
             lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.b, "b"));
             lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.c, "c"));
-           
+            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.e, "e"));
+            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.f, "f"));
+
             lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.WS, "[ \\t]+", true));
             lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.EOL, "[\\n\\r]+", true, true));
             return lexer;
@@ -46,6 +50,24 @@ namespace ParserTests
             result += B + ",";
             result += c.Value;
             result += ")";
+            return result;
+        }
+
+        [Reduction("R : G+ ")]
+        public object RManyNT(List<object> gs)
+        {
+            string result = "R(";
+            result += gs
+                    .Select(g => g.ToString())
+                    .Aggregate((string s1, string s2) => s1 + "," + s2);
+            result += ")";
+            return result;
+        }
+
+        [Reduction("G : e f ")]
+        public object RManyNT(Token<TokenType> e , Token<TokenType> f)
+        {
+            string result = $"G({e.Value},{f.Value})";
             return result;
         }
 
@@ -99,9 +121,9 @@ namespace ParserTests
         {
             Parser = BuildParser();
             Assert.Equal(typeof(EBNFRecursiveDescentSyntaxParser<TokenType>),Parser.SyntaxParser.GetType());
-            Assert.Equal(Parser.Configuration.NonTerminals.Count, 3);
+            Assert.Equal(Parser.Configuration.NonTerminals.Count, 4);
             NonTerminal<TokenType> nt = Parser.Configuration.NonTerminals["R"];
-            Assert.Equal(nt.Rules.Count, 1);
+            Assert.Equal(nt.Rules.Count, 2);
             nt = Parser.Configuration.NonTerminals["A"];
             Assert.Equal(nt.Rules.Count, 1);
             Rule<TokenType> rule = nt.Rules[0];
@@ -113,6 +135,17 @@ namespace ParserTests
             Assert.Equal(rule.Clauses.Count, 1);
             Assert.IsType(typeof(ZeroOrMoreClause<TokenType>), rule.Clauses[0]);
             ;
+        }
+
+
+        [Fact]
+        public void TestOneOrMoreNonTerminal()
+        {
+            Parser = BuildParser();
+            ParseResult<TokenType> result = Parser.Parse("e f e f");
+            Assert.False(result.IsError);
+            Assert.IsType(typeof(string), result.Result);
+            Assert.Equal("R(G(e,f),G(e,f))", result.Result.ToString().Replace(" ", ""));
         }
 
         [Fact]

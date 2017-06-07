@@ -1,5 +1,9 @@
 # sharp Lex Yacc #
 
+[![Build status](https://ci.appveyor.com/api/projects/status/n9uffgkqn2qet7k9?svg=true)](https://ci.appveyor.com/project/OlivierDuhart/sly)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/b3b00/sly/blob/dev/LICENSE)
+[![NuGet version](https://img.shields.io/nuget/v/sly.svg)](https://www.nuget.org/packages/sly/)
+
  #LY is a parser generator halfway between parser combinators and parser generator like [ANTLR](http://www.antlr.org/) 
 
 It provides a way to build a full lexer and parser using only C# with no extra build step. The goal of this parser generator is not to build highly efficient parser but rather rapid prototyping or small DSL embedded in .Net solutions.   
@@ -214,3 +218,11 @@ One build a parser expose :
 Full examples are available under :
 - [jsonparser](https://github.com/b3b00/sly/blob/master/jsonparser/JSONParser.cs) : a json parser
 - [expressionParser](https://github.com/b3b00/sly/blob/master/expressionParser/ExpressionParser.cs) : a mathematical expression parser
+- You can also look at Tests
+
+
+## EBNF notation ##
+
+you can now use EBNF notation :
+ - '*' to repeat 0 or more the same terminal or non terminal
+ - '+' to repeat once or more the same terminal or non terminal

@@ -194,6 +194,10 @@ namespace sly.parser.llparser
                             {
                                 children.Add(nonTerminalResult.Root);
                                 currentPosition = nonTerminalResult.EndingPosition;
+                                if (nonTerminalResult.Errors != null && nonTerminalResult.Errors.Any())
+                                {
+                                    errors.AddRange(nonTerminalResult.Errors);
+                                }
                             }
                             else
                             {
@@ -241,6 +245,12 @@ namespace sly.parser.llparser
 
         public SyntaxParseResult<T> ParseNonTerminal(IList<Token<T>> tokens, NonTerminalClause<T> nonTermClause,int currentPosition)
         {
+
+            if (nonTermClause.NonTerminalName == "members")
+            {
+                ;
+            }
+
             NonTerminal<T> nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
             bool found = false;
             bool isError = false;
@@ -315,6 +325,7 @@ namespace sly.parser.llparser
             else
             {
                 result.IsError = true;
+                result.Errors = errors;
                 result.EndingPosition = greaterIndex;
             }
             return result;

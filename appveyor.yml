@@ -11,7 +11,7 @@ build_script:
 
     dotnet build -c Release
 
-    rem dotnet test -f netcoreapp1.0 ParserTests/ParserTests.csproj
+    dotnet test -f netcoreapp1.0 ParserTests/ParserTests.csproj
 
     dotnet pack -c Release
 test: off
