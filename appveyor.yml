@@ -1,23 +1,53 @@
 version: 1.0.{build}
-branches:
-  only:
-  - dev
-  - master
+skip_branch_with_pr: true
 image: Previous Visual Studio 2017
 build_script:
-- cmd: >-
+- ps: >-
     uname -a
-
+    Write-Host "restoring nugets"
     dotnet restore
 
+    Write-Host "building solution (Release)"
     dotnet build -c Release
 
+    Write-Host "running XUnit tests"
     dotnet test -f netcoreapp1.0 ParserTests/ParserTests.csproj
 
+    Write-Host "packing nuget"
     dotnet pack -c Release
-test: off
+
+
+    function InstallTool
+    {
+        param([string]$nugetName, [string]$outPath)
+        Write-Host "install xunit console tool"
+        appveyor DownloadFile  ("https://api.nuget.org/packages/"+$nugetName+".nupkg")
+        New-Item $outPath -type directory
+        Rename-Item -Path ($nugetName+".nupkg") -NewName ($nugetName+".zip")
+        Expand-Archive -LiteralPath ($nugetName+".zip") -DestinationPath $outPath
+    }
+
+    Write-Host "install opencover tool"
+    InstallTool "opencover.4.6.519" "opencover"
+
+    Write-Host "install xunit console tool"
+    InstallTool "xunit.runner.console.2.2.0" "xunit"
+
+    Write-Host "running opencover"
+    dotnet build -c Debug ParserTests\ParserTests.csproj
+    opencover\tools\OpenCover.Console.exe -register:user "-target:xunit\tools\xunit.console.exe" "-targetargs:ParserTests\bin\Debug\net45\ParserTests.dll"  "-output:ParserTests.OpenCover.xml"
+
+
+    Write-Host "uploading opencover result to codecov"
+    "SET PATH=C:\\Python34;C:\\Python34\\Scripts;%PATH%"
+    pip install codecov
+    codecov -f "ParserTests.OpenCover.xml" -t 31fb1c27-458a-4ddd-a3d1-21bc76a077e4
+test_script:
+- ps: 
 artifacts:
 - path: sly/bin/release/*
+  name: sly
+- path: '*.OpenCover.xml'
   name: sly
 notifications:
 - provider: Email

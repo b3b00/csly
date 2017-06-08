@@ -1,8 +1,10 @@
 # sharp Lex Yacc #
 
 [![Build status](https://ci.appveyor.com/api/projects/status/n9uffgkqn2qet7k9?svg=true)](https://ci.appveyor.com/project/OlivierDuhart/sly)
+[![codecov](https://codecov.io/gh/b3b00/sly/branch/dev/graph/badge.svg)](https://codecov.io/gh/b3b00/sly)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/b3b00/sly/blob/dev/LICENSE)
 [![NuGet version](https://img.shields.io/nuget/v/sly.svg)](https://www.nuget.org/packages/sly/)
+
 
  #LY is a parser generator halfway between parser combinators and parser generator like [ANTLR](http://www.antlr.org/) 
 
