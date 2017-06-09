@@ -3,6 +3,7 @@
 *.suo
 *.user
 *.sln.docstates
+TestResults
 
 # Build results
 

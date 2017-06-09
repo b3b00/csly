@@ -32,13 +32,22 @@ namespace sly.parser.generator
         /// <returns></returns>
         public virtual Parser<T> BuildParser<T>(object parserInstance, ParserType parserType, string rootRule)
         {
-            ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType());
-            ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
-            SyntaxTreeVisitor<T> visitor = new SyntaxTreeVisitor<T>(configuration, parserInstance);
-            Parser<T> parser = new Parser<T>(syntaxParser, visitor);
-            parser.Lexer = BuildLexer<T>(parserInstance.GetType(),parserInstance);
-            parser.Instance = parserInstance;
-            parser.Configuration = configuration;
+            Parser<T> parser = null;
+            if (parserType == ParserType.LL_RECURSIVE_DESCENT)
+            {
+                ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType());
+                ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
+                SyntaxTreeVisitor<T> visitor = new SyntaxTreeVisitor<T>(configuration, parserInstance);
+                parser = new Parser<T>(syntaxParser, visitor);
+                parser.Lexer = BuildLexer<T>(parserInstance.GetType(), parserInstance);
+                parser.Instance = parserInstance;
+                parser.Configuration = configuration;
+            }
+            else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
+            {
+                EBNFParserBuilder<T> builder = new EBNFParserBuilder<T>();
+                parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule);
+            }
             return parser;
         }
 
@@ -121,16 +130,16 @@ namespace sly.parser.generator
             methods = methods.Where(m =>
             {
                 List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>();
-                Attribute attr = attributes.Find(a => a.GetType() == typeof(ReductionAttribute));
+                Attribute attr = attributes.Find(a => a.GetType() == typeof(ProductionAttribute));
                 return attr != null;
             }).ToList<MethodInfo>();
 
             parserClass.GetMethods();
             methods.ForEach(m =>
             {
-                ReductionAttribute[] attributes = (ReductionAttribute[])m.GetCustomAttributes(typeof(ReductionAttribute), true);
+                ProductionAttribute[] attributes = (ProductionAttribute[])m.GetCustomAttributes(typeof(ProductionAttribute), true);
 
-                foreach (ReductionAttribute attr in attributes)
+                foreach (ProductionAttribute attr in attributes)
                 {
                     Tuple<string, string> ntAndRule = ExtractNTAndRule(attr.RuleString);
                     

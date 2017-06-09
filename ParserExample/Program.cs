@@ -38,8 +38,8 @@ class Program
             return lexer;
         }
 
-        [Reduction("R : A b c ")]
-        [Reduction("R : Rec b c ")]
+        [Production("R : A b c ")]
+        [Production("R : Rec b c ")]
         public static object R(List<object> args)
         {
             string result = "R(";
@@ -50,8 +50,8 @@ class Program
             return result;
         }
 
-        [Reduction("A : a ")]
-        [Reduction("A : z ")]
+        [Production("A : a ")]
+        [Production("A : z ")]
         public static object A(List<object> args)
         {
             string result = "A(";
@@ -60,8 +60,8 @@ class Program
             return result;
         }
 
-        [Reduction("Rec : r Rec ")]
-        [Reduction("Rec :  ")]
+        [Production("Rec : r Rec ")]
+        [Production("Rec :  ")]
         public static object Rec(List<object> args)
         {
             if (args.Count == 2)
