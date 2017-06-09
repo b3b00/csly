@@ -58,7 +58,7 @@ namespace sly.parser.generator
             return parser;
         }
 
-        [LexerConfigurationAttribute]
+        [LexerConfiguration]
         public ILexer<EbnfToken> BuildEbnfLexer(ILexer<EbnfToken> lexer)
         {
             lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.COLON, ":"));

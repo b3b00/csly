@@ -27,7 +27,7 @@ namespace ParserTests
         }
 
 
-        [LexerConfigurationAttribute]
+        [LexerConfiguration]
         public ILexer<TokenType> BuildJsonLexer(ILexer<TokenType> lexer)
         {
             lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.a, "a"));
