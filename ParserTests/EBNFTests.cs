@@ -27,7 +27,7 @@ namespace ParserTests
         }
 
 
-        [LexerConfigurationAttribute]
+        [LexerConfiguration]
         public ILexer<TokenType> BuildJsonLexer(ILexer<TokenType> lexer)
         {
             lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.a, "a"));
@@ -42,7 +42,7 @@ namespace ParserTests
         }
 
 
-        [Reduction("R : A B c ")]
+        [Production("R : A B c ")]
         public object R(string A, string B, Token<TokenType> c)
         {
             string result = "R(";
@@ -53,7 +53,7 @@ namespace ParserTests
             return result;
         }
 
-        [Reduction("R : G+ ")]
+        [Production("R : G+ ")]
         public object RManyNT(List<object> gs)
         {
             string result = "R(";
@@ -64,14 +64,14 @@ namespace ParserTests
             return result;
         }
 
-        [Reduction("G : e f ")]
+        [Production("G : e f ")]
         public object RManyNT(Token<TokenType> e , Token<TokenType> f)
         {
             string result = $"G({e.Value},{f.Value})";
             return result;
         }
 
-        [Reduction("A : a + ")]
+        [Production("A : a + ")]
         public object A(List<Token<TokenType>> astr)
         {
             string result = "A(";
@@ -82,7 +82,7 @@ namespace ParserTests
             return result;
         }
 
-        [Reduction("B : b * ")]
+        [Production("B : b * ")]
         public object B(List<Token<TokenType>> bstr)
         {
             if (bstr.Any())
@@ -107,11 +107,11 @@ namespace ParserTests
         private Parser<TokenType> BuildParser()
         {
             EBNFTests parserInstance = new EBNFTests();
-            EBNFParserBuilder<TokenType> builder = new EBNFParserBuilder<TokenType>();
+            ParserBuilder builder = new ParserBuilder();
 
             EBNFTests parserTest = new EBNFTests();
 
-            Parser = builder.BuildParser(parserTest, ParserType.EBNF_LL_RECURSIVE_DESCENT, "R");
+            Parser = builder.BuildParser<TokenType>(parserTest, ParserType.EBNF_LL_RECURSIVE_DESCENT, "R");
             return Parser;
         }
 

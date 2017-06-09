@@ -20,7 +20,7 @@ namespace sly.parser.generator
     /// <summary>
     /// this class provides API to build parser
     /// </summary>
-    public class EBNFParserBuilder<T> : ParserBuilder
+    internal class EBNFParserBuilder<T> : ParserBuilder
     {
 
 
@@ -58,7 +58,7 @@ namespace sly.parser.generator
             return parser;
         }
 
-        [LexerConfigurationAttribute]
+        [LexerConfiguration]
         public ILexer<EbnfToken> BuildEbnfLexer(ILexer<EbnfToken> lexer)
         {
             lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.COLON, ":"));
@@ -113,16 +113,16 @@ namespace sly.parser.generator
             methods = methods.Where(m =>
             {
                 List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>();
-                Attribute attr = attributes.Find(a => a.GetType() == typeof(ReductionAttribute));
+                Attribute attr = attributes.Find(a => a.GetType() == typeof(ProductionAttribute));
                 return attr != null;
             }).ToList<MethodInfo>();
 
             methods.ForEach(m =>
             {
-                ReductionAttribute[] attributes =
-                    (ReductionAttribute[])m.GetCustomAttributes(typeof(ReductionAttribute), true);
+                ProductionAttribute[] attributes =
+                    (ProductionAttribute[])m.GetCustomAttributes(typeof(ProductionAttribute), true);
 
-                foreach (ReductionAttribute attr in attributes)
+                foreach (ProductionAttribute attr in attributes)
                 {
 
                     string ruleString = attr.RuleString;
@@ -174,7 +174,7 @@ namespace sly.parser.generator
 
         #region rules grammar
 
-        [Reduction("rule : IDENTIFIER COLON clauses")]
+        [Production("rule : IDENTIFIER COLON clauses")]
         public object Root(Token<EbnfToken> name, Token<EbnfToken> discarded, List<IClause<T>> clauses)
         {
             Rule<T> rule = new Rule<T>();
@@ -184,7 +184,7 @@ namespace sly.parser.generator
         }
 
 
-        [Reduction("clauses : clause clauses")]
+        [Production("clauses : clause clauses")]
 
         public object Clauses(IClause<T> clause, List<IClause<T>> clauses)
         {
@@ -196,7 +196,7 @@ namespace sly.parser.generator
             return list;
         }
 
-        [Reduction("clauses : clause ")]
+        [Production("clauses : clause ")]
         public object SingleClause(IClause<T> clause)
         {
             return new List<IClause<T>> { clause };
@@ -206,21 +206,21 @@ namespace sly.parser.generator
 
        
 
-        [Reduction("clause : IDENTIFIER ZEROORMORE")]
+        [Production("clause : IDENTIFIER ZEROORMORE")]
         public IClause<T> ZeroMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
         {
             IClause<T> innerClause = BuildTerminalOrNonTerimal(id.Value);
             return new ZeroOrMoreClause<T>(innerClause);
         }
 
-        [Reduction("clause : IDENTIFIER ONEORMORE")]
+        [Production("clause : IDENTIFIER ONEORMORE")]
         public IClause<T> OneMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
         {
             IClause<T> innerClause = BuildTerminalOrNonTerimal(id.Value);
             return new OneOrMoreClause<T>(innerClause);
         }
 
-        [Reduction("clause : IDENTIFIER ")]
+        [Production("clause : IDENTIFIER ")]
         public IClause<T> SimpleClause(Token<EbnfToken> id)
         {
             IClause<T> clause = BuildTerminalOrNonTerimal(id.Value);
