@@ -246,5 +246,15 @@ Full examples are available under :
 ## EBNF notation ##
 
 you can now use EBNF notation :
- - '*' to repeat 0 or more the same terminal or non terminal
- - '+' to repeat once or more the same terminal or non terminal
+ - '*' to repeat 0 or more the same terminal or non terminal 
+```
+ [Production("R : G* ")]
+ public object RManyOne(List<object> manyObjects)
+```
+ - '+' to repeat once or more the same terminal or non terminal  
+ 
+```
+ [Production("R : G+ ")]
+ public object RManyOne(List<object> manyObjects)
+        
+```
