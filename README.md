@@ -44,12 +44,12 @@ It could be improved in the future.
 To configure a lexer 2 items has to be done :
 
 
-- an <span style="color:blue">**enum**</span>  listing all the possible tokens (no special constraint here except public visibility)
-- a method with special attribute [LexerConfigurationAttribute] that associates tokens from the above enum with matching regex.
+- an ```enum```  listing all the possible tokens (no special constraint here except public visibility)
+- a method with special attribute ```[LexerConfigurationAttribute]``` that associates tokens from the above enum with matching regex.
  
-the configuration method takes a Lexer<T> (where T is the tokens <span style="color:blue">**enum**</span>  parameters and returns the same lexer after having added (token,regex) associations.
+the configuration method takes a ```Lexer<T>``` (where T is the tokens ```enum```  parameters and returns the same lexer after having added (token,regex) associations.
 
-The lexer can be used apart from the parser. It provides a method that returns an IEnumerable<Token<T>> (where T is the tokens <span style="color:blue">**enum**</span>) from a <span style="color:blue">**string**</span>
+The lexer can be used apart from the parser. It provides a method that returns an ```IEnumerable<Token<T>>``` (where T is the tokens ```enum```) from a ```string```
 
 ```c#
  IList<Token<T>> tokens = Lexer.Tokenize(source).ToList<Token<T>>();
@@ -85,12 +85,13 @@ public enum ExpressionToken
         EOL = 14 // an end of line
 
     }
+```
 
+#### regular expressions
 
-####regular expressions
 ```c#
 
-        [LexerConfigurationAttribute]
+        [LexerConfiguration]
         public Lexer<ExpressionToken> BuildExpressionLexer(Lexer<ExpressionToken> lexer = null)
         {
             if (lexer == null)
@@ -117,12 +118,13 @@ public enum ExpressionToken
 
 ## Parser ##
 
-The grammar defining the parser is defined using C# attribute [Reduction("some grammar rule")] mapped to static methods ( in the same class used for the lexer)
+The grammar defining the parser is defined using C# attribute ```[Production("some grammar rule")]``` mapped to methods ( in the same class used for the lexer)
+
 The rules follow the classical BNF notation.
 A terminal notation must exactly matches (case sensitive) an enum value.
-Once build the methods of each rule will be used as a syntaxic tree visitor.
+Once the wytaxic tree build, the methods of each rule will be used as a syntaxic tree visitor.
 Each methods takes as many parameters as rule clauses. Each parameter can be typed according to the return value of the clause :
-- for a terminal : the Token<T> corresponding to the token
+- for a terminal : the ```Token<T>``` corresponding to the token
 - for a non terminal : the result of the evaluation of the non terminal, i.e the value returned by the matching static method. 
 
   
@@ -183,17 +185,17 @@ a mathematical parser calculate a mathematical expression. It takes a string as 
 
 as we 've seen above a parser is declared on a single class with static methods that address :
 
-- lexer configuration (with the [LexerConfigurationAttribute] attribute )
+- lexer configuration (with the ```[LexerConfiguration]``` attribute )
 
-- grammar rules (with the [Production("")] attribute )
+- grammar rules (with the ```[Production("")]``` attribute )
 
 Once the class with all its methods has been written, it can be used to build the effective parser instance calling ParserBuilder.BuildParser. the builder methods takes 3 parameters :
 
 
 1. an instance of the class containing the lexer and parser definition
 2. the kind of parser. Currently only a recursive descent parsers are available. this implementation is limited to LL grammar by construction (no left recursion).There are 2 possible types :
-	- ParserType.LL_RECURSIVE_DESCENT : a [BNF](https://fr.wikipedia.org/wiki/Forme_de_Backus-Naur) notation grammar parser
-    - ParserType.EBNF_LL_RECURSIVE_DESCENT : a [EBNF](https://fr.wikipedia.org/wiki/Extended_Backus-Naur_Form) notation grammar parser. EBNF notation provides additional multiplier notation (* and + for now)
+	- ```ParserType.LL_RECURSIVE_DESCENT``` : a [BNF](https://fr.wikipedia.org/wiki/Forme_de_Backus-Naur) notation grammar parser
+    - ```ParserType.EBNF_LL_RECURSIVE_DESCENT``` : a [EBNF](https://fr.wikipedia.org/wiki/Extended_Backus-Naur_Form) notation grammar parser. EBNF notation provides additional multiplier notation (* and + for now)
 3. the root rule for the parser.   
 
 the parser is typed according to the token type.
@@ -205,22 +207,25 @@ Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(expr
                                                                             "expression");
 ```
 
-then calling parser.Parse("some source code") will return the evaluation of the syntax tree.
+then calling ```parser.Parse("some source code")``` will return the evaluation of the syntax tree.
 the parser returns a ParseResult instance containing the evaluation value or a list of errors.
 
 ```c#
 
-    ParseResult<ExpressionToken> r = Parser.Parse("1 + 1");
+	string expression = "1 + 1";
+
+    ParseResult<ExpressionToken> r = Parser.Parse(expression);
 
 
     if (!r.IsError && r.Result != null && r.Result is int)
     {
-        Console.WriteLine($"result is {(int)r.Result}");
+        Console.WriteLine($"result of {expression}  is {(int)r.Result}");
     }
     else
     {
         if (r.Errors !=null && r.Errors.Any())
         {
+        	// display errors
             r.Errors.ForEach(error => Console.WriteLine(error.ErrorMessage));
         }
     }
@@ -229,11 +234,11 @@ the parser returns a ParseResult instance containing the evaluation value or a l
 ### access lexer and parsers
 One build a parser expose :
 
-- a main API through the Parse(string content) method (chain lexical analysis, syntax parsing and finally call your parsing methods)
+- a main API through the ```Parse(string content)``` method (chain lexical analysis, syntax parsing and finally call your parsing methods)
 
 - the lexer through the Lexer property
 
-- the syntax parser  through the SyntaxParser property (which type is ISyntaxParser)
+- the syntax parser  through the SyntaxParser property (which type is a ```ISyntaxParser```)
 
 ## Full examples ##
 
@@ -246,15 +251,5 @@ Full examples are available under :
 ## EBNF notation ##
 
 you can now use EBNF notation :
- - '*' to repeat 0 or more the same terminal or non terminal 
-```
- [Production("R : G* ")]
- public object RManyOne(List<object> manyObjects)
-```
- - '+' to repeat once or more the same terminal or non terminal  
- 
-```
- [Production("R : G+ ")]
- public object RManyOne(List<object> manyObjects)
-        
-```
+ - '*' to repeat 0 or more the same terminal or non terminal
+ - '+' to repeat once or more the same terminal or non terminal
