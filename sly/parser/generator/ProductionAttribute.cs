@@ -5,12 +5,12 @@ using System.Text;
 namespace sly.parser.generator
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class ReductionAttribute : Attribute
+    public class ProductionAttribute : Attribute
     {
 
         public string RuleString { get; set; }
 
-        public ReductionAttribute(string rule)        {
+        public ProductionAttribute(string rule)        {
             RuleString = rule;
         }
     }
