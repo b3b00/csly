@@ -21,7 +21,7 @@ namespace ParserTests
     public class VisitorTests
     {
 
-        [Reduction("R : A b c ")]
+        [Production("R : A b c ")]
         public  object R(string A, Token<TokenType> b, Token<TokenType> c)
         {
             string result = "R(";
@@ -32,7 +32,7 @@ namespace ParserTests
             return result;
         }
 
-        [Reduction("A : a ")]
+        [Production("A : a ")]
         public  object A(Token<TokenType> a)
         {
             string result = "A(";            

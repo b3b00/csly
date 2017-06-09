@@ -49,7 +49,7 @@ namespace jsonparser
 
         #region root
 
-        [Reduction("root : value")]
+        [Production("root : value")]
         public  object Root(object value)
         {
             return value;
@@ -60,19 +60,19 @@ namespace jsonparser
 
         #region VALUE
 
-        [Reduction("value : STRING")]
+        [Production("value : STRING")]
         public  object StringValue(Token<JsonToken> stringToken)
         {
             return stringToken.StringWithoutQuotes;
         }
 
-        [Reduction("value : INT")]
+        [Production("value : INT")]
         public  object IntValue(Token<JsonToken> intToken)
         {
             return intToken.IntValue;
         }
 
-        [Reduction("value : DOUBLE")]
+        [Production("value : DOUBLE")]
         public object DoubleValue(Token<JsonToken> doubleToken)
         {
             double dbl = double.MinValue;
@@ -98,25 +98,25 @@ namespace jsonparser
             return dbl;
         }
 
-        [Reduction("value : BOOLEAN")]
+        [Production("value : BOOLEAN")]
         public  object BooleanValue(Token<JsonToken> boolToken)
         {
             return bool.Parse(boolToken.Value);
         }
 
-        [Reduction("value : NULL")]
+        [Production("value : NULL")]
         public  object NullValue(object forget)
         {
             return null;
         }
 
-        [Reduction("value : object")]
+        [Production("value : object")]
         public  object ObjectValue(object value)
         {
             return value;
         }
 
-        [Reduction("value: list")]
+        [Production("value: list")]
         public  object ListValue(List<object> list)
         {
             return list;
@@ -126,13 +126,13 @@ namespace jsonparser
 
         #region OBJECT
 
-        [Reduction("object: ACCG ACCD")]
+        [Production("object: ACCG ACCD")]
         public  object EmptyObjectValue(object accg , object accd)
         {
             return new Dictionary<string, object>();
         }
 
-        [Reduction("object: ACCG members ACCD")]
+        [Production("object: ACCG members ACCD")]
         public  object AttributesObjectValue(object accg ,Dictionary<string,object> members, object accd)
         {
             return members;
@@ -142,20 +142,20 @@ namespace jsonparser
         #endregion
         #region LIST
 
-        [Reduction("list: CROG CROD")]
+        [Production("list: CROG CROD")]
         public  object EmptyList(object crog , object crod)
         {
             return new List<object>();
         }
 
-        [Reduction("list: CROG listElements CROD")]
+        [Production("list: CROG listElements CROD")]
         public  object List(object crog ,List<object> elements, object crod)
         {
             return elements;
         }
 
 
-        [Reduction("listElements: value COMMA listElements")]
+        [Production("listElements: value COMMA listElements")]
         public  object ListElementsMany(object value, object comma, List<object> tail)
         {
             List<object> elements = new List<object>() { value};
@@ -163,7 +163,7 @@ namespace jsonparser
             return elements;
         }
 
-        [Reduction("listElements: value")]
+        [Production("listElements: value")]
         public  object ListElementsOne(object element)
         {
             return new List<object>() { element };
@@ -174,14 +174,14 @@ namespace jsonparser
 
         #region PROPERTIES
 
-        [Reduction("property: STRING COLON value")]
+        [Production("property: STRING COLON value")]
         public  object property(Token<JsonToken> key, object colon, object value)
         {
             return new KeyValuePair<string, object>(key.StringWithoutQuotes, value);
         }
 
        
-        [Reduction("members : property COMMA members")]
+        [Production("members : property COMMA members")]
         public  object ManyMembers(KeyValuePair<string, object> pair, object comma, Dictionary<string, object> tail)
         {
             Dictionary<string, object> members = new Dictionary<string, object>();
@@ -190,7 +190,7 @@ namespace jsonparser
             return members;
         }
 
-        [Reduction("members : property")]
+        [Production("members : property")]
         public  object SingleMember(KeyValuePair<string, object> pair)
         {
             Dictionary<string, object> members = new Dictionary<string, object>();

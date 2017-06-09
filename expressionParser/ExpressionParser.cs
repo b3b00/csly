@@ -34,13 +34,13 @@ namespace expressionparser
 
 
 
-        [Reduction("primary: INT")]
+        [Production("primary: INT")]
         public object Primary(Token<ExpressionToken> intToken)
         {
             return intToken.IntValue;
         }
 
-        [Reduction("primary: LPAREN expression RPAREN")]
+        [Production("primary: LPAREN expression RPAREN")]
         public object Group(object discaredLParen, int groupValue ,object discardedRParen)
         {
             return groupValue;
@@ -48,8 +48,8 @@ namespace expressionparser
 
 
 
-        [Reduction("expression : term PLUS expression")]
-        [Reduction("expression : term MINUS expression")]
+        [Production("expression : term PLUS expression")]
+        [Production("expression : term MINUS expression")]
 
         public object Expression(int left, Token<ExpressionToken> operatorToken, int  right)
         {
@@ -76,14 +76,14 @@ namespace expressionparser
             return result;
         }
 
-        [Reduction("expression : term")]
+        [Production("expression : term")]
         public object Expression_Term(int termValue)
         {           
             return termValue;
         }
 
-        [Reduction("term : factor TIMES term")]
-        [Reduction("term : factor DIVIDE term")]
+        [Production("term : factor TIMES term")]
+        [Production("term : factor DIVIDE term")]
         public object Term(int left, Token<ExpressionToken> operatorToken, int right)
         {
             int result = 0;
@@ -110,18 +110,18 @@ namespace expressionparser
             return result;
         }
 
-        [Reduction("term : factor")]
+        [Production("term : factor")]
         public object Term_Factor(int factorValue)
         {
             return factorValue;
         }
 
-        [Reduction("factor : primary")]
+        [Production("factor : primary")]
         public object primaryFactor(int primValue)
         {
             return primValue;
         }
-        [Reduction("factor : MINUS factor")]
+        [Production("factor : MINUS factor")]
         public object Factor(Token<ExpressionToken> discardedMinus, int factorValue)
         {            
             return -factorValue;
