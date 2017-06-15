@@ -216,22 +216,20 @@ namespace ParserTests
             Assert.Equal(4, ((List<object>)result.Result).Count);
             List<object> lsto = (List<object>)result.Result;
             Assert.Equal(new List<object> { 1, 2, 3, 4 }, lsto);
-            ;
         }
 
         [Fact]
         public void TestJsonObject()
         {
             Parser<JsonToken> jsonParser = BuildEbnfJsonParser();
-            ParseResult<JsonToken> result = jsonParser.Parse("{\"one\":1,\"one\":2,\"three\":\"trois\" }");
+            ParseResult<JsonToken> result = jsonParser.Parse("{\"one\":1,\"two\":2,\"three\":\"trois\" }");
             Assert.False(result.IsError);
             Assert.IsAssignableFrom(typeof(Dictionary<string,object>), result.Result);
-            Assert.Equal(3, ((List<object>)result.Result).Count);
+            Assert.Equal(3, ((Dictionary<string, object>)result.Result).Count);
             Dictionary<string, object> dico = (Dictionary<string, object>)result.Result;
             Assert.Equal(1,dico["one"]);
             Assert.Equal(2, dico["two"]);
             Assert.Equal("trois", dico["three"]);
-            ;
         }
 
 
