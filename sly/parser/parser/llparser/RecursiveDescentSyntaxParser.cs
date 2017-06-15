@@ -7,7 +7,7 @@ using sly.parser.generator;
 
 namespace sly.parser.llparser
 {
-    
+
 
     public class RecursiveDescentSyntaxParser<T> : ISyntaxParser<T>
     {
@@ -70,7 +70,7 @@ namespace sly.parser.llparser
                         rule.PossibleLeadingTokens.Add(term.ExpectedToken);
                         rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<T>().ToList<T>();
                     }
-                    else 
+                    else
                     {
                         NonTerminalClause<T> nonterm = first as NonTerminalClause<T>;
                         InitStartingTokensForNonTerminal(nonTerminals, nonterm.NonTerminalName);
@@ -97,27 +97,25 @@ namespace sly.parser.llparser
 
         #region parsing
 
-        public SyntaxParseResult<T> Parse(IList<Token<T>> tokens)
+    
+        public SyntaxParseResult<T> Parse(IList<Token<T>> tokens, string startingNonTerminal = null)
         {
+            string start = startingNonTerminal ?? StartingNonTerminal;
             Dictionary<string, NonTerminal<T>> NonTerminals = Configuration.NonTerminals;
             List<UnexpectedTokenSyntaxError<T>> errors = new List<UnexpectedTokenSyntaxError<T>>();
-            NonTerminal<T> nt = NonTerminals[StartingNonTerminal];
+            NonTerminal<T> nt = NonTerminals[start];
 
             List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList<Rule<T>>();
 
             List<SyntaxParseResult<T>> rs = new List<SyntaxParseResult<T>>();
             foreach (Rule<T> rule in rules)
             {
-                SyntaxParseResult<T> r = Parse(tokens, rule, 0,StartingNonTerminal);
-
-                //if (!r.IsError)
-                //{
-                    rs.Add(r);
-                //}
+                SyntaxParseResult<T> r = Parse(tokens, rule, 0, start);                
+                rs.Add(r);                
             }
             SyntaxParseResult<T> result = null;
 
-            
+
             if (rs.Count > 0)
             {
                 result = rs.Find(r => r.IsEnded && !r.IsError);
@@ -127,11 +125,11 @@ namespace sly.parser.llparser
                     List<int> endingPositions = rs.Select(r => r.EndingPosition).ToList<int>();
                     int lastposition = endingPositions.Max();
                     List<SyntaxParseResult<T>> furtherResults = rs.Where<SyntaxParseResult<T>>(r => r.EndingPosition == lastposition).ToList<SyntaxParseResult<T>>();
-                    errors.Add(new UnexpectedTokenSyntaxError<T>(tokens[lastposition], null));                    
+                    errors.Add(new UnexpectedTokenSyntaxError<T>(tokens[lastposition], null));
                     furtherResults.ForEach(r =>
                     {
                         if (r.Errors != null)
-                        {                            
+                        {
                             errors.AddRange(r.Errors);
                         }
                     });
@@ -150,7 +148,7 @@ namespace sly.parser.llparser
                 else
                 {
                     result.Errors = errors;
-                }                
+                }
                 result.IsError = true;
             }
             return result;
@@ -211,9 +209,9 @@ namespace sly.parser.llparser
                             ;
                         }
                         if (isError)
-                        {                            
+                        {
                             break;
-                        }                        
+                        }
                     }
                 }
             }
@@ -224,10 +222,10 @@ namespace sly.parser.llparser
             result.EndingPosition = currentPosition;
             if (!isError)
             {
-                SyntaxNode<T> node = new SyntaxNode<T>(nonTerminalName+"__"+rule.Key, children);
-                result.Root = node;                                
+                SyntaxNode<T> node = new SyntaxNode<T>(nonTerminalName + "__" + rule.Key, children);
+                result.Root = node;
                 result.IsEnded = currentPosition >= tokens.Count - 1
-                                || currentPosition == tokens.Count -2 && tokens[tokens.Count-1].TokenID.Equals(default(T));
+                                || currentPosition == tokens.Count - 2 && tokens[tokens.Count - 1].TokenID.Equals(default(T));
             }
 
             return result;
@@ -243,7 +241,7 @@ namespace sly.parser.llparser
         }
 
 
-        public SyntaxParseResult<T> ParseNonTerminal(IList<Token<T>> tokens, NonTerminalClause<T> nonTermClause,int currentPosition)
+        public SyntaxParseResult<T> ParseNonTerminal(IList<Token<T>> tokens, NonTerminalClause<T> nonTermClause, int currentPosition)
         {
 
             if (nonTermClause.NonTerminalName == "members")
