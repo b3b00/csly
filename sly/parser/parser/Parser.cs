@@ -21,15 +21,16 @@ namespace sly.parser
             SyntaxParser = syntaxParser;
             Visitor = visitor;
         }
-        
 
-        public ParseResult<T> Parse(string source)
+       
+
+        public ParseResult<T> Parse(string source, string startingNonTerminal = null)
         {
             ParseResult<T> result = null;
             try
             {
                 IList<Token<T>> tokens = Lexer.Tokenize(source).ToList<Token<T>>();
-                result = Parse(tokens);
+                result = Parse(tokens, startingNonTerminal);
             }
             catch(LexerException<T> e)
             {
@@ -40,11 +41,11 @@ namespace sly.parser
             }
             return result;            
         }
-        public ParseResult<T> Parse(IList<Token<T>> tokens)
+        public ParseResult<T> Parse(IList<Token<T>> tokens, string startingNonTerminal = null)
         {
             
             ParseResult<T> result = new ParseResult<T>();
-            SyntaxParseResult<T> syntaxResult = SyntaxParser.Parse(tokens);
+            SyntaxParseResult<T> syntaxResult = SyntaxParser.Parse(tokens, startingNonTerminal);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
                 object r  = Visitor.VisitSyntaxTree(syntaxResult.Root);
