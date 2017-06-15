@@ -42,7 +42,7 @@ namespace sly.parser.generator
                 GrammarParser = builder.BuildParser<EbnfToken>(parserGrammar, ParserType.LL_RECURSIVE_DESCENT, "rule");
             }
             ParserConfiguration<T> configuration =
-                ExtractEbnfParserConfiguration(parserInstance.GetType().GetTypeInfo(), GrammarParser);
+                ExtractEbnfParserConfiguration(parserInstance.GetType(), GrammarParser);
 
             ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
 
@@ -103,7 +103,7 @@ namespace sly.parser.generator
 
         #region configuration
 
-        protected virtual ParserConfiguration<T> ExtractEbnfParserConfiguration(TypeInfo parserClass,
+        protected virtual ParserConfiguration<T> ExtractEbnfParserConfiguration(Type parserClass,
             Parser<EbnfToken> grammarParser)
         {
             ParserConfiguration<T> conf = new ParserConfiguration<T>();
