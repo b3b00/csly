@@ -1,55 +1,11 @@
 version: 1.0.{build}
 skip_branch_with_pr: true
 image: Previous Visual Studio 2017
+environment:
+  nugetKey:
+    secure: woGIFYmpUtTLOWygTbMQJ700lYrg/54SIeCadARpMTPeCflob0lsMk92VnAhPowV
 build_script:
-- ps: >-
-    Add-AppveyorMessage "build started"
-    dotnet --info
-    Add-AppveyorMessage "build started"
-    Write-Host "restoring nugets"
-    dotnet restore
-    Add-AppveyorMessage "nugets restored"
-    Write-Host "building solution (Release)"
-    dotnet build -c Release
-    Add-AppveyorMessage "dotnet build success"
-    Write-Host "running XUnit tests"
-    dotnet test -f netcoreapp1.0 ParserTests/ParserTests.csproj
-    Add-AppveyorMessage "xunit tests done"
-    Write-Host "packing nuget"
-    dotnet pack -c Release
-    Add-AppveyorMessage "sly nuget packaged"
-    
-    function InstallTool
-    {
-        param([string]$nugetName, [string]$outPath)
-        Write-Host "install xunit console tool"
-        appveyor DownloadFile  ("https://api.nuget.org/packages/"+$nugetName+".nupkg")
-        New-Item $outPath -type directory
-        Rename-Item -Path ($nugetName+".nupkg") -NewName ($nugetName+".zip")
-        Expand-Archive -LiteralPath ($nugetName+".zip") -DestinationPath $outPath
-    }
-    
-    
-    Write-Host "install opencover tool"
-    InstallTool "opencover.4.6.519" "opencover"
-    Add-AppveyorMessage "opencover tool downloaded"
-    
-    Write-Host "install xunit console tool"
-    InstallTool "xunit.runner.console.2.2.0" "xunit"
-    Add-AppveyorMessage "xunit console tool downloaded"
-    
-    dotnet build -c Debug ParserTests\\ParserTests.csproj
-    
-    ##Write-Host "running opencover"
-    #opencover\\tools\\OpenCover.Console.exe -register:user "-target:xunit\\tools\\xunit.console.exe" "-targetargs:ParserTests\\bin\\Debug\\net45\\ParserTests.dll"  #"-output:ParserTests.OpenCover.xml" -filter:"+[sly*]* -[ParserTests*]*" 
-    #Add-AppveyorMessage "opencover done"
-    #
-    #Write-Host "uploading opencover result to codecov"
-    #
-    #"SET PATH=C:\\\\Python34;C:\\\\Python34\\\\Scripts;%PATH%"
-    #pip install codecov
-    #codecov --disable=gcov -f "ParserTests.OpenCover.xml" -t 31fb1c27-458a-4ddd-a3d1-21bc76a077e4
-    #Add-AppveyorMessage "opencover data sent to codecov""
+- ps: "dotnet --info\nAdd-AppveyorMessage \"build started\"\nWrite-Host \"restoring nugets\"\ndotnet restore\nAdd-AppveyorMessage \"nugets restored\"\nWrite-Host \"building solution (Release)\"\ndotnet build -c Release\nAdd-AppveyorMessage \"dotnet build success\"\nWrite-Host \"running XUnit tests\"\ndotnet test -f netcoreapp1.0 ParserTests/ParserTests.csproj\nAdd-AppveyorMessage \"xunit tests done\"\nWrite-Host \"packing nuget\"\ndotnet pack -c Release\nAdd-AppveyorMessage \"sly nuget packaged\"\n\nfunction InstallTool\n{\n    param([string]$nugetName, [string]$outPath)\n    Write-Host \"install xunit console tool\"\n    appveyor DownloadFile  (\"https://api.nuget.org/packages/\"+$nugetName+\".nupkg\")\n    New-Item $outPath -type directory\n    Rename-Item -Path ($nugetName+\".nupkg\") -NewName ($nugetName+\".zip\")\n    Expand-Archive -LiteralPath ($nugetName+\".zip\") -DestinationPath $outPath\n}\n\n\nWrite-Host \"install opencover tool\"\nInstallTool \"opencover.4.6.519\" \"opencover\"\nAdd-AppveyorMessage \"opencover tool downloaded\"\n\nWrite-Host \"install xunit console tool\"\nInstallTool \"xunit.runner.console.2.2.0\" \"xunit\"\nAdd-AppveyorMessage \"xunit console tool downloaded\"\n\ndotnet build -c Debug ParserTests\\ParserTests.csproj\n\n##Write-Host \"running opencover\"\n#opencover\\tools\\OpenCover.Console.exe -register:user \"-target:xunit\\tools\\xunit.console.exe\" \"-targetargs:ParserTests\\bin\\Debug\\net45\\ParserTests.dll\"  #\"-output:ParserTests.OpenCover.xml\" -filter:\"+[sly*]* -[ParserTests*]*\" \n#Add-AppveyorMessage \"opencover done\"\n#\n#Write-Host \"uploading opencover result to codecov\"\n#\n#\"SET PATH=C:\\\\Python34;C:\\\\Python34\\\\Scripts;%PATH%\"\n#pip install codecov\n#codecov --disable=gcov -f \"ParserTests.OpenCover.xml\" -t 31fb1c27-458a-4ddd-a3d1-21bc76a077e4\n#Add-AppveyorMessage \"opencover data sent to codecov\""
 test_script:
 - ps: appveyor DownloadFile https://api.nuget.org/packages/opencover.4.6.519.nupkg
 artifacts:
@@ -64,9 +20,3 @@ notifications:
   on_build_success: true
   on_build_failure: true
   on_build_status_changed: true
-deploy:
-  provider: NuGet
-  api_key:
-    secure: woGIFYmpUtTLOWygTbMQJ700lYrg/54SIeCadARpMTPeCflob0lsMk92VnAhPowV
-  skip_symbols: true
-  artifact: /.*\.nupkg/
