@@ -13,6 +13,13 @@ artifacts:
   name: sly
 - path: '*.OpenCover.xml'
   name: sly
+deploy:
+- provider: NuGet
+  api_key:
+    secure: woGIFYmpUtTLOWygTbMQJ700lYrg/54SIeCadARpMTPeCflob0lsMk92VnAhPowV
+  skip_symbols: true
+  on:
+    branch: dev
 notifications:
 - provider: Email
   to:
