@@ -8,15 +8,15 @@ using System.Text;
 
 namespace sly.parser
 {
-    public class Parser<T>
+    public class Parser<IN,OUT>
     {
-        public Lexer<T> Lexer { get; set; }
+        public Lexer<IN> Lexer { get; set; }
         public object Instance { get; set; }
-        public ISyntaxParser<T> SyntaxParser { get; set; }
-        public SyntaxTreeVisitor<T> Visitor { get; set; }
-        public ParserConfiguration<T> Configuration { get; set; }
+        public ISyntaxParser<IN> SyntaxParser { get; set; }
+        public SyntaxTreeVisitor<IN,OUT> Visitor { get; set; }
+        public ParserConfiguration<IN,OUT> Configuration { get; set; }
         
-        public Parser(ISyntaxParser<T> syntaxParser, SyntaxTreeVisitor<T> visitor)
+        public Parser(ISyntaxParser<IN> syntaxParser, SyntaxTreeVisitor<IN> visitor)
         {
             SyntaxParser = syntaxParser;
             Visitor = visitor;
@@ -24,28 +24,28 @@ namespace sly.parser
 
        
 
-        public ParseResult<T> Parse(string source, string startingNonTerminal = null)
+        public ParseResult<IN> Parse(string source, string startingNonTerminal = null)
         {
-            ParseResult<T> result = null;
+            ParseResult<IN> result = null;
             try
             {
-                IList<Token<T>> tokens = Lexer.Tokenize(source).ToList<Token<T>>();
+                IList<Token<IN>> tokens = Lexer.Tokenize(source).ToList<Token<IN>>();
                 result = Parse(tokens, startingNonTerminal);
             }
-            catch(LexerException<T> e)
+            catch(LexerException<IN> e)
             {
-                result = new ParseResult<T>();
+                result = new ParseResult<IN>();
                 result.IsError = true;
                 result.Errors = new List<ParseError>();
-                result.Errors.Add((e as LexerException<T>).Error);                
+                result.Errors.Add((e as LexerException<IN>).Error);                
             }
             return result;            
         }
-        public ParseResult<T> Parse(IList<Token<T>> tokens, string startingNonTerminal = null)
+        public ParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
         {
             
-            ParseResult<T> result = new ParseResult<T>();
-            SyntaxParseResult<T> syntaxResult = SyntaxParser.Parse(tokens, startingNonTerminal);
+            ParseResult<IN> result = new ParseResult<IN>();
+            SyntaxParseResult<IN> syntaxResult = SyntaxParser.Parse(tokens, startingNonTerminal);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
                 object r  = Visitor.VisitSyntaxTree(syntaxResult.Root);

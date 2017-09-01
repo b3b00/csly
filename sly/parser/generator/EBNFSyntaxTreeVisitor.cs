@@ -5,7 +5,7 @@ using sly.lexer;
 
 namespace sly.parser.generator
 {
-    public class EBNFSyntaxTreeVisitor<T> : SyntaxTreeVisitor<T>
+    public class EBNFSyntaxTreeVisitor<IN,OUT> : SyntaxTreeVisitor<IN,OUT>
     {
 
         public EBNFSyntaxTreeVisitor(ParserConfiguration<T> conf) : base(conf)
