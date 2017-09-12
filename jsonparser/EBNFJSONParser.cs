@@ -1,26 +1,20 @@
-﻿using sly.lexer;
-using System.Linq;
-using sly.parser.generator;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.ComTypes;
+using sly.lexer;
+using sly.parser.generator;
 
 
 namespace jsonparser
 {
 
-
     public class EbnfJsonParser
     {
 
-
-
         [LexerConfiguration]
         public ILexer<JsonToken> BuildJsonLexer(ILexer<JsonToken> lexer)
-        {                  
+        {
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.DOUBLE, "[0-9]+\\.[0-9]+"));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.INT, "[0-9]+"));            
+            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.INT, "[0-9]+"));
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.STRING, "(\\\")([^(\\\")]*)(\\\")"));
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.BOOLEAN, "(true|false)"));
             lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.NULL, "(null)"));
@@ -35,28 +29,26 @@ namespace jsonparser
             return lexer;
         }
 
-
         #region root
 
         [Production("root : value")]
-        public  object Root(object value)
+        public object Root(object value)
         {
             return value;
         }
-
 
         #endregion
 
         #region VALUE
 
         [Production("value : STRING")]
-        public  object StringValue(Token<JsonToken> stringToken)
+        public object StringValue(Token<JsonToken> stringToken)
         {
             return stringToken.StringWithoutQuotes;
         }
 
         [Production("value : INT")]
-        public  object IntValue(Token<JsonToken> intToken)
+        public object IntValue(Token<JsonToken> intToken)
         {
             return intToken.IntValue;
         }
@@ -88,25 +80,25 @@ namespace jsonparser
         }
 
         [Production("value : BOOLEAN")]
-        public  object BooleanValue(Token<JsonToken> boolToken)
+        public object BooleanValue(Token<JsonToken> boolToken)
         {
             return bool.Parse(boolToken.Value);
         }
 
         [Production("value : NULL")]
-        public  object NullValue(object forget)
+        public object NullValue(object forget)
         {
             return null;
         }
 
         [Production("value : object")]
-        public  object ObjectValue(object value)
+        public object ObjectValue(object value)
         {
             return value;
         }
 
         [Production("value: list")]
-        public  object ListValue(List<object> list)
+        public object ListValue(List<object> list)
         {
             return list;
         }
@@ -116,39 +108,40 @@ namespace jsonparser
         #region OBJECT
 
         [Production("object: ACCG ACCD")]
-        public  object EmptyObjectValue(object accg , object accd)
+        public object EmptyObjectValue(object accg, object accd)
         {
             return new Dictionary<string, object>();
         }
 
         [Production("object: ACCG members ACCD")]
-        public  object AttributesObjectValue(object accg ,Dictionary<string,object> members, object accd)
+        public object AttributesObjectValue(object accg, Dictionary<string, object> members, object accd)
         {
             return members;
         }
-
 
         #endregion
         #region LIST
 
         [Production("list: CROG CROD")]
-        public  object EmptyList(object crog , object crod)
+        public object EmptyList(object crog, object crod)
         {
             return new List<object>();
         }
 
         [Production("list: CROG listElements CROD")]
-        public  object List(object crog ,List<object> elements, object crod)
+        public object List(object crog, List<object> elements, object crod)
         {
             return elements;
         }
 
-
         [Production("listElements: value additionalValue+")]
-        public object listElements(object head, List<object> tail)
+        public object ListElements(object head, List<object> tail)
         {
-            List<object> values = new List<object>();
-            values.Add(head);
+            List<object> values = new List<object>
+            {
+                head
+            };
+
             values.AddRange(tail);
             return values;
         }
@@ -159,20 +152,19 @@ namespace jsonparser
             return value;
         }
 
-        
-
         #endregion
 
         #region PROPERTIES
 
-
-
         [Production("members: property additionalProperty+")]
         public object Members(KeyValuePair<string, object> head, List<object> tail)
         {
-            Dictionary<string, object> value = new Dictionary<string, object>();
-            value[head.Key] = head.Value;
-            foreach(KeyValuePair<string, object> p in tail)
+            Dictionary<string, object> value = new Dictionary<string, object>
+            {
+                [head.Key] = head.Value
+            };
+
+            foreach (KeyValuePair<string, object> p in tail)
             {
                 value[p.Key] = p.Value;
             }
@@ -180,18 +172,17 @@ namespace jsonparser
         }
 
         [Production("additionalProperty : COMMA property")]
-        public object property(Token<JsonToken> comma, KeyValuePair<string, object> property )
+        public object Property(Token<JsonToken> comma, KeyValuePair<string, object> property)
         {
             return property;
         }
 
         [Production("property: STRING COLON value")]
-        public  object property(Token<JsonToken> key, object colon, object value)
+        public object Property(Token<JsonToken> key, object colon, object value)
         {
             return new KeyValuePair<string, object>(key.StringWithoutQuotes, value);
         }
 
-       
         //[Production("members : property COMMA members")]
         //public  object ManyMembers(KeyValuePair<string, object> pair, object comma, Dictionary<string, object> tail)
         //{
@@ -210,9 +201,5 @@ namespace jsonparser
         //}
 
         #endregion
-
-
-
-
     }
 }

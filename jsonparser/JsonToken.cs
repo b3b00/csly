@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace jsonparser
+﻿namespace jsonparser
 {
     public enum JsonToken
     {
@@ -22,5 +18,4 @@ namespace jsonparser
         NULL = 14,
         QUOTE = 99
     }
-
 }
