@@ -8,9 +8,14 @@
 	<RepositoryUrl>https://github.com/b3b00/csly</RepositoryUrl>
 	<PackageLicenseUrl>https://github.com/b3b00/csly/blob/master/LICENSE</PackageLicenseUrl>    
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile></DocumentationFile>
+    <LangVersion>6</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <LangVersion>6</LangVersion>
   </PropertyGroup>
   <ItemGroup>
