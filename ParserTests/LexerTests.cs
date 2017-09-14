@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using sly.parser;
 using expressionparser;
 using jsonparser;
-using NUnit.Framework;
 using sly.lexer;
-using sly.parser;
 using sly.parser.generator;
+using System.Linq;
+using System.Collections.Generic;
+using System.Text;
+using Xunit;
 
 namespace ParserTests
 {
-    [TestFixture]
     public class LexerTests
     {
 
@@ -29,13 +29,16 @@ namespace ParserTests
             return parser.Lexer;
         }
 
-        [Test]
+
+
+
+        [Fact]
         public void TestSingleLineJsonLexing()
         {
             string json = "{ \"propi\": 12 , \"props\":\"val\" }";
             ILexer<JsonToken> lexer = GetJsonLexer();
             List<Token<JsonToken>> tokens = lexer.Tokenize(json).ToList<Token<JsonToken>>();
-            Assert.AreEqual(10, tokens.Count);
+            Assert.Equal(10, tokens.Count);
             List<JsonToken> expectedTokensID = new List<JsonToken>()
             {
                 JsonToken.ACCG, JsonToken.STRING,JsonToken.COLON,JsonToken.INT,
@@ -43,7 +46,7 @@ namespace ParserTests
                 JsonToken.ACCD
             };
             List<JsonToken> tokensID = tokens.Take(9).Select((Token<JsonToken> tok) => tok.TokenID).ToList<JsonToken>();
-            Assert.AreEqual(expectedTokensID, tokensID);
+            Assert.Equal(expectedTokensID, tokensID);
 
             List<int> expectedColumnPositions = new List<int>()
             {
@@ -51,23 +54,25 @@ namespace ParserTests
             };
 
             List<int> columnPositions = tokens.Take(9).Select((Token<JsonToken> tok) => tok.Position.Column).ToList<int>();
-            Assert.AreEqual(expectedColumnPositions, columnPositions);
+            Assert.Equal(expectedColumnPositions, columnPositions);
+
+            ;
         }
 
-        [Test]
+        [Fact]
         public void TestSingleLineExpressionLexing()
         {
             ILexer<ExpressionToken> lexer = GetExpressionLexer();
         }
 
-        [Test]
+        [Fact]
         public void TestMultiLineJsonLexing()
         {
             string json = "{ \"propi\": 12 \n" +
              ", \"props\":\"val\" }";
             ILexer<JsonToken> lexer = GetJsonLexer();
             List<Token<JsonToken>> tokens = lexer.Tokenize(json).ToList<Token<JsonToken>>();
-            Assert.AreEqual(10, tokens.Count);
+            Assert.Equal(10, tokens.Count);
             List<JsonToken> expectedTokensID = new List<JsonToken>()
             {
                 JsonToken.ACCG, JsonToken.STRING,JsonToken.COLON,JsonToken.INT,
@@ -75,7 +80,7 @@ namespace ParserTests
                 JsonToken.ACCD
             };
             List<JsonToken> tokensID = tokens.Take(9).Select((Token<JsonToken> tok) => tok.TokenID).ToList<JsonToken>();
-            Assert.AreEqual(expectedTokensID, tokensID);
+            Assert.Equal(expectedTokensID, tokensID);
 
             List<int> expectedColumnPositions = new List<int>()
             {
@@ -84,7 +89,7 @@ namespace ParserTests
             };
 
             List<int> columnPositions = tokens.Take(9).Select((Token<JsonToken> tok) => tok.Position.Column).ToList<int>();
-            Assert.AreEqual(expectedColumnPositions, columnPositions);
+            Assert.Equal(expectedColumnPositions, columnPositions);
 
             List<int> expectedLinePositions = new List<int>()
             {
@@ -92,10 +97,12 @@ namespace ParserTests
             };
 
             List<int> linePositions = tokens.Take(9).Select((Token<JsonToken> tok) => tok.Position.Line).ToList<int>();
-            Assert.AreEqual(expectedLinePositions, linePositions);
+            Assert.Equal(expectedLinePositions, linePositions);
+
+            ;
         }
 
-        [Test]
+        [Fact]
         public void TestMultiLineExpressionLexing()
         {
             ILexer<ExpressionToken> lexer = GetExpressionLexer();

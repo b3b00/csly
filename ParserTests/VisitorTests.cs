@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using NUnit.Framework;
-using sly.lexer;
-using sly.parser;
+﻿using Xunit;
+using System.Collections.Generic;
 using sly.parser.generator;
+using sly.parser;
 using sly.parser.syntax;
+using sly.lexer;
 
 namespace ParserTests
 {
@@ -16,42 +16,40 @@ namespace ParserTests
         EOL = 101
     }
 
-    [TestFixture]
+
+   
     public class VisitorTests
     {
 
         [Production("R : A b c ")]
-        public object R(string A, Token<TokenType> b, Token<TokenType> c)
+        public  object R(string A, Token<TokenType> b, Token<TokenType> c)
         {
             string result = "R(";
             result += A + ",";
-            result += b.Value + ",";
+            result += b.Value+",";
             result += c.Value;
             result += ")";
             return result;
         }
 
         [Production("A : a ")]
-        public object A(Token<TokenType> a)
+        public  object A(Token<TokenType> a)
         {
-            string result = "A(";
-            result += a.Value;
+            string result = "A(";            
+            result += a.Value;            
             result += ")";
             return result;
         }
 
-        public SyntaxLeaf<TokenType> Leaf(TokenType typ, string value, TokenPosition position)
+        public SyntaxLeaf<TokenType> leaf(TokenType typ, string value,TokenPosition position)
         {
-            Token<TokenType> tok = new Token<TokenType>(typ, value, position)
-            {
-                TokenID = typ,
-                Value = value
-            };
-
+            Token<TokenType> tok = new Token<TokenType>(typ, value, position);
+            tok.TokenID = typ;
+            tok.Value = value;
             return new SyntaxLeaf<TokenType>(tok);
         }
 
-        public SyntaxNode<TokenType> Node(string name, params ISyntaxNode<TokenType>[] leaves)
+        public SyntaxNode<TokenType> node(string name, params ISyntaxNode<TokenType>[] leaves)
         {
             List<ISyntaxNode<TokenType>> subNodes = new List<ISyntaxNode<TokenType>>();
             subNodes.AddRange(leaves);
@@ -59,8 +57,8 @@ namespace ParserTests
             return n;
         }
 
-        [Test]
-        public void TestVisitor()
+        [Fact]
+        public void testVisitor()
         {
             VisitorTests visitorInstance = new VisitorTests();
             ParserBuilder builder = new ParserBuilder();
@@ -70,16 +68,18 @@ namespace ParserTests
             // build a syntax tree
 
             TokenPosition position = new TokenPosition(0, 1, 1);
-            SyntaxLeaf<TokenType> aT = Leaf(TokenType.a, "a", position);
-            SyntaxLeaf<TokenType> bT = Leaf(TokenType.b, "b", position);
-            SyntaxLeaf<TokenType> cT = Leaf(TokenType.c, "c", position);
+            SyntaxLeaf<TokenType> aT = leaf(TokenType.a, "a", position);
+            SyntaxLeaf<TokenType> bT = leaf(TokenType.b, "b", position);
+            SyntaxLeaf<TokenType> cT = leaf(TokenType.c, "c", position);
 
-            SyntaxNode<TokenType> aN = Node("A__a_", aT);
-            SyntaxNode<TokenType> rN = Node("R__A_b_c", aN, bT, cT);
+            SyntaxNode<TokenType> aN = node("A__a_", aT);
+            SyntaxNode<TokenType> rN = node("R__A_b_c", aN,bT,cT);
 
             string r = visitor.VisitSyntaxTree(rN).ToString();
+            ;
+            Assert.Equal("R(A(a),b,c)", r);            
 
-            Assert.AreEqual("R(A(a),b,c)", r);
+
         }
     }
 }
