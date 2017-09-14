@@ -1,17 +1,16 @@
-﻿using System.Linq;
-using Xunit;
-using sly.parser;
+﻿using System.Collections.Generic;
+using System.Linq;
+using jsonparser;
+using NUnit.Framework;
 using sly.lexer;
+using sly.parser;
 using sly.parser.generator;
-using System.Collections.Generic;
-using expressionparser;
 using sly.parser.llparser;
 using sly.parser.syntax;
-using jsonparser;
 
 namespace ParserTests
 {
-    
+    [TestFixture]
     public class EBNFTests
     {
 
@@ -65,7 +64,7 @@ namespace ParserTests
         }
 
         [Production("G : e f ")]
-        public object RManyNT(Token<TokenType> e , Token<TokenType> f)
+        public object RManyNT(Token<TokenType> e, Token<TokenType> f)
         {
             string result = $"G({e.Value},{f.Value})";
             return result;
@@ -75,7 +74,7 @@ namespace ParserTests
         public object A(List<Token<TokenType>> astr)
         {
             string result = "A(";
-            result +=(string) astr
+            result += (string)astr
                 .Select(a => a.Value)
                 .Aggregate<string>((a1, a2) => a1 + ", " + a2);
             result += ")";
@@ -101,16 +100,11 @@ namespace ParserTests
 
         private Parser<JsonToken> JsonParser;
 
-        public EBNFTests()
-        {
-            
-        }
-
         private Parser<TokenType> BuildParser()
         {
             EBNFTests parserInstance = new EBNFTests();
             ParserBuilder builder = new ParserBuilder();
-            
+
             Parser = builder.BuildParser<TokenType>(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "R");
             return Parser;
         }
@@ -125,49 +119,47 @@ namespace ParserTests
             return JsonParser;
         }
 
-        [Fact]
+        [Test]
         public void TestParseBuild()
         {
             Parser = BuildParser();
-            Assert.Equal(typeof(EBNFRecursiveDescentSyntaxParser<TokenType>),Parser.SyntaxParser.GetType());
-            Assert.Equal(Parser.Configuration.NonTerminals.Count, 4);
+            Assert.AreEqual(typeof(EBNFRecursiveDescentSyntaxParser<TokenType>), Parser.SyntaxParser.GetType());
+            Assert.AreEqual(Parser.Configuration.NonTerminals.Count, 4);
             NonTerminal<TokenType> nt = Parser.Configuration.NonTerminals["R"];
-            Assert.Equal(nt.Rules.Count, 2);
+            Assert.AreEqual(nt.Rules.Count, 2);
             nt = Parser.Configuration.NonTerminals["A"];
-            Assert.Equal(nt.Rules.Count, 1);
+            Assert.AreEqual(nt.Rules.Count, 1);
             Rule<TokenType> rule = nt.Rules[0];
-            Assert.Equal(rule.Clauses.Count,1);
-            Assert.IsType(typeof(OneOrMoreClause<TokenType>),rule.Clauses[0]);
-                nt = Parser.Configuration.NonTerminals["B"];
-            Assert.Equal(nt.Rules.Count, 1);
+            Assert.AreEqual(rule.Clauses.Count, 1);
+            Assert.IsInstanceOf<OneOrMoreClause<TokenType>>(rule.Clauses[0]);
+            nt = Parser.Configuration.NonTerminals["B"];
+            Assert.AreEqual(nt.Rules.Count, 1);
             rule = nt.Rules[0];
-            Assert.Equal(rule.Clauses.Count, 1);
-            Assert.IsType(typeof(ZeroOrMoreClause<TokenType>), rule.Clauses[0]);
-            ;
+            Assert.AreEqual(rule.Clauses.Count, 1);
+            Assert.IsInstanceOf<ZeroOrMoreClause<TokenType>>(rule.Clauses[0]);
         }
 
-
-        [Fact]
+        [Test]
         public void TestOneOrMoreNonTerminal()
         {
             Parser = BuildParser();
             ParseResult<TokenType> result = Parser.Parse("e f e f");
             Assert.False(result.IsError);
-            Assert.IsType(typeof(string), result.Result);
-            Assert.Equal("R(G(e,f),G(e,f))", result.Result.ToString().Replace(" ", ""));
+            Assert.IsInstanceOf<string>(result.Result);
+            Assert.AreEqual("R(G(e,f),G(e,f))", result.Result.ToString().Replace(" ", ""));
         }
 
-        [Fact]
+        [Test]
         public void TestOneOrMoreWithMany()
         {
             Parser = BuildParser();
             ParseResult<TokenType> result = Parser.Parse("aaa b c");
             Assert.False(result.IsError);
-            Assert.IsType(typeof(string),result.Result);
-            Assert.Equal("R(A(a,a,a),B(b),c)",result.Result.ToString().Replace(" ",""));
+            Assert.IsInstanceOf<string>(result.Result);
+            Assert.AreEqual("R(A(a,a,a),B(b),c)", result.Result.ToString().Replace(" ", ""));
         }
 
-        [Fact]
+        [Test]
         public void TestOneOrMoreWithOne()
         {
             Parser = BuildParser();
@@ -175,61 +167,61 @@ namespace ParserTests
             Assert.True(result.IsError);
         }
 
-        [Fact]
+        [Test]
         public void TestZeroOrMoreWithOne()
         {
             Parser = BuildParser();
             ParseResult<TokenType> result = Parser.Parse("a b c");
             Assert.False(result.IsError);
-            Assert.IsType(typeof(string), result.Result);
-            Assert.Equal("R(A(a),B(b),c)", result.Result.ToString().Replace(" ", ""));
+            Assert.IsInstanceOf<string>(result.Result);
+            Assert.AreEqual("R(A(a),B(b),c)", result.Result.ToString().Replace(" ", ""));
         }
 
-        [Fact]
+        [Test]
         public void TestZeroOrMoreWithMany()
         {
             Parser = BuildParser();
             ParseResult<TokenType> result = Parser.Parse("a bb c");
             Assert.False(result.IsError);
-            Assert.IsType(typeof(string), result.Result);
-            Assert.Equal("R(A(a),B(b,b),c)", result.Result.ToString().Replace(" ", ""));
+            Assert.IsInstanceOf<string>(result.Result);
+            Assert.AreEqual("R(A(a),B(b,b),c)", result.Result.ToString().Replace(" ", ""));
         }
 
-        [Fact]
+        [Test]
         public void TestZeroOrMoreWithNone()
         {
             Parser = BuildParser();
             ParseResult<TokenType> result = Parser.Parse("a  c");
             Assert.False(result.IsError);
-            Assert.IsType(typeof(string), result.Result);
-            Assert.Equal("R(A(a),B(),c)", result.Result.ToString().Replace(" ", ""));
+            Assert.IsInstanceOf<string>(result.Result);
+            Assert.AreEqual("R(A(a),B(),c)", result.Result.ToString().Replace(" ", ""));
         }
 
 
-        [Fact]
+        [Test]
         public void TestJsonList()
         {
             Parser<JsonToken> jsonParser = BuildEbnfJsonParser();
             ParseResult<JsonToken> result = jsonParser.Parse("[1,2,3,4]");
             Assert.False(result.IsError);
             Assert.IsAssignableFrom(typeof(List<object>), result.Result);
-            Assert.Equal(4, ((List<object>)result.Result).Count);
+            Assert.AreEqual(4, ((List<object>)result.Result).Count);
             List<object> lsto = (List<object>)result.Result;
-            Assert.Equal(new List<object> { 1, 2, 3, 4 }, lsto);
+            Assert.AreEqual(new List<object> { 1, 2, 3, 4 }, lsto);
         }
 
-        [Fact]
+        [Test]
         public void TestJsonObject()
         {
             Parser<JsonToken> jsonParser = BuildEbnfJsonParser();
             ParseResult<JsonToken> result = jsonParser.Parse("{\"one\":1,\"two\":2,\"three\":\"trois\" }");
             Assert.False(result.IsError);
-            Assert.IsAssignableFrom(typeof(Dictionary<string,object>), result.Result);
-            Assert.Equal(3, ((Dictionary<string, object>)result.Result).Count);
+            Assert.IsAssignableFrom(typeof(Dictionary<string, object>), result.Result);
+            Assert.AreEqual(3, ((Dictionary<string, object>)result.Result).Count);
             Dictionary<string, object> dico = (Dictionary<string, object>)result.Result;
-            Assert.Equal(1,dico["one"]);
-            Assert.Equal(2, dico["two"]);
-            Assert.Equal("trois", dico["three"]);
+            Assert.AreEqual(1, dico["one"]);
+            Assert.AreEqual(2, dico["two"]);
+            Assert.AreEqual("trois", dico["three"]);
         }
 
 

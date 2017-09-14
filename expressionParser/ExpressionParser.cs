@@ -1,18 +1,10 @@
 ﻿using sly.lexer;
 using sly.parser.generator;
 
-
-
 namespace expressionparser
 {
-   
-
-
     public class ExpressionParser
     {
-
-
-
         [LexerConfiguration]
         public ILexer<ExpressionToken> BuildExpressionLexer(ILexer<ExpressionToken> lexer)
         {            
@@ -31,9 +23,6 @@ namespace expressionparser
             return lexer;
         }
 
-
-
-
         [Production("primary: INT")]
         public object Primary(Token<ExpressionToken> intToken)
         {
@@ -46,8 +35,6 @@ namespace expressionparser
             return groupValue;
         }
 
-
-
         [Production("expression : term PLUS expression")]
         [Production("expression : term MINUS expression")]
 
@@ -55,7 +42,6 @@ namespace expressionparser
         {
             object result = 0;
             
-
             switch (operatorToken.TokenID)
             {
                 case ExpressionToken.PLUS:
@@ -87,8 +73,6 @@ namespace expressionparser
         public object Term(int left, Token<ExpressionToken> operatorToken, int right)
         {
             int result = 0;
-
-          
           
             switch (operatorToken.TokenID)
             {
@@ -117,7 +101,7 @@ namespace expressionparser
         }
 
         [Production("factor : primary")]
-        public object primaryFactor(int primValue)
+        public object PrimaryFactor(int primValue)
         {
             return primValue;
         }
@@ -126,10 +110,6 @@ namespace expressionparser
         {            
             return -factorValue;
         }
-
-
-
-
     }
 }
 

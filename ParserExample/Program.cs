@@ -2,9 +2,7 @@
 using jsonparser;
 using sly.lexer;
 using sly.parser.generator;
-using System.Linq;
 using System.Collections.Generic;
-using System.IO;
 using System;
 
 namespace ParserExample
@@ -21,10 +19,10 @@ namespace ParserExample
         EOL = 101
     }
 
-class Program
+    class Program
     {
 
-        
+
         public static Lexer<TokenType> BuildLexer()
         {
             Lexer<TokenType> lexer = new Lexer<TokenType>();
@@ -66,25 +64,23 @@ class Program
         {
             if (args.Count == 2)
             {
-                
+
                 string r = "Rec(" + (args[0] as Token<TokenType>).Value + "," + args[1].ToString() + ")";
                 return r;
-                ;
             }
             else
             {
                 return "_";
-                ;
             }
         }
 
         static void Main(string[] args)
         {
-           JSONParser jsonparser = new JSONParser();
+            JSONParser jsonparser = new JSONParser();
             ParserBuilder builder = new ParserBuilder();
 
             Parser<JsonToken> yacc = builder.BuildParser<JsonToken>(jsonparser, ParserType.LL_RECURSIVE_DESCENT, "root");
-            
+
 
             ParseResult<JsonToken> result = yacc.Parse("'hello' 'world!'");
 
@@ -92,7 +88,7 @@ class Program
             {
                 result.Errors.ForEach(e => Console.WriteLine(e));
             }
-            ;
+
             Console.WriteLine("====================");
             Console.WriteLine();
             result = yacc.Parse(@"{
@@ -104,7 +100,6 @@ class Program
             {
                 result.Errors.ForEach(e => Console.WriteLine(e));
             }
-            ;
         }
     }
 }
