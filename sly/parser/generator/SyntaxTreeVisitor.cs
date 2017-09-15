@@ -1,45 +1,46 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using sly.parser.syntax;
 using sly.lexer;
 
 namespace sly.parser.generator
 {
 
-     class SyntaxVisitorResult<IN,OUT>
+    public class SyntaxVisitorResult<IN,OUT>
     {
         
-        public Token<IN> tokenResult = null;
+        public Token<IN> TokenResult = null;
 
-        public OUT valueResult = default(OUT);
+        public OUT ValueResult = default(OUT);
 
         private bool isTok = false;
 
-        public bool isToken {  get { return isTok; }}
+        public bool IsToken => isTok; 
 
         private bool isVal = false;
 
-        public bool isValue { get { return isVal; } }
+        public bool IsValue => isVal; 
 
-        public bool isNone { get { return !isToken && !isValue; } }
+        public bool IsNone => !IsToken && !IsValue; 
 
-        public static SyntaxVisitorResult<IN,OUT> token(Token<IN> tok)
+        public static SyntaxVisitorResult<IN,OUT> NewToken(Token<IN> tok)
         {
             SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
-            res.tokenResult = tok;
+            res.TokenResult = tok;
             res.isTok = true;
             return res;
         }
 
-        public static SyntaxVisitorResult<IN, OUT> value(OUT val)
+        public static SyntaxVisitorResult<IN, OUT> NewValue(OUT val)
         {
             SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
-            res.valueResult = val;
+            res.ValueResult = val;
             res.isVal = true;
             return res;
         }
 
-        public static SyntaxVisitorResult<IN, OUT> none()
+        public static SyntaxVisitorResult<IN, OUT> NoneResult()
         {
             SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();            
             return res;
@@ -73,10 +74,10 @@ namespace sly.parser.generator
         public OUT VisitSyntaxTree(ISyntaxNode<IN> root)
         {
             SyntaxVisitorResult<IN, OUT> result = Visit(root);
-            
+            return result.ValueResult;
         }
 
-        private virtual SyntaxVisitorResult<IN,OUT> Visit(ISyntaxNode<IN> n)
+        protected virtual SyntaxVisitorResult<IN,OUT> Visit(ISyntaxNode<IN> n)
         {
             if (n is SyntaxLeaf<IN>)
             {
@@ -98,21 +99,36 @@ namespace sly.parser.generator
 
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node)
         {
-            SyntaxVisitorResult<IN, OUT> result = SyntaxVisitorResult<IN, OUT>.none();
+            SyntaxVisitorResult<IN, OUT> result = SyntaxVisitorResult<IN, OUT>.NoneResult();
             if (Configuration.Functions.ContainsKey(node.Name))
             {
                 List<object> args = new List<object>();
                 int i = 0;
                 foreach (ISyntaxNode<IN> n in node.Children)
                 {
-                    object v = Visit(n);
+                    SyntaxVisitorResult<IN,OUT> v = Visit(n);
 
-                    args.Add(v);
+                    if (v.IsToken)
+                    {
+                        args.Add(v.TokenResult);
+                    }
+                    else if (v.IsValue)
+                    {
+                        args.Add(v.ValueResult);
+                    }
+                    
 
                     i++;
                 }
-                OUT res =  (OUT)(Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray()));
-                result = SyntaxVisitorResult<IN, OUT>.value(res);
+                try
+                {
+                    OUT res = (OUT) (Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray()));
+                    result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"OUTCH {e.Message} calling {node.Name} =>  {Configuration.Functions[node.Name].Name}");
+                }
 
             }
             return result;
@@ -120,7 +136,7 @@ namespace sly.parser.generator
 
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN> leaf)
         {
-            return SyntaxVisitorResult<IN, OUT>.token(leaf.Token);
+            return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
             //return leaf.Token;
         }
     }

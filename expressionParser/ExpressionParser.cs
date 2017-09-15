@@ -35,13 +35,13 @@ namespace expressionparser
 
 
         [Production("primary: INT")]
-        public object Primary(Token<ExpressionToken> intToken)
+        public int Primary(Token<ExpressionToken> intToken)
         {
             return intToken.IntValue;
         }
 
         [Production("primary: LPAREN expression RPAREN")]
-        public object Group(object discaredLParen, int groupValue ,object discardedRParen)
+        public int Group(object discaredLParen, int groupValue ,object discardedRParen)
         {
             return groupValue;
         }
@@ -51,9 +51,9 @@ namespace expressionparser
         [Production("expression : term PLUS expression")]
         [Production("expression : term MINUS expression")]
 
-        public object Expression(int left, Token<ExpressionToken> operatorToken, int  right)
+        public int Expression(int left, Token<ExpressionToken> operatorToken, int  right)
         {
-            object result = 0;
+            int result = 0;
             
 
             switch (operatorToken.TokenID)
@@ -77,14 +77,14 @@ namespace expressionparser
         }
 
         [Production("expression : term")]
-        public object Expression_Term(int termValue)
+        public int Expression_Term(int termValue)
         {           
             return termValue;
         }
 
         [Production("term : factor TIMES term")]
         [Production("term : factor DIVIDE term")]
-        public object Term(int left, Token<ExpressionToken> operatorToken, int right)
+        public int Term(int left, Token<ExpressionToken> operatorToken, int right)
         {
             int result = 0;
 
@@ -111,18 +111,18 @@ namespace expressionparser
         }
 
         [Production("term : factor")]
-        public object Term_Factor(int factorValue)
+        public int Term_Factor(int factorValue)
         {
             return factorValue;
         }
 
         [Production("factor : primary")]
-        public object primaryFactor(int primValue)
+        public int primaryFactor(int primValue)
         {
             return primValue;
         }
         [Production("factor : MINUS factor")]
-        public object Factor(Token<ExpressionToken> discardedMinus, int factorValue)
+        public int Factor(Token<ExpressionToken> discardedMinus, int factorValue)
         {            
             return -factorValue;
         }

@@ -23,42 +23,42 @@ namespace sly.parser.generator
         /// <summary>
         /// Builds a parser (lexer, syntax parser and syntax tree visitor) according to a parser definition instance
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="IN"></typeparam>
         /// <param name="parserInstance"> a parser definition instance , containing 
         /// [Reduction] methods for grammar rules 
         /// [LexerConfigurationAttribute] method for token definition</param>
         /// <param name="parserType">a ParserType enum value stating the analyser type (LR, LL ...) for now only LL recurive descent parser available </param>
         /// <param name="rootRule">the name of the root non terminal of the grammar</param>
         /// <returns></returns>
-        public virtual Parser<T> BuildParser<T>(object parserInstance, ParserType parserType, string rootRule)
+        public virtual Parser<IN,OUT> BuildParser<IN,OUT>(object parserInstance, ParserType parserType, string rootRule)
         {
-            Parser<T> parser = null;
+            Parser<IN,OUT> parser = null;
             if (parserType == ParserType.LL_RECURSIVE_DESCENT)
             {
-                ParserConfiguration<T> configuration = ExtractParserConfiguration<T>(parserInstance.GetType());
-                ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
-                SyntaxTreeVisitor<T> visitor = new SyntaxTreeVisitor<T>(configuration, parserInstance);
-                parser = new Parser<T>(syntaxParser, visitor);
-                parser.Lexer = BuildLexer<T>(parserInstance.GetType(), parserInstance);
+                ParserConfiguration<IN,OUT> configuration = ExtractParserConfiguration<IN,OUT>(parserInstance.GetType());
+                ISyntaxParser<IN> syntaxParser = BuildSyntaxParser<IN,OUT>(configuration, parserType, rootRule);
+                SyntaxTreeVisitor<IN,OUT> visitor = new SyntaxTreeVisitor<IN,OUT>(configuration, parserInstance);
+                parser = new Parser<IN,OUT>(syntaxParser, visitor);
+                parser.Lexer = BuildLexer<IN>(parserInstance.GetType(), parserInstance);
                 parser.Instance = parserInstance;
                 parser.Configuration = configuration;
             }
             else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
             {
-                EBNFParserBuilder<T> builder = new EBNFParserBuilder<T>();
-                parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule);
+                //EBNFParserBuilder<T> builder = new EBNFParserBuilder<T>();
+                //parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule);
             }
             return parser;
         }
 
-        protected virtual  ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType, string rootRule)
+        protected virtual  ISyntaxParser<IN> BuildSyntaxParser<IN,OUT>(ParserConfiguration<IN,OUT> conf, ParserType parserType, string rootRule)
         {
-            ISyntaxParser<T> parser = null;
+            ISyntaxParser<IN> parser = null;
             switch (parserType)
             {
                 case ParserType.LL_RECURSIVE_DESCENT:
                     {
-                        parser = new RecursiveDescentSyntaxParser<T>(conf, rootRule);
+                        parser = new RecursiveDescentSyntaxParser<IN,OUT>(conf, rootRule);
                         break;
                     }
                 default:
@@ -121,9 +121,9 @@ namespace sly.parser.generator
 
        
 
-        protected virtual  ParserConfiguration<T> ExtractParserConfiguration<T>(Type parserClass)
+        protected virtual  ParserConfiguration<T,OUT> ExtractParserConfiguration<T,OUT>(Type parserClass)
         {
-            ParserConfiguration<T> conf = new ParserConfiguration<T>();
+            ParserConfiguration<T,OUT> conf = new ParserConfiguration<T,OUT>();
             Dictionary<string, MethodInfo> functions = new Dictionary<string, MethodInfo>();
             Dictionary<string, NonTerminal<T>> nonTerminals = new Dictionary<string, NonTerminal<T>>();
             List<MethodInfo> methods = parserClass.GetMethods().ToList<MethodInfo>();

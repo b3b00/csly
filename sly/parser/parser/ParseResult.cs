@@ -4,10 +4,10 @@ using System.Text;
 
 namespace sly.parser
 {
-    public class ParseResult<T>
+    public class ParseResult<IN,OUT>
     {
 
-        public object Result { get; set; }
+        public OUT Result { get; set; }
 
         public bool IsError { get; set; }
 

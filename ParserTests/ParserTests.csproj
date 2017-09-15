@@ -1,28 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>netcoreapp1.0;net45</TargetFrameworks>
-	<Authors>b3b00</Authors>
+    <Authors>b3b00</Authors>
   </PropertyGroup>
-
   <ItemGroup>
     <None Remove=".gitignore" />
   </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
     <PackageReference Include="xunit" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\sly\sly.csproj" />
     <ProjectReference Include="..\expressionParser\expressionParser.csproj" />
     <ProjectReference Include="..\jsonparser\jsonparser.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Compile Remove="EBNFTests.cs" />
+  </ItemGroup>
 </Project>

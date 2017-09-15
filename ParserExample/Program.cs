@@ -6,6 +6,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using jsonparser.JsonModel;
 
 namespace ParserExample
 {
@@ -83,14 +84,14 @@ class Program
            JSONParser jsonparser = new JSONParser();
             ParserBuilder builder = new ParserBuilder();
 
-            Parser<JsonToken> yacc = builder.BuildParser<JsonToken>(jsonparser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            Parser<JsonToken,JSon> yacc = builder.BuildParser<JsonToken,JSon>(jsonparser, ParserType.LL_RECURSIVE_DESCENT, "root");
             
 
-            ParseResult<JsonToken> result = yacc.Parse("'hello' 'world!'");
+            ParseResult<JsonToken,JSon> result = yacc.Parse("'hello' 'world!'");
 
             if (result.IsError)
             {
-                result.Errors.ForEach(e => Console.WriteLine(e));
+                result.Errors.ForEach(e => Console.WriteLine(e.ErrorMessage));
             }
             ;
             Console.WriteLine("====================");
@@ -102,7 +103,7 @@ class Program
 
             if (result.IsError)
             {
-                result.Errors.ForEach(e => Console.WriteLine(e));
+                result.Errors.ForEach(e => Console.WriteLine(e.ErrorMessage));
             }
             ;
         }

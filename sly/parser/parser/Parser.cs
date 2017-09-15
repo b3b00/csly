@@ -16,7 +16,7 @@ namespace sly.parser
         public SyntaxTreeVisitor<IN,OUT> Visitor { get; set; }
         public ParserConfiguration<IN,OUT> Configuration { get; set; }
         
-        public Parser(ISyntaxParser<IN> syntaxParser, SyntaxTreeVisitor<IN> visitor)
+        public Parser(ISyntaxParser<IN> syntaxParser, SyntaxTreeVisitor<IN,OUT> visitor)
         {
             SyntaxParser = syntaxParser;
             Visitor = visitor;
@@ -24,9 +24,9 @@ namespace sly.parser
 
        
 
-        public ParseResult<IN> Parse(string source, string startingNonTerminal = null)
+        public ParseResult<IN,OUT> Parse(string source, string startingNonTerminal = null)
         {
-            ParseResult<IN> result = null;
+            ParseResult<IN,OUT> result = null;
             try
             {
                 IList<Token<IN>> tokens = Lexer.Tokenize(source).ToList<Token<IN>>();
@@ -34,21 +34,21 @@ namespace sly.parser
             }
             catch(LexerException<IN> e)
             {
-                result = new ParseResult<IN>();
+                result = new ParseResult<IN,OUT>();
                 result.IsError = true;
                 result.Errors = new List<ParseError>();
                 result.Errors.Add((e as LexerException<IN>).Error);                
             }
             return result;            
         }
-        public ParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
+        public ParseResult<IN,OUT> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
         {
             
-            ParseResult<IN> result = new ParseResult<IN>();
+            ParseResult<IN,OUT> result = new ParseResult<IN,OUT>();
             SyntaxParseResult<IN> syntaxResult = SyntaxParser.Parse(tokens, startingNonTerminal);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
-                object r  = Visitor.VisitSyntaxTree(syntaxResult.Root);
+                OUT r  = Visitor.VisitSyntaxTree(syntaxResult.Root);
                 result.Result = r;
                 result.IsError = false;
             }

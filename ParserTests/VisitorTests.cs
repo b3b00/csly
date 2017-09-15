@@ -62,8 +62,8 @@ namespace ParserTests
         {
             VisitorTests visitorInstance = new VisitorTests();
             ParserBuilder builder = new ParserBuilder();
-            Parser<TokenType> parser = builder.BuildParser<TokenType>(visitorInstance, ParserType.LL_RECURSIVE_DESCENT, "R");
-            SyntaxTreeVisitor<TokenType> visitor = parser.Visitor;
+            Parser<TokenType,string> parser = builder.BuildParser<TokenType,string>(visitorInstance, ParserType.LL_RECURSIVE_DESCENT, "R");
+            SyntaxTreeVisitor<TokenType,string> visitor = parser.Visitor;
 
             // build a syntax tree
 

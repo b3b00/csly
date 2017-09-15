@@ -1,11 +1,9 @@
 ﻿using sly.parser;
 using expressionparser;
 using jsonparser;
+using jsonparser.JsonModel;
 using sly.lexer;
 using sly.parser.generator;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace ParserTests
@@ -19,14 +17,14 @@ namespace ParserTests
         {
             JSONParser jsonParser = new JSONParser();
             ParserBuilder builder = new ParserBuilder();
-            Parser<JsonToken> parser = builder.BuildParser<JsonToken>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            Parser<JsonToken,JSon> parser = builder.BuildParser<JsonToken,JSon>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
 
 
             string source = @"{
                 'one': 1,
                 'bug':{,}
             }".Replace("'", "\"");
-            ParseResult<JsonToken> r = parser.Parse(source);
+            ParseResult<JsonToken,JSon> r = parser.Parse(source);
             Assert.True(r.IsError);
             Assert.Null(r.Result);
             Assert.NotNull(r.Errors);
@@ -45,11 +43,10 @@ namespace ParserTests
         {
             ExpressionParser exprParser = new ExpressionParser();
             ParserBuilder builder = new ParserBuilder();
-            Parser<ExpressionToken> Parser = builder.BuildParser<ExpressionToken>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            Parser<ExpressionToken,int> Parser = builder.BuildParser<ExpressionToken,int>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
 
-            ParseResult<ExpressionToken> r = Parser.Parse(" 2 + 3 + + 2");
+            ParseResult<ExpressionToken,int> r = Parser.Parse(" 2 + 3 + + 2");
             Assert.True(r.IsError);
-            Assert.Null(r.Result);
             Assert.NotNull(r.Errors);
             Assert.True(r.Errors.Count > 0);
             Assert.IsAssignableFrom(typeof(UnexpectedTokenSyntaxError<ExpressionToken>), r.Errors[0]);
@@ -67,10 +64,9 @@ namespace ParserTests
             ExpressionParser exprParser = new ExpressionParser();
 
             ParserBuilder builder = new ParserBuilder();
-            Parser<ExpressionToken> Parser = builder.BuildParser<ExpressionToken>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "root");
-            ParseResult<ExpressionToken> r = Parser.Parse("2 @ 2");
+            Parser<ExpressionToken,int> Parser = builder.BuildParser<ExpressionToken,int>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            ParseResult<ExpressionToken,int> r = Parser.Parse("2 @ 2");
             Assert.True(r.IsError);
-            Assert.Null(r.Result);
             Assert.NotNull(r.Errors);
             Assert.True(r.Errors.Count > 0);
             Assert.IsAssignableFrom(typeof(LexicalError), r.Errors[0]);
