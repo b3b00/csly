@@ -178,9 +178,7 @@ namespace jsonparser
         [Production("property: STRING COLON value")]
         public  JSon property(Token<JsonToken> key, object colon, JSon value)
         {
-            JObject pair = new JObject();
-            pair[key.StringWithoutQuotes] = value;
-            return pair;
+            return new JObject(key.StringWithoutQuotes ,value);
         }
 
        

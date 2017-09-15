@@ -9,14 +9,14 @@ using sly.parser.generator;
 
 namespace sly.parser.llparser
 {
-    public class EBNFRecursiveDescentSyntaxParser<T> : RecursiveDescentSyntaxParser<T>
+    public class EBNFRecursiveDescentSyntaxParser<IN,OUT> : RecursiveDescentSyntaxParser<IN,OUT>
     {
         //public ParserConfiguration<T> Configuration { get; set; }
 
         //public string StartingNonTerminal { get; set; }
 
 
-        public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<T> configuration, string startingNonTerminal) : base(configuration,startingNonTerminal)
+        public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<IN,OUT> configuration, string startingNonTerminal) : base(configuration,startingNonTerminal)
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
@@ -27,33 +27,33 @@ namespace sly.parser.llparser
 
         
 
-        protected override  void InitStartingTokensForRule(Dictionary<string, NonTerminal<T>> nonTerminals, Rule<T> rule)
+        protected override  void InitStartingTokensForRule(Dictionary<string, NonTerminal<IN>> nonTerminals, Rule<IN> rule)
         {
             if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
             {
-                rule.PossibleLeadingTokens = new List<T>();
+                rule.PossibleLeadingTokens = new List<IN>();
                 if (rule.Clauses.Count > 0)
                 {
-                    IClause<T> first = rule.Clauses[0];
-                    if (first is TerminalClause<T>)
+                    IClause<IN> first = rule.Clauses[0];
+                    if (first is TerminalClause<IN>)
                     {
-                        TerminalClause<T> term = first as TerminalClause<T>;
+                        TerminalClause<IN> term = first as TerminalClause<IN>;
 
                         InitStartingTokensWithTerminal(rule, term);
                     }
-                    else if (first is NonTerminalClause<T>)
+                    else if (first is NonTerminalClause<IN>)
                     {
-                        NonTerminalClause<T> nonterm = first as NonTerminalClause<T>;
+                        NonTerminalClause<IN> nonterm = first as NonTerminalClause<IN>;
                         InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
                     }
-                    else if (first is ZeroOrMoreClause<T>)
+                    else if (first is ZeroOrMoreClause<IN>)
                     {
-                        ZeroOrMoreClause<T> many = first as ZeroOrMoreClause<T>;
+                        ZeroOrMoreClause<IN> many = first as ZeroOrMoreClause<IN>;
                         InitStartingTokensWithZeroOrMore(rule, many, nonTerminals);
                     }
-                    else if (first is OneOrMoreClause<T>)
+                    else if (first is OneOrMoreClause<IN>)
                     {
-                        OneOrMoreClause<T> many = first as OneOrMoreClause<T>;
+                        OneOrMoreClause<IN> many = first as OneOrMoreClause<IN>;
                         InitStartingTokensWithOneOrMore(rule, many, nonTerminals);
                     }
                 }
@@ -61,52 +61,52 @@ namespace sly.parser.llparser
         }
 
 
-        private void InitStartingTokensWithTerminal(Rule<T> rule, TerminalClause<T> term)
+        private void InitStartingTokensWithTerminal(Rule<IN> rule, TerminalClause<IN> term)
         {
             rule.PossibleLeadingTokens.Add(term.ExpectedToken);
-            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<T>().ToList<T>();
+            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<IN>().ToList<IN>();
         }
 
-        private void InitStartingTokensWithNonTerminal(Rule<T> rule, NonTerminalClause<T> nonterm,
-            Dictionary<string, NonTerminal<T>> nonTerminals)
+        private void InitStartingTokensWithNonTerminal(Rule<IN> rule, NonTerminalClause<IN> nonterm,
+            Dictionary<string, NonTerminal<IN>> nonTerminals)
         {
             InitStartingTokensForNonTerminal(nonTerminals, nonterm.NonTerminalName);
             if (nonTerminals.ContainsKey(nonterm.NonTerminalName))
             {
-                NonTerminal<T> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
+                NonTerminal<IN> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
                 firstNonTerminal.Rules.ForEach(r => { rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens); });
-                rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<T>().ToList<T>();
+                rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<IN>().ToList<IN>();
             }
         }
 
-        private void InitStartingTokensWithZeroOrMore(Rule<T> rule, ZeroOrMoreClause<T> manyClause,
-            Dictionary<string, NonTerminal<T>> nonTerminals)
+        private void InitStartingTokensWithZeroOrMore(Rule<IN> rule, ZeroOrMoreClause<IN> manyClause,
+            Dictionary<string, NonTerminal<IN>> nonTerminals)
         {
-            if (manyClause.Clause is TerminalClause<T>)
+            if (manyClause.Clause is TerminalClause<IN>)
             {
-                TerminalClause<T> term = manyClause.Clause as TerminalClause<T>;
+                TerminalClause<IN> term = manyClause.Clause as TerminalClause<IN>;
 
                 InitStartingTokensWithTerminal(rule, term);
             }
-            else if (manyClause.Clause is NonTerminalClause<T>)
+            else if (manyClause.Clause is NonTerminalClause<IN>)
             {
-                NonTerminalClause<T> nonterm = manyClause.Clause as NonTerminalClause<T>;
+                NonTerminalClause<IN> nonterm = manyClause.Clause as NonTerminalClause<IN>;
                 InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
             }
         }
 
-        private void InitStartingTokensWithOneOrMore(Rule<T> rule, OneOrMoreClause<T> manyClause,
-            Dictionary<string, NonTerminal<T>> nonTerminals)
+        private void InitStartingTokensWithOneOrMore(Rule<IN> rule, OneOrMoreClause<IN> manyClause,
+            Dictionary<string, NonTerminal<IN>> nonTerminals)
         {
-            if (manyClause.Clause is TerminalClause<T>)
+            if (manyClause.Clause is TerminalClause<IN>)
             {
-                TerminalClause<T> term = manyClause.Clause as TerminalClause<T>;
+                TerminalClause<IN> term = manyClause.Clause as TerminalClause<IN>;
 
                 InitStartingTokensWithTerminal(rule, term);
             }
-            else if (manyClause.Clause is NonTerminalClause<T>)
+            else if (manyClause.Clause is NonTerminalClause<IN>)
             {
-                NonTerminalClause<T> nonterm = manyClause.Clause as NonTerminalClause<T>;
+                NonTerminalClause<IN> nonterm = manyClause.Clause as NonTerminalClause<IN>;
                 InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
             }
         }
@@ -116,23 +116,23 @@ namespace sly.parser.llparser
         #region parsing
         
 
-        public override SyntaxParseResult<T> Parse(IList<Token<T>> tokens, Rule<T> rule, int position, string nonTerminalName)
+        public override SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position, string nonTerminalName)
         {
             int currentPosition = position;
-            List<UnexpectedTokenSyntaxError<T>> errors = new List<UnexpectedTokenSyntaxError<T>>();
+            List<UnexpectedTokenSyntaxError<IN>> errors = new List<UnexpectedTokenSyntaxError<IN>>();
             bool isError = false;
-            List<ISyntaxNode<T>> children = new List<ISyntaxNode<T>>();
+            List<ISyntaxNode<IN>> children = new List<ISyntaxNode<IN>>();
             if (rule.PossibleLeadingTokens.Contains(tokens[position].TokenID) || rule.MayBeEmpty)
             {
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
-                    children = new List<ISyntaxNode<T>>();
-                    foreach (IClause<T> clause in rule.Clauses)
+                    children = new List<ISyntaxNode<IN>>();
+                    foreach (IClause<IN> clause in rule.Clauses)
                     {
-                        if (clause is TerminalClause<T>)
+                        if (clause is TerminalClause<IN>)
                         {
-                            SyntaxParseResult<T> termRes =
-                                ParseTerminal(tokens, clause as TerminalClause<T>, currentPosition);
+                            SyntaxParseResult<IN> termRes =
+                                ParseTerminal(tokens, clause as TerminalClause<IN>, currentPosition);
                             if (!termRes.IsError)
                             {
                                 children.Add(termRes.Root);
@@ -140,16 +140,16 @@ namespace sly.parser.llparser
                             }
                             else
                             {
-                                Token<T> tok = tokens[currentPosition];
-                                errors.Add(new UnexpectedTokenSyntaxError<T>(tok,
-                                    ((TerminalClause<T>) clause).ExpectedToken));
+                                Token<IN> tok = tokens[currentPosition];
+                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,
+                                    ((TerminalClause<IN>) clause).ExpectedToken));
                             }
                             isError = isError || termRes.IsError;
                         }
-                        else if (clause is NonTerminalClause<T>)
+                        else if (clause is NonTerminalClause<IN>)
                         {
-                            SyntaxParseResult<T> nonTerminalResult =
-                                ParseNonTerminal(tokens, clause as NonTerminalClause<T>, currentPosition);
+                            SyntaxParseResult<IN> nonTerminalResult =
+                                ParseNonTerminal(tokens, clause as NonTerminalClause<IN>, currentPosition);
                             if (!nonTerminalResult.IsError)
                             {
                                 children.Add(nonTerminalResult.Root);
@@ -163,10 +163,10 @@ namespace sly.parser.llparser
                             // TODO
                         }
 
-                        else if (clause is ZeroOrMoreClause<T>)
+                        else if (clause is ZeroOrMoreClause<IN>)
                         {
-                            SyntaxParseResult<T> zeroOrMoreResult =
-                                ParseZeroOrMore(tokens, clause as ZeroOrMoreClause<T>, currentPosition);
+                            SyntaxParseResult<IN> zeroOrMoreResult =
+                                ParseZeroOrMore(tokens, clause as ZeroOrMoreClause<IN>, currentPosition);
                             if (!zeroOrMoreResult.IsError)
                             {
                                 children.Add(zeroOrMoreResult.Root);
@@ -178,10 +178,10 @@ namespace sly.parser.llparser
                             }
                             isError = isError || zeroOrMoreResult.IsError;
                         }
-                        else if (clause is OneOrMoreClause<T>)
+                        else if (clause is OneOrMoreClause<IN>)
                         {
-                            SyntaxParseResult<T> oneMoreResult =
-                                ParseOneOrMore(tokens, clause as OneOrMoreClause<T>, currentPosition);
+                            SyntaxParseResult<IN> oneMoreResult =
+                                ParseOneOrMore(tokens, clause as OneOrMoreClause<IN>, currentPosition);
                             if (!oneMoreResult.IsError)
                             {
                                 children.Add(oneMoreResult.Root);
@@ -201,43 +201,43 @@ namespace sly.parser.llparser
                 }
             }
 
-            SyntaxParseResult<T> result = new SyntaxParseResult<T>();
+            SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             result.IsError = isError;
             result.Errors = errors;
             result.EndingPosition = currentPosition;
             if (!isError)
             {
-                SyntaxNode<T> node = new SyntaxNode<T>(nonTerminalName + "__" + rule.Key, children);
+                SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
                 result.Root = node;
                 result.IsEnded = currentPosition >= tokens.Count - 1
                                  || currentPosition == tokens.Count - 2 &&
-                                 tokens[tokens.Count - 1].TokenID.Equals(default(T));
+                                 tokens[tokens.Count - 1].TokenID.Equals(default(IN));
             }
 
             return result;
         }
 
       
-        public SyntaxParseResult<T> ParseZeroOrMore(IList<Token<T>> tokens, ZeroOrMoreClause<T> clause, int position)
+        public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position)
         {
-            SyntaxParseResult<T> result = new SyntaxParseResult<T>();
-            ManySyntaxNode<T> manyNode = new ManySyntaxNode<T>("");
+            SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
+            ManySyntaxNode<IN> manyNode = new ManySyntaxNode<IN>("");
             int currentPosition = position;
-            IClause<T> innerClause = clause.Clause;
+            IClause<IN> innerClause = clause.Clause;
             bool stillOk = true;
 
-            SyntaxParseResult<T> lastInnerResult = null;
+            SyntaxParseResult<IN> lastInnerResult = null;
 
             while (stillOk)
             {
-                SyntaxParseResult<T> innerResult = null;
-                if (innerClause is TerminalClause<T>)
+                SyntaxParseResult<IN> innerResult = null;
+                if (innerClause is TerminalClause<IN>)
                 {
-                    innerResult = ParseTerminal(tokens, innerClause as TerminalClause<T>, currentPosition);
+                    innerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
                 }
-                else if (innerClause is NonTerminalClause<T>)
+                else if (innerClause is NonTerminalClause<IN>)
                 {
-                    innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<T>, currentPosition);
+                    innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
                 }
                 else
                 {
@@ -260,24 +260,24 @@ namespace sly.parser.llparser
             return result;
         }
 
-        public SyntaxParseResult<T> ParseOneOrMore(IList<Token<T>> tokens, OneOrMoreClause<T> clause, int position)
+        public SyntaxParseResult<IN> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN> clause, int position)
         {
-            SyntaxParseResult<T> result = new SyntaxParseResult<T>();
-            ManySyntaxNode<T> manyNode = new ManySyntaxNode<T>("");
+            SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
+            ManySyntaxNode<IN> manyNode = new ManySyntaxNode<IN>("");
             int currentPosition = position;
-            IClause<T> innerClause = clause.Clause;
+            IClause<IN> innerClause = clause.Clause;
             bool isError;
 
-            SyntaxParseResult<T> lastInnerResult = null;
+            SyntaxParseResult<IN> lastInnerResult = null;
 
-            SyntaxParseResult<T> firstInnerResult = null;
-            if (innerClause is TerminalClause<T>)
+            SyntaxParseResult<IN> firstInnerResult = null;
+            if (innerClause is TerminalClause<IN>)
             {
-                firstInnerResult = ParseTerminal(tokens, innerClause as TerminalClause<T>, currentPosition);
+                firstInnerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
             }
-            else if (innerClause is NonTerminalClause<T>)
+            else if (innerClause is NonTerminalClause<IN>)
             {
-                firstInnerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<T>, currentPosition);
+                firstInnerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
             }
             else
             {
@@ -288,12 +288,12 @@ namespace sly.parser.llparser
                 manyNode.Add(firstInnerResult.Root);
                 lastInnerResult = firstInnerResult;
                 currentPosition = firstInnerResult.EndingPosition;
-                ZeroOrMoreClause<T> more = new ZeroOrMoreClause<T>(innerClause);
-                SyntaxParseResult<T> nextResult = ParseZeroOrMore(tokens, more, currentPosition);
+                ZeroOrMoreClause<IN> more = new ZeroOrMoreClause<IN>(innerClause);
+                SyntaxParseResult<IN> nextResult = ParseZeroOrMore(tokens, more, currentPosition);
                 if (nextResult != null && !nextResult.IsError)
                 {
                     currentPosition = nextResult.EndingPosition;
-                    ManySyntaxNode<T> moreChildren = (ManySyntaxNode<T>) nextResult.Root;
+                    ManySyntaxNode<IN> moreChildren = (ManySyntaxNode<IN>) nextResult.Root;
                     manyNode.Children.AddRange(moreChildren.Children);
                 }
                 isError = false;

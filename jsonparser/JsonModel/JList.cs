@@ -9,7 +9,7 @@ namespace jsonparser.JsonModel
 
         private List<JSon> list;
 
-        private List<JSon> Items => list;
+        public  List<JSon> Items => list;
         public int Count => list.Count;
 
         public JSon this[int index]

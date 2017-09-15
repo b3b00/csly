@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Net;
 using sly.parser.syntax;
 using sly.lexer;
 
@@ -10,19 +11,31 @@ namespace sly.parser.generator
     public class SyntaxVisitorResult<IN,OUT>
     {
         
-        public Token<IN> TokenResult = null;
+        public Token<IN> TokenResult;
 
-        public OUT ValueResult = default(OUT);
+        public OUT ValueResult;
+        
+        public List<OUT> ValueListResult;
+        
+        public List<Token<IN>> TokenListResult;
 
-        private bool isTok = false;
+        private bool isTok;
 
         public bool IsToken => isTok; 
 
-        private bool isVal = false;
+        private bool isVal;
 
-        public bool IsValue => isVal; 
+        public bool IsValue => isVal;
 
-        public bool IsNone => !IsToken && !IsValue; 
+        private bool isValueList = false;
+
+        public bool IsValueList => isValueList;
+        
+        private bool isTokenList = false;
+
+        public bool IsTokenList => isTokenList;
+
+        public bool IsNone => !IsToken && !IsValue && !IsTokenList && ! IsValueList; 
 
         public static SyntaxVisitorResult<IN,OUT> NewToken(Token<IN> tok)
         {
@@ -37,6 +50,22 @@ namespace sly.parser.generator
             SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
             res.ValueResult = val;
             res.isVal = true;
+            return res;
+        }
+
+        public static SyntaxVisitorResult<IN, OUT> NewValueList(List<OUT> values)
+        {
+            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            res.ValueListResult = values;
+            res.isValueList = true;
+            return res;
+        }
+        
+        public static SyntaxVisitorResult<IN, OUT> NewTokenList(List<Token<IN>> tokens)
+        {
+            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            res.TokenListResult = tokens;
+            res.isTokenList = true;
             return res;
         }
 
@@ -116,6 +145,7 @@ namespace sly.parser.generator
                     {
                         args.Add(v.ValueResult);
                     }
+                   
                     
 
                     i++;

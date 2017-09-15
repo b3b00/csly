@@ -20,11 +20,11 @@ namespace sly.parser.generator
     /// <summary>
     /// this class provides API to build parser
     /// </summary>
-    internal class EBNFParserBuilder<T> : ParserBuilder
+    internal class EBNFParserBuilder<IN,OUT> : ParserBuilder
     {
 
 
-        private Parser<EbnfToken> GrammarParser;
+        private Parser<EbnfToken,GrammarNode<IN>> GrammarParser;
 
         public EBNFParserBuilder()
         {
@@ -32,28 +32,32 @@ namespace sly.parser.generator
         }
 
 
-        public virtual Parser<T> BuildParser(object parserInstance, ParserType parserType, string rootRule)
+        public virtual Parser<IN,OUT> BuildParser(object parserInstance, ParserType parserType, string rootRule)
         {
 
             ParserBuilder builder = new ParserBuilder();
-            EBNFParserBuilder<T> parserGrammar = new EBNFParserBuilder<T>();
+            EBNFParserBuilder<EbnfToken,GrammarNode<IN>> parserGrammar = new EBNFParserBuilder<EbnfToken,GrammarNode<IN>>();
             if (GrammarParser == null)
             {
-                GrammarParser = builder.BuildParser<EbnfToken>(parserGrammar, ParserType.LL_RECURSIVE_DESCENT, "rule");
+                GrammarParser = builder.BuildParser<EbnfToken,GrammarNode<IN>>(parserGrammar, ParserType.LL_RECURSIVE_DESCENT, "rule");
             }
-            ParserConfiguration<T> configuration =
+            ParserConfiguration<IN,OUT> configuration =
                 ExtractEbnfParserConfiguration(parserInstance.GetType(), GrammarParser);
 
-            ISyntaxParser<T> syntaxParser = BuildSyntaxParser<T>(configuration, parserType, rootRule);
+            ISyntaxParser<IN> syntaxParser = BuildSyntaxParser<IN,OUT>(configuration, parserType, rootRule);
 
-            SyntaxTreeVisitor<T> visitor = new SyntaxTreeVisitor<T>(configuration, parserInstance);
-            if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
+            SyntaxTreeVisitor<IN, OUT> visitor = null;
+            if (parserType == ParserType.LL_RECURSIVE_DESCENT)
             {
-                visitor = new EBNFSyntaxTreeVisitor<T>(configuration, parserInstance);
+                new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
             }
-            Parser<T> parser = new Parser<T>(syntaxParser, visitor);
+            else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
+            {
+                visitor = new EBNFSyntaxTreeVisitor<IN,OUT>(configuration, parserInstance);
+            }
+            Parser<IN,OUT> parser = new Parser<IN,OUT>(syntaxParser, visitor);
             parser.Configuration = configuration;
-            parser.Lexer = BuildLexer<T>(parserInstance.GetType(), parserInstance);
+            parser.Lexer = BuildLexer<IN>(parserInstance.GetType(), parserInstance);
             parser.Instance = parserInstance;
             return parser;
         }
@@ -65,7 +69,7 @@ namespace sly.parser.generator
             lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.ONEORMORE, "\\+"));
             lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.ZEROORMORE, "\\*"));
             lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.IDENTIFIER,
-                "[A-Za-z0-9_àâéèêëîô][A-Za-z0-9_àâéèêëîô]*"));
+                "[A-Za-z0-9_ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½][A-Za-z0-9_ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½]*"));
             lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.COLON, ":"));
             lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.WS, "[ \\t]+", true));
             lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.EOL, "[\\n\\r]+", true, true));
@@ -75,20 +79,20 @@ namespace sly.parser.generator
 
 
 
-        protected override ISyntaxParser<T> BuildSyntaxParser<T>(ParserConfiguration<T> conf, ParserType parserType,
+        protected override ISyntaxParser<IN> BuildSyntaxParser<IN,OUT>(ParserConfiguration<IN,OUT> conf, ParserType parserType,
             string rootRule)
         {
-            ISyntaxParser<T> parser = null;
+            ISyntaxParser<IN> parser = null;
             switch (parserType)
             {
                 case ParserType.LL_RECURSIVE_DESCENT:
                     {
-                        parser = (ISyntaxParser<T>)(new RecursiveDescentSyntaxParser<T>(conf, rootRule));
+                        parser = (ISyntaxParser<IN>)(new RecursiveDescentSyntaxParser<IN,OUT>(conf, rootRule));
                         break;
                     }
                 case ParserType.EBNF_LL_RECURSIVE_DESCENT:
                 {
-                    parser = (ISyntaxParser<T>)(new EBNFRecursiveDescentSyntaxParser<T>(conf, rootRule));
+                    parser = (ISyntaxParser<IN>)(new EBNFRecursiveDescentSyntaxParser<IN,OUT>(conf, rootRule));
                     break;
                 }
                 default:
@@ -103,12 +107,12 @@ namespace sly.parser.generator
 
         #region configuration
 
-        protected virtual ParserConfiguration<T> ExtractEbnfParserConfiguration(Type parserClass,
-            Parser<EbnfToken> grammarParser)
+        protected virtual ParserConfiguration<IN,OUT> ExtractEbnfParserConfiguration(Type parserClass,
+            Parser<EbnfToken,GrammarNode<IN>> grammarParser)
         {
-            ParserConfiguration<T> conf = new ParserConfiguration<T>();
+            ParserConfiguration<IN,OUT> conf = new ParserConfiguration<IN,OUT>();
             Dictionary<string, MethodInfo> functions = new Dictionary<string, MethodInfo>();
-            Dictionary<string, NonTerminal<T>> nonTerminals = new Dictionary<string, NonTerminal<T>>();
+            Dictionary<string, NonTerminal<IN>> nonTerminals = new Dictionary<string, NonTerminal<IN>>();
             List<MethodInfo> methods = parserClass.GetMethods().ToList<MethodInfo>();
             methods = methods.Where(m =>
             {
@@ -126,20 +130,17 @@ namespace sly.parser.generator
                 {
 
                     string ruleString = attr.RuleString;
-                    ParseResult<EbnfToken> parseResult = grammarParser.Parse(ruleString);
+                    ParseResult<EbnfToken,GrammarNode<IN>> parseResult = grammarParser.Parse(ruleString);
                     if (!parseResult.IsError)
                     {
-                        Rule<T> rule = (Rule<T>)parseResult.Result;
-
-                        
-                        
+                        Rule<IN> rule = (Rule<IN>)parseResult.Result;
                         functions[rule.NonTerminalName+"__"+rule.Key] = m;
 
 
-                        NonTerminal<T> nonT = null;
+                        NonTerminal<IN> nonT = null;
                         if (!nonTerminals.ContainsKey(rule.NonTerminalName))
                         {
-                            nonT = new NonTerminal<T>(rule.NonTerminalName, new List<Rule<T>>());
+                            nonT = new NonTerminal<IN>(rule.NonTerminalName, new List<Rule<IN>>());
                         }
                         else
                         {
@@ -175,9 +176,9 @@ namespace sly.parser.generator
         #region rules grammar
 
         [Production("rule : IDENTIFIER COLON clauses")]
-        public object Root(Token<EbnfToken> name, Token<EbnfToken> discarded, List<IClause<T>> clauses)
+        public object Root(Token<EbnfToken> name, Token<EbnfToken> discarded, List<IClause<IN>> clauses)
         {
-            Rule<T> rule = new Rule<T>();
+            Rule<IN> rule = new Rule<IN>();
             rule.NonTerminalName = name.Value;
             rule.Clauses = clauses;
             return rule;
@@ -186,9 +187,9 @@ namespace sly.parser.generator
 
         [Production("clauses : clause clauses")]
 
-        public object Clauses(IClause<T> clause, List<IClause<T>> clauses)
+        public object Clauses(IClause<IN> clause, List<IClause<IN>> clauses)
         {
-            List<IClause<T>> list = new List<IClause<T>> { clause };
+            List<IClause<IN>> list = new List<IClause<IN>> { clause };
             if (clauses != null)
             {
                 list.AddRange(clauses);
@@ -197,9 +198,9 @@ namespace sly.parser.generator
         }
 
         [Production("clauses : clause ")]
-        public object SingleClause(IClause<T> clause)
+        public object SingleClause(IClause<IN> clause)
         {
-            return new List<IClause<T>> { clause };
+            return new List<IClause<IN>> { clause };
         }
 
 
@@ -207,35 +208,35 @@ namespace sly.parser.generator
        
 
         [Production("clause : IDENTIFIER ZEROORMORE")]
-        public IClause<T> ZeroMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
+        public IClause<IN> ZeroMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
         {
-            IClause<T> innerClause = BuildTerminalOrNonTerimal(id.Value);
-            return new ZeroOrMoreClause<T>(innerClause);
+            IClause<IN> innerClause = BuildTerminalOrNonTerimal(id.Value);
+            return new ZeroOrMoreClause<IN>(innerClause);
         }
 
         [Production("clause : IDENTIFIER ONEORMORE")]
-        public IClause<T> OneMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
+        public IClause<IN> OneMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
         {
-            IClause<T> innerClause = BuildTerminalOrNonTerimal(id.Value);
-            return new OneOrMoreClause<T>(innerClause);
+            IClause<IN> innerClause = BuildTerminalOrNonTerimal(id.Value);
+            return new OneOrMoreClause<IN>(innerClause);
         }
 
         [Production("clause : IDENTIFIER ")]
-        public IClause<T> SimpleClause(Token<EbnfToken> id)
+        public IClause<IN> SimpleClause(Token<EbnfToken> id)
         {
-            IClause<T> clause = BuildTerminalOrNonTerimal(id.Value);
+            IClause<IN> clause = BuildTerminalOrNonTerimal(id.Value);
             return clause;
         }
 
-        private IClause<T> BuildTerminalOrNonTerimal(string name)
+        private IClause<IN> BuildTerminalOrNonTerimal(string name)
         {
 
-            T token = default(T);
-            IClause<T> clause;
+            IN token = default(IN);
+            IClause<IN> clause;
             bool isTerminal = false;
             try
             {
-                token = (T)Enum.Parse(typeof(T), name, false);
+                token = (IN)Enum.Parse(typeof(IN), name, false);
                 isTerminal = true;
             }
             catch
@@ -244,11 +245,11 @@ namespace sly.parser.generator
             }
             if (isTerminal)
             {
-                clause = new TerminalClause<T>(token);
+                clause = new TerminalClause<IN>(token);
             }
             else
             {
-                clause = new NonTerminalClause<T>(name);
+                clause = new NonTerminalClause<IN>(name);
             }
             return clause;
         }

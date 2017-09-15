@@ -9,7 +9,7 @@ namespace sly.parser.syntax
     /// a clause within a grammar rule
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IClause<T>
+    public interface IClause<T> : GrammarNode<T>
     {
         bool Check(T nextToken);
 

@@ -14,17 +14,4 @@
     </DocumentationFile>
     <LangVersion>6</LangVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <Folder Include="parser\parser\llparser" />
-    <Folder Include="parser\syntax" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="parser\generator\EBNFSyntaxTreeVisitor.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="parser\generator\EBNFParserBuilder.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="parser\parser\llparser\EBNFRecursiveDescentSyntaxParser.cs" />
-  </ItemGroup>
 </Project>

@@ -31,14 +31,20 @@ namespace jsonparser.JsonModel
             }
         }
 
+        public JObject(string key, JSon value)
+        {
+            values = new Dictionary<string, JSon>();
+            values[key] = value;
+        }
+
         public JObject()
         {
             values = new Dictionary<string, JSon>();
         }
         
-        public JObject(Dictionary<string, JSon> lst)
+        public JObject(Dictionary<string, JSon> dic)
         {
-            values = lst;
+            values = dic;
         }
 
         
