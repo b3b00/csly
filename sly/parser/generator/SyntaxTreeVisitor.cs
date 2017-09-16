@@ -128,6 +128,8 @@ namespace sly.parser.generator
 
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node)
         {
+            
+            
             SyntaxVisitorResult<IN, OUT> result = SyntaxVisitorResult<IN, OUT>.NoneResult();
             if (Configuration.Functions.ContainsKey(node.Name))
             {
@@ -136,6 +138,7 @@ namespace sly.parser.generator
                 foreach (ISyntaxNode<IN> n in node.Children)
                 {
                     SyntaxVisitorResult<IN,OUT> v = Visit(n);
+
 
                     if (v.IsToken)
                     {
@@ -152,7 +155,9 @@ namespace sly.parser.generator
                 }
                 try
                 {
-                    OUT res = (OUT) (Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray()));
+                    object t =  (Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray()));
+                    string typename = t.GetType().Name;
+                    OUT res = (OUT) t;
                     result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
                 }
                 catch (Exception e)

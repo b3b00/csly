@@ -53,7 +53,7 @@ namespace sly.parser.generator
                 {
                     SyntaxVisitorResult<IN, OUT> v = Visit(n);
 
-                    
+
                     if (v.IsToken)
                     {
                         args.Add(v.TokenResult);
@@ -73,9 +73,8 @@ namespace sly.parser.generator
 
                     i++;
                 }
-                
-                result = (OUT)(Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray()));
 
+                result = (OUT) (Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray()));
             }
             return SyntaxVisitorResult<IN, OUT>.NewValue(result);
         }

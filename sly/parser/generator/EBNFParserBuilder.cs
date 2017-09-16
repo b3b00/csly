@@ -34,17 +34,22 @@ namespace sly.parser.generator
 
         public virtual Parser<IN,OUT> BuildParser(object parserInstance, ParserType parserType, string rootRule)
         {
-
+            
+            RuleParser<IN> ruleparser = new RuleParser<IN>();
             ParserBuilder builder = new ParserBuilder();
-            EBNFParserBuilder<EbnfToken,GrammarNode<IN>> parserGrammar = new EBNFParserBuilder<EbnfToken,GrammarNode<IN>>();
-            if (GrammarParser == null)
-            {
-                GrammarParser = builder.BuildParser<EbnfToken,GrammarNode<IN>>(parserGrammar, ParserType.LL_RECURSIVE_DESCENT, "rule");
-            }
+
+            Parser<EbnfToken,GrammarNode<IN>> GrammarParser = builder.BuildParser<EbnfToken,GrammarNode<IN>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
+
+            //ParserBuilder builder = new ParserBuilder();
+//            EBNFParserBuilder<EbnfToken,GrammarNode<IN>> parserGrammar = new EBNFParserBuilder<EbnfToken,GrammarNode<IN>>();
+//            if (GrammarParser == null)
+//            {
+//                GrammarParser = builder.BuildParser<EbnfToken,GrammarNode<IN>>(parserGrammar, ParserType.LL_RECURSIVE_DESCENT, "rule");
+//            }
             ParserConfiguration<IN,OUT> configuration =
                 ExtractEbnfParserConfiguration(parserInstance.GetType(), GrammarParser);
 
-            ISyntaxParser<IN> syntaxParser = BuildSyntaxParser<IN,OUT>(configuration, parserType, rootRule);
+            ISyntaxParser<IN> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
 
             SyntaxTreeVisitor<IN, OUT> visitor = null;
             if (parserType == ParserType.LL_RECURSIVE_DESCENT)
@@ -173,88 +178,7 @@ namespace sly.parser.generator
 
         #endregion
 
-        #region rules grammar
-
-        [Production("rule : IDENTIFIER COLON clauses")]
-        public object Root(Token<EbnfToken> name, Token<EbnfToken> discarded, List<IClause<IN>> clauses)
-        {
-            Rule<IN> rule = new Rule<IN>();
-            rule.NonTerminalName = name.Value;
-            rule.Clauses = clauses;
-            return rule;
-        }
-
-
-        [Production("clauses : clause clauses")]
-
-        public object Clauses(IClause<IN> clause, List<IClause<IN>> clauses)
-        {
-            List<IClause<IN>> list = new List<IClause<IN>> { clause };
-            if (clauses != null)
-            {
-                list.AddRange(clauses);
-            }
-            return list;
-        }
-
-        [Production("clauses : clause ")]
-        public object SingleClause(IClause<IN> clause)
-        {
-            return new List<IClause<IN>> { clause };
-        }
-
-
-
-       
-
-        [Production("clause : IDENTIFIER ZEROORMORE")]
-        public IClause<IN> ZeroMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
-        {
-            IClause<IN> innerClause = BuildTerminalOrNonTerimal(id.Value);
-            return new ZeroOrMoreClause<IN>(innerClause);
-        }
-
-        [Production("clause : IDENTIFIER ONEORMORE")]
-        public IClause<IN> OneMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
-        {
-            IClause<IN> innerClause = BuildTerminalOrNonTerimal(id.Value);
-            return new OneOrMoreClause<IN>(innerClause);
-        }
-
-        [Production("clause : IDENTIFIER ")]
-        public IClause<IN> SimpleClause(Token<EbnfToken> id)
-        {
-            IClause<IN> clause = BuildTerminalOrNonTerimal(id.Value);
-            return clause;
-        }
-
-        private IClause<IN> BuildTerminalOrNonTerimal(string name)
-        {
-
-            IN token = default(IN);
-            IClause<IN> clause;
-            bool isTerminal = false;
-            try
-            {
-                token = (IN)Enum.Parse(typeof(IN), name, false);
-                isTerminal = true;
-            }
-            catch
-            {
-                isTerminal = false;
-            }
-            if (isTerminal)
-            {
-                clause = new TerminalClause<IN>(token);
-            }
-            else
-            {
-                clause = new NonTerminalClause<IN>(name);
-            }
-            return clause;
-        }
-
-        #endregion
+      
 
     }
 
