@@ -146,7 +146,7 @@ namespace jsonparser
 
 
         [Production("listElements: value additionalValue+")]
-        public JSon listElements(JSon head, JList tail)
+        public JSon listElements(JSon head, List<JSon> tail)
         {
             JList values = new JList(head);
             values.AddRange(tail);

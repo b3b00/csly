@@ -51,6 +51,11 @@ namespace jsonparser.JsonModel
             list.AddRange(items.Items);
         }
         
+        public void AddRange(List<JSon> items)
+        {
+            list.AddRange(items);
+        }
+        
         
     }
 }

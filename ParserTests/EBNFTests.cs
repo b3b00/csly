@@ -207,27 +207,98 @@ namespace ParserTests
         [Fact]
         public void TestJsonList()
         {
-//            Parser<JsonToken,JSon> jsonParser = BuildEbnfJsonParser();
-//            ParseResult<JsonToken,JSon> result = jsonParser.Parse("[1,2,3,4]");
-//            Assert.False(result.IsError);
-//            Assert.True(result.Result.IsList);
-//            JList list = (JList) result.Result;
-//            Assert.Equal(4, list.Count);
-//            Assert.Equal(new List<object> { new JValue(1), new JValue(2), new JValue(3), new JValue(4) }, list.Items);
+            Parser<JsonToken,JSon> jsonParser = BuildEbnfJsonParser();
+            ParseResult<JsonToken,JSon> result = jsonParser.Parse("[1,2,3,4]");
+            Assert.False(result.IsError);
+            Assert.True(result.Result.IsList);
+            JList list = (JList) result.Result;
+            Assert.Equal(4, list.Count);
+            Assert.Equal(new List<object> { new JValue(1), new JValue(2), new JValue(3), new JValue(4) }, list.Items);
         }
 
         [Fact]
         public void TestJsonObject()
         {
-//            Parser<JsonToken,JSon> jsonParser = BuildEbnfJsonParser();
-//            ParseResult<JsonToken,JSon> result = jsonParser.Parse("{\"one\":1,\"two\":2,\"three\":\"trois\" }");
-//            Assert.False(result.IsError);
-//            Assert.True(result.Result.IsObject);
-//            JObject o = (JObject) result.Result;
-//            Assert.Equal(3, o.Count);
-//            Assert.Equal(new JValue(1),o["one"]);
-//            Assert.Equal(2, dico["two"]);
-//            Assert.Equal("trois", dico["three"]);
+            Parser<JsonToken,JSon> jsonParser = BuildEbnfJsonParser();
+            ParseResult<JsonToken,JSon> result = jsonParser.Parse("{\"one\":1,\"two\":2,\"three\":\"trois\" }");
+            Assert.False(result.IsError);
+            Assert.True(result.Result.IsObject);
+            JObject o = (JObject) result.Result;
+            Assert.Equal(3, o.Count);
+            AssertInt(o,"one",1);
+            AssertInt(o,"two",2);
+            AssertString(o,"three","trois");
+        }
+        
+        private void AssertString(JObject obj, string key, string value)
+        {
+            Assert.True(obj.ContainsKey(key));
+            Assert.True(obj[key].IsValue);
+            JValue val = (JValue) obj[key];
+            Assert.True(val.IsString);
+            Assert.Equal(value, val.GetValue<string>() );
+        }
+        
+        private void AssertInt(JObject obj, string key, int value)
+        {
+            Assert.True(obj.ContainsKey(key));
+            Assert.True(obj[key].IsValue);
+            JValue val = (JValue) obj[key];
+            Assert.True(val.IsInt);
+            Assert.Equal(value, val.GetValue<int>() );
+        }
+        
+        
+        private void AssertDouble(JObject obj, string key, double value)
+        {
+            Assert.True(obj.ContainsKey(key));
+            Assert.True(obj[key].IsValue);
+            JValue val = (JValue) obj[key];
+            Assert.True(val.IsDouble);
+            Assert.Equal(value, val.GetValue<double>() );
+        }
+        
+        
+        private void AssertString(JList list, int index, string value)
+        {
+            Assert.True(list[index].IsValue);
+            JValue val = (JValue) list[index];
+            Assert.True(val.IsString);
+            Assert.Equal(value, val.GetValue<string>() );
+        }
+        
+        private void AssertInt(JList list, int index, int value)
+        {
+            Assert.True(list[index].IsValue);
+            JValue val = (JValue) list[index];
+            Assert.True(val.IsInt);
+            Assert.Equal(value, val.GetValue<int>() );
+        }
+        
+        
+        private void AssertDouble(JList list, int index, double value)
+        {
+            Assert.True(list[index].IsValue);
+            JValue val = (JValue) list[index];
+            Assert.True(val.IsDouble);
+            Assert.Equal(value, val.GetValue<double>() );
+        }
+        
+        
+        private void AssertBool(JList list, int index, bool value)
+        {
+            Assert.True(list[index].IsValue);
+            JValue val = (JValue) list[index];
+            Assert.True(val.IsBool);
+            Assert.Equal(value, val.GetValue<bool>() );
+        }
+        
+        
+        private void AssertObject(JList list, int index, int count)
+        {
+            Assert.True(list[index].IsObject);
+            JObject val = (JObject) list[index];
+            Assert.Equal(count, val.Count);
         }
 
 
