@@ -273,7 +273,7 @@ you can now use EBNF notation :
  
  for repeated elements values passed to ```[Production]``` methods are :
  * ```List<TOut>``` for a repeated non terminal
- * ```List<Token<TIn>> for a repeated terminal
+ * ```List<Token<TIn>>``` for a repeated terminal
  
  See (https://github.com/b3b00/csly/blob/master/jsonparser/EBNFJSONParser.cs) for a complete EBNF json parser.
  
