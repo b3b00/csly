@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using sly.parser.syntax;
+
 
 namespace sly.parser.generator
 {
-    public class NonTerminal<T>
+    public class NonTerminal<IN>
     {
 
         public string Name { get; set; }
 
-        public List<Rule<T>> Rules { get; set; }
+        public List<Rule<IN>> Rules { get; set; }
 
-        public NonTerminal(string name, List<Rule<T>> rules)
+        public NonTerminal(string name, List<Rule<IN>> rules)
         {
             Name = name;
             Rules = rules;

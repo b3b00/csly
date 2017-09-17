@@ -9,14 +9,14 @@ namespace sly.parser.llparser
 {
 
 
-    public class RecursiveDescentSyntaxParser<T> : ISyntaxParser<T>
+    public class RecursiveDescentSyntaxParser<T,OUT> : ISyntaxParser<T>
     {
-        public ParserConfiguration<T> Configuration { get; set; }
+        public ParserConfiguration<T,OUT> Configuration { get; set; }
 
         public string StartingNonTerminal { get; set; }
 
 
-        public RecursiveDescentSyntaxParser(ParserConfiguration<T> configuration, string startingNonTerminal)
+        public RecursiveDescentSyntaxParser(ParserConfiguration<T,OUT> configuration, string startingNonTerminal)
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
@@ -26,7 +26,7 @@ namespace sly.parser.llparser
         #region STARTING_TOKENS
 
 
-        protected virtual void InitializeStartingTokens(ParserConfiguration<T> configuration, string root)
+        protected virtual void InitializeStartingTokens(ParserConfiguration<T,OUT> configuration, string root)
         {
 
 

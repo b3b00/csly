@@ -8,6 +8,10 @@ namespace sly.parser.syntax
     public class ManySyntaxNode<T> : SyntaxNode<T>
     {
 
+        public bool IsManyTokens { get; set; }
+        
+        public bool IsManyValues { get { return !IsManyTokens; } set { IsManyTokens = !value; }}
+        
         public ManySyntaxNode(string name) : base(name)
         {
         }
@@ -17,6 +21,8 @@ namespace sly.parser.syntax
             this.Name = name;
             this.AddChildren(children);
         }
+        
+        
 
         public void Add(ISyntaxNode<T> child)
         {

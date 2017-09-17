@@ -4,10 +4,10 @@ using System.Collections.Generic;
 namespace sly.parser
 {
 
-    public interface ISyntaxParser<T>
+    public interface ISyntaxParser<IN>
     {
         
-        SyntaxParseResult<T> Parse(IList<Token<T>> tokens, string startingNonTerminal = null);
+        SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null);
 
 
     }

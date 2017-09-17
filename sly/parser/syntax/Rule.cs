@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using System.Text;
 using sly.parser.syntax;
 
-namespace sly.parser.generator
+namespace sly.parser.syntax
 {
 
-    public class Rule<T>
+    public class Rule<T> : GrammarNode<T>
     {
 
         public string RuleString { get;  }

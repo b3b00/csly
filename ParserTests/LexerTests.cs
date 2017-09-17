@@ -1,6 +1,7 @@
 ﻿using sly.parser;
 using expressionparser;
 using jsonparser;
+using jsonparser.JsonModel;
 using sly.lexer;
 using sly.parser.generator;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace ParserTests
         {
             JSONParser jsonParser = new JSONParser();
             ParserBuilder builder = new ParserBuilder();
-            Parser<JsonToken> parser = builder.BuildParser<JsonToken>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            Parser<JsonToken,JSon> parser = builder.BuildParser<JsonToken,JSon>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
             return parser.Lexer;
         }
 
@@ -25,7 +26,7 @@ namespace ParserTests
         {
             ExpressionParser exprParser = new ExpressionParser();
             ParserBuilder builder = new ParserBuilder();
-            Parser<ExpressionToken> parser = builder.BuildParser<ExpressionToken>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            Parser<ExpressionToken,int> parser = builder.BuildParser<ExpressionToken,int>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
             return parser.Lexer;
         }
 
