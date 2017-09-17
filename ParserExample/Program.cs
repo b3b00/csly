@@ -6,6 +6,8 @@ using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using jsonparser.JsonModel;
+using sly.parser.syntax;
 
 namespace ParserExample
 {
@@ -80,31 +82,16 @@ class Program
 
         static void Main(string[] args)
         {
-           JSONParser jsonparser = new JSONParser();
+
+            
+            RuleParser<JsonToken> ruleparser = new RuleParser<JsonToken>();
             ParserBuilder builder = new ParserBuilder();
 
-            Parser<JsonToken> yacc = builder.BuildParser<JsonToken>(jsonparser, ParserType.LL_RECURSIVE_DESCENT, "root");
-            
+            Parser<EbnfToken,GrammarNode<JsonToken>> yacc = builder.BuildParser<EbnfToken,GrammarNode<JsonToken>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
 
-            ParseResult<JsonToken> result = yacc.Parse("'hello' 'world!'");
-
-            if (result.IsError)
-            {
-                result.Errors.ForEach(e => Console.WriteLine(e));
-            }
+            var r = yacc.Parse("test : CROG INT CROD");
             ;
-            Console.WriteLine("====================");
-            Console.WriteLine();
-            result = yacc.Parse(@"{
-                'one': 1,
-                'bug':{,}
-            }");
 
-            if (result.IsError)
-            {
-                result.Errors.ForEach(e => Console.WriteLine(e));
-            }
-            ;
         }
     }
 }

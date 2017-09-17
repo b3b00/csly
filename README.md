@@ -1,4 +1,4 @@
-# sharp Lex Yacc #
+# C# Lex Yacc #
 
 [![Build status](https://ci.appveyor.com/api/projects/status/n9uffgkqn2qet7k9?svg=true)](https://ci.appveyor.com/project/OlivierDuhart/sly)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/b3b00/sly/blob/dev/LICENSE)
@@ -118,6 +118,16 @@ public enum ExpressionToken
 
 ## Parser ##
 
+### Parser typing ###
+
+A parser is  of type Parser<TIn,TOut> where :
+* TIn is the enum token type as seen before 
+* TOut is the type of object produced bye the parser. Classicaly it will be an Asbtract Syntax Tree (AST) or it may be an int for an expression parser.
+
+
+
+### Grammar definition ###
+
 The grammar defining the parser is defined using C# attribute ```[Production("some grammar rule")]``` mapped to methods ( in the same class used for the lexer)
 
 The rules follow the classical BNF notation.
@@ -125,7 +135,7 @@ A terminal notation must exactly matches (case sensitive) an enum value.
 Once the wytaxic tree build, the methods of each rule will be used as a syntaxic tree visitor.
 Each methods takes as many parameters as rule clauses. Each parameter can be typed according to the return value of the clause :
 - for a terminal : the ```Token<T>``` corresponding to the token
-- for a non terminal : the result of the evaluation of the non terminal, i.e the value returned by the matching static method. 
+- for a non terminal : the result of the evaluation of the non terminal, i.e the value returned by the matching static method. As the parser output is typed (TOut as seen before) , the result of an evaluation for a non terminal is necessarily of type TOut.
 
   
 ### partial example for a mathematical expression evaluator ###
@@ -137,13 +147,13 @@ a mathematical parser calculate a mathematical expression. It takes a string as 
 
 
          [Production("primary: INT")]
-        public object Primary(Token<ExpressionToken> intToken)
+        public int Primary(Token<ExpressionToken> intToken)
         {
             return intToken.IntValue;
         }
 
         [Production("primary: LPAREN expression RPAREN")]
-        public object Group(object discaredLParen, int groupValue ,object discardedRParen)
+        public int Group(object discaredLParen, int groupValue ,object discardedRParen)
         {
             return groupValue;
         }
@@ -153,7 +163,7 @@ a mathematical parser calculate a mathematical expression. It takes a string as 
         [Production("expression : term PLUS expression")]
         [Production("expression : term MINUS expression")]
 
-        public object Expression(int left, Token<ExpressionToken> operatorToken, int  right)
+        public int Expression(int left, Token<ExpressionToken> operatorToken, int  right)
         {
             object result = 0;
             
@@ -202,12 +212,17 @@ the parser is typed according to the token type.
 
 ```c#
 ExpressionParser expressionParserDefinition = new ExpressionParser()
-Parser<ExpressionToken> Parser = ParserBuilder.BuildParser<ExpressionToken>(expressionParserDefinition,
+// here see the typing :
+//  ExpressionToken is the token enum type
+//  int is the type of a parse evaluation
+Parser<ExpressionToken,int> Parser = ParserBuilder.BuildParser<ExpressionToken,int>(expressionParserDefinition,
                                                                             ParserType.LL_RECURSIVE_DESCENT,
                                                                             "expression");
-```
 
-then calling ```parser.Parse("some source code")``` will return the evaluation of the syntax tree.
+
+then calling 
+```C#parser.Parse("some source code")``` 
+will return the evaluation of the syntax tree.
 the parser returns a ParseResult instance containing the evaluation value or a list of errors.
 
 ```c#
@@ -253,3 +268,13 @@ Full examples are available under :
 you can now use EBNF notation :
  - '*' to repeat 0 or more the same terminal or non terminal
  - '+' to repeat once or more the same terminal or non terminal
+ 
+ 
+ 
+ for repeated elements values passed to ```[Production]``` methods are :
+ * ```List<TOut>``` for a repeated non terminal
+ * ```List<Token<TIn>>``` for a repeated terminal
+ 
+ See (https://github.com/b3b00/csly/blob/master/jsonparser/EBNFJSONParser.cs) for a complete EBNF json parser.
+ 
+ 

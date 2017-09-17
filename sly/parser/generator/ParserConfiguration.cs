@@ -3,9 +3,9 @@ using System.Reflection;
 
 namespace sly.parser.generator
 {
-    public class ParserConfiguration<T>
+    public class ParserConfiguration<IN,OUT>
     {
         public Dictionary<string, MethodInfo> Functions { get; set; }
-        public Dictionary<string, NonTerminal<T>> NonTerminals { get; set; }
+        public Dictionary<string, NonTerminal<IN>> NonTerminals { get; set; }
     }
 }

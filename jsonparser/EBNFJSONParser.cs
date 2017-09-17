@@ -5,6 +5,7 @@ using sly.parser.generator;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
+using jsonparser.JsonModel;
 
 
 namespace jsonparser
@@ -39,7 +40,7 @@ namespace jsonparser
         #region root
 
         [Production("root : value")]
-        public  object Root(object value)
+        public  JSon Root(JSon value)
         {
             return value;
         }
@@ -50,15 +51,15 @@ namespace jsonparser
         #region VALUE
 
         [Production("value : STRING")]
-        public  object StringValue(Token<JsonToken> stringToken)
+        public  JSon StringValue(Token<JsonToken> stringToken)
         {
-            return stringToken.StringWithoutQuotes;
+            return new JValue(stringToken.StringWithoutQuotes);
         }
 
         [Production("value : INT")]
         public  object IntValue(Token<JsonToken> intToken)
         {
-            return intToken.IntValue;
+            return new JValue(intToken.IntValue);
         }
 
         [Production("value : DOUBLE")]
@@ -84,29 +85,29 @@ namespace jsonparser
                 dbl = double.MinValue;
             }
 
-            return dbl;
+            return new JValue(dbl);
         }
 
         [Production("value : BOOLEAN")]
         public  object BooleanValue(Token<JsonToken> boolToken)
         {
-            return bool.Parse(boolToken.Value);
+            return new JValue(bool.Parse(boolToken.Value));
         }
 
         [Production("value : NULL")]
         public  object NullValue(object forget)
         {
-            return null;
+            return new JNull();
         }
 
         [Production("value : object")]
-        public  object ObjectValue(object value)
+        public  JSon ObjectValue(JSon value)
         {
             return value;
         }
 
         [Production("value: list")]
-        public  object ListValue(List<object> list)
+        public  JSon ListValue(JList list)
         {
             return list;
         }
@@ -116,13 +117,13 @@ namespace jsonparser
         #region OBJECT
 
         [Production("object: ACCG ACCD")]
-        public  object EmptyObjectValue(object accg , object accd)
+        public  JSon EmptyObjectValue(object accg , object accd)
         {
-            return new Dictionary<string, object>();
+            return new JObject();
         }
 
         [Production("object: ACCG members ACCD")]
-        public  object AttributesObjectValue(object accg ,Dictionary<string,object> members, object accd)
+        public  JSon AttributesObjectValue(object accg ,JObject members, object accd)
         {
             return members;
         }
@@ -132,29 +133,28 @@ namespace jsonparser
         #region LIST
 
         [Production("list: CROG CROD")]
-        public  object EmptyList(object crog , object crod)
+        public  JSon EmptyList(object crog , object crod)
         {
-            return new List<object>();
+            return new JList();
         }
 
         [Production("list: CROG listElements CROD")]
-        public  object List(object crog ,List<object> elements, object crod)
+        public  JSon List(object crog ,JList elements, object crod)
         {
             return elements;
         }
 
 
         [Production("listElements: value additionalValue+")]
-        public object listElements(object head, List<object> tail)
+        public JSon listElements(JSon head, List<JSon> tail)
         {
-            List<object> values = new List<object>();
-            values.Add(head);
+            JList values = new JList(head);
             values.AddRange(tail);
             return values;
         }
 
         [Production("additionalValue: COMMA value")]
-        public object ListElementsOne(Token<JsonToken> discardedComma, object value)
+        public JSon ListElementsOne(Token<JsonToken> discardedComma, JSon value)
         {
             return value;
         }
@@ -168,27 +168,27 @@ namespace jsonparser
 
 
         [Production("members: property additionalProperty+")]
-        public object Members(KeyValuePair<string, object> head, List<object> tail)
+        public object Members(JObject head, List<JSon> tail)
         {
-            Dictionary<string, object> value = new Dictionary<string, object>();
-            value[head.Key] = head.Value;
-            foreach(KeyValuePair<string, object> p in tail)
+            JObject value = new JObject();
+            value.Merge(head);
+            foreach(JSon p in tail)
             {
-                value[p.Key] = p.Value;
+                value.Merge((JObject)p);
             }
             return value;
         }
 
         [Production("additionalProperty : COMMA property")]
-        public object property(Token<JsonToken> comma, KeyValuePair<string, object> property )
+        public object property(Token<JsonToken> comma, JObject property )
         {
             return property;
         }
 
         [Production("property: STRING COLON value")]
-        public  object property(Token<JsonToken> key, object colon, object value)
+        public  object property(Token<JsonToken> key, object colon, JSon value)
         {
-            return new KeyValuePair<string, object>(key.StringWithoutQuotes, value);
+            return new JObject(key.StringWithoutQuotes ,value);
         }
 
        

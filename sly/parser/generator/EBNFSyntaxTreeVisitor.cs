@@ -5,36 +5,36 @@ using sly.lexer;
 
 namespace sly.parser.generator
 {
-    public class EBNFSyntaxTreeVisitor<T> : SyntaxTreeVisitor<T>
+    public class EBNFSyntaxTreeVisitor<IN,OUT> : SyntaxTreeVisitor<IN,OUT>
     {
 
-        public EBNFSyntaxTreeVisitor(ParserConfiguration<T> conf) : base(conf)
+        public EBNFSyntaxTreeVisitor(ParserConfiguration<IN,OUT> conf) : base(conf)
         {
         }
 
-        public EBNFSyntaxTreeVisitor(ParserConfiguration<T> conf, object parserInstance) : base(conf, parserInstance)
+        public EBNFSyntaxTreeVisitor(ParserConfiguration<IN,OUT> conf, object parserInstance) : base(conf, parserInstance)
         {
         }
 
 
 
-        protected override object Visit(ISyntaxNode<T> n)
+        protected override SyntaxVisitorResult<IN,OUT> Visit(ISyntaxNode<IN> n)
         {
-            if (n is SyntaxLeaf<T>)
+            if (n is SyntaxLeaf<IN>)
             {
-                return Visit(n as SyntaxLeaf<T>);
+                return Visit(n as SyntaxLeaf<IN>);
             }
-            else if (n is SyntaxEpsilon<T>)
+            else if (n is SyntaxEpsilon<IN>)
             {
-                return Visit(n as SyntaxEpsilon<T>);
+                return Visit(n as SyntaxEpsilon<IN>);
             }
-            else if (n is ManySyntaxNode<T>)
+            else if (n is ManySyntaxNode<IN>)
             {
-                return Visit(n as ManySyntaxNode<T>);
+                return Visit(n as ManySyntaxNode<IN>);
             }
-            else if (n is SyntaxNode<T>)
+            else if (n is SyntaxNode<IN>)
             {
-                return Visit(n as SyntaxNode<T>);
+                return Visit(n as SyntaxNode<IN>);
             }
             else
             {
@@ -42,73 +42,84 @@ namespace sly.parser.generator
             }
         }
 
-        private object Visit(SyntaxNode<T> node)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node)
         {
-            object result = null;
+            OUT result = default(OUT);
             if (Configuration.Functions.ContainsKey(node.Name))
             {
                 List<object> args = new List<object>();
                 int i = 0;
-                foreach (ISyntaxNode<T> n in node.Children)
+                foreach (ISyntaxNode<IN> n in node.Children)
                 {
-                    object v = Visit(n);
+                    SyntaxVisitorResult<IN, OUT> v = Visit(n);
 
-                    args.Add(v);
+
+                    if (v.IsToken)
+                    {
+                        args.Add(v.TokenResult);
+                    }
+                    else if (v.IsValue)
+                    {
+                        args.Add(v.ValueResult);
+                    }
+                    else if (v.IsTokenList)
+                    {
+                        args.Add(v.TokenListResult);
+                    }
+                    else if (v.IsValueList)
+                    {
+                        args.Add(v.ValueListResult);
+                    }
 
                     i++;
                 }
-                
-                result = Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray());
 
+                result = (OUT) (Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray()));
             }
-            return result;
+            return SyntaxVisitorResult<IN, OUT>.NewValue(result);
         }
 
-        private object Visit(ManySyntaxNode<T> node)
+        private SyntaxVisitorResult<IN, OUT> Visit(ManySyntaxNode<IN> node)
         {
-
-            List<object> values = new List<object>();
-            List<Token<T>> tokenValues = new List<Token<T>>();
-            bool areTokens = false;
+            SyntaxVisitorResult<IN, OUT> result = null;
+            
+            List<SyntaxVisitorResult<IN, OUT>> values = new List<SyntaxVisitorResult<IN, OUT>>();
             int i = 0;
-            foreach (ISyntaxNode<T> n in node.Children)
+            foreach (ISyntaxNode<IN> n in node.Children)
             {
-                object v = Visit(n);
+                SyntaxVisitorResult<IN, OUT> v = Visit(n);
 
                 values.Add(v);
 
                 i++;
             }
-            areTokens = values.Count > 0 && values[0].GetType() == typeof(Token<T>);
-            if (areTokens)
-            {
-                foreach (object v in values)
-                {
-                    Token<T> t = (Token<T>)v;
-                    tokenValues.Add(t);
 
-                }
-            }
-            if (values.Count == 0)
+            if (node.IsManyTokens)
             {
-                return new List<Token<T>>();
-            }
-            if (areTokens)
-            {
-                return tokenValues;
+                List<Token<IN>> tokens = new List<Token<IN>>();
+                values.ForEach(v => tokens.Add(v.TokenResult));
+                result = SyntaxVisitorResult<IN, OUT>.NewTokenList(tokens);
             }
             else
             {
-                return values;
+                List<OUT> vals = new List<OUT>();
+                values.ForEach(v => vals.Add(v.ValueResult));
+                result = SyntaxVisitorResult<IN, OUT>.NewValueList(vals);
             }
+                        
+            
+
+
+            return result;
+
 
         }
 
 
 
-        private object Visit(SyntaxLeaf<T> leaf)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN> leaf)
         {
-            return leaf.Token;
+            return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
         }
     }
 }
