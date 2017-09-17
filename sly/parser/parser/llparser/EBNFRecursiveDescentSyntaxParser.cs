@@ -233,10 +233,12 @@ namespace sly.parser.llparser
                 SyntaxParseResult<IN> innerResult = null;
                 if (innerClause is TerminalClause<IN>)
                 {
+                    manyNode.IsManyTokens = true;
                     innerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
                 }
                 else if (innerClause is NonTerminalClause<IN>)
                 {
+                    manyNode.IsManyValues = true;
                     innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
                 }
                 else
@@ -273,10 +275,12 @@ namespace sly.parser.llparser
             SyntaxParseResult<IN> firstInnerResult = null;
             if (innerClause is TerminalClause<IN>)
             {
+                manyNode.IsManyTokens = true;
                 firstInnerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
             }
             else if (innerClause is NonTerminalClause<IN>)
             {
+                manyNode.IsManyValues = true;
                 firstInnerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
             }
             else

@@ -94,9 +94,7 @@ namespace sly.parser.generator
                 i++;
             }
 
-            bool istokenList = values.Count > 0 && values[0].IsToken;
-
-            if (istokenList)
+            if (node.IsManyTokens)
             {
                 List<Token<IN>> tokens = new List<Token<IN>>();
                 values.ForEach(v => tokens.Add(v.TokenResult));
