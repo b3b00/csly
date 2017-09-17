@@ -213,7 +213,10 @@ namespace ParserTests
             Assert.True(result.Result.IsList);
             JList list = (JList) result.Result;
             Assert.Equal(4, list.Count);
-            Assert.Equal(new List<object> { new JValue(1), new JValue(2), new JValue(3), new JValue(4) }, list.Items);
+            AssertInt(list,0,1);
+            AssertInt(list,1,2);
+            AssertInt(list,2,3);
+            AssertInt(list,3,4);
         }
 
         [Fact]

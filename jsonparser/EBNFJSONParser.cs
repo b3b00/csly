@@ -168,13 +168,13 @@ namespace jsonparser
 
 
         [Production("members: property additionalProperty+")]
-        public object Members(JObject head, List<JObject> tail)
+        public object Members(JObject head, List<JSon> tail)
         {
             JObject value = new JObject();
             value.Merge(head);
-            foreach(JObject p in tail)
+            foreach(JSon p in tail)
             {
-                value.Merge(p);
+                value.Merge((JObject)p);
             }
             return value;
         }
