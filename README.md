@@ -275,6 +275,9 @@ you can now use EBNF notation :
  * ```List<TOut>``` for a repeated non terminal
  * ```List<Token<TIn>>``` for a repeated terminal
  
- See (https://github.com/b3b00/csly/blob/master/jsonparser/EBNFJSONParser.cs) for a complete EBNF json parser.
+ See [EBNFJsonParser.cs](https://github.com/b3b00/csly/blob/master/jsonparser/EBNFJSONParser.cs) for a complete EBNF json parser.
  
+#### under the hood meta consideration on EBNF parsers ####
+
+The EBNF notation has been implemented in CSLY using the BNF notation. The EBNF parser builder is built using the BNF parser builder. Incidently the EBNF parser builder is a good and complete example for BNF parser : [RuleParser.cs](https://github.com/b3b00/csly/blob/master/sly/parser/generator/RuleParser.cs)
  
