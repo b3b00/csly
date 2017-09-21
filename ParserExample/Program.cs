@@ -1,20 +1,19 @@
-﻿using sly.parser;
-using jsonparser;
-using sly.lexer;
+﻿using sly.lexer;
 using sly.parser.generator;
-using System.Linq;
 using System.Collections.Generic;
-using System.IO;
+using expressionparser;
 using System;
-using jsonparser.JsonModel;
-using sly.parser.syntax;
+using System.Linq;
+using System.Reflection;
 
 namespace ParserExample
 {
 
     public enum TokenType
     {
+        [Description("one")]
         a = 1,
+        [Description("two")]
         b = 2,
         c = 3,
         z = 26,
@@ -23,7 +22,26 @@ namespace ParserExample
         EOL = 101
     }
 
-class Program
+
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = true)]
+    public class DescriptionAttribute : Attribute
+    {
+
+        public string Description { get; set; }
+
+        public bool IsSkippable { get; set; }
+
+        public bool IsEnding { get; set; }
+
+        public DescriptionAttribute(string description)
+        {
+            Description = description;            
+        }
+    }
+
+   
+
+    class Program
     {
 
         
@@ -83,14 +101,27 @@ class Program
         static void Main(string[] args)
         {
 
-            
-            RuleParser<JsonToken> ruleparser = new RuleParser<JsonToken>();
-            ParserBuilder builder = new ParserBuilder();
 
-            Parser<EbnfToken,GrammarNode<JsonToken>> yacc = builder.BuildParser<EbnfToken,GrammarNode<JsonToken>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
+            DescriptionAttribute attr = TokenType.a.GetAttributeOfType<DescriptionAttribute>();
+            string desc = attr.Description;
 
-            var r = yacc.Parse("test : CROG INT CROD");
-            ;
+            ILexer<ExpressionToken> lexer = LexerBuilder.BuildLexer<ExpressionToken>();
+
+
+            ExpressionParser exprParser = new ExpressionParser();
+
+            ParserBuilder<ExpressionToken, int> builder = new ParserBuilder<ExpressionToken, int>();
+            var p = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            var r = p.Parse("1", "expression");
+
+
+            //RuleParser<JsonToken> ruleparser = new RuleParser<JsonToken>();
+            //ParserBuilder builder = new ParserBuilder();
+
+            //Parser<EbnfToken,GrammarNode<JsonToken>> yacc = builder.BuildParser<EbnfToken,GrammarNode<JsonToken>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
+
+            //var r = yacc.Parse("test : CROG INT CROD");
+            //;
 
         }
     }

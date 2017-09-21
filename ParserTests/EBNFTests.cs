@@ -110,9 +110,9 @@ namespace ParserTests
         private Parser<TokenType, string> BuildParser()
         {
             EBNFTests parserInstance = new EBNFTests();
-            ParserBuilder builder = new ParserBuilder();
+            ParserBuilder<TokenType, string> builder = new ParserBuilder<TokenType, string>();
 
-            Parser = builder.BuildParser<TokenType, string>(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "R");
+            Parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "R");
             return Parser;
         }
 
@@ -120,10 +120,10 @@ namespace ParserTests
         private Parser<JsonToken, JSon> BuildEbnfJsonParser()
         {
             EbnfJsonParser parserInstance = new EbnfJsonParser();
-            ParserBuilder builder = new ParserBuilder();
+            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
 
             JsonParser =
-                builder.BuildParser<JsonToken, JSon>(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+                builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
             return JsonParser;
         }
 

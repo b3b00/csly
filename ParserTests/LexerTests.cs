@@ -17,16 +17,16 @@ namespace ParserTests
         private ILexer<JsonToken> GetJsonLexer()
         {
             JSONParser jsonParser = new JSONParser();
-            ParserBuilder builder = new ParserBuilder();
-            Parser<JsonToken,JSon> parser = builder.BuildParser<JsonToken,JSon>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
+            Parser<JsonToken,JSon> parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
             return parser.Lexer;
         }
 
         private ILexer<ExpressionToken> GetExpressionLexer()
         {
             ExpressionParser exprParser = new ExpressionParser();
-            ParserBuilder builder = new ParserBuilder();
-            Parser<ExpressionToken,int> parser = builder.BuildParser<ExpressionToken,int>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            ParserBuilder<ExpressionToken, int> builder = new ParserBuilder<ExpressionToken, int>();
+            Parser<ExpressionToken,int> parser = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
             return parser.Lexer;
         }
 
