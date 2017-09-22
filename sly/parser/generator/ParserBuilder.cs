@@ -39,7 +39,7 @@ namespace sly.parser.generator
                 ISyntaxParser<IN> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                 SyntaxTreeVisitor<IN,OUT> visitor = new SyntaxTreeVisitor<IN,OUT>(configuration, parserInstance);
                 parser = new Parser<IN,OUT>(syntaxParser, visitor);
-                parser.Lexer = BuildLexer<IN>();
+                parser.Lexer = BuildLexer();
                 parser.Instance = parserInstance;
                 parser.Configuration = configuration;
             }
@@ -99,7 +99,7 @@ namespace sly.parser.generator
         }
 
 
-        protected ILexer<IN> BuildLexer<IN>() where IN : struct
+        protected ILexer<IN> BuildLexer() 
         {
             ILexer<IN> lexer = LexerBuilder.BuildLexer<IN>();            
             return lexer;

@@ -43,7 +43,7 @@ namespace expressionparser
         [Lexeme("[ \\t]+",true)]
         WS = 12, 
 
-        [Lexeme("[\\n\\r] + ", true, true)]
+        [Lexeme("[\\n\\r]+", true, true)]
         EOL = 14
     }
 }

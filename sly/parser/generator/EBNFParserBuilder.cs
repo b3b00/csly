@@ -59,7 +59,7 @@ namespace sly.parser.generator
             }
             Parser<IN,OUT> parser = new Parser<IN,OUT>(syntaxParser, visitor);
             parser.Configuration = configuration;
-            parser.Lexer = BuildLexer<IN>();
+            parser.Lexer = BuildLexer();
             parser.Instance = parserInstance;
             return parser;
         }

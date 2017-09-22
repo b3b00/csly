@@ -100,20 +100,17 @@ namespace ParserExample
 
         static void Main(string[] args)
         {
-
-
-            DescriptionAttribute attr = TokenType.a.GetAttributeOfType<DescriptionAttribute>();
-            string desc = attr.Description;
-
+            
             ILexer<ExpressionToken> lexer = LexerBuilder.BuildLexer<ExpressionToken>();
 
+            string source = "1 + 2\n*3";
 
-            ExpressionParser exprParser = new ExpressionParser();
 
-            ParserBuilder<ExpressionToken, int> builder = new ParserBuilder<ExpressionToken, int>();
-            var p = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
-            var r = p.Parse("1", "expression");
 
+
+
+            List<Token<ExpressionToken>> toks = lexer.Tokenize(source).ToList();
+            ;
 
             //RuleParser<JsonToken> ruleparser = new RuleParser<JsonToken>();
             //ParserBuilder builder = new ParserBuilder();

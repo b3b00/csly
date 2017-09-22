@@ -9,10 +9,15 @@ namespace ParserTests
 {
     public enum TokenType
     {
+        [Lexeme("a")]
         a = 1,
+        [Lexeme("b")]
         b = 2,
+        [Lexeme("c")]
         c = 3,
+        [Lexeme("[ \\t]+", true)]
         WS = 100,
+        [Lexeme("[\\n\\r]+", true, true)]
         EOL = 101
     }
 

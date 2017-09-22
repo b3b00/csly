@@ -1,26 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using sly.lexer;
 
 namespace jsonparser
 {
     public enum JsonToken
     {
+        [Lexeme("(\\\")([^(\\\")]*)(\\\")")]
         STRING = 1,
-        INT = 2,
-        DOUBLE = 3,
+        [Lexeme("[0-9]+\\.[0-9]+")]
+        DOUBLE = 2,
+       [Lexeme("[0-9]+")]
+        INT = 3,
+        [Lexeme("(true|false)")]
         BOOLEAN = 4,
+        [Lexeme("{")]
         ACCG = 5,
+        [Lexeme("}")]
         ACCD = 6,
+        [Lexeme("\\[")]
         CROG = 7,
+        [Lexeme("\\]")]
         CROD = 8,
+        [Lexeme(",")]
         COMMA = 9,
-        COLON = 10,
-        SEMICOLON = 11,
+        [Lexeme(":")]
+        COLON = 10,        
+        [Lexeme("[ \\t]+", true)]
         WS = 12,
+        [Lexeme("[\\n\\r]+", true,true)]
         EOL = 13,
-        NULL = 14,
-        QUOTE = 99
+        [Lexeme("(null)")]
+        NULL = 14,        
     }
 
 }
