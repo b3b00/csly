@@ -17,16 +17,16 @@ namespace ParserTests
         private ILexer<JsonToken> GetJsonLexer()
         {
             JSONParser jsonParser = new JSONParser();
-            ParserBuilder builder = new ParserBuilder();
-            Parser<JsonToken,JSon> parser = builder.BuildParser<JsonToken,JSon>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
+            Parser<JsonToken,JSon> parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
             return parser.Lexer;
         }
 
         private ILexer<ExpressionToken> GetExpressionLexer()
         {
             ExpressionParser exprParser = new ExpressionParser();
-            ParserBuilder builder = new ParserBuilder();
-            Parser<ExpressionToken,int> parser = builder.BuildParser<ExpressionToken,int>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            ParserBuilder<ExpressionToken, int> builder = new ParserBuilder<ExpressionToken, int>();
+            Parser<ExpressionToken,int> parser = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
             return parser.Lexer;
         }
 
@@ -64,6 +64,24 @@ namespace ParserTests
         public void TestSingleLineExpressionLexing()
         {
             ILexer<ExpressionToken> lexer = GetExpressionLexer();
+            string expr = "1 + 2 * 3";
+            List<Token<ExpressionToken>> tokens = lexer.Tokenize(expr).ToList<Token<ExpressionToken>>();
+            Assert.Equal(6, tokens.Count);
+            List<ExpressionToken> expectedTokensID = new List<ExpressionToken>()
+            {
+                ExpressionToken.INT, ExpressionToken.PLUS,ExpressionToken.INT,
+                ExpressionToken.TIMES, ExpressionToken.INT
+            };
+            List<ExpressionToken> tokensID = tokens.Take(5).Select((Token<ExpressionToken> tok) => tok.TokenID).ToList<ExpressionToken>();
+            Assert.Equal(expectedTokensID, tokensID);
+
+            List<int> expectedColumnPositions = new List<int>()
+            {                
+                1,3,5,7,9
+            };
+
+            List<int> columnPositions = tokens.Take(5).Select((Token<ExpressionToken> tok) => tok.Position.Column).ToList<int>();
+            Assert.Equal(expectedColumnPositions, columnPositions);
         }
 
         [Fact]
@@ -107,6 +125,32 @@ namespace ParserTests
         public void TestMultiLineExpressionLexing()
         {
             ILexer<ExpressionToken> lexer = GetExpressionLexer();
+            string expr = "1 + 2 \n* 3";
+            List<Token<ExpressionToken>> tokens = lexer.Tokenize(expr).ToList<Token<ExpressionToken>>();
+            Assert.Equal(6, tokens.Count);
+            List<ExpressionToken> expectedTokensID = new List<ExpressionToken>()
+            {
+                ExpressionToken.INT, ExpressionToken.PLUS,ExpressionToken.INT,
+                ExpressionToken.TIMES, ExpressionToken.INT
+            };
+            List<ExpressionToken> tokensID = tokens.Take(5).Select((Token<ExpressionToken> tok) => tok.TokenID).ToList<ExpressionToken>();
+            Assert.Equal(expectedTokensID, tokensID);
+
+            List<int> expectedColumnPositions = new List<int>()
+            {   
+                1,3,5,1,3
+            };
+
+            List<int> columnPositions = tokens.Take(5).Select((Token<ExpressionToken> tok) => tok.Position.Column).ToList<int>();
+            Assert.Equal(expectedColumnPositions, columnPositions);
+
+            List<int> expectedLinePositions = new List<int>()
+            {
+                1,3,5,1,3
+            };
+
+            List<int> linePositions = tokens.Take(5).Select((Token<ExpressionToken> tok) => tok.Position.Line).ToList<int>();
+            Assert.Equal(expectedLinePositions, columnPositions);
         }
     }
 }

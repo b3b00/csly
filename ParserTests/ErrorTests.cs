@@ -16,8 +16,8 @@ namespace ParserTests
         public void TestJsonSyntaxError()
         {
             JSONParser jsonParser = new JSONParser();
-            ParserBuilder builder = new ParserBuilder();
-            Parser<JsonToken,JSon> parser = builder.BuildParser<JsonToken,JSon>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
+            Parser<JsonToken,JSon> parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
 
 
             string source = @"{
@@ -42,8 +42,8 @@ namespace ParserTests
         public void TestExpressionSyntaxError()
         {
             ExpressionParser exprParser = new ExpressionParser();
-            ParserBuilder builder = new ParserBuilder();
-            Parser<ExpressionToken,int> Parser = builder.BuildParser<ExpressionToken,int>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            ParserBuilder<ExpressionToken, int> builder = new ParserBuilder<ExpressionToken, int>();
+            Parser<ExpressionToken,int> Parser = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
 
             ParseResult<ExpressionToken,int> r = Parser.Parse(" 2 + 3 + + 2");
             Assert.True(r.IsError);
@@ -63,8 +63,8 @@ namespace ParserTests
         {
             ExpressionParser exprParser = new ExpressionParser();
 
-            ParserBuilder builder = new ParserBuilder();
-            Parser<ExpressionToken,int> Parser = builder.BuildParser<ExpressionToken,int>(exprParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            ParserBuilder<ExpressionToken, int> builder = new ParserBuilder<ExpressionToken, int>();
+            Parser<ExpressionToken,int> Parser = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "root");
             ParseResult<ExpressionToken,int> r = Parser.Parse("2 @ 2");
             Assert.True(r.IsError);
             Assert.NotNull(r.Errors);

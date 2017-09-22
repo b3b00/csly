@@ -10,7 +10,7 @@ namespace sly.parser
 {
     public class Parser<IN,OUT>
     {
-        public Lexer<IN> Lexer { get; set; }
+        public ILexer<IN> Lexer { get; set; }
         public object Instance { get; set; }
         public ISyntaxParser<IN> SyntaxParser { get; set; }
         public SyntaxTreeVisitor<IN,OUT> Visitor { get; set; }
@@ -29,6 +29,7 @@ namespace sly.parser
             ParseResult<IN,OUT> result = null;
             try
             {
+
                 IList<Token<IN>> tokens = Lexer.Tokenize(source).ToList<Token<IN>>();
                 result = Parse(tokens, startingNonTerminal);
             }

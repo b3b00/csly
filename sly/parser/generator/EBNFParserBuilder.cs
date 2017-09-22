@@ -20,11 +20,8 @@ namespace sly.parser.generator
     /// <summary>
     /// this class provides API to build parser
     /// </summary>
-    internal class EBNFParserBuilder<IN,OUT> : ParserBuilder
+    internal class EBNFParserBuilder<IN,OUT> : ParserBuilder<IN,OUT> where IN :struct
     {
-
-
-        private Parser<EbnfToken,GrammarNode<IN>> GrammarParser;
 
         public EBNFParserBuilder()
         {
@@ -32,13 +29,13 @@ namespace sly.parser.generator
         }
 
 
-        public virtual Parser<IN,OUT> BuildParser(object parserInstance, ParserType parserType, string rootRule)
+        public override Parser<IN,OUT> BuildParser(object parserInstance, ParserType parserType, string rootRule)
         {
             
             RuleParser<IN> ruleparser = new RuleParser<IN>();
-            ParserBuilder builder = new ParserBuilder();
+            ParserBuilder<EbnfToken, GrammarNode<IN>> builder = new ParserBuilder<EbnfToken, GrammarNode<IN>>();
 
-            Parser<EbnfToken,GrammarNode<IN>> GrammarParser = builder.BuildParser<EbnfToken,GrammarNode<IN>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
+            Parser<EbnfToken,GrammarNode<IN>> grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
 
             //ParserBuilder builder = new ParserBuilder();
 //            EBNFParserBuilder<EbnfToken,GrammarNode<IN>> parserGrammar = new EBNFParserBuilder<EbnfToken,GrammarNode<IN>>();
@@ -47,7 +44,7 @@ namespace sly.parser.generator
 //                GrammarParser = builder.BuildParser<EbnfToken,GrammarNode<IN>>(parserGrammar, ParserType.LL_RECURSIVE_DESCENT, "rule");
 //            }
             ParserConfiguration<IN,OUT> configuration =
-                ExtractEbnfParserConfiguration(parserInstance.GetType(), GrammarParser);
+                ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
 
             ISyntaxParser<IN> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
 
@@ -62,7 +59,7 @@ namespace sly.parser.generator
             }
             Parser<IN,OUT> parser = new Parser<IN,OUT>(syntaxParser, visitor);
             parser.Configuration = configuration;
-            parser.Lexer = BuildLexer<IN>(parserInstance.GetType(), parserInstance);
+            parser.Lexer = BuildLexer();
             parser.Instance = parserInstance;
             return parser;
         }
@@ -84,7 +81,7 @@ namespace sly.parser.generator
 
 
 
-        protected override ISyntaxParser<IN> BuildSyntaxParser<IN,OUT>(ParserConfiguration<IN,OUT> conf, ParserType parserType,
+        protected override ISyntaxParser<IN> BuildSyntaxParser(ParserConfiguration<IN,OUT> conf, ParserType parserType,
             string rootRule)
         {
             ISyntaxParser<IN> parser = null;
