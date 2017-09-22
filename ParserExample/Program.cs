@@ -28,40 +28,12 @@ namespace ParserExample
     }
 
 
-    [AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = true)]
-    public class DescriptionAttribute : Attribute
-    {
-
-        public string Description { get; set; }
-
-        public bool IsSkippable { get; set; }
-
-        public bool IsEnding { get; set; }
-
-        public DescriptionAttribute(string description)
-        {
-            Description = description;            
-        }
-    }
+    
 
    
 
     class Program
     {
-
-        
-        public static Lexer<TokenType> BuildLexer()
-        {
-            Lexer<TokenType> lexer = new Lexer<TokenType>();
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.WS, "[ \\t]+", true));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.EOL, "[\\n\\r]+", true, true));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.a, "a"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.b, "b"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.c, "c"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.z, "z"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.r, "r"));
-            return lexer;
-        }
 
         [Production("R : A b c ")]
         [Production("R : Rec b c ")]
