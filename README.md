@@ -30,6 +30,10 @@ Install from the NuGet gallery GUI or with the Package Manager Console using the
 
 ```Install-Package sly```
 
+or with dotnet core 
+
+```dotnet add package sly```
+
 
 ## Lexer ##
 
@@ -41,79 +45,81 @@ It could be improved in the future.
 
 ### configuration ###
 
-To configure a lexer 2 items has to be done :
+The full lexer configuration is done in an ```enum```:
 
+The ```enum``` is listing all the possible tokens (no special constraint here except public visibility)
 
-- an ```enum```  listing all the possible tokens (no special constraint here except public visibility)
-- a method with special attribute ```[LexerConfigurationAttribute]``` that associates tokens from the above enum with matching regex.
- 
-the configuration method takes a ```Lexer<T>``` (where T is the tokens ```enum```  parameters and returns the same lexer after having added (token,regex) associations.
+Each ```enum``` value has a ```[Lexeme]``` attribute to mark it has a lexeme. The lexeme attribute takes 3 parameters:
+ - 
+ ```c# 
+ string regex
+ ``` : a regular expression that captures the lexeme
+ - ```boolean isSkippable``` (optional, default is ```false```): a boolean ,  true if the lexeme must be ignored ( whitespace for example)
+ - ```boolean isLineending``` (optionanl, default is ```false```) : true if the lexeme matches a line end (to allow line counting while lexing).
+
 
 The lexer can be used apart from the parser. It provides a method that returns an ```IEnumerable<Token<T>>``` (where T is the tokens ```enum```) from a ```string```
+
+
 
 ```c#
  IList<Token<T>> tokens = Lexer.Tokenize(source).ToList<Token<T>>();
 ```
 
-### full example, for a mathematical parser ###
 
-#### the tokens enum ####
+You can also build only a lexer using :
 
 ```c#
+ILexer<ExpressionToken> lexer = LexerBuilder.BuildLexer<ExpressionToken>();
+var tokens = lexer.Tokenize(source).ToList();
+```
 
+### full example, for a mathematical parser ###
+
+```c#
 public enum ExpressionToken
     {
+        // float number 
+        [Lexeme("[0-9]+\\.[0-9]+")]
+        DOUBLE = 1,
 
-        INT = 2, // integer
+        // integer        
+        [Lexeme("[0-9]+")]
+        INT = 3,
 
-        DOUBLE = 3, // float number
- 
-        PLUS = 4, // the + operator
+        // the + operator
+        [Lexeme("\\+")]
+        PLUS = 4,
 
-        MINUS = 5, // the - operator
+        // the - operator
+        [Lexeme("\\-")]
+        MINUS = 5,
 
-        TIMES = 6, // the * operator
+        // the * operator
+        [Lexeme("\\*")]
+        TIMES = 6,
 
-        DIVIDE = 7, //  the  / operator
+        //  the  / operator
+        [Lexeme("\\/")]
+        DIVIDE = 7,
 
-        LPAREN = 8, // a left paranthesis (
+        // a left paranthesis (
+        [Lexeme("\\(")]
+        LPAREN = 8,
 
-        RPAREN = 9,// a right paranthesis )
+        // a right paranthesis )
+        [Lexeme("\\)")]
+        RPAREN = 9,
 
-        WS = 12, // a whitespace
+        // a whitespace
+        [Lexeme("[ \\t]+",true)]
+        WS = 12, 
 
-        EOL = 14 // an end of line
-
+        [Lexeme("[\\n\\r]+", true, true)]
+        EOL = 14
     }
 ```
 
-#### regular expressions
-
-```c#
-
-        [LexerConfiguration]
-        public Lexer<ExpressionToken> BuildExpressionLexer(Lexer<ExpressionToken> lexer = null)
-        {
-            if (lexer == null)
-            {
-                lexer = new Lexer<ExpressionToken>();
-            }
-
-            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.DOUBLE, "[0-9]+\\.[0-9]+"));
-            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.INT, "[0-9]+"));            
-            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.PLUS, "\\+"));
-            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.MINUS, "\\-"));
-            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.TIMES, "\\*"));
-            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.DIVIDE, "\\/"));
-
-            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.LPAREN, "\\("));
-            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.RPAREN, "\\)"));
-
-            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.WS, "[ \\t]+", true));
-            lexer.AddDefinition(new TokenDefinition<ExpressionToken>(ExpressionToken.EOL, "[\\n\\r]+", true, true));
-            return lexer;
-        }
-``` 
 
 
 ## Parser ##
