@@ -11,14 +11,19 @@ namespace ParserExample
 
     public enum TokenType
     {
-        [Description("one")]
+        [Lexeme("a")]
         a = 1,
-        [Description("two")]
+        [Lexeme("b")]
         b = 2,
+        [Lexeme("c")]
         c = 3,
+        [Lexeme("z")]
         z = 26,
+        [Lexeme("r")]
         r = 21,
+        [Lexeme("[ \\t]+",true)]
         WS = 100,
+        [Lexeme("[\\r\\n]+",true,true)]
         EOL = 101
     }
 
