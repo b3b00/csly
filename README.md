@@ -45,15 +45,13 @@ It could be improved in the future.
 
 ### configuration ###
 
-The full lexer configuration is done in an ```enum```:
+The full lexer configuration is done in a C# ```enum```:
 
 The ```enum``` is listing all the possible tokens (no special constraint here except public visibility)
 
 Each ```enum``` value has a ```[Lexeme]``` attribute to mark it has a lexeme. The lexeme attribute takes 3 parameters:
  - 
- ```c# 
- string regex
- ``` : a regular expression that captures the lexeme
+ ```string regex``` : a regular expression that captures the lexeme
  - ```boolean isSkippable``` (optional, default is ```false```): a boolean ,  true if the lexeme must be ignored ( whitespace for example)
  - ```boolean isLineending``` (optionanl, default is ```false```) : true if the lexeme matches a line end (to allow line counting while lexing).
 
