@@ -1,44 +1,39 @@
-﻿using sly.parser;
-using jsonparser;
-using sly.lexer;
+﻿using sly.lexer;
 using sly.parser.generator;
-using System.Linq;
 using System.Collections.Generic;
-using System.IO;
+using expressionparser;
 using System;
-using jsonparser.JsonModel;
-using sly.parser.syntax;
+using System.Linq;
+using System.Reflection;
 
 namespace ParserExample
 {
 
     public enum TokenType
     {
+        [Lexeme("a")]
         a = 1,
+        [Lexeme("b")]
         b = 2,
+        [Lexeme("c")]
         c = 3,
+        [Lexeme("z")]
         z = 26,
+        [Lexeme("r")]
         r = 21,
+        [Lexeme("[ \\t]+",true)]
         WS = 100,
+        [Lexeme("[\\r\\n]+",true,true)]
         EOL = 101
     }
 
-class Program
-    {
 
-        
-        public static Lexer<TokenType> BuildLexer()
-        {
-            Lexer<TokenType> lexer = new Lexer<TokenType>();
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.WS, "[ \\t]+", true));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.EOL, "[\\n\\r]+", true, true));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.a, "a"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.b, "b"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.c, "c"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.z, "z"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.r, "r"));
-            return lexer;
-        }
+    
+
+   
+
+    class Program
+    {
 
         [Production("R : A b c ")]
         [Production("R : Rec b c ")]
@@ -82,15 +77,25 @@ class Program
 
         static void Main(string[] args)
         {
-
             
-            RuleParser<JsonToken> ruleparser = new RuleParser<JsonToken>();
-            ParserBuilder builder = new ParserBuilder();
+            ILexer<ExpressionToken> lexer = LexerBuilder.BuildLexer<ExpressionToken>();
 
-            Parser<EbnfToken,GrammarNode<JsonToken>> yacc = builder.BuildParser<EbnfToken,GrammarNode<JsonToken>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
+            string source = "1 + 2\n*3";
 
-            var r = yacc.Parse("test : CROG INT CROD");
+
+
+
+
+            List<Token<ExpressionToken>> toks = lexer.Tokenize(source).ToList();
             ;
+
+            //RuleParser<JsonToken> ruleparser = new RuleParser<JsonToken>();
+            //ParserBuilder builder = new ParserBuilder();
+
+            //Parser<EbnfToken,GrammarNode<JsonToken>> yacc = builder.BuildParser<EbnfToken,GrammarNode<JsonToken>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
+
+            //var r = yacc.Parse("test : CROG INT CROD");
+            //;
 
         }
     }

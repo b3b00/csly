@@ -18,8 +18,8 @@ namespace ParserTests
         public JsonTests()
         {
             JSONParser jsonParser = new JSONParser();
-            ParserBuilder builder = new ParserBuilder();
-            Parser = builder.BuildParser<JsonToken,JSon>(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
+            Parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
         }
 
         

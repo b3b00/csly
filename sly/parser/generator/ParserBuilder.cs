@@ -16,7 +16,7 @@ namespace sly.parser.generator
     /// <summary>
     /// this class provides API to build parser
     /// </summary>
-    public class ParserBuilder
+    public class ParserBuilder<IN,OUT> where IN : struct
     {
         #region API
 
@@ -30,16 +30,16 @@ namespace sly.parser.generator
         /// <param name="parserType">a ParserType enum value stating the analyser type (LR, LL ...) for now only LL recurive descent parser available </param>
         /// <param name="rootRule">the name of the root non terminal of the grammar</param>
         /// <returns></returns>
-        public virtual Parser<IN,OUT> BuildParser<IN,OUT>(object parserInstance, ParserType parserType, string rootRule)
+        public virtual Parser<IN,OUT> BuildParser(object parserInstance, ParserType parserType, string rootRule)
         {
             Parser<IN,OUT> parser = null;
             if (parserType == ParserType.LL_RECURSIVE_DESCENT)
             {
-                ParserConfiguration<IN,OUT> configuration = ExtractParserConfiguration<IN,OUT>(parserInstance.GetType());
-                ISyntaxParser<IN> syntaxParser = BuildSyntaxParser<IN,OUT>(configuration, parserType, rootRule);
+                ParserConfiguration<IN,OUT> configuration = ExtractParserConfiguration(parserInstance.GetType());
+                ISyntaxParser<IN> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                 SyntaxTreeVisitor<IN,OUT> visitor = new SyntaxTreeVisitor<IN,OUT>(configuration, parserInstance);
                 parser = new Parser<IN,OUT>(syntaxParser, visitor);
-                parser.Lexer = BuildLexer<IN>(parserInstance.GetType(), parserInstance);
+                parser.Lexer = BuildLexer();
                 parser.Instance = parserInstance;
                 parser.Configuration = configuration;
             }
@@ -51,7 +51,7 @@ namespace sly.parser.generator
             return parser;
         }
 
-        protected virtual  ISyntaxParser<IN> BuildSyntaxParser<IN,OUT>(ParserConfiguration<IN,OUT> conf, ParserType parserType, string rootRule)
+        protected virtual  ISyntaxParser<IN> BuildSyntaxParser(ParserConfiguration<IN,OUT> conf, ParserType parserType, string rootRule)
         {
             ISyntaxParser<IN> parser = null;
             switch (parserType)
@@ -99,33 +99,19 @@ namespace sly.parser.generator
         }
 
 
-        protected Lexer<T> BuildLexer<T>(Type parserClass, object parserInstance = null)
+        protected ILexer<IN> BuildLexer() 
         {
-            TypeInfo typeInfo = parserClass.GetTypeInfo();
-            Lexer<T> lexer = null;
-            List < MethodInfo > methods = typeInfo.DeclaredMethods.ToList<MethodInfo>();
-            methods = methods.Where(m =>
-            {
-                List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>();
-                Attribute attr = attributes.Find(a => a.GetType() == typeof(LexerConfigurationAttribute));
-                return attr != null;
-            }).ToList<MethodInfo>();
-            if (methods.Count > 0)
-            {
-                MethodInfo lexerConfigurerMethod = methods[0];
-                lexer = new Lexer<T>();
-                object res = lexerConfigurerMethod.Invoke(parserInstance, new object[] { lexer });
-            }
+            ILexer<IN> lexer = LexerBuilder.BuildLexer<IN>();            
             return lexer;
         }
 
        
 
-        protected virtual  ParserConfiguration<T,OUT> ExtractParserConfiguration<T,OUT>(Type parserClass)
+        protected virtual  ParserConfiguration<IN,OUT> ExtractParserConfiguration(Type parserClass)
         {
-            ParserConfiguration<T,OUT> conf = new ParserConfiguration<T,OUT>();
+            ParserConfiguration<IN,OUT> conf = new ParserConfiguration<IN,OUT>();
             Dictionary<string, MethodInfo> functions = new Dictionary<string, MethodInfo>();
-            Dictionary<string, NonTerminal<T>> nonTerminals = new Dictionary<string, NonTerminal<T>>();
+            Dictionary<string, NonTerminal<IN>> nonTerminals = new Dictionary<string, NonTerminal<IN>>();
             List<MethodInfo> methods = parserClass.GetMethods().ToList<MethodInfo>();
             methods = methods.Where(m =>
             {
@@ -146,13 +132,13 @@ namespace sly.parser.generator
 
                     
 
-                    Rule<T> r = BuildNonTerminal<T>(ntAndRule);
+                    Rule<IN> r = BuildNonTerminal<IN>(ntAndRule);
                     string key = ntAndRule.Item1 + "__" + r.Key;
                     functions[key] = m;
-                    NonTerminal<T> nonT = null;
+                    NonTerminal<IN> nonT = null;
                     if (!nonTerminals.ContainsKey(ntAndRule.Item1))
                     {
-                        nonT = new NonTerminal<T>(ntAndRule.Item1, new List<Rule<T>>());
+                        nonT = new NonTerminal<IN>(ntAndRule.Item1, new List<Rule<IN>>());
                     }
                     else
                     {

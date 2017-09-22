@@ -17,8 +17,8 @@ namespace ParserTests
         public ExpressionTests()
         {
             ExpressionParser parserInstance = new ExpressionParser();
-            ParserBuilder builder = new ParserBuilder();
-            Parser = builder.BuildParser<ExpressionToken,int>(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            ParserBuilder<ExpressionToken, int> builder = new ParserBuilder<ExpressionToken, int>();
+            Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression");
         }
 
 
