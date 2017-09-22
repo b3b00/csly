@@ -21,6 +21,7 @@ namespace sly.lexer
             var type = enumVal.GetType();
             var memInfo = type.GetMember(enumVal.ToString());
             IEnumerable<Attribute> attributes = (IEnumerable<Attribute>)(memInfo[0].GetCustomAttributes(typeof(T), false));
+
             return (T)attributes?.ToArray()[0];
         }
     }
@@ -39,10 +40,12 @@ namespace sly.lexer
             var fields = typeof(T).GetFields();
             foreach(Enum value in values)
             {
+                T tokenID = (T)(object)value; 
+
                 LexemeAttribute lexem = value.GetAttributeOfType<LexemeAttribute>();
                 if (lexem != null)
                 {
-                    lexer.AddDefinition(new TokenDefinition<T>(default(T), lexem.Pattern, lexem.IsSkippable, lexem.IsEnding));
+                    lexer.AddDefinition(new TokenDefinition<T>(tokenID, lexem.Pattern, lexem.IsSkippable, lexem.IsLineEnding));
                 }
                 ;
             }

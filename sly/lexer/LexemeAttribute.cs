@@ -4,7 +4,7 @@ using System.Text;
 
 namespace sly.lexer
 {
-    [AttributeUsage(AttributeTargets.All, AllowMultiple = false,Inherited =true)]
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false,Inherited =true)]
     public class LexemeAttribute : Attribute
     {
 
@@ -12,12 +12,12 @@ namespace sly.lexer
 
         public bool IsSkippable { get; set; }
 
-        public bool IsEnding { get; set; }
+        public bool IsLineEnding { get; set; }
 
-        public LexemeAttribute(string pattern, bool isSkippable = false, bool isEnding = false)        {
+        public LexemeAttribute(string pattern, bool isSkippable = false, bool isLineEnding = false)        {
             Pattern = pattern;
             IsSkippable = isSkippable;
-            IsEnding = isEnding;
+            IsLineEnding = isLineEnding;
         }
     }
 }
