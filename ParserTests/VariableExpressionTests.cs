@@ -116,6 +116,16 @@ namespace ParserTests
             ExpressionContext context = new ExpressionContext(new Dictionary<string, int>() { {"a",6}, {"b",2},{"c",2} });
             Assert.Equal(14, r.Result.Evaluate(context));
         }
+        
+        [Fact]
+        public void TestVariablesAndNumbers()
+        {
+            ParseResult<ExpressionToken,Expression> r = Parser.Parse("a * b + 2");
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            ExpressionContext context = new ExpressionContext(new Dictionary<string, int>() { {"a",6}, {"b",2}});
+            Assert.Equal(14, r.Result.Evaluate(context));
+        }
 
       
     }
