@@ -1,12 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netcoreapp1.0;net45</TargetFrameworks>
-	<Authors>b3b00</Authors>
+    <Authors>b3b00</Authors>
   </PropertyGroup>
-
-
-<ItemGroup>
-  <ProjectReference Include="..\sly\sly.csproj" />
-</ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\..\sly\sly.csproj" />
+  </ItemGroup>
 </Project>

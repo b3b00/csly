@@ -15,7 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\expressionParser\expressionParser.csproj" />
     <ProjectReference Include="..\jsonparser\jsonparser.csproj" />
-    <ProjectReference Include="..\sly\sly.csproj" />
+    <ProjectReference Include="..\..\sly\sly.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -14,36 +14,39 @@ namespace expressionparser
         // integer        
         [Lexeme("[0-9]+")]
         INT = 3,
+        
+        [Lexeme("[a-zA-Z]+")]
+        IDENTIFIER = 4,
 
         // the + operator
         [Lexeme("\\+")]
-        PLUS = 4,
+        PLUS = 5,
 
         // the - operator
         [Lexeme("\\-")]
-        MINUS = 5,
+        MINUS = 6,
 
         // the * operator
         [Lexeme("\\*")]
-        TIMES = 6,
+        TIMES = 7,
 
         //  the  / operator
         [Lexeme("\\/")]
-        DIVIDE = 7,
+        DIVIDE = 8,
 
         // a left paranthesis (
         [Lexeme("\\(")]
-        LPAREN = 8,
+        LPAREN = 9,
 
         // a right paranthesis )
         [Lexeme("\\)")]
-        RPAREN = 9,
+        RPAREN = 10,
 
         // a whitespace
         [Lexeme("[ \\t]+",true)]
-        WS = 12, 
+        WS = 11, 
 
         [Lexeme("[\\n\\r]+", true, true)]
-        EOL = 14
+        EOL = 12
     }
 }
