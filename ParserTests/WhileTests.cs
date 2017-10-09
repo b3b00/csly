@@ -36,8 +36,8 @@ namespace ParserTests
         [Fact]
         public void TestBuildParser()
         {
-            
-            Parser<WhileToken, WhileAST> parser = buildParser();            
+
+            Parser<WhileToken, WhileAST> parser = buildParser();
         }
 
         #endregion
@@ -47,9 +47,9 @@ namespace ParserTests
         {
 
             Parser<WhileToken, WhileAST> parser = buildParser();
-            ParseResult<WhileToken,WhileAST> result = parser.Parse("(a:=1+1)");
+            ParseResult<WhileToken, WhileAST> result = parser.Parse("(a:=1+1)");
             Assert.False(result.IsError);
-            Assert.NotNull(result.Result);            
+            Assert.NotNull(result.Result);
 
             Assert.IsAssignableFrom(typeof(SequenceStatement), result.Result);
             SequenceStatement seq = result.Result as SequenceStatement;
@@ -76,7 +76,7 @@ namespace ParserTests
 
             Assert.IsAssignableFrom(typeof(SequenceStatement), result.Result);
             SequenceStatement seq = result.Result as SequenceStatement;
-            Assert.IsAssignableFrom(typeof(SkipStatement), seq.Get(0));            
+            Assert.IsAssignableFrom(typeof(SkipStatement), seq.Get(0));
         }
 
         [Fact]
@@ -161,6 +161,43 @@ namespace ParserTests
             Assert.IsAssignableFrom(typeof(StringConstant), elseAssign.Value);
             Assert.Equal("world", (elseAssign.Value as StringConstant).Value);
         }
+
+
+        [Fact]
+        public void TestSkipSkipSequence()
+        {
+
+            Parser<WhileToken, WhileAST> parser = buildParser();
+            ParseResult<WhileToken, WhileAST> result = parser.Parse("(skip; skip; skip)");
+            Assert.False(result.IsError);
+            Assert.NotNull(result.Result);
+            Assert.IsAssignableFrom(typeof(SequenceStatement), result.Result);
+            SequenceStatement seq = result.Result as SequenceStatement;
+            Assert.Equal(3, seq.Count);
+            Assert.IsAssignableFrom(typeof(SkipStatement), seq.Get(0));
+            Assert.IsAssignableFrom(typeof(SkipStatement), seq.Get(1));
+            Assert.IsAssignableFrom(typeof(SkipStatement), seq.Get(2));
+        }
+
+        public void TestSkipAssignSequence()
+        {
+
+            Parser<WhileToken, WhileAST> parser = buildParser();
+            ParseResult<WhileToken, WhileAST> result = parser.Parse("(a:=1; b:=2; c:=3)");
+            Assert.False(result.IsError);
+            Assert.NotNull(result.Result);
+            Assert.IsAssignableFrom(typeof(SequenceStatement), result.Result);
+            SequenceStatement seq = result.Result as SequenceStatement;
+            Assert.Equal(3, seq.Count);
+
+            string[] names = new string[] { "a", "b", "c" };
+            for (int i =0; i < names.Length; i++)
+            {
+                Assert.IsAssignableFrom(typeof(AssignStatement), seq.Get(i));
+                AssignStatement assign = seq.Get(i) as AssignStatement;
+                Assert.Equal(names[i], assign.VariableName);
+                Assert.Equal(i + 1, (assign.Value as IntegerConstant).Value);
+            }
+        }
     }
 }
-

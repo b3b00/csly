@@ -32,8 +32,8 @@ namespace csly.whileLang.parser
             return seq;
         }
 
-        [Production("additionalStatements : SEMICOLON statementPrim*")]
-        public WhileAST additional(Token<WhileToken> semi, Statement statement)
+        [Production("additionalStatements : SEMICOLON statementPrim")]
+        public WhileAST additional(Token<WhileToken> semi, WhileAST statement)
         {
             return statement;
         }
