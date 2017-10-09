@@ -26,7 +26,6 @@ namespace sly.parser.generator
         /// <typeparam name="IN"></typeparam>
         /// <param name="parserInstance"> a parser definition instance , containing 
         /// [Reduction] methods for grammar rules 
-        /// [LexerConfigurationAttribute] method for token definition</param>
         /// <param name="parserType">a ParserType enum value stating the analyser type (LR, LL ...) for now only LL recurive descent parser available </param>
         /// <param name="rootRule">the name of the root non terminal of the grammar</param>
         /// <returns></returns>

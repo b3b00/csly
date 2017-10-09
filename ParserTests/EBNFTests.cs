@@ -35,19 +35,7 @@ namespace ParserTests
         }
 
 
-        [LexerConfiguration]
-        public ILexer<TokenType> BuildLexer(ILexer<TokenType> lexer)
-        {
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.a, "a"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.b, "b"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.c, "c"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.e, "e"));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.f, "f"));
-
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.WS, "[ \\t]+", true));
-            lexer.AddDefinition(new TokenDefinition<TokenType>(TokenType.EOL, "[\\n\\r]+", true, true));
-            return lexer;
-        }
+        
 
 
         [Production("R : A B c ")]

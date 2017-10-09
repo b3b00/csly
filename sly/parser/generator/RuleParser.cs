@@ -8,20 +8,7 @@ namespace sly.parser.generator
     public class RuleParser<IN>
     {
         
-        [LexerConfiguration]
-        public ILexer<EbnfToken> BuildEbnfLexer(ILexer<EbnfToken> lexer)
-        {
-            lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.COLON, ":"));
-            lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.ONEORMORE, "\\+"));
-            lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.ZEROORMORE, "\\*"));
-            lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.IDENTIFIER,
-                "[A-Za-z0-9_��������][A-Za-z0-9_��������]*"));
-            lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.COLON, ":"));
-            lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.WS, "[ \\t]+", true));
-            lexer.AddDefinition(new TokenDefinition<EbnfToken>(EbnfToken.EOL, "[\\n\\r]+", true, true));
-            return lexer;
-        }
-
+        
         
          #region rules grammar
 
