@@ -22,11 +22,11 @@ namespace csly.whileLang.model
     public class BinaryOperation : Expression
     {
 
-        Expression Left { get; set; }
+        public Expression Left { get; set; }
 
-        BinaryOperator Operator { get; set; }
+        public BinaryOperator Operator { get; set; }
 
-        Expression Right { get; set; }
+        public Expression Right { get; set; }
 
         public BinaryOperation(Expression left, BinaryOperator oper, Expression right)
         {

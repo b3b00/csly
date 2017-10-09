@@ -4,7 +4,7 @@ using System.Text;
 
 namespace csly.whileLang.model
 {
-    class WhileStatement : Statement
+    public class WhileStatement : Statement
     {
 
         public Expression Condition { get; set; }

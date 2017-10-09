@@ -4,10 +4,10 @@ using System.Text;
 
 namespace csly.whileLang.model
 {
-    class StringConstant : Expression
+    public class StringConstant : Expression
     {
 
-        string Value { get; set; }
+        public string Value { get; set; }
 
         public StringConstant(string value)
         {

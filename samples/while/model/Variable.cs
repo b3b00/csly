@@ -4,7 +4,7 @@ using System.Text;
 
 namespace csly.whileLang.model
 {
-    class Variable : Expression
+    public class Variable : Expression
     {
     }
 }

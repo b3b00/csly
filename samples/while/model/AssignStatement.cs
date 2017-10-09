@@ -4,7 +4,7 @@ using System.Text;
 
 namespace csly.whileLang.model
 {
-    class AssignStatement : Statement
+    public class AssignStatement : Statement
     {
 
         public string VariableName { get; set; }

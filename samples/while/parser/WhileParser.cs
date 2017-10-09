@@ -27,8 +27,8 @@ namespace csly.whileLang.parser
         [Production("sequence : statementPrim additionalStatements*")]
         public WhileAST sequenceStatements(WhileAST first, List<WhileAST> next)
         {
-            SequenceStatement seq = new SequenceStatement(first as Statement);
-            seq.AddRange(next.Select((WhileAST s) => (Statement)s).ToList<Statement>()) ;
+            SequenceStatement seq = new SequenceStatement(first as Statement);            
+            seq.AddRange(next.Cast<Statement>().ToList<Statement>()) ;
             return seq;
         }
 
@@ -46,7 +46,7 @@ namespace csly.whileLang.parser
         }
         
         [Production("statementPrim: WHILE expression DO statement")]
-        public WhileAST ifStmt(Token<WhileToken> discardWhile, WhileAST cond, Token<WhileToken> dicardDo, WhileAST blockStmt)
+        public WhileAST whileStmt(Token<WhileToken> discardWhile, WhileAST cond, Token<WhileToken> dicardDo, WhileAST blockStmt)
         {
             WhileStatement stmt = new WhileStatement(cond as Expression, blockStmt as Statement);
             return stmt;
@@ -238,7 +238,7 @@ namespace csly.whileLang.parser
         [Production("string_expression : STRING")]
         public WhileAST String_constantFactor(Token<WhileToken> value)
         {
-            return new StringConstant(value.Value);
+            return new StringConstant(value.StringWithoutQuotes);
         }
 
         #endregion

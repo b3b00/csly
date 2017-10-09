@@ -4,10 +4,10 @@ using System.Text;
 
 namespace csly.whileLang.model
 {
-    class BoolConstant : Expression
+    public class BoolConstant : Expression
     {
 
-        bool Value { get; set; }
+        public bool Value { get; set; }
 
         public BoolConstant(bool value)
         {

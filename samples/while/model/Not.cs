@@ -4,7 +4,7 @@ using System.Text;
 
 namespace csly.whileLang.model
 {
-    class Not : Expression
+    public class Not : Expression
     {
         Expression Value { get; set; }
 
