@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using sly.lexer;
 using sly.parser.generator;
 using csly.whileLang.model;
@@ -19,16 +19,16 @@ namespace csly.whileLang.parser
         }
 
       [Production("statement : sequence")]
-        public WhileAST statementSequence(Statement sequence)
+        public WhileAST statementSequence(WhileAST sequence)
         {
             return sequence;
         }
 
         [Production("sequence : statementPrim additionalStatements*")]
-        public WhileAST sequenceStatements(Statement first, List<Statement> next)
+        public WhileAST sequenceStatements(WhileAST first, List<WhileAST> next)
         {
-            SequenceStatement seq = new SequenceStatement(first);
-            seq.AddRange(next);
+            SequenceStatement seq = new SequenceStatement(first as Statement);
+            seq.AddRange(next.Select((WhileAST s) => (Statement)s).ToList<Statement>()) ;
             return seq;
         }
 
@@ -39,16 +39,16 @@ namespace csly.whileLang.parser
         }
 
         [Production("statementPrim: IF expression THEN statement ELSE statement")]
-        public WhileAST  ifStmt(Token<WhileToken> discardIf, Expression cond, Token<WhileToken> dicardThen, Statement thenStmt, Token<WhileToken> dicardElse, Statement elseStmt)
+        public WhileAST  ifStmt(Token<WhileToken> discardIf, WhileAST cond, Token<WhileToken> dicardThen, WhileAST thenStmt, Token<WhileToken> dicardElse, Statement elseStmt)
         {
-            IfStatement stmt = new IfStatement(cond, thenStmt, elseStmt);
+            IfStatement stmt = new IfStatement(cond as Expression, thenStmt as Statement, elseStmt);
             return stmt;
         }
         
         [Production("statementPrim: WHILE expression DO statement")]
-        public WhileAST ifStmt(Token<WhileToken> discardWhile, Expression cond, Token<WhileToken> dicardDo, Statement blockStmt)
+        public WhileAST ifStmt(Token<WhileToken> discardWhile, WhileAST cond, Token<WhileToken> dicardDo, WhileAST blockStmt)
         {
-            WhileStatement stmt = new WhileStatement(cond, blockStmt);
+            WhileStatement stmt = new WhileStatement(cond as Expression, blockStmt as Statement);
             return stmt;
         }
 
@@ -66,9 +66,9 @@ namespace csly.whileLang.parser
         }
 
         [Production("statementPrim: PRINT expression")]
-        public WhileAST skipStmt(Token<WhileToken> discard, Expression expression)
+        public WhileAST skipStmt(Token<WhileToken> discard, WhileAST expression)
         {
-            return new PrintStatement(expression);
+            return new PrintStatement(expression as Expression);
         }
 
       
