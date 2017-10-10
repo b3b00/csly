@@ -6,98 +6,117 @@ using sly.lexer;
 namespace csly.whileLang.parser
 {
     public enum WhileToken
-    {   
+    {
+
+        #region keywords 0 -> 19
 
         [Lexeme("(if)")]
-        IF,
+        IF = 1,
 
         [Lexeme("(then)")]
-        THEN,
+        THEN = 2,
 
         [Lexeme("(else)")]
-        ELSE,
+        ELSE = 3,
 
         [Lexeme("(while)")]
-        WHILE,
+        WHILE = 4,
 
         [Lexeme("(do)")]
-        DO,
+        DO = 5,
 
         [Lexeme("(skip)")]
-        SKIP,
+        SKIP = 6,
 
         [Lexeme("(true)")]
-        TRUE,
+        TRUE = 7,
 
         [Lexeme("(false)")]
-        FALSE,
+        FALSE = 8,
         [Lexeme("(not)")]
-        NOT,
+        NOT = 9,
 
         [Lexeme("(and)")]
-        AND,
+        AND = 10,
 
         [Lexeme("(or)")]
-        OR,
-
-        [Lexeme(">")]
-        GREATER,
-
-        [Lexeme("<")]
-        LESSER,
-
-        [Lexeme("==")]
-        EQUALS,
-
-        [Lexeme("!=")]
-        DIFFERENT,
-
-        [Lexeme("\\.")]
-        CONCAT,
+        OR = 11,
 
         [Lexeme("(print)")]
-        PRINT,
+        PRINT = 12,
+
+        #endregion
+
+        #region literals 20 -> 29
 
         [Lexeme("[a-zA-Z]+")]
-        IDENTIFIER,
+        IDENTIFIER = 20,
 
         [Lexeme("\"[^\"]*\"")]
-        STRING,
-
-        [Lexeme(":=")]
-        ASSIGN,
-
-        [Lexeme("\\+")]
-        PLUS,
-
-        [Lexeme("\\-")]
-        MINUS,
-
-        [Lexeme("\\*")]
-        TIMES,
-
-        [Lexeme("\\/")]
-        DIVIDE,
-
-        [Lexeme("\\(")]
-        LPAREN,
-
-        [Lexeme("\\)")]
-        RPAREN,
-
-        [Lexeme(";")]
-        SEMICOLON,
+        STRING = 21,
 
         [Lexeme("[0-9]+")]
-        INT,
+        INT = 22,
+
+        #endregion
+
+        #region operators 30 -> 49
+
+        [Lexeme(">")]
+        GREATER = 30,
+
+        [Lexeme("<")]
+        LESSER = 31,
+
+        [Lexeme("==")]
+        EQUALS = 32,
+
+        [Lexeme("!=")]
+        DIFFERENT = 33,
+
+        [Lexeme("\\.")]
+        CONCAT = 34,
+        
+        [Lexeme(":=")]
+        ASSIGN = 35,
+
+        [Lexeme("\\+")]
+        PLUS = 36,
+
+        [Lexeme("\\-")]
+        MINUS = 37,
+
+
+        [Lexeme("\\*")]
+        TIMES = 38,
+
+        [Lexeme("\\/")]
+        DIVIDE = 39,
+
+        #endregion 
+
+        #region sugar 50 ->
+
+        [Lexeme("\\(")]
+        LPAREN = 50,
+
+        [Lexeme("\\)")]
+        RPAREN = 51,
+
+        [Lexeme(";")]
+        SEMICOLON = 52,
 
         [Lexeme("[ \\t]+", true)]
-        WS,
+        WS = 53,
 
         [Lexeme("[\\n\\r]+", true, true)]
-        EOL,
-        
+        EOL = 54,
+
         EOF = 0
+
+        #endregion
+
+       
 
     }
 }
