@@ -115,11 +115,11 @@ namespace csly.whileLang.interpreter
     public class Interpreter
     {
 
-        private ExpressionEavluator evaluator;
+        private ExpressionEvaluator evaluator;
 
         public InterpreterContext Interprete(WhileAST ast)
         {
-            evaluator = new ExpressionEavluator();
+            evaluator = new ExpressionEvaluator();
             return Interprete(ast, new InterpreterContext());
         }
 
@@ -233,14 +233,12 @@ namespace csly.whileLang.interpreter
 
     }
 
-    class ExpressionEavluator
+    class ExpressionEvaluator
     {
-
-        ValueTuple t;
-
+        
         private Dictionary<BinaryOperator, List<Signature>> binaryOperationSignatures;
 
-        public ExpressionEavluator()
+        public ExpressionEvaluator()
         {
             binaryOperationSignatures = new Dictionary<BinaryOperator, List<Signature>>()
             {

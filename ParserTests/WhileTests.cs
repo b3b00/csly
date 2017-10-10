@@ -42,6 +42,8 @@ namespace ParserTests
 
         #endregion
 
+        #region compilation
+
         [Fact]
         public void TestAssignAdd()
         {
@@ -191,7 +193,7 @@ namespace ParserTests
             Assert.Equal(3, seq.Count);
 
             string[] names = new string[] { "a", "b", "c" };
-            for (int i =0; i < names.Length; i++)
+            for (int i = 0; i < names.Length; i++)
             {
                 Assert.IsAssignableFrom(typeof(AssignStatement), seq.Get(i));
                 AssignStatement assign = seq.Get(i) as AssignStatement;
@@ -199,5 +201,18 @@ namespace ParserTests
                 Assert.Equal(i + 1, (assign.Value as IntegerConstant).Value);
             }
         }
+
+        [Fact]
+        public void TestCounterProgram()
+        {
+
+            Parser<WhileToken, WhileAST> parser = buildParser();
+            ParseResult<WhileToken, WhileAST> result = parser.Parse("(a:=0; while a < 10 do (print a; a := a +1 ))");
+            Assert.False(result.IsError);
+            Assert.NotNull(result.Result);
+            ;
+        }
+
+        #endregion
     }
 }
