@@ -21,8 +21,14 @@ namespace sly.lexer
             var type = enumVal.GetType();
             var memInfo = type.GetMember(enumVal.ToString());
             IEnumerable<Attribute> attributes = (IEnumerable<Attribute>)(memInfo[0].GetCustomAttributes(typeof(T), false));
-
-            return (T)attributes?.ToArray()[0];
+            if (attributes.Count() > 0)
+            {
+                return (T)attributes?.ToArray()[0];
+            }
+            else
+            {
+                return default(T);
+            }
         }
     }
 
