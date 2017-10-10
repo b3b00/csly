@@ -1,6 +1,7 @@
 using sly.parser.syntax;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace sly.parser.syntax
 {
@@ -43,6 +44,16 @@ namespace sly.parser.syntax
 
         public bool IsTerminal() {
             return false;
+        }
+
+
+        public string Dump(string tab)
+        {
+            StringBuilder dump = new StringBuilder();
+            dump.AppendLine($"{tab}({Name} [");
+            Children.ForEach(c => dump.AppendLine($"{c.Dump(tab + "\t")},"));
+            dump.AppendLine($"{tab}]");
+            return dump.ToString();
         }
 
     }

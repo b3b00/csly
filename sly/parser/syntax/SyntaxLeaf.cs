@@ -23,5 +23,10 @@ namespace sly.parser.syntax
             return true;
         }
 
+        public string Dump(string tab)
+        {
+            return $"{tab}({this.Token.TokenID} : {this.Token.Value})";
+        }
+
     }
 }

@@ -9,5 +9,7 @@ namespace sly.parser.syntax
     public interface ISyntaxNode<T>
     {
         bool IsTerminal();
+
+        string Dump(string tab);
     }
 }
