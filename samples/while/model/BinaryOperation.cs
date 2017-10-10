@@ -41,7 +41,7 @@ namespace csly.whileLang.model
             StringBuilder dmp = new StringBuilder();
             dmp.AppendLine($"{tab}(OPERATION [{Operator}]");
             dmp.AppendLine($"{Left.Dump("\t"+tab)},");
-            dmp.AppendLine(Left.Dump("\t" + tab));
+            dmp.AppendLine(Right.Dump("\t" + tab));
             dmp.AppendLine($"{tab})");
             return dmp.ToString();
         }
