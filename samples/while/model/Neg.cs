@@ -6,7 +6,7 @@ namespace csly.whileLang.model
 {
     public class Neg : Expression
     {
-        Expression Value { get; set; }
+        public Expression Value { get; set; }
 
         public Neg(Expression value)
         {
