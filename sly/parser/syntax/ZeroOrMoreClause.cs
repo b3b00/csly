@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace sly.parser.syntax
 {
 
@@ -22,5 +24,7 @@ namespace sly.parser.syntax
         {
             return true;
         }
+
+      
     }
 }
