@@ -6,6 +6,6 @@ namespace csly.whileLang.model
 {
     public interface WhileAST
     {
-
+        public string Dump(string tab);
     }
 }

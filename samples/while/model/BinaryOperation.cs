@@ -16,6 +16,7 @@ namespace csly.whileLang.model
         GREATER,
         LESSER,
         EQUALS,
+        DIFFERENT,
         CONCAT
     }
 
@@ -33,6 +34,16 @@ namespace csly.whileLang.model
             Left = left;
             Operator = oper;
             Right = right;
+        }
+
+        public string Dump(string tab)
+        {
+            StringBuilder dmp = new StringBuilder();
+            dmp.AppendLine($"{tab}(OPERATION [{Operator}]");
+            dmp.AppendLine($"{Left.Dump("\t"+tab)},");
+            dmp.AppendLine(Left.Dump("\t" + tab));
+            dmp.AppendLine($"{tab})");
+            return dmp.ToString();
         }
     }
 }

@@ -13,5 +13,10 @@ namespace csly.whileLang.model
         {
             Value = value;
         }
+
+        public string Dump(string tab)
+        {
+            return $"{tab}(STRING {Value})";
+        }
     }
 }

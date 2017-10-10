@@ -20,5 +20,26 @@ namespace csly.whileLang.model
             ElseStmt = elseStmt;
         }
 
+        public string Dump(string tab)
+        {
+            StringBuilder dmp = new StringBuilder();
+            dmp.AppendLine($"{tab}(IF");
+
+            dmp.AppendLine($"{tab+"\t"}(COND");
+            dmp.AppendLine(Condition.Dump("\t\t" + tab));
+            dmp.AppendLine($"{tab + "\t"})");
+
+            dmp.AppendLine($"{tab + "\t"}(THEN");
+            dmp.AppendLine(ThenStmt.Dump("\t\t" + tab));
+            dmp.AppendLine($"{tab})");
+
+            dmp.AppendLine($"{tab + "\t"}(THEN");
+            dmp.AppendLine(ThenStmt.Dump("\t\t" + tab));
+            dmp.AppendLine($"{tab + "\t"})");
+
+            dmp.AppendLine($"{tab})");
+            return dmp.ToString();
+        }
+
     }
 }

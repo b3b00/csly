@@ -40,5 +40,14 @@ namespace csly.whileLang.model
             Statements.AddRange(stmts);
         }
 
+        public string Dump(string tab)
+        {
+            StringBuilder dump = new StringBuilder();
+            dump.AppendLine($"{tab}(SEQUENCE [");
+            Statements.ForEach(c => dump.AppendLine($"{c.Dump(tab + "\t")},"));
+            dump.AppendLine($"{tab}] )");
+            return dump.ToString();
+        }
+
     }
 }

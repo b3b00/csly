@@ -12,5 +12,16 @@ namespace csly.whileLang.model
         {
             Value = value;
         }
+
+
+        public string Dump(string tab)
+        {
+            StringBuilder dmp = new StringBuilder();
+            dmp.AppendLine($"{tab}(NEG");
+            dmp.AppendLine(Value.Dump(tab + "\t"));
+            dmp.AppendLine($"{tab})");
+            return dmp.ToString();
+        }
+        
     }
 }

@@ -6,5 +6,10 @@ namespace csly.whileLang.model
 {
     public sealed class SkipStatement : Statement
     {
+
+        public string Dump(string tab)
+        {
+            return $"{tab}(SKIP)";
+        }
     }
 }

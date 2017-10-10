@@ -9,94 +9,95 @@ namespace csly.whileLang.parser
     {   
 
         [Lexeme("(if)")]
-        IF = 0,
+        IF,
 
         [Lexeme("(then)")]
-        THEN = 1,
+        THEN,
 
         [Lexeme("(else)")]
-        ELSE = 2,
+        ELSE,
 
         [Lexeme("(while)")]
-        WHILE = 3,
+        WHILE,
 
         [Lexeme("(do)")]
-        DO = 4,
+        DO,
 
         [Lexeme("(skip)")]
-        SKIP = 5,
+        SKIP,
 
         [Lexeme("(true)")]
-        TRUE = 6,
+        TRUE,
 
         [Lexeme("(false)")]
-        FALSE = 7,
+        FALSE,
         [Lexeme("(not)")]
-        NOT = 8,
+        NOT,
 
         [Lexeme("(and)")]
-        AND = 9,
+        AND,
 
         [Lexeme("(or)")]
-        OR = 10,
-
-
+        OR,
 
         [Lexeme(">")]
-        GREATER = 11,
+        GREATER,
 
         [Lexeme("<")]
-        LESSER = 12,
+        LESSER,
 
         [Lexeme("==")]
-        EQUALS = 13,
+        EQUALS,
+
+        [Lexeme("!=")]
+        DIFFERENT,
 
         [Lexeme("\\.")]
-        CONCAT = 14,
+        CONCAT,
 
         [Lexeme("(print)")]
-        PRINT = 15,
+        PRINT,
 
         [Lexeme("[a-zA-Z]+")]
-        IDENTIFIER = 16,
+        IDENTIFIER,
 
         [Lexeme("\"[^\"]*\"")]
-        STRING = 17,
+        STRING,
 
         [Lexeme(":=")]
-        ASSIGN = 18,
+        ASSIGN,
 
         [Lexeme("\\+")]
-        PLUS = 19,
+        PLUS,
 
         [Lexeme("\\-")]
-        MINUS = 20,
+        MINUS,
 
         [Lexeme("\\*")]
-        TIMES = 21,
+        TIMES,
 
         [Lexeme("\\/")]
-        DIVIDE = 22,
+        DIVIDE,
 
         [Lexeme("\\(")]
-        LPAREN = 23,
+        LPAREN,
 
         [Lexeme("\\)")]
-        RPAREN = 24,
+        RPAREN,
 
         [Lexeme(";")]
-        SEMICOLON = 25,
+        SEMICOLON,
 
         [Lexeme("[0-9]+")]
-        INT = 26,
-
-
+        INT,
 
         [Lexeme("[ \\t]+", true)]
-        WS = 27,
+        WS,
 
         [Lexeme("[\\n\\r]+", true, true)]
-        EOL = 28
+        EOL,
+        
+        EOF = 0
 
     }
 }
