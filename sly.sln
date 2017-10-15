@@ -19,6 +19,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleExpressionParser", "samples\SimpleExpressionParser\SimpleExpressionParser.csproj", "{CA92D7D9-40AA-4B7B-BEBC-B9180CCEB7D6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9B288577-1AF6-4F42-8BBE-CACC0BF8A51D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pratt", "Pratt\Pratt.csproj", "{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -111,6 +115,18 @@ Global
 		{CA92D7D9-40AA-4B7B-BEBC-B9180CCEB7D6}.Release|x64.Build.0 = Release|Any CPU
 		{CA92D7D9-40AA-4B7B-BEBC-B9180CCEB7D6}.Release|x86.ActiveCfg = Release|Any CPU
 		{CA92D7D9-40AA-4B7B-BEBC-B9180CCEB7D6}.Release|x86.Build.0 = Release|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Debug|x64.Build.0 = Debug|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Debug|x86.Build.0 = Debug|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Release|x64.ActiveCfg = Release|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Release|x64.Build.0 = Release|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Release|x86.ActiveCfg = Release|Any CPU
+		{CF278EBD-E801-4F5E-9EE2-3CF0BF754279}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
