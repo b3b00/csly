@@ -1,102 +1,159 @@
 using System;
 using System.Collections.Generic;
-using com.stuffwithstuff.bantam.expressions;
-using com.stuffwithstuff.bantam.parselets;
+using sly.pratt.parselets;
+using sly.lexer;
 
 
-namespace  com.stuffwithstuff.bantam {
 
-public class Parser {
-  public Parser(List<Token> tokens) {
-    mTokens = tokens;
-  }
-  
-  public void register(TokenType token, PrefixParselet parselet) {
-    mPrefixParselets.put(token, parselet);
-  }
-  
-  public void register(TokenType token, InfixParselet parselet) {
-    mInfixParselets.put(token, parselet);
-  }
-  
-  public Expression parseExpression(int precedence) {
-    Token token = consume();
-    PrefixParselet prefix = mPrefixParselets.get(token.getType());
-    
-    if (prefix == null) throw new ParseException("Could not parse \"" +
-        token.getText() + "\".");
-    
-    Expression left = prefix.parse(this, token);
-    
-    while (precedence < getPrecedence()) {
-      token = consume();
-      
-      InfixParselet infix = mInfixParselets.get(token.getType());
-      left = infix.parse(this, left, token);
+namespace sly.pratt
+{
+
+
+    public static class DictionaryExtensions
+    {
+
+        public static V Get<K, V>(this Dictionary<K, V> dict, K key)
+        {
+            if (dict.ContainsKey(key))
+            {
+                return dict[key];
+            }
+            return default(V);
+        }
+
     }
-    
-    return left;
-  }
-  
-  public Expression parseExpression() {
-    return parseExpression(0);
-  }
-  
-  public boolean match(TokenType expected) {
-    Token token = lookAhead(0);
-    if (token.getType() != expected) {
-      return false;
-    }
-    
-    consume();
-    return true;
-  }
-  
-  public Token consume(TokenType expected) {
-    Token token = lookAhead(0);
-    if (token.getType() != expected) {
-      throw new Exception("Expected token " + expected +
-          " and found " + token.getType());
-    }
-    
-    return consume();
-  }
 
-        public Token consume()
+    public class Parser<IN, OUT> where IN : struct
+    {
+
+        private int Position;
+
+        private List<Token<IN>> Tokens;
+        //private List<Token<IN>> ReadTokens = new List<Token<IN>>();
+        private Dictionary<IN, PrefixParselet<IN, OUT>> PrefixParselets =
+            new Dictionary<IN, PrefixParselet<IN, OUT>>();
+        private Dictionary<IN, InfixParselet<IN, OUT>> InfixParselets =
+            new Dictionary<IN, InfixParselet<IN, OUT>>();
+
+        public Parser(List<Token<IN>> tokens, int startPosition)
+        {
+            Position = startPosition;
+            Tokens = tokens;
+        }
+
+        
+
+
+        public void infix(IN token, int precedence, BinaryExpressionBuilder<IN,OUT> builder, Associativity assoc = Associativity.Right) 
+        {
+            InfixParselet<IN, OUT> infixparse = new InfixParselet<IN, OUT>(token, precedence, assoc, builder);
+            InfixParselets[token] = infixparse;
+        }
+
+        public void prefix(IN token, int precedence, UnaryExpressionBuilder<IN, OUT> builder)
+        {
+            PrefixParselet<IN, OUT> prefixparse = new PrefixParselet<IN, OUT>(token, precedence, builder);
+            PrefixParselets[token] = prefixparse;
+        }
+
+        public void register(IN token, PrefixParselet<IN, OUT> parselet)
+        {
+            PrefixParselets[token] = parselet;
+        }
+
+        public void register(IN token, InfixParselet<IN, OUT> parselet)
+        {
+            InfixParselets[token] = parselet;
+        }
+
+        public OUT parseExpression(int precedence)
+        {
+            Token<IN> token = lookAhead(0);
+            PrefixParselet<IN, OUT> prefix = PrefixParselets.Get(token.TokenID);
+
+            OUT left = default(OUT);
+
+            if (prefix != null)
+            {
+                left = prefix.Parse(this, token);
+            }
+            
+            //OUT left = prefix.Parse(this, token);
+
+            while (precedence < getPrecedence())
+            {
+                token = consume();
+
+                InfixParselet<IN, OUT> infix = InfixParselets.Get(token.TokenID);
+                left = infix.Parse(this, left, token);
+            }
+
+            return left;
+        }
+
+        public OUT parseExpression()
+        {
+            return parseExpression(0);
+        }
+
+        public bool match(IN expected)
+        {
+            Token<IN> token = lookAhead(0);
+            if (!token.TokenID.Equals(expected))
+            {
+                return false;
+            }
+            
+            return true;
+        }
+
+        public Token<IN> consume(IN expected)
+        {
+
+            Token<IN> token = Tokens[Position];
+            if (!token.TokenID.Equals(expected))
+            {
+                throw new Exception("Expected token " + expected +
+                    " and found " + token.TokenID);
+            }
+            Position++;
+
+            return token;
+        }
+
+        public Token<IN> consume()
         {
             // Make sure we've read the token.
             lookAhead(0);
-            Token t = mRead[0];
-            mRead.RemoveAt(0);
+            Token<IN> t = Tokens[Position];
+            Position++;
             return t;
         }
-  
-  private Token lookAhead(int distance) {
-    // Read in as many as needed.
-    while (distance >= mRead.Count) {
-      mRead.Add(mTokens.next());
-    }
 
-    // Get the queued token.
-    return mRead.get(distance);
-  }
+        private Token<IN> lookAhead(int distance)
+        {
+            // Read in as many as needed.
+            //while (distance >= ReadTokens.Count)
+            //{
+            //    ReadTokens.Add(Tokens[distance]);
+            //}
+
+            // Get the queued token.
+            return Tokens[Position+distance];
+
+        }
 
         private int getPrecedence()
         {
-            Token next = lookAhead(0);
-            TokenType toktyp = next.getType();
-            InfixParselet parser = mInfixParselets.ContainsKey(toktyp) ? mInfixParselets[toktyp] : null;
-            if (parser != null) return parser.getPrecedence();
+            Token<IN> next = lookAhead(0);
+            IN toktyp = next.TokenID;
+            InfixParselet<IN,OUT> parser = InfixParselets.ContainsKey(toktyp) ? InfixParselets[toktyp] : null;
+            if (parser != null) return parser.Precedence;
 
             return 0;
         }
-  
-  private  List<Token> mTokens;
-  private  List<Token> mRead = new List<Token>();
-  private  Dictionary<TokenType, PrefixParselet> mPrefixParselets =
-      new Dictionary<TokenType, PrefixParselet>();
-  private Dictionary<TokenType, InfixParselet> mInfixParselets =
-      new Dictionary<TokenType, InfixParselet>();
-}
+
+
+    }
 
 }

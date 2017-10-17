@@ -1,7 +1,6 @@
+using sly.lexer;
 
-using com.stuffwithstuff.bantam.expressions;
-
-namespace com.stuffwithstuff.bantam.parselets
+namespace sly.pratt.parselets
 {
 
 
@@ -15,9 +14,23 @@ namespace com.stuffwithstuff.bantam.parselets
      * that comes after the token. This is also used for postfix expressions, in
      * which case it simply doesn't consume any more tokens in its parse() call.
      */
-    public interface InfixParselet
+    public class InfixParselet<IN, OUT> : Parselet<IN, OUT> where IN : struct
     {
-        Expression Parse(Parser parser, Expression left, Token token);
-        int getPrecedence();
+
+        public BinaryExpressionBuilder<IN, OUT> Builder { get; set; }
+        public Associativity Associativity { get; }
+
+
+        public InfixParselet(IN oper, int precedence, Associativity assoc, BinaryExpressionBuilder<IN, OUT> builder) : base(precedence, oper)
+        {
+            Associativity = assoc;
+            Builder = builder;
+        }
+
+        public virtual OUT Parse(Parser<IN,OUT> parser, OUT left, Token<IN> token)
+        {
+            OUT right = parser.parseExpression();            
+            return Builder(token, left, right);
+        }
     }
 }

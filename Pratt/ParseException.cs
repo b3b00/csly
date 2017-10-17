@@ -1,11 +1,12 @@
-namespace com.stuffwithstuff.bantam
+using System;
+
+namespace sly.pratt
 {
 
-    public class ParseException : Exception
+    public class PrattParseException : Exception
     {
-        public ParseException(String message)
+        public PrattParseException(String message) : base(message)
         {
-            super(message);
         }
     }
 

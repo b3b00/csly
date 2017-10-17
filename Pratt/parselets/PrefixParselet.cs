@@ -1,8 +1,6 @@
-using com.stuffwithstuff.bantam;
-using com.stuffwithstuff.bantam;
-using com.stuffwithstuff.bantam.expressions;
+using sly.lexer;
 
-namespace com.stuffwithstuff.bantam.parselets
+namespace sly.pratt.parselets
 {
 
 
@@ -17,9 +15,22 @@ namespace com.stuffwithstuff.bantam.parselets
      * @author rnystrom
      *
      */
-    public interface PrefixParselet
+    public class PrefixParselet<IN,OUT> : Parselet<IN,OUT> where IN : struct
     {
-        Expression parse(Parser parser, Token token);
+
+        public UnaryExpressionBuilder<IN, OUT> Builder { get; set; } 
+
+
+        public PrefixParselet(IN oper, int precedence, UnaryExpressionBuilder<IN, OUT> builder) : base(precedence, oper)
+        {
+            Builder = builder;
+        }
+
+        public OUT Parse(Parser<IN,OUT> parser, Token<IN> token)
+        {
+            OUT right = parser.parseExpression(Precedence);
+            return Builder(token, right);
+        }
     }
 
 }

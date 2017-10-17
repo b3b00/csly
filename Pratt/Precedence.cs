@@ -1,4 +1,4 @@
-namespace com.stuffwithstuff.bantam {
+namespace sly.pratt.bantam {
 
     /**
      * Defines the different precendence levels used by the infix parsers. These
