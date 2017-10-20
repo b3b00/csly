@@ -1,29 +1,29 @@
 using sly.parser.syntax;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace sly.parser.syntax
 {
 
     public class SyntaxNode<T> : ISyntaxNode<T>
     {
+        
+        
 
         public string Name {get; set;} 
 
         public List<ISyntaxNode<T>> Children { get; }
 
-        public SyntaxNode(string name, List<ISyntaxNode<T>> children)
+        public MethodInfo visitor;
+
+        public SyntaxNode(string name, List<ISyntaxNode<T>> children = null, MethodInfo visitor = null)
         {
             this.Name = name;            
             this.Children = children;
+            this.visitor = visitor;
         }
-
-        public SyntaxNode(string name)
-        {
-            this.Name = name;
-            this.Children = new List<ISyntaxNode<T>>();
-        }
-
+        
         public override string ToString()
         {
             string r = Name+"(\n";
@@ -44,6 +44,8 @@ namespace sly.parser.syntax
         public bool IsTerminal() {
             return false;
         }
+
+        
 
     }
 }

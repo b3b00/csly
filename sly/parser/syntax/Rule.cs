@@ -4,12 +4,17 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using sly.parser.syntax;
+using System.Reflection;
+using sly.parser.generator;
 
 namespace sly.parser.syntax
 {
 
-    public class Rule<T> : GrammarNode<T>
+    public class Rule<T> : GrammarNode<T> where T : struct
     {
+        public Dictionary<T, MethodInfo> VisitorMethods { get; set; }
+
+        public bool IsExpressionRule { get; set; }
 
         public string RuleString { get;  }
 

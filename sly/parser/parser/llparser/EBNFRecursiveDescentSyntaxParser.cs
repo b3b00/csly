@@ -9,7 +9,7 @@ using sly.parser.generator;
 
 namespace sly.parser.llparser
 {
-    public class EBNFRecursiveDescentSyntaxParser<IN,OUT> : RecursiveDescentSyntaxParser<IN,OUT>
+    public class EBNFRecursiveDescentSyntaxParser<IN,OUT> : RecursiveDescentSyntaxParser<IN,OUT> where IN : struct
     {
         //public ParserConfiguration<T> Configuration { get; set; }
 
@@ -208,6 +208,7 @@ namespace sly.parser.llparser
             if (!isError)
             {
                 SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
+                node = ManageExpressionRules(rule, node);
                 result.Root = node;
                 result.IsEnded = currentPosition >= tokens.Count - 1
                                  || currentPosition == tokens.Count - 2 &&

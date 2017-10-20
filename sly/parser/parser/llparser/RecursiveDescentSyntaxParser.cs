@@ -9,7 +9,7 @@ namespace sly.parser.llparser
 {
 
 
-    public class RecursiveDescentSyntaxParser<T,OUT> : ISyntaxParser<T>
+    public class RecursiveDescentSyntaxParser<T,OUT> : ISyntaxParser<T> where T : struct
     {
         public ParserConfiguration<T,OUT> Configuration { get; set; }
 
@@ -222,13 +222,55 @@ namespace sly.parser.llparser
             result.EndingPosition = currentPosition;
             if (!isError)
             {
-                SyntaxNode<T> node = new SyntaxNode<T>(nonTerminalName + "__" + rule.Key, children);
-                result.Root = node;
+                
+                SyntaxNode<T> node = new SyntaxNode<T>(nonTerminalName + "__" + rule.Key, children);                
+                node = ManageExpressionRules(rule, node);
+                result.Root =  node;
                 result.IsEnded = currentPosition >= tokens.Count - 1
                                 || currentPosition == tokens.Count - 2 && tokens[tokens.Count - 1].TokenID.Equals(default(T));
+                if (rule.IsExpressionRule)
+                {
+
+                }
             }
 
             return result;
+        }
+
+        protected SyntaxNode<T> ManageExpressionRules(Rule<T> rule, SyntaxNode<T> node)
+        {
+            int operatorIndex = -1;
+            if (rule.IsExpressionRule)
+            {
+                
+                if (node.Children.Count == 2)
+                {
+                    operatorIndex = 1;
+                }
+                else if (node.Children.Count == 2)
+                {
+                    operatorIndex = 0;
+                }
+                if (operatorIndex > 0)
+                {
+                    if (node.Children[operatorIndex] is SyntaxLeaf<T> operatorNode)
+                    {
+                        if (operatorNode != null)
+                        {
+                            if (rule.VisitorMethods != null && rule.VisitorMethods.Any())
+                            {
+                                if (rule.VisitorMethods.ContainsKey(operatorNode.Token.TokenID))
+                                {
+                                    var visitor = rule.VisitorMethods[operatorNode.Token.TokenID];
+                                    node.visitor = visitor;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return node;
+                
         }
 
         public SyntaxParseResult<T> ParseTerminal(IList<Token<T>> tokens, TerminalClause<T> term, int position)
