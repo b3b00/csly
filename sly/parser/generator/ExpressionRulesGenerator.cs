@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using sly.parser.syntax;
 
 namespace sly.parser.generator
 {
@@ -29,13 +30,10 @@ namespace sly.parser.generator
 
     }
 
-    class ExpressionRulesGenerator
+    public class ExpressionRulesGenerator
     {
-        // TODO 
-        public static ParserConfiguration<IN, OUT> BuildExpressionRules<IN, OUT>(ParserConfiguration<IN, OUT> configuration, Type parserClass) where IN : struct
+        public static ParserConfiguration<IN, OUT> BuildExpressionRules<IN, OUT>(ParserConfiguration<IN, OUT> configuration, Type parserClass) where IN : struct 
         {
-            return configuration;
-
             List<MethodInfo> methods = parserClass.GetMethods().ToList<MethodInfo>();
             methods = methods.Where(m =>
             {
@@ -44,7 +42,9 @@ namespace sly.parser.generator
                 return attr != null;
             }).ToList<MethodInfo>();
 
-            Dictionary<int, List<OperationMetaData<IN>>> operationByPrecedence = new Dictionary<int, List<OperationMetaData<IN>>>();
+
+            var operationsByPrecedence = new Dictionary<int, List<OperationMetaData<IN>>>();
+
 
             methods.ForEach(m =>
             {
@@ -54,13 +54,12 @@ namespace sly.parser.generator
                 foreach (OperationAttribute attr in attributes)
                 {
                     OperationMetaData<IN> operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc,m,ConvertIntToEnum<IN>(attr.Token));
-                    List<OperationMetaData<IN>> operations = new List<OperationMetaData<IN>>();
-                    if (operationByPrecedence.ContainsKey(operation.Precedence))
+                    var operations = new List<OperationMetaData<IN>>();
+                    if (operationsByPrecedence.ContainsKey(operation.Precedence))
                     {
-                        operations = operationByPrecedence[operation.Precedence];
+                        operations = operationsByPrecedence[operation.Precedence];
                     }
                     operations.Add(operation);
-                    operationByPrecedence[operation.Precedence] = operations;
                 }
             });
 
@@ -88,30 +87,52 @@ namespace sly.parser.generator
                 }
             }
 
-            if (operandNonTerminal != null && operationByPrecedence.Count > 0)
+            if (operandNonTerminal != null && operationsByPrecedence.Count > 0)
             {
-                GenerateExpressionParser<IN,OUT>(configuration, operandNonTerminal, operationByPrecedence);
+                GenerateExpressionParser<IN,OUT>(configuration, operandNonTerminal, operationsByPrecedence);
             }
+
+            return configuration;
 
         }
 
-        private static void GenerateExpressionParser<IN, OUT>(ParserConfiguration<IN, OUT> configuration, string operandNonTerminal, Dictionary<int, List<OperationMetaData<IN>>> operationByPrecedence) where IN : struct
+        private static void GenerateExpressionParser<IN, OUT>(ParserConfiguration<IN, OUT> configuration, string operandNonTerminal, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence) where IN : struct
         {
-            List<int> precedences = operationByPrecedence.Keys.ToList<int>();
+            List<int> precedences = operationsByPrecedence.Keys.ToList<int>();
             precedences.Sort();
-            int i = 0;
-            foreach  (int precedence in precedences)
+            int max = precedences.Max();
+
+            for (int i = 0; i < precedences.Count-1; i++)
             {
-                bool last = i == precedence.Count - 1;
-                i++;
+                int precedence = precedences[i];
+                int nextPrecedence = precedences[i + 1];
+                var operations = operationsByPrecedence[precedence];
+                string name = GetNonTerminalNameForPrecedence(precedence, operationsByPrecedence);
+                string nextName = GetNonTerminalNameForPrecedence(nextPrecedence, operationsByPrecedence);
             }
         }
 
+        private static string GetNonTerminalNameForPrecedence<IN>(int precedence, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence) where IN : struct
+        {
+            List<IN> tokens = operationsByPrecedence[precedence].Select(o => o.OperatorToken).ToList<IN>();
+            return GetNonTerminalNameForPrecedence(precedence, tokens);
+        }
+
+        private static string GetNonTerminalNameForPrecedence<IN>(int precedence, List<IN> operators) where IN : struct
+        {
+            string operatorsPart = operators
+                .Select(oper => oper.ToString())
+                .ToList<string>()
+                .Aggregate((s1, s2) => $"{s1}_{s2}");
+            string name = $"expr_{precedence}_{operators}";
+            
+
+            return name;
+        }
+
+        
         
 
-
-
-        
 
         public static IN ConvertIntToEnum<IN>(int intValue)
         {

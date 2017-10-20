@@ -8,7 +8,7 @@ using System.Text;
 
 namespace sly.parser
 {
-    public class Parser<IN,OUT>
+    public class Parser<IN,OUT> where IN : struct
     {
         public ILexer<IN> Lexer { get; set; }
         public object Instance { get; set; }

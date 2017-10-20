@@ -5,16 +5,16 @@ using expressionparser;
 using sly.lexer;
 using sly.parser.generator;
 
-namespace SimpleExpressionParser
+namespace simpleExpressionParser
 {
-    class SimpleExpressionParser
+    public class SimpleExpressionParser
     {
-
+        
         [Operation((int)ExpressionToken.PLUS, 2, Associativity.Right, 10)]
         [Operation((int)ExpressionToken.MINUS, 2, Associativity.Right, 10)]
         [Operation((int)ExpressionToken.TIMES, 2, Associativity.Right, 50)]
         [Operation((int)ExpressionToken.DIVIDE, 2, Associativity.Right, 50)]
-        public static int binaryExpression(Token<ExpressionToken> operation, int left, int right)
+        public int binaryExpression(Token<ExpressionToken> operation, int left, int right)
         {
             int result = 0;
             switch (operation.TokenID)
@@ -45,9 +45,11 @@ namespace SimpleExpressionParser
 
 
         [Operation((int)ExpressionToken.MINUS, 1, Associativity.Right, 100)]
-        public static int unaryExpression(Token<ExpressionToken> operation, int value)
+        public  int unaryExpression(Token<ExpressionToken> operation, int value)
         {
             return -value;
         }
+
+        
     }
 }

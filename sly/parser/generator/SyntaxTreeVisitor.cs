@@ -8,7 +8,7 @@ using sly.lexer;
 namespace sly.parser.generator
 {
 
-    public class SyntaxVisitorResult<IN,OUT>
+    public class SyntaxVisitorResult<IN,OUT> where IN : struct
     {
         
         public Token<IN> TokenResult;
@@ -78,7 +78,7 @@ namespace sly.parser.generator
 
     }
 
-    public class SyntaxTreeVisitor<IN,OUT>
+    public class SyntaxTreeVisitor<IN,OUT> where IN : struct
     {
         public Type ParserClass { get; set; }
 
