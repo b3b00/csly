@@ -177,7 +177,7 @@ namespace sly.parser.generator
                     token = (IN)Enum.Parse(typeof(IN) , item, false);
                     isTerminal = true;
                 }
-                catch 
+                catch(Exception e) 
                 {
                     isTerminal = false;
                 }
