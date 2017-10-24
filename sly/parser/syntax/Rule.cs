@@ -16,7 +16,7 @@ namespace sly.parser.syntax
 
         public bool IsExpressionRule { get; set; }
 
-        public string RuleString { get;  }
+        public string RuleString { get; }
 
         public string NonTerminalName { get; set; }
 
@@ -38,7 +38,13 @@ namespace sly.parser.syntax
 
         public List<IClause<T>> Clauses { get; set; }
         public List<T> PossibleLeadingTokens { get; set; }
-        
+
+
+        public Rule()
+        {
+            Clauses = new List<IClause<T>>();
+            VisitorMethods = new Dictionary<T, MethodInfo>();
+        }
 
         public bool MayBeEmpty { get
             {

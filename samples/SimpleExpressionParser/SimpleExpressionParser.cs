@@ -50,6 +50,13 @@ namespace simpleExpressionParser
             return -value;
         }
 
+        [Operand]
+        [Production("operand : INT")]
+        public int operand(Token<ExpressionToken> value)
+        {
+            return value.IntValue;
+        }
+
         
     }
 }

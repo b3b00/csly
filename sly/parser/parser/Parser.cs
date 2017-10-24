@@ -12,17 +12,33 @@ namespace sly.parser
     {
         public ILexer<IN> Lexer { get; set; }
         public object Instance { get; set; }
-        public ISyntaxParser<IN> SyntaxParser { get; set; }
+        public ISyntaxParser<IN,OUT> SyntaxParser { get; set; }
         public SyntaxTreeVisitor<IN,OUT> Visitor { get; set; }
         public ParserConfiguration<IN,OUT> Configuration { get; set; }
         
-        public Parser(ISyntaxParser<IN> syntaxParser, SyntaxTreeVisitor<IN,OUT> visitor)
+        public Parser(ISyntaxParser<IN,OUT> syntaxParser, SyntaxTreeVisitor<IN,OUT> visitor)
         {
             SyntaxParser = syntaxParser;
             Visitor = visitor;
         }
 
-       
+
+        #region expression generator
+
+        public virtual void BuildExpressionParser(string startingRule = null)
+        {
+            var conf = ExpressionRulesGenerator.BuildExpressionRules<IN, OUT>(Configuration, Instance.GetType());
+            Configuration = conf;
+            SyntaxParser.Init(conf);
+            if (startingRule != null)
+            {
+                SyntaxParser.StartingNonTerminal = startingRule;
+            }
+        }
+
+
+        #endregion
+
 
         public ParseResult<IN,OUT> Parse(string source, string startingNonTerminal = null)
         {

@@ -35,7 +35,7 @@ namespace sly.parser.generator
             if (parserType == ParserType.LL_RECURSIVE_DESCENT)
             {
                 ParserConfiguration<IN,OUT> configuration = ExtractParserConfiguration(parserInstance.GetType());
-                ISyntaxParser<IN> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
+                ISyntaxParser<IN,OUT> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                 SyntaxTreeVisitor<IN,OUT> visitor = new SyntaxTreeVisitor<IN,OUT>(configuration, parserInstance);
                 parser = new Parser<IN,OUT>(syntaxParser, visitor);
                 parser.Lexer = BuildLexer();
@@ -50,9 +50,9 @@ namespace sly.parser.generator
             return parser;
         }
 
-        protected virtual  ISyntaxParser<IN> BuildSyntaxParser(ParserConfiguration<IN,OUT> conf, ParserType parserType, string rootRule)
+        protected virtual  ISyntaxParser<IN,OUT> BuildSyntaxParser(ParserConfiguration<IN,OUT> conf, ParserType parserType, string rootRule)
         {
-            ISyntaxParser<IN> parser = null;
+            ISyntaxParser<IN,OUT> parser = null;
             switch (parserType)
             {
                 case ParserType.LL_RECURSIVE_DESCENT:
@@ -71,6 +71,7 @@ namespace sly.parser.generator
 
         #endregion
 
+       
 
 
 
@@ -131,7 +132,7 @@ namespace sly.parser.generator
 
                     
 
-                    Rule<IN> r = BuildNonTerminal<IN>(ntAndRule);
+                    Rule<IN> r = BuildNonTerminal(ntAndRule);
                     string key = ntAndRule.Item1 + "__" + r.Key;
                     functions[key] = m;
                     NonTerminal<IN> nonT = null;
@@ -159,7 +160,7 @@ namespace sly.parser.generator
             return conf;
         }
 
-        private Rule<IN> BuildNonTerminal<IN>(Tuple<string, string> ntAndRule) 
+        private Rule<IN> BuildNonTerminal(Tuple<string, string> ntAndRule) 
         {
             Rule<IN> rule = new Rule<IN>();
 

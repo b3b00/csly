@@ -9,14 +9,12 @@ namespace sly.parser.llparser
 {
 
 
-    public class RecursiveDescentSyntaxParser<T,OUT> : ISyntaxParser<T> where T : struct
+    public class RecursiveDescentSyntaxParser<IN,OUT> : ISyntaxParser<IN,OUT> where IN : struct
     {
-        public ParserConfiguration<T,OUT> Configuration { get; set; }
-
+        public ParserConfiguration<IN,OUT> Configuration { get; set; }
         public string StartingNonTerminal { get; set; }
 
-
-        public RecursiveDescentSyntaxParser(ParserConfiguration<T,OUT> configuration, string startingNonTerminal)
+        public RecursiveDescentSyntaxParser(ParserConfiguration<IN,OUT> configuration, string startingNonTerminal)
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
@@ -26,17 +24,17 @@ namespace sly.parser.llparser
         #region STARTING_TOKENS
 
 
-        protected virtual void InitializeStartingTokens(ParserConfiguration<T,OUT> configuration, string root)
+        protected virtual void InitializeStartingTokens(ParserConfiguration<IN,OUT> configuration, string root)
         {
 
 
-            Dictionary<string, NonTerminal<T>> nts = configuration.NonTerminals;
+            Dictionary<string, NonTerminal<IN>> nts = configuration.NonTerminals;
 
 
             InitStartingTokensForNonTerminal(nts, root);
-            foreach (NonTerminal<T> nt in nts.Values)
+            foreach (NonTerminal<IN> nt in nts.Values)
             {
-                foreach (Rule<T> rule in nt.Rules)
+                foreach (Rule<IN> rule in nt.Rules)
                 {
                     if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
                     {
@@ -46,42 +44,42 @@ namespace sly.parser.llparser
             }
         }
 
-        protected virtual void InitStartingTokensForNonTerminal(Dictionary<string, NonTerminal<T>> nonTerminals, string name)
+        protected virtual void InitStartingTokensForNonTerminal(Dictionary<string, NonTerminal<IN>> nonTerminals, string name)
         {
             if (nonTerminals.ContainsKey(name))
             {
-                NonTerminal<T> nt = nonTerminals[name];
+                NonTerminal<IN> nt = nonTerminals[name];
                 nt.Rules.ForEach(r => InitStartingTokensForRule(nonTerminals, r));
             }
             return;
         }
 
-        protected virtual void InitStartingTokensForRule(Dictionary<string, NonTerminal<T>> nonTerminals, Rule<T> rule)
+        protected virtual void InitStartingTokensForRule(Dictionary<string, NonTerminal<IN>> nonTerminals, Rule<IN> rule)
         {
             if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
             {
-                rule.PossibleLeadingTokens = new List<T>();
+                rule.PossibleLeadingTokens = new List<IN>();
                 if (rule.Clauses.Count > 0)
                 {
-                    IClause<T> first = rule.Clauses[0];
-                    if (first is TerminalClause<T>)
+                    IClause<IN> first = rule.Clauses[0];
+                    if (first is TerminalClause<IN>)
                     {
-                        TerminalClause<T> term = first as TerminalClause<T>;
+                        TerminalClause<IN> term = first as TerminalClause<IN>;
                         rule.PossibleLeadingTokens.Add(term.ExpectedToken);
-                        rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<T>().ToList<T>();
+                        rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<IN>().ToList<IN>();
                     }
                     else
                     {
-                        NonTerminalClause<T> nonterm = first as NonTerminalClause<T>;
+                        NonTerminalClause<IN> nonterm = first as NonTerminalClause<IN>;
                         InitStartingTokensForNonTerminal(nonTerminals, nonterm.NonTerminalName);
                         if (nonTerminals.ContainsKey(nonterm.NonTerminalName))
                         {
-                            NonTerminal<T> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
+                            NonTerminal<IN> firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
                             firstNonTerminal.Rules.ForEach(r =>
                             {
                                 rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
                             });
-                            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<T>().ToList<T>();
+                            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<IN>().ToList<IN>();
                         }
                         else
                         {
@@ -98,22 +96,22 @@ namespace sly.parser.llparser
         #region parsing
 
     
-        public SyntaxParseResult<T> Parse(IList<Token<T>> tokens, string startingNonTerminal = null)
+        public SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
         {
             string start = startingNonTerminal ?? StartingNonTerminal;
-            Dictionary<string, NonTerminal<T>> NonTerminals = Configuration.NonTerminals;
-            List<UnexpectedTokenSyntaxError<T>> errors = new List<UnexpectedTokenSyntaxError<T>>();
-            NonTerminal<T> nt = NonTerminals[start];
+            Dictionary<string, NonTerminal<IN>> NonTerminals = Configuration.NonTerminals;
+            List<UnexpectedTokenSyntaxError<IN>> errors = new List<UnexpectedTokenSyntaxError<IN>>();
+            NonTerminal<IN> nt = NonTerminals[start];
 
-            List<Rule<T>> rules = nt.Rules.Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList<Rule<T>>();
+            List<Rule<IN>> rules = nt.Rules.Where<Rule<IN>>(r => r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList<Rule<IN>>();
 
-            List<SyntaxParseResult<T>> rs = new List<SyntaxParseResult<T>>();
-            foreach (Rule<T> rule in rules)
+            List<SyntaxParseResult<IN>> rs = new List<SyntaxParseResult<IN>>();
+            foreach (Rule<IN> rule in rules)
             {
-                SyntaxParseResult<T> r = Parse(tokens, rule, 0, start);                
+                SyntaxParseResult<IN> r = Parse(tokens, rule, 0, start);                
                 rs.Add(r);                
             }
-            SyntaxParseResult<T> result = null;
+            SyntaxParseResult<IN> result = null;
 
 
             if (rs.Count > 0)
@@ -124,8 +122,8 @@ namespace sly.parser.llparser
                 {
                     List<int> endingPositions = rs.Select(r => r.EndingPosition).ToList<int>();
                     int lastposition = endingPositions.Max();
-                    List<SyntaxParseResult<T>> furtherResults = rs.Where<SyntaxParseResult<T>>(r => r.EndingPosition == lastposition).ToList<SyntaxParseResult<T>>();
-                    errors.Add(new UnexpectedTokenSyntaxError<T>(tokens[lastposition], null));
+                    List<SyntaxParseResult<IN>> furtherResults = rs.Where<SyntaxParseResult<IN>>(r => r.EndingPosition == lastposition).ToList<SyntaxParseResult<IN>>();
+                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastposition], null));
                     furtherResults.ForEach(r =>
                     {
                         if (r.Errors != null)
@@ -138,11 +136,11 @@ namespace sly.parser.llparser
             }
             if (result == null)
             {
-                result = new SyntaxParseResult<T>();
+                result = new SyntaxParseResult<IN>();
                 errors.Sort();
                 if (errors.Count > 0)
                 {
-                    List<UnexpectedTokenSyntaxError<T>> singleError = new List<UnexpectedTokenSyntaxError<T>>() { errors[errors.Count() - 1] };
+                    List<UnexpectedTokenSyntaxError<IN>> singleError = new List<UnexpectedTokenSyntaxError<IN>>() { errors[errors.Count() - 1] };
                     result.Errors = singleError;
                 }
                 else
@@ -156,22 +154,22 @@ namespace sly.parser.llparser
         }
 
 
-        public virtual SyntaxParseResult<T> Parse(IList<Token<T>> tokens, Rule<T> rule, int position, string nonTerminalName)
+        public virtual SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position, string nonTerminalName)
         {
             int currentPosition = position;
-            List<UnexpectedTokenSyntaxError<T>> errors = new List<UnexpectedTokenSyntaxError<T>>();
+            List<UnexpectedTokenSyntaxError<IN>> errors = new List<UnexpectedTokenSyntaxError<IN>>();
             bool isError = false;
-            List<ISyntaxNode<T>> children = new List<ISyntaxNode<T>>();
+            List<ISyntaxNode<IN>> children = new List<ISyntaxNode<IN>>();
             if (rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
             {
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
-                    children = new List<ISyntaxNode<T>>();
-                    foreach (IClause<T> clause in rule.Clauses)
+                    children = new List<ISyntaxNode<IN>>();
+                    foreach (IClause<IN> clause in rule.Clauses)
                     {
-                        if (clause is TerminalClause<T>)
+                        if (clause is TerminalClause<IN>)
                         {
-                            SyntaxParseResult<T> termRes = ParseTerminal(tokens, clause as TerminalClause<T>, currentPosition);
+                            SyntaxParseResult<IN> termRes = ParseTerminal(tokens, clause as TerminalClause<IN>, currentPosition);
                             if (!termRes.IsError)
                             {
                                 children.Add(termRes.Root);
@@ -179,15 +177,15 @@ namespace sly.parser.llparser
                             }
                             else
                             {
-                                Token<T> tok = tokens[currentPosition];
-                                errors.Add(new UnexpectedTokenSyntaxError<T>(tok, ((TerminalClause<T>)clause).ExpectedToken));
+                                Token<IN> tok = tokens[currentPosition];
+                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok, ((TerminalClause<IN>)clause).ExpectedToken));
                             }
                             isError = isError || termRes.IsError;
                         }
-                        else if (clause is NonTerminalClause<T>)
+                        else if (clause is NonTerminalClause<IN>)
                         {
-                            SyntaxParseResult<T> nonTerminalResult =
-                                ParseNonTerminal(tokens, clause as NonTerminalClause<T>, currentPosition);
+                            SyntaxParseResult<IN> nonTerminalResult =
+                                ParseNonTerminal(tokens, clause as NonTerminalClause<IN>, currentPosition);
                             if (!nonTerminalResult.IsError)
                             {
                                 children.Add(nonTerminalResult.Root);
@@ -216,18 +214,18 @@ namespace sly.parser.llparser
                 }
             }
 
-            SyntaxParseResult<T> result = new SyntaxParseResult<T>();
+            SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             result.IsError = isError;
             result.Errors = errors;
             result.EndingPosition = currentPosition;
             if (!isError)
             {
                 
-                SyntaxNode<T> node = new SyntaxNode<T>(nonTerminalName + "__" + rule.Key, children);                
+                SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);                
                 node = ManageExpressionRules(rule, node);
                 result.Root =  node;
                 result.IsEnded = currentPosition >= tokens.Count - 1
-                                || currentPosition == tokens.Count - 2 && tokens[tokens.Count - 1].TokenID.Equals(default(T));
+                                || currentPosition == tokens.Count - 2 && tokens[tokens.Count - 1].TokenID.Equals(default(IN));
                 if (rule.IsExpressionRule)
                 {
 
@@ -237,7 +235,7 @@ namespace sly.parser.llparser
             return result;
         }
 
-        protected SyntaxNode<T> ManageExpressionRules(Rule<T> rule, SyntaxNode<T> node)
+        protected SyntaxNode<IN> ManageExpressionRules(Rule<IN> rule, SyntaxNode<IN> node)
         {
             int operatorIndex = -1;
             if (rule.IsExpressionRule)
@@ -253,7 +251,7 @@ namespace sly.parser.llparser
                 }
                 if (operatorIndex > 0)
                 {
-                    if (node.Children[operatorIndex] is SyntaxLeaf<T> operatorNode)
+                    if (node.Children[operatorIndex] is SyntaxLeaf<IN> operatorNode)
                     {
                         if (operatorNode != null)
                         {
@@ -273,17 +271,17 @@ namespace sly.parser.llparser
                 
         }
 
-        public SyntaxParseResult<T> ParseTerminal(IList<Token<T>> tokens, TerminalClause<T> term, int position)
+        public SyntaxParseResult<IN> ParseTerminal(IList<Token<IN>> tokens, TerminalClause<IN> term, int position)
         {
-            SyntaxParseResult<T> result = new SyntaxParseResult<T>();
+            SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             result.IsError = !term.Check(tokens[position].TokenID);
             result.EndingPosition = !result.IsError ? position + 1 : position;
-            result.Root = new SyntaxLeaf<T>(tokens[position]);
+            result.Root = new SyntaxLeaf<IN>(tokens[position]);
             return result;
         }
 
 
-        public SyntaxParseResult<T> ParseNonTerminal(IList<Token<T>> tokens, NonTerminalClause<T> nonTermClause, int currentPosition)
+        public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, NonTerminalClause<IN> nonTermClause, int currentPosition)
         {
 
             if (nonTermClause.NonTerminalName == "members")
@@ -291,14 +289,14 @@ namespace sly.parser.llparser
                 ;
             }
 
-            NonTerminal<T> nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
+            NonTerminal<IN> nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
             bool found = false;
             bool isError = false;
-            List<UnexpectedTokenSyntaxError<T>> errors = new List<UnexpectedTokenSyntaxError<T>>();
+            List<UnexpectedTokenSyntaxError<IN>> errors = new List<UnexpectedTokenSyntaxError<IN>>();
 
             int i = 0;
 
-            List<T> allAcceptableTokens = new List<T>();
+            List<IN> allAcceptableTokens = new List<IN>();
             nt.Rules.ForEach(r =>
             {
                 if (r != null && r.PossibleLeadingTokens != null)
@@ -310,27 +308,27 @@ namespace sly.parser.llparser
                     ;
                 }
             });
-            allAcceptableTokens = allAcceptableTokens.Distinct<T>().ToList<T>();
+            allAcceptableTokens = allAcceptableTokens.Distinct<IN>().ToList<IN>();
 
-            List<Rule<T>> rules = nt.Rules
-                .Where<Rule<T>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.MayBeEmpty)
-                .ToList<Rule<T>>();
+            List<Rule<IN>> rules = nt.Rules
+                .Where<Rule<IN>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.MayBeEmpty)
+                .ToList<Rule<IN>>();
 
             if (rules.Count == 0)
             {
                 isError = true;
-                errors.Add(new UnexpectedTokenSyntaxError<T>(tokens[currentPosition],
-                    allAcceptableTokens.ToArray<T>()));
+                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],
+                    allAcceptableTokens.ToArray<IN>()));
             }
 
-            List<UnexpectedTokenSyntaxError<T>> innerRuleErrors = new List<UnexpectedTokenSyntaxError<T>>();
-            SyntaxParseResult<T> okResult = null;
+            List<UnexpectedTokenSyntaxError<IN>> innerRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
+            SyntaxParseResult<IN> okResult = null;
             int greaterIndex = 0;
             bool allRulesInError = true;
             while (!found && i < rules.Count)
             {
-                Rule<T> innerrule = rules[i];
-                SyntaxParseResult<T> innerRuleRes = Parse(tokens, innerrule, currentPosition, nonTermClause.NonTerminalName);
+                Rule<IN> innerrule = rules[i];
+                SyntaxParseResult<IN> innerRuleRes = Parse(tokens, innerrule, currentPosition, nonTermClause.NonTerminalName);
                 if (!innerRuleRes.IsError && okResult == null)
                 {
                     okResult = innerRuleRes;
@@ -351,7 +349,7 @@ namespace sly.parser.llparser
             isError = isError || allRulesInError;
             errors.AddRange(innerRuleErrors);
 
-            SyntaxParseResult<T> result = new SyntaxParseResult<T>();
+            SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             result.Errors = errors;
             if (okResult != null)
             {
@@ -369,6 +367,11 @@ namespace sly.parser.llparser
                 result.EndingPosition = greaterIndex;
             }
             return result;
+        }
+
+        public virtual void  Init(ParserConfiguration<IN, OUT> configuration)
+        {
+            this.InitializeStartingTokens(configuration, StartingNonTerminal);
         }
 
         #endregion

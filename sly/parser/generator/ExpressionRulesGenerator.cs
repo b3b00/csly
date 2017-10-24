@@ -19,15 +19,26 @@ namespace sly.parser.generator
 
         public T OperatorToken { get; set; }
 
-        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, T oper)
+        public int Arity { get; set; }
+
+        public bool IsBinary => Arity == 2;
+
+        public bool IsUnary => Arity == 1;
+
+
+        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, int arity, T oper)
         {
             Precedence = precedence;
             Associativity = assoc;
             VisitorMethod = method;
             OperatorToken = oper;
+            Arity = arity;
         }
 
-
+        public override string ToString()
+        {
+            return $"{OperatorToken} / {Arity} : {Precedence} / {Associativity}";
+        }
     }
 
     public class ExpressionRulesGenerator
@@ -53,13 +64,14 @@ namespace sly.parser.generator
 
                 foreach (OperationAttribute attr in attributes)
                 {
-                    OperationMetaData<IN> operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc,m,ConvertIntToEnum<IN>(attr.Token));
+                    OperationMetaData<IN> operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc,m,attr.Arity,ConvertIntToEnum<IN>(attr.Token));
                     var operations = new List<OperationMetaData<IN>>();
                     if (operationsByPrecedence.ContainsKey(operation.Precedence))
                     {
                         operations = operationsByPrecedence[operation.Precedence];
                     }
                     operations.Add(operation);
+                    operationsByPrecedence[operation.Precedence] = operations;
                 }
             });
 
@@ -96,26 +108,105 @@ namespace sly.parser.generator
 
         }
 
+
+
+
         private static void GenerateExpressionParser<IN, OUT>(ParserConfiguration<IN, OUT> configuration, string operandNonTerminal, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence) where IN : struct
         {
             List<int> precedences = operationsByPrecedence.Keys.ToList<int>();
             precedences.Sort();
             int max = precedences.Max();
 
-            for (int i = 0; i < precedences.Count-1; i++)
+            for (int i = 0; i < precedences.Count; i++)
             {
                 int precedence = precedences[i];
-                int nextPrecedence = precedences[i + 1];
+                int nextPrecedence = i < precedences.Count-1 ? precedences[i + 1] : -1;
                 var operations = operationsByPrecedence[precedence];
-                string name = GetNonTerminalNameForPrecedence(precedence, operationsByPrecedence);
-                string nextName = GetNonTerminalNameForPrecedence(nextPrecedence, operationsByPrecedence);
+                string name = GetNonTerminalNameForPrecedence(precedence, operationsByPrecedence, operandNonTerminal);
+                string nextName = GetNonTerminalNameForPrecedence(nextPrecedence, operationsByPrecedence, operandNonTerminal);
+
+                NonTerminal<IN> nonTerminal = BuilNonTerminal<IN>(i == precedences.Count - 1, name, nextName, operations, operationsByPrecedence);
+
+                configuration.NonTerminals[nonTerminal.Name] = nonTerminal;
+                /*
+                NonTerminal<IN> nonTerminal = new NonTerminal<IN>(name,new List<Rule<IN>>());
+                foreach (OperationMetaData<IN> operation in operations)
+                {
+                    if (operation.IsBinary)
+                    {
+                        Rule<IN> rule1 = new Rule<IN>();
+                        rule1.Clauses.Add(new NonTerminalClause<IN>(nextName));
+                        rule1.Clauses.Add(new TerminalClause<IN>(operation.OperatorToken));
+                        rule1.Clauses.Add(new NonTerminalClause<IN>(name));
+                        nonTerminal.Rules.Add(rule1);
+
+                        Rule<IN> rule2 = new Rule<IN>();
+                        rule2.Clauses.Add(new NonTerminalClause<IN>(nextName));
+                        nonTerminal.Rules.Add(rule2);
+                    }
+                    else if (operation.IsUnary)
+                    {
+                        Rule<IN> rule1 = new Rule<IN>();                        
+                        rule1.Clauses.Add(new TerminalClause<IN>(operation.OperatorToken));
+                        rule1.Clauses.Add(new NonTerminalClause<IN>(name));
+                        nonTerminal.Rules.Add(rule1);
+                    }                
+                }
+
+
+                // TODO last precednce :
+                //  p : operand*/
+            
             }
+            
+
         }
 
-        private static string GetNonTerminalNameForPrecedence<IN>(int precedence, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence) where IN : struct
+        private static NonTerminal<IN> BuilNonTerminal<IN>(bool last, string name, string nextName,List<OperationMetaData<IN>> operations, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence) where IN : struct
         {
-            List<IN> tokens = operationsByPrecedence[precedence].Select(o => o.OperatorToken).ToList<IN>();
-            return GetNonTerminalNameForPrecedence(precedence, tokens);
+
+            NonTerminal<IN> nonTerminal = new NonTerminal<IN>(name, new List<Rule<IN>>());
+            foreach (OperationMetaData<IN> operation in operations)
+            {
+                if (operation.IsBinary)
+                {
+                    Rule<IN> rule = new Rule<IN>();
+                    rule.Clauses.Add(new NonTerminalClause<IN>(nextName));
+                    rule.Clauses.Add(new TerminalClause<IN>(operation.OperatorToken));
+                    rule.Clauses.Add(new NonTerminalClause<IN>(name));
+                    rule.VisitorMethods[operation.OperatorToken] = operation.VisitorMethod;
+                    nonTerminal.Rules.Add(rule);
+                    
+                }
+                else if (operation.IsUnary)
+                {
+                    Rule<IN> rule = new Rule<IN>();
+                    rule.Clauses.Add(new TerminalClause<IN>(operation.OperatorToken));
+                    rule.Clauses.Add(new NonTerminalClause<IN>(name));
+                    nonTerminal.Rules.Add(rule);                    
+                }
+            }
+            if (last)
+            {
+                Rule<IN> rule = new Rule<IN>();
+                rule.Clauses.Add(new NonTerminalClause<IN>(nextName));
+                nonTerminal.Rules.Add(rule);
+            }
+
+            return nonTerminal;
+        }
+
+        private static string GetNonTerminalNameForPrecedence<IN>(int precedence, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence, string operandName) where IN : struct
+        {
+            if (precedence > 0)
+            {
+                List<IN> tokens = operationsByPrecedence[precedence].Select(o => o.OperatorToken).ToList<IN>();
+                return GetNonTerminalNameForPrecedence(precedence, tokens);
+            }
+            else
+            {
+                return operandName;
+            }
         }
 
         private static string GetNonTerminalNameForPrecedence<IN>(int precedence, List<IN> operators) where IN : struct
@@ -124,7 +215,7 @@ namespace sly.parser.generator
                 .Select(oper => oper.ToString())
                 .ToList<string>()
                 .Aggregate((s1, s2) => $"{s1}_{s2}");
-            string name = $"expr_{precedence}_{operators}";
+            string name = $"expr_{precedence}_{operatorsPart}";
             
 
             return name;
