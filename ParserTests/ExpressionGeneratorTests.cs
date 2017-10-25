@@ -45,12 +45,12 @@ namespace ParserTests
             Assert.Equal(1, nt.Rules.Count);
             Assert.Equal("operand", nt.Name);
             nt = nonterminals[1];
-            Assert.Equal(2, nt.Rules.Count);
+            Assert.Equal(3, nt.Rules.Count);
             Assert.Contains("10", nt.Name);
             Assert.Contains("PLUS", nt.Name);
             Assert.Contains("MINUS", nt.Name);
             nt = nonterminals[2];
-            Assert.Equal(2, nt.Rules.Count);
+            Assert.Equal(3, nt.Rules.Count);
             Assert.Contains("50", nt.Name);
             Assert.Contains("TIMES", nt.Name);
             Assert.Contains("DIVIDE", nt.Name);
@@ -122,6 +122,27 @@ namespace ParserTests
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(21, r.Result);
+        }
+
+        [Fact]
+        public void TestUnaryPrecedence()
+        {
+            BuildParser();
+            ParseResult<ExpressionToken, int> r = Parser.Parse("-1 * 2", StartingRule);
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.Equal(-2, r.Result);
+        }
+
+
+        [Fact]
+        public void TestPrecedence()
+        {
+            BuildParser();
+            ParseResult<ExpressionToken, int> r = Parser.Parse("-1 + 2  * 3", StartingRule);
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.Equal(5, r.Result);
         }
 
 

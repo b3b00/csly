@@ -29,7 +29,7 @@ namespace sly.parser
         {
             var conf = ExpressionRulesGenerator.BuildExpressionRules<IN, OUT>(Configuration, Instance.GetType());
             Configuration = conf;
-            SyntaxParser.Init(conf);
+            SyntaxParser.Init(conf,startingRule);
             if (startingRule != null)
             {
                 SyntaxParser.StartingNonTerminal = startingRule;

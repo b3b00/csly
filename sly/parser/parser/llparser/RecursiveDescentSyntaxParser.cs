@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using sly.parser.generator;
+using System.Reflection;
 
 namespace sly.parser.llparser
 {
@@ -220,7 +221,6 @@ namespace sly.parser.llparser
             result.EndingPosition = currentPosition;
             if (!isError)
             {
-                
                 SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);                
                 node = ManageExpressionRules(rule, node);
                 result.Root =  node;
@@ -238,10 +238,13 @@ namespace sly.parser.llparser
         protected SyntaxNode<IN> ManageExpressionRules(Rule<IN> rule, SyntaxNode<IN> node)
         {
             int operatorIndex = -1;
-            if (rule.IsExpressionRule)
+            if (rule.IsExpressionRule && rule.IsByPassRule)
             {
-                
-                if (node.Children.Count == 2)
+                node.IsByPassNode = true;
+            }
+            else if (rule.IsExpressionRule && !rule.IsByPassRule)
+            {                
+                if (node.Children.Count == 3)
                 {
                     operatorIndex = 1;
                 }
@@ -249,7 +252,7 @@ namespace sly.parser.llparser
                 {
                     operatorIndex = 0;
                 }
-                if (operatorIndex > 0)
+                if (operatorIndex >= 0)
                 {
                     if (node.Children[operatorIndex] is SyntaxLeaf<IN> operatorNode)
                     {
@@ -260,7 +263,7 @@ namespace sly.parser.llparser
                                 if (rule.VisitorMethods.ContainsKey(operatorNode.Token.TokenID))
                                 {
                                     var visitor = rule.VisitorMethods[operatorNode.Token.TokenID];
-                                    node.visitor = visitor;
+                                    node.Visitor = visitor;
                                 }
                             }
                         }
@@ -369,8 +372,12 @@ namespace sly.parser.llparser
             return result;
         }
 
-        public virtual void  Init(ParserConfiguration<IN, OUT> configuration)
+        public virtual void  Init(ParserConfiguration<IN, OUT> configuration, string root)
         {
+            if (root != null)
+            {
+                StartingNonTerminal = root;
+            }
             this.InitializeStartingTokens(configuration, StartingNonTerminal);
         }
 

@@ -14,7 +14,7 @@ namespace simpleExpressionParser
         [Operation((int)ExpressionToken.MINUS, 2, Associativity.Right, 10)]
         [Operation((int)ExpressionToken.TIMES, 2, Associativity.Right, 50)]
         [Operation((int)ExpressionToken.DIVIDE, 2, Associativity.Right, 50)]
-        public int binaryExpression(Token<ExpressionToken> operation, int left, int right)
+        public int binaryExpression(int left, Token<ExpressionToken> operation, int right)
         {
             int result = 0;
             switch (operation.TokenID)

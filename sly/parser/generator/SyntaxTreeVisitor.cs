@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Net;
 using sly.parser.syntax;
 using sly.lexer;
+using System.Reflection;
 
 namespace sly.parser.generator
 {
@@ -131,8 +132,8 @@ namespace sly.parser.generator
             
             
             SyntaxVisitorResult<IN, OUT> result = SyntaxVisitorResult<IN, OUT>.NoneResult();
-            if (Configuration.Functions.ContainsKey(node.Name))
-            {
+            if (Configuration.Functions.ContainsKey(node.Name) || node.Visitor != null || node.IsByPassNode)
+            {                
                 List<object> args = new List<object>();
                 int i = 0;
                 foreach (ISyntaxNode<IN> n in node.Children)
@@ -153,19 +154,33 @@ namespace sly.parser.generator
 
                     i++;
                 }
-                try
-                {
-                    object t =  (Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray()));
-                    string typename = t.GetType().Name;
-                    OUT res = (OUT) t;
-                    result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                if (node.IsByPassNode)
+                {                    
+                    result = SyntaxVisitorResult<IN, OUT>.NewValue((OUT)args[0]);                    
                 }
-                catch (Exception e)
+                else
                 {
-                    Console.WriteLine($"OUTCH {e.Message} calling {node.Name} =>  {Configuration.Functions[node.Name].Name}");
+                    MethodInfo method = null;
+                    try
+                    {                        
+                        bool found = Configuration.Functions.TryGetValue(node.Name, out method);
+                        if (method == null && !found)
+                        {
+                            method = node.Visitor;
+                        }
+                        object t = (method.Invoke(ParserVsisitorInstance, args.ToArray()));
+                        //string typename = t.GetType().Name;
+                        OUT res = (OUT)t;
+                        result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"OUTCH {e.Message} calling {node.Name} =>  {method.Name}");
+                    }
                 }
 
             }
+            
             return result;
         }
 

@@ -12,6 +12,9 @@ namespace sly.parser.syntax
 
     public class Rule<T> : GrammarNode<T> where T : struct
     {
+
+        public bool IsByPassRule { get; set; } = false;
+
         public Dictionary<T, MethodInfo> VisitorMethods { get; set; }
 
         public bool IsExpressionRule { get; set; }

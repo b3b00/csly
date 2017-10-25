@@ -17,13 +17,15 @@ namespace sly.parser.syntax
 
         public List<ISyntaxNode<T>> Children { get; }
 
-        public MethodInfo visitor;
+        public MethodInfo Visitor { get; set; }
+
+        public bool IsByPassNode { get; set; } = false;
 
         public SyntaxNode(string name, List<ISyntaxNode<T>> children = null, MethodInfo visitor = null)
         {
             this.Name = name;            
             this.Children = children;
-            this.visitor = visitor;
+            this.Visitor = visitor;
         }
         
         public override string ToString()
