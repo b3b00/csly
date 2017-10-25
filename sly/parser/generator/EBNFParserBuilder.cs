@@ -46,7 +46,7 @@ namespace sly.parser.generator
             ParserConfiguration<IN,OUT> configuration =
                 ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
 
-            ISyntaxParser<IN> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
+            ISyntaxParser<IN, OUT> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
 
             SyntaxTreeVisitor<IN, OUT> visitor = null;
             if (parserType == ParserType.LL_RECURSIVE_DESCENT)
@@ -66,20 +66,20 @@ namespace sly.parser.generator
 
 
 
-        protected override ISyntaxParser<IN> BuildSyntaxParser(ParserConfiguration<IN,OUT> conf, ParserType parserType,
+        protected override ISyntaxParser<IN,OUT> BuildSyntaxParser(ParserConfiguration<IN,OUT> conf, ParserType parserType,
             string rootRule)
         {
-            ISyntaxParser<IN> parser = null;
+            ISyntaxParser<IN,OUT> parser = null;
             switch (parserType)
             {
                 case ParserType.LL_RECURSIVE_DESCENT:
                     {
-                        parser = (ISyntaxParser<IN>)(new RecursiveDescentSyntaxParser<IN,OUT>(conf, rootRule));
+                        parser = (ISyntaxParser<IN, OUT>)(new RecursiveDescentSyntaxParser<IN,OUT>(conf, rootRule));
                         break;
                     }
                 case ParserType.EBNF_LL_RECURSIVE_DESCENT:
                 {
-                    parser = (ISyntaxParser<IN>)(new EBNFRecursiveDescentSyntaxParser<IN,OUT>(conf, rootRule));
+                    parser = (ISyntaxParser<IN, OUT>)(new EBNFRecursiveDescentSyntaxParser<IN,OUT>(conf, rootRule));
                     break;
                 }
                 default:

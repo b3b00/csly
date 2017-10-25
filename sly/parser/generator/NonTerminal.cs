@@ -5,7 +5,7 @@ using sly.parser.syntax;
 
 namespace sly.parser.generator
 {
-    public class NonTerminal<IN>
+    public class NonTerminal<IN> where IN : struct
     {
 
         public string Name { get; set; }

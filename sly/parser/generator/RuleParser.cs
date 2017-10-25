@@ -5,7 +5,7 @@ using sly.parser.syntax;
 
 namespace sly.parser.generator
 {
-    public class RuleParser<IN>
+    public class RuleParser<IN> where IN : struct
     {
         
         
@@ -13,7 +13,7 @@ namespace sly.parser.generator
          #region rules grammar
 
         [Production("rule : IDENTIFIER COLON clauses")]
-        public object Root(Token<EbnfToken> name, Token<EbnfToken> discarded, ClauseSequence<IN> clauses)
+        public object Root(Token<EbnfToken> name, Token<EbnfToken> discarded, ClauseSequence<IN> clauses) 
         {
             Rule<IN> rule = new Rule<IN>();
             rule.NonTerminalName = name.Value;
