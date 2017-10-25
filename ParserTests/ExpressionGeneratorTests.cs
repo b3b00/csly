@@ -13,7 +13,7 @@ namespace ParserTests
 
         private Parser<ExpressionToken,int> Parser;
 
-        private const string StartingRule = "expr_10_PLUS_MINUS";
+        private string StartingRule = "";
         public ExpressionGeneratorTests()
         {
             
@@ -22,20 +22,17 @@ namespace ParserTests
 
         private void BuildParser()
         {
+            StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
             SimpleExpressionParser parserInstance = new SimpleExpressionParser();
             ParserBuilder<ExpressionToken, int> builder = new ParserBuilder<ExpressionToken, int>();
-            Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "generatedExpression");
-            Parser.BuildExpressionParser(StartingRule);
-            //var conf = ExpressionRulesGenerator.BuildExpressionRules<ExpressionToken, int>(Parser.Configuration, typeof(SimpleExpressionParser));
-            //Parser.Configuration = conf;
-            //builder.BuildParser
+            Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);            
         }
 
         [Fact]
        public void TestBuild()
         {
             BuildParser();            
-            Assert.Equal(4, Parser.Configuration.NonTerminals.Count);
+            Assert.Equal(5, Parser.Configuration.NonTerminals.Count);
             var nonterminals = new List<NonTerminal<ExpressionToken>>();
             foreach(var pair in Parser.Configuration.NonTerminals)
             {
@@ -58,7 +55,10 @@ namespace ParserTests
             Assert.Equal(2, nt.Rules.Count);
             Assert.Contains("100", nt.Name);
             Assert.Contains("MINUS", nt.Name);
-            ;
+            nt = nonterminals[4];
+            Assert.Equal(1, nt.Rules.Count);
+            Assert.Equal(StartingRule, nt.Name);
+            Assert.Equal(1, nt.Rules[0].Clauses.Count);
         }
 
 

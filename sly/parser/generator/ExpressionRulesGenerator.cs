@@ -75,35 +75,43 @@ namespace sly.parser.generator
                 }
             });
 
-
-            methods = parserClass.GetMethods().ToList<MethodInfo>();
-            MethodInfo operandMethod = methods.Find(m =>
+            if (operationsByPrecedence.Count > 0)
             {
-                List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>();
-                Attribute attr = attributes.Find(a => a.GetType() == typeof(OperandAttribute));
-                return attr != null;
-            });
 
-            string operandNonTerminal = null;
-
-            if (operandMethod != null)
-            {
-                ProductionAttribute production = operandMethod.GetCustomAttributes().ToList<Attribute>().Find((Attribute attr) => attr.GetType() == typeof(ProductionAttribute)) as ProductionAttribute;
-                if (production != null)
+                methods = parserClass.GetMethods().ToList<MethodInfo>();
+                MethodInfo operandMethod = methods.Find(m =>
                 {
-                    string[] ruleItems = production.RuleString.Split(new char[] { ':' });
-                    if (ruleItems.Length == 2)
+                    List<Attribute> attributes = m.GetCustomAttributes().ToList<Attribute>();
+                    Attribute attr = attributes.Find(a => a.GetType() == typeof(OperandAttribute));
+                    return attr != null;
+                });
+
+                string operandNonTerminal = null;
+
+                if (operandMethod == null)
+                {
+                    throw new Exception("missing [operand] attribute");
+                }
+                else
+                {
+                    ProductionAttribute production = operandMethod.GetCustomAttributes().ToList<Attribute>().Find((Attribute attr) => attr.GetType() == typeof(ProductionAttribute)) as ProductionAttribute;
+                    if (production != null)
                     {
-                        operandNonTerminal = ruleItems[0].Trim();
+                        string[] ruleItems = production.RuleString.Split(new char[] { ':' });
+                        if (ruleItems.Length == 2)
+                        {
+                            operandNonTerminal = ruleItems[0].Trim();
+                        }
                     }
                 }
-            }
 
-            if (operandNonTerminal != null && operationsByPrecedence.Count > 0)
-            {
-                GenerateExpressionParser<IN, OUT>(configuration, operandNonTerminal, operationsByPrecedence);
-            }
 
+                if (operandNonTerminal != null && operationsByPrecedence.Count > 0)
+                {
+                    GenerateExpressionParser<IN, OUT>(configuration, operandNonTerminal, operationsByPrecedence, parserClass.Name);
+                }
+
+            }
             return configuration;
 
         }
@@ -111,7 +119,7 @@ namespace sly.parser.generator
 
 
 
-        private static void GenerateExpressionParser<IN, OUT>(ParserConfiguration<IN, OUT> configuration, string operandNonTerminal, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence) where IN : struct
+        private static void GenerateExpressionParser<IN, OUT>(ParserConfiguration<IN, OUT> configuration, string operandNonTerminal, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence, string parserClassName) where IN : struct
         {
             List<int> precedences = operationsByPrecedence.Keys.ToList<int>();
             precedences.Sort();
@@ -130,8 +138,18 @@ namespace sly.parser.generator
                 configuration.NonTerminals[nonTerminal.Name] = nonTerminal;
             }
 
-
+            // entry point non terminal
+            NonTerminal<IN> entrypoint = new NonTerminal<IN>($"{parserClassName}_expressions", new List<Rule<IN>>());
+            int prec = precedences[0];            
+            string lowestname = GetNonTerminalNameForPrecedence(prec, operationsByPrecedence, operandNonTerminal);
+            Rule<IN> rule = new Rule<IN>();
+            rule.Clauses.Add(new NonTerminalClause<IN>(lowestname));
+            rule.IsByPassRule = true;
+            rule.IsExpressionRule = true;
+            configuration.NonTerminals[entrypoint.Name] = entrypoint;
+            entrypoint.Rules.Add(rule);
         }
+            
 
         private static NonTerminal<IN> BuilNonTerminal<IN>(bool last, string name, string nextName, List<OperationMetaData<IN>> operations, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence) where IN : struct
         {

@@ -308,6 +308,10 @@ Each attribute is associated to a method that will act as the syntax tree visito
 for example here is a basic example for a numeric expression parser : 
 
 ```c#
+
+    public class SimpleExpressionParser
+    {
+    
 		[Operation((int)ExpressionToken.TIMES, 2, Associativity.Right, 50)]
         [Operation((int)ExpressionToken.DIVIDE, 2, Associativity.Right, 50)]
         public int binaryExpression(int left, Token<ExpressionToken> operation, int right)
@@ -356,6 +360,18 @@ In addition an ```[Operand]``` attribute must indicate the ```Production``` rule
  		{
  			return value.IntValue;
  		}
+        
+}
+```
+
+The expression rules generator generates en entrypoint rule named ```<ParserClassName>_expressions```. where <ParserClassName> is the name of the supporting class for the parser.For the example above (```SimpleExpressionParser```) the non terminal name for the expressions will be ```SimpleExpressionParser_expressions```.
+Then this non terminal name can be used in other syntaxic construction in the grammar. 
+
+For instance an ```if then else```construct may be described with
+
+```c#
+[Production("ifthenelse : IF myparser_expression THEN statement ELSE statement")]
+// with statement as the non terminal that matches a statement of the language
 ```
 
 
