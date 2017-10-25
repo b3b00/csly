@@ -16,13 +16,15 @@ namespace sly.parser
 
         public override int Line {
             get {
-                return UnexpectedToken.Position.Line;
+                int? l = UnexpectedToken?.Position?.Line;
+                return l.HasValue ? l.Value : 0;
             }
         }
         public override int Column
         {
             get {
-                return UnexpectedToken.Position.Column;
+                int? c = UnexpectedToken?.Position?.Column;
+                return c.HasValue ? c.Value : 0;
             }            
         }
 

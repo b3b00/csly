@@ -13,7 +13,7 @@ namespace sly.parser.syntax
         
         public bool IsManyValues { get { return !IsManyTokens; } set { IsManyTokens = !value; }}
         
-        public ManySyntaxNode(string name) : base(name)
+        public ManySyntaxNode(string name) : base(name, new List<ISyntaxNode<T>>())
         {
         }
 

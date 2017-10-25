@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp1.0;net45</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0;net45</TargetFrameworks>
     <Authors>b3b00</Authors>
   </PropertyGroup>
   <ItemGroup>
@@ -13,6 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\samples\expressionParser\expressionParser.csproj" />
+    <ProjectReference Include="..\samples\SimpleExpressionParser\SimpleExpressionParser.csproj" />
     <ProjectReference Include="..\samples\while\while.csproj" />
     <ProjectReference Include="..\sly\sly.csproj" />
     <ProjectReference Include="..\samples\expressionParser\expressionParser.csproj" />

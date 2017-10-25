@@ -285,3 +285,93 @@ you can now use EBNF notation :
 
 The EBNF notation has been implemented in CSLY using the BNF notation. The EBNF parser builder is built using the BNF parser builder. Incidently the EBNF parser builder is a good and complete example for BNF parser : [RuleParser.cs](https://github.com/b3b00/csly/blob/master/sly/parser/generator/RuleParser.cs)
  
+ 
+ ## expressions parser ##
+ 
+ Many language needs parsing expressions (boolean or numeric).
+ A recursive descent parser is hard to maintain when parsing expressions with multiple precedence levels.
+ So CSLY offers a way to express expression parsing using only operator tokens and precedence level.
+ CSLY will then generates production rules to parse expressions.
+ 
+ An expression operation is noted using the ```[Operation(token, arity, associativity, precedence)]``` attribute where 
+* token is the ```int``` value of a token
+* arity is the arity of the expression :
+    * 1 for an unary operation
+    * 2 for a binary operation
+* associativity is an ```Associativity``` enum member
+    * Associativity.Right for right associativity 
+    * Associativity.Left for left associativity (not supported for now)
+* precedence is an ```int``` stating the precedence level : the higher the int is the higher the precedence is.
+
+Each attribute is associated to a method that will act as the syntax tree visitor for the matching operation.
+
+for example here is a basic example for a numeric expression parser : 
+
+```c#
+
+    public class SimpleExpressionParser
+    {
+    
+		[Operation((int)ExpressionToken.TIMES, 2, Associativity.Right, 50)]
+        [Operation((int)ExpressionToken.DIVIDE, 2, Associativity.Right, 50)]
+        public int binaryExpression(int left, Token<ExpressionToken> operation, int right)
+        {
+            int result = 0;
+            switch (operation.TokenID)
+            {
+                case ExpressionToken.PLUS:
+                    {
+                        result = left + right;
+                        break;
+                    }
+                case ExpressionToken.MINUS:
+                    {
+                        result = left - right;
+                        break;
+                    }
+                case ExpressionToken.TIMES:
+                    {
+                        result = left * right;
+                        break;
+                    }
+                case ExpressionToken.DIVIDE:
+                    {
+                        result = left / right;
+                        break;
+                    }
+            }
+            return result;
+        }
+
+
+        [Operation((int)ExpressionToken.MINUS, 1, Associativity.Right, 100)]
+        public  int unaryExpression(Token<ExpressionToken> operation, int value)
+        {
+            return -value;
+        }
+```
+
+In addition an ```[Operand]``` attribute must indicate the ```Production``` rule producing basic operands (as int or boolean value).
+
+```c#
+ 		[Operand]
+ 		[Production("operand : INT")]
+ 		public int operand(Token<ExpressionToken> value)
+ 		{
+ 			return value.IntValue;
+ 		}
+        
+}
+```
+
+The expression rules generator generates en entrypoint rule named ```<ParserClassName>_expressions```. where <ParserClassName> is the name of the supporting class for the parser.For the example above (```SimpleExpressionParser```) the non terminal name for the expressions will be ```SimpleExpressionParser_expressions```.
+Then this non terminal name can be used in other syntaxic construction in the grammar. 
+
+For instance an ```if then else```construct may be described with
+
+```c#
+[Production("ifthenelse : IF myparser_expression THEN statement ELSE statement")]
+// with statement as the non terminal that matches a statement of the language
+```
+
+
