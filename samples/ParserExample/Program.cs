@@ -9,6 +9,10 @@ using System.IO;
 using jsonparser.JsonModel;
 using jsonparser;
 using System.Diagnostics;
+using csly.whileLang.parser;
+using csly.whileLang.model;
+using sly.parser;
+using csly.whileLang.interpreter;
 
 namespace ParserExample
 {
@@ -79,27 +83,54 @@ namespace ParserExample
             }
         }
 
+
+        static void TestFactorial()
+        {
+
+            WhileParser whileParser = new WhileParser();
+            ParserBuilder<WhileToken, WhileAST> builder = new ParserBuilder<WhileToken, WhileAST>();
+            var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
+            ;
+
+            string program = @"
+(
+    r:=1;
+    i:=1;
+    while i < 11 do 
+    ("; 
+        program += "print \"r=\".r;\n";
+            program += "r := r * i;\n";
+            program += "print \"r=\".r;\n";
+            program += "print \"i=\".i;\n";
+            program += "i := i + 1 ))";
+            ParseResult<WhileToken, WhileAST> result = Parser.Parse(program);
+            Interpreter interpreter = new Interpreter();
+            var context = interpreter.Interprete(result.Result);
+            ;
+        }
+
         static void Main(string[] args)
         {
 
-            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
-            //Parser<JsonToken, JSon> parser = builder.BuildParser(new EbnfJsonParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            Lexer<JsonToken> lexer = (Lexer<JsonToken>)LexerBuilder.BuildLexer<JsonToken>();
-            Stopwatch sw = new Stopwatch();
+            //ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
+            ////Parser<JsonToken, JSon> parser = builder.BuildParser(new EbnfJsonParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            //Lexer<JsonToken> lexer = (Lexer<JsonToken>)LexerBuilder.BuildLexer<JsonToken>();
+            //Stopwatch sw = new Stopwatch();
 
-            sw.Start();
-            string json = File.ReadAllText("test.json");
-            var result = lexer.Tokenize(json).ToList();
-            sw.Stop();
-            long milli = sw.ElapsedMilliseconds;
-            Console.WriteLine($"wo/ optim : {milli} ms");
-            sw.Reset();
-            sw.Start();
-            json = File.ReadAllText("test.json");
-            result = lexer.Tokenize(json).ToList();
-            sw.Stop();
-            milli = sw.ElapsedMilliseconds;
-            Console.WriteLine($"w/ optim : {milli} ms");
+            //sw.Start();
+            //string json = File.ReadAllText("test.json");
+            //var result = lexer.Tokenize(json).ToList();
+            //sw.Stop();
+            //long milli = sw.ElapsedMilliseconds;
+            //Console.WriteLine($"wo/ optim : {milli} ms");
+            //sw.Reset();
+            //sw.Start();
+            //json = File.ReadAllText("test.json");
+            //result = lexer.Tokenize(json).ToList();
+            //sw.Stop();
+            //milli = sw.ElapsedMilliseconds;
+            //Console.WriteLine($"w/ optim : {milli} ms");
+            TestFactorial();
 
 
             ;

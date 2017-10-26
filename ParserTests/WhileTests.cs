@@ -235,7 +235,7 @@ namespace ParserTests
         }
 
         [Fact]
-        public static void TestFactorialProgramExec()
+        public void TestFactorialProgramExec()
         {
             string program = @"
 (
@@ -244,7 +244,9 @@ namespace ParserTests
     while i < 11 do 
     ( 
     r := r * i;
-    i := i +1 )
+    print r;
+    print i;
+    i := i + 1 )
 )";
             Parser<WhileToken, WhileAST> parser = buildParser();
             ParseResult<WhileToken, WhileAST> result = parser.Parse(program);
@@ -253,8 +255,8 @@ namespace ParserTests
             Interpreter interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result);
             Assert.Equal(2, context.variables.Count);
-            Assert.True(CheckIntVariable(context, "i", 10));
-            Assert.True(CheckIntVariable(context, "r", 56));
+            Assert.True(CheckIntVariable(context, "i", 11));
+            Assert.True(CheckIntVariable(context, "r", 3628800));
 
 
             ;

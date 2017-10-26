@@ -146,18 +146,18 @@ namespace csly.whileLang.parser
         [Operation((int)WhileToken.DIVIDE, 2, Associativity.Right, 50)]
         public WhileAST binaryFactorNumericExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
         {
-            BinaryOperator oper = BinaryOperator.ADD;
+            BinaryOperator oper = BinaryOperator.MULTIPLY;
 
             switch (operatorToken.TokenID)
             {
-                case WhileToken.PLUS:
+                case WhileToken.TIMES:
                     {
-                        oper = BinaryOperator.ADD;
+                        oper = BinaryOperator.MULTIPLY;
                         break;
                     }
-                case WhileToken.MINUS:
+                case WhileToken.DIVIDE:
                     {
-                        oper = BinaryOperator.SUB;
+                        oper = BinaryOperator.DIVIDE;
                         break;
                     }
                 default:
