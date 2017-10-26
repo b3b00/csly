@@ -1,6 +1,6 @@
 # How to contribute 
 
-You can contribute to CSLy in various way :
+You can contribute to CSLY in various way :
 - using it,I need some testing
 - creating issues when finding bug
 - taking some opened issues
