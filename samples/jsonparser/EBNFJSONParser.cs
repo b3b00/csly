@@ -63,7 +63,7 @@ namespace jsonparser
                     dbl += decimalPart;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 dbl = double.MinValue;
             }
