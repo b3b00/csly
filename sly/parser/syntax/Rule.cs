@@ -4,14 +4,22 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using sly.parser.syntax;
+using System.Reflection;
+using sly.parser.generator;
 
 namespace sly.parser.syntax
 {
 
-    public class Rule<T> : GrammarNode<T>
+    public class Rule<T> : GrammarNode<T> where T : struct
     {
 
-        public string RuleString { get;  }
+        public bool IsByPassRule { get; set; } = false;
+
+        public Dictionary<T, MethodInfo> VisitorMethods { get; set; }
+
+        public bool IsExpressionRule { get; set; }
+
+        public string RuleString { get; }
 
         public string NonTerminalName { get; set; }
 
@@ -33,7 +41,13 @@ namespace sly.parser.syntax
 
         public List<IClause<T>> Clauses { get; set; }
         public List<T> PossibleLeadingTokens { get; set; }
-        
+
+
+        public Rule()
+        {
+            Clauses = new List<IClause<T>>();
+            VisitorMethods = new Dictionary<T, MethodInfo>();
+        }
 
         public bool MayBeEmpty { get
             {

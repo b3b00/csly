@@ -1,6 +1,7 @@
 using sly.parser.syntax;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace sly.parser.syntax
 {
@@ -12,7 +13,7 @@ namespace sly.parser.syntax
         
         public bool IsManyValues { get { return !IsManyTokens; } set { IsManyTokens = !value; }}
         
-        public ManySyntaxNode(string name) : base(name)
+        public ManySyntaxNode(string name) : base(name, new List<ISyntaxNode<T>>())
         {
         }
 
@@ -42,6 +43,15 @@ namespace sly.parser.syntax
             Children.ForEach(c => r += c.ToString() + ",\n");
             return r+"\n)";
         }
-        
+
+
+        public new string Dump(string tab)
+        {
+            StringBuilder dump = new StringBuilder();
+            dump.AppendLine($"{tab}(<{Name}>* {Children.Count} [");
+            Children.ForEach(c => dump.AppendLine($"{c.Dump(tab + "\t")},"));
+            dump.AppendLine($"{tab}]");
+            return dump.ToString();
+        }
     }
 }

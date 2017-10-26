@@ -4,12 +4,15 @@ using System.Text;
 
 namespace sly.parser.generator
 {
+
+   
+
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class LexerConfigurationAttribute : Attribute
+    public class OperandAttribute : Attribute 
     {
-        
-        public LexerConfigurationAttribute() {
-            
+        public OperandAttribute()
+        {
+
         }
     }
 }

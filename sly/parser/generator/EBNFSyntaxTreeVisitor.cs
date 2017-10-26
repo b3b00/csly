@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using sly.parser.syntax;
 using sly.lexer;
+using System.Reflection;
 
 namespace sly.parser.generator
 {
-    public class EBNFSyntaxTreeVisitor<IN,OUT> : SyntaxTreeVisitor<IN,OUT>
+    public class EBNFSyntaxTreeVisitor<IN,OUT> : SyntaxTreeVisitor<IN,OUT> where IN : struct
     {
 
         public EBNFSyntaxTreeVisitor(ParserConfiguration<IN,OUT> conf) : base(conf)
@@ -44,11 +45,17 @@ namespace sly.parser.generator
 
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node)
         {
-            OUT result = default(OUT);
-            if (Configuration.Functions.ContainsKey(node.Name))
+            SyntaxVisitorResult < IN, OUT > result = SyntaxVisitorResult<IN, OUT>.NoneResult();
+            if (Configuration.Functions.ContainsKey(node.Name) || node.Visitor != null || node.IsByPassNode)
             {
                 List<object> args = new List<object>();
                 int i = 0;
+
+                if (node.Name == "statementPrim__IDENTIFIER_ASSIGN_WhileParser_expressions")
+                {
+                    ;
+                }
+
                 foreach (ISyntaxNode<IN> n in node.Children)
                 {
                     SyntaxVisitorResult<IN, OUT> v = Visit(n);
@@ -74,9 +81,35 @@ namespace sly.parser.generator
                     i++;
                 }
 
-                result = (OUT) (Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray()));
+                if (node.IsByPassNode)
+                {
+                    result = SyntaxVisitorResult<IN, OUT>.NewValue((OUT)args[0]);
+                }
+                else
+                {
+                    MethodInfo method = null;
+                    try
+                    {
+                        bool found = Configuration.Functions.TryGetValue(node.Name, out method);
+                        if (method == null && !found)
+                        {
+                            method = node.Visitor;
+                        }
+                        object t = (method.Invoke(ParserVsisitorInstance, args.ToArray()));
+                        //string typename = t.GetType().Name;
+                        OUT res = (OUT)t;
+                        result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"OUTCH {e.Message} calling {node.Name} =>  {method.Name}");
+                    }
+                }
+
+
+                //result = (OUT) (Configuration.Functions[node.Name].Invoke(ParserVsisitorInstance, args.ToArray()));
             }
-            return SyntaxVisitorResult<IN, OUT>.NewValue(result);
+            return result;
         }
 
         private SyntaxVisitorResult<IN, OUT> Visit(ManySyntaxNode<IN> node)

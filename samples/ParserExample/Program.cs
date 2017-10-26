@@ -5,6 +5,10 @@ using expressionparser;
 using System;
 using System.Linq;
 using System.Reflection;
+using System.IO;
+using jsonparser.JsonModel;
+using jsonparser;
+using System.Diagnostics;
 
 namespace ParserExample
 {
@@ -77,25 +81,28 @@ namespace ParserExample
 
         static void Main(string[] args)
         {
-            
-            ILexer<ExpressionToken> lexer = LexerBuilder.BuildLexer<ExpressionToken>();
 
-            string source = "1 + 2\n*3";
+            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
+            //Parser<JsonToken, JSon> parser = builder.BuildParser(new EbnfJsonParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Lexer<JsonToken> lexer = (Lexer<JsonToken>)LexerBuilder.BuildLexer<JsonToken>();
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+            string json = File.ReadAllText("test.json");
+            var result = lexer.Tokenize(json).ToList();
+            sw.Stop();
+            long milli = sw.ElapsedMilliseconds;
+            Console.WriteLine($"wo/ optim : {milli} ms");
+            sw.Reset();
+            sw.Start();
+            json = File.ReadAllText("test.json");
+            result = lexer.Tokenize(json).ToList();
+            sw.Stop();
+            milli = sw.ElapsedMilliseconds;
+            Console.WriteLine($"w/ optim : {milli} ms");
 
 
-
-
-
-            List<Token<ExpressionToken>> toks = lexer.Tokenize(source).ToList();
             ;
-
-            //RuleParser<JsonToken> ruleparser = new RuleParser<JsonToken>();
-            //ParserBuilder builder = new ParserBuilder();
-
-            //Parser<EbnfToken,GrammarNode<JsonToken>> yacc = builder.BuildParser<EbnfToken,GrammarNode<JsonToken>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
-
-            //var r = yacc.Parse("test : CROG INT CROD");
-            //;
 
         }
     }

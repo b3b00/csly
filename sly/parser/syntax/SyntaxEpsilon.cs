@@ -16,5 +16,11 @@ namespace sly.parser.syntax
             return true;
         }
 
+        public string Dump(string tab)
+        {
+            
+            return $"{tab}(e)";
+        }
+
     }
 }

@@ -26,7 +26,6 @@ namespace sly.parser.generator
         /// <typeparam name="IN"></typeparam>
         /// <param name="parserInstance"> a parser definition instance , containing 
         /// [Reduction] methods for grammar rules 
-        /// [LexerConfigurationAttribute] method for token definition</param>
         /// <param name="parserType">a ParserType enum value stating the analyser type (LR, LL ...) for now only LL recurive descent parser available </param>
         /// <param name="rootRule">the name of the root non terminal of the grammar</param>
         /// <returns></returns>
@@ -36,7 +35,7 @@ namespace sly.parser.generator
             if (parserType == ParserType.LL_RECURSIVE_DESCENT)
             {
                 ParserConfiguration<IN,OUT> configuration = ExtractParserConfiguration(parserInstance.GetType());
-                ISyntaxParser<IN> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
+                ISyntaxParser<IN,OUT> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                 SyntaxTreeVisitor<IN,OUT> visitor = new SyntaxTreeVisitor<IN,OUT>(configuration, parserInstance);
                 parser = new Parser<IN,OUT>(syntaxParser, visitor);
                 parser.Lexer = BuildLexer();
@@ -48,12 +47,13 @@ namespace sly.parser.generator
                 EBNFParserBuilder<IN,OUT> builder = new EBNFParserBuilder<IN,OUT>();
                 parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule);
             }
+            parser.BuildExpressionParser(rootRule);
             return parser;
         }
 
-        protected virtual  ISyntaxParser<IN> BuildSyntaxParser(ParserConfiguration<IN,OUT> conf, ParserType parserType, string rootRule)
+        protected virtual  ISyntaxParser<IN,OUT> BuildSyntaxParser(ParserConfiguration<IN,OUT> conf, ParserType parserType, string rootRule)
         {
-            ISyntaxParser<IN> parser = null;
+            ISyntaxParser<IN,OUT> parser = null;
             switch (parserType)
             {
                 case ParserType.LL_RECURSIVE_DESCENT:
@@ -72,6 +72,7 @@ namespace sly.parser.generator
 
         #endregion
 
+       
 
 
 
@@ -132,7 +133,7 @@ namespace sly.parser.generator
 
                     
 
-                    Rule<IN> r = BuildNonTerminal<IN>(ntAndRule);
+                    Rule<IN> r = BuildNonTerminal(ntAndRule);
                     string key = ntAndRule.Item1 + "__" + r.Key;
                     functions[key] = m;
                     NonTerminal<IN> nonT = null;
@@ -160,34 +161,34 @@ namespace sly.parser.generator
             return conf;
         }
 
-        private Rule<T> BuildNonTerminal<T>(Tuple<string, string> ntAndRule)
+        private Rule<IN> BuildNonTerminal(Tuple<string, string> ntAndRule) 
         {
-            Rule<T> rule = new Rule<T>();
+            Rule<IN> rule = new Rule<IN>();
 
-            List<IClause<T>> clauses = new List<IClause<T>>();
+            List<IClause<IN>> clauses = new List<IClause<IN>>();
             string ruleString = ntAndRule.Item2;
             string[] clausesString = ruleString.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string item in clausesString)
             {
-                IClause<T> clause = null;
+                IClause<IN> clause = null;
                 bool isTerminal = false;
-                T token = default(T);                              
+                IN token = default(IN);                              
                 try
                 {
-                    token = (T)Enum.Parse(typeof(T) , item, false);
+                    token = (IN)Enum.Parse(typeof(IN) , item, false);
                     isTerminal = true;
                 }
-                catch 
+                catch(Exception) 
                 {
                     isTerminal = false;
                 }
                 if (isTerminal)
                 {
-                    clause = new TerminalClause<T>(token);
+                    clause = new TerminalClause<IN>(token);
                 }
                 else
                 {
-                    clause = new NonTerminalClause<T>(item);
+                    clause = new NonTerminalClause<IN>(item);
                 }
                 if (clause != null)
                 {

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RootNamespace>sly.pratt</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\samples\expressionParser\expressionParser.csproj" />
+    <ProjectReference Include="..\sly\sly.csproj" />
+  </ItemGroup>
+
+</Project>

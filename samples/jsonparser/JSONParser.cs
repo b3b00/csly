@@ -28,25 +28,6 @@ namespace jsonparser
 
 
 
-        [LexerConfiguration]
-        public  ILexer<JsonToken> BuildJsonLexer(ILexer<JsonToken> lexer)
-        {                  
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.DOUBLE, "[0-9]+\\.[0-9]+"));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.INT, "[0-9]+"));            
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.STRING, "(\\\")([^(\\\")]*)(\\\")"));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.BOOLEAN, "(true|false)"));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.NULL, "(null)"));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.ACCG, "{"));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.ACCD, "}"));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.CROG, "\\["));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.CROD, "\\]"));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.COLON, ":"));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.COMMA, ","));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.WS, "[ \\t]+", true));
-            lexer.AddDefinition(new TokenDefinition<JsonToken>(JsonToken.EOL, "[\\n\\r]+", true, true));
-            return lexer;
-        }
-
 
         #region root
 

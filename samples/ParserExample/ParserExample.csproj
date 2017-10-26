@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp1.0;net45</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0;net45</TargetFrameworks>
 	<Authors>b3b00</Authors>
   </PropertyGroup>
 
@@ -15,7 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\expressionParser\expressionParser.csproj" />
     <ProjectReference Include="..\jsonparser\jsonparser.csproj" />
-    <ProjectReference Include="..\sly\sly.csproj" />
+    <ProjectReference Include="..\..\sly\sly.csproj" />
   </ItemGroup>
 
   <ItemGroup>

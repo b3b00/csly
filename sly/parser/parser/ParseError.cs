@@ -20,8 +20,8 @@
             ParseError unexpectedError = obj as ParseError;
             if (unexpectedError != null)
             {
-                int lineComparison = Line.CompareTo(unexpectedError.Line);
-                int columnComparison = Column.CompareTo(unexpectedError.Column);
+                int lineComparison = Line.CompareTo(unexpectedError != null ? unexpectedError.Line : 0); 
+                int columnComparison = Column.CompareTo(unexpectedError != null ? unexpectedError.Column : 0);
 
                 if (lineComparison > 0)
                 {
