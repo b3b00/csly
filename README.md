@@ -286,7 +286,9 @@ you can now use EBNF notation :
 The EBNF notation has been implemented in CSLY using the BNF notation. The EBNF parser builder is built using the BNF parser builder. Incidently the EBNF parser builder is a good and complete example for BNF parser : [RuleParser.cs](https://github.com/b3b00/csly/blob/master/sly/parser/generator/RuleParser.cs)
  
  
- ## expressions parser ##
+ 
+## expressions parser ##
+ 
  
  Many language needs parsing expressions (boolean or numeric).
  A recursive descent parser is hard to maintain when parsing expressions with multiple precedence levels.
