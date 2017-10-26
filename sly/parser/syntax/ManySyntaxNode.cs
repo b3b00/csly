@@ -45,7 +45,7 @@ namespace sly.parser.syntax
         }
 
 
-        public string Dump(string tab)
+        public new string Dump(string tab)
         {
             StringBuilder dump = new StringBuilder();
             dump.AppendLine($"{tab}(<{Name}>* {Children.Count} [");
