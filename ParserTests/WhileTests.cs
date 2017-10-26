@@ -3,7 +3,7 @@ using sly.parser;
 using sly.parser.generator;
 using csly.whileLang.parser;
 using csly.whileLang.model;
-
+using csly.whileLang.interpreter;
 
 namespace ParserTests
 {
@@ -212,6 +212,65 @@ namespace ParserTests
             Assert.NotNull(result.Result);
             ;
         }
+
+        #endregion
+
+        #region interprete
+
+        [Fact]
+        public void TestCounterProgramExec()
+        {
+
+            Parser<WhileToken, WhileAST> parser = buildParser();
+            ParseResult<WhileToken, WhileAST> result = parser.Parse("(a:=0; while a < 10 do (print a; a := a +1 ))");
+            Assert.False(result.IsError);
+            Assert.NotNull(result.Result);
+            Interpreter interpreter = new Interpreter();
+            var context = interpreter.Interprete(result.Result);
+            Assert.Equal(1,context.variables.Count);
+            Assert.True(CheckIntVariable(context, "a", 10));
+            
+
+            ;
+        }
+
+        [Fact]
+        public static void TestFactorialProgramExec()
+        {
+            string program = @"
+(
+    r:=1;
+    i:=1;
+    while i < 11 do 
+    ( 
+    r := r * i;
+    i := i +1 )
+)";
+            Parser<WhileToken, WhileAST> parser = buildParser();
+            ParseResult<WhileToken, WhileAST> result = parser.Parse(program);
+            Assert.False(result.IsError);
+            Assert.NotNull(result.Result);
+            Interpreter interpreter = new Interpreter();
+            var context = interpreter.Interprete(result.Result);
+            Assert.Equal(2, context.variables.Count);
+            Assert.True(CheckIntVariable(context, "i", 10));
+            Assert.True(CheckIntVariable(context, "r", 56));
+
+
+            ;
+        }
+
+        public bool CheckIntVariable(InterpreterContext context, string variable, int value)
+        {
+            bool ok = false;
+            if (context.GetVariable(variable) != null)
+            {
+                int v = context.GetVariable(variable).IntValue;
+                ok = v == value;
+            }
+            return ok;
+        }
+
 
         #endregion
     }
