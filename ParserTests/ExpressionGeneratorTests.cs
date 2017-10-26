@@ -148,6 +148,16 @@ namespace ParserTests
             Assert.Equal(5, r.Result);
         }
 
+        [Fact]
+        public void TestGroup()
+        {
+            BuildParser();
+            ParseResult<ExpressionToken, int> r = Parser.Parse("(-1 + 2)  * 3", StartingRule);
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.Equal(3, r.Result);
+        }
+
 
     }
 }
