@@ -28,16 +28,6 @@ namespace simpleExpressionParser
                         result = left - right;
                         break;
                     }
-                case ExpressionToken.TIMES:
-                    {
-                        result = left * right;
-                        break;
-                    }
-                case ExpressionToken.DIVIDE:
-                    {
-                        result = left / right;
-                        break;
-                    }
             }
             return result;
         }
@@ -49,17 +39,7 @@ namespace simpleExpressionParser
         {
             int result = 0;
             switch (operation.TokenID)
-            {
-                case ExpressionToken.PLUS:
-                    {
-                        result = left + right;
-                        break;
-                    }
-                case ExpressionToken.MINUS:
-                    {
-                        result = left - right;
-                        break;
-                    }
+            {                
                 case ExpressionToken.TIMES:
                     {
                         result = left * right;
