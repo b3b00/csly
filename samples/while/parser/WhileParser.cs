@@ -13,12 +13,12 @@ namespace csly.whileLang.parser
         #region statements
 
         [Production("statement :  LPAREN statement RPAREN ")]
-        public WhileAST block(Token<WhileToken> discardLpar, Statement statement ,Token<WhileToken> discardRpar)
+        public WhileAST block(Token<WhileToken> discardLpar, Statement statement, Token<WhileToken> discardRpar)
         {
             return statement;
         }
 
-      [Production("statement : sequence")]
+        [Production("statement : sequence")]
         public WhileAST statementSequence(WhileAST sequence)
         {
             return sequence;
@@ -27,8 +27,8 @@ namespace csly.whileLang.parser
         [Production("sequence : statementPrim additionalStatements*")]
         public WhileAST sequenceStatements(WhileAST first, List<WhileAST> next)
         {
-            SequenceStatement seq = new SequenceStatement(first as Statement);            
-            seq.AddRange(next.Cast<Statement>().ToList<Statement>()) ;
+            SequenceStatement seq = new SequenceStatement(first as Statement);
+            seq.AddRange(next.Cast<Statement>().ToList<Statement>());
             return seq;
         }
 
@@ -38,21 +38,21 @@ namespace csly.whileLang.parser
             return statement;
         }
 
-        [Production("statementPrim: IF expression THEN statement ELSE statement")]
-        public WhileAST  ifStmt(Token<WhileToken> discardIf, WhileAST cond, Token<WhileToken> dicardThen, WhileAST thenStmt, Token<WhileToken> dicardElse, Statement elseStmt)
+        [Production("statementPrim: IF WhileParser_expressions THEN statement ELSE statement")]
+        public WhileAST ifStmt(Token<WhileToken> discardIf, WhileAST cond, Token<WhileToken> dicardThen, WhileAST thenStmt, Token<WhileToken> dicardElse, Statement elseStmt)
         {
             IfStatement stmt = new IfStatement(cond as Expression, thenStmt as Statement, elseStmt);
             return stmt;
         }
-        
-        [Production("statementPrim: WHILE expression DO statement")]
+
+        [Production("statementPrim: WHILE WhileParser_expressions DO statement")]
         public WhileAST whileStmt(Token<WhileToken> discardWhile, WhileAST cond, Token<WhileToken> dicardDo, WhileAST blockStmt)
         {
             WhileStatement stmt = new WhileStatement(cond as Expression, blockStmt as Statement);
             return stmt;
         }
 
-        [Production("statementPrim: IDENTIFIER ASSIGN expression")]
+        [Production("statementPrim: IDENTIFIER ASSIGN WhileParser_expressions")]
         public WhileAST assignStmt(Token<WhileToken> variable, Token<WhileToken> discardAssign, Expression value)
         {
             AssignStatement assign = new AssignStatement(variable.StringWithoutQuotes, value);
@@ -65,7 +65,7 @@ namespace csly.whileLang.parser
             return new SkipStatement();
         }
 
-        [Production("statementPrim: PRINT expression")]
+        [Production("statementPrim: PRINT WhileParser_expressions")]
         public WhileAST skipStmt(Token<WhileToken> discard, WhileAST expression)
         {
             return new PrintStatement(expression as Expression);
@@ -77,9 +77,8 @@ namespace csly.whileLang.parser
 
         #endregion
 
-        #region expression
 
-
+        #region OPERANDS
 
         [Production("primary: INT")]
         public WhileAST PrimaryInt(Token<WhileToken> intToken)
@@ -106,14 +105,19 @@ namespace csly.whileLang.parser
             return new Variable(varToken.StringWithoutQuotes);
         }
 
+        [Operand]
+        [Production("operand: primary")]
+        public WhileAST Operand(WhileAST prim)
+        {
+            return prim;
+        }
 
+        #endregion
 
-
-        [Production("expression : term PLUS expression")]
-        [Production("expression : term MINUS expression")]
-        [Production("expression : term CONCAT expression")]
-
-        public WhileAST Expression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
+        #region NUMERIC OPERATIONS
+        [Operation((int)WhileToken.PLUS, 2, Associativity.Right, 10)]
+        [Operation((int)WhileToken.MINUS, 2, Associativity.Right, 10)]
+        public WhileAST binaryTermNumericExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.ADD;
 
@@ -129,9 +133,31 @@ namespace csly.whileLang.parser
                         oper = BinaryOperator.SUB;
                         break;
                     }
-                case WhileToken.CONCAT:
+                default:
                     {
-                        oper = BinaryOperator.CONCAT;
+                        break;
+                    }
+            }
+            BinaryOperation operation = new BinaryOperation(left as Expression, oper, right as Expression);
+            return operation;
+        }
+
+        [Operation((int)WhileToken.TIMES, 2, Associativity.Right, 50)]
+        [Operation((int)WhileToken.DIVIDE, 2, Associativity.Right, 50)]
+        public WhileAST binaryFactorNumericExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
+        {
+            BinaryOperator oper = BinaryOperator.ADD;
+
+            switch (operatorToken.TokenID)
+            {
+                case WhileToken.PLUS:
+                    {
+                        oper = BinaryOperator.ADD;
+                        break;
+                    }
+                case WhileToken.MINUS:
+                    {
+                        oper = BinaryOperator.SUB;
                         break;
                     }
                 default:
@@ -143,48 +169,67 @@ namespace csly.whileLang.parser
             return operation;
         }
 
-        [Production("expression : term")]
-        public WhileAST Expression_Term(WhileAST termValue)
+        [Operation((int)WhileToken.MINUS, 1, Associativity.Right, 100)]
+        public WhileAST unaryNumericExpression(Token<WhileToken> operation, WhileAST value)
         {
-            return termValue;
+            return new Neg(value as Expression);
         }
 
-        [Production("term : factor TIMES term")]
-        [Production("term : factor DIVIDE term")]
-        [Production("term : factor AND term")]
-        [Production("term : factor LESSER term")]
-        [Production("term : factor GREATER term")]
-        [Production("term : factor EQUALS term")]
-        [Production("term : factor DIFFERENT term")]
-        public WhileAST Term(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
+
+        #endregion
+
+
+
+        #region BOOLEAN OPERATIONS
+
+        [Operation((int)WhileToken.OR, 2, Associativity.Right, 10)]
+        public WhileAST binaryOrExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
         {
-            BinaryOperator oper = BinaryOperator.MULTIPLY;
+            BinaryOperator oper = BinaryOperator.OR;
+
+            
+            BinaryOperation operation = new BinaryOperation(left as Expression, oper, right as Expression);
+            return operation;
+        }
+
+        [Operation((int)WhileToken.AND, 2, Associativity.Right, 50)]
+        public WhileAST binaryAndExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
+        {
+            BinaryOperator oper = BinaryOperator.AND;
+
+
+            BinaryOperation operation = new BinaryOperation(left as Expression, oper, right as Expression);
+            return operation;
+        }
+
+        [Operation((int)WhileToken.NOT, 1, Associativity.Right, 100)]
+        public WhileAST binaryOrExpression(Token<WhileToken> operatorToken, WhileAST value)
+        {
+            
+            return new Not(value as Expression);
+        }
+        #endregion
+
+        #region COMPARISON OPERATIONS
+
+        [Operation((int)WhileToken.LESSER, 2, Associativity.Right, 50)]
+        [Operation((int)WhileToken.GREATER, 2, Associativity.Right, 50)]
+        [Operation((int)WhileToken.EQUALS, 2, Associativity.Right, 50)]
+        [Operation((int)WhileToken.DIFFERENT, 2, Associativity.Right, 50)]
+        public WhileAST binaryComparisonExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
+        {
+            BinaryOperator oper = BinaryOperator.ADD;
 
             switch (operatorToken.TokenID)
             {
-                case WhileToken.TIMES:
+                case WhileToken.LESSER:
                     {
-                        oper = BinaryOperator.MULTIPLY;
-                        break;
-                    }
-                case WhileToken.DIVIDE:
-                    {
-                        oper = BinaryOperator.DIVIDE;
-                        break;
-                    }
-                case WhileToken.AND:
-                    {
-                        oper = BinaryOperator.AND;
+                        oper = BinaryOperator.LESSER;
                         break;
                     }
                 case WhileToken.GREATER:
                     {
                         oper = BinaryOperator.GREATER;
-                        break;
-                    }
-                case WhileToken.LESSER:
-                    {
-                        oper = BinaryOperator.LESSER;
                         break;
                     }
                 case WhileToken.EQUALS:
@@ -206,54 +251,28 @@ namespace csly.whileLang.parser
             return operation;
         }
 
-        [Production("term : factor")]
-        public WhileAST Term_Factor(WhileAST factorValue)
+
+        #endregion
+
+        #region STRING OPERATIONS
+
+        [Operation((int)WhileToken.CONCAT, 2, Associativity.Right, 10)]
+        public WhileAST binaryStringExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
         {
-            return factorValue;
+            BinaryOperator oper = BinaryOperator.CONCAT;            
+            BinaryOperation operation = new BinaryOperation(left as Expression, oper, right as Expression);
+            return operation;
         }
-
-        [Production("factor : primary")]
-        public WhileAST primaryFactor(WhileAST primValue)
-        {
-            return primValue;
-        }
-        [Production("factor : MINUS factor")]
-        public WhileAST negFactor(Token<WhileToken> discardedMinus, WhileAST factorValue)
-        {
-            return new Neg(factorValue as Expression);
-        }
-
-        [Production("factor : NOT factor")]
-        public WhileAST notFactor(Token<WhileToken> discardedMinus, WhileAST factorValue)
-        {
-            return new Not(factorValue as Expression);
-        }
-
-
-
         #endregion
 
 
 
 
 
-        #region string expression
 
 
-        //[Production("string_expression : expression CONCAT expression")]
-        //public WhileAST String_Term(Expression left, Token<WhileToken> discard, Expression right)
-        //{
-        //    WhileAST result = new BinaryOperation(left, BinaryOperator.CONCAT, right);
-        //    return result;
-        //}
 
-        [Production("string_expression : STRING")]
-        public WhileAST String_constantFactor(Token<WhileToken> value)
-        {
-            return new StringConstant(value.StringWithoutQuotes);
-        }
 
-        #endregion
 
 
     }
