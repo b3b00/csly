@@ -266,11 +266,8 @@ namespace sly.parser.llparser
                             if (visitor != null)
                             {
                                 node.Visitor = visitor;
-                            }
-                            else
-                            {
-                                ;
-                            }
+                                node.Operation = rule.GetOperation(operatorNode.Token.TokenID);
+                            }                           
                         }
                     }
                 }

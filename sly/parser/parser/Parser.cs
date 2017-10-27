@@ -5,6 +5,7 @@ using sly.parser.generator;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using sly.parser.parser;
 
 namespace sly.parser
 {
@@ -61,8 +62,11 @@ namespace sly.parser
         public ParseResult<IN,OUT> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
         {
             
-            ParseResult<IN,OUT> result = new ParseResult<IN,OUT>();
+            var result = new ParseResult<IN,OUT>();
+
+            var cleaner = new SyntaxTreeCleaner<IN>();            
             SyntaxParseResult<IN> syntaxResult = SyntaxParser.Parse(tokens, startingNonTerminal);
+            syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
                 OUT r  = Visitor.VisitSyntaxTree(syntaxResult.Root);

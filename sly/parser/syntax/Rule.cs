@@ -28,7 +28,15 @@ namespace sly.parser.syntax
         public string NonTerminalName { get; set; }
 
 
-
+        public OperationMetaData<IN> GetOperation(IN token = default(IN))
+        {
+            if (IsExpressionRule)
+            {
+                OperationMetaData<IN> operation = VisitorMethodsForOperation.ContainsKey(token) ? VisitorMethodsForOperation[token] : null;
+                return operation;
+            }
+            return null;
+        }
 
         public MethodInfo GetVisitor(IN token = default(IN))
         {
