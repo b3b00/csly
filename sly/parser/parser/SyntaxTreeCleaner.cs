@@ -72,6 +72,13 @@ namespace sly.parser.parser
         private ISyntaxNode<IN> SetAssociativity(ISyntaxNode<IN> tree)
         {
             return tree;
+            // todo :
+            // si n isexpr 
+            //    si binary
+            //       si child(0] expr et binary
+            //            si prec == child[0].prec
+            //               si assoc == left
+            //                  permutation....  
         }
 
 
