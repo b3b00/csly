@@ -34,8 +34,12 @@ namespace sly.parser.syntax
 
         public Associativity Associativity => IsExpressionNode && IsBinaryOperationNode ? Operation.Associativity : Associativity.None;
 
-        public IN Operator { get {
-                IN oper = default(IN);
+        public bool IsLeftAssociative => Associativity == Associativity.Left;
+
+        public bool IsRightAssociative => Associativity == Associativity.Right;
+
+        public SyntaxLeaf<IN> Operator { get {
+                IN oper = null;
                 if (IsExpressionNode)
                 {
                     int operatorIndex = -1;

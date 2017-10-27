@@ -71,14 +71,47 @@ namespace sly.parser.parser
 
         private ISyntaxNode<IN> SetAssociativity(ISyntaxNode<IN> tree)
         {
-            return tree;
-            // todo :
-            // si n isexpr 
-            //    si binary
-            //       si child(0] expr et binary
-            //            si prec == child[0].prec
-            //               si assoc == left
-            //                  permutation....  
+            ISyntaxNode<IN> result = null;
+
+            if (tree is SyntaxNode<IN> node)
+            {
+                // todo :
+                // si n isexpr 
+                if (node.IsBinaryOperationNode &&  node.IsLeftAssociative)
+                {
+                    if (node.Right is SyntaxNode<IN> right && right.IsExpressionNode)
+                    {
+                        if (right.Precedence == node.Precedence)
+                        {
+
+                            // TODO first recurse down
+
+                            SyntaxNode<IN> top = new SyntaxNode<IN>(right.Name);
+                            SyntaxNode<IN> left = new SyntaxNode<IN>(node.Name);
+                            left.AddChild(node.Left);
+                            left.AddChild(node.Operator);
+                            left.AddChild(right.Left);
+                            //do permutation
+                            top.AddChild(left);
+                            top.AddChild(right.Operator);
+                            top.AddChild(right.Right);
+
+                            result = top;
+                        }
+                    }
+                }                
+            }
+            if (tree is ManySyntaxNode<IN> many)
+            {
+
+            }
+            if (tree is SyntaxEpsilon<IN> leaf)
+            {
+
+            }
+            return result;
+
+            
         }
 
 
