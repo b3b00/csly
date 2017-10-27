@@ -134,6 +134,7 @@ namespace sly.parser.generator
                     
 
                     Rule<IN> r = BuildNonTerminal(ntAndRule);
+                    r.SetVisitor(m);
                     string key = ntAndRule.Item1 + "__" + r.Key;
                     functions[key] = m;
                     NonTerminal<IN> nonT = null;
@@ -153,9 +154,6 @@ namespace sly.parser.generator
 
             });
 
-           
-
-            conf.Functions = functions;
             conf.NonTerminals = nonTerminals;
             
             return conf;

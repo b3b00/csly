@@ -46,16 +46,11 @@ namespace sly.parser.generator
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node)
         {
             SyntaxVisitorResult < IN, OUT > result = SyntaxVisitorResult<IN, OUT>.NoneResult();
-            if (Configuration.Functions.ContainsKey(node.Name) || node.Visitor != null || node.IsByPassNode)
+            if (node.Visitor != null || node.IsByPassNode)
             {
                 List<object> args = new List<object>();
                 int i = 0;
-
-                if (node.Name == "statementPrim__IDENTIFIER_ASSIGN_WhileParser_expressions")
-                {
-                    ;
-                }
-
+                
                 foreach (ISyntaxNode<IN> n in node.Children)
                 {
                     SyntaxVisitorResult<IN, OUT> v = Visit(n);
@@ -89,14 +84,12 @@ namespace sly.parser.generator
                 {
                     MethodInfo method = null;
                     try
-                    {
-                        bool found = Configuration.Functions.TryGetValue(node.Name, out method);
-                        if (method == null && !found)
+                    {   
+                        if (method == null)
                         {
                             method = node.Visitor;
                         }
                         object t = (method.Invoke(ParserVsisitorInstance, args.ToArray()));
-                        //string typename = t.GetType().Name;
                         OUT res = (OUT)t;
                         result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
                     }
