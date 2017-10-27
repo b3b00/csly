@@ -132,7 +132,7 @@ namespace sly.parser.generator
             
             
             SyntaxVisitorResult<IN, OUT> result = SyntaxVisitorResult<IN, OUT>.NoneResult();
-            if (Configuration.Functions.ContainsKey(node.Name) || node.Visitor != null || node.IsByPassNode)
+            if (node.Visitor != null || node.IsByPassNode)
             {                
                 List<object> args = new List<object>();
                 int i = 0;
@@ -149,25 +149,19 @@ namespace sly.parser.generator
                     {
                         args.Add(v.ValueResult);
                     }
-                   
-                    
 
                     i++;
                 }
                 if (node.IsByPassNode)
-                {                    
+                {   
                     result = SyntaxVisitorResult<IN, OUT>.NewValue((OUT)args[0]);                    
                 }
                 else
                 {
                     MethodInfo method = null;
                     try
-                    {                        
-                        bool found = Configuration.Functions.TryGetValue(node.Name, out method);
-                        if (method == null && !found)
-                        {
-                            method = node.Visitor;
-                        }
+                    {
+                        method = node.Visitor;
                         object t = (method.Invoke(ParserVsisitorInstance, args.ToArray()));
                         //string typename = t.GetType().Name;
                         OUT res = (OUT)t;

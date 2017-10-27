@@ -223,6 +223,10 @@ namespace sly.parser.llparser
             {
                 SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);                
                 node = ManageExpressionRules(rule, node);
+                if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
+                {
+                    result.Root = children[0];
+                }
                 result.Root =  node;
                 result.IsEnded = currentPosition >= tokens.Count - 1
                                 || currentPosition == tokens.Count - 2 && tokens[tokens.Count - 1].TokenID.Equals(default(IN));
@@ -243,7 +247,7 @@ namespace sly.parser.llparser
                 node.IsByPassNode = true;
             }
             else if (rule.IsExpressionRule && !rule.IsByPassRule)
-            {                
+            {
                 if (node.Children.Count == 3)
                 {
                     operatorIndex = 1;
@@ -258,17 +262,26 @@ namespace sly.parser.llparser
                     {
                         if (operatorNode != null)
                         {
-                            if (rule.VisitorMethods != null && rule.VisitorMethods.Any())
+                            var visitor = rule.GetVisitor(operatorNode.Token.TokenID);
+                            if (visitor != null)
                             {
-                                if (rule.VisitorMethods.ContainsKey(operatorNode.Token.TokenID))
-                                {
-                                    var visitor = rule.VisitorMethods[operatorNode.Token.TokenID];
-                                    node.Visitor = visitor;
-                                }
+                                node.Visitor = visitor;
+                            }
+                            else
+                            {
+                                ;
                             }
                         }
                     }
                 }
+            }  
+            else if( !rule.IsExpressionRule)
+            {
+                node.Visitor = rule.GetVisitor();
+            }
+            else
+            {
+                ;
             }
             return node;
                 
