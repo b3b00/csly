@@ -173,10 +173,10 @@ namespace sly.parser.generator
                 IN token = default(IN);                              
                 try
                 {
-                    token = (IN)Enum.Parse(typeof(IN) , item, false);
+                    token = (IN)Enum.Parse(typeof(IN) , item);
                     isTerminal = true;
                 }
-                catch(Exception) 
+                catch(ArgumentException) 
                 {
                     isTerminal = false;
                 }

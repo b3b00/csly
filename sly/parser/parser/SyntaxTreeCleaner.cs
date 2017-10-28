@@ -14,7 +14,9 @@ namespace sly.parser.parser
             if (tree != null)
             {
                 tree = RemoveByPassNodes(tree);
+                tree = SetAssociativity(tree);
                 result.Root = tree;
+                
             }
             return result;
         }
@@ -75,48 +77,62 @@ namespace sly.parser.parser
 
             if (tree is SyntaxNode<IN> node)
             {
-                // todo :
-                // si n isexpr 
-                if (node.IsBinaryOperationNode &&  node.IsLeftAssociative)
+                var newNode = (SyntaxNode<IN>)node.Clone();
+               if (NeedLeftAssociativity(node))
                 {
-                    if (node.Right is SyntaxNode<IN> right && right.IsExpressionNode)
-                    {
-                        if (right.Precedence == node.Precedence)
-                        {
+                    newNode = ApplyLeftAssociativity(node);
+                }
+                var newChildren = new List<ISyntaxNode<IN>>();
+                foreach (var child in newNode.Children)
+                {
+                    newChildren.Add(SetAssociativity(child));
+                }
+                node.Children.Clear();
+                node.Children.AddRange(newChildren);
+                result = newNode;
 
-                            // TODO first recurse down
-
-                            SyntaxNode<IN> top = new SyntaxNode<IN>(right.Name);
-                            SyntaxNode<IN> left = new SyntaxNode<IN>(node.Name);
-                            left.AddChild(node.Left);
-                            left.AddChild(node.Operator);
-                            left.AddChild(right.Left);
-                            //do permutation
-                            top.AddChild(left);
-                            top.AddChild(right.Operator);
-                            top.AddChild(right.Right);
-
-                            result = top;
-                        }
-                    }
-                }                
             }
             if (tree is ManySyntaxNode<IN> many)
             {
-
+                var newNode = (ManySyntaxNode<IN>)many.Clone();
+                var newChildren = new List<ISyntaxNode<IN>>();
+                foreach (var child in newNode.Children)
+                {
+                    newChildren.Add(SetAssociativity(child));
+                }
+                many.Children.Clear();
+                many.Children.AddRange(newChildren);
+                result = many;
             }
-            if (tree is SyntaxEpsilon<IN> leaf)
+            if (tree is SyntaxLeaf<IN> leaf)
             {
-
+                result = leaf;
             }
             return result;
-
-            
         }
 
 
+        private bool NeedLeftAssociativity(SyntaxNode<IN> node)
+        {
+            return node.IsBinaryOperationNode && node.IsLeftAssociative
+                && node.Right is SyntaxNode<IN> right && right.IsExpressionNode
+                && right.Precedence == node.Precedence;
+        }
 
-
+        private SyntaxNode<IN> ApplyLeftAssociativity(SyntaxNode<IN> node)
+        {
+            var result = node;
+            while (NeedLeftAssociativity(result))
+            {
+                var newLeft = (SyntaxNode<IN>)node.Clone();
+                var newTop = (SyntaxNode<IN>)node.Right.Clone();
+                newLeft.Children[2] = newTop.Left;
+                newTop.Children[0] = newLeft;
+                result = newTop;
+            }
+            
+            return result;
+        }
 
     }
 }

@@ -39,7 +39,7 @@ namespace sly.parser.syntax
         public bool IsRightAssociative => Associativity == Associativity.Right;
 
         public SyntaxLeaf<IN> Operator { get {
-                IN oper = null;
+                SyntaxLeaf<IN> oper = null;
                 if (IsExpressionNode)
                 {
                     int operatorIndex = -1;
@@ -53,7 +53,7 @@ namespace sly.parser.syntax
 
                     if (operatorIndex > 0 && Children[operatorIndex] is SyntaxLeaf<IN> leaf)
                     {
-                        oper = leaf.Token.TokenID;
+                        oper = leaf;
                     }
                 }
                 return oper;
@@ -73,7 +73,7 @@ namespace sly.parser.syntax
                     {
                         leftindex = 0;
                     }                    
-                    if (leftindex > 0)
+                    if (leftindex >= 0)
                     {
                         l = Children[leftindex];
                     }
@@ -113,7 +113,7 @@ namespace sly.parser.syntax
         public SyntaxNode(string name, List<ISyntaxNode<IN>> children = null, MethodInfo visitor = null)
         {
             this.Name = name;            
-            this.Children = children;
+            this.Children = children == null ? new List<ISyntaxNode<IN>>() : children;
             this.Visitor = visitor;
         }
         
@@ -138,6 +138,15 @@ namespace sly.parser.syntax
             return false;
         }
 
+        public ISyntaxNode<IN> Clone()
+        {
+            var clone = new SyntaxNode<IN>(Name);
+
+            Children.ForEach(c => clone.AddChild(c.Clone()));
+            clone.Operation = Operation;
+            clone.Visitor = Visitor;
+            return clone;
+        }
 
 
         public string Dump(string tab)
