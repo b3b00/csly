@@ -14,11 +14,41 @@ namespace sly.parser.parser
             if (tree != null)
             {
                 tree = RemoveByPassNodes(tree);
-                tree = SetAssociativity(tree);
+                if (NeedAssociativityProcessing(tree))
+                {
+                    tree = SetAssociativity(tree);
+                }
                 result.Root = tree;
-                
+
             }
             return result;
+        }
+
+        private bool NeedAssociativityProcessing(ISyntaxNode<IN> tree)
+        {
+            bool need = false;
+            if (tree is ManySyntaxNode<IN> many)
+            {
+                
+                foreach (var child in many.Children)
+                {
+                    need = need || NeedAssociativityProcessing(child);
+                    if (need)
+                    {
+                        break;
+                    }
+                }                
+            }
+            else if (tree is SyntaxLeaf<IN> leaf)
+            {
+                need = false;
+            }
+            else if (tree is SyntaxNode<IN> node)
+            {
+                need = node.IsExpressionNode;
+
+            }
+            return need;
         }
 
         private ISyntaxNode<IN> RemoveByPassNodes(ISyntaxNode<IN> tree)
@@ -75,23 +105,7 @@ namespace sly.parser.parser
         {
             ISyntaxNode<IN> result = null;
 
-            if (tree is SyntaxNode<IN> node)
-            {
-                var newNode = (SyntaxNode<IN>)node.Clone();
-               if (NeedLeftAssociativity(node))
-                {
-                    newNode = ApplyLeftAssociativity(node);
-                }
-                var newChildren = new List<ISyntaxNode<IN>>();
-                foreach (var child in newNode.Children)
-                {
-                    newChildren.Add(SetAssociativity(child));
-                }
-                node.Children.Clear();
-                node.Children.AddRange(newChildren);
-                result = newNode;
 
-            }
             if (tree is ManySyntaxNode<IN> many)
             {
                 var newNode = (ManySyntaxNode<IN>)many.Clone();
@@ -104,9 +118,26 @@ namespace sly.parser.parser
                 many.Children.AddRange(newChildren);
                 result = many;
             }
-            if (tree is SyntaxLeaf<IN> leaf)
+            else if (tree is SyntaxLeaf<IN> leaf)
             {
                 result = leaf;
+            }
+            else if (tree is SyntaxNode<IN> node)
+            {
+                var newNode = (SyntaxNode<IN>)node.Clone();
+                if (NeedLeftAssociativity(node))
+                {
+                    newNode = ApplyLeftAssociativity(node);
+                }
+                var newChildren = new List<ISyntaxNode<IN>>();
+                foreach (var child in newNode.Children)
+                {
+                    newChildren.Add(SetAssociativity(child));
+                }
+                node.Children.Clear();
+                node.Children.AddRange(newChildren);
+                result = newNode;
+
             }
             return result;
         }
