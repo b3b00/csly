@@ -5,7 +5,7 @@ using sly.lexer;
 namespace sly.parser.syntax
 {
 
-    public class SyntaxEpsilon<T> : ISyntaxNode<T> {
+    public class SyntaxEpsilon<IN> : ISyntaxNode<IN> where IN : struct {
 
 
         public override string ToString()
@@ -21,6 +21,6 @@ namespace sly.parser.syntax
             
             return $"{tab}(e)";
         }
-
+             
     }
 }

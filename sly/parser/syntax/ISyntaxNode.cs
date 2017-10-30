@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace sly.parser.syntax
 {
-    public interface ISyntaxNode<T>
+    public interface ISyntaxNode<IN> where IN : struct    
     {
         bool IsTerminal();
 
         string Dump(string tab);
+
     }
 }
