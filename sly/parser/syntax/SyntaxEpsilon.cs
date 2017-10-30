@@ -21,10 +21,6 @@ namespace sly.parser.syntax
             
             return $"{tab}(e)";
         }
-
-        public ISyntaxNode<IN> Clone()
-        {
-            return new SyntaxEpsilon<IN>();
-        }
+             
     }
 }

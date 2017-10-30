@@ -138,16 +138,7 @@ namespace sly.parser.syntax
             return false;
         }
 
-        public ISyntaxNode<IN> Clone()
-        {
-            var clone = new SyntaxNode<IN>(Name);
-
-            Children.ForEach(c => clone.AddChild(c.Clone()));
-            clone.Operation = Operation;
-            clone.Visitor = Visitor;
-            return clone;
-        }
-
+        
 
         public string Dump(string tab)
         {

@@ -98,7 +98,7 @@ namespace sly.parser.generator
                     if (production != null)
                     {
                         string[] ruleItems = production.RuleString.Split(new char[] { ':' });
-                        if (ruleItems.Length == 2)
+                        if (ruleItems.Length > 0)
                         {
                             operandNonTerminal = ruleItems[0].Trim();
                         }

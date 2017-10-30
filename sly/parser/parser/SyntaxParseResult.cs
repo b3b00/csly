@@ -3,12 +3,13 @@ using sly.parser.syntax;
 
 namespace sly.parser
 {
-    public class SyntaxParseResult<T> {
-        public ISyntaxNode<T> Root {get; set;}
+    public class SyntaxParseResult<IN> where IN : struct
+    { 
+        public ISyntaxNode<IN> Root {get; set;}
 
         public bool IsError{get; set;}
 
-        public List<UnexpectedTokenSyntaxError<T>> Errors {get; set;}
+        public List<UnexpectedTokenSyntaxError<IN>> Errors {get; set;}
 
         public int EndingPosition { get; set; }
 

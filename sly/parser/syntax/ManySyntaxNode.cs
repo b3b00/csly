@@ -17,13 +17,6 @@ namespace sly.parser.syntax
         {
         }
 
-        public  ISyntaxNode<IN> Clone()
-        {
-            var clone = new ManySyntaxNode<IN>(Name);
-            Children.ForEach(c => clone.AddChild(c.Clone()));
-            return clone;
-        }
-
         public ManySyntaxNode(string name, List<ISyntaxNode<IN>> children) : base(name,children)
         {
             this.Name = name;

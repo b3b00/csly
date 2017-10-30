@@ -108,9 +108,8 @@ namespace sly.parser.parser
 
             if (tree is ManySyntaxNode<IN> many)
             {
-                var newNode = (ManySyntaxNode<IN>)many.Clone();
                 var newChildren = new List<ISyntaxNode<IN>>();
-                foreach (var child in newNode.Children)
+                foreach (var child in many.Children)
                 {
                     newChildren.Add(SetAssociativity(child));
                 }
@@ -124,19 +123,18 @@ namespace sly.parser.parser
             }
             else if (tree is SyntaxNode<IN> node)
             {
-                var newNode = (SyntaxNode<IN>)node.Clone();
                 if (NeedLeftAssociativity(node))
                 {
-                    newNode = ApplyLeftAssociativity(node);
+                    node = ProcessLeftAssociativity(node);
                 }
                 var newChildren = new List<ISyntaxNode<IN>>();
-                foreach (var child in newNode.Children)
+                foreach (var child in node.Children)
                 {
                     newChildren.Add(SetAssociativity(child));
                 }
                 node.Children.Clear();
                 node.Children.AddRange(newChildren);
-                result = newNode;
+                result = node;
 
             }
             return result;
@@ -150,13 +148,13 @@ namespace sly.parser.parser
                 && right.Precedence == node.Precedence;
         }
 
-        private SyntaxNode<IN> ApplyLeftAssociativity(SyntaxNode<IN> node)
+        private SyntaxNode<IN> ProcessLeftAssociativity(SyntaxNode<IN> node)
         {
             var result = node;
             while (NeedLeftAssociativity(result))
             {
-                var newLeft = (SyntaxNode<IN>)node.Clone();
-                var newTop = (SyntaxNode<IN>)node.Right.Clone();
+                var newLeft = (SyntaxNode<IN>)result;
+                var newTop = (SyntaxNode<IN>)result.Right;
                 newLeft.Children[2] = newTop.Left;
                 newTop.Children[0] = newLeft;
                 result = newTop;
