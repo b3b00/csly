@@ -174,7 +174,6 @@ namespace sly.parser.generator
                 try
                 {
                     var tIn = typeof(IN);
-                    object o = null;
                     bool b = Enum.TryParse<IN>(item, out token);
                     if (b)
                     {

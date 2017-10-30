@@ -54,47 +54,42 @@ namespace sly.parser.parser
         private ISyntaxNode<IN> RemoveByPassNodes(ISyntaxNode<IN> tree)
         {
             ISyntaxNode<IN> result = null;
-            try
+
+
+            if (tree is SyntaxNode<IN> node && node.IsByPassNode)
             {
-                
-                if (tree is SyntaxNode<IN> node && node.IsByPassNode)
+                result = RemoveByPassNodes(node.Children[0]);
+            }
+            else
+            {
+                if (tree is SyntaxLeaf<IN> leaf)
                 {
-                    result = RemoveByPassNodes(node.Children[0]);
+                    result = leaf;
                 }
-                else
+                if (tree is SyntaxNode<IN> innernode)
                 {
-                    if (tree is SyntaxLeaf<IN> leaf)
+                    var newChildren = new List<ISyntaxNode<IN>>();
+                    foreach (var child in innernode.Children)
                     {
-                        result = leaf;
+                        newChildren.Add(RemoveByPassNodes(child));
                     }
-                    if (tree is SyntaxNode<IN> innernode)
+                    innernode.Children.Clear();
+                    innernode.Children.AddRange(newChildren);
+                    result = innernode;
+                }
+                if (tree is ManySyntaxNode<IN> many)
+                {
+                    var newChildren = new List<ISyntaxNode<IN>>();
+                    foreach (var child in many.Children)
                     {
-                        var newChildren = new List<ISyntaxNode<IN>>();
-                        foreach (var child in innernode.Children)
-                        {
-                            newChildren.Add(RemoveByPassNodes(child));
-                        }
-                        innernode.Children.Clear();
-                        innernode.Children.AddRange(newChildren);
-                        result = innernode;
+                        newChildren.Add(RemoveByPassNodes(child));
                     }
-                    if (tree is ManySyntaxNode<IN> many)
-                    {
-                        var newChildren = new List<ISyntaxNode<IN>>();
-                        foreach (var child in many.Children)
-                        {
-                            newChildren.Add(RemoveByPassNodes(child));
-                        }
-                        many.Children.Clear();
-                        many.Children.AddRange(newChildren);
-                        result = many;
-                    }
+                    many.Children.Clear();
+                    many.Children.AddRange(newChildren);
+                    result = many;
                 }
             }
-            catch(Exception e)
-            {
-                ;
-            }
+
             return result;
         }
 
