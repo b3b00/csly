@@ -5,11 +5,12 @@ using sly.lexer;
 namespace sly.parser.syntax
 {
 
-    public class SyntaxLeaf<T> : ISyntaxNode<T> {
+    public class SyntaxLeaf<IN> : ISyntaxNode<IN> where IN : struct
+    {
 
-        public Token<T> Token {get; set;}
+        public Token<IN> Token {get; set;}
 
-        public SyntaxLeaf(Token<T> token)
+        public SyntaxLeaf(Token<IN> token)
         {
             this.Token = token;
         }
@@ -27,6 +28,6 @@ namespace sly.parser.syntax
         {
             return $"{tab}({this.Token.TokenID} : {this.Token.Value})";
         }
-
+          
     }
 }

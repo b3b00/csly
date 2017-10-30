@@ -10,18 +10,59 @@ using sly.parser.generator;
 namespace sly.parser.syntax
 {
 
-    public class Rule<T> : GrammarNode<T> where T : struct
+    public class Rule<IN> : GrammarNode<IN> where IN : struct
     {
 
         public bool IsByPassRule { get; set; } = false;
 
-        public Dictionary<T, MethodInfo> VisitorMethods { get; set; }
+        // visitors for operation rules
+        private Dictionary<IN, OperationMetaData<IN>> VisitorMethodsForOperation { get; set; }
 
+        // visitor for classical rules
+        private MethodInfo Visitor { get; set; } 
+        
         public bool IsExpressionRule { get; set; }
 
         public string RuleString { get; }
 
         public string NonTerminalName { get; set; }
+
+
+        public OperationMetaData<IN> GetOperation(IN token = default(IN))
+        {
+            if (IsExpressionRule)
+            {
+                OperationMetaData<IN> operation = VisitorMethodsForOperation.ContainsKey(token) ? VisitorMethodsForOperation[token] : null;
+                return operation;
+            }
+            return null;
+        }
+
+        public MethodInfo GetVisitor(IN token = default(IN))
+        {
+            MethodInfo visitor = null;
+            if (IsExpressionRule)
+            {
+                OperationMetaData < IN > operation = VisitorMethodsForOperation.ContainsKey(token) ? VisitorMethodsForOperation[token] : null;
+                visitor = operation?.VisitorMethod;
+            }
+            else
+            {
+                visitor = Visitor;
+            }
+            return visitor;
+
+        }
+
+        public void SetVisitor(MethodInfo visitor)
+        {
+            Visitor = visitor;
+        }
+
+        public void SetVisitor(OperationMetaData<IN> operation)
+        {
+            VisitorMethodsForOperation[operation.OperatorToken] = operation;
+        }
 
         public string Key
         {
@@ -39,21 +80,22 @@ namespace sly.parser.syntax
             }
         }
 
-        public List<IClause<T>> Clauses { get; set; }
-        public List<T> PossibleLeadingTokens { get; set; }
+        public List<IClause<IN>> Clauses { get; set; }
+        public List<IN> PossibleLeadingTokens { get; set; }
 
 
         public Rule()
         {
-            Clauses = new List<IClause<T>>();
-            VisitorMethods = new Dictionary<T, MethodInfo>();
+            Clauses = new List<IClause<IN>>();
+            VisitorMethodsForOperation = new Dictionary<IN, OperationMetaData<IN>>();
+            Visitor = null;
         }
 
         public bool MayBeEmpty { get
             {
                 return Clauses == null
                     || Clauses.Count == 0
-                    || (Clauses.Count == 1 && Clauses[0] is EmptyClause<T>)
+                    || (Clauses.Count == 1 && Clauses[0] is EmptyClause<IN>)
                     || (Clauses.Count == 1 && Clauses[0].MayBeEmpty());
             } }
 

@@ -134,6 +134,7 @@ namespace sly.parser.generator
                     
 
                     Rule<IN> r = BuildNonTerminal(ntAndRule);
+                    r.SetVisitor(m);
                     string key = ntAndRule.Item1 + "__" + r.Key;
                     functions[key] = m;
                     NonTerminal<IN> nonT = null;
@@ -153,9 +154,6 @@ namespace sly.parser.generator
 
             });
 
-           
-
-            conf.Functions = functions;
             conf.NonTerminals = nonTerminals;
             
             return conf;
@@ -175,10 +173,18 @@ namespace sly.parser.generator
                 IN token = default(IN);                              
                 try
                 {
-                    token = (IN)Enum.Parse(typeof(IN) , item, false);
-                    isTerminal = true;
+                    var tIn = typeof(IN);
+                    bool b = Enum.TryParse<IN>(item, out token);
+                    if (b)
+                    {
+                        isTerminal = true;
+                        ;
+                    }
+
+                    //token = (IN)Enum.Parse(tIn , item);
+                    //isTerminal = true;
                 }
-                catch(Exception) 
+                catch(ArgumentException) 
                 {
                     isTerminal = false;
                 }

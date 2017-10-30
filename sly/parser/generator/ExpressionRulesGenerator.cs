@@ -98,7 +98,7 @@ namespace sly.parser.generator
                     if (production != null)
                     {
                         string[] ruleItems = production.RuleString.Split(new char[] { ':' });
-                        if (ruleItems.Length == 2)
+                        if (ruleItems.Length > 0)
                         {
                             operandNonTerminal = ruleItems[0].Trim();
                         }
@@ -163,7 +163,7 @@ namespace sly.parser.generator
                     rule.Clauses.Add(new TerminalClause<IN>(operation.OperatorToken));
                     rule.Clauses.Add(new NonTerminalClause<IN>(name));
                     rule.IsExpressionRule = true;
-                    rule.VisitorMethods[operation.OperatorToken] = operation.VisitorMethod;
+                    rule.SetVisitor(operation);
                     nonTerminal.Rules.Add(rule);
 
                 }
@@ -173,7 +173,7 @@ namespace sly.parser.generator
                     rule.Clauses.Add(new TerminalClause<IN>(operation.OperatorToken));
                     rule.Clauses.Add(new NonTerminalClause<IN>(nextName));
                     rule.IsExpressionRule = true;
-                    rule.VisitorMethods[operation.OperatorToken] = operation.VisitorMethod;
+                    rule.SetVisitor(operation);
                     nonTerminal.Rules.Add(rule);
                 }
             }

@@ -36,13 +36,7 @@ namespace sly.parser.generator
             ParserBuilder<EbnfToken, GrammarNode<IN>> builder = new ParserBuilder<EbnfToken, GrammarNode<IN>>();
 
             Parser<EbnfToken,GrammarNode<IN>> grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
-
-            //ParserBuilder builder = new ParserBuilder();
-//            EBNFParserBuilder<EbnfToken,GrammarNode<IN>> parserGrammar = new EBNFParserBuilder<EbnfToken,GrammarNode<IN>>();
-//            if (GrammarParser == null)
-//            {
-//                GrammarParser = builder.BuildParser<EbnfToken,GrammarNode<IN>>(parserGrammar, ParserType.LL_RECURSIVE_DESCENT, "rule");
-//            }
+                        
             ParserConfiguration<IN,OUT> configuration =
                 ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
 
@@ -98,7 +92,6 @@ namespace sly.parser.generator
             Parser<EbnfToken,GrammarNode<IN>> grammarParser)
         {
             ParserConfiguration<IN,OUT> conf = new ParserConfiguration<IN,OUT>();
-            Dictionary<string, MethodInfo> functions = new Dictionary<string, MethodInfo>();
             Dictionary<string, NonTerminal<IN>> nonTerminals = new Dictionary<string, NonTerminal<IN>>();
             List<MethodInfo> methods = parserClass.GetMethods().ToList<MethodInfo>();
             methods = methods.Where(m =>
@@ -121,9 +114,7 @@ namespace sly.parser.generator
                     if (!parseResult.IsError)
                     {
                         Rule<IN> rule = (Rule<IN>)parseResult.Result;
-                        functions[rule.NonTerminalName+"__"+rule.Key] = m;
-
-
+                        rule.SetVisitor(m);
                         NonTerminal<IN> nonT = null;
                         if (!nonTerminals.ContainsKey(rule.NonTerminalName))
                         {
@@ -150,9 +141,6 @@ namespace sly.parser.generator
 
             });
 
-
-
-            conf.Functions = functions;
             conf.NonTerminals = nonTerminals;
 
             return conf;
