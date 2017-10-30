@@ -159,7 +159,7 @@ namespace ParserTests
         }
 
         [Fact]
-        public void TestAssociativity()
+        public void TestAssociativityTerm()
         {
             BuildParser();
             ParseResult<ExpressionToken, int> r = Parser.Parse("1 - 2 - 3", StartingRule); 
@@ -172,7 +172,34 @@ namespace ParserTests
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(1 - 2 - 3 - 4, r.Result);
-            // should be ((1 - 2) - 3) - 4= (-1 -3) -4  = -4 -4 = -8  but is 1 - (2 - ( 3  - 4 ) = 1- (2 - (-1)) = 1 - 3 = -2
+
+
+            r = Parser.Parse("1 - 2 + 3", StartingRule);
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.Equal(1 - 2 + 3, r.Result);
+        }
+
+        [Fact]
+        public void TestAssociativityFactor()
+        {
+            BuildParser();
+            ParseResult<ExpressionToken, int> r = Parser.Parse("1 / 2 / 3", StartingRule);
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.Equal(1 / 2 / 3, r.Result);
+
+
+            r = Parser.Parse("1 / 2 / 3 / 4", StartingRule);
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.Equal(1 / 2 / 3 / 4, r.Result);
+
+
+            r = Parser.Parse("1 / 2 * 3", StartingRule);
+            Assert.False(r.IsError);
+            Assert.NotNull(r.Result);
+            Assert.Equal(1 / 2 * 3, r.Result);
         }
 
 
