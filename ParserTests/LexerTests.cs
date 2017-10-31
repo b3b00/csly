@@ -18,7 +18,7 @@ namespace ParserTests
         {
             JSONParser jsonParser = new JSONParser();
             ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
-            Parser<JsonToken,JSon> parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            Parser<JsonToken,JSon> parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
             return parser.Lexer;
         }
 
@@ -26,7 +26,7 @@ namespace ParserTests
         {
             ExpressionParser exprParser = new ExpressionParser();
             ParserBuilder<ExpressionToken, int> builder = new ParserBuilder<ExpressionToken, int>();
-            Parser<ExpressionToken,int> parser = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            Parser<ExpressionToken,int> parser = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression").Result;
             return parser.Lexer;
         }
 

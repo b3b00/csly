@@ -19,7 +19,7 @@ namespace ParserTests
         {
             JSONParser jsonParser = new JSONParser();
             ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
-            Parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            Parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
         }
 
         

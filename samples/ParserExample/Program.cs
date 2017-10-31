@@ -103,7 +103,7 @@ namespace ParserExample
             program += "print \"r=\".r;\n";
             program += "print \"i=\".i;\n";
             program += "i := i + 1 ))";
-            ParseResult<WhileToken, WhileAST> result = Parser.Parse(program);
+            ParseResult<WhileToken, WhileAST> result = Parser.Result.Parse(program);
             Interpreter interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result);
             ;
