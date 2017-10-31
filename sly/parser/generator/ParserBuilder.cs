@@ -10,9 +10,9 @@ using sly.buildresult;
 namespace sly.parser.generator
 {
 
-   
 
 
+    public delegate BuildResult<Parser<IN, OUT>> ParserChecker<IN,OUT>(BuildResult<Parser<IN, OUT>> result, NonTerminal<IN> nonterminal) where IN : struct;
   
     /// <summary>
     /// this class provides API to build parser
@@ -234,12 +234,95 @@ namespace sly.parser.generator
         #region parser checking
         private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result)
         {
-            // WARN unreachable non terminals
-            // 
+            var checkers = new List<ParserChecker<IN, OUT>>();
+            checkers.Add(CheckUnreachable);
+            checkers.Add(CheckNotFound);
+
+            if (result.Result != null && !result.IsError)
+            {
+                foreach (var checker in checkers)
+                {
+                    if (checker != null)
+                    {
+                        result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>()
+                            .ForEach(nt => result = checker(result, nt));
+                    }
+                }
+                //ParserChecker<IN, OUT> c = CheckUnreachable;
+                
+
+                // WARN : unreachable non terminals
+
+
+                // ERROR / FATAL ?: unknown non term / term
+            }
             return result;
         }
 
+        private static BuildResult<Parser<IN,OUT>> CheckUnreachable(BuildResult<Parser<IN,OUT>> result, NonTerminal<IN> nonTerminal)
+        {
+            var conf = result.Result.Configuration;
+            bool found = false;
+            foreach(var nt in result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>())
+            {
+                if (nt.Name != nonTerminal.Name)
+                {
+                    found = NonTerminalReferences(nt,nonTerminal.Name);
+                    if (found)
+                    {
+                        break;
+                    }
+                }
+            }
+            if (!found)
+            {
+                result.AddError(new ParserInitializationError(ErrorLevel.WARN, $"non terminal {nonTerminal.Name} is never used."));
+            }
+            return result;
+        }
+
+
+        private static bool NonTerminalReferences(NonTerminal<IN> nonTerminal, string referenceName)
+        {
+            bool found = false;
+            int iRule = 0;
+            while (iRule < nonTerminal.Rules.Count && !found)
+            {
+                var rule = nonTerminal.Rules[iRule];
+                int iClause = 0;
+                while (iClause < rule.Clauses.Count && !found)
+                {
+                    var clause = rule.Clauses[iClause];
+                    found = found || clause is NonTerminalClause<IN> ntClause && ntClause.NonTerminalName == nonTerminal.Name;
+                    iClause++;
+                }
+                iRule++;
+            }
+            return found;
+        }
+
         
+
+        private static BuildResult<Parser<IN, OUT>> CheckNotFound(BuildResult<Parser<IN, OUT>> result, NonTerminal<IN> nonTerminal)
+        {
+            var conf = result.Result.Configuration;
+            foreach(var rule in nonTerminal.Rules)
+            {
+                foreach(var clause in rule.Clauses)
+                {
+                    if (clause is NonTerminalClause<IN> ntClause)
+                    {
+                        if (!conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
+                        {
+                            result.AddError(new ParserInitializationError(ErrorLevel.ERROR, $"{ntClause.NonTerminalName} references from {rule.RuleString} does not exist."));
+                        }
+                    }                    
+                }
+            }
+            return result;
+        }
+
+
 
         #endregion
 

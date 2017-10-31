@@ -10,7 +10,9 @@ namespace sly.buildresult
 
         public R Result { get; set; }
 
-        public bool IsError => Errors.Any();
+
+
+        public bool IsError { get { return Errors.Where(e => e.Level != ErrorLevel.WARN).Any(); } set { } }
 
 
         public BuildResult() : this(default(R))
