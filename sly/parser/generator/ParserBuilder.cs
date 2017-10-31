@@ -38,6 +38,7 @@ namespace sly.parser.generator
             if (parserType == ParserType.LL_RECURSIVE_DESCENT)
             {
                 ParserConfiguration<IN, OUT> configuration = ExtractParserConfiguration(parserInstance.GetType());
+                configuration.StartingRule = rootRule;
                 ISyntaxParser<IN, OUT> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                 SyntaxTreeVisitor<IN, OUT> visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
                 parser = new Parser<IN, OUT>(syntaxParser, visitor);
@@ -55,6 +56,7 @@ namespace sly.parser.generator
             {
                 EBNFParserBuilder<IN, OUT> builder = new EBNFParserBuilder<IN, OUT>();
                 result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule);
+                
             }
             parser = result.Result;
             var expressionResult = parser.BuildExpressionParser(result, rootRule);
@@ -247,14 +249,7 @@ namespace sly.parser.generator
                         result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>()
                             .ForEach(nt => result = checker(result, nt));
                     }
-                }
-                //ParserChecker<IN, OUT> c = CheckUnreachable;
-                
-
-                // WARN : unreachable non terminals
-
-
-                // ERROR / FATAL ?: unknown non term / term
+                }              
             }
             return result;
         }
@@ -263,20 +258,23 @@ namespace sly.parser.generator
         {
             var conf = result.Result.Configuration;
             bool found = false;
-            foreach(var nt in result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>())
+            if (nonTerminal.Name != conf.StartingRule)
             {
-                if (nt.Name != nonTerminal.Name)
+                foreach (var nt in result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>())
                 {
-                    found = NonTerminalReferences(nt,nonTerminal.Name);
-                    if (found)
+                    if (nt.Name != nonTerminal.Name)
                     {
-                        break;
+                        found = NonTerminalReferences(nt, nonTerminal.Name);
+                        if (found)
+                        {
+                            break;
+                        }
                     }
                 }
-            }
-            if (!found)
-            {
-                result.AddError(new ParserInitializationError(ErrorLevel.WARN, $"non terminal {nonTerminal.Name} is never used."));
+                if (!found)
+                {
+                    result.AddError(new ParserInitializationError(ErrorLevel.WARN, $"non terminal {nonTerminal.Name} is never used."));
+                }
             }
             return result;
         }
@@ -293,7 +291,13 @@ namespace sly.parser.generator
                 while (iClause < rule.Clauses.Count && !found)
                 {
                     var clause = rule.Clauses[iClause];
-                    found = found || clause is NonTerminalClause<IN> ntClause && ntClause.NonTerminalName == nonTerminal.Name;
+                    if (clause is NonTerminalClause<IN> ntClause)
+                    {
+                        if (ntClause != null)
+                        {
+                            found = found || ntClause.NonTerminalName == referenceName;
+                        }
+                    }
                     iClause++;
                 }
                 iRule++;

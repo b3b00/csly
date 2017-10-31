@@ -41,6 +41,7 @@ namespace sly.parser.generator
 
             ParserConfiguration<IN,OUT> configuration =
                 ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
+            configuration.StartingRule = rootRule;
 
             ISyntaxParser<IN, OUT> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
 

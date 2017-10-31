@@ -34,6 +34,7 @@ namespace sly.parser
             SyntaxParser.Init(exprResult.Result,startingRule);
             if (startingRule != null)
             {
+                Configuration.StartingRule = startingRule;
                 SyntaxParser.StartingNonTerminal = startingRule;
             }
             if (exprResult.IsError)
