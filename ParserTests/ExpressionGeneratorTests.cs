@@ -4,6 +4,7 @@ using sly.parser.generator;
 using expressionparser;
 using simpleExpressionParser;
 using System.Collections.Generic;
+using sly.buildresult;
 
 namespace ParserTests
 {
@@ -11,7 +12,7 @@ namespace ParserTests
     public class ExpressionGeneratorTests
     {
 
-        private Parser<ExpressionToken,int> Parser;
+        private BuildResult<Parser<ExpressionToken,int>> Parser;
 
         private string StartingRule = "";
         public ExpressionGeneratorTests()
@@ -31,10 +32,11 @@ namespace ParserTests
         [Fact]
        public void TestBuild()
         {
-            BuildParser();            
-            Assert.Equal(6, Parser.Configuration.NonTerminals.Count);
+            BuildParser();
+            Assert.False(Parser.IsError);
+            Assert.Equal(6, Parser.Result.Configuration.NonTerminals.Count);
             var nonterminals = new List<NonTerminal<ExpressionToken>>();
-            foreach(var pair in Parser.Configuration.NonTerminals)
+            foreach(var pair in Parser.Result.Configuration.NonTerminals)
             {
                 nonterminals.Add(pair.Value);
             }
@@ -69,7 +71,7 @@ namespace ParserTests
         public void TestSingleValue()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Parse("1",StartingRule);
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("1",StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(1, r.Result);
@@ -79,7 +81,7 @@ namespace ParserTests
         public void TestSingleNegativeValue()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Parse("-1", StartingRule);
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("-1", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(-1, r.Result);
@@ -89,7 +91,7 @@ namespace ParserTests
         public void TestTermPlus()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Parse("1 + 1", StartingRule);
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("1 + 1", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.IsAssignableFrom(typeof(int), r.Result);
@@ -100,7 +102,7 @@ namespace ParserTests
         public void TestTermMinus()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Parse("1 - 1", StartingRule);
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("1 - 1", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(0, r.Result);
@@ -110,7 +112,7 @@ namespace ParserTests
         public void TestFactorTimes()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Parse("2*2", StartingRule);
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("2*2", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.IsAssignableFrom(typeof(int), r.Result);
@@ -121,7 +123,7 @@ namespace ParserTests
         public void TestFactorDivide()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Parse("42/2", StartingRule);
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("42/2", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(21, r.Result);
@@ -131,7 +133,7 @@ namespace ParserTests
         public void TestUnaryPrecedence()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Parse("-1 * 2", StartingRule);
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("-1 * 2", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(-2, r.Result);
@@ -142,7 +144,7 @@ namespace ParserTests
         public void TestPrecedence()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Parse("-1 + 2  * 3", StartingRule);
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("-1 + 2  * 3", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(5, r.Result);
@@ -152,7 +154,7 @@ namespace ParserTests
         public void TestGroup()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Parse("(-1 + 2)  * 3", StartingRule);
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("(-1 + 2)  * 3", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(3, r.Result);
@@ -162,19 +164,19 @@ namespace ParserTests
         public void TestAssociativityTerm()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Parse("1 - 2 - 3", StartingRule); 
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("1 - 2 - 3", StartingRule); 
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(1-2-3, r.Result);
             
 
-            r = Parser.Parse("1 - 2 - 3 - 4", StartingRule);
+            r = Parser.Result.Parse("1 - 2 - 3 - 4", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(1 - 2 - 3 - 4, r.Result);
 
 
-            r = Parser.Parse("1 - 2 + 3", StartingRule);
+            r = Parser.Result.Parse("1 - 2 + 3", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(1 - 2 + 3, r.Result);
@@ -184,19 +186,19 @@ namespace ParserTests
         public void TestAssociativityFactor()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Parse("1 / 2 / 3", StartingRule);
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("1 / 2 / 3", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(1 / 2 / 3, r.Result);
 
 
-            r = Parser.Parse("1 / 2 / 3 / 4", StartingRule);
+            r = Parser.Result.Parse("1 / 2 / 3 / 4", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(1 / 2 / 3 / 4, r.Result);
 
 
-            r = Parser.Parse("1 / 2 * 3", StartingRule);
+            r = Parser.Result.Parse("1 / 2 * 3", StartingRule);
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
             Assert.Equal(1 / 2 * 3, r.Result);

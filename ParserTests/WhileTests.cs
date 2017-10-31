@@ -4,6 +4,7 @@ using sly.parser.generator;
 using csly.whileLang.parser;
 using csly.whileLang.model;
 using csly.whileLang.interpreter;
+using sly.buildresult;
 
 namespace ParserTests
 {
@@ -11,7 +12,7 @@ namespace ParserTests
     public class WhileTests
     {
 
-        private static Parser<WhileToken, WhileAST> Parser;
+        private static BuildResult<Parser<WhileToken, WhileAST>> Parser;
 
 
         public WhileTests()
@@ -19,7 +20,7 @@ namespace ParserTests
         }
 
 
-        public Parser<WhileToken, WhileAST> buildParser()
+        public BuildResult<Parser<WhileToken, WhileAST>> buildParser()
         {
             if (Parser == null)
             {
@@ -37,7 +38,9 @@ namespace ParserTests
         public void TestBuildParser()
         {
 
-            Parser<WhileToken, WhileAST> parser = buildParser();
+           var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
         }
 
         #endregion
@@ -48,7 +51,9 @@ namespace ParserTests
         public void TestAssignAdd()
         {
 
-            Parser<WhileToken, WhileAST> parser = buildParser();
+            var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
             ParseResult<WhileToken, WhileAST> result = parser.Parse("(a:=1+1)");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -71,7 +76,9 @@ namespace ParserTests
         public void TestSkip()
         {
 
-            Parser<WhileToken, WhileAST> parser = buildParser();
+            var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
             ParseResult<WhileToken, WhileAST> result = parser.Parse("skip");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -85,7 +92,9 @@ namespace ParserTests
         public void TestPrintBoolExpression()
         {
 
-            Parser<WhileToken, WhileAST> parser = buildParser();
+            var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
             ParseResult<WhileToken, WhileAST> result = parser.Parse("print true and false");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -106,7 +115,9 @@ namespace ParserTests
         public void TestInfiniteWhile()
         {
 
-            Parser<WhileToken, WhileAST> parser = buildParser();
+            var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
             ParseResult<WhileToken, WhileAST> result = parser.Parse("while true do (skip)");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -130,7 +141,9 @@ namespace ParserTests
         public void TestIfThenElse()
         {
 
-            Parser<WhileToken, WhileAST> parser = buildParser();
+            var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
             ParseResult<WhileToken, WhileAST> result = parser.Parse("if true then (a := \"hello\") else (b := \"world\")");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -169,7 +182,9 @@ namespace ParserTests
         public void TestSkipSkipSequence()
         {
 
-            Parser<WhileToken, WhileAST> parser = buildParser();
+            var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
             ParseResult<WhileToken, WhileAST> result = parser.Parse("(skip; skip; skip)");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -184,7 +199,9 @@ namespace ParserTests
         public void TestSkipAssignSequence()
         {
 
-            Parser<WhileToken, WhileAST> parser = buildParser();
+            var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
             ParseResult<WhileToken, WhileAST> result = parser.Parse("(a:=1; b:=2; c:=3)");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -206,7 +223,9 @@ namespace ParserTests
         public void TestCounterProgram()
         {
 
-            Parser<WhileToken, WhileAST> parser = buildParser();
+            var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
             ParseResult<WhileToken, WhileAST> result = parser.Parse("(a:=0; while a < 10 do (print a; a := a +1 ))");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -221,7 +240,9 @@ namespace ParserTests
         public void TestCounterProgramExec()
         {
 
-            Parser<WhileToken, WhileAST> parser = buildParser();
+            var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
             ParseResult<WhileToken, WhileAST> result = parser.Parse("(a:=0; while a < 10 do (print a; a := a +1 ))");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -248,7 +269,9 @@ namespace ParserTests
     print i;
     i := i + 1 )
 )";
-            Parser<WhileToken, WhileAST> parser = buildParser();
+            var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
             ParseResult<WhileToken, WhileAST> result = parser.Parse(program);
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);

@@ -4,7 +4,7 @@ using sly.parser.generator;
 
 using System.Linq;
 using System.Collections.Generic;
-using System.Text;
+using sly.buildresult;
 using sly.parser.parser;
 
 namespace sly.parser
@@ -26,15 +26,26 @@ namespace sly.parser
 
         #region expression generator
 
-        public virtual void BuildExpressionParser(string startingRule = null)
+        public virtual BuildResult<ParserConfiguration<IN, OUT>> BuildExpressionParser(BuildResult<Parser<IN, OUT>> result, string startingRule = null)
         {
-            var conf = ExpressionRulesGenerator.BuildExpressionRules<IN, OUT>(Configuration, Instance.GetType());
-            Configuration = conf;
-            SyntaxParser.Init(conf,startingRule);
+            var exprResult = new BuildResult<ParserConfiguration<IN, OUT>>(Configuration);
+            exprResult = ExpressionRulesGenerator.BuildExpressionRules<IN, OUT>(Configuration, Instance.GetType(), exprResult);
+            Configuration = exprResult.Result;
+            SyntaxParser.Init(exprResult.Result,startingRule);
             if (startingRule != null)
             {
+                Configuration.StartingRule = startingRule;
                 SyntaxParser.StartingNonTerminal = startingRule;
             }
+            if (exprResult.IsError)
+            {
+                result.AddErrors(exprResult.Errors);
+            }           
+            else
+            {
+                result.Result.Configuration = Configuration;
+            }
+            return exprResult;
         }
 
 

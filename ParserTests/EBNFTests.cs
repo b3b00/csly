@@ -9,6 +9,7 @@ using sly.parser.llparser;
 using sly.parser.syntax;
 using jsonparser;
 using jsonparser.JsonModel;
+using sly.buildresult;
 
 namespace ParserTests
 {
@@ -102,30 +103,31 @@ namespace ParserTests
 
         }
 
-        private Parser<TokenType, string> BuildParser()
+        private BuildResult<Parser<TokenType, string>> BuildParser()
         {
             EBNFTests parserInstance = new EBNFTests();
             ParserBuilder<TokenType, string> builder = new ParserBuilder<TokenType, string>();
-
-            Parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "R");
-            return Parser;
+            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "R");
+            return result;
         }
 
 
-        private Parser<JsonToken, JSon> BuildEbnfJsonParser()
+        private BuildResult<Parser<JsonToken, JSon>> BuildEbnfJsonParser()
         {
             EbnfJsonParser parserInstance = new EbnfJsonParser();
             ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
 
-            JsonParser =
+            var result =
                 builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            return JsonParser;
+            return result;
         }
 
         [Fact]
         public void TestParseBuild()
         {
-            Parser = BuildParser();
+            var buildResult = BuildParser();
+            Assert.False(buildResult.IsError);
+            Parser = buildResult.Result;
             Assert.Equal(typeof(EBNFRecursiveDescentSyntaxParser<TokenType, string>), Parser.SyntaxParser.GetType());
             Assert.Equal(Parser.Configuration.NonTerminals.Count, 4);
             NonTerminal<TokenType> nt = Parser.Configuration.NonTerminals["R"];
@@ -147,7 +149,9 @@ namespace ParserTests
         [Fact]
         public void TestOneOrMoreNonTerminal()
         {
-            Parser = BuildParser();
+            var buildResult = BuildParser();
+            Assert.False(buildResult.IsError);
+            Parser = buildResult.Result;
             ParseResult<TokenType, string> result = Parser.Parse("e f e f");
             Assert.False(result.IsError);
             Assert.Equal("R(G(e,f),G(e,f))", result.Result.ToString().Replace(" ", ""));
@@ -157,7 +161,9 @@ namespace ParserTests
     [Fact]
         public void TestOneOrMoreWithMany()
         {
-            Parser = BuildParser();
+            var buildResult = BuildParser();
+            Assert.False(buildResult.IsError);
+            Parser = buildResult.Result;
             ParseResult<TokenType,string> result = Parser.Parse("aaa b c");
             Assert.False(result.IsError);
             Assert.Equal("R(A(a,a,a),B(b),c)",result.Result.ToString().Replace(" ",""));
@@ -166,7 +172,9 @@ namespace ParserTests
         [Fact]
         public void TestOneOrMoreWithOne()
         {
-            Parser = BuildParser();
+            var buildResult = BuildParser();
+            Assert.False(buildResult.IsError);
+            Parser = buildResult.Result;
             ParseResult<TokenType,string> result = Parser.Parse(" b c");
             Assert.True(result.IsError);
         }
@@ -174,7 +182,9 @@ namespace ParserTests
         [Fact]
         public void TestZeroOrMoreWithOne()
         {
-            Parser = BuildParser();
+            var buildResult = BuildParser();
+            Assert.False(buildResult.IsError);
+            Parser = buildResult.Result;
             ParseResult<TokenType,string> result = Parser.Parse("a b c");
             Assert.False(result.IsError);
             Assert.Equal("R(A(a),B(b),c)", result.Result.ToString().Replace(" ", ""));
@@ -183,7 +193,9 @@ namespace ParserTests
         [Fact]
         public void TestZeroOrMoreWithMany()
         {
-            Parser = BuildParser();
+            var buildResult = BuildParser();
+            Assert.False(buildResult.IsError);
+            Parser = buildResult.Result;
             ParseResult<TokenType,string> result = Parser.Parse("a bb c");
             Assert.False(result.IsError);
             Assert.Equal("R(A(a),B(b,b),c)", result.Result.ToString().Replace(" ", ""));
@@ -192,7 +204,9 @@ namespace ParserTests
         [Fact]
         public void TestZeroOrMoreWithNone()
         {
-            Parser = BuildParser();
+            var buildResult = BuildParser();
+            Assert.False(buildResult.IsError);
+            Parser = buildResult.Result;
             ParseResult<TokenType,string> result = Parser.Parse("a  c");
             Assert.False(result.IsError);
             Assert.Equal("R(A(a),B(),c)", result.Result.ToString().Replace(" ", ""));
@@ -202,7 +216,10 @@ namespace ParserTests
         [Fact]
         public void TestJsonList()
         {
-            Parser<JsonToken,JSon> jsonParser = BuildEbnfJsonParser();
+            var buildResult = BuildEbnfJsonParser();
+            Assert.False(buildResult.IsError);
+            Parser<JsonToken, JSon> jsonParser = buildResult.Result;
+
             ParseResult<JsonToken,JSon> result = jsonParser.Parse("[1,2,3,4]");
             Assert.False(result.IsError);
             Assert.True(result.Result.IsList);
@@ -217,7 +234,9 @@ namespace ParserTests
         [Fact]
         public void TestJsonObject()
         {
-            Parser<JsonToken,JSon> jsonParser = BuildEbnfJsonParser();
+            var buildResult = BuildEbnfJsonParser();
+            Assert.False(buildResult.IsError);
+            Parser<JsonToken, JSon> jsonParser = buildResult.Result;
             ParseResult<JsonToken,JSon> result = jsonParser.Parse("{\"one\":1,\"two\":2,\"three\":\"trois\" }");
             Assert.False(result.IsError);
             Assert.True(result.Result.IsObject);

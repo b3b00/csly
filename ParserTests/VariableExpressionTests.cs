@@ -20,7 +20,7 @@ namespace ParserTests
         {
             VariableExpressionParser parserInstance = new VariableExpressionParser();
             ParserBuilder<ExpressionToken, Expression> builder = new ParserBuilder<ExpressionToken, Expression>();
-            Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression").Result;
         }
 
 
