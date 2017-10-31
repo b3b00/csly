@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using sly.parser.llparser;
 using sly.lexer;
 using sly.parser.syntax;
+using sly.buildresult;
 
 namespace sly.parser.generator
 {
@@ -29,27 +30,46 @@ namespace sly.parser.generator
         /// <param name="parserType">a ParserType enum value stating the analyser type (LR, LL ...) for now only LL recurive descent parser available </param>
         /// <param name="rootRule">the name of the root non terminal of the grammar</param>
         /// <returns></returns>
-        public virtual Parser<IN,OUT> BuildParser(object parserInstance, ParserType parserType, string rootRule)
+        public virtual BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType, string rootRule)
         {
-            Parser<IN,OUT> parser = null;
+
+            Parser<IN, OUT> parser = null;
+            BuildResult<Parser<IN, OUT>> result = new BuildResult<Parser<IN, OUT>>();
             if (parserType == ParserType.LL_RECURSIVE_DESCENT)
             {
-                ParserConfiguration<IN,OUT> configuration = ExtractParserConfiguration(parserInstance.GetType());
-                ISyntaxParser<IN,OUT> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
-                SyntaxTreeVisitor<IN,OUT> visitor = new SyntaxTreeVisitor<IN,OUT>(configuration, parserInstance);
-                parser = new Parser<IN,OUT>(syntaxParser, visitor);
-                parser.Lexer = BuildLexer();
+                ParserConfiguration<IN, OUT> configuration = ExtractParserConfiguration(parserInstance.GetType());
+                ISyntaxParser<IN, OUT> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
+                SyntaxTreeVisitor<IN, OUT> visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
+                parser = new Parser<IN, OUT>(syntaxParser, visitor);
+                var lexerResult = BuildLexer();
+                parser.Lexer = lexerResult.Result;
+                if (lexerResult.IsError)
+                {
+                    result.AddErrors(lexerResult.Errors);
+                }
                 parser.Instance = parserInstance;
                 parser.Configuration = configuration;
+                result.Result = parser;
             }
             else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
             {
-                EBNFParserBuilder<IN,OUT> builder = new EBNFParserBuilder<IN,OUT>();
-                parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule);
+                EBNFParserBuilder<IN, OUT> builder = new EBNFParserBuilder<IN, OUT>();
+                result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule);
             }
-            parser.BuildExpressionParser(rootRule);
-            return parser;
+            parser = result.Result;
+            var expressionResult = parser.BuildExpressionParser(result, rootRule);
+            if (expressionResult.IsError)
+            {
+                result.AddErrors(expressionResult.Errors);
+            }
+            result.Result.Configuration = expressionResult.Result;
+
+            result = CheckParser(result);
+
+            return result;
         }
+
+        
 
         protected virtual  ISyntaxParser<IN,OUT> BuildSyntaxParser(ParserConfiguration<IN,OUT> conf, ParserType parserType, string rootRule)
         {
@@ -100,9 +120,9 @@ namespace sly.parser.generator
         }
 
 
-        protected ILexer<IN> BuildLexer() 
+        protected BuildResult<ILexer<IN>> BuildLexer() 
         {
-            ILexer<IN> lexer = LexerBuilder.BuildLexer<IN>();            
+            var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>());            
             return lexer;
         }
 
@@ -207,11 +227,21 @@ namespace sly.parser.generator
             return rule;
         }
 
-       
+
 
         #endregion
 
+        #region parser checking
+        private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result)
+        {
+            // WARN unreachable non terminals
+            // 
+            return result;
+        }
 
+        
+
+        #endregion
 
     }
 }

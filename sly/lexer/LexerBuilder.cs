@@ -1,4 +1,5 @@
-﻿using System;
+﻿using sly.buildresult;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -35,28 +36,37 @@ namespace sly.lexer
     public class LexerBuilder
     {
 
-        public static ILexer<T> BuildLexer<T>() where T:struct
+        public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result) where IN:struct
         {
-            Type type = typeof(T);
+           Type type = typeof(IN);
             TypeInfo typeInfo = type.GetTypeInfo();
-            ILexer<T> lexer = new Lexer<T>();
+            ILexer<IN> lexer = new Lexer<IN>();
 
-            var values = Enum.GetValues(typeof(T));
+            var values = Enum.GetValues(typeof(IN));
             
-            var fields = typeof(T).GetFields();
+            var fields = typeof(IN).GetFields();
             foreach(Enum value in values)
             {
-                T tokenID = (T)(object)value; 
+                IN tokenID = (IN)(object)value; 
 
                 LexemeAttribute lexem = value.GetAttributeOfType<LexemeAttribute>();
                 if (lexem != null)
                 {
-                    lexer.AddDefinition(new TokenDefinition<T>(tokenID, lexem.Pattern, lexem.IsSkippable, lexem.IsLineEnding));
+                    lexer.AddDefinition(new TokenDefinition<IN>(tokenID, lexem.Pattern, lexem.IsSkippable, lexem.IsLineEnding));
+                }
+                else
+                {
+                    if (!tokenID.Equals(default(IN)))
+                    {
+                        result.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have"));
+                    }
                 }
                 ;
             }
-            
-            return lexer;
+
+            result.Result = lexer;
+
+            return result;
         }
 
     }

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using sly.parser.syntax;
+using sly.buildresult;
 
 namespace sly.parser.generator
 {
@@ -43,7 +43,7 @@ namespace sly.parser.generator
 
     public class ExpressionRulesGenerator
     {
-        public static ParserConfiguration<IN, OUT> BuildExpressionRules<IN, OUT>(ParserConfiguration<IN, OUT> configuration, Type parserClass) where IN : struct
+        public static BuildResult<ParserConfiguration<IN, OUT>> BuildExpressionRules<IN, OUT>(ParserConfiguration<IN, OUT> configuration, Type parserClass, BuildResult<ParserConfiguration<IN, OUT>> result) where IN : struct
         {
             List<MethodInfo> methods = parserClass.GetMethods().ToList<MethodInfo>();
             methods = methods.Where(m =>
@@ -90,6 +90,7 @@ namespace sly.parser.generator
 
                 if (operandMethod == null)
                 {
+                    result.AddError(new ParserInitializationError(ErrorLevel.FATAL, "missing [operand] attribute"));
                     throw new Exception("missing [operand] attribute");
                 }
                 else
@@ -112,7 +113,8 @@ namespace sly.parser.generator
                 }
 
             }
-            return configuration;
+            result.Result = configuration;
+            return result;
 
         }
 
