@@ -52,13 +52,20 @@ namespace sly.lexer
                 LexemeAttribute lexem = value.GetAttributeOfType<LexemeAttribute>();
                 if (lexem != null)
                 {
-                    lexer.AddDefinition(new TokenDefinition<IN>(tokenID, lexem.Pattern, lexem.IsSkippable, lexem.IsLineEnding));
+                    try
+                    {
+                        lexer.AddDefinition(new TokenDefinition<IN>(tokenID, lexem.Pattern, lexem.IsSkippable, lexem.IsLineEnding));
+                    }
+                    catch(Exception e)
+                    {
+                        result.AddError(new LexerInitializationError(ErrorLevel.ERROR, $"error at lexem {tokenID} : {e.Message}"));
+                    }
                 }
                 else
                 {
                     if (!tokenID.Equals(default(IN)))
                     {
-                        result.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have"));
+                        result.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme definition"));
                     }
                 }
                 ;
