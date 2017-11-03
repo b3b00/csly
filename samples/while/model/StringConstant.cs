@@ -21,6 +21,8 @@ namespace csly.whileLang.model
             Value = value;
         }
 
+        public WhileType Whiletype { get { return WhileType.STRING; } set { } }
+
         public string Dump(string tab)
         {
             return $"{tab}(STRING {Value})";

@@ -78,7 +78,9 @@ namespace csly.whileLang.compiler
         {
             operation.CompilerScope = context.CurrentScope;
             WhileType left = TypeExpression(operation.Left, context);
+            operation.Left.Whiletype = left;
             WhileType right = TypeExpression(operation.Right, context);
+            operation.Right.Whiletype = right;
             WhileType resultType = signatures.CheckBinaryOperationTyping(operation.Operator, left, right);
 
             return resultType;

@@ -14,6 +14,8 @@ namespace csly.whileLang.model
 
         public TokenPosition Position { get; set; }
 
+        public WhileType Whiletype { get; set; }
+
         public Variable(string name)
         {
             Name = name;

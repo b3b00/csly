@@ -20,6 +20,7 @@ namespace csly.whileLang.model
             Value = value;
         }
 
+        public WhileType Whiletype { get { return WhileType.INT; } set { } }
 
         public string Dump(string tab)
         {

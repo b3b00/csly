@@ -14,10 +14,14 @@ namespace csly.whileLang.model
         public Scope CompilerScope { get; set; }
 
         public TokenPosition Position { get; set; }
+
+        public WhileType Whiletype { get { return WhileType.BOOL; } set { } }
+
         public Not(Expression value)
         {
             Value = value;
         }
+
 
         public string Dump(string tab)
         {

@@ -15,10 +15,15 @@ namespace csly.whileLang.model
 
         public Scope CompilerScope { get; set; }
 
+
+        public WhileType Whiletype { get { return WhileType.INT; } set { } }
+
         public IntegerConstant(int value)
         {
             Value = value;
         }
+
+        
 
         public string Dump(string tab)
         {

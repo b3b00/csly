@@ -35,6 +35,7 @@ namespace csly.whileLang.model
         public Scope CompilerScope { get; set; }
 
         public TokenPosition Position { get; set; }
+        public WhileType Whiletype { get; set; }
 
         public BinaryOperation(Expression left, BinaryOperator oper, Expression right)
         {
@@ -78,6 +79,10 @@ namespace csly.whileLang.model
 
         public Emit<Func<int>> EmitByteCode(CompilerContext context, Emit<Func<int>> emiter)
         {
+            if (Operator == BinaryOperator.CONCAT)
+            {
+                return EmitConcat(context, emiter);
+            }
             emiter = Left.EmitByteCode(context,emiter);
             emiter = Right.EmitByteCode(context,emiter);
             switch (Operator)
@@ -122,8 +127,28 @@ namespace csly.whileLang.model
                 case BinaryOperator.GREATER: {
                         emiter = emiter.CompareGreaterThan();
                         break;
-                    }
+                    }               
             }
+            return emiter;
+        }
+
+        private Emit<Func<int>> EmitConcat(CompilerContext context, Emit<Func<int>> emiter)
+        {
+            ExpressionTyper typer = new ExpressionTyper();
+            Left.EmitByteCode(context, emiter);
+            if (Left.Whiletype != WhileType.STRING)
+            {
+                var t = TypeConverter.WhileToType(Left.Whiletype);
+                emiter.Box(t);
+            }
+            Right.EmitByteCode(context, emiter);
+            if (Right.Whiletype != WhileType.STRING)
+            {
+                var t = TypeConverter.WhileToType(Right.Whiletype);
+                emiter.Box(t);
+            }
+            var mi = typeof(string).GetMethod("Concat", new[] { typeof(object), typeof(object) });
+            emiter.Call(mi);
             return emiter;
         }
     }
