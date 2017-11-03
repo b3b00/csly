@@ -45,6 +45,9 @@ namespace csly.whileLang.parser
         [Lexeme("(print)")]
         PRINT = 12,
 
+        [Lexeme("(return)")]
+        RETURN = 13,
+
         #endregion
 
         #region literals 20 -> 29

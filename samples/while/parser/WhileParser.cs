@@ -65,6 +65,12 @@ namespace csly.whileLang.parser
             return new SkipStatement();
         }
 
+        [Production("statementPrim: RETURN WhileParser_expressions")]
+        public WhileAST returnStmt(Token<WhileToken> discard, WhileAST expression)
+        {
+            return new ReturnStatement(expression as Expression);
+        }
+
         [Production("statementPrim: PRINT WhileParser_expressions")]
         public WhileAST skipStmt(Token<WhileToken> discard, WhileAST expression)
         {

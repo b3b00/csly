@@ -5,6 +5,7 @@ using csly.whileLang.parser;
 using csly.whileLang.model;
 using csly.whileLang.interpreter;
 using sly.buildresult;
+using csly.whileLang.compiler;
 
 namespace ParserTests
 {
@@ -284,6 +285,31 @@ namespace ParserTests
 
             ;
         }
+
+
+        [Fact]
+        public void TestFactorialProgramExecAsIL()
+        {
+            string program = @"
+(
+    r:=1;
+    i:=1;
+    while i < 11 do 
+    ( 
+    r := r * i;
+    print "".r;
+    print "".i;
+    i := i + 1 );
+return r
+)";
+            WhileCompiler compiler = new WhileCompiler();
+            var func = compiler.CompileToFunction(program);
+            Assert.NotNull(func);
+            int f = func();
+            Assert.Equal(3628800, f);
+                       ;
+        }
+
 
         public bool CheckIntVariable(InterpreterContext context, string variable, int value)
         {

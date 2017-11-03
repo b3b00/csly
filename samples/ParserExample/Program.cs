@@ -13,6 +13,7 @@ using csly.whileLang.parser;
 using csly.whileLang.model;
 using sly.parser;
 using csly.whileLang.interpreter;
+using csly.whileLang.compiler;
 
 namespace ParserExample
 {
@@ -98,14 +99,19 @@ namespace ParserExample
     i:=1;
     while i < 11 do 
     ("; 
-        program += "print \"r=\".r;\n";
+        program += "\nprint \"r=\".r;\n";
             program += "r := r * i;\n";
             program += "print \"r=\".r;\n";
             program += "print \"i=\".i;\n";
-            program += "i := i + 1 ))";
+            program += "i := i + 1 \n);\n";
+            program += "return r)\n";
             ParseResult<WhileToken, WhileAST> result = Parser.Result.Parse(program);
             Interpreter interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result);
+
+            var compiler = new WhileCompiler();
+            string code = compiler.TranspileToCSharp(program);
+            var f = compiler.CompileToFunction(program);
             ;
         }
 
