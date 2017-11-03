@@ -10,4 +10,7 @@
   <ItemGroup>
     <Folder Include="compiler\" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Sigil" Version="4.7.0" />
+  </ItemGroup>
 </Project>
