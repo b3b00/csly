@@ -79,6 +79,11 @@ namespace jsonparser
                     else if (Char.IsDigit(current))
                     {
                         currentValue += current;
+                        var type = NumIsDouble ? JsonToken.DOUBLE : JsonToken.INT;
+                        if (position == length-1 )
+                        {
+                            NewToken(type);
+                        }
                     }
                     else
                     {

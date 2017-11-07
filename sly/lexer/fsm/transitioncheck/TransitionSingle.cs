@@ -4,16 +4,15 @@ using System.Text;
 
 namespace sly.lexer.fsm.transitioncheck
 {
-   public class TransitionSingle<I> : ITransitionCheck<I> where I : struct, IComparable
+   public class TransitionSingle : ITransitionCheck
     {
-        I TransitionToken;
-        private I token;
+        private char TransitionToken;
 
-        public TransitionSingle(I token) {
+        public TransitionSingle(char token) {
             TransitionToken = token;
         }
 
-        public bool Match(I input)
+        public bool Match(char input)
         {
             return input.Equals(TransitionToken);
         }

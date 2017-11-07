@@ -4,8 +4,8 @@ using System.Text;
 
 namespace sly.lexer.fsm.transitioncheck
 {
-    public interface ITransitionCheck<I> where I : struct, IComparable
+    public interface ITransitionCheck
     {
-        bool Match(I input);
+        bool Match(char input);
     }
 }

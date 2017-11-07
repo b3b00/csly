@@ -13,6 +13,7 @@ namespace sly.lexer.fsm
         internal bool IsEnd { get; set; } = false;
 
         internal bool IsStart { get; set; } = false;
+        public string Mark { get; internal set; }
 
         internal FSMNode(N value)
         {

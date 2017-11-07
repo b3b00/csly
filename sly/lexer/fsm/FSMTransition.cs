@@ -5,9 +5,9 @@ using System.Text;
 
 namespace sly.lexer.fsm
 {
-    public class FSMTransition<I, T> where I : struct, IComparable
+    public class FSMTransition<T> 
     {
-        public ITransitionCheck<I> Check { get; set; }
+        public ITransitionCheck Check { get; set; }
 
         public List<T> TransitionValues { get; set; }
 
@@ -15,7 +15,7 @@ namespace sly.lexer.fsm
 
         public int ToNode;
 
-        internal FSMTransition(ITransitionCheck<I> check, int from ,int to, List<T> values )
+        internal FSMTransition(ITransitionCheck check, int from ,int to, List<T> values )
         {
             Check = check;
             TransitionValues = values;
@@ -23,7 +23,7 @@ namespace sly.lexer.fsm
             ToNode = to;
         }
 
-        internal bool Match(I token)
+        internal bool Match(char token)
         {
             return Check.Match(token);
         }

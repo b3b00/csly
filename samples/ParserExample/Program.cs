@@ -113,8 +113,22 @@ namespace ParserExample
 
         static void testLexerBuilder()
         {
-            var builder = new FSMLexerBuilder<char, JsonToken, JsonToken>();
+            var builder = new FSMLexerBuilder<JsonToken, JsonToken>();
+
+
+            // conf
+            builder.IgnoreWS()
+                .WhiteSpace(' ')
+                .WhiteSpace('\t')
+                .IgnoreEOL()
+                .AggregateEOL()
+                .EOL('\n')
+                .EOL('\r');
+
+            // start machine definition
             builder.Mark("start");
+
+
 
             // string literal
             builder.Transition('\"', JsonToken.STRING)
@@ -122,7 +136,7 @@ namespace ParserExample
                 .ExceptTransitionTo('\"', "in_string", JsonToken.STRING)
                 .Transition('\"', JsonToken.STRING)
                 .End(JsonToken.STRING)
-                .Mark("string_end");
+                .Mark("string_end"); 
 
             // accolades
             builder.GoTo("start")
@@ -154,21 +168,32 @@ namespace ParserExample
 
             //numeric
             builder.GoTo("start")
-                .RangeTransition('0', '9', JsonToken.INT, JsonToken.DOUBLE)
-                .Mark("in_int")
-                .RangeTransitionTo('0', '9', "in_int", JsonToken.INT, JsonToken.DOUBLE)
-                .End(JsonToken.INT)
-                .Transition('.', JsonToken.DOUBLE).
-                Mark("start_double")
-                .RangeTransition('0', '9', JsonToken.INT, JsonToken.INT, JsonToken.DOUBLE)
-                .Mark("in_double")
-                .RangeTransitionTo('0', '9',  "in_double", JsonToken.INT, JsonToken.DOUBLE)
-                .End(JsonToken.DOUBLE);
+            .RangeTransition('0', '9', JsonToken.INT, JsonToken.DOUBLE)
+            .Mark("in_int")
+            .RangeTransitionTo('0', '9', "in_int", JsonToken.INT, JsonToken.DOUBLE)
+            .End(JsonToken.INT)
+            .Transition('.', JsonToken.DOUBLE)
+            .Mark("start_double")
+            .RangeTransition('0', '9', JsonToken.INT, JsonToken.INT, JsonToken.DOUBLE)
+            .Mark("in_double")
+            .RangeTransitionTo('0', '9', "in_double", JsonToken.INT, JsonToken.DOUBLE)
+            .End(JsonToken.DOUBLE);
 
+
+            string code = "{\"d\":42.42,\"i\":42,\"s\":\"quarante-deux\"}";
             var lex = builder.Fsm;
-            var r = lex.Run("1.1".ToList<char>(),0);
+            var r = lex.Run(code,0);
+            while (r.IsSuccess)
+            {
+                Console.WriteLine($"{r.Result.TokenID} : {r.Result.Value}");
+                r = lex.Run(code);
+            }
+            
 
-
+            JSONLexer lexer = new JSONLexer();
+            var jlex = lexer.Tokenize(code).ToList();
+            var t = jlex[0];
+            ;
 
         }
 

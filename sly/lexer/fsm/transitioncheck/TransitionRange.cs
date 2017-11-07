@@ -4,21 +4,21 @@ using System.Text;
 
 namespace sly.lexer.fsm.transitioncheck
 {
-    public class TransitionRange<I> : ITransitionCheck<I> where I: struct, IComparable
+    public class TransitionRange : ITransitionCheck
     {
-        I RangeStart;
+        char RangeStart;
 
-        I RangeEnd;
+        char RangeEnd;
 
-        public TransitionRange(I start, I end)
+        public TransitionRange(char start, char end)
         {
             RangeStart = start;
             RangeEnd = end;
         }
 
-        public bool Match(I input)
+        public bool Match(char input)
         {
-            throw new NotImplementedException();
+            return input.CompareTo(RangeStart) >= 0  && input.CompareTo(RangeEnd) <= 0; 
         }
     }
 }
