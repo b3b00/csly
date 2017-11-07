@@ -136,7 +136,11 @@ namespace ParserExample
                 .ExceptTransitionTo('\"', "in_string", JsonToken.STRING)
                 .Transition('\"', JsonToken.STRING)
                 .End(JsonToken.STRING)
-                .Mark("string_end"); 
+                .Mark("string_end")
+                .CallBack((FSMMatch<JsonToken> match) => {
+                    match.Result.Value = match.Result.Value.ToUpper();
+                    return match;
+            } );
 
             // accolades
             builder.GoTo("start")
@@ -180,20 +184,17 @@ namespace ParserExample
             .End(JsonToken.DOUBLE);
 
 
-            string code = "{\"d\":42.42,\"i\":42,\"s\":\"quarante-deux\"}";
+            string code = "{\"d\" : 42.42 , \"i\" : 42 , \"s\" : \"quarante-deux\" }";
+            //code = File.ReadAllText("test.json");
             var lex = builder.Fsm;
             var r = lex.Run(code,0);
             while (r.IsSuccess)
             {
-                Console.WriteLine($"{r.Result.TokenID} : {r.Result.Value}");
+                Console.WriteLine($"{r.Result.TokenID} : {r.Result.Value} @{r.Result.Position}");
                 r = lex.Run(code);
             }
-            
 
-            JSONLexer lexer = new JSONLexer();
-            var jlex = lexer.Tokenize(code).ToList();
-            var t = jlex[0];
-            ;
+;
 
         }
 

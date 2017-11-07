@@ -37,11 +37,13 @@ namespace sly.lexer.fsm
 
         public List<char> EOLs { get; set; }
 
+        private Dictionary<int, NodeCallback<N>> Callbacks { get; set; }
 
         public FSMLexer()
         {
             Nodes = new Dictionary<int, FSMNode<N>>();
             Transitions = new Dictionary<int, List<FSMTransition<T>>>();
+            Callbacks = new Dictionary<int, NodeCallback<N>>();
             IgnoreWhiteSpace = false;
             IgnoreEOL = false;
             AggregateEOL = false;
@@ -49,6 +51,7 @@ namespace sly.lexer.fsm
             WhiteSpaces = new List<char>();
         }
 
+        
         #region accessors
 
         internal bool HasState(int state)
@@ -65,6 +68,16 @@ namespace sly.lexer.fsm
 
 
         internal int NewNodeId=> Nodes.Count;
+
+
+        internal bool HasCallback(int nodeId)
+        {
+            return Callbacks.ContainsKey(nodeId);            
+        }
+
+        internal void SetCallback(int nodeId, NodeCallback<N> callback) {
+            Callbacks[nodeId] = callback;
+        }
 
 
         #endregion
@@ -129,6 +142,8 @@ namespace sly.lexer.fsm
         #region run
 
         int CurrentPosition = 0;
+        int CurrentColumn = 0;
+        int CurrentLine = 0;
 
 
         public FSMMatch<N> Run(string source)
@@ -142,29 +157,63 @@ namespace sly.lexer.fsm
             var result = new FSMMatch<N>(false);
             Stack<N> successes = new Stack<N>();
             CurrentPosition = start;
+            FSMNode<N> currentNode = Nodes[0];
+            int lastNode = 0;
             if (CurrentPosition < source.Length)
             {
                 char currentToken = source[CurrentPosition];
-                FSMNode<N> currentNode = Nodes[0];
+                
                 while (CurrentPosition < source.Length && currentNode != null)
                 {
                     currentToken = source[CurrentPosition];
-                    currentNode = Move(currentNode, currentToken);
-                    if (currentNode != null)
+
+                    // TODO : if WS && ignoreWS => next column ++
+                    if (IgnoreWhiteSpace && WhiteSpaces.Contains(currentToken))
                     {
-                        value += currentToken;
-                        if (currentNode.IsEnd)
-                        {
-                            successes.Push(currentNode.Value);
-                        }
                         CurrentPosition++;
+                        CurrentColumn++;
+                    }
+                    else
+                    {
+                        if (IgnoreEOL && EOLs.Contains(currentToken))
+                        {
+                            CurrentPosition++;
+                            if (AggregateEOL)
+                            {
+                                CurrentLine++;
+                                while (EOLs.Contains(currentToken))
+                                {
+                                    currentToken = source[CurrentPosition];
+                                    CurrentPosition++;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            currentNode = Move(currentNode, currentToken);
+                            if (currentNode != null)
+                            {
+                                lastNode = currentNode.Id;
+                                value += currentToken;
+                                if (currentNode.IsEnd)
+                                {
+                                    successes.Push(currentNode.Value);
+                                }
+                                CurrentPosition++;
+                                CurrentColumn++;
+                            }
+                        }
                     }
                 }
             }
             
             if (successes.Any())
             {
-                result = new FSMMatch<N>(true, successes.Pop(), value,CurrentPosition); // TODO get line and column
+                result = new FSMMatch<N>(true, successes.Pop(), value,CurrentPosition,CurrentLine,CurrentColumn-value.Length); // TODO get line and column
+                if (HasCallback(lastNode))
+                {
+                    result = Callbacks[lastNode](result);
+                }
             }
             return result;
 

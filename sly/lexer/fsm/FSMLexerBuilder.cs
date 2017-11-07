@@ -6,6 +6,8 @@ using System.Text;
 
 namespace sly.lexer.fsm
 {
+
+    public delegate FSMMatch<N> NodeCallback<N>(FSMMatch<N> node);
     public class FSMLexerBuilder<T, N> 
     {
 
@@ -14,6 +16,8 @@ namespace sly.lexer.fsm
         private int CurrentState;
 
         private Dictionary<string, int> Marks;
+
+        
 
         public FSMLexerBuilder()
         {
@@ -110,6 +114,16 @@ namespace sly.lexer.fsm
                 node.Value = nodeValue;
 
             }
+            return this;
+        }
+
+        public FSMLexerBuilder<T, N> CallBack(NodeCallback<N> callback)
+        {
+            if (Fsm.HasState(CurrentState))
+            {
+                Fsm.SetCallback(CurrentState, callback);
+            }
+
             return this;
         }
 
