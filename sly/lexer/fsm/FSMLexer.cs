@@ -142,12 +142,10 @@ namespace sly.lexer.fsm
             var result = new FSMMatch<N>(false);
             Stack<N> successes = new Stack<N>();
             CurrentPosition = start;
-            // pile de succes
             if (CurrentPosition < source.Length)
             {
                 char currentToken = source[CurrentPosition];
                 FSMNode<N> currentNode = Nodes[0];
-                //currentNode = Move(currentNode,currentToken);
                 while (CurrentPosition < source.Length && currentNode != null)
                 {
                     currentToken = source[CurrentPosition];
@@ -159,23 +157,14 @@ namespace sly.lexer.fsm
                         {
                             successes.Push(currentNode.Value);
                         }
+                        CurrentPosition++;
                     }
-
-                    CurrentPosition++;
                 }
             }
             
             if (successes.Any())
             {
                 result = new FSMMatch<N>(true, successes.Pop(), value,CurrentPosition); // TODO get line and column
-            }
-            if (result.Result.Value == "}")
-            {
-                ;
-            }
-            if (CurrentPosition < source.Length)
-            {
-                CurrentPosition--;
             }
             return result;
 
