@@ -13,6 +13,7 @@ using csly.whileLang.parser;
 using csly.whileLang.model;
 using sly.parser;
 using csly.whileLang.interpreter;
+using sly.lexer.fsm;
 
 namespace ParserExample
 {
@@ -109,6 +110,93 @@ namespace ParserExample
             ;
         }
 
+
+        static void testLexerBuilder()
+        {
+            var builder = new FSMLexerBuilder<char, JsonToken, JsonToken>();
+            builder.Mark("start");
+
+            // string literal
+            builder.Transition('\"', JsonToken.STRING)
+                .Mark("in_string")
+                .ExceptTransitionTo('\"', "in_string", JsonToken.STRING)
+                .Transition('\"', JsonToken.STRING)
+                .End(JsonToken.STRING)
+                .Mark("string_end");
+
+            // accolades
+            builder.GoTo("start")
+                .Transition('{')
+                .End(JsonToken.ACCG);
+
+            builder.GoTo("start")
+                .Transition('}')
+                .End(JsonToken.ACCD);
+
+            // corchets
+            builder.GoTo("start")
+                .Transition('[')
+                .End(JsonToken.CROG);
+
+            builder.GoTo("start")
+                .Transition(']')
+                .End(JsonToken.CROD);
+
+            // 2 points
+            builder.GoTo("start")
+                .Transition(':')
+                .End(JsonToken.COLON);
+
+            // comma
+            builder.GoTo("start")
+                .Transition(',')
+                .End(JsonToken.COMMA);
+
+            //numeric
+            builder.GoTo("start")
+                .RangeTransition('0', '9', JsonToken.INT, JsonToken.DOUBLE)
+                .Mark("in_int")
+                .RangeTransitionTo('0', '9', "in_int", JsonToken.INT, JsonToken.DOUBLE)
+                .End(JsonToken.INT)
+                .Transition('.', JsonToken.DOUBLE).
+                Mark("start_double")
+                .RangeTransition('0', '9', JsonToken.INT, JsonToken.INT, JsonToken.DOUBLE)
+                .Mark("in_double")
+                .RangeTransitionTo('0', '9',  "in_double", JsonToken.INT, JsonToken.DOUBLE)
+                .End(JsonToken.DOUBLE);
+
+            var lex = builder.Fsm;
+            var r = lex.Run("1.1".ToList<char>(),0);
+
+
+
+        }
+
+        static void testJSONLexer()
+        {
+            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
+            var parser = builder.BuildParser(new JSONParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+
+            string source = "{ \"k\" : 1;\"k2\" : 1.1;\"k3\" : null;\"k4\" : false}";
+            source = File.ReadAllText("test.json");
+            JSONLexer lexer = new JSONLexer();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var tokens = lexer.Tokenize(source);
+            sw.Stop();
+            Console.WriteLine($"new lexer {tokens.Count()} tokens in {sw.ElapsedMilliseconds}ms");
+            var sw2 = new Stopwatch();
+            int start = DateTime.Now.Millisecond;
+            sw2.Start();                        
+            tokens = parser.Result.Lexer.Tokenize(source).ToList();
+            sw2.Stop();
+            int end = DateTime.Now.Millisecond;
+            Console.WriteLine($"old lexer {tokens.Count()} tokens in {sw2.ElapsedMilliseconds}ms / {end-start}ms");
+
+
+            ;
+        }
+
         static void Main(string[] args)
         {
 
@@ -130,7 +218,9 @@ namespace ParserExample
             //sw.Stop();
             //milli = sw.ElapsedMilliseconds;
             //Console.WriteLine($"w/ optim : {milli} ms");
-            TestFactorial();
+            //TestFactorial();
+            //testJSONLexer();
+            testLexerBuilder();
 
 
             ;
