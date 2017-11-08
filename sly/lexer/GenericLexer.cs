@@ -58,7 +58,10 @@ namespace sly.lexer
             // string literal
             FSMBuilder.Transition('\"', GenericToken.String)
                 .Mark(in_string)
-                .ExceptTransitionTo('\"', in_string, GenericToken.String)
+                .ExceptTransitionTo(new char[] { '\"', '\\' }, "in_string", GenericToken.String)
+                .Transition('\\', GenericToken.String)
+                .Mark("escape")
+                .AnyTransitionTo(' ', "in_string", GenericToken.String)
                 .Transition('\"', GenericToken.String)
                 .End(GenericToken.String)
                 .Mark(string_end)

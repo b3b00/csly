@@ -158,10 +158,40 @@ namespace sly.lexer.fsm
         {
             string value = "";
             var result = new FSMMatch<N>(false);
-            Stack<N> successes = new Stack<N>();
+            var successes = new Stack<FSMMatch<N>>();
             CurrentPosition = start;
             FSMNode<N> currentNode = Nodes[0];
             int lastNode = 0;
+
+            bool tokenStarted = false;
+            int tokenPosition = 0;
+            int tokenColumn = 0;
+            int tokenLine = 0;
+
+
+            // TODO : compute current line & column at CurrentPosition
+            string passed = source.Substring(0, CurrentPosition);
+            var lines = passed.Split(new string[] { EOL }, StringSplitOptions.RemoveEmptyEntries);
+            CurrentLine = lines.Length;
+            if (passed.StartsWith("\"i\""))
+            {
+                ;
+            }
+            if (lines.Any())
+            {
+                string lastLine = lines[lines.Length - 1];
+                if (passed.EndsWith(EOL))
+                {
+                    CurrentColumn = 0;
+                }
+                else
+                {
+                    CurrentLine--;
+                    CurrentColumn = lastLine.Length;
+                }
+            }
+
+
             if (CurrentPosition < source.Length)
             {
                 char currentToken = source[CurrentPosition];
@@ -193,12 +223,21 @@ namespace sly.lexer.fsm
                             {
                                 lastNode = currentNode.Id;
                                 value += currentToken;
+                                if (!tokenStarted)
+                                {
+                                    tokenStarted = true;
+                                    tokenPosition = CurrentPosition;
+                                    tokenColumn = CurrentColumn;
+                                    tokenLine = CurrentLine;
+                                }
                                 if (currentNode.IsEnd)
                                 {
-                                    successes.Push(currentNode.Value);
+                                    var resultInter = new FSMMatch<N>(true, currentNode.Value, value, tokenPosition, tokenLine, tokenColumn);
+                                    successes.Push(resultInter);                                   
+                                    //successes.Push((CurrentPosition,CurrentLine, CurrentColumn, currentNode.Value));
                                 }
                                 CurrentPosition++;
-                                CurrentColumn++;
+                                CurrentColumn+= value.Length ;
                             }
                         }
                     }
@@ -207,7 +246,7 @@ namespace sly.lexer.fsm
             
             if (successes.Any())
             {
-                result = new FSMMatch<N>(true, successes.Pop(), value,CurrentPosition,CurrentLine,CurrentColumn-value.Length); // TODO get line and column
+                result = successes.Pop(); // TODO get line and column
                 if (HasCallback(lastNode))
                 {
                     result = Callbacks[lastNode](result);

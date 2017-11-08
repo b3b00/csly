@@ -131,7 +131,10 @@ namespace ParserExample
             // string literal
             builder.Transition('\"', JsonToken.STRING)
                 .Mark("in_string")
-                .ExceptTransitionTo('\"', "in_string", JsonToken.STRING)
+                .ExceptTransitionTo(new char[] { '\"', '\\' }, "in_string", JsonToken.STRING)
+                .Transition('\\',JsonToken.STRING)
+                .Mark("escape")
+                .AnyTransitionTo(' ',"in_string",JsonToken.STRING)
                 .Transition('\"', JsonToken.STRING)
                 .End(JsonToken.STRING)
                 .Mark("string_end")
@@ -182,15 +185,19 @@ namespace ParserExample
             .End(JsonToken.DOUBLE);
 
 
-            string code = "{\n\"d\" : 42.42 ,\n\"i\" : 42 ,\n\"s\" : \"quarante-deux\"\n}";
+            string code = "{\n\"d\" : 42.42 ,\n\"i\" : 42 ,\n\"s\" : \"quarante-deux\",\n\"s2\":\"a\\\"b\"\n}";
             //code = File.ReadAllText("test.json");
             var lex = builder.Fsm;
             var r = lex.Run(code,0);
+            string total = "";
             while (r.IsSuccess)
             {
-                Console.WriteLine($"{r.Result.TokenID} : {r.Result.Value} @{r.Result.Position}");
+                string msg = $"{r.Result.TokenID} : {r.Result.Value} @{r.Result.Position}";
+                total += msg + "\n";
+                Console.WriteLine(msg);
                 r = lex.Run(code);
             }
+
 
 ;
 

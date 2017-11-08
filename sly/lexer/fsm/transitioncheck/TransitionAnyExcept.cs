@@ -6,16 +6,17 @@ namespace sly.lexer.fsm.transitioncheck
 {
     public class TransitionAnyExcept : ITransitionCheck
     {
-        char TokenException;
+        List<char> TokenExceptions;
 
-        public TransitionAnyExcept(char token)
+        public TransitionAnyExcept(params char[] tokens)
         {
-            TokenException = token;
+            TokenExceptions = new List<char>();
+            TokenExceptions.AddRange(tokens);
         }
 
         public bool Match(char input)
         {
-            return !input.Equals(TokenException);
+            return !TokenExceptions.Contains(input);
         }
     }
 }
