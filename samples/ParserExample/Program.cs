@@ -213,6 +213,9 @@ namespace ParserExample
             generic.AddSugarLexem(JsonToken.CROD, "]");
             generic.AddSugarLexem(JsonToken.COMMA, ",");
             generic.AddSugarLexem(JsonToken.COLON, ":");
+            generic.AddLexeme(GenericToken.String, JsonToken.STRING);
+            generic.AddLexeme(GenericToken.Double, JsonToken.DOUBLE);
+            generic.AddLexeme(GenericToken.Int, JsonToken.INT);
             string json = "{\n\"hello\":\"world\",\n\"int\":42,\n\"double\":42.42,\n\"bool\":true,\n\"null\":null\n}";
             var t = generic.Tokenize(json).ToList();
             Console.WriteLine($"{t.Count}");

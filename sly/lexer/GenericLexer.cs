@@ -49,7 +49,7 @@ namespace sly.lexer
                 .WhiteSpace(' ')
                 .WhiteSpace('\t')
                 .IgnoreEOL()
-                .UseEnvironmentEOL();
+                .UseNixEOL();
 
             // start machine definition
             FSMBuilder.Mark(start);
@@ -65,12 +65,7 @@ namespace sly.lexer
                 .AnyTransitionTo(' ', "in_string", GenericToken.String)
                 .Transition('\"', GenericToken.String)
                 .End(GenericToken.String)
-                .Mark(string_end)
-                .CallBack((FSMMatch<GenericToken> match) =>
-                {
-                    match.Result.Value = match.Result.Value.ToUpper();
-                    return match;
-                });
+                .Mark(string_end);
 
             // identifier
             FSMBuilder.GoTo(start).
@@ -102,6 +97,36 @@ namespace sly.lexer
             LexerFsm = FSMBuilder.Fsm;
         }
 
+
+        public void AddLexeme(GenericToken generic, IN token)
+        {
+            NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
+            {
+                match.Properties[DerivedToken] = token;
+                return match;
+            };
+
+            switch(generic)
+            {
+                case GenericToken.String:
+                    {
+                        FSMBuilder.GoTo(string_end);
+                        break;
+                    }
+                case GenericToken.Double:
+                    {
+                        FSMBuilder.GoTo(in_double);
+                        break;
+                    }
+                case GenericToken.Int:
+                    {
+                        FSMBuilder.GoTo(in_int);
+                        break;
+                    }
+            }
+
+            FSMBuilder.CallBack(callback);
+        }
 
         public void AddLexeme(GenericToken genericToken, IN token, string specialValue)
         {
@@ -171,14 +196,16 @@ namespace sly.lexer
 
         public IEnumerable<Token<IN>> Tokenize(string source)
         {
+            List<Token<IN>> tokens = new List<Token<IN>>();
             var r = LexerFsm.Run(source, 0);
             while (r.IsSuccess)
             {
-                yield return Transcode(r);// r.Result;
+                tokens.Add(Transcode(r));// r.Result;
                 //Console.WriteLine($"{r.Result.TokenID} : {r.Result.Value} @{r.Result.Position}");
                 r = LexerFsm.Run(source);
                 
             }
+            return tokens;
 
         }
 
