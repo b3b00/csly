@@ -195,55 +195,63 @@ namespace sly.lexer.fsm
             if (CurrentPosition < source.Length)
             {
                 char currentToken = source[CurrentPosition];
-                
+
                 while (CurrentPosition < source.Length && currentNode != null)
                 {
                     currentToken = source[CurrentPosition];
 
-                    // TODO : if WS && ignoreWS => next column ++
-                    if (IgnoreWhiteSpace && WhiteSpaces.Contains(currentToken))
+                    bool consumeSkipped = true;
+
+                    while (consumeSkipped)
                     {
-                        CurrentPosition++;
-                        CurrentColumn++;
-                    }
-                    else
-                    {
-                        string subSource = source.Substring(Math.Max(CurrentPosition,0));
-                        if (IgnoreEOL && subSource.StartsWith(EOL))
+                        // TODO : if WS && ignoreWS => next column ++
+                        if (IgnoreWhiteSpace && WhiteSpaces.Contains(currentToken))
                         {
-                            CurrentPosition += EOL.Length;
-                            CurrentColumn = 0;
-                            CurrentLine++;
-                            
+                            CurrentPosition++;
+                            CurrentColumn++;
                         }
                         else
                         {
-                            currentNode = Move(currentNode, currentToken);
-                            if (currentNode != null)
+                            string subSource = source.Substring(Math.Max(CurrentPosition, 0));
+                            if (IgnoreEOL && subSource.StartsWith(EOL))
                             {
-                                lastNode = currentNode.Id;
-                                value += currentToken;
-                                if (!tokenStarted)
-                                {
-                                    tokenStarted = true;
-                                    tokenPosition = CurrentPosition;
-                                    tokenColumn = CurrentColumn;
-                                    tokenLine = CurrentLine;
-                                }
-                                if (currentNode.IsEnd)
-                                {
-                                    var resultInter = new FSMMatch<N>(true, currentNode.Value, value, tokenPosition, tokenLine, tokenColumn);
-                                    successes.Push(resultInter);                                   
-                                    //successes.Push((CurrentPosition,CurrentLine, CurrentColumn, currentNode.Value));
-                                }
-                                CurrentPosition++;
-                                CurrentColumn+= value.Length ;
+                                CurrentPosition += EOL.Length;
+                                CurrentColumn = 0;
+                                CurrentLine++;
+                            }
+                            else
+                            {
+                                consumeSkipped = false;
                             }
                         }
                     }
+
+                    currentNode = Move(currentNode, currentToken);
+                    if (currentNode != null)
+                    {
+                        lastNode = currentNode.Id;
+                        value += currentToken;
+                        if (!tokenStarted)
+                        {
+                            tokenStarted = true;
+                            tokenPosition = CurrentPosition;
+                            tokenColumn = CurrentColumn;
+                            tokenLine = CurrentLine;
+                        }
+                        if (currentNode.IsEnd)
+                        {
+                            var resultInter = new FSMMatch<N>(true, currentNode.Value, value, tokenPosition, tokenLine, tokenColumn);
+                            successes.Push(resultInter);
+                            //successes.Push((CurrentPosition,CurrentLine, CurrentColumn, currentNode.Value));
+                        }
+                        CurrentPosition++;
+                        CurrentColumn += value.Length;
+                    }
+
                 }
             }
-            
+
+
             if (successes.Any())
             {
                 result = successes.Pop(); // TODO get line and column
@@ -282,6 +290,8 @@ namespace sly.lexer.fsm
             }
             return next;
         }
+
+
 
         #endregion
 
