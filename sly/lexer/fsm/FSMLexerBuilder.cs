@@ -7,7 +7,7 @@ using System.Text;
 namespace sly.lexer.fsm
 {
 
-    public delegate FSMMatch<N> NodeCallback<N>(FSMMatch<N> node);
+    public delegate FSMMatch<IN> NodeCallback<IN>(FSMMatch<IN> node);
     public class FSMLexerBuilder<T, N> 
     {
 
@@ -18,6 +18,8 @@ namespace sly.lexer.fsm
         private Dictionary<string, int> Marks;
 
         
+
+
 
         public FSMLexerBuilder()
         {
@@ -63,6 +65,20 @@ namespace sly.lexer.fsm
             return this;
         }
 
+        public FSMNode<N> GetNode(int nodeId)
+        {
+            return Fsm.GetNode(nodeId);
+        }
+
+        public FSMNode<N> GetNode(string mark)
+        {
+            FSMNode<N> node = null;
+            if (Marks.ContainsKey(mark))
+            {
+                node = GetNode(Marks[mark]);
+            }
+            return node;
+        }
         #endregion
 
         #region special chars
@@ -79,11 +95,24 @@ namespace sly.lexer.fsm
             return this;
         }
 
-        public FSMLexerBuilder<T, N> AggregateEOL()
+        public FSMLexerBuilder<T, N> UseEnvironmentEOL()
         {
-            Fsm.AggregateEOL = true;
+            Fsm.EOL = Environment.NewLine;
             return this;
         }
+
+        public FSMLexerBuilder<T, N> UseWindowsEOL()
+        {
+            Fsm.EOL = "\r\n";
+            return this;
+        }
+
+        public FSMLexerBuilder<T, N> UseNixEOL()
+        {
+            Fsm.EOL = "\n";
+            return this;
+        }
+
 
         public FSMLexerBuilder<T, N> WhiteSpace(char spacechar)
         {
@@ -91,11 +120,7 @@ namespace sly.lexer.fsm
             return this;
         }
 
-        public FSMLexerBuilder<T, N> EOL(char newlinechar)
-        {
-            Fsm.EOLs.Add(newlinechar);
-            return this;
-        }
+        
 
 
         #endregion

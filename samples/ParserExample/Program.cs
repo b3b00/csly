@@ -121,9 +121,7 @@ namespace ParserExample
                 .WhiteSpace(' ')
                 .WhiteSpace('\t')
                 .IgnoreEOL()
-                .AggregateEOL()
-                .EOL('\n')
-                .EOL('\r');
+                .UseNixEOL();
 
             // start machine definition
             builder.Mark("start");
@@ -184,7 +182,7 @@ namespace ParserExample
             .End(JsonToken.DOUBLE);
 
 
-            string code = "{\"d\" : 42.42 , \"i\" : 42 , \"s\" : \"quarante-deux\" }";
+            string code = "{\n\"d\" : 42.42 ,\n\"i\" : 42 ,\n\"s\" : \"quarante-deux\"\n}";
             //code = File.ReadAllText("test.json");
             var lex = builder.Fsm;
             var r = lex.Run(code,0);

@@ -9,12 +9,15 @@ namespace sly.lexer.fsm
     public class FSMMatch<N>
     {
 
+        public Dictionary<string,object> Properties { get; set; }
+
         public bool IsSuccess { get; set; }
 
         public Token<N> Result { get; set; }
         
         public FSMMatch(bool success, N result = default(N), string value = null, int position = 0, int line = 0, int column = 0)
         {
+            Properties = new Dictionary<string, object>();
             IsSuccess = success;
             Result = new Token<N>(result,value,new TokenPosition(position,line,column));
         }
@@ -35,7 +38,7 @@ namespace sly.lexer.fsm
 
         public bool  AggregateEOL { get; set; }
 
-        public List<char> EOLs { get; set; }
+        public string EOL { get; set; }
 
         private Dictionary<int, NodeCallback<N>> Callbacks { get; set; }
 
@@ -47,7 +50,7 @@ namespace sly.lexer.fsm
             IgnoreWhiteSpace = false;
             IgnoreEOL = false;
             AggregateEOL = false;
-            EOLs = new List<char>();
+            EOL = "";
             WhiteSpaces = new List<char>();
         }
 
@@ -175,18 +178,13 @@ namespace sly.lexer.fsm
                     }
                     else
                     {
-                        if (IgnoreEOL && EOLs.Contains(currentToken))
+                        string subSource = source.Substring(Math.Max(CurrentPosition,0));
+                        if (IgnoreEOL && subSource.StartsWith(EOL))
                         {
-                            CurrentPosition++;
-                            if (AggregateEOL)
-                            {
-                                CurrentLine++;
-                                while (EOLs.Contains(currentToken))
-                                {
-                                    currentToken = source[CurrentPosition];
-                                    CurrentPosition++;
-                                }
-                            }
+                            CurrentPosition += EOL.Length;
+                            CurrentColumn = 0;
+                            CurrentLine++;
+                            
                         }
                         else
                         {
