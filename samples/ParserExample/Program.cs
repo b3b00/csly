@@ -198,9 +198,24 @@ namespace ParserExample
                 r = lex.Run(code);
             }
 
+            
+        }
 
-;
-
+        static void testGenericLexer()
+        {
+            GenericLexer<JsonToken> generic = new GenericLexer<JsonToken>();
+            generic.AddKeyWord(JsonToken.BOOLEAN, "true");
+            generic.AddKeyWord(JsonToken.BOOLEAN, "false");
+            generic.AddKeyWord(JsonToken.NULL, "null");
+            generic.AddSugarLexem(JsonToken.ACCG, "{");
+            generic.AddSugarLexem(JsonToken.ACCD, "}");
+            generic.AddSugarLexem(JsonToken.CROG, "[");
+            generic.AddSugarLexem(JsonToken.CROD, "]");
+            generic.AddSugarLexem(JsonToken.COMMA, ",");
+            generic.AddSugarLexem(JsonToken.COLON, ":");
+            string json = "{\n\"hello\":\"world\",\n\"int\":42,\n\"double\":42.42,\n\"bool\":true,\n\"null\":null\n}";
+            var t = generic.Tokenize(json).ToList();
+            Console.WriteLine($"{t.Count}");
         }
 
         static void testJSONLexer()
@@ -251,7 +266,8 @@ namespace ParserExample
             //Console.WriteLine($"w/ optim : {milli} ms");
             //TestFactorial();
             //testJSONLexer();
-            testLexerBuilder();
+            //testLexerBuilder();
+            testGenericLexer();
 
 
             ;

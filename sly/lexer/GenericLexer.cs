@@ -6,7 +6,7 @@ using System.Text;
 namespace sly.lexer
 {
 
-    enum GenericToken
+    public enum GenericToken
     {
         Identifier,
         Int,
@@ -16,7 +16,7 @@ namespace sly.lexer
         SugarToken
     }
 
-    class GenericLexer<IN> : ILexer<IN> where IN : struct
+    public class GenericLexer<IN> : ILexer<IN> where IN : struct
     {
         private const string in_string = "in_string";
         private const string string_end = "string_end";
@@ -25,7 +25,8 @@ namespace sly.lexer
         private const string start_double = "start_double";
         private const string in_double = "in_double";
         private const string in_identifier = "in_identifier";
-        private const string token_properties = "token";
+        private const string token_property = "token";
+        public const string DerivedToken = "derivedToken";
         private FSMLexer<GenericToken, GenericToken> LexerFsm;
 
         private Dictionary<GenericToken, Dictionary<string, IN>> derivedTokens;
@@ -130,7 +131,7 @@ namespace sly.lexer
                     Dictionary<string, IN> derived = derivedTokens[GenericToken.Identifier];
                     if (derived.ContainsKey(keyword))
                     {
-                        match.Properties[token_properties] = token;
+                        match.Properties[token_property] = token;
                     }
                 }
                 return match;
@@ -151,7 +152,7 @@ namespace sly.lexer
         {
             NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
             {
-                match.Properties["derivedToken"] = token;
+                match.Properties[DerivedToken] = token;
                 return match;
             };
 
@@ -173,11 +174,21 @@ namespace sly.lexer
             var r = LexerFsm.Run(source, 0);
             while (r.IsSuccess)
             {
+                yield return Transcode(r);// r.Result;
                 //Console.WriteLine($"{r.Result.TokenID} : {r.Result.Value} @{r.Result.Position}");
                 r = LexerFsm.Run(source);
-                yield return null;// r.Result;
+                
             }
 
+        }
+
+        public Token<IN> Transcode(FSMMatch<GenericToken> match)
+        {
+            var tok = new Token<IN>();
+            tok.Value = match.Result.Value;
+            tok.Position = match.Result.Position;
+            tok.TokenID = (IN)match.Properties[DerivedToken];
+            return tok;
         }
     }
 }
