@@ -150,10 +150,7 @@ namespace sly.lexer.fsm
             return node;
         }
 
-        public void Prepare()
-        {
-            // TODO ranger les transitions dans 1 ou des dictionnaires
-        }
+        
 
         #endregion
 
@@ -185,7 +182,6 @@ namespace sly.lexer.fsm
             int tokenLine = 0;
 
 
-            // TODO : compute current line & column at CurrentPosition
             string passed = source.Substring(0, CurrentPosition);
             var lines = passed.Split(new string[] { EOL }, StringSplitOptions.RemoveEmptyEntries);
             CurrentLine = lines.Length;
@@ -212,6 +208,7 @@ namespace sly.lexer.fsm
             {
                 char currentToken = source[CurrentPosition];
 
+
                 while (CurrentPosition < source.Length && currentNode != null)
                 {
                     currentToken = source[CurrentPosition];
@@ -221,9 +218,16 @@ namespace sly.lexer.fsm
                     while (consumeSkipped)
                     {
                         currentToken = source[CurrentPosition];
-                        // TODO : if WS && ignoreWS => next column ++
                         if (IgnoreWhiteSpace && WhiteSpaces.Contains(currentToken))
                         {
+                            if (successes.Any())
+                            {
+                                currentNode = null;
+                            }
+                            else
+                            {
+                                currentNode = Nodes[0];
+                            }
                             CurrentPosition++;
                             CurrentColumn++;
                         }
@@ -232,6 +236,14 @@ namespace sly.lexer.fsm
                             string subSource = source.Substring(Math.Max(CurrentPosition, 0));
                             if (IgnoreEOL && subSource.StartsWith(EOL))
                             {
+                                if (successes.Any())
+                                {
+                                    currentNode = null;
+                                }
+                                else
+                                {
+                                    currentNode = Nodes[0];
+                                }
                                 CurrentPosition += EOL.Length;
                                 CurrentColumn = 0;
                                 CurrentLine++;
@@ -258,7 +270,7 @@ namespace sly.lexer.fsm
                         if (currentNode.IsEnd)
                         {
                             var resultInter = new FSMMatch<N>(true, currentNode.Value, value, tokenPosition, tokenLine, tokenColumn);
-                            successes.Push(resultInter);
+                            successes.Push(resultInter);                            
                             //successes.Push((CurrentPosition,CurrentLine, CurrentColumn, currentNode.Value));
                         }
                         CurrentPosition++;
@@ -271,7 +283,7 @@ namespace sly.lexer.fsm
 
             if (successes.Any())
             {
-                result = successes.Pop(); // TODO get line and column
+                result = successes.Pop(); 
                 if (HasCallback(lastNode))
                 {
                     result = Callbacks[lastNode](result);
@@ -284,24 +296,27 @@ namespace sly.lexer.fsm
         protected FSMNode<N> Move(FSMNode<N> from, char token)
         {
             FSMNode<N> next = null;
-            if (Transitions.ContainsKey(from.Id))
-            {
-                var transitions = Transitions[from.Id];
-                if (transitions.Any())
+            if (from != null)
+            {               
+                if (Transitions.ContainsKey(from.Id))
                 {
-                    int i = 0;
-                    bool match = false;
-                    var transition = transitions[i];
-                    match = transition.Match(token);
-                    while (i < transitions.Count && !match)
-                    {       
-                        transition = transitions[i];                        
-                        match = transition.Match(token);
-                        i++;
-                    }
-                    if (match)
+                    var transitions = Transitions[from.Id];
+                    if (transitions.Any())
                     {
-                        next = Nodes[transition.ToNode];
+                        int i = 0;
+                        bool match = false;
+                        var transition = transitions[i];
+                        match = transition.Match(token);
+                        while (i < transitions.Count && !match)
+                        {
+                            transition = transitions[i];
+                            match = transition.Match(token);
+                            i++;
+                        }
+                        if (match)
+                        {
+                            next = Nodes[transition.ToNode];
+                        }
                     }
                 }
             }

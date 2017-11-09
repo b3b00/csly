@@ -182,7 +182,7 @@ namespace sly.lexer.fsm
         {
             return RangeTransitionTo(start, end, Fsm.NewNodeId, transitionData);
         }
-
+        
         public FSMLexerBuilder<T, N> ExceptTransition(char[] exceptions, params T[] transitionData)
         {
             return ExceptTransitionTo(exceptions, Fsm.NewNodeId, transitionData);
