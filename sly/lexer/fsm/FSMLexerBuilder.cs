@@ -157,6 +157,21 @@ namespace sly.lexer.fsm
 
         #region TRANSITIONS
 
+
+        public FSMLexerBuilder<T, N> SafeTransition(char input, params T[] transitionData)
+        {            
+            var transition = Fsm.GetTransition(CurrentState, input);
+            if (transition != null)
+            {
+                transition.TransitionValues.AddRange(transitionData);
+                CurrentState = transition.ToNode;
+            }
+            else {
+                return TransitionTo(input, Fsm.NewNodeId, transitionData);
+            }
+            return this;
+        }
+
         public FSMLexerBuilder<T,N> Transition(char input, params T[] transitionData)
         {            
             return TransitionTo(input, Fsm.NewNodeId, transitionData);

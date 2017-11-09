@@ -182,7 +182,10 @@ namespace sly.lexer
             };
 
             FSMBuilder.GoTo(start);
-            FSMBuilder.Transition(specialValue[0], GenericToken.SugarToken);
+            for (int i = 0; i < specialValue.Length; i++)
+            {
+                FSMBuilder.SafeTransition(specialValue[i], GenericToken.SugarToken);                
+            }
             FSMBuilder.End(GenericToken.SugarToken)
                 .CallBack(callback);
 
