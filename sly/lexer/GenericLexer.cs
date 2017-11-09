@@ -16,6 +16,13 @@ namespace sly.lexer
         SugarToken
     }
 
+    public enum EOLType
+    {
+        Windows,
+        Nix,
+        Environment
+    }
+
     public class GenericLexer<IN> : ILexer<IN> where IN : struct
     {
         private const string in_string = "in_string";
@@ -30,16 +37,17 @@ namespace sly.lexer
         private FSMLexer<GenericToken, GenericToken> LexerFsm;
 
         private Dictionary<GenericToken, Dictionary<string, IN>> derivedTokens;
+        private IN identifierDerivedToken;
         private FSMLexerBuilder<GenericToken, GenericToken> FSMBuilder;
 
 
-        public GenericLexer()
+        public GenericLexer(EOLType eolType)
         {
-            InitializeStaticLexer();
+            InitializeStaticLexer(eolType);
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
         }
 
-        private void InitializeStaticLexer()
+        private void InitializeStaticLexer(EOLType eolType)
         {
             FSMBuilder = new FSMLexerBuilder<GenericToken, GenericToken>();
 
@@ -48,8 +56,26 @@ namespace sly.lexer
             FSMBuilder.IgnoreWS()
                 .WhiteSpace(' ')
                 .WhiteSpace('\t')
-                .IgnoreEOL()
-                .UseNixEOL();
+                .IgnoreEOL();
+            switch (eolType)
+            {
+                case EOLType.Windows:
+                    {
+                        FSMBuilder.UseWindowsEOL();
+                        break;
+                    }
+                case EOLType.Nix:
+                    {
+                        FSMBuilder.UseNixEOL();
+                        break;
+                    }
+                case EOLType.Environment:
+                    {
+                        FSMBuilder.UseEnvironmentEOL();
+                        break;
+                    }
+            }
+
 
             // start machine definition
             FSMBuilder.Mark(start);
@@ -70,12 +96,13 @@ namespace sly.lexer
             // identifier
             FSMBuilder.GoTo(start).
             RangeTransition('a', 'z', GenericToken.Identifier).
-            Mark(in_identifier);
+            Mark(in_identifier)
+            .End(GenericToken.Identifier);
 
             FSMBuilder.GoTo(start).
             RangeTransitionTo('A', 'Z', in_identifier, GenericToken.Identifier, GenericToken.Identifier).
-            RangeTransition('a', 'z', GenericToken.Identifier).
-            RangeTransition('A', 'Z', GenericToken.Identifier).
+            RangeTransitionTo('a', 'z', in_identifier,GenericToken.Identifier).
+            RangeTransitionTo('A', 'Z', in_identifier, GenericToken.Identifier).
             End(GenericToken.Identifier);
 
 
@@ -100,13 +127,26 @@ namespace sly.lexer
 
         public void AddLexeme(GenericToken generic, IN token)
         {
+            if (generic == GenericToken.Identifier)
+            {
+                identifierDerivedToken = token;
+            }
+
             NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
             {
-                match.Properties[DerivedToken] = token;
+                if (match.Result.TokenID == GenericToken.Identifier)
+                {
+                    match.Properties[DerivedToken] = identifierDerivedToken;
+                }
+                else
+                {
+                    match.Properties[DerivedToken] = token;
+                }
+
                 return match;
             };
 
-            switch(generic)
+            switch (generic)
             {
                 case GenericToken.String:
                     {
@@ -123,9 +163,15 @@ namespace sly.lexer
                         FSMBuilder.GoTo(in_int);
                         break;
                     }
+                case GenericToken.Identifier:
+                    {
+                        FSMBuilder.GoTo(in_identifier);
+                        break;
+                    }
             }
 
             FSMBuilder.CallBack(callback);
+
         }
 
         public void AddLexeme(GenericToken genericToken, IN token, string specialValue)

@@ -201,9 +201,9 @@ namespace ParserExample
             
         }
 
-        static void testGenericLexer()
+        static void testGenericLexerJSON()
         {
-            GenericLexer<JsonToken> generic = new GenericLexer<JsonToken>();
+            GenericLexer<JsonToken> generic = new GenericLexer<JsonToken>(EOLType.Nix);
             generic.AddKeyWord(JsonToken.BOOLEAN, "true");
             generic.AddKeyWord(JsonToken.BOOLEAN, "false");
             generic.AddKeyWord(JsonToken.NULL, "null");
@@ -217,8 +217,71 @@ namespace ParserExample
             generic.AddLexeme(GenericToken.Double, JsonToken.DOUBLE);
             generic.AddLexeme(GenericToken.Int, JsonToken.INT);
             string json = "{\n\"hello\":\"world\",\n\"int\":42,\n\"double\":42.42,\n\"bool\":true,\n\"null\":null\n}";
+            json = File.ReadAllText("test.json");
+            var sw = new Stopwatch();
+            sw.Start();
             var t = generic.Tokenize(json).ToList();
-            Console.WriteLine($"{t.Count}");
+            sw.Stop();
+            Console.WriteLine($"generic found <{t.Count}> : {sw.ElapsedMilliseconds} ms");
+        }
+
+        static void testGenericLexerWhile()
+        {
+            GenericLexer<WhileToken> generic = new GenericLexer<WhileToken>(EOLType.Environment);            
+            generic.AddKeyWord(WhileToken.TRUE, "true");
+            generic.AddKeyWord(WhileToken.FALSE, "false");
+            generic.AddKeyWord(WhileToken.IF, "if");
+            generic.AddKeyWord(WhileToken.THEN, "then");
+            generic.AddKeyWord(WhileToken.ELSE, "else");
+            generic.AddKeyWord(WhileToken.WHILE, "while");
+            generic.AddKeyWord(WhileToken.DO, "do");
+            generic.AddKeyWord(WhileToken.PRINT, "print");
+            generic.AddSugarLexem(WhileToken.ASSIGN, "=");
+            generic.AddSugarLexem(WhileToken.EQUALS, "==");
+            generic.AddSugarLexem(WhileToken.LPAREN, "(");
+            generic.AddSugarLexem(WhileToken.RPAREN, ")");
+            generic.AddSugarLexem(WhileToken.SEMICOLON, ";");
+
+            generic.AddSugarLexem(WhileToken.DIFFERENT, "!=");
+            generic.AddSugarLexem(WhileToken.GREATER, ">");
+            generic.AddSugarLexem(WhileToken.LESSER, "<");
+            generic.AddSugarLexem(WhileToken.OR, "||");
+            generic.AddSugarLexem(WhileToken.AND, "&&");
+            generic.AddSugarLexem(WhileToken.MINUS, "-");
+            generic.AddSugarLexem(WhileToken.PLUS, "+");
+            generic.AddSugarLexem(WhileToken.TIMES, "*");
+            generic.AddSugarLexem(WhileToken.DIVIDE, "/");
+            generic.AddSugarLexem(WhileToken.NOT, "!");
+
+
+            generic.AddLexeme(GenericToken.Identifier, WhileToken.IDENTIFIER);
+            generic.AddLexeme(GenericToken.String, WhileToken.STRING);
+            generic.AddLexeme(GenericToken.Int, WhileToken.INT);            
+            string source = "( a = 1 ; a == 2 )";
+
+            var sw = new Stopwatch();
+            //sw.Start();
+            //var t = generic.Tokenize(source).ToList();
+            //sw.Stop();
+            //Console.WriteLine($"generic found <{t.Count}> : {sw.ElapsedMilliseconds} ms");
+            ;
+            source = @"
+(
+    r=1;
+    i=1;
+    while i < 11 do 
+    ( 
+    r = r * i;
+    print r;
+    print i;
+    i = i + 1 )
+)";
+            sw.Reset();
+            sw.Start();
+            var t = generic.Tokenize(source).ToList();
+            sw.Stop();
+            Console.WriteLine($"generic found <{t.Count}> : {sw.ElapsedMilliseconds} ms");
+            ;
         }
 
         static void testJSONLexer()
@@ -233,7 +296,7 @@ namespace ParserExample
             sw.Start();
             var tokens = lexer.Tokenize(source);
             sw.Stop();
-            Console.WriteLine($"new lexer {tokens.Count()} tokens in {sw.ElapsedMilliseconds}ms");
+            Console.WriteLine($"hard coded lexer {tokens.Count()} tokens in {sw.ElapsedMilliseconds}ms");
             var sw2 = new Stopwatch();
             int start = DateTime.Now.Millisecond;
             sw2.Start();                        
@@ -268,13 +331,19 @@ namespace ParserExample
             //milli = sw.ElapsedMilliseconds;
             //Console.WriteLine($"w/ optim : {milli} ms");
             //TestFactorial();
-            //testJSONLexer();
             //testLexerBuilder();
-            testGenericLexer();
 
+
+            //testJSONLexer();
+            //testGenericLexerJSON();
+
+            testGenericLexerWhile();
+            Console.WriteLine("so what ?");
 
             ;
 
         }
     }
 }
+
+
