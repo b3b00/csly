@@ -93,6 +93,22 @@ namespace sly.lexer.fsm
 
         #region build
 
+        
+
+        public FSMTransition<T> GetTransition(int nodeId, char token)
+        {
+            FSMTransition<T> transition = null;
+            if (HasState(nodeId))
+            {
+                if (Transitions.ContainsKey(nodeId))
+                {
+                    var leavingTransitions = Transitions[nodeId];
+                    transition = leavingTransitions.FirstOrDefault((FSMTransition<T> t) => t.Match(token));
+                }
+            }
+            return transition;
+        }
+
         public void AddTransition(FSMTransition<T> transition)
         {   
             var transitions = new List<FSMTransition<T>>();
@@ -204,6 +220,7 @@ namespace sly.lexer.fsm
 
                     while (consumeSkipped)
                     {
+                        currentToken = source[CurrentPosition];
                         // TODO : if WS && ignoreWS => next column ++
                         if (IgnoreWhiteSpace && WhiteSpaces.Contains(currentToken))
                         {
