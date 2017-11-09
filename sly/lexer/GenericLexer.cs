@@ -34,6 +34,7 @@ namespace sly.lexer
         private const string in_identifier = "in_identifier";
         private const string token_property = "token";
         public const string DerivedToken = "derivedToken";
+        private const string defaultIdentifierKey = "identifier";
         private FSMLexer<GenericToken, GenericToken> LexerFsm;
 
         private Dictionary<GenericToken, Dictionary<string, IN>> derivedTokens;
@@ -130,6 +131,13 @@ namespace sly.lexer
             if (generic == GenericToken.Identifier)
             {
                 identifierDerivedToken = token;
+                var derived = new Dictionary<string, IN>();
+                if (derivedTokens.ContainsKey(generic))
+                {
+                    derived = derivedTokens[generic];
+                }
+                derived[defaultIdentifierKey] = token;
+                return;
             }
 
             NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
@@ -190,7 +198,9 @@ namespace sly.lexer
                 tokensForGeneric = derivedTokens[genericToken];
             }
             tokensForGeneric[specialValue] = token;
-            
+            derivedTokens[genericToken] = tokensForGeneric;
+
+
         }
 
         public void AddKeyWord(IN token, string keyword)
@@ -200,9 +210,12 @@ namespace sly.lexer
                 if (derivedTokens.ContainsKey(GenericToken.Identifier))
                 {
                     Dictionary<string, IN> derived = derivedTokens[GenericToken.Identifier];
-                    if (derived.ContainsKey(keyword))
+                    if (derived.ContainsKey(match.Result.Value))
                     {
-                        match.Properties[token_property] = token;
+                        match.Properties[DerivedToken] = derived[match.Result.Value];
+                    }
+                    else if(derived.ContainsKey(defaultIdentifierKey)) {                        
+                        match.Properties[DerivedToken] = identifierDerivedToken;
                     }
                 }
                 return match;
