@@ -190,7 +190,7 @@ namespace csly.whileLang.parser
         [Lexeme(GenericToken.SugarToken, ".")]
         CONCAT = 34,
 
-        [Lexeme(GenericToken.SugarToken, "=")]
+        [Lexeme(GenericToken.SugarToken, ":=")]
         ASSIGN = 35,
 
         [Lexeme(GenericToken.SugarToken, "+")]

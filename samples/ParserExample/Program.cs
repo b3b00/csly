@@ -227,77 +227,62 @@ namespace ParserExample
 
         static void testGenericLexerWhile()
         {
-            GenericLexer<WhileTokenGeneric> generic = new GenericLexer<WhileTokenGeneric>(EOLType.Environment, GenericToken.Double, GenericToken.Int, GenericToken.String, GenericToken.Identifier);            
-            generic.AddKeyWord(WhileTokenGeneric.TRUE, "true");
-            generic.AddKeyWord(WhileTokenGeneric.FALSE, "false");
-            generic.AddKeyWord(WhileTokenGeneric.IF, "if");
-            generic.AddKeyWord(WhileTokenGeneric.THEN, "then");
-            generic.AddKeyWord(WhileTokenGeneric.ELSE, "else");
-            generic.AddKeyWord(WhileTokenGeneric.WHILE, "while");
-            generic.AddKeyWord(WhileTokenGeneric.DO, "do");
-            generic.AddKeyWord(WhileTokenGeneric.PRINT, "print");
-            generic.AddSugarLexem(WhileTokenGeneric.ASSIGN, "=");
-            generic.AddSugarLexem(WhileTokenGeneric.EQUALS, "==");
-            generic.AddSugarLexem(WhileTokenGeneric.LPAREN, "(");
-            generic.AddSugarLexem(WhileTokenGeneric.RPAREN, ")");
-            generic.AddSugarLexem(WhileTokenGeneric.SEMICOLON, ";");
-
-            generic.AddSugarLexem(WhileTokenGeneric.DIFFERENT, "!=");
-            generic.AddSugarLexem(WhileTokenGeneric.GREATER, ">");
-            generic.AddSugarLexem(WhileTokenGeneric.LESSER, "<");
-            generic.AddSugarLexem(WhileTokenGeneric.OR, "||");
-            generic.AddSugarLexem(WhileTokenGeneric.AND, "&&");
-            generic.AddSugarLexem(WhileTokenGeneric.MINUS, "-");
-            generic.AddSugarLexem(WhileTokenGeneric.PLUS, "+");
-            generic.AddSugarLexem(WhileTokenGeneric.TIMES, "*");
-            generic.AddSugarLexem(WhileTokenGeneric.DIVIDE, "/");
-            generic.AddSugarLexem(WhileTokenGeneric.NOT, "!");
-
-
-            generic.AddLexeme(GenericToken.Identifier, WhileTokenGeneric.IDENTIFIER);
-            generic.AddLexeme(GenericToken.String, WhileTokenGeneric.STRING);
-            generic.AddLexeme(GenericToken.Int, WhileTokenGeneric.INT);            
-            string source = "( a = 1 ; a == 2 )";
+           
 
             var sw = new Stopwatch();
-            //sw.Start();
-            //var t = generic.Tokenize(source).ToList();
-            //sw.Stop();
-            //Console.WriteLine($"generic found <{t.Count}> : {sw.ElapsedMilliseconds} ms");
-            ;
-            source = @"
+           
+            string source = @"
 (
-    r=1;
-    i=1;
+    r:=1;
+    i:=1;
     while i < 11 do 
     ( 
-    r = r * i;
+    r := r * i;
     print r;
     print i;
-    i = i + 1 )
+    i := i + 1 )
 )";
+
+            WhileParser wp = new WhileParser();
             sw.Reset();
             sw.Start();
-            List<Token<WhileTokenGeneric>> t = generic.Tokenize(source).ToList();
-            sw.Stop();
-            Console.WriteLine($"generic found <{t.Count}> : {sw.ElapsedMilliseconds} ms");
-
-            WhileParserGeneric wp = new WhileParserGeneric();
-            ParserBuilder <WhileTokenGeneric, WhileAST > wbuilder = new ParserBuilder<WhileTokenGeneric, WhileAST>();
+            ParserBuilder<WhileToken, WhileAST> wbuilder = new ParserBuilder<WhileToken, WhileAST>();
             var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
             var parser = buildResult.Result;
-            //parser.Lexer = generic;
             var r = parser.Parse(source);
+            sw.Stop();
+            Console.WriteLine($"regex parser : {sw.ElapsedMilliseconds} ms");
             if (!r.IsError)
             {
                 var interpreter = new Interpreter();
                 var ctx = interpreter.Interprete(r.Result);
                 ;
-                
+
             }
             else
             {
                 r.Errors.ForEach(e => Console.WriteLine(e.ToString()));
+            }
+
+            sw.Reset();
+            sw.Start();
+            WhileParserGeneric wpg = new WhileParserGeneric();
+            ParserBuilder <WhileTokenGeneric, WhileAST > wbuilderGen = new ParserBuilder<WhileTokenGeneric, WhileAST>();
+            var buildResultgen = wbuilderGen.BuildParser(wpg, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
+            var parserGen = buildResult.Result;
+            var rGen = parser.Parse(source);
+            sw.Stop();
+            Console.WriteLine($"generic parser : {sw.ElapsedMilliseconds} ms");
+            if (!rGen.IsError)
+            {
+                var interpreter = new Interpreter();
+                var ctx = interpreter.Interprete(rGen.Result);
+                ;
+                
+            }
+            else
+            {
+                rGen.Errors.ForEach(e => Console.WriteLine(e.ToString()));
             }
 
 
