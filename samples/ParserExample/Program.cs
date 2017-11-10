@@ -201,29 +201,7 @@ namespace ParserExample
             
         }
 
-        static void testGenericLexerJSON()
-        {
-            GenericLexer<JsonToken> generic = new GenericLexer<JsonToken>(EOLType.Nix);
-            generic.AddKeyWord(JsonToken.BOOLEAN, "true");
-            generic.AddKeyWord(JsonToken.BOOLEAN, "false");
-            generic.AddKeyWord(JsonToken.NULL, "null");
-            generic.AddSugarLexem(JsonToken.ACCG, "{");
-            generic.AddSugarLexem(JsonToken.ACCD, "}");
-            generic.AddSugarLexem(JsonToken.CROG, "[");
-            generic.AddSugarLexem(JsonToken.CROD, "]");
-            generic.AddSugarLexem(JsonToken.COMMA, ",");
-            generic.AddSugarLexem(JsonToken.COLON, ":");
-            generic.AddLexeme(GenericToken.String, JsonToken.STRING);
-            generic.AddLexeme(GenericToken.Double, JsonToken.DOUBLE);
-            generic.AddLexeme(GenericToken.Int, JsonToken.INT);
-            string json = "{\n\"hello\":\"world\",\n\"int\":42,\n\"double\":42.42,\n\"bool\":true,\n\"null\":null\n}";
-            json = File.ReadAllText("test.json");
-            var sw = new Stopwatch();
-            sw.Start();
-            var t = generic.Tokenize(json).ToList();
-            sw.Stop();
-            Console.WriteLine($"generic found <{t.Count}> : {sw.ElapsedMilliseconds} ms");
-        }
+        
 
         static void testGenericLexerWhile()
         {
@@ -289,6 +267,57 @@ namespace ParserExample
             ;
         }
 
+        static void testGenericLexerJson()
+        {
+
+
+            var sw = new Stopwatch();
+
+            string source =File.ReadAllText("test.json");
+
+            EbnfJsonParser wp = new EbnfJsonParser();
+            sw.Reset();
+            sw.Start();
+            ParserBuilder<JsonToken, JSon> wbuilder = new ParserBuilder<JsonToken, JSon>();
+            var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parser = buildResult.Result;
+            var r = parser.Parse(source);
+            sw.Stop();
+            Console.WriteLine($"json regex parser : {sw.ElapsedMilliseconds} ms");
+            if (r.IsError)            
+            {
+                r.Errors.ForEach(e => Console.WriteLine(e.ToString()));
+            }
+
+            
+            sw.Reset();
+            sw.Start();
+            wbuilder = new ParserBuilder<JsonToken, JSon>();
+            buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            parser = buildResult.Result;
+            parser.Lexer = new JSONLexer();
+            r = parser.Parse(source);
+            Console.WriteLine($"json hard coded lexer : {sw.ElapsedMilliseconds} ms");
+            sw.Stop();
+
+            sw.Reset();
+            sw.Start();
+            EbnfJsonGenericParser wpg = new EbnfJsonGenericParser();
+            ParserBuilder<JsonTokenGeneric, JSon> wbuilderGen = new ParserBuilder<JsonTokenGeneric, JSon>();
+            var buildResultgen = wbuilderGen.BuildParser(wpg, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parserGen = buildResult.Result;
+            var rGen = parser.Parse(source);
+            sw.Stop();
+            Console.WriteLine($"json generic parser : {sw.ElapsedMilliseconds} ms");
+            if (rGen.IsError)
+            {
+                rGen.Errors.ForEach(e => Console.WriteLine(e.ToString()));
+            }
+
+
+            ;
+        }
+
         static void testJSONLexer()
         {
             ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
@@ -342,7 +371,8 @@ namespace ParserExample
             //testJSONLexer();
             //testGenericLexerJSON();
 
-            testGenericLexerWhile();
+            //testGenericLexerWhile();
+            testGenericLexerJson();
             Console.WriteLine("so what ?");
 
             ;
