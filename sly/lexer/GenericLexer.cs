@@ -1,6 +1,7 @@
 ﻿using sly.lexer.fsm;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace sly.lexer
@@ -35,6 +36,7 @@ namespace sly.lexer
         private const string token_property = "token";
         public const string DerivedToken = "derivedToken";
         private const string defaultIdentifierKey = "identifier";
+        private const string escape_string = "escape";
         private FSMLexer<GenericToken, GenericToken> LexerFsm;
 
         private Dictionary<GenericToken, Dictionary<string, IN>> derivedTokens;
@@ -42,13 +44,13 @@ namespace sly.lexer
         private FSMLexerBuilder<GenericToken, GenericToken> FSMBuilder;
 
 
-        public GenericLexer(EOLType eolType)
+        public GenericLexer(EOLType eolType, params GenericToken[] staticTokens)
         {
-            InitializeStaticLexer(eolType);
+            InitializeStaticLexer(eolType,staticTokens);
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
         }
 
-        private void InitializeStaticLexer(EOLType eolType)
+        private void InitializeStaticLexer(EOLType eolType, params GenericToken[] staticTokens)
         {
             FSMBuilder = new FSMLexerBuilder<GenericToken, GenericToken>();
 
@@ -83,45 +85,55 @@ namespace sly.lexer
 
 
 
-            // string literal
-            FSMBuilder.Transition('\"', GenericToken.String)
-                .Mark(in_string)
-                .ExceptTransitionTo(new char[] { '\"', '\\' }, "in_string", GenericToken.String)
-                .Transition('\\', GenericToken.String)
-                .Mark("escape")
-                .AnyTransitionTo(' ', "in_string", GenericToken.String)
-                .Transition('\"', GenericToken.String)
-                .End(GenericToken.String)
-                .Mark(string_end);
+            if (staticTokens.ToList().Contains(GenericToken.String))
+            {
 
-            // identifier
-            FSMBuilder.GoTo(start).
+                // string literal
+                FSMBuilder.Transition('\"', GenericToken.String)
+                    .Mark(in_string)
+                    .ExceptTransitionTo(new char[] { '\"', '\\' }, in_string, GenericToken.String)
+                    .Transition('\\', GenericToken.String)
+                    .Mark(escape_string)
+                    .AnyTransitionTo(' ', in_string, GenericToken.String)
+                    .Transition('\"', GenericToken.String)
+                    .End(GenericToken.String)
+                    .Mark(string_end);
+            }
+
+            if (staticTokens.ToList().Contains(GenericToken.Identifier))
+            {
+                // identifier
+                FSMBuilder.GoTo(start).
             RangeTransition('a', 'z', GenericToken.Identifier).
             Mark(in_identifier)
             .End(GenericToken.Identifier);
 
-            FSMBuilder.GoTo(start).
-            RangeTransitionTo('A', 'Z', in_identifier, GenericToken.Identifier, GenericToken.Identifier).
-            RangeTransitionTo('a', 'z', in_identifier,GenericToken.Identifier).
-            RangeTransitionTo('A', 'Z', in_identifier, GenericToken.Identifier).
-            End(GenericToken.Identifier);
-
+                FSMBuilder.GoTo(start).
+                RangeTransitionTo('A', 'Z', in_identifier, GenericToken.Identifier, GenericToken.Identifier).
+                RangeTransitionTo('a', 'z', in_identifier, GenericToken.Identifier).
+                RangeTransitionTo('A', 'Z', in_identifier, GenericToken.Identifier).
+                End(GenericToken.Identifier);
+            }
 
             //numeric
-            FSMBuilder.GoTo(start)
+            if (staticTokens.ToList().Contains(GenericToken.Int) || staticTokens.ToList().Contains(GenericToken.Double))
+            {
+                FSMBuilder = FSMBuilder.GoTo(start)
             .RangeTransition('0', '9', GenericToken.Int, GenericToken.Double)
             .Mark(in_int)
             .RangeTransitionTo('0', '9', in_int, GenericToken.Int, GenericToken.Double)
-            .End(GenericToken.Int)
-            .Transition('.', GenericToken.Double)
-            .Mark(start_double)
-            .RangeTransition('0', '9', GenericToken.Int, GenericToken.Int, GenericToken.Double)
-            .Mark(in_double)
-            .RangeTransitionTo('0', '9', in_double, GenericToken.Int, GenericToken.Double)
-            .End(GenericToken.Double);
+            .End(GenericToken.Int);
+                if (staticTokens.ToList().Contains(GenericToken.Double))
+                {
+                    FSMBuilder.Transition('.', GenericToken.Double)
+                    .Mark(start_double)
+                    .RangeTransition('0', '9', GenericToken.Int, GenericToken.Int, GenericToken.Double)
+                    .Mark(in_double)
+                    .RangeTransitionTo('0', '9', in_double, GenericToken.Int, GenericToken.Double)
+                    .End(GenericToken.Double);
+                }
+            }
 
-
-            string code = "{\"d\" : 42.42 , \"i\" : 42 , \"s\" : \"quarante-deux\" }";
             LexerFsm = FSMBuilder.Fsm;
         }
 
