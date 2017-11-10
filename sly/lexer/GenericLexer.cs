@@ -287,6 +287,10 @@ namespace sly.lexer
 
         public void AddSugarLexem(IN token, string specialValue)
         {
+            if (char.IsLetter(specialValue[0]))
+            {
+                throw new ArgumentException($"bad lexem {specialValue} :  SugarToken lexeme can not start with a letter.");
+            }
             NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
             {
                 match.Properties[DerivedToken] = token;
