@@ -36,27 +36,83 @@ namespace sly.lexer
     public class LexerBuilder
     {
 
-        public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result) where IN:struct
+        public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result) where IN : struct
         {
-           Type type = typeof(IN);
+            Type type = typeof(IN);
             TypeInfo typeInfo = type.GetTypeInfo();
             ILexer<IN> lexer = new Lexer<IN>();
 
             var values = Enum.GetValues(typeof(IN));
-            
+
+            var attributes = new Dictionary<IN, LexemeAttribute>();
+
             var fields = typeof(IN).GetFields();
-            foreach(Enum value in values)
+            foreach (Enum value in values)
             {
-                IN tokenID = (IN)(object)value; 
+                IN tokenID = (IN)(object)value;
 
                 LexemeAttribute lexem = value.GetAttributeOfType<LexemeAttribute>();
+                if (lexem != null)
+                {
+                    attributes[tokenID] = lexem;
+                }
+                else
+                {
+                    if (!tokenID.Equals(default(IN)))
+                    {
+                        result.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
+                    }
+                }
+                ;
+            }
+
+            result = Build(attributes, result);
+
+            return result;
+        }
+
+
+        private static BuildResult<ILexer<IN>> Build<IN>(Dictionary<IN, LexemeAttribute> attributes, BuildResult<ILexer<IN>> result) where IN : struct
+        {
+            bool hasRegexLexem = attributes.Values.FirstOrDefault(a => !string.IsNullOrEmpty(a.Pattern)) != null;
+            bool hasGenericLexem = attributes.Values.FirstOrDefault(a => a.GenericToken != default(GenericToken)) != null;
+
+            if (hasGenericLexem && hasRegexLexem)
+            {
+                result.AddError(new LexerInitializationError(ErrorLevel.WARN, $"cannot mix Regex lexemes and Generic lexemes in same lexer"));
+                result.IsError = true;
+            }
+            else
+            {
+                if (hasRegexLexem)
+                {
+                    result = BuildRegexLexer<IN>(attributes, result);
+                }
+                else if (hasGenericLexem)
+                {
+                    result = BuildGenericLexer<IN>(attributes, result);
+                }
+            }
+            return result;
+        }
+
+
+        private static BuildResult<ILexer<IN>> BuildRegexLexer<IN>(Dictionary<IN, LexemeAttribute> attributes, BuildResult<ILexer<IN>> result) where IN : struct
+        {
+            ILexer<IN> lexer = new Lexer<IN>();
+            foreach (KeyValuePair<IN, LexemeAttribute> pair in attributes)
+            {
+                IN tokenID = pair.Key;
+
+                LexemeAttribute lexem = pair.Value;
+
                 if (lexem != null)
                 {
                     try
                     {
                         lexer.AddDefinition(new TokenDefinition<IN>(tokenID, lexem.Pattern, lexem.IsSkippable, lexem.IsLineEnding));
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         result.AddError(new LexerInitializationError(ErrorLevel.ERROR, $"error at lexem {tokenID} : {e.Message}"));
                     }
@@ -65,16 +121,47 @@ namespace sly.lexer
                 {
                     if (!tokenID.Equals(default(IN)))
                     {
-                        result.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme definition"));
+                        result.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have"));
                     }
                 }
                 ;
             }
 
             result.Result = lexer;
-
             return result;
         }
 
+        private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(Dictionary<IN, LexemeAttribute> attributes, BuildResult<ILexer<IN>> result) where IN : struct
+        {
+            List<GenericToken> statics = attributes.Values.Select(a => a.GenericToken).ToList();
+
+            GenericLexer<IN> lexer = new GenericLexer<IN>(EOLType.Environment, statics.ToArray());
+            foreach (KeyValuePair<IN, LexemeAttribute> pair in attributes)
+            {
+                IN tokenID = pair.Key;
+
+                LexemeAttribute lexem = pair.Value;
+                if (lexem.IsStaticGeneric)
+                {
+                    lexer.AddLexeme(lexem.GenericToken, tokenID);
+                }
+                if (lexem.IsKeyWord)
+                {
+                    foreach (string param in lexem.GenericTokenParameters)
+                    {
+                        lexer.AddKeyWord(tokenID, param);
+                    }
+                }
+                if (lexem.IsSugar)
+                {
+                    foreach (string param in lexem.GenericTokenParameters)
+                    {
+                        lexer.AddSugarLexem(tokenID, param);
+                    }
+                }
+            }
+            result.Result = lexer;
+            return result;
+        }
     }
 }
