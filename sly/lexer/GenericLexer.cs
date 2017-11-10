@@ -41,6 +41,9 @@ namespace sly.lexer
 
         private Dictionary<GenericToken, Dictionary<string, IN>> derivedTokens;
         private IN identifierDerivedToken;
+        private IN intDerivedToken;
+        private IN doubleDerivedToken;
+        private IN stringDerivedToken;
         private FSMLexerBuilder<GenericToken, GenericToken> FSMBuilder;
 
 
@@ -100,7 +103,7 @@ namespace sly.lexer
                     .Mark(string_end);
             }
 
-            if (staticTokens.ToList().Contains(GenericToken.Identifier))
+            if (staticTokens.ToList().Contains(GenericToken.Identifier) || staticTokens.ToList().Contains(GenericToken.KeyWord))
             {
                 // identifier
                 FSMBuilder.GoTo(start).
@@ -151,16 +154,48 @@ namespace sly.lexer
                 derived[defaultIdentifierKey] = token;
                 return;
             }
+            if (generic == GenericToken.Double)
+            {
+                doubleDerivedToken = token;                
+            }
+            if (generic == GenericToken.Int)
+            {
+                intDerivedToken = token;               
+            }
+            if (generic == GenericToken.String)
+            {
+                stringDerivedToken = token;                
+            }
 
             NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
             {
-                if (match.Result.TokenID == GenericToken.Identifier)
+                switch (match.Result.TokenID)
                 {
-                    match.Properties[DerivedToken] = identifierDerivedToken;
-                }
-                else
-                {
-                    match.Properties[DerivedToken] = token;
+                    case GenericToken.Identifier:
+                        {
+                            match.Properties[DerivedToken] = identifierDerivedToken;
+                            break;
+                        }
+                    case GenericToken.Int:
+                        {
+                            match.Properties[DerivedToken] = intDerivedToken;
+                            break;
+                        }
+                    case GenericToken.Double:
+                        {
+                            match.Properties[DerivedToken] = doubleDerivedToken;
+                            break;
+                        }
+                    case GenericToken.String:
+                        {
+                            match.Properties[DerivedToken] = stringDerivedToken;
+                            break;
+                        }
+                    default:
+                        {
+                            match.Properties[DerivedToken] = token;
+                            break;
+                        }
                 }
 
                 return match;
@@ -171,26 +206,32 @@ namespace sly.lexer
                 case GenericToken.String:
                     {
                         FSMBuilder.GoTo(string_end);
+                        FSMBuilder.CallBack(callback);
+                        FSMBuilder.GoTo(in_string);
+                        FSMBuilder.CallBack(callback);
                         break;
                     }
                 case GenericToken.Double:
                     {
                         FSMBuilder.GoTo(in_double);
+                        FSMBuilder.CallBack(callback);
                         break;
                     }
                 case GenericToken.Int:
                     {
                         FSMBuilder.GoTo(in_int);
+                        FSMBuilder.CallBack(callback);
                         break;
                     }
                 case GenericToken.Identifier:
                     {
                         FSMBuilder.GoTo(in_identifier);
+                        FSMBuilder.CallBack(callback);
                         break;
                     }
             }
 
-            FSMBuilder.CallBack(callback);
+
 
         }
 
@@ -274,8 +315,7 @@ namespace sly.lexer
             var r = LexerFsm.Run(source, 0);
             while (r.IsSuccess)
             {
-                tokens.Add(Transcode(r));// r.Result;
-                //Console.WriteLine($"{r.Result.TokenID} : {r.Result.Value} @{r.Result.Position}");
+                tokens.Add(Transcode(r));
                 r = LexerFsm.Run(source);
                 
             }
