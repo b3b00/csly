@@ -185,10 +185,7 @@ namespace sly.lexer.fsm
             string passed = source.Substring(0, CurrentPosition);
             var lines = passed.Split(new string[] { EOL }, StringSplitOptions.RemoveEmptyEntries);
             CurrentLine = lines.Length;
-            if (passed.StartsWith("\"i\""))
-            {
-                ;
-            }
+           
             if (lines.Any())
             {
                 string lastLine = lines[lines.Length - 1];
