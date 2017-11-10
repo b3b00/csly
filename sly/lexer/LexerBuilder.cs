@@ -140,11 +140,17 @@ namespace sly.lexer
                 }
                 if (lexem.IsKeyWord)
                 {
-                    lexer.AddKeyWord(tokenID, lexem.GenericTokenParameter);
+                    foreach (string param in lexem.GenericTokenParameters)
+                    {
+                        lexer.AddKeyWord(tokenID, param);
+                    }
                 }
                 if (lexem.IsSugar)
                 {
-                    lexer.AddSugarLexem(tokenID, lexem.GenericTokenParameter);
+                    foreach (string param in lexem.GenericTokenParameters)
+                    {
+                        lexer.AddSugarLexem(tokenID, param);
+                    }
                 }
             }
             result.Result = lexer;
