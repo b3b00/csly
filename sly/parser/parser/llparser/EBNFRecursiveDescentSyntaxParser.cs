@@ -188,7 +188,14 @@ namespace sly.parser.llparser
                             }
                             else
                             {
-                                errors.AddRange(oneMoreResult.Errors);
+                                if (oneMoreResult.Errors != null && oneMoreResult.Errors.Count > 0)
+                                {
+                                    errors.AddRange(oneMoreResult.Errors);
+                                }
+                                else
+                                {
+                                    ;
+                                }
                             }
                             isError = isError || oneMoreResult.IsError;
                         }
