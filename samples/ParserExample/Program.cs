@@ -227,36 +227,36 @@ namespace ParserExample
 
         static void testGenericLexerWhile()
         {
-            GenericLexer<WhileToken> generic = new GenericLexer<WhileToken>(EOLType.Environment, GenericToken.Double, GenericToken.Int, GenericToken.String, GenericToken.Identifier);            
-            generic.AddKeyWord(WhileToken.TRUE, "true");
-            generic.AddKeyWord(WhileToken.FALSE, "false");
-            generic.AddKeyWord(WhileToken.IF, "if");
-            generic.AddKeyWord(WhileToken.THEN, "then");
-            generic.AddKeyWord(WhileToken.ELSE, "else");
-            generic.AddKeyWord(WhileToken.WHILE, "while");
-            generic.AddKeyWord(WhileToken.DO, "do");
-            generic.AddKeyWord(WhileToken.PRINT, "print");
-            generic.AddSugarLexem(WhileToken.ASSIGN, "=");
-            generic.AddSugarLexem(WhileToken.EQUALS, "==");
-            generic.AddSugarLexem(WhileToken.LPAREN, "(");
-            generic.AddSugarLexem(WhileToken.RPAREN, ")");
-            generic.AddSugarLexem(WhileToken.SEMICOLON, ";");
+            GenericLexer<WhileTokenGeneric> generic = new GenericLexer<WhileTokenGeneric>(EOLType.Environment, GenericToken.Double, GenericToken.Int, GenericToken.String, GenericToken.Identifier);            
+            generic.AddKeyWord(WhileTokenGeneric.TRUE, "true");
+            generic.AddKeyWord(WhileTokenGeneric.FALSE, "false");
+            generic.AddKeyWord(WhileTokenGeneric.IF, "if");
+            generic.AddKeyWord(WhileTokenGeneric.THEN, "then");
+            generic.AddKeyWord(WhileTokenGeneric.ELSE, "else");
+            generic.AddKeyWord(WhileTokenGeneric.WHILE, "while");
+            generic.AddKeyWord(WhileTokenGeneric.DO, "do");
+            generic.AddKeyWord(WhileTokenGeneric.PRINT, "print");
+            generic.AddSugarLexem(WhileTokenGeneric.ASSIGN, "=");
+            generic.AddSugarLexem(WhileTokenGeneric.EQUALS, "==");
+            generic.AddSugarLexem(WhileTokenGeneric.LPAREN, "(");
+            generic.AddSugarLexem(WhileTokenGeneric.RPAREN, ")");
+            generic.AddSugarLexem(WhileTokenGeneric.SEMICOLON, ";");
 
-            generic.AddSugarLexem(WhileToken.DIFFERENT, "!=");
-            generic.AddSugarLexem(WhileToken.GREATER, ">");
-            generic.AddSugarLexem(WhileToken.LESSER, "<");
-            generic.AddSugarLexem(WhileToken.OR, "||");
-            generic.AddSugarLexem(WhileToken.AND, "&&");
-            generic.AddSugarLexem(WhileToken.MINUS, "-");
-            generic.AddSugarLexem(WhileToken.PLUS, "+");
-            generic.AddSugarLexem(WhileToken.TIMES, "*");
-            generic.AddSugarLexem(WhileToken.DIVIDE, "/");
-            generic.AddSugarLexem(WhileToken.NOT, "!");
+            generic.AddSugarLexem(WhileTokenGeneric.DIFFERENT, "!=");
+            generic.AddSugarLexem(WhileTokenGeneric.GREATER, ">");
+            generic.AddSugarLexem(WhileTokenGeneric.LESSER, "<");
+            generic.AddSugarLexem(WhileTokenGeneric.OR, "||");
+            generic.AddSugarLexem(WhileTokenGeneric.AND, "&&");
+            generic.AddSugarLexem(WhileTokenGeneric.MINUS, "-");
+            generic.AddSugarLexem(WhileTokenGeneric.PLUS, "+");
+            generic.AddSugarLexem(WhileTokenGeneric.TIMES, "*");
+            generic.AddSugarLexem(WhileTokenGeneric.DIVIDE, "/");
+            generic.AddSugarLexem(WhileTokenGeneric.NOT, "!");
 
 
-            generic.AddLexeme(GenericToken.Identifier, WhileToken.IDENTIFIER);
-            generic.AddLexeme(GenericToken.String, WhileToken.STRING);
-            generic.AddLexeme(GenericToken.Int, WhileToken.INT);            
+            generic.AddLexeme(GenericToken.Identifier, WhileTokenGeneric.IDENTIFIER);
+            generic.AddLexeme(GenericToken.String, WhileTokenGeneric.STRING);
+            generic.AddLexeme(GenericToken.Int, WhileTokenGeneric.INT);            
             string source = "( a = 1 ; a == 2 )";
 
             var sw = new Stopwatch();
@@ -278,15 +278,15 @@ namespace ParserExample
 )";
             sw.Reset();
             sw.Start();
-            List<Token<WhileToken>> t = generic.Tokenize(source).ToList();
+            List<Token<WhileTokenGeneric>> t = generic.Tokenize(source).ToList();
             sw.Stop();
             Console.WriteLine($"generic found <{t.Count}> : {sw.ElapsedMilliseconds} ms");
 
-            WhileParser wp = new WhileParser();
-            ParserBuilder <WhileToken, WhileAST > wbuilder = new ParserBuilder<WhileToken, WhileAST>();
-            var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "");
+            WhileParserGeneric wp = new WhileParserGeneric();
+            ParserBuilder <WhileTokenGeneric, WhileAST > wbuilder = new ParserBuilder<WhileTokenGeneric, WhileAST>();
+            var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
             var parser = buildResult.Result;
-            parser.Lexer = generic;
+            //parser.Lexer = generic;
             var r = parser.Parse(source);
             if (!r.IsError)
             {
