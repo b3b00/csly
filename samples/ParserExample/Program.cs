@@ -227,7 +227,7 @@ namespace ParserExample
 
         static void testGenericLexerWhile()
         {
-            GenericLexer<WhileToken> generic = new GenericLexer<WhileToken>(EOLType.Environment);            
+            GenericLexer<WhileToken> generic = new GenericLexer<WhileToken>(EOLType.Environment, GenericToken.Double, GenericToken.Int, GenericToken.String, GenericToken.Identifier);            
             generic.AddKeyWord(WhileToken.TRUE, "true");
             generic.AddKeyWord(WhileToken.FALSE, "false");
             generic.AddKeyWord(WhileToken.IF, "if");
@@ -278,9 +278,29 @@ namespace ParserExample
 )";
             sw.Reset();
             sw.Start();
-            var t = generic.Tokenize(source).ToList();
+            List<Token<WhileToken>> t = generic.Tokenize(source).ToList();
             sw.Stop();
             Console.WriteLine($"generic found <{t.Count}> : {sw.ElapsedMilliseconds} ms");
+
+            WhileParser wp = new WhileParser();
+            ParserBuilder <WhileToken, WhileAST > wbuilder = new ParserBuilder<WhileToken, WhileAST>();
+            var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "");
+            var parser = buildResult.Result;
+            parser.Lexer = generic;
+            var r = parser.Parse(source);
+            if (!r.IsError)
+            {
+                var interpreter = new Interpreter();
+                var ctx = interpreter.Interprete(r.Result);
+                ;
+                
+            }
+            else
+            {
+                r.Errors.ForEach(e => Console.WriteLine(e.ToString()));
+            }
+
+
             ;
         }
 
