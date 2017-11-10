@@ -18,6 +18,12 @@ namespace sly.lexer
 
         public bool IsLineEnding { get; set; }
 
+        public bool IsStaticGeneric => string.IsNullOrEmpty(GenericTokenParameter);
+
+        public bool IsKeyWord => GenericToken == GenericToken.KeyWord;
+
+        public bool IsSugar => GenericToken == GenericToken.SugarToken;
+
         public LexemeAttribute(string pattern, bool isSkippable = false, bool isLineEnding = false)        {
             Pattern = pattern;
             IsSkippable = isSkippable;
