@@ -11,7 +11,7 @@ using System.Security.Principal;
 using System.Xml;
 using sly.parser.syntax;
 using sly.parser.llparser;
-
+using sly.buildresult;
 
 namespace sly.parser.generator
 {
@@ -29,16 +29,28 @@ namespace sly.parser.generator
         }
 
 
-        public override Parser<IN,OUT> BuildParser(object parserInstance, ParserType parserType, string rootRule)
+        public override BuildResult<Parser<IN,OUT>> BuildParser(object parserInstance, ParserType parserType, string rootRule)
         {
             
             RuleParser<IN> ruleparser = new RuleParser<IN>();
             ParserBuilder<EbnfToken, GrammarNode<IN>> builder = new ParserBuilder<EbnfToken, GrammarNode<IN>>();
 
-            Parser<EbnfToken,GrammarNode<IN>> grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
-                        
-            ParserConfiguration<IN,OUT> configuration =
-                ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
+            Parser<EbnfToken,GrammarNode<IN>> grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
+
+            BuildResult<Parser<IN, OUT>> result = new BuildResult<Parser<IN, OUT>>();
+
+            ParserConfiguration<IN, OUT> configuration = null;
+
+            try
+            {
+                configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
+                configuration.StartingRule = rootRule;
+            }
+            catch (Exception e)
+            {
+                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message));
+                return result;
+            }
 
             ISyntaxParser<IN, OUT> syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
 
@@ -53,9 +65,18 @@ namespace sly.parser.generator
             }
             Parser<IN,OUT> parser = new Parser<IN,OUT>(syntaxParser, visitor);
             parser.Configuration = configuration;
-            parser.Lexer = BuildLexer();
+            var lexerResult = BuildLexer();
+            if (lexerResult.IsError)
+            {
+                result.AddErrors(lexerResult.Errors);
+            }
+            else
+            {
+                parser.Lexer = lexerResult.Result;
+            }
             parser.Instance = parserInstance;
-            return parser;
+            result.Result = parser;
+            return result;
         }
 
 

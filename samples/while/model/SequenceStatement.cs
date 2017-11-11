@@ -1,6 +1,9 @@
-﻿using System;
+﻿using csly.whileLang.compiler;
+using sly.lexer;
+using System;
 using System.Collections.Generic;
 using System.Text;
+using Sigil;
 
 namespace csly.whileLang.model
 {
@@ -8,7 +11,11 @@ namespace csly.whileLang.model
     {
 
         List<Statement> Statements { get; set; }
-        public int Count => Statements.Count; 
+        public int Count => Statements.Count;
+
+        public Scope CompilerScope { get; set; }
+
+        public TokenPosition Position { get; set; }
 
         public SequenceStatement()
         {
@@ -49,5 +56,25 @@ namespace csly.whileLang.model
             return dump.ToString();
         }
 
+        public string Transpile(CompilerContext context)
+        {
+            StringBuilder block = new StringBuilder("{\n");
+            foreach (var stmt in Statements)
+            {
+                block.Append(stmt.Transpile(context));
+                block.AppendLine(";");
+            }
+            block.AppendLine("}");
+            return block.ToString();
+        }
+
+        public Emit<Func<int>> EmitByteCode(CompilerContext context, Emit<Func<int>> emiter)
+        {
+            foreach (var stmt in Statements)
+            {
+                emiter = stmt.EmitByteCode(context, emiter);
+            }
+            return emiter;
+        }
     }
 }

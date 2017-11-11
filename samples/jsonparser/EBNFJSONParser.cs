@@ -128,7 +128,7 @@ namespace jsonparser
         }
 
 
-        [Production("listElements: value additionalValue+")]
+        [Production("listElements: value additionalValue*")]
         public JSon listElements(JSon head, List<JSon> tail)
         {
             JList values = new JList(head);
@@ -150,7 +150,7 @@ namespace jsonparser
 
 
 
-        [Production("members: property additionalProperty+")]
+        [Production("members: property additionalProperty*")]
         public object Members(JObject head, List<JSon> tail)
         {
             JObject value = new JObject();

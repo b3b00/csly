@@ -4,6 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/b3b00/sly/blob/dev/LICENSE)
 [![NuGet version](https://img.shields.io/nuget/v/sly.svg)](https://www.nuget.org/packages/sly/)
 
+:warning: This readme is a bit out of date. Go to to the [wiki](https://github.com/b3b00/csly/wiki) for a more up to date documentation.
 
  #LY is a parser generator halfway between parser combinators and parser generator like 
 
@@ -302,7 +303,7 @@ The EBNF notation has been implemented in CSLY using the BNF notation. The EBNF 
     * 2 for a binary operation
 * associativity is an ```Associativity``` enum member
     * Associativity.Right for right associativity 
-    * Associativity.Left for left associativity (not supported for now)
+    * Associativity.Left for left associativity
 * precedence is an ```int``` stating the precedence level : the higher the int is the higher the precedence is.
 
 Each attribute is associated to a method that will act as the syntax tree visitor for the matching operation.

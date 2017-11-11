@@ -201,7 +201,6 @@ namespace sly.parser.llparser
                                 errors.AddRange(nonTerminalResult.Errors);
                             }
                             isError = isError || nonTerminalResult.IsError;
-                            // TODO
                         }
                         else
                         {

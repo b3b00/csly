@@ -71,14 +71,11 @@ namespace sly.parser.generator
             IN token = default(IN);
             IClause<IN> clause;
             bool isTerminal = false;
-            try
+            bool b = Enum.TryParse<IN>(name, out token);
+            if (b)
             {
-                token = (IN)Enum.Parse(typeof(IN), name, false);
                 isTerminal = true;
-            }
-            catch
-            {
-                isTerminal = false;
+                ;
             }
             if (isTerminal)
             {

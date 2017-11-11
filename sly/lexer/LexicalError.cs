@@ -20,6 +20,11 @@ namespace sly.lexer
             this.UnexpectedChar = unexpectedChar;
         }
 
+        public override string ToString()
+        {
+            return ErrorMessage;
+        }
+
 
 
     }

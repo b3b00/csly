@@ -11,6 +11,8 @@ namespace sly.parser
 
         public bool IsError { get; set; }
 
+        public bool IsOk => !IsError;
+
         public List<ParseError> Errors { get; set; }
 
         public int EndingPosition { get; set; }
