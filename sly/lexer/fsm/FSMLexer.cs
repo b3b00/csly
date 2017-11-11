@@ -182,25 +182,6 @@ namespace sly.lexer.fsm
             int tokenLine = 0;
 
 
-            string passed = source.Substring(0, CurrentPosition);
-            var lines = passed.Split(new string[] { EOL }, StringSplitOptions.RemoveEmptyEntries);
-            CurrentLine = lines.Length;
-           
-            if (lines.Any())
-            {
-                string lastLine = lines[lines.Length - 1];
-                if (passed.EndsWith(EOL))
-                {
-                    CurrentColumn = 0;
-                }
-                else
-                {
-                    CurrentLine--;
-                    CurrentColumn = lastLine.Length;
-                }
-            }
-
-
             if (CurrentPosition < source.Length)
             {
                 char currentToken = source[CurrentPosition];
@@ -212,7 +193,7 @@ namespace sly.lexer.fsm
 
                     bool consumeSkipped = true;
 
-                    while (consumeSkipped)
+                    while (consumeSkipped && !tokenStarted)
                     {
                         currentToken = source[CurrentPosition];
                         if (IgnoreWhiteSpace && WhiteSpaces.Contains(currentToken))
