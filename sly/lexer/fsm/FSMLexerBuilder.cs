@@ -174,8 +174,7 @@ namespace sly.lexer.fsm
 
         public FSMLexerBuilder<T,N> Transition(char input, params T[] transitionData)
         {            
-            return TransitionTo(input, Fsm.NewNodeId, transitionData);
-            return this;
+            return TransitionTo(input, Fsm.NewNodeId, transitionData);            
         }
 
         public FSMLexerBuilder<T, N> RangeTransition(char start, char end, params T[] transitionData)
