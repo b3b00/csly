@@ -211,8 +211,15 @@ namespace sly.lexer.fsm
                         }
                         else
                         {
-                            string subSource = source.Substring(Math.Max(CurrentPosition, 0));
-                            if (IgnoreEOL && subSource.StartsWith(EOL))
+                            bool newLine = true;
+                            int i = 0;
+                            while (newLine && i < EOL.Length && CurrentPosition+i < source.Length)
+                            {
+                                newLine = newLine && source[CurrentPosition + i] == EOL[i];
+                                i++;
+                            }
+                            //string subSource = source.Substring(Math.Max(CurrentPosition, 0));
+                            if (IgnoreEOL && newLine)
                             {
                                 if (successes.Any())
                                 {
