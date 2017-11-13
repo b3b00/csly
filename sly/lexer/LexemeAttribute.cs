@@ -4,7 +4,7 @@ using System.Text;
 
 namespace sly.lexer
 {
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false,Inherited =true)]
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true,Inherited =true)]
     public class LexemeAttribute : Attribute
     {
 

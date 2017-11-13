@@ -74,7 +74,7 @@ namespace sly.lexer
 
         public override string ToString()
         {
-            return string.Format($" {Position.Index}, {Position.Line}, {Position.Column}");
+            return string.Format($"{TokenID} [{Value}] @{Position}");
         }
     }
 }

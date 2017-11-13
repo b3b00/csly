@@ -8,7 +8,7 @@ namespace sly.parser.generator
     public enum EbnfToken
     {
 
-        [Lexeme("[A-Za-z0-9_��������][A-Za-z0-9_��������]*") ]
+        [Lexeme("[A-Za-z][A-Za-z0-9_]*") ]
         IDENTIFIER = 1,
         [Lexeme(":")]
         COLON = 2,

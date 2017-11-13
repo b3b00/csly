@@ -65,6 +65,11 @@ namespace sly.parser
 
         }
 
-        
+        public override string ToString()
+        {
+            return ErrorMessage;
+        }
+
+
     }
 }

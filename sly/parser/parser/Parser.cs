@@ -57,7 +57,6 @@ namespace sly.parser
             ParseResult<IN,OUT> result = null;
             try
             {
-
                 IList<Token<IN>> tokens = Lexer.Tokenize(source).ToList<Token<IN>>();
                 result = Parse(tokens, startingNonTerminal);
             }

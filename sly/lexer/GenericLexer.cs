@@ -9,6 +9,7 @@ namespace sly.lexer
 
     public enum GenericToken
     {
+        Default,
         Identifier,
         Int,
         Double,
