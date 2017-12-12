@@ -210,25 +210,32 @@ namespace sly.lexer
             return result;
         }
 
-        private static List<GenericToken> GetGenericTokens<IN>(Dictionary<IN, List<LexemeAttribute>> attributes)
+        private static (List<GenericToken> tokens, IdentifierType idType)  GetGenericTokensAndIdentifierType<IN>(Dictionary<IN, List<LexemeAttribute>> attributes)
         {
+            (List<GenericToken> tokens, IdentifierType idType) result = (new List<GenericToken>(), IdentifierType.Alpha);
             List<GenericToken> statics = new List<GenericToken>();
             foreach (var ls in attributes)
             {
                 foreach (var l in ls.Value)
                 {
                     statics.Add(l.GenericToken);
+                    if (l.IsIdentifier)
+                    {
+                        result.idType = l.IdentifierType;
+                    }
                 }                
             }
             statics.Distinct();
-            return statics;
+            result.tokens = statics;
+
+            return result;
         }
 
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes, BuildResult<ILexer<IN>> result) where IN : struct
         {
-            List<GenericToken> statics = GetGenericTokens(attributes);
+            (List<GenericToken> tokens, IdentifierType idType) statics = GetGenericTokensAndIdentifierType(attributes);
 
-            GenericLexer<IN> lexer = new GenericLexer<IN>(EOLType.Environment, statics.ToArray());
+            GenericLexer<IN> lexer = new GenericLexer<IN>(EOLType.Environment, statics.idType, statics.tokens.ToArray());
             foreach (KeyValuePair<IN, List<LexemeAttribute>> pair in attributes)
             {
                 IN tokenID = pair.Key;

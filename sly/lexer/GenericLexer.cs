@@ -18,6 +18,13 @@ namespace sly.lexer
         SugarToken
     }
 
+    public enum IdentifierType
+    {
+        Alpha,
+        AlphaNumeric,
+        AlphaNumericDash
+    }
+
     public enum EOLType
     {
         Windows,
@@ -48,13 +55,13 @@ namespace sly.lexer
         private FSMLexerBuilder<GenericToken, GenericToken> FSMBuilder;
 
 
-        public GenericLexer(EOLType eolType, params GenericToken[] staticTokens)
+        public GenericLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, params GenericToken[] staticTokens)
         {
-            InitializeStaticLexer(eolType,staticTokens);
+            InitializeStaticLexer(eolType,idType, staticTokens);
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
         }
 
-        private void InitializeStaticLexer(EOLType eolType, params GenericToken[] staticTokens)
+        private void InitializeStaticLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, params GenericToken[] staticTokens)
         {
             FSMBuilder = new FSMLexerBuilder<GenericToken, GenericToken>();
 
@@ -106,17 +113,8 @@ namespace sly.lexer
 
             if (staticTokens.ToList().Contains(GenericToken.Identifier) || staticTokens.ToList().Contains(GenericToken.KeyWord))
             {
-                // identifier
-                FSMBuilder.GoTo(start).
-            RangeTransition('a', 'z', GenericToken.Identifier).
-            Mark(in_identifier)
-            .End(GenericToken.Identifier);
-
-                FSMBuilder.GoTo(start).
-                RangeTransitionTo('A', 'Z', in_identifier, GenericToken.Identifier, GenericToken.Identifier).
-                RangeTransitionTo('a', 'z', in_identifier, GenericToken.Identifier).
-                RangeTransitionTo('A', 'Z', in_identifier, GenericToken.Identifier).
-                End(GenericToken.Identifier);
+                InitializeIdentifier(idType);
+                
             }
 
             //numeric
@@ -142,6 +140,36 @@ namespace sly.lexer
         }
 
 
+        private void InitializeIdentifier(IdentifierType idType = IdentifierType.Alpha)
+        {
+            
+                // identifier
+                FSMBuilder.GoTo(start).
+            RangeTransition('a', 'z', GenericToken.Identifier).
+            Mark(in_identifier)
+            .End(GenericToken.Identifier);
+
+                FSMBuilder.GoTo(start).
+                RangeTransitionTo('A', 'Z', in_identifier, GenericToken.Identifier, GenericToken.Identifier).
+                RangeTransitionTo('a', 'z', in_identifier, GenericToken.Identifier).
+                RangeTransitionTo('A', 'Z', in_identifier, GenericToken.Identifier).
+                End(GenericToken.Identifier);
+
+            if (idType == IdentifierType.AlphaNumeric || idType == IdentifierType.AlphaNumericDash)
+            {
+                FSMBuilder.GoTo(in_identifier).
+                    RangeTransitionTo('0', '9', in_identifier, GenericToken.Identifier, GenericToken.Identifier);
+            }
+            if (idType == IdentifierType.AlphaNumericDash)
+            {
+                FSMBuilder.GoTo(in_identifier).
+                    TransitionTo('-', in_identifier, GenericToken.Identifier, GenericToken.Identifier).
+                    TransitionTo('_', in_identifier, GenericToken.Identifier, GenericToken.Identifier);
+                FSMBuilder.GoTo(start).
+                    TransitionTo('_', in_identifier, GenericToken.Identifier, GenericToken.Identifier);
+            }
+
+        }
         public void AddLexeme(GenericToken generic, IN token)
         {
             if (generic == GenericToken.Identifier)
@@ -153,7 +181,7 @@ namespace sly.lexer
                     derived = derivedTokens[generic];
                 }
                 derived[defaultIdentifierKey] = token;
-                return;
+                //return;
             }
             if (generic == GenericToken.Double)
             {

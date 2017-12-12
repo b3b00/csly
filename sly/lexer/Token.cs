@@ -68,13 +68,21 @@ namespace sly.lexer
                 return double.Parse(Value);
             }
         }
+
+        public char CharValue
+        {
+            get
+            {
+                return StringWithoutQuotes[0];
+            }
+        }
             
 
         public bool End { get; set; }
 
         public override string ToString()
         {
-            return string.Format($"{TokenID} [{Value}] @{Position}");
+            return $"{TokenID} [{Value}] @{Position}";
         }
     }
 }

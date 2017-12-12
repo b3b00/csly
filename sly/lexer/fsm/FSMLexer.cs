@@ -218,7 +218,6 @@ namespace sly.lexer.fsm
                                 newLine = newLine && source[CurrentPosition + i] == EOL[i];
                                 i++;
                             }
-                            //string subSource = source.Substring(Math.Max(CurrentPosition, 0));
                             if (IgnoreEOL && newLine)
                             {
                                 if (successes.Any())
@@ -256,7 +255,6 @@ namespace sly.lexer.fsm
                         {
                             var resultInter = new FSMMatch<N>(true, currentNode.Value, value, tokenPosition, tokenLine, tokenColumn);
                             successes.Push(resultInter);                            
-                            //successes.Push((CurrentPosition,CurrentLine, CurrentColumn, currentNode.Value));
                         }
                         CurrentPosition++;
                         CurrentColumn += value.Length;
