@@ -78,5 +78,19 @@ namespace ParserTests
             ;
         }
 
+        [Fact]
+        public void TestAlphaNumDashIdStartsWithUnderscore()
+        {
+            var lexerRes = LexerBuilder.BuildLexer<AlphaNumDashId>(new BuildResult<ILexer<AlphaNumDashId>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("_alpha-123_").ToList();
+            Assert.Equal(1, r.Count);
+            Token<AlphaNumDashId> tok = r[0];
+            Assert.Equal(AlphaNumDashId.ID, tok.TokenID);
+            Assert.Equal("_alpha-123_", tok.StringWithoutQuotes);
+            ;
+        }
+
     }
 }

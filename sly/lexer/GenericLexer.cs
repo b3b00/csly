@@ -165,6 +165,8 @@ namespace sly.lexer
                 FSMBuilder.GoTo(in_identifier).
                     TransitionTo('-', in_identifier, GenericToken.Identifier, GenericToken.Identifier).
                     TransitionTo('_', in_identifier, GenericToken.Identifier, GenericToken.Identifier);
+                FSMBuilder.GoTo(start).
+                    TransitionTo('_', in_identifier, GenericToken.Identifier, GenericToken.Identifier);
             }
 
         }
