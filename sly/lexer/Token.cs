@@ -68,6 +68,14 @@ namespace sly.lexer
                 return double.Parse(Value);
             }
         }
+
+        public char CharValue
+        {
+            get
+            {
+                return StringWithoutQuotes[0];
+            }
+        }
             
 
         public bool End { get; set; }
