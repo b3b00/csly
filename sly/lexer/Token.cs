@@ -82,7 +82,7 @@ namespace sly.lexer
 
         public override string ToString()
         {
-            return string.Format($"{TokenID} [{Value}] @{Position}");
+            return $"{TokenID} [{Value}] @{Position}";
         }
     }
 }
