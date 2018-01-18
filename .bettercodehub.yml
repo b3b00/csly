@@ -1,2 +1,11 @@
 exclude:
 - /samples/.*
+component_depth: 3
+languages:
+- name: csharp
+  production:
+    exclude:
+      - .*Tests \.cs
+  test:
+    include:
+      - .*Tests\.cs
