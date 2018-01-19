@@ -1,3 +1,10 @@
 component_depth: 1
 exclude:
 - /samples/.*
+- name: csharp
+  production:
+    exclude:
+      - .*/ParserTests/.*\.cs
+  test:
+    include:
+      - .*/ParserTests/.*\.cs
