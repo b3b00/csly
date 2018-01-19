@@ -3,8 +3,8 @@ exclude:
 - /samples/.*
 - name: csharp
   production:
-    exclude:
+   exclude:
       - .*/ParserTests/.*\.cs
   test:
     include:
-      - .*/ParserTests/.*\.cs
+       - .*/ParserTests/.*\.cs
