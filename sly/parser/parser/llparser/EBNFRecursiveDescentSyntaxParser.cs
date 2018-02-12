@@ -161,43 +161,33 @@ namespace sly.parser.llparser
                             }
                             isError = isError || nonTerminalResult.IsError;
                         }
-
-                        else if (clause is ZeroOrMoreClause<IN>)
+                        
+                        else if (clause is OneOrMoreClause<IN> || clause is ZeroOrMoreClause<IN>)
                         {
-                            SyntaxParseResult<IN> zeroOrMoreResult =
-                                ParseZeroOrMore(tokens, clause as ZeroOrMoreClause<IN>, currentPosition);
-                            if (!zeroOrMoreResult.IsError)
+                            SyntaxParseResult<IN> manyResult = null;
+                            if (clause is OneOrMoreClause<IN> oneOrMore) {
+                                manyResult = ParseOneOrMore(tokens, oneOrMore, currentPosition);
+                            }
+                            else if (clause is ZeroOrMoreClause<IN> zeroOrMore) {
+                                manyResult = ParseZeroOrMore(tokens, zeroOrMore, currentPosition);
+                            }
+                            if (!manyResult.IsError)
                             {
-                                children.Add(zeroOrMoreResult.Root);
-                                currentPosition = zeroOrMoreResult.EndingPosition;
+                                children.Add(manyResult.Root);
+                                currentPosition = manyResult.EndingPosition;
                             }
                             else
                             {
-                                errors.AddRange(zeroOrMoreResult.Errors);
-                            }
-                            isError = isError || zeroOrMoreResult.IsError;
-                        }
-                        else if (clause is OneOrMoreClause<IN>)
-                        {
-                            SyntaxParseResult<IN> oneMoreResult =
-                                ParseOneOrMore(tokens, clause as OneOrMoreClause<IN>, currentPosition);
-                            if (!oneMoreResult.IsError)
-                            {
-                                children.Add(oneMoreResult.Root);
-                                currentPosition = oneMoreResult.EndingPosition;
-                            }
-                            else
-                            {
-                                if (oneMoreResult.Errors != null && oneMoreResult.Errors.Count > 0)
+                                if (manyResult.Errors != null && manyResult.Errors.Count > 0)
                                 {
-                                    errors.AddRange(oneMoreResult.Errors);
+                                    errors.AddRange(manyResult.Errors);
                                 }
                                 else
                                 {
                                     ;
                                 }
                             }
-                            isError = isError || oneMoreResult.IsError;
+                            isError = isError || manyResult.IsError;
                         }
                         if (isError)
                         {
