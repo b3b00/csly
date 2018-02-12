@@ -161,22 +161,7 @@ namespace sly.parser.llparser
                             }
                             isError = isError || nonTerminalResult.IsError;
                         }
-
-                        // else if (clause is ZeroOrMoreClause<IN>)
-                        // {
-                        //     SyntaxParseResult<IN> zeroOrMoreResult =
-                        //         ParseZeroOrMore(tokens, clause as ZeroOrMoreClause<IN>, currentPosition);
-                        //     if (!zeroOrMoreResult.IsError)
-                        //     {
-                        //         children.Add(zeroOrMoreResult.Root);
-                        //         currentPosition = zeroOrMoreResult.EndingPosition;
-                        //     }
-                        //     else
-                        //     {
-                        //         errors.AddRange(zeroOrMoreResult.Errors);
-                        //     }
-                        //     isError = isError || zeroOrMoreResult.IsError;
-                        // }
+                        
                         else if (clause is OneOrMoreClause<IN> || clause is ZeroOrMoreClause<IN>)
                         {
                             SyntaxParseResult<IN> manyResult = null;
