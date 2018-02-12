@@ -181,11 +181,7 @@ namespace sly.parser.llparser
                                 if (manyResult.Errors != null && manyResult.Errors.Count > 0)
                                 {
                                     errors.AddRange(manyResult.Errors);
-                                }
-                                else
-                                {
-                                    ;
-                                }
+                                }                                
                             }
                             isError = isError || manyResult.IsError;
                         }
