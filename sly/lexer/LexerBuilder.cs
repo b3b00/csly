@@ -93,7 +93,7 @@ namespace sly.lexer
                         }
                     }
                 }
-            
+
                 ;
             }
 
@@ -131,9 +131,9 @@ namespace sly.lexer
         private static bool IsRegexLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes)
         {
             bool isGeneric = false;
-            foreach(var ls in attributes)
+            foreach (var ls in attributes)
             {
-                foreach(var l in ls.Value)
+                foreach (var l in ls.Value)
                 {
                     isGeneric = !string.IsNullOrEmpty(l.Pattern);
                     if (isGeneric)
@@ -210,7 +210,7 @@ namespace sly.lexer
             return result;
         }
 
-        private static (List<GenericToken> tokens, IdentifierType idType)  GetGenericTokensAndIdentifierType<IN>(Dictionary<IN, List<LexemeAttribute>> attributes)
+        private static (List<GenericToken> tokens, IdentifierType idType) GetGenericTokensAndIdentifierType<IN>(Dictionary<IN, List<LexemeAttribute>> attributes)
         {
             (List<GenericToken> tokens, IdentifierType idType) result = (new List<GenericToken>(), IdentifierType.Alpha);
             List<GenericToken> statics = new List<GenericToken>();
@@ -223,7 +223,7 @@ namespace sly.lexer
                     {
                         result.idType = l.IdentifierType;
                     }
-                }                
+                }
             }
             statics.Distinct();
             result.tokens = statics;
@@ -241,7 +241,7 @@ namespace sly.lexer
                 IN tokenID = pair.Key;
 
                 List<LexemeAttribute> lexems = pair.Value;
-                foreach(var lexem in lexems) 
+                foreach (var lexem in lexems)
                 {
                     if (lexem.IsStaticGeneric)
                     {
@@ -259,6 +259,15 @@ namespace sly.lexer
                         foreach (string param in lexem.GenericTokenParameters)
                         {
                             lexer.AddSugarLexem(tokenID, param);
+                        }
+                    }
+                    if (lexem.IsString)
+                    {
+                        if (lexem.GenericTokenParameters != null && lexem.GenericTokenParameters.Length > 0) {
+                            lexer.AddStringLexem(tokenID, lexem.GenericTokenParameters[0]);
+                        }
+                        else {
+                            lexer.AddStringLexem(tokenID, "\"");
                         }
                     }
                 }

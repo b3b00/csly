@@ -13,6 +13,24 @@ using sly.buildresult;
 namespace ParserTests
 {
 
+    public enum DoubleQuotedString {
+
+         [Lexeme(GenericToken.String,"\"")]
+        DoubleString
+    }
+
+    public enum SingleQuotedString {
+
+         [Lexeme(GenericToken.String,"'")]
+        SingleString
+    }
+
+    public enum DefaultQuotedString {
+
+         [Lexeme(GenericToken.String)]
+        DefaultString
+    }
+
     public enum AlphaId
     {
         [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)]
@@ -92,5 +110,43 @@ namespace ParserTests
             ;
         }
 
+        [Fact]
+        public void TestDoubleQuotedString() {
+            var lexerRes = LexerBuilder.BuildLexer<DoubleQuotedString>(new BuildResult<ILexer<DoubleQuotedString>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            string source = "hello \\\"world ";
+            var r = lexer.Tokenize($"\"{source}\"").ToList();
+            Assert.Equal(1, r.Count);
+            Token<DoubleQuotedString> tok = r[0];
+            Assert.Equal(DoubleQuotedString.DoubleString, tok.TokenID);
+            Assert.Equal(source, tok.StringWithoutQuotes);
+        }
+
+         [Fact]
+        public void TestSingleQuotedString() {
+            var lexerRes = LexerBuilder.BuildLexer<SingleQuotedString>(new BuildResult<ILexer<SingleQuotedString>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            string source = "hello \\\"world ";
+            var r = lexer.Tokenize($"\"{source}\"").ToList();
+            Assert.Equal(1, r.Count);
+            Token<SingleQuotedString> tok = r[0];
+            Assert.Equal(SingleQuotedString.SingleString, tok.TokenID);
+            Assert.Equal(source, tok.StringWithoutQuotes);
+        }
+
+[Fact]
+        public void TestDefaultQuotedString() {
+            var lexerRes = LexerBuilder.BuildLexer<DefaultQuotedString>(new BuildResult<ILexer<DefaultQuotedString>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            string source = "hello \\\"world ";
+            var r = lexer.Tokenize($"'{source}'").ToList();
+            Assert.Equal(1, r.Count);
+            Token<DefaultQuotedString> tok = r[0];
+            Assert.Equal(DefaultQuotedString.DefaultString, tok.TokenID);
+            Assert.Equal(source, tok.StringWithoutQuotes);
+        }
     }
 }
