@@ -128,7 +128,7 @@ namespace ParserTests
             var lexerRes = LexerBuilder.BuildLexer<SingleQuotedString>(new BuildResult<ILexer<SingleQuotedString>>());
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
-            string source = "hello \\\"world ";
+            string source = "hello \\'world ";
             var r = lexer.Tokenize($"\"{source}\"").ToList();
             Assert.Equal(1, r.Count);
             Token<SingleQuotedString> tok = r[0];
