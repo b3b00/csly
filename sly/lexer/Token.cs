@@ -5,9 +5,8 @@ namespace sly.lexer
     public class Token<T>
     {
 
-        private static T defTok;
 
-        
+        private static T defTok;
 
         public static T DefaultToken
         {
@@ -27,8 +26,6 @@ namespace sly.lexer
             TokenID = DefaultToken;
         }
 
-        public char StringDelimiter = '"';
-
         public bool IsEndOfStream
         {
             get
@@ -38,6 +35,8 @@ namespace sly.lexer
             private set {
             }
         }
+
+        public char StringDelimiter = '"';
 
         public TokenPosition Position { get; set; }
         public T TokenID { get; set; }
