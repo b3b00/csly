@@ -47,11 +47,11 @@ namespace sly.lexer
             get
             {
                 string result = Value;
-                if (result.StartsWith(StringDelimiter))
+                if (result.StartsWith(StringDelimiter.ToString()))
                 {
                     result = result.Substring(1);
                 }
-                if (result.EndsWith(StringDelimiter))
+                if (result.EndsWith(StringDelimiter.ToString()))
                 {
                     result = result.Substring(0, result.Length - 1);
                 }
