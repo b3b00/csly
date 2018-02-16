@@ -15,11 +15,18 @@ namespace sly.lexer.fsm
 
         public Token<N> Result { get; set; }
         
-        public FSMMatch(bool success, N result = default(N), string value = null, int position = 0, int line = 0, int column = 0)
+        // public FSMMatch(bool success, N result = default(N), string value = null, int position = 0, int line = 0, int column = 0)
+        // {
+        //     Properties = new Dictionary<string, object>();
+        //     IsSuccess = success;
+        //     Result = new Token<N>(result,value,new TokenPosition(position,line,column));
+        // }
+
+        public FSMMatch(bool success, N result = default(N), string value = null, TokenPosition position = null)
         {
             Properties = new Dictionary<string, object>();
             IsSuccess = success;
-            Result = new Token<N>(result,value,new TokenPosition(position,line,column));
+            Result = new Token<N>(result,value,position);
         }
     }
 
@@ -177,10 +184,7 @@ namespace sly.lexer.fsm
             int lastNode = 0;
 
             bool tokenStarted = false;
-            int tokenPosition = 0;
-            int tokenColumn = 0;
-            int tokenLine = 0;
-
+        
 
             if (CurrentPosition < source.Length)
             {
@@ -244,16 +248,15 @@ namespace sly.lexer.fsm
                     {
                         lastNode = currentNode.Id;
                         value += currentToken;
+                        TokenPosition position = null;
                         if (!tokenStarted)
                         {
-                            tokenStarted = true;
-                            tokenPosition = CurrentPosition;
-                            tokenColumn = CurrentColumn;
-                            tokenLine = CurrentLine;
+                            tokenStarted = true;                            
+                            position = new TokenPosition(CurrentPosition,CurrentLine,CurrentColumn);
                         }
                         if (currentNode.IsEnd)
                         {
-                            var resultInter = new FSMMatch<N>(true, currentNode.Value, value, tokenPosition, tokenLine, tokenColumn);
+                            var resultInter = new FSMMatch<N>(true, currentNode.Value, value, position);
                             successes.Push(resultInter);                            
                         }
                         CurrentPosition++;
