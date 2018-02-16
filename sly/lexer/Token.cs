@@ -27,7 +27,7 @@ namespace sly.lexer
             TokenID = DefaultToken;
         }
 
-        public char StringDelimiter;
+        public char StringDelimiter = '"';
 
         public bool IsEndOfStream
         {
