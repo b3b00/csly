@@ -32,7 +32,8 @@ namespace sly.lexer
             {
                 return TokenID.Equals(DefaultToken);
             }
-            private set {
+            private set
+            {
             }
         }
 
@@ -47,22 +48,30 @@ namespace sly.lexer
             get
             {
                 string result = Value;
-                if (result.StartsWith(StringDelimiter.ToString()))
+                if (StringDelimiter != (char)0 )
                 {
-                    result = result.Substring(1);
-                }
-                if (result.EndsWith(StringDelimiter.ToString()))
-                {
-                    result = result.Substring(0, result.Length - 1);
+                    if (result.StartsWith(StringDelimiter.ToString()))
+                    {
+                        result = result.Substring(1);
+                    }
+                    if (result.EndsWith(StringDelimiter.ToString()))
+                    {
+                        result = result.Substring(0, result.Length - 1);
+                    }
                 }
                 return result;
             }
             private set { }
         }
 
-        public int IntValue { get {
+        public int IntValue
+        {
+            get
+            {
                 return int.Parse(Value);
-            } set { } }
+            }
+            set { }
+        }
 
         public double DoubleValue
         {
@@ -79,7 +88,7 @@ namespace sly.lexer
                 return StringWithoutQuotes[0];
             }
         }
-            
+
 
         public bool End { get; set; }
 
