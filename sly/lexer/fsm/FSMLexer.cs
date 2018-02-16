@@ -9,6 +9,8 @@ namespace sly.lexer.fsm
     public class FSMMatch<N>
     {
 
+        public char StringDelimiter = '"';
+
         public Dictionary<string,object> Properties { get; set; }
 
         public bool IsSuccess { get; set; }
@@ -29,6 +31,8 @@ namespace sly.lexer.fsm
         private Dictionary<int, List<FSMTransition<T>>> Transitions;
 
         private Dictionary<int, FSMNode<N>> Nodes;
+
+        public char StringDelimiter = '"';
 
         public bool IgnoreWhiteSpace { get; set; }
 

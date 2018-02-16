@@ -129,20 +129,20 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             string source = "hello \\'world ";
-            var r = lexer.Tokenize($"\"{source}\"").ToList();
+            var r = lexer.Tokenize($"'{source}'").ToList();
             Assert.Equal(1, r.Count);
             Token<SingleQuotedString> tok = r[0];
             Assert.Equal(SingleQuotedString.SingleString, tok.TokenID);
             Assert.Equal(source, tok.StringWithoutQuotes);
         }
 
-[Fact]
+        [Fact]
         public void TestDefaultQuotedString() {
             var lexerRes = LexerBuilder.BuildLexer<DefaultQuotedString>(new BuildResult<ILexer<DefaultQuotedString>>());
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             string source = "hello \\\"world ";
-            var r = lexer.Tokenize($"'{source}'").ToList();
+            var r = lexer.Tokenize($"\"{source}\"").ToList();
             Assert.Equal(1, r.Count);
             Token<DefaultQuotedString> tok = r[0];
             Assert.Equal(DefaultQuotedString.DefaultString, tok.TokenID);

@@ -51,9 +51,10 @@ namespace sly.lexer
         private IN identifierDerivedToken;
         private IN intDerivedToken;
         private IN doubleDerivedToken;
-        private IN stringDerivedToken;
         private FSMLexerBuilder<GenericToken, GenericToken> FSMBuilder;
 
+
+        private char StringDelimiter;
 
         public GenericLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, params GenericToken[] staticTokens)
         {
@@ -193,12 +194,7 @@ namespace sly.lexer
                         {
                             match.Properties[DerivedToken] = doubleDerivedToken;
                             break;
-                        }
-                    case GenericToken.String:
-                        {
-                            match.Properties[DerivedToken] = stringDerivedToken;
-                            break;
-                        }
+                        }                    
                     default:
                         {
                             match.Properties[DerivedToken] = token;
@@ -304,25 +300,29 @@ namespace sly.lexer
                 throw new ArgumentException($"bad lexem {stringDelimiter} :  SugarToken lexeme <{token.ToString()}> can not start with a letter.");
             }
               
-              char delimiter = stringDelimiter[0];
+              StringDelimiter = stringDelimiter[0];
 
 NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
             {
-                match.Properties[DerivedToken] = stringDerivedToken;
+                match.Properties[DerivedToken] = token;
+                string value = match.Result.Value;
+                
+                match.Result.Value = value;
                 return match;
             };         
 
                 FSMBuilder.GoTo(start);
-                FSMBuilder.Transition(delimiter, GenericToken.String)
+                FSMBuilder.Transition(StringDelimiter, GenericToken.String)
                     .Mark(in_string)
-                    .ExceptTransitionTo(new char[] { delimiter, '\\' }, in_string, GenericToken.String)
+                    .ExceptTransitionTo(new char[] { StringDelimiter, '\\' }, in_string, GenericToken.String)
                     .Transition('\\', GenericToken.String)
                     .Mark(escape_string)
                     .AnyTransitionTo(' ', in_string, GenericToken.String)
-                    .Transition(delimiter, GenericToken.String)
+                    .Transition(StringDelimiter, GenericToken.String)
                     .End(GenericToken.String)
                     .Mark(string_end)
                     .CallBack(callback);
+                    FSMBuilder.Fsm.StringDelimiter = StringDelimiter;
 
         }
         public void AddSugarLexem(IN token, string specialValue)
@@ -372,6 +372,7 @@ NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
             var tok = new Token<IN>();
             tok.Value = match.Result.Value;
             tok.Position = match.Result.Position;
+            tok.StringDelimiter = StringDelimiter;
             tok.TokenID = (IN)match.Properties[DerivedToken];
             return tok;
         }

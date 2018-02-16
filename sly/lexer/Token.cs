@@ -7,6 +7,8 @@ namespace sly.lexer
 
         private static T defTok;
 
+        
+
         public static T DefaultToken
         {
             get { return defTok; }
@@ -24,6 +26,8 @@ namespace sly.lexer
             End = true;
             TokenID = DefaultToken;
         }
+
+        public char StringDelimiter;
 
         public bool IsEndOfStream
         {
@@ -44,11 +48,11 @@ namespace sly.lexer
             get
             {
                 string result = Value;
-                if (result.StartsWith("\""))
+                if (result.StartsWith(StringDelimiter))
                 {
                     result = result.Substring(1);
                 }
-                if (result.EndsWith("\""))
+                if (result.EndsWith(StringDelimiter))
                 {
                     result = result.Substring(0, result.Length - 1);
                 }
