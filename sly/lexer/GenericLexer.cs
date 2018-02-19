@@ -51,9 +51,10 @@ namespace sly.lexer
         private IN identifierDerivedToken;
         private IN intDerivedToken;
         private IN doubleDerivedToken;
-        private IN stringDerivedToken;
         private FSMLexerBuilder<GenericToken, GenericToken> FSMBuilder;
 
+
+        private char StringDelimiter;
 
         public GenericLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, params GenericToken[] staticTokens)
         {
@@ -93,23 +94,6 @@ namespace sly.lexer
 
             // start machine definition
             FSMBuilder.Mark(start);
-
-
-
-            if (staticTokens.ToList().Contains(GenericToken.String))
-            {
-
-                // string literal
-                FSMBuilder.Transition('\"', GenericToken.String)
-                    .Mark(in_string)
-                    .ExceptTransitionTo(new char[] { '\"', '\\' }, in_string, GenericToken.String)
-                    .Transition('\\', GenericToken.String)
-                    .Mark(escape_string)
-                    .AnyTransitionTo(' ', in_string, GenericToken.String)
-                    .Transition('\"', GenericToken.String)
-                    .End(GenericToken.String)
-                    .Mark(string_end);
-            }
 
             if (staticTokens.ToList().Contains(GenericToken.Identifier) || staticTokens.ToList().Contains(GenericToken.KeyWord))
             {
@@ -190,11 +174,7 @@ namespace sly.lexer
             if (generic == GenericToken.Int)
             {
                 intDerivedToken = token;               
-            }
-            if (generic == GenericToken.String)
-            {
-                stringDerivedToken = token;                
-            }
+            }            
 
             NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
             {
@@ -214,12 +194,7 @@ namespace sly.lexer
                         {
                             match.Properties[DerivedToken] = doubleDerivedToken;
                             break;
-                        }
-                    case GenericToken.String:
-                        {
-                            match.Properties[DerivedToken] = stringDerivedToken;
-                            break;
-                        }
+                        }                    
                     default:
                         {
                             match.Properties[DerivedToken] = token;
@@ -272,7 +247,7 @@ namespace sly.lexer
                     {
                         AddSugarLexem(token, specialValue);
                         break;
-                    }                    
+                    }                      
             }
             Dictionary<string, IN> tokensForGeneric = new Dictionary<string, IN>();
             if (derivedTokens.ContainsKey(genericToken))
@@ -314,11 +289,47 @@ namespace sly.lexer
         }
 
 
+        public void AddStringLexem(IN token, string stringDelimiter) 
+        {
+            if (string.IsNullOrEmpty(stringDelimiter) || stringDelimiter.Length > 1)
+            {
+                throw new ArgumentException($"bad lexem {stringDelimiter} :  StringToken lexeme <{token.ToString()}> must be  1 character length.");
+            }
+            if (char.IsLetterOrDigit(stringDelimiter[0]))
+            {
+                throw new ArgumentException($"bad lexem {stringDelimiter} :  SugarToken lexeme <{token.ToString()}> can not start with a letter.");
+            }
+              
+              StringDelimiter = stringDelimiter[0];
+
+NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
+            {
+                match.Properties[DerivedToken] = token;
+                string value = match.Result.Value;
+                
+                match.Result.Value = value;
+                return match;
+            };         
+
+                FSMBuilder.GoTo(start);
+                FSMBuilder.Transition(StringDelimiter, GenericToken.String)
+                    .Mark(in_string)
+                    .ExceptTransitionTo(new char[] { StringDelimiter, '\\' }, in_string, GenericToken.String)
+                    .Transition('\\', GenericToken.String)
+                    .Mark(escape_string)
+                    .AnyTransitionTo(' ', in_string, GenericToken.String)
+                    .Transition(StringDelimiter, GenericToken.String)
+                    .End(GenericToken.String)
+                    .Mark(string_end)
+                    .CallBack(callback);
+                    FSMBuilder.Fsm.StringDelimiter = StringDelimiter;
+
+        }
         public void AddSugarLexem(IN token, string specialValue)
         {
             if (char.IsLetter(specialValue[0]))
             {
-                throw new ArgumentException($"bad lexem {specialValue} :  SugarToken lexeme can not start with a letter.");
+                throw new ArgumentException($"bad lexem {specialValue} :  SugarToken lexeme <{token.ToString()}>  can not start with a letter.");
             }
             NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
             {
@@ -361,6 +372,7 @@ namespace sly.lexer
             var tok = new Token<IN>();
             tok.Value = match.Result.Value;
             tok.Position = match.Result.Position;
+            tok.StringDelimiter = StringDelimiter;
             tok.TokenID = (IN)match.Properties[DerivedToken];
             return tok;
         }

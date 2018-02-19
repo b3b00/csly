@@ -21,11 +21,13 @@ namespace sly.lexer
         public bool IsLineEnding { get; set; }
 
 
-        public bool IsStaticGeneric => GenericTokenParameters == null || GenericTokenParameters.Length == 0;
+        public bool IsStaticGeneric => ( GenericTokenParameters == null || GenericTokenParameters.Length == 0) && GenericToken != GenericToken.String;
 
         public bool IsKeyWord => GenericToken == GenericToken.KeyWord;
 
         public bool IsSugar => GenericToken == GenericToken.SugarToken;
+
+        public bool IsString => GenericToken == GenericToken.String;
 
         public bool IsIdentifier => GenericToken == GenericToken.Identifier;
 

@@ -4,6 +4,7 @@ namespace jsonparser
 {
     public enum JsonTokenGeneric
     {
+        
         [Lexeme(GenericToken.String)]
         STRING = 1,
         [Lexeme(GenericToken.Double)]
