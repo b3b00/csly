@@ -7,7 +7,7 @@ namespace sly.lexer.fsm
 {
     public class FSMTransition<T> 
     {
-        public ITransitionCheck Check { get; set; }
+        public AbstractTransitionCheck Check { get; set; }
 
         public List<T> TransitionValues { get; set; }
 
@@ -15,7 +15,7 @@ namespace sly.lexer.fsm
 
         public int ToNode;
 
-        internal FSMTransition(ITransitionCheck check, int from ,int to, List<T> values )
+        internal FSMTransition(AbstractTransitionCheck check, int from ,int to, List<T> values )
         {
             Check = check;
             TransitionValues = values;
@@ -23,7 +23,13 @@ namespace sly.lexer.fsm
             ToNode = to;
         }
 
-        internal bool Match(char token)
+
+        internal bool Match(char token, string value)
+        {
+            return Check.Check(token,value);
+        }
+
+         internal bool Match(char token)
         {
             return Check.Match(token);
         }

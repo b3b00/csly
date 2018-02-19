@@ -4,7 +4,7 @@ using System.Text;
 
 namespace sly.lexer.fsm.transitioncheck
 {
-    public class TransitionRange : ITransitionCheck
+    public class TransitionRange : AbstractTransitionCheck
     {
         char RangeStart;
 
@@ -16,9 +16,17 @@ namespace sly.lexer.fsm.transitioncheck
             RangeEnd = end;
         }
 
-        public bool Match(char input)
+
+
+        public TransitionRange(char start, char end, TransitionPrecondition precondition)
         {
-            return input.CompareTo(RangeStart) >= 0  && input.CompareTo(RangeEnd) <= 0; 
+            RangeStart = start;
+            RangeEnd = end;
+            Precondition = precondition;
+        }
+        public override bool Match(char input)
+        {
+            return input.CompareTo(RangeStart) >= 0 && input.CompareTo(RangeEnd) <= 0;
         }
     }
 }
