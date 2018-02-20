@@ -51,12 +51,8 @@ namespace sly.lexer
     public class LexerBuilder
     {
 
-        public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result) where IN : struct
-        {
-            Type type = typeof(IN);
-            TypeInfo typeInfo = type.GetTypeInfo();
-            ILexer<IN> lexer = new Lexer<IN>();
 
+        public static Dictionary<IN, List<LexemeAttribute>> GetLexemes<IN>(BuildResult<ILexer<IN>> result) {
             var values = Enum.GetValues(typeof(IN));
 
             var attributes = new Dictionary<IN, List<LexemeAttribute>>();
@@ -68,7 +64,7 @@ namespace sly.lexer
                 List<LexemeAttribute> enumattributes = value.GetAttributesOfType<LexemeAttribute>();
                 if (enumattributes == null || enumattributes.Count == 0)
                 {
-                    result.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
+                    result?.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
                 }
                 else
                 {
@@ -88,7 +84,7 @@ namespace sly.lexer
                         {
                             if (!tokenID.Equals(default(IN)))
                             {
-                                result.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
+                                result?.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
                             }
                         }
                     }
@@ -96,6 +92,56 @@ namespace sly.lexer
 
                 ;
             }
+            return attributes;
+        }
+
+        public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result) where IN : struct
+        {
+            Type type = typeof(IN);
+            TypeInfo typeInfo = type.GetTypeInfo();
+            ILexer<IN> lexer = new Lexer<IN>();
+
+            // var values = Enum.GetValues(typeof(IN));
+
+            // var attributes = new Dictionary<IN, List<LexemeAttribute>>();
+
+            // var fields = typeof(IN).GetFields();
+            // foreach (Enum value in values)
+            // {
+            //     IN tokenID = (IN)(object)value;
+            //     List<LexemeAttribute> enumattributes = value.GetAttributesOfType<LexemeAttribute>();
+            //     if (enumattributes == null || enumattributes.Count == 0)
+            //     {
+            //         result.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
+            //     }
+            //     else
+            //     {
+            //         foreach (var lexem in enumattributes)
+            //         {
+            //             if (lexem != null)
+            //             {
+            //                 List<LexemeAttribute> lex = new List<LexemeAttribute>();
+            //                 if (attributes.ContainsKey(tokenID))
+            //                 {
+            //                     lex = attributes[tokenID];
+            //                 }
+            //                 lex.Add(lexem);
+            //                 attributes[tokenID] = lex;
+            //             }
+            //             else
+            //             {
+            //                 if (!tokenID.Equals(default(IN)))
+            //                 {
+            //                     result.AddError(new LexerInitializationError(ErrorLevel.WARN, $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
+            //                 }
+            //             }
+            //         }
+            //     }
+
+            //     ;
+            // }
+
+            var attributes = GetLexemes(result);
 
             result = Build(attributes, result);
 
@@ -269,7 +315,7 @@ namespace sly.lexer
                         else {
                             lexer.AddStringLexem(tokenID, "\"");
                         }
-                    }
+                    }                   
                 }
             }
             result.Result = lexer;

@@ -16,13 +16,6 @@ namespace sly.lexer.fsm
         public bool IsSuccess { get; set; }
 
         public Token<N> Result { get; set; }
-        
-        // public FSMMatch(bool success, N result = default(N), string value = null, int position = 0, int line = 0, int column = 0)
-        // {
-        //     Properties = new Dictionary<string, object>();
-        //     IsSuccess = success;
-        //     Result = new Token<N>(result,value,new TokenPosition(position,line,column));
-        // }
 
         public FSMMatch(bool success, N result = default(N), string value = null, TokenPosition position = null)
         {
