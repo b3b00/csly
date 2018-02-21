@@ -5,7 +5,8 @@ using System.Linq;
 
 namespace sly.lexer.fsm
 {
-
+    public delegate void BuildExtension<IN>( IN token, LexemeAttribute lexem,  GenericLexer<IN> lexer) where IN : struct;
+    
     public class FSMMatch<N>
     {
 

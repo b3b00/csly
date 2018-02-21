@@ -23,34 +23,32 @@ namespace ParserTests
     }
 
 
-    public class ExtendedGenericLexer : GenericLexer<Extensions>
+    public static class ExtendedGenericLexer 
     {
 
-        public ExtendedGenericLexer(GenericLexer<Extensions> lexer) : base()
-        {
-            lexer.CopyTo(this);
-            AddExtensions();
-        }
+        
 
-        public bool CheckDate(string value) {
+        public static bool CheckDate(string value) {
             return true;
         }
 
 
 
-        public override void AddExtension(LexemeAttribute lexem,Extensions token ) {
+        public static void AddExtension(Extensions token, LexemeAttribute lexem, GenericLexer<Extensions> lexer) {
             if (token == Extensions.DATE) {
 
 
                 NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) => 
                 {
-                     match.Properties[DerivedToken] = Extensions.DATE;
+                     match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
                      return match;
                 };
 
+                var fsmBuilder = lexer.FSMBuilder;
+
                 // TODO
-                FSMBuilder.GoTo(in_double)
-                .Transition('.',this.CheckDate)
+                fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
+                .Transition('.',CheckDate)
                 .Mark("start_date")
                 .RangeTransition('0','9')
                 .Mark("y1")
@@ -110,15 +108,17 @@ namespace ParserTests
         [Fact]
         public void TestExtensions() 
         {
-            var lexerRes = LexerBuilder.BuildLexer<Extensions>(new BuildResult<ILexer<Extensions>>());
+            var lexerRes = LexerBuilder.BuildLexer<Extensions>(new BuildResult<ILexer<Extensions>>(), ExtendedGenericLexer.AddExtension);
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result as GenericLexer<Extensions>;
             Assert.NotNull(lexer);
-            GenericLexer<Extensions> extended = new ExtendedGenericLexer(lexer);
-            List<Token<Extensions>> tokens = extended.Tokenize("20.02.2018").ToList();
-            Assert.Equal(1,tokens.Count);
+            
+            List<Token<Extensions>> tokens = lexer.Tokenize("20.02.2018 3.14").ToList();
+            Assert.Equal(2,tokens.Count);
             Assert.Equal(Extensions.DATE,tokens[0].TokenID);
             Assert.Equal("20.02.2018",tokens[0].Value);
+            Assert.Equal(Extensions.DOUBLE,tokens[1].TokenID);
+            Assert.Equal("3.14",tokens[1].Value);
         }
 
         [Fact]

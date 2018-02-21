@@ -7,6 +7,8 @@ using System.Text;
 namespace sly.lexer
 {
 
+    
+
     public enum GenericToken
     {
         Default,
@@ -36,24 +38,26 @@ namespace sly.lexer
 
     public class GenericLexer<IN> : ILexer<IN> where IN : struct
     {
-        protected const string in_string = "in_string";
-        protected const string string_end = "string_end";
-        protected const string start = "start";
-        protected const string in_int = "in_int";
-        protected const string start_double = "start_double";
-        protected const string in_double = "in_double";
-        protected const string in_identifier = "in_identifier";
-        protected const string token_property = "token";
-        protected const string DerivedToken = "derivedToken";
-        protected const string defaultIdentifierKey = "identifier";
-        protected const string escape_string = "escape";
+        public static string in_string = "in_string";
+        public static string string_end = "string_end";
+        public static string start = "start";
+        public static string in_int = "in_int";
+        public static string start_double = "start_double";
+        public static string in_double = "in_double";
+        public static string in_identifier = "in_identifier";
+        public static string token_property = "token";
+        public static string DerivedToken = "derivedToken";
+        public static string defaultIdentifierKey = "identifier";
+        public static string escape_string = "escape_string";
         protected FSMLexer<GenericToken, GenericToken> LexerFsm;
+
+        protected BuildExtension<IN> ExtensionBuilder;
 
         protected Dictionary<GenericToken, Dictionary<string, IN>> derivedTokens;
         protected IN identifierDerivedToken;
         protected IN intDerivedToken;
         protected IN doubleDerivedToken;
-        protected FSMLexerBuilder<GenericToken, GenericToken> FSMBuilder;
+        public FSMLexerBuilder<GenericToken, GenericToken> FSMBuilder;
 
 
         protected char StringDelimiter;
@@ -64,10 +68,11 @@ namespace sly.lexer
 
         }
 
-        public GenericLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, params GenericToken[] staticTokens)
+        public GenericLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, BuildExtension<IN> extensionBuilder = null, params GenericToken[] staticTokens)
         {
             InitializeStaticLexer(eolType, idType, staticTokens);
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
+            this.ExtensionBuilder = extensionBuilder;
         }
 
         public void CopyTo(GenericLexer<IN> otherLexer)
@@ -398,19 +403,6 @@ namespace sly.lexer
             return tok;
         }
 
-        public virtual void AddExtension(LexemeAttribute lexem, IN token) {            
-
-        }
-
-        public void AddExtensions() {
-            var attributes = LexerBuilder.GetLexemes<IN>(null);
-            Console.WriteLine(attributes.Count);
-            foreach(KeyValuePair<IN,List<LexemeAttribute>> attrs in attributes) {
-                foreach(LexemeAttribute lexem in attrs.Value) {
-                    AddExtension(lexem,attrs.Key);
-                }
-            }
-            ;
-        }
+       
     }
 }
