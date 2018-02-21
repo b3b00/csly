@@ -21,7 +21,7 @@ namespace sly.lexer
         public bool IsLineEnding { get; set; }
 
 
-        public bool IsStaticGeneric => ( GenericTokenParameters == null || GenericTokenParameters.Length == 0) && GenericToken != GenericToken.String;
+        public bool IsStaticGeneric => ( GenericTokenParameters == null || GenericTokenParameters.Length == 0) && GenericToken != GenericToken.String && GenericToken != GenericToken.Extension;
 
         public bool IsKeyWord => GenericToken == GenericToken.KeyWord;
 
@@ -31,6 +31,7 @@ namespace sly.lexer
 
         public bool IsIdentifier => GenericToken == GenericToken.Identifier;
 
+        public bool IsExtension => GenericToken == GenericToken.Extension;
 
         public LexemeAttribute(string pattern, bool isSkippable = false, bool isLineEnding = false)        {
             Pattern = pattern;

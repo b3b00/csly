@@ -9,9 +9,61 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using sly.buildresult;
+using sly.lexer.fsm;
 
 namespace ParserTests
 {
+
+ public enum Extensions {
+        [Lexeme(GenericToken.Extension)] 
+       DATE,
+
+               [Lexeme(GenericToken.Double)] 
+       DOUBLE,
+    }
+
+
+    public static class ExtendedGenericLexer 
+    {
+
+        
+
+        public static bool CheckDate(string value) {
+            return true;
+        }
+
+
+
+        public static void AddExtension(Extensions token, LexemeAttribute lexem, GenericLexer<Extensions> lexer) {
+            if (token == Extensions.DATE) {
+
+
+                NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) => 
+                {
+                     match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
+                     return match;
+                };
+
+                var fsmBuilder = lexer.FSMBuilder;
+
+                // TODO
+                fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
+                .Transition('.',CheckDate)
+                .Mark("start_date")
+                .RangeTransition('0','9')
+                .Mark("y1")
+                .RangeTransition('0','9')
+                .Mark("y2")
+                .RangeTransition('0','9')
+                .Mark("y3")
+                .RangeTransition('0','9')
+                .Mark("y4")
+                .End(GenericToken.Extension)
+                .CallBack(callback);
+            }
+        }
+
+    }
 
     public enum DoubleQuotedString {
 
@@ -51,6 +103,23 @@ namespace ParserTests
 
     public class GenericLexerTests
     {
+
+
+        [Fact]
+        public void TestExtensions() 
+        {
+            var lexerRes = LexerBuilder.BuildLexer<Extensions>(new BuildResult<ILexer<Extensions>>(), ExtendedGenericLexer.AddExtension);
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result as GenericLexer<Extensions>;
+            Assert.NotNull(lexer);
+            
+            List<Token<Extensions>> tokens = lexer.Tokenize("20.02.2018 3.14").ToList();
+            Assert.Equal(2,tokens.Count);
+            Assert.Equal(Extensions.DATE,tokens[0].TokenID);
+            Assert.Equal("20.02.2018",tokens[0].Value);
+            Assert.Equal(Extensions.DOUBLE,tokens[1].TokenID);
+            Assert.Equal("3.14",tokens[1].Value);
+        }
 
         [Fact]
         public void TestAlphaId()

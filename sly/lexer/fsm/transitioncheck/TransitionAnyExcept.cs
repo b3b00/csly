@@ -4,7 +4,7 @@ using System.Text;
 
 namespace sly.lexer.fsm.transitioncheck
 {
-    public class TransitionAnyExcept : ITransitionCheck
+    public class TransitionAnyExcept : AbstractTransitionCheck
     {
         List<char> TokenExceptions;
 
@@ -14,7 +14,14 @@ namespace sly.lexer.fsm.transitioncheck
             TokenExceptions.AddRange(tokens);
         }
 
-        public bool Match(char input)
+         public TransitionAnyExcept(TransitionPrecondition precondition,params char[] tokens)
+        {
+            TokenExceptions = new List<char>();
+            TokenExceptions.AddRange(tokens);
+            Precondition = precondition;
+        }
+
+        public override bool Match(char input)
         {
             return !TokenExceptions.Contains(input);
         }
