@@ -96,7 +96,6 @@ namespace ParserTests
 
         private Parser<TokenType, string> Parser;
 
-        private Parser<JsonToken, JSon> JsonParser;
 
         public EBNFTests()
         {
@@ -129,18 +128,18 @@ namespace ParserTests
             Assert.False(buildResult.IsError);
             Parser = buildResult.Result;
             Assert.Equal(typeof(EBNFRecursiveDescentSyntaxParser<TokenType, string>), Parser.SyntaxParser.GetType());
-            Assert.Equal(Parser.Configuration.NonTerminals.Count, 4);
+            Assert.Equal(4,Parser.Configuration.NonTerminals.Count);
             NonTerminal<TokenType> nt = Parser.Configuration.NonTerminals["R"];
-            Assert.Equal(nt.Rules.Count, 2);
+            Assert.Equal(2,nt.Rules.Count);
             nt = Parser.Configuration.NonTerminals["A"];
-            Assert.Equal(nt.Rules.Count, 1);
+            Assert.Equal(1,nt.Rules.Count);
             Rule<TokenType> rule = nt.Rules[0];
-            Assert.Equal(rule.Clauses.Count, 1);
+            Assert.Equal(1,rule.Clauses.Count);
             Assert.IsType(typeof(OneOrMoreClause<TokenType>), rule.Clauses[0]);
             nt = Parser.Configuration.NonTerminals["B"];
-            Assert.Equal(nt.Rules.Count, 1);
+            Assert.Equal(1,nt.Rules.Count);
             rule = nt.Rules[0];
-            Assert.Equal(rule.Clauses.Count, 1);
+            Assert.Equal(1, rule.Clauses.Count);
             Assert.IsType(typeof(ZeroOrMoreClause<TokenType>), rule.Clauses[0]);
             ;
         }

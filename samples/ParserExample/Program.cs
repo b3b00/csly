@@ -219,42 +219,42 @@ namespace ParserExample
 (
     r:=1;
     i:=1;
-    while i < 11 do 
+    while i < 11 DO 
     ( 
     r := r * i;
-    print r;
+    PRINT r;
     print i;
     i := i + 1 )
 )";
 
-            WhileParser wp = new WhileParser();
-            sw.Reset();
-            sw.Start();
-            ParserBuilder<WhileToken, WhileAST> wbuilder = new ParserBuilder<WhileToken, WhileAST>();
-            var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
-            var parser = buildResult.Result;
-            var r = parser.Parse(source);
-            sw.Stop();
-            Console.WriteLine($"regex parser : {sw.ElapsedMilliseconds} ms");
-            if (!r.IsError)
-            {
-                var interpreter = new Interpreter();
-                var ctx = interpreter.Interprete(r.Result);
-                ;
+            //WhileParser wp = new WhileParser();
+            //sw.Reset();
+            //sw.Start();
+            //ParserBuilder<WhileToken, WhileAST> wbuilder = new ParserBuilder<WhileToken, WhileAST>();
+            //var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
+            //var parser = buildResult.Result;
+            //var r = parser.Parse(source);
+            //sw.Stop();
+            //Console.WriteLine($"regex parser : {sw.ElapsedMilliseconds} ms");
+            //if (!r.IsError)
+            //{
+            //    var interpreter = new Interpreter();
+            //    var ctx = interpreter.Interprete(r.Result);
+            //    ;
 
-            }
-            else
-            {
-                r.Errors.ForEach(e => Console.WriteLine(e.ToString()));
-            }
+            //}
+            //else
+            //{
+            //    r.Errors.ForEach(e => Console.WriteLine(e.ToString()));
+            //}
 
             sw.Reset();
             sw.Start();
             WhileParserGeneric wpg = new WhileParserGeneric();
             ParserBuilder <WhileTokenGeneric, WhileAST > wbuilderGen = new ParserBuilder<WhileTokenGeneric, WhileAST>();
             var buildResultgen = wbuilderGen.BuildParser(wpg, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
-            var parserGen = buildResult.Result;
-            var rGen = parser.Parse(source);
+            var parserGen = buildResultgen.Result;
+            var rGen = parserGen.Parse(source);
             sw.Stop();
             Console.WriteLine($"generic parser : {sw.ElapsedMilliseconds} ms");
             if (!rGen.IsError)
@@ -290,12 +290,12 @@ namespace ParserExample
             var r = parser.Parse(source);
             sw.Stop();
             Console.WriteLine($"json regex parser : {sw.ElapsedMilliseconds} ms");
-            if (r.IsError)            
+            if (r.IsError)
             {
                 r.Errors.ForEach(e => Console.WriteLine(e.ToString()));
             }
 
-            
+
             sw.Reset();
             sw.Start();
             wbuilder = new ParserBuilder<JsonToken, JSon>();
@@ -306,13 +306,14 @@ namespace ParserExample
             Console.WriteLine($"json hard coded lexer : {sw.ElapsedMilliseconds} ms");
             sw.Stop();
 
+
             sw.Reset();
             sw.Start();
             EbnfJsonGenericParser wpg = new EbnfJsonGenericParser();
             ParserBuilder<JsonTokenGeneric, JSon> wbuilderGen = new ParserBuilder<JsonTokenGeneric, JSon>();
             var buildResultgen = wbuilderGen.BuildParser(wpg, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            var parserGen = buildResult.Result;
-            var rGen = parser.Parse(source);
+            var parserGen = buildResultgen.Result;
+            var rGen = parserGen.Parse(source);
             sw.Stop();
             Console.WriteLine($"json generic parser : {sw.ElapsedMilliseconds} ms");
             if (rGen.IsError)
@@ -330,7 +331,7 @@ namespace ParserExample
             var parser = builder.BuildParser(new JSONParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
 
             string source = "{ \"k\" : 1;\"k2\" : 1.1;\"k3\" : null;\"k4\" : false}";
-            source = File.ReadAllText("test.json");
+            //source = File.ReadAllText("test.json");
             JSONLexer lexer = new JSONLexer();
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -377,8 +378,9 @@ namespace ParserExample
             //testJSONLexer();
             //testGenericLexerJSON();
 
-            //testGenericLexerWhile();
-            testGenericLexerJson();
+
+            testGenericLexerWhile();
+            //testGenericLexerJson();
             Console.WriteLine("so what ?");
 
             ;

@@ -4,14 +4,19 @@ using System.Text;
 
 namespace sly.lexer.fsm.transitioncheck
 {
-    public class TransitionAny : ITransitionCheck
+    public class TransitionAny : AbstractTransitionCheck
     {
 
         public TransitionAny(char token)
         {
         }
 
-        public bool Match(char input)
+        public TransitionAny(char token, TransitionPrecondition transitionPrecondition)
+        {
+            Precondition = transitionPrecondition;
+        }
+
+        public override bool Match(char input)
         {
             return true;
         }

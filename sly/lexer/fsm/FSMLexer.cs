@@ -5,21 +5,24 @@ using System.Linq;
 
 namespace sly.lexer.fsm
 {
-
+    public delegate void BuildExtension<IN>( IN token, LexemeAttribute lexem,  GenericLexer<IN> lexer) where IN : struct;
+    
     public class FSMMatch<N>
     {
+
+        public char StringDelimiter = '"';
 
         public Dictionary<string,object> Properties { get; set; }
 
         public bool IsSuccess { get; set; }
 
         public Token<N> Result { get; set; }
-        
-        public FSMMatch(bool success, N result = default(N), string value = null, int position = 0, int line = 0, int column = 0)
+
+        public FSMMatch(bool success, N result = default(N), string value = null, TokenPosition position = null)
         {
             Properties = new Dictionary<string, object>();
             IsSuccess = success;
-            Result = new Token<N>(result,value,new TokenPosition(position,line,column));
+            Result = new Token<N>(result,value,position);
         }
     }
 
@@ -29,6 +32,8 @@ namespace sly.lexer.fsm
         private Dictionary<int, List<FSMTransition<T>>> Transitions;
 
         private Dictionary<int, FSMNode<N>> Nodes;
+
+        public char StringDelimiter = '"';
 
         public bool IgnoreWhiteSpace { get; set; }
 
@@ -94,7 +99,6 @@ namespace sly.lexer.fsm
         #region build
 
         
-
         public FSMTransition<T> GetTransition(int nodeId, char token)
         {
             FSMTransition<T> transition = null;
@@ -104,6 +108,21 @@ namespace sly.lexer.fsm
                 {
                     var leavingTransitions = Transitions[nodeId];
                     transition = leavingTransitions.FirstOrDefault((FSMTransition<T> t) => t.Match(token));
+                }
+            }
+            return transition;
+        }
+
+
+        public FSMTransition<T> GetTransition(int nodeId, char token, string value)
+        {
+            FSMTransition<T> transition = null;
+            if (HasState(nodeId))
+            {
+                if (Transitions.ContainsKey(nodeId))
+                {
+                    var leavingTransitions = Transitions[nodeId];
+                    transition = leavingTransitions.FirstOrDefault((FSMTransition<T> t) => t.Match(token,value));
                 }
             }
             return transition;
@@ -177,10 +196,7 @@ namespace sly.lexer.fsm
             int lastNode = 0;
 
             bool tokenStarted = false;
-            int tokenPosition = 0;
-            int tokenColumn = 0;
-            int tokenLine = 0;
-
+        
 
             if (CurrentPosition < source.Length)
             {
@@ -211,8 +227,14 @@ namespace sly.lexer.fsm
                         }
                         else
                         {
-                            string subSource = source.Substring(Math.Max(CurrentPosition, 0));
-                            if (IgnoreEOL && subSource.StartsWith(EOL))
+                            bool newLine = true;
+                            int i = 0;
+                            while (newLine && i < EOL.Length && CurrentPosition+i < source.Length)
+                            {
+                                newLine = newLine && source[CurrentPosition + i] == EOL[i];
+                                i++;
+                            }
+                            if (IgnoreEOL && newLine)
                             {
                                 if (successes.Any())
                                 {
@@ -233,23 +255,21 @@ namespace sly.lexer.fsm
                         }
                     }
 
-                    currentNode = Move(currentNode, currentToken);
+                    currentNode = Move(currentNode, currentToken, value);
                     if (currentNode != null)
                     {
                         lastNode = currentNode.Id;
                         value += currentToken;
+                        TokenPosition position = null;
                         if (!tokenStarted)
                         {
-                            tokenStarted = true;
-                            tokenPosition = CurrentPosition;
-                            tokenColumn = CurrentColumn;
-                            tokenLine = CurrentLine;
+                            tokenStarted = true;                            
+                            position = new TokenPosition(CurrentPosition,CurrentLine,CurrentColumn);
                         }
                         if (currentNode.IsEnd)
                         {
-                            var resultInter = new FSMMatch<N>(true, currentNode.Value, value, tokenPosition, tokenLine, tokenColumn);
+                            var resultInter = new FSMMatch<N>(true, currentNode.Value, value, position);
                             successes.Push(resultInter);                            
-                            //successes.Push((CurrentPosition,CurrentLine, CurrentColumn, currentNode.Value));
                         }
                         CurrentPosition++;
                         CurrentColumn += value.Length;
@@ -271,7 +291,7 @@ namespace sly.lexer.fsm
 
         }
 
-        protected FSMNode<N> Move(FSMNode<N> from, char token)
+        protected FSMNode<N> Move(FSMNode<N> from, char token, string value)
         {
             FSMNode<N> next = null;
             if (from != null)
@@ -284,11 +304,12 @@ namespace sly.lexer.fsm
                         int i = 0;
                         bool match = false;
                         var transition = transitions[i];
-                        match = transition.Match(token);
+                        match = transition.Match(token,value);
+                        
                         while (i < transitions.Count && !match)
                         {
                             transition = transitions[i];
-                            match = transition.Match(token);
+                            match = transition.Match(token,value);
                             i++;
                         }
                         if (match)

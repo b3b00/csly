@@ -1,0 +1,12 @@
+component_depth: 3
+exclude:
+- /samples/.*
+languages:
+- name: csharp
+  production:
+    exclude:
+      - samples/.*\.cs
+      - ParserTests/.*Tests\.java
+  test:
+    include:
+      - ParserTests/.*Tests\.java  

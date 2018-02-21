@@ -78,7 +78,7 @@ namespace csly.whileLang.compiler
                     sharpCode = GetCSharpCode(sharpCode, Guid.NewGuid().ToString());
                 }
             }
-            catch (Exception e)
+            catch 
             {
                 sharpCode = null;
             }
@@ -114,7 +114,7 @@ namespace csly.whileLang.compiler
                     ;
                 }
             }
-            catch (Exception e)
+            catch 
             {
                 function = null;
             }

@@ -8,7 +8,9 @@ namespace sly.lexer.fsm
 {
 
     public delegate FSMMatch<IN> NodeCallback<IN>(FSMMatch<IN> node);
-    public class FSMLexerBuilder<T, N> 
+
+    public delegate bool TransitionPrecondition(string value);
+    public class FSMLexerBuilder<T, N>
     {
 
         public FSMLexer<T, N> Fsm { get; private set; }
@@ -17,7 +19,7 @@ namespace sly.lexer.fsm
 
         private Dictionary<string, int> Marks;
 
-        
+
 
 
 
@@ -32,7 +34,7 @@ namespace sly.lexer.fsm
 
         #region MARKS
 
-        public FSMLexerBuilder<T,N> GoTo(int state)
+        public FSMLexerBuilder<T, N> GoTo(int state)
         {
             if (Fsm.HasState(state))
             {
@@ -83,7 +85,7 @@ namespace sly.lexer.fsm
 
         #region special chars
 
-        public  FSMLexerBuilder<T, N> IgnoreWS()
+        public FSMLexerBuilder<T, N> IgnoreWS()
         {
             Fsm.IgnoreWhiteSpace = true;
             return this;
@@ -120,7 +122,7 @@ namespace sly.lexer.fsm
             return this;
         }
 
-        
+
 
 
         #endregion
@@ -129,7 +131,7 @@ namespace sly.lexer.fsm
         #region NODES
 
 
-        public FSMLexerBuilder<T,N> End(N nodeValue)
+        public FSMLexerBuilder<T, N> End(N nodeValue)
         {
             if (Fsm.HasState(CurrentState))
             {
@@ -158,33 +160,69 @@ namespace sly.lexer.fsm
         #region TRANSITIONS
 
 
+
         public FSMLexerBuilder<T, N> SafeTransition(char input, params T[] transitionData)
-        {            
+        {
             var transition = Fsm.GetTransition(CurrentState, input);
             if (transition != null)
             {
                 transition.TransitionValues.AddRange(transitionData);
                 CurrentState = transition.ToNode;
             }
-            else {
+            else
+            {
                 return TransitionTo(input, Fsm.NewNodeId, transitionData);
             }
             return this;
         }
 
-        public FSMLexerBuilder<T,N> Transition(char input, params T[] transitionData)
-        {            
-            return TransitionTo(input, Fsm.NewNodeId, transitionData);            
+        public FSMLexerBuilder<T, N> SafeTransition(char input, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            var transition = Fsm.GetTransition(CurrentState, input);
+            if (transition != null)
+            {
+                transition.TransitionValues.AddRange(transitionData);
+                CurrentState = transition.ToNode;
+            }
+            else
+            {
+                return TransitionTo(input, Fsm.NewNodeId, precondition, transitionData);
+            }
+            return this;
         }
+
+
+
+        public FSMLexerBuilder<T, N> Transition(char input, params T[] transitionData)
+        {
+            return TransitionTo(input, Fsm.NewNodeId, transitionData);
+        }
+
+        public FSMLexerBuilder<T, N> Transition(char input, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            return TransitionTo(input, Fsm.NewNodeId, precondition, transitionData);
+        }
+
 
         public FSMLexerBuilder<T, N> RangeTransition(char start, char end, params T[] transitionData)
         {
             return RangeTransitionTo(start, end, Fsm.NewNodeId, transitionData);
         }
-        
+
+        public FSMLexerBuilder<T, N> RangeTransition(char start, char end, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            return RangeTransitionTo(start, end, Fsm.NewNodeId, precondition, transitionData);
+        }
+
+
         public FSMLexerBuilder<T, N> ExceptTransition(char[] exceptions, params T[] transitionData)
         {
             return ExceptTransitionTo(exceptions, Fsm.NewNodeId, transitionData);
+        }
+
+        public FSMLexerBuilder<T, N> ExceptTransition(char[] exceptions, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            return ExceptTransitionTo(exceptions, Fsm.NewNodeId, precondition, transitionData);
         }
 
         public FSMLexerBuilder<T, N> AnyTransition(char input, params T[] transitionData)
@@ -192,9 +230,17 @@ namespace sly.lexer.fsm
             return AnyTransitionTo(input, Fsm.NewNodeId, transitionData);
         }
 
+        public FSMLexerBuilder<T, N> AnyTransition(char input, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            return AnyTransitionTo(input, Fsm.NewNodeId, precondition, transitionData);
+        }
+
+
+
+
         public FSMLexerBuilder<T, N> TransitionTo(char input, int toNode, params T[] transitionData)
         {
-            ITransitionCheck checker = new TransitionSingle(input);
+            AbstractTransitionCheck checker = new TransitionSingle(input);
             if (!Fsm.HasState(toNode))
             {
                 Fsm.AddNode();
@@ -204,10 +250,26 @@ namespace sly.lexer.fsm
             CurrentState = toNode;
             return this;
         }
+
+
+        public FSMLexerBuilder<T, N> TransitionTo(char input, int toNode, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            AbstractTransitionCheck checker = new TransitionSingle(input, precondition);
+            if (!Fsm.HasState(toNode))
+            {
+                Fsm.AddNode();
+            }
+            var transition = new FSMTransition<T>(checker, CurrentState, toNode, transitionData.ToList<T>());
+            Fsm.AddTransition(transition);
+            CurrentState = toNode;
+            return this;
+        }
+
+
 
         public FSMLexerBuilder<T, N> RangeTransitionTo(char start, char end, int toNode, params T[] transitionData)
         {
-            ITransitionCheck checker = new TransitionRange(start, end);
+            AbstractTransitionCheck checker = new TransitionRange(start, end);
             if (!Fsm.HasState(toNode))
             {
                 Fsm.AddNode();
@@ -218,9 +280,36 @@ namespace sly.lexer.fsm
             return this;
         }
 
+        public FSMLexerBuilder<T, N> RangeTransitionTo(char start, char end, int toNode, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            AbstractTransitionCheck checker = new TransitionRange(start, end, precondition);
+            if (!Fsm.HasState(toNode))
+            {
+                Fsm.AddNode();
+            }
+            var transition = new FSMTransition<T>(checker, CurrentState, toNode, transitionData.ToList<T>());
+            Fsm.AddTransition(transition);
+            CurrentState = toNode;
+            return this;
+        }
+
+
         public FSMLexerBuilder<T, N> ExceptTransitionTo(char[] exceptions, int toNode, params T[] transitionData)
         {
-            ITransitionCheck checker = new TransitionAnyExcept(exceptions);
+            AbstractTransitionCheck checker = new TransitionAnyExcept(exceptions);
+            if (!Fsm.HasState(toNode))
+            {
+                Fsm.AddNode();
+            }
+            var transition = new FSMTransition<T>(checker, CurrentState, toNode, transitionData.ToList<T>());
+            Fsm.AddTransition(transition);
+            CurrentState = toNode;
+            return this;
+        }
+
+        public FSMLexerBuilder<T, N> ExceptTransitionTo(char[] exceptions, int toNode, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            AbstractTransitionCheck checker = new TransitionAnyExcept(precondition, exceptions);
             if (!Fsm.HasState(toNode))
             {
                 Fsm.AddNode();
@@ -233,7 +322,7 @@ namespace sly.lexer.fsm
 
         public FSMLexerBuilder<T, N> AnyTransitionTo(char input, int toNode, params T[] transitionData)
         {
-            ITransitionCheck checker = new TransitionAny(input);
+            AbstractTransitionCheck checker = new TransitionAny(input);
             if (!Fsm.HasState(toNode))
             {
                 Fsm.AddNode();
@@ -244,10 +333,30 @@ namespace sly.lexer.fsm
             return this;
         }
 
-            public FSMLexerBuilder<T, N> TransitionTo(char input, string toNodeMark, params T[] transitionData)
+        public FSMLexerBuilder<T, N> AnyTransitionTo(char input, int toNode, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            AbstractTransitionCheck checker = new TransitionAny(input, precondition);
+            if (!Fsm.HasState(toNode))
+            {
+                Fsm.AddNode();
+            }
+            var transition = new FSMTransition<T>(checker, CurrentState, toNode, transitionData.ToList<T>());
+            Fsm.AddTransition(transition);
+            CurrentState = toNode;
+            return this;
+        }
+
+        public FSMLexerBuilder<T, N> TransitionTo(char input, string toNodeMark, params T[] transitionData)
         {
             int toNode = Marks[toNodeMark];
-            return TransitionTo(input,toNode,transitionData);
+            return TransitionTo(input, toNode, transitionData);
+        }
+
+
+        public FSMLexerBuilder<T, N> TransitionTo(char input, string toNodeMark, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            int toNode = Marks[toNodeMark];
+            return TransitionTo(input, toNode, precondition, transitionData);
         }
 
         public FSMLexerBuilder<T, N> RangeTransitionTo(char start, char end, string toNodeMark, params T[] transitionData)
@@ -256,10 +365,22 @@ namespace sly.lexer.fsm
             return RangeTransitionTo(start, end, toNode, transitionData);
         }
 
+        public FSMLexerBuilder<T, N> RangeTransitionTo(char start, char end, string toNodeMark, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            int toNode = Marks[toNodeMark];
+            return RangeTransitionTo(start, end, toNode, precondition, transitionData);
+        }
+
         public FSMLexerBuilder<T, N> ExceptTransitionTo(char[] exceptions, string toNodeMark, params T[] transitionData)
         {
             int toNode = Marks[toNodeMark];
-            return ExceptTransitionTo(exceptions, toNode, transitionData);            
+            return ExceptTransitionTo(exceptions, toNode, transitionData);
+        }
+
+        public FSMLexerBuilder<T, N> ExceptTransitionTo(char[] exceptions, string toNodeMark, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            int toNode = Marks[toNodeMark];
+            return ExceptTransitionTo(exceptions, toNode, precondition, transitionData);
         }
 
         public FSMLexerBuilder<T, N> AnyTransitionTo(char input, string toNodeMark, params T[] transitionData)
@@ -268,11 +389,17 @@ namespace sly.lexer.fsm
             return AnyTransitionTo(input, toNode, transitionData);
         }
 
+        public FSMLexerBuilder<T, N> AnyTransitionTo(char input, string toNodeMark, TransitionPrecondition precondition, params T[] transitionData)
+        {
+            int toNode = Marks[toNodeMark];
+            return AnyTransitionTo(input, toNode, precondition, transitionData);
+        }
+
     }
 
 
     #endregion
 
-    
+
 }
 

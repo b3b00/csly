@@ -298,6 +298,20 @@ namespace sly.parser.generator
                             found = found || ntClause.NonTerminalName == referenceName;
                         }
                     }
+                    else if (clause is ZeroOrMoreClause<IN> zeroOrMore )
+                    {
+                        if (zeroOrMore != null && zeroOrMore.Clause is NonTerminalClause<IN> inner)
+                        {
+                            found = found || inner.NonTerminalName == referenceName;
+                        }
+                    }
+                    else if (clause is OneOrMoreClause<IN> oneOrMore)
+                    {
+                        if (oneOrMore != null && oneOrMore.Clause is NonTerminalClause<IN> inner)
+                        {
+                            found = found || inner.NonTerminalName == referenceName;
+                        }
+                    }
                     iClause++;
                 }
                 iRule++;
