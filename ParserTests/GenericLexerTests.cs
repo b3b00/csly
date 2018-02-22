@@ -29,7 +29,15 @@ namespace ParserTests
         
 
         public static bool CheckDate(string value) {
-            return true;
+            bool ok = false;
+            if (value.Length==5) {
+                ok = char.IsDigit(value[0]);
+                ok = ok && char.IsDigit(value[1]);
+                ok = ok && value[2] == '.';
+                ok = ok && char.IsDigit(value[3]);
+                ok = ok && char.IsDigit(value[4]);
+            }            
+            return ok;
         }
 
 
@@ -37,7 +45,7 @@ namespace ParserTests
         public static void AddExtension(Extensions token, LexemeAttribute lexem, GenericLexer<Extensions> lexer) {
             if (token == Extensions.DATE) {
 
-
+                
                 NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) => 
                 {
                      match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
