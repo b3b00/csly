@@ -24,7 +24,7 @@ A lexer - parser chain is fully described in only 2 C# files :
  * an enum that lists all the lexems used (plus metadata to describe their patterns) ;
  * a class that lists production rules and their associated actions.
  
-CSLY also has an additional feature that allow to write expression parsers(boolean or numeric expressions for instance) in a very compact and efficient way. (see expression parser)
+CSLY also has an additional feature that allow to write expression parsers(boolean or numeric expressions for instance) in a very compact and efficient way. (see [expression parser](#expressions-parser))
  
 
 ## Installation ##
