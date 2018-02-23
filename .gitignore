@@ -5,6 +5,12 @@
 *.sln.docstates
 TestResults
 
+#profiling sessions
+*.psess
+*.vspx
+*.vsp
+
+
 # Build results
 
 [Dd]ebug/
@@ -17,3 +23,7 @@ packages/
 .vscode/
 .vs/
 
+# git  shit
+*.orig
+
+dotnet.psess
