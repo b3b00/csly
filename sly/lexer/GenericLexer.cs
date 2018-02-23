@@ -62,28 +62,11 @@ namespace sly.lexer
 
         protected char StringDelimiter;
 
-
-        public GenericLexer()
-        {
-
-        }
-
         public GenericLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, BuildExtension<IN> extensionBuilder = null, params GenericToken[] staticTokens)
         {
             InitializeStaticLexer(eolType, idType, staticTokens);
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
             this.ExtensionBuilder = extensionBuilder;
-        }
-
-        public void CopyTo(GenericLexer<IN> otherLexer)
-        {
-            otherLexer.LexerFsm = LexerFsm;
-            
-            otherLexer.derivedTokens = derivedTokens;
-            otherLexer.identifierDerivedToken = identifierDerivedToken;
-            otherLexer.intDerivedToken = intDerivedToken;
-            otherLexer.doubleDerivedToken = doubleDerivedToken;
-            otherLexer.FSMBuilder = FSMBuilder;
         }
 
 
@@ -231,15 +214,7 @@ namespace sly.lexer
             };
 
             switch (generic)
-            {
-                case GenericToken.String:
-                    {
-                        FSMBuilder.GoTo(string_end);
-                        FSMBuilder.CallBack(callback);
-                        FSMBuilder.GoTo(in_string);
-                        FSMBuilder.CallBack(callback);
-                        break;
-                    }
+            {               
                 case GenericToken.Double:
                     {
                         FSMBuilder.GoTo(in_double);

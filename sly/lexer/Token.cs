@@ -32,9 +32,6 @@ namespace sly.lexer
             {
                 return TokenID.Equals(DefaultToken);
             }
-            private set
-            {
-            }
         }
 
         public char StringDelimiter = '"';
@@ -61,7 +58,6 @@ namespace sly.lexer
                 }
                 return result;
             }
-            private set { }
         }
 
         public int IntValue
@@ -70,7 +66,6 @@ namespace sly.lexer
             {
                 return int.Parse(Value);
             }
-            set { }
         }
 
         public double DoubleValue

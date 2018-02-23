@@ -114,20 +114,6 @@ namespace sly.lexer.fsm
         }
 
 
-        public FSMTransition<T> GetTransition(int nodeId, char token, string value)
-        {
-            FSMTransition<T> transition = null;
-            if (HasState(nodeId))
-            {
-                if (Transitions.ContainsKey(nodeId))
-                {
-                    var leavingTransitions = Transitions[nodeId];
-                    transition = leavingTransitions.FirstOrDefault((FSMTransition<T> t) => t.Match(token,value));
-                }
-            }
-            return transition;
-        }
-
         public void AddTransition(FSMTransition<T> transition)
         {   
             var transitions = new List<FSMTransition<T>>();
@@ -155,19 +141,6 @@ namespace sly.lexer.fsm
             return node;
         }
 
-        public FSMNode<N> AddFinalNode(N value)
-        {
-            FSMNode<N> node = AddNode(value);
-            node.IsEnd = true;
-            return node;
-        }
-
-        public FSMNode<N> AddStartNode(N value)
-        {
-            FSMNode<N> node = AddNode(value);
-            node.IsEnd = true;
-            return node;
-        }
 
         
 

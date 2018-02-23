@@ -24,24 +24,6 @@ namespace sly.lexer
         }
 
 
-        public void InitGlobalRegex()
-        {
-            StringBuilder globReg = new StringBuilder();
-
-            for (int i = 0; i < tokenDefinitions.Count; i++)
-            {
-                string unitRegex = tokenDefinitions[i].Regex.ToString();
-                globReg.Append($"(?<{tokenDefinitions[i].TokenID}>{unitRegex})");
-                if (i < tokenDefinitions.Count -1)
-                {
-                    globReg.Append("|");
-                }
-            }
-
-            GlobalRegex = new Regex(globReg.ToString());
-        }
-        
-
         public IEnumerable<Token<T>> Tokenize(string source)
         {
             int currentIndex = 0;
