@@ -10,13 +10,13 @@
  #LY is a parser generator halfway between parser combinators and parser generator like 
 
 
-## Why?
+## Why? ##
 
 I needed a solution for building  parsers and found all existing solution either 
  - too complicated to integrate with an additional build step as with [ANTLR](http://www.antlr.org/) )  
  - or too different from the classical BNF notation (as parser combinators like [sprache](https://github.com/sprache/Sprache) or [Eto.Parse](https://github.com/picoe/Eto.Parse)). These tools are great, but I don't feel comfortable with them.
 
-## General presentation
+## General presentation ##
 
 SLY is highly inspired by the python lex yacc library ([PLY](http://www.dabeaz.com/ply/))
 
@@ -27,7 +27,7 @@ A lexer - parser chain is fully described in only 2 C# files :
 CSLY also has an additional feature that allow to write expression parsers(boolean or numeric expressions for instance) in a very compact and efficient way. (see expression parser)
  
 
-## Installation
+## Installation ##
 
 Install from the NuGet gallery GUI or with the Package Manager Console using the following command:
 
@@ -48,7 +48,7 @@ The full lexers documentation can be found in the
 [lexer wiki](https://github.com/b3b00/csly/wiki/Lexer)
 
 
-### full example, for a arithmetci expression parser ###
+### full example, for a arithmetic expression parser ###
 
 Here is a lexer definition for a arithmetic expression parser using the generic lexer.
 
@@ -100,7 +100,7 @@ namespace simpleExpressionParser
 
 
 
-## Parser ##
+## Parsers ##
 
 ### Typed Parser ###
 
@@ -231,6 +231,7 @@ the parser returns a ParseResult instance containing the evaluation value or a l
             r.Errors.ForEach(error => Console.WriteLine(error.ErrorMessage));
         }
     }
+    
 ```
 
 ### access lexer and parsers
