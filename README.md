@@ -16,14 +16,15 @@ I needed a solution for building  parsers and found all existing solution either
  - too complicated to integrate with an additional build step as with [ANTLR](http://www.antlr.org/) )  
  - or too different from the classical BNF notation (as parser combinators like [sprache](https://github.com/sprache/Sprache) or [Eto.Parse](https://github.com/picoe/Eto.Parse)). These tools are great, but I don't feel comfortable with them.
 
-## General principle
+## General presentation
 
 SLY is highly inspired by the python lex yacc library ([PLY](http://www.dabeaz.com/ply/))
 
-The parser and lexer implementations fully reside in a single class.
-The class describes 
- - every token definition for the lexer
- - every grammar rule and its associated action to transform the syntaxic tree.  
+A lexer - parser chain is fully described in only 2 C# files :
+ * an enum that lists all the lexems used (plus metadata to describe their patterns) ;
+ * a class that lists production rules and their associated actions.
+ 
+CSLY also has an additional feature that allow to write expression parsers(boolean or numeric expressions for instance) in a very compact and efficient way. (see expression parser)
  
 
 ## Installation
@@ -37,95 +38,73 @@ or with dotnet core
 ```dotnet add package sly```
 
 
-## Lexer ##
+## Lexers ##
 
-### presentation ###
+Yes 2 Lexers and not just Lexer. CSLY comes with 2 lexers :
+ * a [regex based lexer](https://github.com/b3b00/csly/wiki/RegexLexer) very flexible but with some performance issues;
+ * a "[generic lexer](https://github.com/b3b00/csly/wiki/GenericLexer)" based on a Finite State Machine that adresses the performance issue at the cost of some lesser flexibility.This lexer is inspired by this [post](https://blogs.msdn.microsoft.com/drew/2009/12/31/a-simple-lexer-in-c-that-uses-regular-expressions/) 
 
-For now the lexer is a poor man regex based lexer inspired by this [post](https://blogs.msdn.microsoft.com/drew/2009/12/31/a-simple-lexer-in-c-that-uses-regular-expressions/) 
-So it's not a very efficient lexer. Indeed this lexer is slow and is the bottleneck of the whole lexer/parser.  
-It could be improved in the future.
-
-### configuration ###
-
-The full lexer configuration is done in a C# ```enum```:
-
-The ```enum``` is listing all the possible tokens (no special constraint here except public visibility)
-
-Each ```enum``` value has a ```[Lexeme]``` attribute to mark it has a lexeme. The lexeme attribute takes 3 parameters:
- -  ```string regex``` : a regular expression that captures the lexeme
- - ```boolean isSkippable``` (optional, default is ```false```): a boolean ,  true if the lexeme must be ignored ( whitespace for example)
- - ```boolean isLineending``` (optionanl, default is ```false```) : true if the lexeme matches a line end (to allow line counting while lexing).
+The full lexers documentation can be found in the  
+[lexer wiki](https://github.com/b3b00/csly/wiki/Lexer)
 
 
-The lexer can be used apart from the parser. It provides a method that returns an ```IEnumerable<Token<T>>``` (where T is the tokens ```enum```) from a ```string```
+### full example, for a arithmetci expression parser ###
 
-
+Here is a lexer definition for a arithmetic expression parser using the generic lexer.
 
 ```c#
- IList<Token<T>> tokens = Lexer.Tokenize(source).ToList<Token<T>>();
-```
+using sly.lexer;
 
-
-You can also build only a lexer using :
-
-```c#
-ILexer<ExpressionToken> lexer = LexerBuilder.BuildLexer<ExpressionToken>();
-var tokens = lexer.Tokenize(source).ToList();
-```
-
-### full example, for a mathematical parser ###
-
-```c#
-public enum ExpressionToken
+namespace simpleExpressionParser
+{
+    public enum SimpleExpressionToken
     {
         // float number 
-        [Lexeme("[0-9]+\\.[0-9]+")]
+        [Lexeme(GenericToken.Double)]
         DOUBLE = 1,
 
         // integer        
-        [Lexeme("[0-9]+")]
+        [Lexeme(GenericToken.Int)]
         INT = 3,
+        
+        [Lexeme(GenericToken.Identifier)]
+        IDENTIFIER = 4,
 
         // the + operator
-        [Lexeme("\\+")]
-        PLUS = 4,
+        [Lexeme(GenericToken.SugarToken,"+")]
+        PLUS = 5,
 
         // the - operator
-        [Lexeme("\\-")]
-        MINUS = 5,
+        [Lexeme(GenericToken.SugarToken,"-")]
+        MINUS = 6,
 
         // the * operator
-        [Lexeme("\\*")]
-        TIMES = 6,
+        [Lexeme(GenericToken.SugarToken,"*")]
+        TIMES = 7,
 
         //  the  / operator
-        [Lexeme("\\/")]
-        DIVIDE = 7,
+        [Lexeme(GenericToken.SugarToken,"/")]
+        DIVIDE = 8,
 
         // a left paranthesis (
-        [Lexeme("\\(")]
-        LPAREN = 8,
+        [Lexeme(GenericToken.SugarToken,"(")]
+        LPAREN = 9,
 
         // a right paranthesis )
-        [Lexeme("\\)")]
-        RPAREN = 9,
+        [Lexeme(GenericToken.SugarToken,")")]
+        RPAREN = 10,
 
-        // a whitespace
-        [Lexeme("[ \\t]+",true)]
-        WS = 12, 
-
-        [Lexeme("[\\n\\r]+", true, true)]
-        EOL = 14
     }
+}
 ```
 
 
 
 ## Parser ##
 
-### Parser typing ###
+### Typed Parser ###
 
-A parser is  of type Parser<TIn,TOut> where :
+A parser is  of type Parser &lt;TIn,TOut&gt; where :
 * TIn is the enum token type as seen before 
 * TOut is the type of object produced bye the parser. Classicaly it will be an Asbtract Syntax Tree (AST) or it may be an int for an expression parser.
 
@@ -135,12 +114,16 @@ A parser is  of type Parser<TIn,TOut> where :
 
 The grammar defining the parser is defined using C# attribute ```[Production("some grammar rule")]``` mapped to methods ( in the same class used for the lexer)
 
-The rules follow the classical BNF notation.
-A terminal notation must exactly matches (case sensitive) an enum value.
-Once the wytaxic tree build, the methods of each rule will be used as a syntaxic tree visitor.
-Each methods takes as many parameters as rule clauses. Each parameter can be typed according to the return value of the clause :
-- for a terminal : the ```Token<T>``` corresponding to the token
-- for a non terminal : the result of the evaluation of the non terminal, i.e the value returned by the matching static method. As the parser output is typed (TOut as seen before) , the result of an evaluation for a non terminal is necessarily of type TOut.
+Production rules can used :
+ * [BNF notation](https://github.com/b3b00/csly/wiki/BNF-Parser)
+ * [EBNF notation](https://github.com/b3b00/csly/wiki/EBNF-Parser) : using multiplier operator 
+ 	* zero or more : \*
+    * one or more : \+
+
+
+A terminal notation must exactly matche (case sensitive) an enum value.
+Once the syntaxic tree build, the methods of each rule will be used as a syntaxic tree visitor.
+Each production rule is associated to a method that acts as a visitor for the syntaxic tree.
 
   
 ### partial example for a mathematical expression evaluator ###
@@ -198,11 +181,9 @@ a mathematical parser calculate a mathematical expression. It takes a string as 
 ``` 
 ## Building a parser and using it ##
 
-as we 've seen above a parser is declared on a single class with static methods that address :
-
-- lexer configuration (with the ```[LexerConfiguration]``` attribute )
-
-- grammar rules (with the ```[Production("")]``` attribute )
+as we 've seen above a parser is declared on only 2 files :
+	* the lexer enum 
+    * the parser class
 
 Once the class with all its methods has been written, it can be used to build the effective parser instance calling ParserBuilder.BuildParser. the builder methods takes 3 parameters :
 
@@ -210,10 +191,10 @@ Once the class with all its methods has been written, it can be used to build th
 1. an instance of the class containing the lexer and parser definition
 2. the kind of parser. Currently only a recursive descent parsers are available. this implementation is limited to LL grammar by construction (no left recursion).There are 2 possible types :
 	- ```ParserType.LL_RECURSIVE_DESCENT``` : a [BNF](https://fr.wikipedia.org/wiki/Forme_de_Backus-Naur) notation grammar parser
-    - ```ParserType.EBNF_LL_RECURSIVE_DESCENT``` : a [EBNF](https://fr.wikipedia.org/wiki/Extended_Backus-Naur_Form) notation grammar parser. EBNF notation provides additional multiplier notation (* and + for now)
-3. the root rule for the parser.   
+    - ```ParserType.EBNF_LL_RECURSIVE_DESCENT``` : a [EBNF](https://fr.wikipedia.org/wiki/Extended_Backus-Naur_Form) notation grammar parser. 
+3. the root rule for the parser (grammar entrypoint).   
 
-the parser is typed according to the token type.
+the parser is typed according to the token type and output (int for our expression parser).
 
 ```c#
 ExpressionParser expressionParserDefinition = new ExpressionParser()
@@ -226,20 +207,21 @@ Parser<ExpressionToken,int> Parser = ParserBuilder.BuildParser<ExpressionToken,i
 
 
 then calling 
-```C#parser.Parse("some source code")``` 
+```var result = C#parser.Parse("2 + 2")``` 
 will return the evaluation of the syntax tree.
 the parser returns a ParseResult instance containing the evaluation value or a list of errors.
 
 ```c#
 
-	string expression = "1 + 1";
+	string expression = "2 + 2";
 
     ParseResult<ExpressionToken> r = Parser.Parse(expression);
 
 
     if (!r.IsError && r.Result != null && r.Result is int)
     {
-        Console.WriteLine($"result of {expression}  is {(int)r.Result}");
+        Console.WriteLine($"result of <{expression}>  is {(int)r.Result}");
+        // outputs : result of <2 + 2>  is 4"
     }
     else
     {
@@ -260,32 +242,10 @@ One build a parser expose :
 
 - the syntax parser  through the SyntaxParser property (which type is a ```ISyntaxParser```)
 
-## Full examples ##
-
-Full examples are available under :
-- [jsonparser](https://github.com/b3b00/sly/blob/master/jsonparser/JSONParser.cs) : a json parser
-- [expressionParser](https://github.com/b3b00/sly/blob/master/expressionParser/ExpressionParser.cs) : a mathematical expression parser
-- [While Language](https://github.com/b3b00/csly/tree/master/samples/while) : a dummy language inspired by this [parsec sample](https://wiki.haskell.org/Parsing_a_simple_imperative_language)
-- You can also look at Tests that presents a simple EBNF grammar in [EBNFTests](https://github.com/b3b00/sly/blob/master/ParserTests/EBNFTests.cs)
 
 
-## EBNF notation ##
 
-you can now use EBNF notation :
- - '*' to repeat 0 or more the same terminal or non terminal
- - '+' to repeat once or more the same terminal or non terminal
- 
- 
- 
- for repeated elements values passed to ```[Production]``` methods are :
- * ```List<TOut>``` for a repeated non terminal
- * ```List<Token<TIn>>``` for a repeated terminal
- 
- See [EBNFJsonParser.cs](https://github.com/b3b00/csly/blob/master/jsonparser/EBNFJSONParser.cs) for a complete EBNF json parser.
- 
-#### under the hood meta consideration on EBNF parsers ####
 
-The EBNF notation has been implemented in CSLY using the BNF notation. The EBNF parser builder is built using the BNF parser builder. Incidently the EBNF parser builder is a good and complete example for BNF parser : [RuleParser.cs](https://github.com/b3b00/csly/blob/master/sly/parser/generator/RuleParser.cs)
  
  
  
@@ -295,30 +255,25 @@ The EBNF notation has been implemented in CSLY using the BNF notation. The EBNF 
  Many language needs parsing expressions (boolean or numeric).
  A recursive descent parser is hard to maintain when parsing expressions with multiple precedence levels.
  So CSLY offers a way to express expression parsing using only operator tokens and precedence level.
- CSLY will then generates production rules to parse expressions.
+ CSLY will then generates production rules to parse expressions. It also manages precedence and left or right associativity.
  
- An expression operation is noted using the ```[Operation(token, arity, associativity, precedence)]``` attribute where 
-* token is the ```int``` value of a token
-* arity is the arity of the expression :
-    * 1 for an unary operation
-    * 2 for a binary operation
-* associativity is an ```Associativity``` enum member
-    * Associativity.Right for right associativity 
-    * Associativity.Left for left associativity
-* precedence is an ```int``` stating the precedence level : the higher the int is the higher the precedence is.
+ here is a parser for a classical numeric expression parser using classical precedence and associativity.
 
-Each attribute is associated to a method that will act as the syntax tree visitor for the matching operation.
-
-for example here is a basic example for a numeric expression parser : 
+Full expression parser generator documentation can be found on the (https://github.com/b3b00/csly/wiki/expression-parsing)[expression parsing wiki]
 
 ```c#
 
+using sly.lexer;
+using sly.parser.generator;
+
+namespace simpleExpressionParser
+{
     public class SimpleExpressionParser
-    {
-    
-		[Operation((int)ExpressionToken.TIMES, 2, Associativity.Right, 50)]
-        [Operation((int)ExpressionToken.DIVIDE, 2, Associativity.Right, 50)]
-        public int binaryExpression(int left, Token<ExpressionToken> operation, int right)
+    {        
+      
+        [Operation((int)ExpressionToken.PLUS, 2, Associativity.Right, 10)]
+        [Operation((int)ExpressionToken.MINUS, 2, Associativity.Left, 10)]
+        public int binaryTermExpression(int left, Token<ExpressionToken> operation, int right)
         {
             int result = 0;
             switch (operation.TokenID)
@@ -333,6 +288,18 @@ for example here is a basic example for a numeric expression parser :
                         result = left - right;
                         break;
                     }
+            }
+            return result;
+        }
+
+        
+        [Operation((int)ExpressionToken.TIMES, 2, Associativity.Right, 50)]
+        [Operation((int)ExpressionToken.DIVIDE, 2, Associativity.Left, 50)]
+        public int binaryFactorExpression(int left, Token<ExpressionToken> operation, int right)
+        {
+            int result = 0;
+            switch (operation.TokenID)
+            {                
                 case ExpressionToken.TIMES:
                     {
                         result = left * right;
@@ -353,29 +320,38 @@ for example here is a basic example for a numeric expression parser :
         {
             return -value;
         }
-```
 
-In addition an ```[Operand]``` attribute must indicate the ```Production``` rule producing basic operands (as int or boolean value).
+        [Operand]
+        [Production("operand : primary_value")]        
+        public int operand(int value)
+        {
+            return value;
+        }
 
-```c#
- 		[Operand]
- 		[Production("operand : INT")]
- 		public int operand(Token<ExpressionToken> value)
- 		{
- 			return value.IntValue;
- 		}
-        
+
+        [Production("primary_value : INT")]
+        public int operand1(Token<ExpressionToken> value)
+        {
+            return value.IntValue;
+        }
+
+        [Production("primary_value : LPAREN SimpleExpressionParser_expressions RPAREN")]
+        public int operand2(Token<ExpressionToken> lparen, int value, Token<ExpressionToken> rparen)
+        {
+            return value;
+        }
+    }
 }
-```
-
-The expression rules generator generates en entrypoint rule named ```<ParserClassName>_expressions```. where <ParserClassName> is the name of the supporting class for the parser.For the example above (```SimpleExpressionParser```) the non terminal name for the expressions will be ```SimpleExpressionParser_expressions```.
-Then this non terminal name can be used in other syntaxic construction in the grammar. 
-
-For instance an ```if then else```construct may be described with
-
-```c#
-[Production("ifthenelse : IF myparser_expression THEN statement ELSE statement")]
-// with statement as the non terminal that matches a statement of the language
+   
 ```
 
 
+
+
+## Full examples ##
+
+Full examples are available under :
+- [jsonparser](https://github.com/b3b00/sly/blob/master/jsonparser/JSONParser.cs) : a json parser
+- [expressionParser](https://github.com/b3b00/sly/blob/master/expressionParser/ExpressionParser.cs) : a mathematical expression parser
+- [While Language](https://github.com/b3b00/csly/tree/master/samples/while) : a dummy language inspired by this [parsec sample](https://wiki.haskell.org/Parsing_a_simple_imperative_language)
+- You can also look at Tests that presents a simple EBNF grammar in [EBNFTests](https://github.com/b3b00/sly/blob/master/ParserTests/EBNFTests.cs)
