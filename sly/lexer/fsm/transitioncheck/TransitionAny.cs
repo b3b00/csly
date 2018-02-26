@@ -16,6 +16,15 @@ namespace sly.lexer.fsm.transitioncheck
             Precondition = transitionPrecondition;
         }
 
+        public override string ToString()  {
+            string t = "";
+            if (Precondition != null) {
+                t = "[|] ";
+            }
+            t+="*";
+            return t;
+        }
+
         public override bool Match(char input)
         {
             return true;

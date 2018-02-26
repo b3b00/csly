@@ -21,6 +21,15 @@ namespace sly.lexer.fsm.transitioncheck
             Precondition = precondition;
         }
 
+        public override string ToString()  {
+            string t = "";
+            if (Precondition != null) {
+                t = "[|] ";
+            }
+            t+=$"^({TokenExceptions.ToString()})";
+            return t;
+        }
+
         public override bool Match(char input)
         {
             return !TokenExceptions.Contains(input);

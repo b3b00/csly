@@ -19,7 +19,9 @@ namespace sly.lexer
         String,
         SugarToken,
 
-        Extension
+        Extension,
+
+        Comment
     }
 
     public enum IdentifierType
@@ -49,6 +51,10 @@ namespace sly.lexer
         public static string DerivedToken = "derivedToken";
         public static string defaultIdentifierKey = "identifier";
         public static string escape_string = "escape_string";
+
+        public static string single_line_comment_start = "single_line_comment_start";
+
+        public static string multi_line_comment_start = "multi_line_comment_start";
         protected FSMLexer<GenericToken, GenericToken> LexerFsm;
 
         protected BuildExtension<IN> ExtensionBuilder;
@@ -362,10 +368,37 @@ namespace sly.lexer
             {
                 tokens.Add(Transcode(r));
                 r = LexerFsm.Run(source);
-
+                if (r.Result.IsCommentStart) {
+                    ConsumeComment(r.Result, source);
+                }
             }
             return tokens;
 
+        }
+
+        public void ConsumeComment(Token<GenericToken> comment, string source)  {
+
+            string commentValue = "";
+
+            if (comment.IsSingleLineComment) {
+                int position = this.LexerFsm.CurrentPosition;
+                int end = source.IndexOf(LexerFsm.EOL,position);
+                if (end < 0) {
+                    position = source.Length;
+                }
+                else {
+                    position = end;
+                }
+                commentValue = source.Substring(this.LexerFsm.CurrentPosition, position-this.LexerFsm.CurrentPosition);
+                comment.Value = commentValue;
+                LexerFsm.Move(position,LexerFsm.CurrentLine+1,0);
+                
+            }
+
+            else {
+
+                // TODO later
+            }            
         }
 
         public Token<IN> Transcode(FSMMatch<GenericToken> match)
@@ -376,6 +409,10 @@ namespace sly.lexer
             tok.StringDelimiter = StringDelimiter;
             tok.TokenID = (IN)match.Properties[DerivedToken];
             return tok;
+        }
+
+        public override string ToString() {
+            return LexerFsm.ToString();
         }
 
        

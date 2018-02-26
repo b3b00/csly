@@ -2,23 +2,47 @@
 
 namespace sly.lexer
 {
+
+    public enum CommentType {
+        Single,
+        Multi
+    }
     public class Token<T>
     {
 
 
         private static T defTok;
 
+
+        public char StringDelimiter = '"';
+
+        public TokenPosition Position { get; set; }
+        public T TokenID { get; set; }
+        public bool IsCommentStart { get; set; }
+
+        public CommentType CommentType {get; set;} = CommentType.Single;
+
+        public bool IsMultiLineComment => CommentType == CommentType.Multi;
+
+        public bool IsSingleLineComment => CommentType == CommentType.Single;
+
+        public string Value { get; set; }
+
         public static T DefaultToken
         {
             get { return defTok; }
             set { defTok = value; }
         }
-        public Token(T token, string value, TokenPosition position)
+
+
+        public Token(T token, string value, TokenPosition position, bool isCommentStart = false, CommentType commentType =  CommentType.Single) 
         {
             TokenID = token;
             Value = value;
             Position = position;
+            CommentType = commentType;
         }
+
 
         public Token()
         {
@@ -34,11 +58,7 @@ namespace sly.lexer
             }
         }
 
-        public char StringDelimiter = '"';
-
-        public TokenPosition Position { get; set; }
-        public T TokenID { get; set; }
-        public string Value { get; set; }
+       
 
         public string StringWithoutQuotes
         {
