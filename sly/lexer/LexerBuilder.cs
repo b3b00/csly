@@ -286,27 +286,46 @@ namespace sly.lexer
 
             var comments = GetCommentsAttribute<IN>(result);
 
-            if (!result.IsError) {
-                foreach (var comment in comments) 
+            if (!result.IsError)
+            {
+                foreach (var comment in comments)
                 {
-                    NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) => {
-                        match.Properties[GenericLexer<IN>.DerivedToken] = comment.Key;                        
-                        match.Result.IsCommentStart = true;
+                    NodeCallback<GenericToken> callbackSingle = (FSMMatch<GenericToken> match) =>
+                    {
+                        match.Properties[GenericLexer<IN>.DerivedToken] = comment.Key;
+                        match.Result.IsComment = true;
+                        match.Result.CommentType = CommentType.Single;
                         return match;
                     };
 
+                    NodeCallback<GenericToken> callbackMulti = (FSMMatch<GenericToken> match) =>
+                    {
+                        match.Properties[GenericLexer<IN>.DerivedToken] = comment.Key;
+                        match.Result.IsComment = true;
+                        match.Result.CommentType = CommentType.Multi;
+                        return match;
+                    };
+
+
+
                     var commentAttr = comment.Value[0];
+
+                    lexer.SingleLineComment = commentAttr.SingleLineCommentStart;
+                    lexer.MultiLineCommentStart = commentAttr.MultiLineCommentStart;
+                    lexer.MultiLineCommentEnd = commentAttr.MultiLineCommentEnd;
+
+
                     var fsmBuilder = lexer.FSMBuilder;
                     fsmBuilder.GoTo(GenericLexer<IN>.start);
                     fsmBuilder.ConstantTransition(commentAttr.SingleLineCommentStart);
                     fsmBuilder.Mark(GenericLexer<IN>.single_line_comment_start);
                     fsmBuilder.End(GenericToken.Comment);
-                    fsmBuilder.CallBack(callback);  
+                    fsmBuilder.CallBack(callbackSingle);
                     fsmBuilder.GoTo(GenericLexer<IN>.start);
                     fsmBuilder.ConstantTransition(commentAttr.MultiLineCommentStart);
                     fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
                     fsmBuilder.End(GenericToken.Comment);
-                    fsmBuilder.CallBack(callback);  
+                    fsmBuilder.CallBack(callbackMulti);
                 }
             }
 
@@ -326,12 +345,14 @@ namespace sly.lexer
             {
                 IN tokenID = (IN)(object)value;
                 List<CommentAttribute> enumattributes = value.GetAttributesOfType<CommentAttribute>();
-                if (enumattributes != null && enumattributes.Any()) {
+                if (enumattributes != null && enumattributes.Any())
+                {
                     attributes[tokenID] = enumattributes;
                 }
             }
-            int count = attributes.Values.ToList().Select((List<CommentAttribute> l ) => l != null ? l.Count : 0).ToList().Sum();
-            if (count > 1) {
+            int count = attributes.Values.ToList().Select((List<CommentAttribute> l) => l != null ? l.Count : 0).ToList().Sum();
+            if (count > 1)
+            {
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL, $"too many comment lexem"));
             }
 

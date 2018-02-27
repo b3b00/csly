@@ -234,6 +234,8 @@ namespace sly.lexer.fsm
                             }
                         }
                     }
+
+                    
                   
                     currentNode = Move(currentNode, currentToken, value);
                     if (currentNode != null)

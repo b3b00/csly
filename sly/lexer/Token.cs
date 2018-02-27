@@ -18,7 +18,7 @@ namespace sly.lexer
 
         public TokenPosition Position { get; set; }
         public T TokenID { get; set; }
-        public bool IsCommentStart { get; set; }
+        public bool IsComment { get; set; }
 
         public CommentType CommentType {get; set;} = CommentType.Single;
 

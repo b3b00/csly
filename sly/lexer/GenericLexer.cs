@@ -7,7 +7,34 @@ using System.Text;
 namespace sly.lexer
 {
 
-    
+
+    public static class StringExtension
+    {
+
+        public static List<string> SplitString(this string value, string delimiter)
+        {
+            List<string> elements = new List<string>();
+            int index = value.IndexOf(delimiter);
+            int lastPosition = 0;
+            if (index > 0)
+            {
+                while (index > 0)
+                {
+                    string element = value.Substring(lastPosition, index - lastPosition);
+                    lastPosition = index + delimiter.Length;
+                    elements.Add(element);
+                    index = value.IndexOf(delimiter, lastPosition);
+                }
+                elements.Add(value.Substring(lastPosition, value.Length - lastPosition));
+
+            }
+            else
+            {
+                elements.Add(value);
+            }
+            return elements;
+        }
+    }
 
     public enum GenericToken
     {
@@ -67,6 +94,11 @@ namespace sly.lexer
 
 
         protected char StringDelimiter;
+
+        public string SingleLineComment { get; set; }
+        public string MultiLineCommentStart { get; set; }
+
+        public string MultiLineCommentEnd { get; set; }
 
         public GenericLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, BuildExtension<IN> extensionBuilder = null, params GenericToken[] staticTokens)
         {
@@ -220,7 +252,7 @@ namespace sly.lexer
             };
 
             switch (generic)
-            {               
+            {
                 case GenericToken.Double:
                     {
                         FSMBuilder.GoTo(in_double);
@@ -368,7 +400,8 @@ namespace sly.lexer
             {
                 tokens.Add(Transcode(r));
                 r = LexerFsm.Run(source);
-                if (r.Result.IsCommentStart) {
+                if (r.Result.IsComment)
+                {
                     ConsumeComment(r.Result, source);
                 }
             }
@@ -376,29 +409,54 @@ namespace sly.lexer
 
         }
 
-        public void ConsumeComment(Token<GenericToken> comment, string source)  {
+        public void ConsumeComment(Token<GenericToken> comment, string source)
+        {
 
             string commentValue = "";
 
-            if (comment.IsSingleLineComment) {
+            if (comment.IsSingleLineComment)
+            {
                 int position = this.LexerFsm.CurrentPosition;
-                int end = source.IndexOf(LexerFsm.EOL,position);
-                if (end < 0) {
+                int end = source.IndexOf(LexerFsm.EOL, position);
+                if (end < 0)
+                {
                     position = source.Length;
                 }
-                else {
+                else
+                {
                     position = end;
                 }
-                commentValue = source.Substring(this.LexerFsm.CurrentPosition, position-this.LexerFsm.CurrentPosition);
+                commentValue = source.Substring(this.LexerFsm.CurrentPosition, position - this.LexerFsm.CurrentPosition);
                 comment.Value = commentValue;
-                LexerFsm.Move(position,LexerFsm.CurrentLine+1,0);
-                
+                LexerFsm.Move(position, LexerFsm.CurrentLine + 1, 0);
             }
+            else if (comment.IsMultiLineComment)
+            {
+                int position = this.LexerFsm.CurrentPosition;
+                int end = source.IndexOf(this.MultiLineCommentEnd, position);
+                if (end < 0)
+                {
+                    position = source.Length+this.MultiLineCommentEnd.Length;
+                }
+                else
+                {
+                    position = end;
+                }
+                commentValue = source.Substring(this.LexerFsm.CurrentPosition, position - this.LexerFsm.CurrentPosition);
+                comment.Value = commentValue;
 
-            else {
+                // TODO : compute new line and column
+                int newPosition = LexerFsm.CurrentPosition + commentValue.Length + this.MultiLineCommentEnd.Length;
+                var remaining = source.Substring(newPosition);
+                
+                var lines = commentValue.SplitString(LexerFsm.EOL);
+                int newLine = LexerFsm.CurrentLine + lines.Count - 1;
+                int newColumn = lines[lines.Count - 1].Length;
 
-                // TODO later
-            }            
+
+
+                LexerFsm.Move(newPosition, newLine, newColumn);
+            }
         }
 
         public Token<IN> Transcode(FSMMatch<GenericToken> match)
@@ -411,10 +469,11 @@ namespace sly.lexer
             return tok;
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return LexerFsm.ToString();
         }
 
-       
+
     }
 }
