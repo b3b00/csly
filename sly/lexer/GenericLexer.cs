@@ -451,7 +451,7 @@ namespace sly.lexer
                 
                 var lines = commentValue.SplitString(LexerFsm.EOL);
                 int newLine = LexerFsm.CurrentLine + lines.Count - 1;
-                int newColumn = lines[lines.Count - 1].Length;
+                int newColumn = lines[lines.Count - 1].Length+this.MultiLineCommentEnd.Length;
 
 
 

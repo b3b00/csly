@@ -174,6 +174,7 @@ namespace sly.lexer.fsm
             CurrentPosition = start;
             FSMNode<N> currentNode = Nodes[0];
             int lastNode = 0;
+            TokenPosition position = null;
 
             bool tokenStarted = false;
         
@@ -181,7 +182,6 @@ namespace sly.lexer.fsm
             if (CurrentPosition < source.Length)
             {
                 char currentToken = source[CurrentPosition];
-
 
                 while (CurrentPosition < source.Length && currentNode != null)
                 {
@@ -242,9 +242,9 @@ namespace sly.lexer.fsm
                     {
                         lastNode = currentNode.Id;
                         value += currentToken;
-                        TokenPosition position = null;
+                        
                         if (!tokenStarted)
-                        {
+                        {                                
                             tokenStarted = true;                            
                             position = new TokenPosition(CurrentPosition,CurrentLine,CurrentColumn);
                         }
