@@ -24,6 +24,17 @@ namespace sly.lexer.fsm.transitioncheck
             RangeEnd = end;
             Precondition = precondition;
         }
+
+        public override string ToString()  {
+            string t = "";
+            if (Precondition != null) {
+                t = "[|] ";
+            }
+            t+=$"[{RangeStart}-{RangeEnd}]";
+            return t;
+        }
+
+
         public override bool Match(char input)
         {
             return input.CompareTo(RangeStart) >= 0 && input.CompareTo(RangeEnd) <= 0;

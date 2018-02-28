@@ -204,6 +204,15 @@ namespace sly.lexer.fsm
         }
 
 
+        public FSMLexerBuilder<T,N> ConstantTransition(string constant) {
+            for (int i = 0; i < constant.Length; i++) {
+                char c = constant[i];
+                this.SafeTransition(c);
+            }            
+            return this;
+        }
+
+
         public FSMLexerBuilder<T, N> RangeTransition(char start, char end, params T[] transitionData)
         {
             return RangeTransitionTo(start, end, Fsm.NewNodeId, transitionData);
@@ -394,6 +403,7 @@ namespace sly.lexer.fsm
             int toNode = Marks[toNodeMark];
             return AnyTransitionTo(input, toNode, precondition, transitionData);
         }
+
 
     }
 

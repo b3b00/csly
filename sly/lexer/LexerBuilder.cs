@@ -9,7 +9,7 @@ using sly.lexer.fsm;
 namespace sly.lexer
 {
 
-    
+
 
     public static class EnumHelper
     {
@@ -40,8 +40,8 @@ namespace sly.lexer
     public class LexerBuilder
     {
 
-
-        public static Dictionary<IN, List<LexemeAttribute>> GetLexemes<IN>(BuildResult<ILexer<IN>> result) {
+        public static Dictionary<IN, List<LexemeAttribute>> GetLexemes<IN>(BuildResult<ILexer<IN>> result)
+        {
             var values = Enum.GetValues(typeof(IN));
 
             var attributes = new Dictionary<IN, List<LexemeAttribute>>();
@@ -84,13 +84,15 @@ namespace sly.lexer
             return attributes;
         }
 
-        public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result , BuildExtension<IN> extensionBuilder = null) where IN : struct
+
+
+        public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result, BuildExtension<IN> extensionBuilder = null) where IN : struct
         {
             Type type = typeof(IN);
             TypeInfo typeInfo = type.GetTypeInfo();
             ILexer<IN> lexer = new Lexer<IN>();
 
-          
+
 
             var attributes = GetLexemes(result);
 
@@ -260,33 +262,110 @@ namespace sly.lexer
                     }
                     if (lexem.IsString)
                     {
-                        if (lexem.GenericTokenParameters != null && lexem.GenericTokenParameters.Length > 0) {
+                        if (lexem.GenericTokenParameters != null && lexem.GenericTokenParameters.Length > 0)
+                        {
                             lexer.AddStringLexem(tokenID, lexem.GenericTokenParameters[0]);
                         }
-                        else {
+                        else
+                        {
                             lexer.AddStringLexem(tokenID, "\"");
                         }
-                    }  
-                    if (lexem.IsExtension) {
-                        Extensions[tokenID] = lexem; 
+                    }
+                    if (lexem.IsExtension)
+                    {
+                        Extensions[tokenID] = lexem;
                     }
 
                 }
 
-                AddExtensions(Extensions,extensionBuilder,lexer);
+
+
+                AddExtensions(Extensions, extensionBuilder, lexer);
             }
 
+
+            var comments = GetCommentsAttribute<IN>(result);
+
+            if (!result.IsError)
+            {
+                foreach (var comment in comments)
+                {
+                    NodeCallback<GenericToken> callbackSingle = (FSMMatch<GenericToken> match) =>
+                    {
+                        match.Properties[GenericLexer<IN>.DerivedToken] = comment.Key;
+                        match.Result.IsComment = true;
+                        match.Result.CommentType = CommentType.Single;
+                        return match;
+                    };
+
+                    NodeCallback<GenericToken> callbackMulti = (FSMMatch<GenericToken> match) =>
+                    {
+                        match.Properties[GenericLexer<IN>.DerivedToken] = comment.Key;
+                        match.Result.IsComment = true;
+                        match.Result.CommentType = CommentType.Multi;
+                        return match;
+                    };
+
+
+
+                    var commentAttr = comment.Value[0];
+
+                    lexer.SingleLineComment = commentAttr.SingleLineCommentStart;
+                    lexer.MultiLineCommentStart = commentAttr.MultiLineCommentStart;
+                    lexer.MultiLineCommentEnd = commentAttr.MultiLineCommentEnd;
+
+
+                    var fsmBuilder = lexer.FSMBuilder;
+                    fsmBuilder.GoTo(GenericLexer<IN>.start);
+                    fsmBuilder.ConstantTransition(commentAttr.SingleLineCommentStart);
+                    fsmBuilder.Mark(GenericLexer<IN>.single_line_comment_start);
+                    fsmBuilder.End(GenericToken.Comment);
+                    fsmBuilder.CallBack(callbackSingle);
+                    fsmBuilder.GoTo(GenericLexer<IN>.start);
+                    fsmBuilder.ConstantTransition(commentAttr.MultiLineCommentStart);
+                    fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
+                    fsmBuilder.End(GenericToken.Comment);
+                    fsmBuilder.CallBack(callbackMulti);
+                }
+            }
 
 
             result.Result = lexer;
             return result;
         }
 
-        private static void AddExtensions<IN>(Dictionary<IN, LexemeAttribute> Extensions, BuildExtension<IN> extensionBuilder, GenericLexer<IN> lexer) where IN : struct{
-           
-            if (extensionBuilder != null) {
-                foreach(KeyValuePair<IN,LexemeAttribute> attr in Extensions) {  
-                        extensionBuilder(attr.Key, attr.Value, lexer);                
+        private static Dictionary<IN, List<CommentAttribute>> GetCommentsAttribute<IN>(BuildResult<ILexer<IN>> result)
+        {
+            var values = Enum.GetValues(typeof(IN));
+
+            var attributes = new Dictionary<IN, List<CommentAttribute>>();
+
+            var fields = typeof(IN).GetFields();
+            foreach (Enum value in values)
+            {
+                IN tokenID = (IN)(object)value;
+                List<CommentAttribute> enumattributes = value.GetAttributesOfType<CommentAttribute>();
+                if (enumattributes != null && enumattributes.Any())
+                {
+                    attributes[tokenID] = enumattributes;
+                }
+            }
+            int count = attributes.Values.ToList().Select((List<CommentAttribute> l) => l != null ? l.Count : 0).ToList().Sum();
+            if (count > 1)
+            {
+                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, $"too many comment lexem"));
+            }
+
+            return attributes;
+        }
+        private static void AddExtensions<IN>(Dictionary<IN, LexemeAttribute> Extensions, BuildExtension<IN> extensionBuilder, GenericLexer<IN> lexer) where IN : struct
+        {
+
+            if (extensionBuilder != null)
+            {
+                foreach (KeyValuePair<IN, LexemeAttribute> attr in Extensions)
+                {
+                    extensionBuilder(attr.Key, attr.Value, lexer);
                 }
             }
             ;

@@ -24,6 +24,11 @@ namespace sly.lexer.fsm
         }
 
 
+        public override string ToString() {
+            return $"{FromNode} - {Check.ToString()} -> {ToNode}";
+        }
+
+
         internal bool Match(char token, string value)
         {
             return Check.Check(token,value);
