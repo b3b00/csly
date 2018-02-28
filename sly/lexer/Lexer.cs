@@ -12,8 +12,6 @@ namespace sly.lexer
     /// <typeparam name="T">T is the enum Token type</typeparam>
     public class Lexer<T> : ILexer<T>
     {
-
-        Regex GlobalRegex = null;
         
         IList<TokenDefinition<T>> tokenDefinitions = new List<TokenDefinition<T>>();
 

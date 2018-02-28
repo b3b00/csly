@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace sly.lexer.fsm
 {
@@ -149,10 +150,16 @@ namespace sly.lexer.fsm
 
         #region run
 
-        int CurrentPosition = 0;
-        int CurrentColumn = 0;
-        int CurrentLine = 0;
+        public int CurrentPosition {get; private set;} = 0;
+        public int CurrentColumn {get; private set;} = 0;
+        public int CurrentLine {get; private set;} = 0;
 
+
+        public void Move(int newPosition, int newLine, int newColumn) {
+            CurrentPosition = newPosition;
+            CurrentLine = newLine;
+            CurrentColumn = newColumn;
+        }
 
         public FSMMatch<N> Run(string source)
         {
@@ -167,6 +174,7 @@ namespace sly.lexer.fsm
             CurrentPosition = start;
             FSMNode<N> currentNode = Nodes[0];
             int lastNode = 0;
+            TokenPosition position = null;
 
             bool tokenStarted = false;
         
@@ -174,7 +182,6 @@ namespace sly.lexer.fsm
             if (CurrentPosition < source.Length)
             {
                 char currentToken = source[CurrentPosition];
-
 
                 while (CurrentPosition < source.Length && currentNode != null)
                 {
@@ -228,14 +235,16 @@ namespace sly.lexer.fsm
                         }
                     }
 
+                    
+                  
                     currentNode = Move(currentNode, currentToken, value);
                     if (currentNode != null)
                     {
                         lastNode = currentNode.Id;
                         value += currentToken;
-                        TokenPosition position = null;
+                        
                         if (!tokenStarted)
-                        {
+                        {                                
                             tokenStarted = true;                            
                             position = new TokenPosition(CurrentPosition,CurrentLine,CurrentColumn);
                         }
@@ -260,6 +269,7 @@ namespace sly.lexer.fsm
                     result = Callbacks[lastNode](result);
                 }
             }
+            
             return result;
 
         }
@@ -294,10 +304,19 @@ namespace sly.lexer.fsm
             }
             return next;
         }
-
-
-
+        
         #endregion
+
+
+        public override string ToString() {
+            StringBuilder dump = new StringBuilder();
+            foreach(var transitions in Transitions.Values) {
+                foreach(var transition in transitions) {
+                    dump.AppendLine(transition.ToString());
+                }
+            }
+            return dump.ToString();
+        }
 
     }
 }
