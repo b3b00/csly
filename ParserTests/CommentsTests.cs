@@ -8,6 +8,7 @@ using jsonparser.JsonModel;
 using sly.lexer;
 using sly.buildresult;
 using System.Linq;
+using System;
 
 namespace ParserTests
 {
@@ -85,11 +86,21 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result as GenericLexer<CommentsToken>;
 
+            var eol = lexer.FSMBuilder.Fsm.EOL;
+            for(int i = 0; i < eol.Length;i++) {
+                Console.WriteLine($"EOL[{i}]=>{(int)eol[i]}<");
+            }
+
             string dump = lexer.ToString();
 
-            var tokens = lexer.Tokenize(@"1
+            string code = @"1
 2 /* multi line 
-comment on 2 lines */ 3.0").ToList();
+comment on 2 lines */ 3.0";
+            for(int i = 0; i < code.Length;i++) {
+                Console.WriteLine($"code[{i}]=>{(int)code[i]}<");
+            }
+
+            var tokens = lexer.Tokenize(code).ToList();
 
 
             
