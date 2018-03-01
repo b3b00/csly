@@ -30,7 +30,7 @@ namespace ParserTests
 
         public static bool CheckDate(string value) {
             bool ok = false;
-            if (value.Length==5) {
+            if (value.Length==5) {                
                 ok = char.IsDigit(value[0]);
                 ok = ok && char.IsDigit(value[1]);
                 ok = ok && value[2] == '.';
@@ -58,14 +58,15 @@ namespace ParserTests
                 fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
                 .Transition('.',CheckDate)
                 .Mark("start_date")
-                .RangeTransition('0','9')
-                .Mark("y1")
-                .RangeTransition('0','9')
-                .Mark("y2")
-                .RangeTransition('0','9')
-                .Mark("y3")
-                .RangeTransition('0','9')
-                .Mark("y4")
+                .RepetitionTransition(4,"[0-9]")
+                // .RangeTransition('0','9')
+                // .Mark("y1")
+                // .RangeTransition('0','9')
+                // .Mark("y2")
+                // .RangeTransition('0','9')
+                // .Mark("y3")
+                // .RangeTransition('0','9')
+                // .Mark("y4")
                 .End(GenericToken.Extension)
                 .CallBack(callback);
             }
