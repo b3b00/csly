@@ -234,7 +234,7 @@ namespace sly.lexer
         {
             (List<GenericToken> tokens, IdentifierType idType) statics = GetGenericTokensAndIdentifierType(attributes);
             Dictionary<IN, LexemeAttribute> Extensions = new Dictionary<IN, LexemeAttribute>();
-            GenericLexer<IN> lexer = new GenericLexer<IN>(EOLType.Environment, statics.idType, extensionBuilder, statics.tokens.ToArray());
+            GenericLexer<IN> lexer = new GenericLexer<IN>(statics.idType, extensionBuilder, statics.tokens.ToArray());
             foreach (KeyValuePair<IN, List<LexemeAttribute>> pair in attributes)
             {
                 IN tokenID = pair.Key;

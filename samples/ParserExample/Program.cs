@@ -15,6 +15,7 @@ using sly.parser;
 using csly.whileLang.interpreter;
 using csly.whileLang.compiler;
 using sly.lexer.fsm;
+using ParserTests;
 
 namespace ParserExample
 {
@@ -126,8 +127,7 @@ namespace ParserExample
             builder.IgnoreWS()
                 .WhiteSpace(' ')
                 .WhiteSpace('\t')
-                .IgnoreEOL()
-                .UseNixEOL();
+                .IgnoreEOL();
 
             // start machine definition
             builder.Mark("start");
@@ -354,7 +354,7 @@ namespace ParserExample
         {
 
             //ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
-            ////Parser<JsonToken, JSon> parser = builder.BuildParser(new EbnfJsonParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            //Parser<JsonToken, JSon> parser = builder.BuildParser(new EbnfJsonParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
             //Lexer<JsonToken> lexer = (Lexer<JsonToken>)LexerBuilder.BuildLexer<JsonToken>();
             //Stopwatch sw = new Stopwatch();
 
@@ -379,7 +379,7 @@ namespace ParserExample
             //testGenericLexerJSON();
 
 
-            testGenericLexerWhile();
+            // TestSingleComment();
             //testGenericLexerJson();
             Console.WriteLine("so what ?");
 

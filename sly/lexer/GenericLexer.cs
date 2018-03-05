@@ -104,15 +104,15 @@ namespace sly.lexer
 
         public string MultiLineCommentEnd { get; set; }
 
-        public GenericLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, BuildExtension<IN> extensionBuilder = null, params GenericToken[] staticTokens)
+        public GenericLexer(IdentifierType idType = IdentifierType.Alpha, BuildExtension<IN> extensionBuilder = null, params GenericToken[] staticTokens)
         {
-            InitializeStaticLexer(eolType, idType, staticTokens);
+            InitializeStaticLexer(idType, staticTokens);
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
             this.ExtensionBuilder = extensionBuilder;
         }
 
 
-        private void InitializeStaticLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, params GenericToken[] staticTokens)
+        private void InitializeStaticLexer(IdentifierType idType = IdentifierType.Alpha, params GenericToken[] staticTokens)
         {
             FSMBuilder = new FSMLexerBuilder<GenericToken, GenericToken>();
 
@@ -122,26 +122,7 @@ namespace sly.lexer
                 .WhiteSpace(' ')
                 .WhiteSpace('\t')
                 .IgnoreEOL();
-            switch (eolType)
-            {
-                case EOLType.Windows:
-                    {
-                        FSMBuilder.UseWindowsEOL();
-                        break;
-                    }
-                case EOLType.Nix:
-                    {
-                        FSMBuilder.UseNixEOL();
-                        break;
-                    }
-                case EOLType.Environment:
-                    {
-                        FSMBuilder.UseEnvironmentEOL();
-                        break;
-                    }
-            }
-
-
+            
             // start machine definition
             FSMBuilder.Mark(start);
 

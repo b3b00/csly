@@ -44,7 +44,6 @@ namespace sly.lexer.fsm
 
         public bool  AggregateEOL { get; set; }
 
-        public string EOL { get; set; }
 
         private Dictionary<int, NodeCallback<N>> Callbacks { get; set; }
 
@@ -56,7 +55,6 @@ namespace sly.lexer.fsm
             IgnoreWhiteSpace = false;
             IgnoreEOL = false;
             AggregateEOL = false;
-            EOL = "";
             WhiteSpaces = new List<char>();
         }
 
