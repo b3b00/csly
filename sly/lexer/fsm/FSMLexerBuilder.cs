@@ -97,23 +97,6 @@ namespace sly.lexer.fsm
             return this;
         }
 
-        public FSMLexerBuilder<T, N> UseEnvironmentEOL()
-        {
-            Fsm.EOL = Environment.NewLine;
-            return this;
-        }
-
-        public FSMLexerBuilder<T, N> UseWindowsEOL()
-        {
-            Fsm.EOL = "\r\n";
-            return this;
-        }
-
-        public FSMLexerBuilder<T, N> UseNixEOL()
-        {
-            Fsm.EOL = "\n";
-            return this;
-        }
 
 
         public FSMLexerBuilder<T, N> WhiteSpace(char spacechar)

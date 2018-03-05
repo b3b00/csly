@@ -73,7 +73,7 @@ namespace ParserTests
             Assert.Equal(2,token3.Position.Column);
             Assert.Equal(CommentsToken.DOUBLE,token4.TokenID);
             Assert.Equal("3.0",token4.Value);
-            Assert.Equal(3,token4.Position.Line);
+            Assert.Equal(2,token4.Position.Line);
             Assert.Equal(0,token4.Position.Column);
 
         }
@@ -86,19 +86,13 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result as GenericLexer<CommentsToken>;
 
-            var eol = lexer.FSMBuilder.Fsm.EOL;
-            for(int i = 0; i < eol.Length;i++) {
-                Console.WriteLine($"EOL[{i}]=>{(int)eol[i]}<");
-            }
-
+           
             string dump = lexer.ToString();
 
             string code = @"1
 2 /* multi line 
 comment on 2 lines */ 3.0";
-            for(int i = 0; i < code.Length;i++) {
-                Console.WriteLine($"code[{i}]=>{(int)code[i]}<");
-            }
+            
 
             var tokens = lexer.Tokenize(code).ToList();
 

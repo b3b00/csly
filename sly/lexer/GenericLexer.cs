@@ -62,7 +62,11 @@ namespace sly.lexer
     {
         Windows,
         Nix,
-        Environment
+        
+        Mac,
+        Environment,
+
+        No
     }
 
     public class GenericLexer<IN> : ILexer<IN> where IN : struct
@@ -100,15 +104,15 @@ namespace sly.lexer
 
         public string MultiLineCommentEnd { get; set; }
 
-        public GenericLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, BuildExtension<IN> extensionBuilder = null, params GenericToken[] staticTokens)
+        public GenericLexer(IdentifierType idType = IdentifierType.Alpha, BuildExtension<IN> extensionBuilder = null, params GenericToken[] staticTokens)
         {
-            InitializeStaticLexer(eolType, idType, staticTokens);
+            InitializeStaticLexer(idType, staticTokens);
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
             this.ExtensionBuilder = extensionBuilder;
         }
 
 
-        private void InitializeStaticLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, params GenericToken[] staticTokens)
+        private void InitializeStaticLexer(IdentifierType idType = IdentifierType.Alpha, params GenericToken[] staticTokens)
         {
             FSMBuilder = new FSMLexerBuilder<GenericToken, GenericToken>();
 
@@ -118,26 +122,7 @@ namespace sly.lexer
                 .WhiteSpace(' ')
                 .WhiteSpace('\t')
                 .IgnoreEOL();
-            switch (eolType)
-            {
-                case EOLType.Windows:
-                    {
-                        FSMBuilder.UseWindowsEOL();
-                        break;
-                    }
-                case EOLType.Nix:
-                    {
-                        FSMBuilder.UseNixEOL();
-                        break;
-                    }
-                case EOLType.Environment:
-                    {
-                        FSMBuilder.UseEnvironmentEOL();
-                        break;
-                    }
-            }
-
-
+            
             // start machine definition
             FSMBuilder.Mark(start);
 
@@ -409,6 +394,9 @@ namespace sly.lexer
 
         }
 
+
+      
+
         public void ConsumeComment(Token<GenericToken> comment, string source)
         {
 
@@ -417,17 +405,9 @@ namespace sly.lexer
             if (comment.IsSingleLineComment)
             {
                 int position = this.LexerFsm.CurrentPosition;
-                int end = source.IndexOf(LexerFsm.EOL, position);
-                if (end < 0)
-                {
-                    position = source.Length;
-                }
-                else
-                {
-                    position = end;
-                }
-                commentValue = source.Substring(this.LexerFsm.CurrentPosition, position - this.LexerFsm.CurrentPosition);
-                comment.Value = commentValue;
+                commentValue = EOLManager.GetToEndOfLine(source,position);
+                position = position + commentValue.Length;               
+                comment.Value = commentValue.Replace("\n","").Replace("\r","");
                 LexerFsm.Move(position, LexerFsm.CurrentLine + 1, 0);
             }
             else if (comment.IsMultiLineComment)
@@ -449,11 +429,9 @@ namespace sly.lexer
                 int newPosition = LexerFsm.CurrentPosition + commentValue.Length + this.MultiLineCommentEnd.Length;
                 var remaining = source.Substring(newPosition);
                 
-                var lines = commentValue.SplitString(LexerFsm.EOL);
+                var lines = EOLManager.GetLines(commentValue);
                 int newLine = LexerFsm.CurrentLine + lines.Count - 1;
                 int newColumn = lines[lines.Count - 1].Length+this.MultiLineCommentEnd.Length;
-
-
 
                 LexerFsm.Move(newPosition, newLine, newColumn);
             }
