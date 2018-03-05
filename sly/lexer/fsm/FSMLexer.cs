@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace sly.lexer.fsm
 {
@@ -43,7 +44,6 @@ namespace sly.lexer.fsm
 
         public bool  AggregateEOL { get; set; }
 
-        public string EOL { get; set; }
 
         private Dictionary<int, NodeCallback<N>> Callbacks { get; set; }
 
@@ -55,7 +55,6 @@ namespace sly.lexer.fsm
             IgnoreWhiteSpace = false;
             IgnoreEOL = false;
             AggregateEOL = false;
-            EOL = "";
             WhiteSpaces = new List<char>();
         }
 
@@ -114,20 +113,6 @@ namespace sly.lexer.fsm
         }
 
 
-        public FSMTransition<T> GetTransition(int nodeId, char token, string value)
-        {
-            FSMTransition<T> transition = null;
-            if (HasState(nodeId))
-            {
-                if (Transitions.ContainsKey(nodeId))
-                {
-                    var leavingTransitions = Transitions[nodeId];
-                    transition = leavingTransitions.FirstOrDefault((FSMTransition<T> t) => t.Match(token,value));
-                }
-            }
-            return transition;
-        }
-
         public void AddTransition(FSMTransition<T> transition)
         {   
             var transitions = new List<FSMTransition<T>>();
@@ -155,19 +140,6 @@ namespace sly.lexer.fsm
             return node;
         }
 
-        public FSMNode<N> AddFinalNode(N value)
-        {
-            FSMNode<N> node = AddNode(value);
-            node.IsEnd = true;
-            return node;
-        }
-
-        public FSMNode<N> AddStartNode(N value)
-        {
-            FSMNode<N> node = AddNode(value);
-            node.IsEnd = true;
-            return node;
-        }
 
         
 
@@ -176,10 +148,16 @@ namespace sly.lexer.fsm
 
         #region run
 
-        int CurrentPosition = 0;
-        int CurrentColumn = 0;
-        int CurrentLine = 0;
+        public int CurrentPosition {get; private set;} = 0;
+        public int CurrentColumn {get; private set;} = 0;
+        public int CurrentLine {get; private set;} = 0;
 
+
+        public void Move(int newPosition, int newLine, int newColumn) {
+            CurrentPosition = newPosition;
+            CurrentLine = newLine;
+            CurrentColumn = newColumn;
+        }
 
         public FSMMatch<N> Run(string source)
         {
@@ -194,6 +172,7 @@ namespace sly.lexer.fsm
             CurrentPosition = start;
             FSMNode<N> currentNode = Nodes[0];
             int lastNode = 0;
+            TokenPosition position = null;
 
             bool tokenStarted = false;
         
@@ -201,7 +180,6 @@ namespace sly.lexer.fsm
             if (CurrentPosition < source.Length)
             {
                 char currentToken = source[CurrentPosition];
-
 
                 while (CurrentPosition < source.Length && currentNode != null)
                 {
@@ -227,14 +205,9 @@ namespace sly.lexer.fsm
                         }
                         else
                         {
-                            bool newLine = true;
-                            int i = 0;
-                            while (newLine && i < EOL.Length && CurrentPosition+i < source.Length)
-                            {
-                                newLine = newLine && source[CurrentPosition + i] == EOL[i];
-                                i++;
-                            }
-                            if (IgnoreEOL && newLine)
+                            var eol = EOLManager.IsEndOfLine(source,CurrentPosition);
+                            
+                            if (IgnoreEOL && eol != EOLType.No)
                             {
                                 if (successes.Any())
                                 {
@@ -244,7 +217,7 @@ namespace sly.lexer.fsm
                                 {
                                     currentNode = Nodes[0];
                                 }
-                                CurrentPosition += EOL.Length;
+                                CurrentPosition += (eol == EOLType.Windows ? 2 : 1);
                                 CurrentColumn = 0;
                                 CurrentLine++;
                             }
@@ -255,14 +228,16 @@ namespace sly.lexer.fsm
                         }
                     }
 
+                    
+                  
                     currentNode = Move(currentNode, currentToken, value);
                     if (currentNode != null)
                     {
                         lastNode = currentNode.Id;
                         value += currentToken;
-                        TokenPosition position = null;
+                        
                         if (!tokenStarted)
-                        {
+                        {                                
                             tokenStarted = true;                            
                             position = new TokenPosition(CurrentPosition,CurrentLine,CurrentColumn);
                         }
@@ -287,6 +262,7 @@ namespace sly.lexer.fsm
                     result = Callbacks[lastNode](result);
                 }
             }
+            
             return result;
 
         }
@@ -321,10 +297,21 @@ namespace sly.lexer.fsm
             }
             return next;
         }
-
-
-
+        
         #endregion
+
+
+        public override string ToString() {
+            StringBuilder dump = new StringBuilder();
+            foreach(var transitions in Transitions.Values) {
+                foreach(var transition in transitions) {
+                    dump.AppendLine(transition.ToString());
+                }
+            }
+            return dump.ToString();
+        }
+
+        
 
     }
 }

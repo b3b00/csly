@@ -97,23 +97,6 @@ namespace sly.lexer.fsm
             return this;
         }
 
-        public FSMLexerBuilder<T, N> UseEnvironmentEOL()
-        {
-            Fsm.EOL = Environment.NewLine;
-            return this;
-        }
-
-        public FSMLexerBuilder<T, N> UseWindowsEOL()
-        {
-            Fsm.EOL = "\r\n";
-            return this;
-        }
-
-        public FSMLexerBuilder<T, N> UseNixEOL()
-        {
-            Fsm.EOL = "\n";
-            return this;
-        }
 
 
         public FSMLexerBuilder<T, N> WhiteSpace(char spacechar)
@@ -201,6 +184,45 @@ namespace sly.lexer.fsm
         public FSMLexerBuilder<T, N> Transition(char input, TransitionPrecondition precondition, params T[] transitionData)
         {
             return TransitionTo(input, Fsm.NewNodeId, precondition, transitionData);
+        }
+
+        public FSMLexerBuilder<T, N> ConstantTransition(string constant, TransitionPrecondition precondition = null)
+        {
+            char c = constant[0];
+            this.SafeTransition(c, precondition);
+            for (int i = 1; i < constant.Length; i++)
+            {
+                c = constant[i];
+                this.SafeTransition(c);
+            }
+            return this;
+        }
+
+        public FSMLexerBuilder<T, N> RepetitionTransition(int count, string pattern, TransitionPrecondition precondition = null)
+        {
+            if (count > 0 && !string.IsNullOrEmpty(pattern))
+            {
+                if (pattern.StartsWith("[") && pattern.EndsWith("]") && pattern.Contains("-") && pattern.Length == 5)
+                {
+                    char start = pattern[1];
+                    char end = pattern[3];
+                    RangeTransition(start, end, precondition);
+                    for (int i = 1; i < count; i++)
+                    {
+                        RangeTransition(start, end);
+                    }
+                }
+                else
+                {
+                    ConstantTransition(pattern, precondition);
+                    for (int i = 1; i < count; i++)
+                    {
+                        ConstantTransition(pattern);
+                    }
+                    ConstantTransition(pattern, precondition);
+                }
+            }
+            return this;
         }
 
 
@@ -394,6 +416,7 @@ namespace sly.lexer.fsm
             int toNode = Marks[toNodeMark];
             return AnyTransitionTo(input, toNode, precondition, transitionData);
         }
+
 
     }
 

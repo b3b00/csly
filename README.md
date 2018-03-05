@@ -3,6 +3,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/n9uffgkqn2qet7k9?svg=true)](https://ci.appveyor.com/project/OlivierDuhart/sly)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/b3b00/sly/blob/dev/LICENSE)
 [![NuGet](https://img.shields.io/nuget/v/sly.svg)](https://www.nuget.org/packages/sly/)
+[![codecov](https://codecov.io/gh/b3b00/csly/branch/dev/graph/badge.svg)](https://codecov.io/gh/b3b00/csly)
 
 
 :warning: This readme is a bit out of date. Go to to the [wiki](https://github.com/b3b00/csly/wiki) for a more up to date documentation.
@@ -21,10 +22,10 @@ I needed a solution for building  parsers and found all existing solution either
 SLY is highly inspired by the python lex yacc library ([PLY](http://www.dabeaz.com/ply/))
 
 A lexer - parser chain is fully described in only 2 C# files :
- * an enum that lists all the lexems used (plus metadata to describe their patterns) ;
- * a class that lists production rules and their associated actions.
+ * [Lexer](#lexers) : an enum that lists all the lexems used (plus metadata to describe their patterns) ;
+ * [Parser](#parsers) : a class that lists production rules and their associated actions.
  
-CSLY also has an additional feature that allow to write expression parsers(boolean or numeric expressions for instance) in a very compact and efficient way. (see expression parser)
+CSLY also has an additional feature that allow to write expression parsers(boolean or numeric expressions for instance) in a very compact and efficient way. (see [expression parser](#expressions-parser))
  
 
 ## Installation ##

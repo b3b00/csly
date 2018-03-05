@@ -7,7 +7,34 @@ using System.Text;
 namespace sly.lexer
 {
 
-    
+
+    public static class StringExtension
+    {
+
+        public static List<string> SplitString(this string value, string delimiter)
+        {
+            List<string> elements = new List<string>();
+            int index = value.IndexOf(delimiter);
+            int lastPosition = 0;
+            if (index > 0)
+            {
+                while (index > 0)
+                {
+                    string element = value.Substring(lastPosition, index - lastPosition);
+                    lastPosition = index + delimiter.Length;
+                    elements.Add(element);
+                    index = value.IndexOf(delimiter, lastPosition);
+                }
+                elements.Add(value.Substring(lastPosition, value.Length - lastPosition));
+
+            }
+            else
+            {
+                elements.Add(value);
+            }
+            return elements;
+        }
+    }
 
     public enum GenericToken
     {
@@ -19,7 +46,9 @@ namespace sly.lexer
         String,
         SugarToken,
 
-        Extension
+        Extension,
+
+        Comment
     }
 
     public enum IdentifierType
@@ -33,7 +62,11 @@ namespace sly.lexer
     {
         Windows,
         Nix,
-        Environment
+        
+        Mac,
+        Environment,
+
+        No
     }
 
     public class GenericLexer<IN> : ILexer<IN> where IN : struct
@@ -49,6 +82,10 @@ namespace sly.lexer
         public static string DerivedToken = "derivedToken";
         public static string defaultIdentifierKey = "identifier";
         public static string escape_string = "escape_string";
+
+        public static string single_line_comment_start = "single_line_comment_start";
+
+        public static string multi_line_comment_start = "multi_line_comment_start";
         protected FSMLexer<GenericToken, GenericToken> LexerFsm;
 
         protected BuildExtension<IN> ExtensionBuilder;
@@ -62,32 +99,20 @@ namespace sly.lexer
 
         protected char StringDelimiter;
 
+        public string SingleLineComment { get; set; }
+        public string MultiLineCommentStart { get; set; }
 
-        public GenericLexer()
+        public string MultiLineCommentEnd { get; set; }
+
+        public GenericLexer(IdentifierType idType = IdentifierType.Alpha, BuildExtension<IN> extensionBuilder = null, params GenericToken[] staticTokens)
         {
-
-        }
-
-        public GenericLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, BuildExtension<IN> extensionBuilder = null, params GenericToken[] staticTokens)
-        {
-            InitializeStaticLexer(eolType, idType, staticTokens);
+            InitializeStaticLexer(idType, staticTokens);
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
             this.ExtensionBuilder = extensionBuilder;
         }
 
-        public void CopyTo(GenericLexer<IN> otherLexer)
-        {
-            otherLexer.LexerFsm = LexerFsm;
-            
-            otherLexer.derivedTokens = derivedTokens;
-            otherLexer.identifierDerivedToken = identifierDerivedToken;
-            otherLexer.intDerivedToken = intDerivedToken;
-            otherLexer.doubleDerivedToken = doubleDerivedToken;
-            otherLexer.FSMBuilder = FSMBuilder;
-        }
 
-
-        private void InitializeStaticLexer(EOLType eolType, IdentifierType idType = IdentifierType.Alpha, params GenericToken[] staticTokens)
+        private void InitializeStaticLexer(IdentifierType idType = IdentifierType.Alpha, params GenericToken[] staticTokens)
         {
             FSMBuilder = new FSMLexerBuilder<GenericToken, GenericToken>();
 
@@ -97,26 +122,7 @@ namespace sly.lexer
                 .WhiteSpace(' ')
                 .WhiteSpace('\t')
                 .IgnoreEOL();
-            switch (eolType)
-            {
-                case EOLType.Windows:
-                    {
-                        FSMBuilder.UseWindowsEOL();
-                        break;
-                    }
-                case EOLType.Nix:
-                    {
-                        FSMBuilder.UseNixEOL();
-                        break;
-                    }
-                case EOLType.Environment:
-                    {
-                        FSMBuilder.UseEnvironmentEOL();
-                        break;
-                    }
-            }
-
-
+            
             // start machine definition
             FSMBuilder.Mark(start);
 
@@ -232,14 +238,6 @@ namespace sly.lexer
 
             switch (generic)
             {
-                case GenericToken.String:
-                    {
-                        FSMBuilder.GoTo(string_end);
-                        FSMBuilder.CallBack(callback);
-                        FSMBuilder.GoTo(in_string);
-                        FSMBuilder.CallBack(callback);
-                        break;
-                    }
                 case GenericToken.Double:
                     {
                         FSMBuilder.GoTo(in_double);
@@ -387,10 +385,56 @@ namespace sly.lexer
             {
                 tokens.Add(Transcode(r));
                 r = LexerFsm.Run(source);
-
+                if (r.Result.IsComment)
+                {
+                    ConsumeComment(r.Result, source);
+                }
             }
             return tokens;
 
+        }
+
+
+      
+
+        public void ConsumeComment(Token<GenericToken> comment, string source)
+        {
+
+            string commentValue = "";
+
+            if (comment.IsSingleLineComment)
+            {
+                int position = this.LexerFsm.CurrentPosition;
+                commentValue = EOLManager.GetToEndOfLine(source,position);
+                position = position + commentValue.Length;               
+                comment.Value = commentValue.Replace("\n","").Replace("\r","");
+                LexerFsm.Move(position, LexerFsm.CurrentLine + 1, 0);
+            }
+            else if (comment.IsMultiLineComment)
+            {
+                int position = this.LexerFsm.CurrentPosition;
+                int end = source.IndexOf(this.MultiLineCommentEnd, position);
+                if (end < 0)
+                {
+                    position = source.Length+this.MultiLineCommentEnd.Length;
+                }
+                else
+                {
+                    position = end;
+                }
+                commentValue = source.Substring(this.LexerFsm.CurrentPosition, position - this.LexerFsm.CurrentPosition);
+                comment.Value = commentValue;
+
+                // TODO : compute new line and column
+                int newPosition = LexerFsm.CurrentPosition + commentValue.Length + this.MultiLineCommentEnd.Length;
+                var remaining = source.Substring(newPosition);
+                
+                var lines = EOLManager.GetLines(commentValue);
+                int newLine = LexerFsm.CurrentLine + lines.Count - 1;
+                int newColumn = lines[lines.Count - 1].Length+this.MultiLineCommentEnd.Length;
+
+                LexerFsm.Move(newPosition, newLine, newColumn);
+            }
         }
 
         public Token<IN> Transcode(FSMMatch<GenericToken> match)
@@ -403,6 +447,11 @@ namespace sly.lexer
             return tok;
         }
 
-       
+        public override string ToString()
+        {
+            return LexerFsm.ToString();
+        }
+
+
     }
 }
