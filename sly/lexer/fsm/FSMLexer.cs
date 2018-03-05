@@ -207,14 +207,9 @@ namespace sly.lexer.fsm
                         }
                         else
                         {
-                            bool newLine = true;
-                            int i = 0;
-                            while (newLine && i < EOL.Length && CurrentPosition+i < source.Length)
-                            {
-                                newLine = newLine && source[CurrentPosition + i] == EOL[i];
-                                i++;
-                            }
-                            if (IgnoreEOL && newLine)
+                            var eol = EOLManager.IsEndOfLine(source,CurrentPosition);
+                            
+                            if (IgnoreEOL && eol != EOLType.No)
                             {
                                 if (successes.Any())
                                 {
@@ -224,7 +219,7 @@ namespace sly.lexer.fsm
                                 {
                                     currentNode = Nodes[0];
                                 }
-                                CurrentPosition += EOL.Length;
+                                CurrentPosition += (eol == EOLType.Windows ? 2 : 1);
                                 CurrentColumn = 0;
                                 CurrentLine++;
                             }
@@ -317,6 +312,8 @@ namespace sly.lexer.fsm
             }
             return dump.ToString();
         }
+
+        
 
     }
 }

@@ -15,16 +15,16 @@ namespace sly.lexer.fsm
         {
             int CurrentPosition = position;
             char current = value[CurrentPosition];
-            EOLType end = IsEndofLine(value, CurrentPosition);
+            EOLType end = IsEndOfLine(value, CurrentPosition);
             while (CurrentPosition < value.Length && end == EOLType.No)
             {
                 CurrentPosition++;
-                end = IsEndofLine(value, CurrentPosition);
+                end = IsEndOfLine(value, CurrentPosition);
             }
             return value.Substring(position, CurrentPosition - position + (end == EOLType.Windows ? 2 : 1));
         }
 
-        public static EOLType IsEndofLine(string value, int position)
+        public static EOLType IsEndOfLine(string value, int position)
         {
             EOLType end = EOLType.No;
             char n = value[position];
@@ -53,7 +53,7 @@ namespace sly.lexer.fsm
             int i = 0;
             while (i < value.Length)
             {
-                var end = IsEndofLine(value, i);
+                var end = IsEndOfLine(value, i);
                 if (end != EOLType.No)
                 {
                     if (end == EOLType.Windows)
