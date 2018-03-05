@@ -15,7 +15,7 @@ using sly.parser;
 using csly.whileLang.interpreter;
 using csly.whileLang.compiler;
 using sly.lexer.fsm;
-using ParserTests;
+
 
 namespace ParserExample
 {
