@@ -187,7 +187,7 @@ namespace sly.lexer.fsm
 
                     bool consumeSkipped = true;
 
-                    while (consumeSkipped && !tokenStarted)
+                    while (consumeSkipped && !tokenStarted && CurrentPosition < source.Length)
                     {
                         currentToken = source[CurrentPosition];
                         if (IgnoreWhiteSpace && WhiteSpaces.Contains(currentToken))
@@ -247,7 +247,14 @@ namespace sly.lexer.fsm
                             successes.Push(resultInter);                            
                         }
                         CurrentPosition++;
-                        CurrentColumn += value.Length;
+                        CurrentColumn++ ;
+                    }
+                    else {
+
+                        if (lastNode == 0 && !tokenStarted && !successes.Any() && CurrentPosition < source.Length) {
+                            throw new LexerException<T>(new LexicalError(CurrentLine,CurrentColumn, source[CurrentPosition]));
+                        }
+                        ;
                     }
 
                 }
