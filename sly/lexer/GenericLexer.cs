@@ -291,11 +291,11 @@ namespace sly.lexer
         {
             if (string.IsNullOrEmpty(stringDelimiter) || stringDelimiter.Length > 1)
             {
-                throw new ArgumentException($"bad lexem {stringDelimiter} :  StringToken lexeme <{token.ToString()}> must be  1 character length.");
+                throw new InvalidLexerException($"bad lexem {stringDelimiter} :  StringToken lexeme <{token.ToString()}> must be 1 character length.");
             }
             if (char.IsLetterOrDigit(stringDelimiter[0]))
             {
-                throw new ArgumentException($"bad lexem {stringDelimiter} :  SugarToken lexeme <{token.ToString()}> can not start with a letter.");
+                throw new InvalidLexerException($"bad lexem {stringDelimiter} :  SugarToken lexeme <{token.ToString()}> can not start with a letter.");
             }
 
             StringDelimiter = stringDelimiter[0];
@@ -327,7 +327,7 @@ namespace sly.lexer
         {
             if (char.IsLetter(specialValue[0]))
             {
-                throw new ArgumentException($"bad lexem {specialValue} :  SugarToken lexeme <{token.ToString()}>  can not start with a letter.");
+                throw new InvalidLexerException($"bad lexem {specialValue} :  SugarToken lexeme <{token.ToString()}>  can not start with a letter.");
             }
             NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
             {
@@ -411,8 +411,7 @@ namespace sly.lexer
                 }
                 else
                 {
-                    int t = LexerFsm.CurrentColumn+lines[0].Length-MultiLineCommentEnd.Length;
-                    newColumn = LexerFsm.CurrentColumn+lines[0].Length;
+                    newColumn = LexerFsm.CurrentColumn+lines[0].Length+MultiLineCommentEnd.Length;
                 }
 
 

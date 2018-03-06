@@ -7,6 +7,7 @@ using sly.parser.generator;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System;
 using Xunit;
 using sly.buildresult;
 using sly.lexer.fsm;
@@ -14,51 +15,58 @@ using sly.lexer.fsm;
 namespace ParserTests
 {
 
- public enum Extensions {
-        [Lexeme(GenericToken.Extension)] 
-       DATE,
+    public enum Extensions
+    {
+        [Lexeme(GenericToken.Extension)]
+        DATE,
 
-               [Lexeme(GenericToken.Double)] 
-       DOUBLE,
+        [Lexeme(GenericToken.Double)]
+        DOUBLE,
     }
 
 
-    public static class ExtendedGenericLexer 
+
+
+    public static class ExtendedGenericLexer
     {
 
-        
 
-        public static bool CheckDate(string value) {
+
+        public static bool CheckDate(string value)
+        {
             bool ok = false;
-            if (value.Length==5) {                
+            if (value.Length == 5)
+            {
                 ok = char.IsDigit(value[0]);
                 ok = ok && char.IsDigit(value[1]);
                 ok = ok && value[2] == '.';
                 ok = ok && char.IsDigit(value[3]);
                 ok = ok && char.IsDigit(value[4]);
-            }            
+            }
             return ok;
         }
 
 
 
-        public static void AddExtension(Extensions token, LexemeAttribute lexem, GenericLexer<Extensions> lexer) {
-            if (token == Extensions.DATE) {
+        public static void AddExtension(Extensions token, LexemeAttribute lexem, GenericLexer<Extensions> lexer)
+        {
+            if (token == Extensions.DATE)
+            {
 
-                
-                NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) => 
+
+                NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
                 {
-                     match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
-                     return match;
+                    match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
+                    return match;
                 };
 
                 var fsmBuilder = lexer.FSMBuilder;
 
                 // TODO
                 fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
-                .Transition('.',CheckDate)
+                .Transition('.', CheckDate)
                 .Mark("start_date")
-                .RepetitionTransition(4,"[0-9]")
+                .RepetitionTransition(4, "[0-9]")
                 // .RangeTransition('0','9')
                 // .Mark("y1")
                 // .RangeTransition('0','9')
@@ -74,33 +82,48 @@ namespace ParserTests
 
     }
 
-    public enum DoubleQuotedString {
+    public enum BadLetterStringDelimiter
+    {
+        [Lexeme(GenericToken.String, "a")]
+        Letter
+    }
 
-         [Lexeme(GenericToken.String,"\"")]
+    public enum BadEmptyStringDelimiter
+    {
+        [Lexeme(GenericToken.String, "")]
+        Empty
+    }
+
+    public enum DoubleQuotedString
+    {
+
+        [Lexeme(GenericToken.String, "\"")]
         DoubleString
     }
 
-    public enum SingleQuotedString {
+    public enum SingleQuotedString
+    {
 
-         [Lexeme(GenericToken.String,"'")]
+        [Lexeme(GenericToken.String, "'")]
         SingleString
     }
 
-    public enum DefaultQuotedString {
+    public enum DefaultQuotedString
+    {
 
-         [Lexeme(GenericToken.String)]
+        [Lexeme(GenericToken.String)]
         DefaultString
     }
 
     public enum AlphaId
     {
-        [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)]
+        [Lexeme(GenericToken.Identifier, IdentifierType.Alpha)]
         ID
     }
 
     public enum AlphaNumId
     {
-        [Lexeme(GenericToken.Identifier,IdentifierType.AlphaNumeric)]
+        [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumeric)]
         ID
     }
 
@@ -115,19 +138,19 @@ namespace ParserTests
 
 
         [Fact]
-        public void TestExtensions() 
+        public void TestExtensions()
         {
             var lexerRes = LexerBuilder.BuildLexer<Extensions>(new BuildResult<ILexer<Extensions>>(), ExtendedGenericLexer.AddExtension);
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result as GenericLexer<Extensions>;
             Assert.NotNull(lexer);
-            
+
             List<Token<Extensions>> tokens = lexer.Tokenize("20.02.2018 3.14").ToList();
-            Assert.Equal(2,tokens.Count);
-            Assert.Equal(Extensions.DATE,tokens[0].TokenID);
-            Assert.Equal("20.02.2018",tokens[0].Value);
-            Assert.Equal(Extensions.DOUBLE,tokens[1].TokenID);
-            Assert.Equal("3.14",tokens[1].Value);
+            Assert.Equal(2, tokens.Count);
+            Assert.Equal(Extensions.DATE, tokens[0].TokenID);
+            Assert.Equal("20.02.2018", tokens[0].Value);
+            Assert.Equal(Extensions.DOUBLE, tokens[1].TokenID);
+            Assert.Equal("3.14", tokens[1].Value);
         }
 
         [Fact]
@@ -189,7 +212,8 @@ namespace ParserTests
         }
 
         [Fact]
-        public void TestDoubleQuotedString() {
+        public void TestDoubleQuotedString()
+        {
             var lexerRes = LexerBuilder.BuildLexer<DoubleQuotedString>(new BuildResult<ILexer<DoubleQuotedString>>());
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
@@ -201,8 +225,9 @@ namespace ParserTests
             Assert.Equal(source, tok.StringWithoutQuotes);
         }
 
-         [Fact]
-        public void TestSingleQuotedString() {
+        [Fact]
+        public void TestSingleQuotedString()
+        {
             var lexerRes = LexerBuilder.BuildLexer<SingleQuotedString>(new BuildResult<ILexer<SingleQuotedString>>());
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
@@ -215,7 +240,8 @@ namespace ParserTests
         }
 
         [Fact]
-        public void TestDefaultQuotedString() {
+        public void TestDefaultQuotedString()
+        {
             var lexerRes = LexerBuilder.BuildLexer<DefaultQuotedString>(new BuildResult<ILexer<DefaultQuotedString>>());
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
@@ -225,6 +251,46 @@ namespace ParserTests
             Token<DefaultQuotedString> tok = r[0];
             Assert.Equal(DefaultQuotedString.DefaultString, tok.TokenID);
             Assert.Equal(source, tok.StringWithoutQuotes);
+        }
+
+        [Fact]
+        public void TestBadLetterStringDelimiter()
+        {
+            var lexerRes = LexerBuilder.BuildLexer<BadLetterStringDelimiter>(new BuildResult<ILexer<BadLetterStringDelimiter>>());
+            Assert.True(lexerRes.IsError);
+            Assert.Equal(1, lexerRes.Errors.Count);
+            var error = lexerRes.Errors[0];
+            Assert.Equal(ErrorLevel.FATAL, error.Level);
+            Assert.True(error.Message.Contains("can not start with a letter"));
+        }
+
+        [Fact]
+        public void TestBadEmptyStringDelimiter()
+        {
+            var lexerRes = LexerBuilder.BuildLexer<BadEmptyStringDelimiter>(new BuildResult<ILexer<BadEmptyStringDelimiter>>());
+            Assert.True(lexerRes.IsError);
+            Assert.Equal(1, lexerRes.Errors.Count);
+            var error = lexerRes.Errors[0];
+            Assert.Equal(ErrorLevel.FATAL, error.Level);
+            Assert.True(error.Message.Contains("must be 1 character length"));
+        }
+
+        [Fact]
+        public void TestLexerError()
+        {
+            var lexerRes = LexerBuilder.BuildLexer<AlphaNumDashId>(new BuildResult<ILexer<AlphaNumDashId>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            string source = "hello world  2 + 2 ";
+            var errException = Assert.Throws<LexerException<GenericToken>>(() => lexer.Tokenize(source).ToList());
+            var error = errException.Error;
+            Assert.Equal(0, error.Line);
+            Assert.Equal(13, error.Column);
+            Assert.Equal('2', error.UnexpectedChar);
+
+
+
+
         }
     }
 }
