@@ -187,7 +187,7 @@ namespace sly.lexer.fsm
 
                     bool consumeSkipped = true;
 
-                    while (consumeSkipped && !tokenStarted)
+                    while (consumeSkipped && !tokenStarted && CurrentPosition < source.Length)
                     {
                         currentToken = source[CurrentPosition];
                         if (IgnoreWhiteSpace && WhiteSpaces.Contains(currentToken))
