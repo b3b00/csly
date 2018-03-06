@@ -390,7 +390,7 @@ namespace sly.lexer
                 int end = source.IndexOf(MultiLineCommentEnd, position);
                 if (end < 0)
                 {
-                    position = source.Length + MultiLineCommentEnd.Length;
+                    position = source.Length;
                 }
                 else
                 {
@@ -401,7 +401,6 @@ namespace sly.lexer
 
                 // TODO : compute new line and column
                 int newPosition = LexerFsm.CurrentPosition + commentValue.Length + MultiLineCommentEnd.Length;
-                var remaining = source.Substring(newPosition);
 
                 var lines = EOLManager.GetLines(commentValue);
                 int newLine = LexerFsm.CurrentLine + lines.Count - 1;
