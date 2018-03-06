@@ -264,7 +264,13 @@ namespace sly.lexer
                     {
                         if (lexem.GenericTokenParameters != null && lexem.GenericTokenParameters.Length > 0)
                         {
+                            try {
                             lexer.AddStringLexem(tokenID, lexem.GenericTokenParameters[0]);
+                            }
+                            catch (Exception e) {
+                                result.IsError = true;
+                                result.AddError(new InitializationError(ErrorLevel.FATAL,e.Message));
+                            }
                         }
                         else
                         {

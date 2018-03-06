@@ -247,7 +247,14 @@ namespace sly.lexer.fsm
                             successes.Push(resultInter);                            
                         }
                         CurrentPosition++;
-                        CurrentColumn += value.Length;
+                        CurrentColumn++ ;
+                    }
+                    else {
+
+                        if (lastNode == 0 && !tokenStarted && !successes.Any() && CurrentPosition < source.Length) {
+                            throw new LexerException<T>(new LexicalError(CurrentLine,CurrentColumn, source[CurrentPosition]));
+                        }
+                        ;
                     }
 
                 }

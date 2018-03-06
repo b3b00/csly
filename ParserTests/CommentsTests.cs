@@ -167,7 +167,7 @@ comment on 2 lines ",token3.Value);
             Assert.Equal(CommentsToken.INT,token4.TokenID);
             Assert.Equal("3",token4.Value);
             Assert.Equal(1,token4.Position.Line);
-            Assert.Equal(13,token4.Position.Column);
+            Assert.Equal(14,token4.Position.Column);
 
             Assert.Equal(CommentsToken.INT,token5.TokenID);
             Assert.Equal("4",token5.Value);
