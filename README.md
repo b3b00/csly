@@ -2,7 +2,7 @@
 
 [![Build status](https://ci.appveyor.com/api/projects/status/n9uffgkqn2qet7k9?svg=true)](https://ci.appveyor.com/project/OlivierDuhart/sly)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/b3b00/sly/blob/dev/LICENSE)
-[![NuGet](https://badge.fury.io/nu/sly.svg)](https://badge.fury.io/nu/sly)
+![NuGet](https://img.shields.io/nuget/v/sly.svg)
 [![codecov](https://codecov.io/gh/b3b00/csly/branch/dev/graph/badge.svg)](https://codecov.io/gh/b3b00/csly)
 
 
