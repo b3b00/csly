@@ -264,12 +264,23 @@ namespace sly.lexer
                     {
                         if (lexem.GenericTokenParameters != null && lexem.GenericTokenParameters.Length > 0)
                         {
-                            try {
-                            lexer.AddStringLexem(tokenID, lexem.GenericTokenParameters[0]);
+                            try
+                            {
+                                string delimiter = lexem.GenericTokenParameters[0];
+                                if (lexem.GenericTokenParameters.Length > 1)
+                                {
+                                    string escape = lexem.GenericTokenParameters[1];
+                                    lexer.AddStringLexem(tokenID, delimiter, escape);
+                                }
+                                else
+                                {
+                                    lexer.AddStringLexem(tokenID, delimiter);
+                                }
                             }
-                            catch (Exception e) {
+                            catch (Exception e)
+                            {
                                 result.IsError = true;
-                                result.AddError(new InitializationError(ErrorLevel.FATAL,e.Message));
+                                result.AddError(new InitializationError(ErrorLevel.FATAL, e.Message));
                             }
                         }
                         else
