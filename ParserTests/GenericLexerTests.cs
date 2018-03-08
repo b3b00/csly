@@ -30,6 +30,7 @@ namespace ParserTests
     }
 
 
+    
 
 
     public static class ExtendedGenericLexer
@@ -152,6 +153,17 @@ namespace ParserTests
         DefaultString
     }
 
+    public enum SelfEscapedString {
+        [Lexeme(GenericToken.String,"'","'")]
+        STRING
+    }
+
+    public enum ManyString {
+        [Lexeme(GenericToken.String,"'","'")]
+        [Lexeme(GenericToken.String)]
+        STRING
+    }
+
     public enum AlphaId
     {
         [Lexeme(GenericToken.Identifier, IdentifierType.Alpha)]
@@ -201,6 +213,8 @@ namespace ParserTests
             Assert.Equal(Extensions.CHAINE,tok.TokenID);
             Assert.Equal("'et voilà'",tokens[0].Value);
         }
+
+       
 
         [Fact]
         public void TestAlphaId()
@@ -300,6 +314,47 @@ namespace ParserTests
             Token<DefaultQuotedString> tok = r[0];
             Assert.Equal(DefaultQuotedString.DefaultString, tok.TokenID);
             Assert.Equal(source, tok.StringWithoutQuotes);
+        }
+
+         [Fact]
+        public void TestSelfEscapedString()
+        {
+            var lexerRes = LexerBuilder.BuildLexer<SelfEscapedString>(new BuildResult<ILexer<SelfEscapedString>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result as GenericLexer<SelfEscapedString>;
+            Assert.NotNull(lexer);
+            var tokens = lexer.Tokenize("'that''s it'").ToList();
+            Assert.Equal(1,tokens.Count);
+            Token<SelfEscapedString> tok = tokens[0];
+            Assert.Equal(SelfEscapedString.STRING,tok.TokenID);
+            Assert.Equal("'that's it'",tokens[0].Value);
+
+            tokens = lexer.Tokenize("'et voilà'").ToList();
+            Assert.Equal(1,tokens.Count);
+            tok = tokens[0];
+            Assert.Equal(SelfEscapedString.STRING,tok.TokenID);
+            Assert.Equal("'et voilà'",tokens[0].Value);
+
+        }
+
+        [Fact]
+        public void TestManyString()
+        {
+            var lexerRes = LexerBuilder.BuildLexer<ManyString>(new BuildResult<ILexer<ManyString>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            string string1 ="\"hello \\\"world \"";
+            string string2 = "'that''s it'";
+            string source1 = $"{string1} {string2}";
+            var r = lexer.Tokenize(source1).ToList();
+            Assert.Equal(2, r.Count);
+            Token<ManyString> tok1 = r[0];
+            Assert.Equal(ManyString.STRING, tok1.TokenID);
+            Assert.Equal(string1, tok1.Value);
+
+            Token<ManyString> tok2 = r[1];
+            Assert.Equal(ManyString.STRING, tok2.TokenID);
+            Assert.Equal(string2, tok2.Value);
         }
 
         [Fact]
