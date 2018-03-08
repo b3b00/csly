@@ -7,7 +7,7 @@ using System.Text;
 
 namespace sly.lexer
 {
-    public class LexerException<T> : Exception
+    public class LexerException : Exception
     {
 
         public LexicalError Error { get; set; }

@@ -27,10 +27,10 @@ namespace sly.lexer.fsm
         }
     }
 
-    public class FSMLexer<T, N>
+    public class FSMLexer<N>
     {
 
-        private Dictionary<int, List<FSMTransition<T>>> Transitions;
+        private Dictionary<int, List<FSMTransition>> Transitions;
 
         private Dictionary<int, FSMNode<N>> Nodes;
 
@@ -52,7 +52,7 @@ namespace sly.lexer.fsm
         public FSMLexer()
         {
             Nodes = new Dictionary<int, FSMNode<N>>();
-            Transitions = new Dictionary<int, List<FSMTransition<T>>>();
+            Transitions = new Dictionary<int, List<FSMTransition>>();
             Callbacks = new Dictionary<int, NodeCallback<N>>();
             Actions = new Dictionary<int,NodeAction>();
             IgnoreWhiteSpace = false;
@@ -111,24 +111,24 @@ namespace sly.lexer.fsm
         #region build
 
 
-        public FSMTransition<T> GetTransition(int nodeId, char token)
+        public FSMTransition GetTransition(int nodeId, char token)
         {
-            FSMTransition<T> transition = null;
+            FSMTransition transition = null;
             if (HasState(nodeId))
             {
                 if (Transitions.ContainsKey(nodeId))
                 {
                     var leavingTransitions = Transitions[nodeId];
-                    transition = leavingTransitions.FirstOrDefault((FSMTransition<T> t) => t.Match(token));
+                    transition = leavingTransitions.FirstOrDefault((FSMTransition t) => t.Match(token));
                 }
             }
             return transition;
         }
 
 
-        public void AddTransition(FSMTransition<T> transition)
+        public void AddTransition(FSMTransition transition)
         {
-            var transitions = new List<FSMTransition<T>>();
+            var transitions = new List<FSMTransition>();
             if (Transitions.ContainsKey(transition.FromNode))
             {
                 transitions = Transitions[transition.FromNode];
@@ -273,7 +273,7 @@ namespace sly.lexer.fsm
 
                         if (lastNode == 0 && !tokenStarted && !successes.Any() && CurrentPosition < source.Length)
                         {
-                            throw new LexerException<T>(new LexicalError(CurrentLine, CurrentColumn, source[CurrentPosition]));
+                            throw new LexerException(new LexicalError(CurrentLine, CurrentColumn, source[CurrentPosition]));
                         }
                         ;
                     }

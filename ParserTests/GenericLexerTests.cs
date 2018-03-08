@@ -386,7 +386,7 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             string source = "hello world  2 + 2 ";
-            var errException = Assert.Throws<LexerException<GenericToken>>(() => lexer.Tokenize(source).ToList());
+            var errException = Assert.Throws<LexerException>(() => lexer.Tokenize(source).ToList());
             var error = errException.Error;
             Assert.Equal(0, error.Line);
             Assert.Equal(13, error.Column);
