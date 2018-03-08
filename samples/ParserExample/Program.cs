@@ -120,7 +120,7 @@ namespace ParserExample
 
         static void testLexerBuilder()
         {
-            var builder = new FSMLexerBuilder<JsonToken, JsonToken>();
+            var builder = new FSMLexerBuilder<JsonToken>();
 
 
             // conf
@@ -135,13 +135,13 @@ namespace ParserExample
 
 
             // string literal
-            builder.Transition('\"', JsonToken.STRING)
+            builder.Transition('\"')
                 .Mark("in_string")
-                .ExceptTransitionTo(new char[] { '\"', '\\' }, "in_string", JsonToken.STRING)
-                .Transition('\\',JsonToken.STRING)
+                .ExceptTransitionTo(new char[] { '\"', '\\' }, "in_string")
+                .Transition('\\')
                 .Mark("escape")
-                .AnyTransitionTo(' ',"in_string",JsonToken.STRING)
-                .Transition('\"', JsonToken.STRING)
+                .AnyTransitionTo(' ',"in_string")
+                .Transition('\"')
                 .End(JsonToken.STRING)
                 .Mark("string_end")
                 .CallBack((FSMMatch<JsonToken> match) => {
@@ -179,15 +179,15 @@ namespace ParserExample
 
             //numeric
             builder.GoTo("start")
-            .RangeTransition('0', '9', JsonToken.INT, JsonToken.DOUBLE)
+            .RangeTransition('0', '9')
             .Mark("in_int")
-            .RangeTransitionTo('0', '9', "in_int", JsonToken.INT, JsonToken.DOUBLE)
+            .RangeTransitionTo('0', '9', "in_int")
             .End(JsonToken.INT)
-            .Transition('.', JsonToken.DOUBLE)
+            .Transition('.')
             .Mark("start_double")
-            .RangeTransition('0', '9', JsonToken.INT, JsonToken.INT, JsonToken.DOUBLE)
+            .RangeTransition('0', '9')
             .Mark("in_double")
-            .RangeTransitionTo('0', '9', "in_double", JsonToken.INT, JsonToken.DOUBLE)
+            .RangeTransitionTo('0', '9', "in_double")
             .End(JsonToken.DOUBLE);
 
 

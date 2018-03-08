@@ -53,7 +53,7 @@ namespace sly.lexer
 
                 if (matchedDefinition == null)
                 {                    
-                    throw new LexerException<T>(new LexicalError(currentLine,currentColumn, source[currentIndex]));
+                    throw new LexerException(new LexicalError(currentLine,currentColumn, source[currentIndex]));
                 }
                 else
                 {
