@@ -5,20 +5,18 @@ using System.Text;
 
 namespace sly.lexer.fsm
 {
-    public class FSMTransition<T> 
+    public class FSMTransition
     {
         public AbstractTransitionCheck Check { get; set; }
 
-        public List<T> TransitionValues { get; set; }
 
         public int FromNode;
 
         public int ToNode;
 
-        internal FSMTransition(AbstractTransitionCheck check, int from ,int to, List<T> values )
+        internal FSMTransition(AbstractTransitionCheck check, int from ,int to)
         {
             Check = check;
-            TransitionValues = values;
             FromNode = from;
             ToNode = to;
         }
