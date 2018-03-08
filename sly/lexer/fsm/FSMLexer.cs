@@ -6,14 +6,14 @@ using System.Text;
 
 namespace sly.lexer.fsm
 {
-    public delegate void BuildExtension<IN>( IN token, LexemeAttribute lexem,  GenericLexer<IN> lexer) where IN : struct;
-    
+    public delegate void BuildExtension<IN>(IN token, LexemeAttribute lexem, GenericLexer<IN> lexer) where IN : struct;
+
     public class FSMMatch<N>
     {
 
         public char StringDelimiter = '"';
 
-        public Dictionary<string,object> Properties { get; set; }
+        public Dictionary<string, object> Properties { get; set; }
 
         public bool IsSuccess { get; set; }
 
@@ -23,7 +23,7 @@ namespace sly.lexer.fsm
         {
             Properties = new Dictionary<string, object>();
             IsSuccess = success;
-            Result = new Token<N>(result,value,position);
+            Result = new Token<N>(result, value, position);
         }
     }
 
@@ -40,25 +40,28 @@ namespace sly.lexer.fsm
 
         public List<char> WhiteSpaces { get; set; }
 
-        public bool IgnoreEOL { get; set;}
+        public bool IgnoreEOL { get; set; }
 
-        public bool  AggregateEOL { get; set; }
+        public bool AggregateEOL { get; set; }
 
 
         private Dictionary<int, NodeCallback<N>> Callbacks { get; set; }
+
+        private Dictionary<int, NodeAction> Actions { get; set; }
 
         public FSMLexer()
         {
             Nodes = new Dictionary<int, FSMNode<N>>();
             Transitions = new Dictionary<int, List<FSMTransition<T>>>();
             Callbacks = new Dictionary<int, NodeCallback<N>>();
+            Actions = new Dictionary<int,NodeAction>();
             IgnoreWhiteSpace = false;
             IgnoreEOL = false;
             AggregateEOL = false;
             WhiteSpaces = new List<char>();
         }
 
-        
+
         #region accessors
 
         internal bool HasState(int state)
@@ -74,16 +77,26 @@ namespace sly.lexer.fsm
         }
 
 
-        internal int NewNodeId=> Nodes.Count;
+        internal int NewNodeId => Nodes.Count;
 
 
         internal bool HasCallback(int nodeId)
         {
-            return Callbacks.ContainsKey(nodeId);            
+            return Callbacks.ContainsKey(nodeId);
         }
 
-        internal void SetCallback(int nodeId, NodeCallback<N> callback) {
+        internal void SetCallback(int nodeId, NodeCallback<N> callback)
+        {
             Callbacks[nodeId] = callback;
+        }
+
+
+        internal bool HasAction(int nodeId) {
+            return Actions.ContainsKey(nodeId);
+        }
+        internal void SetAction(int nodeId, NodeAction action)
+        {
+            Actions[nodeId] = action;
         }
 
 
@@ -91,13 +104,13 @@ namespace sly.lexer.fsm
 
 
         #region  special conf
- 
+
 
         #endregion
 
         #region build
 
-        
+
         public FSMTransition<T> GetTransition(int nodeId, char token)
         {
             FSMTransition<T> transition = null;
@@ -114,15 +127,17 @@ namespace sly.lexer.fsm
 
 
         public void AddTransition(FSMTransition<T> transition)
-        {   
+        {
             var transitions = new List<FSMTransition<T>>();
             if (Transitions.ContainsKey(transition.FromNode))
             {
                 transitions = Transitions[transition.FromNode];
             }
             transitions.Add(transition);
-            Transitions[transition.FromNode] = transitions;            
+            Transitions[transition.FromNode] = transitions;
         }
+
+
 
         public FSMNode<N> AddNode(N value)
         {
@@ -141,19 +156,20 @@ namespace sly.lexer.fsm
         }
 
 
-        
+
 
         #endregion
 
 
         #region run
 
-        public int CurrentPosition {get; private set;} = 0;
-        public int CurrentColumn {get; private set;} = 0;
-        public int CurrentLine {get; private set;} = 0;
+        public int CurrentPosition { get; private set; } = 0;
+        public int CurrentColumn { get; private set; } = 0;
+        public int CurrentLine { get; private set; } = 0;
 
 
-        public void Move(int newPosition, int newLine, int newColumn) {
+        public void Move(int newPosition, int newLine, int newColumn)
+        {
             CurrentPosition = newPosition;
             CurrentLine = newLine;
             CurrentColumn = newColumn;
@@ -175,7 +191,7 @@ namespace sly.lexer.fsm
             TokenPosition position = null;
 
             bool tokenStarted = false;
-        
+
 
             if (CurrentPosition < source.Length)
             {
@@ -205,8 +221,8 @@ namespace sly.lexer.fsm
                         }
                         else
                         {
-                            var eol = EOLManager.IsEndOfLine(source,CurrentPosition);
-                            
+                            var eol = EOLManager.IsEndOfLine(source, CurrentPosition);
+
                             if (IgnoreEOL && eol != EOLType.No)
                             {
                                 if (successes.Any())
@@ -228,31 +244,36 @@ namespace sly.lexer.fsm
                         }
                     }
 
-                    
-                  
+
+
                     currentNode = Move(currentNode, currentToken, value);
                     if (currentNode != null)
                     {
                         lastNode = currentNode.Id;
                         value += currentToken;
-                        
+
                         if (!tokenStarted)
-                        {                                
-                            tokenStarted = true;                            
-                            position = new TokenPosition(CurrentPosition,CurrentLine,CurrentColumn);
+                        {
+                            tokenStarted = true;
+                            position = new TokenPosition(CurrentPosition, CurrentLine, CurrentColumn);
                         }
                         if (currentNode.IsEnd)
                         {
                             var resultInter = new FSMMatch<N>(true, currentNode.Value, value, position);
-                            successes.Push(resultInter);                            
+                            successes.Push(resultInter);
+                        }
+                        if (HasAction(currentNode.Id)) {
+                           value = Actions[currentNode.Id](value);
                         }
                         CurrentPosition++;
-                        CurrentColumn++ ;
+                        CurrentColumn++;
                     }
-                    else {
+                    else
+                    {
 
-                        if (lastNode == 0 && !tokenStarted && !successes.Any() && CurrentPosition < source.Length) {
-                            throw new LexerException<T>(new LexicalError(CurrentLine,CurrentColumn, source[CurrentPosition]));
+                        if (lastNode == 0 && !tokenStarted && !successes.Any() && CurrentPosition < source.Length)
+                        {
+                            throw new LexerException<T>(new LexicalError(CurrentLine, CurrentColumn, source[CurrentPosition]));
                         }
                         ;
                     }
@@ -263,13 +284,13 @@ namespace sly.lexer.fsm
 
             if (successes.Any())
             {
-                result = successes.Pop(); 
+                result = successes.Pop();
                 if (HasCallback(lastNode))
                 {
                     result = Callbacks[lastNode](result);
                 }
             }
-            
+
             return result;
 
         }
@@ -278,7 +299,7 @@ namespace sly.lexer.fsm
         {
             FSMNode<N> next = null;
             if (from != null)
-            {               
+            {
                 if (Transitions.ContainsKey(from.Id))
                 {
                     var transitions = Transitions[from.Id];
@@ -287,12 +308,12 @@ namespace sly.lexer.fsm
                         int i = 0;
                         bool match = false;
                         var transition = transitions[i];
-                        match = transition.Match(token,value);
-                        
+                        match = transition.Match(token, value);
+
                         while (i < transitions.Count && !match)
                         {
                             transition = transitions[i];
-                            match = transition.Match(token,value);
+                            match = transition.Match(token, value);
                             i++;
                         }
                         if (match)
@@ -304,21 +325,24 @@ namespace sly.lexer.fsm
             }
             return next;
         }
-        
+
         #endregion
 
 
-        public override string ToString() {
+        public override string ToString()
+        {
             StringBuilder dump = new StringBuilder();
-            foreach(var transitions in Transitions.Values) {
-                foreach(var transition in transitions) {
+            foreach (var transitions in Transitions.Values)
+            {
+                foreach (var transition in transitions)
+                {
                     dump.AppendLine(transition.ToString());
                 }
             }
             return dump.ToString();
         }
 
-        
+
 
     }
 }

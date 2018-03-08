@@ -20,8 +20,13 @@ namespace ParserTests
         [Lexeme(GenericToken.Extension)]
         DATE,
 
+        [Lexeme(GenericToken.Extension)]
+        CHAINE,
+
         [Lexeme(GenericToken.Double)]
         DOUBLE,
+
+        
     }
 
 
@@ -52,8 +57,6 @@ namespace ParserTests
         {
             if (token == Extensions.DATE)
             {
-
-
                 NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
                 {
                     match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
@@ -66,17 +69,51 @@ namespace ParserTests
                 fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
                 .Transition('.', CheckDate)
                 .Mark("start_date")
-                .RepetitionTransition(4, "[0-9]")
-                // .RangeTransition('0','9')
-                // .Mark("y1")
-                // .RangeTransition('0','9')
-                // .Mark("y2")
-                // .RangeTransition('0','9')
-                // .Mark("y3")
-                // .RangeTransition('0','9')
-                // .Mark("y4")
+                .RepetitionTransition(4, "[0-9]")                
                 .End(GenericToken.Extension)
                 .CallBack(callback);
+            }
+            else if (token == Extensions.CHAINE) {
+                NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
+                {
+                    match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.CHAINE;
+                    return match;
+                };
+
+                char quote = '\'';
+                NodeAction collapseDelimiter = (string value) => {
+                    if (value.EndsWith(""+quote+quote)) {
+                        return value.Substring(0,value.Length-2)+quote;
+                    }
+                    return value;
+                };
+                
+                var exceptQuote = new char[]{quote};
+                string in_string = "in_string_same";
+                string escaped = "escaped_same";
+                string delim = "delim_same";
+
+                var fsmBuilder = lexer.FSMBuilder;
+
+                fsmBuilder.GoTo(GenericLexer<Extensions>.start)                
+                .Transition(quote)
+                .Mark(in_string)
+                .ExceptTransitionTo(exceptQuote,in_string)
+                .Transition(quote)
+
+                .Mark(escaped)
+                .End(GenericToken.String)
+                .CallBack(callback)
+                .Transition(quote)
+
+                .Mark(delim)
+                .Action(collapseDelimiter)                
+                .ExceptTransitionTo(exceptQuote,in_string);
+                fsmBuilder.GoTo(delim)
+                .TransitionTo(quote,escaped)
+
+                .ExceptTransitionTo(exceptQuote,in_string);
+                
             }
         }
 
@@ -151,6 +188,18 @@ namespace ParserTests
             Assert.Equal("20.02.2018", tokens[0].Value);
             Assert.Equal(Extensions.DOUBLE, tokens[1].TokenID);
             Assert.Equal("3.14", tokens[1].Value);
+
+            tokens = lexer.Tokenize("'that''s it'").ToList();
+            Assert.Equal(1,tokens.Count);
+            Token<Extensions> tok = tokens[0];
+            Assert.Equal(Extensions.CHAINE,tok.TokenID);
+            Assert.Equal("'that's it'",tokens[0].Value);
+
+            tokens = lexer.Tokenize("'et voilà'").ToList();
+            Assert.Equal(1,tokens.Count);
+            tok = tokens[0];
+            Assert.Equal(Extensions.CHAINE,tok.TokenID);
+            Assert.Equal("'et voilà'",tokens[0].Value);
         }
 
         [Fact]
