@@ -20,11 +20,17 @@ namespace ParserTests
         [Lexeme(GenericToken.Extension)]
         DATE,
 
+        [Lexeme(GenericToken.Extension)]
+        CHAINE,
+
         [Lexeme(GenericToken.Double)]
         DOUBLE,
+
+        
     }
 
 
+    
 
 
     public static class ExtendedGenericLexer
@@ -52,8 +58,6 @@ namespace ParserTests
         {
             if (token == Extensions.DATE)
             {
-
-
                 NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
                 {
                     match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
@@ -66,17 +70,51 @@ namespace ParserTests
                 fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
                 .Transition('.', CheckDate)
                 .Mark("start_date")
-                .RepetitionTransition(4, "[0-9]")
-                // .RangeTransition('0','9')
-                // .Mark("y1")
-                // .RangeTransition('0','9')
-                // .Mark("y2")
-                // .RangeTransition('0','9')
-                // .Mark("y3")
-                // .RangeTransition('0','9')
-                // .Mark("y4")
+                .RepetitionTransition(4, "[0-9]")                
                 .End(GenericToken.Extension)
                 .CallBack(callback);
+            }
+            else if (token == Extensions.CHAINE) {
+                NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
+                {
+                    match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.CHAINE;
+                    return match;
+                };
+
+                char quote = '\'';
+                NodeAction collapseDelimiter = (string value) => {
+                    if (value.EndsWith(""+quote+quote)) {
+                        return value.Substring(0,value.Length-2)+quote;
+                    }
+                    return value;
+                };
+                
+                var exceptQuote = new char[]{quote};
+                string in_string = "in_string_same";
+                string escaped = "escaped_same";
+                string delim = "delim_same";
+
+                var fsmBuilder = lexer.FSMBuilder;
+
+                fsmBuilder.GoTo(GenericLexer<Extensions>.start)                
+                .Transition(quote)
+                .Mark(in_string)
+                .ExceptTransitionTo(exceptQuote,in_string)
+                .Transition(quote)
+
+                .Mark(escaped)
+                .End(GenericToken.String)
+                .CallBack(callback)
+                .Transition(quote)
+
+                .Mark(delim)
+                .Action(collapseDelimiter)                
+                .ExceptTransitionTo(exceptQuote,in_string);
+                fsmBuilder.GoTo(delim)
+                .TransitionTo(quote,escaped)
+
+                .ExceptTransitionTo(exceptQuote,in_string);
+                
             }
         }
 
@@ -115,6 +153,17 @@ namespace ParserTests
         DefaultString
     }
 
+    public enum SelfEscapedString {
+        [Lexeme(GenericToken.String,"'","'")]
+        STRING
+    }
+
+    public enum ManyString {
+        [Lexeme(GenericToken.String,"'","'")]
+        [Lexeme(GenericToken.String)]
+        STRING
+    }
+
     public enum AlphaId
     {
         [Lexeme(GenericToken.Identifier, IdentifierType.Alpha)]
@@ -151,7 +200,21 @@ namespace ParserTests
             Assert.Equal("20.02.2018", tokens[0].Value);
             Assert.Equal(Extensions.DOUBLE, tokens[1].TokenID);
             Assert.Equal("3.14", tokens[1].Value);
+
+            tokens = lexer.Tokenize("'that''s it'").ToList();
+            Assert.Equal(1,tokens.Count);
+            Token<Extensions> tok = tokens[0];
+            Assert.Equal(Extensions.CHAINE,tok.TokenID);
+            Assert.Equal("'that's it'",tokens[0].Value);
+
+            tokens = lexer.Tokenize("'et voilà'").ToList();
+            Assert.Equal(1,tokens.Count);
+            tok = tokens[0];
+            Assert.Equal(Extensions.CHAINE,tok.TokenID);
+            Assert.Equal("'et voilà'",tokens[0].Value);
         }
+
+       
 
         [Fact]
         public void TestAlphaId()
@@ -251,6 +314,47 @@ namespace ParserTests
             Token<DefaultQuotedString> tok = r[0];
             Assert.Equal(DefaultQuotedString.DefaultString, tok.TokenID);
             Assert.Equal(source, tok.StringWithoutQuotes);
+        }
+
+         [Fact]
+        public void TestSelfEscapedString()
+        {
+            var lexerRes = LexerBuilder.BuildLexer<SelfEscapedString>(new BuildResult<ILexer<SelfEscapedString>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result as GenericLexer<SelfEscapedString>;
+            Assert.NotNull(lexer);
+            var tokens = lexer.Tokenize("'that''s it'").ToList();
+            Assert.Equal(1,tokens.Count);
+            Token<SelfEscapedString> tok = tokens[0];
+            Assert.Equal(SelfEscapedString.STRING,tok.TokenID);
+            Assert.Equal("'that's it'",tokens[0].Value);
+
+            tokens = lexer.Tokenize("'et voilà'").ToList();
+            Assert.Equal(1,tokens.Count);
+            tok = tokens[0];
+            Assert.Equal(SelfEscapedString.STRING,tok.TokenID);
+            Assert.Equal("'et voilà'",tokens[0].Value);
+
+        }
+
+        [Fact]
+        public void TestManyString()
+        {
+            var lexerRes = LexerBuilder.BuildLexer<ManyString>(new BuildResult<ILexer<ManyString>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            string string1 ="\"hello \\\"world \"";
+            string string2 = "'that''s it'";
+            string source1 = $"{string1} {string2}";
+            var r = lexer.Tokenize(source1).ToList();
+            Assert.Equal(2, r.Count);
+            Token<ManyString> tok1 = r[0];
+            Assert.Equal(ManyString.STRING, tok1.TokenID);
+            Assert.Equal(string1, tok1.Value);
+
+            Token<ManyString> tok2 = r[1];
+            Assert.Equal(ManyString.STRING, tok2.TokenID);
+            Assert.Equal(string2, tok2.Value);
         }
 
         [Fact]
