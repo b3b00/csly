@@ -10,7 +10,6 @@ namespace sly.parser.syntax
     {
         bool IsTerminal();
 
-        string Dump(string tab);
 
     }
 }

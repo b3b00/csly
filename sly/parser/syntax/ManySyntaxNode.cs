@@ -45,13 +45,6 @@ namespace sly.parser.syntax
         }
 
 
-        public new string Dump(string tab)
-        {
-            StringBuilder dump = new StringBuilder();
-            dump.AppendLine($"{tab}(<{Name}>* {Children.Count} [");
-            Children.ForEach(c => dump.AppendLine($"{c.Dump(tab + "\t")},"));
-            dump.AppendLine($"{tab}]");
-            return dump.ToString();
-        }
+        
     }
 }

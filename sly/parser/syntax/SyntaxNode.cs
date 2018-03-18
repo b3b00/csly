@@ -117,12 +117,7 @@ namespace sly.parser.syntax
             this.Visitor = visitor;
         }
         
-        public override string ToString()
-        {
-            string r = Name+"(\n";
-            Children.ForEach(c => r += c.ToString() + ",\n");
-            return r+"\n)";
-        }
+      
 
         public void AddChildren(List<ISyntaxNode<IN>> children)
         {
@@ -140,23 +135,7 @@ namespace sly.parser.syntax
 
         
 
-        public string Dump(string tab)
-        {
-            StringBuilder dump = new StringBuilder();
-            string bypass = IsByPassNode ? "#BYPASS#" : "";
-            string precedence = Operation != null ? $"@{Operation.Precedence}@" : "";
-            if (IsExpressionNode)
-            {
-                dump.AppendLine($"{tab}(operation:>{Operator}< {bypass} {precedence} [");
-            }
-            else
-            {
-                dump.AppendLine($"{tab}({Name} {bypass} {precedence} [");
-            }
-            Children.ForEach(c => dump.AppendLine($"{c.Dump(tab + "\t")},"));
-            dump.AppendLine($"{tab}]");
-            return dump.ToString();
-        }
+       
 
     }
 }
