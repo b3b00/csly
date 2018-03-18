@@ -95,7 +95,6 @@ namespace sly.parser.syntax
             {
                 return Clauses == null
                     || Clauses.Count == 0
-                    || (Clauses.Count == 1 && Clauses[0] is EmptyClause<IN>)
                     || (Clauses.Count == 1 && Clauses[0].MayBeEmpty());
             } }
 

@@ -16,18 +16,7 @@ namespace sly.parser.syntax
             Clauses.Add(item);
         }
 
-        
-        public ClauseSequence(List<IClause<T>> items)
-        {
-            Clauses = new List<IClause<T>>();
-            Clauses.AddRange(items);
-        }
-        
-        public void Add(IClause<T> clause)
-        {
-            Clauses.Add(clause);
-        }
-
+    
         public void AddRange(List<IClause<T>> clauses)
         {
             Clauses.AddRange(clauses);

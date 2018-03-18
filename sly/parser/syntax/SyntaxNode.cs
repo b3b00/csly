@@ -38,30 +38,6 @@ namespace sly.parser.syntax
 
         public bool IsRightAssociative => Associativity == Associativity.Right;
 
-        public SyntaxLeaf<IN> Operator { get {
-                SyntaxLeaf<IN> oper = null;
-                if (IsExpressionNode)
-                {
-                    int operatorIndex = -1;
-                    if (IsBinaryOperationNode) {
-                        operatorIndex = 1;
-                    }
-                    else if (IsUnaryOperationNode)
-                    {
-                        operatorIndex = 0;
-                    }
-
-                    if (operatorIndex > 0 && Children[operatorIndex] is SyntaxLeaf<IN> leaf)
-                    {
-                        oper = leaf;
-                    }
-                }
-                return oper;
-            }
-        }
- 
-        
-
         public ISyntaxNode<IN> Left
         {
             get  {
