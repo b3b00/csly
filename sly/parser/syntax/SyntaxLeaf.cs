@@ -14,14 +14,5 @@ namespace sly.parser.syntax
         {
             this.Token = token;
         }
-
-     
-
-        public bool IsTerminal() {
-            return true;
-        }
-
-       
-          
     }
 }

@@ -10,10 +10,6 @@ namespace sly.parser.syntax
         {
             Clause = clause;
         }
-        public bool Check(T nextToken)
-        {
-            return true;
-        }
 
         public override string ToString()
         {

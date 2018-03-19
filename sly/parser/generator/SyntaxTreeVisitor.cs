@@ -112,11 +112,7 @@ namespace sly.parser.generator
             if (n is SyntaxLeaf<IN>)
             {
                 return Visit(n as SyntaxLeaf<IN>);
-            }
-            else if (n is SyntaxEpsilon<IN>)
-            {
-                return Visit(n as SyntaxEpsilon<IN>);
-            }
+            }            
             else if (n is SyntaxNode<IN>)
             {
                 return Visit(n as SyntaxNode<IN>);

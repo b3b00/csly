@@ -26,14 +26,12 @@ namespace sly.parser.syntax
         {
             AddRange(seq.Clauses);
         }
-        
-        public bool Check(T nextToken) {
-            return true;
-        }
 
         public bool MayBeEmpty()
         {
             return true;
         }
+
+    
     }
 }

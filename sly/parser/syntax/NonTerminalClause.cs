@@ -8,10 +8,6 @@ namespace sly.parser.syntax
         {
             NonTerminalName = name;
         }
-        public bool Check(T nextToken)
-        {
-            return true;
-        }
 
         public override string ToString()
         {

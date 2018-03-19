@@ -36,8 +36,6 @@ namespace sly.parser.syntax
 
         public bool IsLeftAssociative => Associativity == Associativity.Left;
 
-        public bool IsRightAssociative => Associativity == Associativity.Right;
-
         public ISyntaxNode<IN> Left
         {
             get  {
@@ -104,14 +102,7 @@ namespace sly.parser.syntax
         {
             this.Children.Add(child);
         }
-
-        public bool IsTerminal() {
-            return false;
-        }
-
-        
-
-       
+               
 
     }
 }
