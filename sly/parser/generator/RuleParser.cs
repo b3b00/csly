@@ -47,7 +47,7 @@ namespace sly.parser.generator
         [Production("clause : IDENTIFIER ZEROORMORE")]
         public IClause<IN> ZeroMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
         {
-            IClause<IN> innerClause = BuildTerminalOrNonTerimal(id.Value);
+            IClause<IN> innerClause = BuildTerminalOrNonTerimal(id.Value,true);
             return new ZeroOrMoreClause<IN>(innerClause);
         }
 
@@ -58,6 +58,13 @@ namespace sly.parser.generator
             return new OneOrMoreClause<IN>(innerClause);
         }
 
+        [Production("clause : IDENTIFIER DISCARD ")]
+        public IClause<IN> SimpleDiscardedClause(Token<EbnfToken> id, Token<EbnfToken> discard)
+        {
+            IClause<IN> clause = BuildTerminalOrNonTerimal(id.Value, true);
+            return clause;
+        }
+
         [Production("clause : IDENTIFIER ")]
         public IClause<IN> SimpleClause(Token<EbnfToken> id)
         {
@@ -65,7 +72,11 @@ namespace sly.parser.generator
             return clause;
         }
 
-        private IClause<IN> BuildTerminalOrNonTerimal(string name)
+       
+
+
+
+        private IClause<IN> BuildTerminalOrNonTerimal(string name, bool discard = false)
         {
 
             IN token = default(IN);
@@ -79,7 +90,7 @@ namespace sly.parser.generator
             }
             if (isTerminal)
             {
-                clause = new TerminalClause<IN>(token);
+                clause = new TerminalClause<IN>(token,discard);
             }
             else
             {

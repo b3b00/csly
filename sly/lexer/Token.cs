@@ -5,7 +5,8 @@ namespace sly.lexer
 
     public enum CommentType {
         Single,
-        Multi
+        Multi,
+        No
     }
     public class Token<T>
     {
@@ -20,7 +21,9 @@ namespace sly.lexer
         public T TokenID { get; set; }
         public bool IsComment { get; set; }
 
-        public CommentType CommentType {get; set;} = CommentType.Single;
+        public bool Discarded { get; set; } = false;
+
+        public CommentType CommentType {get; set;} = CommentType.No;
 
         public bool IsMultiLineComment => CommentType == CommentType.Multi;
 

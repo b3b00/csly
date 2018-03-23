@@ -288,18 +288,15 @@ namespace sly.parser.llparser
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             result.IsError = !term.Check(tokens[position].TokenID);
             result.EndingPosition = !result.IsError ? position + 1 : position;
-            result.Root = new SyntaxLeaf<IN>(tokens[position]);
+            Token<IN> token = tokens[position];
+            token.Discarded = term.Discarded;
+            result.Root = new SyntaxLeaf<IN>(token);
             return result;
         }
 
 
         public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, NonTerminalClause<IN> nonTermClause, int currentPosition)
         {
-
-            if (nonTermClause.NonTerminalName == "members")
-            {
-                ;
-            }
 
             NonTerminal<IN> nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
             bool found = false;

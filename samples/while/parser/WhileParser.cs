@@ -12,8 +12,8 @@ namespace csly.whileLang.parser
 
         #region statements
 
-        [Production("statement :  LPAREN statement RPAREN ")]
-        public WhileAST block(Token<WhileToken> discardLpar, Statement statement, Token<WhileToken> discardRpar)
+        [Production("statement :  LPAREN [d] statement RPAREN [d]")]
+        public WhileAST block( Statement statement)
         {
             return statement;
         }
@@ -32,47 +32,47 @@ namespace csly.whileLang.parser
             return seq;
         }
 
-        [Production("additionalStatements : SEMICOLON statementPrim")]
-        public WhileAST additional(Token<WhileToken> semi, WhileAST statement)
+        [Production("additionalStatements : SEMICOLON [d] statementPrim")]
+        public WhileAST additional(WhileAST statement)
         {
             return statement;
         }
 
-        [Production("statementPrim: IF WhileParser_expressions THEN statement ELSE statement")]
-        public WhileAST ifStmt(Token<WhileToken> discardIf, WhileAST cond, Token<WhileToken> dicardThen, WhileAST thenStmt, Token<WhileToken> dicardElse, Statement elseStmt)
+        [Production("statementPrim: IF [d] WhileParser_expressions THEN [d] statement ELSE [d] statement")]
+        public WhileAST ifStmt(WhileAST cond, WhileAST thenStmt, Statement elseStmt)
         {
             IfStatement stmt = new IfStatement(cond as Expression, thenStmt as Statement, elseStmt);
             return stmt;
         }
 
-        [Production("statementPrim: WHILE WhileParser_expressions DO statement")]
-        public WhileAST whileStmt(Token<WhileToken> discardWhile, WhileAST cond, Token<WhileToken> dicardDo, WhileAST blockStmt)
+        [Production("statementPrim: WHILE [d] WhileParser_expressions DO [d] statement")]
+        public WhileAST whileStmt(WhileAST cond,  WhileAST blockStmt)
         {
             WhileStatement stmt = new WhileStatement(cond as Expression, blockStmt as Statement);
             return stmt;
         }
 
-        [Production("statementPrim: IDENTIFIER ASSIGN WhileParser_expressions")]
-        public WhileAST assignStmt(Token<WhileToken> variable, Token<WhileToken> discardAssign, Expression value)
+        [Production("statementPrim: IDENTIFIER ASSIGN [d] WhileParser_expressions")]
+        public WhileAST assignStmt(Token<WhileToken> variable, Expression value)
         {
             AssignStatement assign = new AssignStatement(variable.StringWithoutQuotes, value);
             return assign;
         }
 
-        [Production("statementPrim: SKIP")]
-        public WhileAST skipStmt(Token<WhileToken> discard)
+        [Production("statementPrim: SKIP [d]")]
+        public WhileAST skipStmt()
         {
             return new SkipStatement();
         }
 
-        [Production("statementPrim: RETURN WhileParser_expressions")]
-        public WhileAST returnStmt(Token<WhileToken> discard, WhileAST expression)
+        [Production("statementPrim: RETURN [d] WhileParser_expressions")]
+        public WhileAST returnStmt( WhileAST expression)
         {
             return new ReturnStatement(expression as Expression);
         }
 
-        [Production("statementPrim: PRINT WhileParser_expressions")]
-        public WhileAST skipStmt(Token<WhileToken> discard, WhileAST expression)
+        [Production("statementPrim: PRINT [d] WhileParser_expressions")]
+        public WhileAST skipStmt(WhileAST expression)
         {
             return new PrintStatement(expression as Expression);
         }
