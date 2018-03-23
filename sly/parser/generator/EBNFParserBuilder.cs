@@ -130,7 +130,7 @@ namespace sly.parser.generator
                 foreach (ProductionAttribute attr in attributes)
                 {
 
-                    string ruleString = attr.RuleString;
+                    string ruleString = attr.RuleString;                   
                     ParseResult<EbnfToken,GrammarNode<IN>> parseResult = grammarParser.Parse(ruleString);
                     if (!parseResult.IsError)
                     {

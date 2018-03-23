@@ -22,7 +22,9 @@ namespace sly.parser.generator
 
         private bool isTok;
 
-        public bool IsToken => isTok; 
+        public bool IsToken => isTok;
+
+        public bool Discarded => IsToken && TokenResult != null && TokenResult.Discarded;
 
         private bool isVal;
 
@@ -139,7 +141,10 @@ namespace sly.parser.generator
 
                     if (v.IsToken)
                     {
-                        args.Add(v.TokenResult);
+                        if (!v.Discarded)
+                        {
+                            args.Add(v.TokenResult);
+                        }
                     }
                     else if (v.IsValue)
                     {

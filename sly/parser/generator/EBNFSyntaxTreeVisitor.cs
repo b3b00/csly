@@ -40,7 +40,7 @@ namespace sly.parser.generator
         }
 
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node)
-        {
+        {            
             SyntaxVisitorResult < IN, OUT > result = SyntaxVisitorResult<IN, OUT>.NoneResult();
             if (node.Visitor != null || node.IsByPassNode)
             {
@@ -54,7 +54,10 @@ namespace sly.parser.generator
 
                     if (v.IsToken)
                     {
-                        args.Add(v.TokenResult);
+                        if (!v.Discarded)
+                        {
+                            args.Add(v.TokenResult);
+                        }
                     }
                     else if (v.IsValue)
                     {
@@ -140,7 +143,7 @@ namespace sly.parser.generator
 
 
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN> leaf)
-        {
+        {            
             return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
         }
     }

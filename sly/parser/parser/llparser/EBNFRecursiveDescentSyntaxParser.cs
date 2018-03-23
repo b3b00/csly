@@ -11,11 +11,7 @@ namespace sly.parser.llparser
 {
     public class EBNFRecursiveDescentSyntaxParser<IN,OUT> : RecursiveDescentSyntaxParser<IN,OUT> where IN : struct
     {
-        //public ParserConfiguration<T> Configuration { get; set; }
-
-        //public string StartingNonTerminal { get; set; }
-
-
+    
         public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<IN,OUT> configuration, string startingNonTerminal) : base(configuration,startingNonTerminal)
         {
             Configuration = configuration;
