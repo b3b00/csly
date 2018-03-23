@@ -214,6 +214,13 @@ namespace sly.parser.generator
                 {
                     clause = new TerminalClause<IN>(token);
                 }
+                else if (item == "[d]")
+                {
+                    if (clauses.Last() is TerminalClause<IN> discardedTerminal)
+                    {
+                        discardedTerminal.Discarded = true;
+                    }
+                }
                 else
                 {
                     clause = new NonTerminalClause<IN>(item);
