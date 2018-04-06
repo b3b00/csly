@@ -7,6 +7,7 @@
         {
             "taskName": "build",
             "command": "dotnet",
+            "isBuildCommand": true,
             "args": [
                 "build",
                 "${workspaceFolder}/ParserTests/ParserTests.csproj"
@@ -16,6 +17,7 @@
         {
             "taskName": "unit tests",
             "command": "dotnet",
+            "isTestCommand": true,
             "args": [
                 "test",
                 "${workspaceFolder}/ParserTests/ParserTests.csproj"
@@ -24,7 +26,8 @@
         },
         {
             "taskName": "test with coverage",
-            "command": "dotnet",
+            "command": "dotnet",            
+            "isTestCommand": true,
             "args": [
                 "test",
                 "/p:CollectCoverage=true",

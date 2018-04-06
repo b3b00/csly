@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.0;net45</TargetFrameworks>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <Description>#LY is a parser generator halfway between parser combinators and parser generator like ANTLR</Description>
     <Authors>b3b00</Authors>
     <version>2.0.7</version>
