@@ -1,0 +1,38 @@
+{
+    "version": "0.1.0",
+    "command": "dotnet",
+    "isShellCommand": true,
+    "args": [],
+    "tasks": [
+        {
+            "taskName": "build",
+            "command": "dotnet",
+            "args": [
+                "build",
+                "${workspaceFolder}/ParserTests/ParserTests.csproj"
+            ],
+            "problemMatcher": "$msCompile",
+        },
+        {
+            "taskName": "unit tests",
+            "command": "dotnet",
+            "args": [
+                "test",
+                "${workspaceFolder}/ParserTests/ParserTests.csproj"
+            ],
+            "problemMatcher": "$msCompile",                        
+        },
+        {
+            "taskName": "test with coverage",
+            "command": "dotnet",
+            "args": [
+                "test",
+                "/p:CollectCoverage=true",
+                "/p:CoverletOutputFormat=lcov",
+                "/p:CoverletOutput=./lcov.info",
+                "${workspaceFolder}/ParserTests/ParserTests.csproj"
+            ],
+            "problemMatcher": "$msCompile",            
+        },
+    ]
+}
