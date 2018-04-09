@@ -249,7 +249,7 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
             Interpreter interpreter = new Interpreter();
-            var context = interpreter.Interprete(result.Result);
+            var context = interpreter.Interprete(result.Result,true);
             Assert.Equal(1,context.variables.Count);
             Assert.True(CheckIntVariable(context, "a", 10));
             
