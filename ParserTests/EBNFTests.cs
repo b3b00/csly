@@ -132,15 +132,15 @@ namespace ParserTests
             NonTerminal<TokenType> nt = Parser.Configuration.NonTerminals["R"];
             Assert.Equal(2,nt.Rules.Count);
             nt = Parser.Configuration.NonTerminals["A"];
-            Assert.Equal(1,nt.Rules.Count);
+            Assert.Single(nt.Rules);
             Rule<TokenType> rule = nt.Rules[0];
-            Assert.Equal(1,rule.Clauses.Count);
-            Assert.IsType(typeof(OneOrMoreClause<TokenType>), rule.Clauses[0]);
+            Assert.Single(rule.Clauses);
+            Assert.IsType<TokenType>(rule.Clauses[0]);
             nt = Parser.Configuration.NonTerminals["B"];
-            Assert.Equal(1,nt.Rules.Count);
+            Assert.Single(nt.Rules);
             rule = nt.Rules[0];
-            Assert.Equal(1, rule.Clauses.Count);
-            Assert.IsType(typeof(ZeroOrMoreClause<TokenType>), rule.Clauses[0]);
+            Assert.Single(rule.Clauses);
+            Assert.IsType< ZeroOrMoreClause<TokenType>>(rule.Clauses[0]);
             ;
         }
 

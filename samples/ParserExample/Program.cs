@@ -227,26 +227,7 @@ namespace ParserExample
     i := i + 1 )
 )";
 
-            //WhileParser wp = new WhileParser();
-            //sw.Reset();
-            //sw.Start();
-            //ParserBuilder<WhileToken, WhileAST> wbuilder = new ParserBuilder<WhileToken, WhileAST>();
-            //var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
-            //var parser = buildResult.Result;
-            //var r = parser.Parse(source);
-            //sw.Stop();
-            //Console.WriteLine($"regex parser : {sw.ElapsedMilliseconds} ms");
-            //if (!r.IsError)
-            //{
-            //    var interpreter = new Interpreter();
-            //    var ctx = interpreter.Interprete(r.Result);
-            //    ;
-
-            //}
-            //else
-            //{
-            //    r.Errors.ForEach(e => Console.WriteLine(e.ToString()));
-            //}
+           
 
             sw.Reset();
             sw.Start();
