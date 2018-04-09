@@ -239,7 +239,7 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("alpha123").ToList();
-            Assert..Single(r);
+            Assert.Single(r);
             Token<AlphaNumId> tok = r[0];
             Assert.Equal(AlphaNumId.ID, tok.TokenID);
             Assert.Equal("alpha123", tok.StringWithoutQuotes);
@@ -253,7 +253,7 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("alpha-123_").ToList();
-            Assert..Single(r);
+            Assert.Single(r);
             Token<AlphaNumDashId> tok = r[0];
             Assert.Equal(AlphaNumDashId.ID, tok.TokenID);
             Assert.Equal("alpha-123_", tok.StringWithoutQuotes);
@@ -282,7 +282,7 @@ namespace ParserTests
             var lexer = lexerRes.Result;
             string source = "hello \\\"world ";
             var r = lexer.Tokenize($"\"{source}\"").ToList();
-            Assert..Single(r);
+            Assert.Single(r);
             Token<DoubleQuotedString> tok = r[0];
             Assert.Equal(DoubleQuotedString.DoubleString, tok.TokenID);
             Assert.Equal(source, tok.StringWithoutQuotes);
