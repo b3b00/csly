@@ -115,7 +115,16 @@ namespace csly.whileLang.interpreter
     public class Interpreter
     {
 
+        private bool IsQuiet = false;
+
         private ExpressionEvaluator evaluator;
+
+        public InterpreterContext Interprete(WhileAST ast, bool quiet = false)
+        {
+            IsQuiet = false;
+            evaluator = new ExpressionEvaluator(quiet);
+            return Interprete(ast, new InterpreterContext());
+        }
 
         public InterpreterContext Interprete(WhileAST ast)
         {
@@ -161,7 +170,9 @@ namespace csly.whileLang.interpreter
         private void Interprete(PrintStatement ast, InterpreterContext context)
         {
             TypedValue val = evaluator.Evaluate(ast.Value, context);
-            Console.WriteLine(val.StringValue);
+            if (!IsQuiet) {
+                Console.WriteLine(val.StringValue);
+            }
         }
 
         private void Interprete(SequenceStatement ast, InterpreterContext context)
@@ -236,10 +247,13 @@ namespace csly.whileLang.interpreter
     class ExpressionEvaluator
     {
         
+        bool IsQuiet {get; set;} = false;
+
         private Dictionary<BinaryOperator, List<Signature>> binaryOperationSignatures;
 
-        public ExpressionEvaluator()
+        public ExpressionEvaluator(bool quiet = false)
         {
+            IsQuiet = quiet;
             binaryOperationSignatures = new Dictionary<BinaryOperator, List<Signature>>()
             {
                 { BinaryOperator.ADD,new List<Signature> {
