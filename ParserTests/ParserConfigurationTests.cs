@@ -57,9 +57,9 @@ namespace ParserTests
             Assert.Equal(2, result.Errors.Count);
             var warnerrors = result.Errors.Where(e => e.Level == sly.buildresult.ErrorLevel.WARN).ToList();
             var errorerrors = result.Errors.Where(e => e.Level == sly.buildresult.ErrorLevel.ERROR).ToList();
-            Assert.Equal(1, warnerrors.Count);
+            Assert.Single(warnerrors);
             Assert.True(warnerrors[0].Message.Contains("R3") && warnerrors[0].Message.Contains("never used"));
-            Assert.Equal(1, errorerrors.Count);
+            Assert.Single(errorerrors);
             Assert.True(errorerrors[0].Message.Contains("R2") && errorerrors[0].Message.Contains("not exist"));
         }
 
@@ -73,10 +73,10 @@ namespace ParserTests
             Assert.Equal(2, result.Errors.Count);
             var errors = result.Errors.Where(e => e.Level == ErrorLevel.ERROR).ToList();
             var warnings = result.Errors.Where(e => e.Level == ErrorLevel.WARN).ToList();
-            Assert.Equal(1, errors.Count);
+            Assert.Single(errors);
             var errorMessage = errors[0].Message;
             Assert.True(errorMessage.Contains(BadTokens.BadRegex.ToString()) && errorMessage.Contains("BadRegex"));
-            Assert.Equal(1, warnings.Count);
+            Assert.Single(warnings);
             var warnMessage = warnings[0].Message;
             Assert.True(warnMessage.Contains(BadTokens.MissingLexeme.ToString()) && warnMessage.Contains("not have Lexeme"));
             ;
