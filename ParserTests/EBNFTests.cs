@@ -135,12 +135,12 @@ namespace ParserTests
             Assert.Single(nt.Rules);
             Rule<TokenType> rule = nt.Rules[0];
             Assert.Single(rule.Clauses);
-            Assert.IsType<TokenType>(rule.Clauses[0]);
+            Assert.IsType<OneOrMoreClause<TokenType>>(rule.Clauses[0]);
             nt = Parser.Configuration.NonTerminals["B"];
             Assert.Single(nt.Rules);
             rule = nt.Rules[0];
             Assert.Single(rule.Clauses);
-            Assert.IsType< ZeroOrMoreClause<TokenType>>(rule.Clauses[0]);
+            Assert.IsType<ZeroOrMoreClause<TokenType>>(rule.Clauses[0]);
             ;
         }
 
