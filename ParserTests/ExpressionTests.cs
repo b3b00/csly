@@ -27,7 +27,6 @@ namespace ParserTests
         {
             ParseResult<ExpressionToken,int> r = Parser.Parse("1");
             Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
             Assert.Equal(1, r.Result);
         }
 
@@ -36,7 +35,6 @@ namespace ParserTests
         {
             ParseResult <ExpressionToken,int> r = Parser.Parse("-1");
             Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
             Assert.Equal(-1, r.Result);
         }
 
@@ -45,8 +43,6 @@ namespace ParserTests
         {
             ParseResult<ExpressionToken,int> r = Parser.Parse("1 + 1");
             Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.IsAssignableFrom(typeof(int), r.Result);
             Assert.Equal(2, (int)r.Result);
         }
 
@@ -55,7 +51,6 @@ namespace ParserTests
         {
             ParseResult<ExpressionToken,int> r = Parser.Parse("1 - 1");
             Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
             Assert.Equal(0, r.Result);
         }
 
@@ -64,8 +59,6 @@ namespace ParserTests
         {
             ParseResult<ExpressionToken,int> r = Parser.Parse("2*2");
             Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.IsAssignableFrom(typeof(int), r.Result);
             Assert.Equal(4, r.Result);
         }
 
@@ -74,7 +67,6 @@ namespace ParserTests
         {
             ParseResult<ExpressionToken,int> r = Parser.Parse("42/2");
             Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
             Assert.Equal(21, r.Result);
         }
 
@@ -83,7 +75,6 @@ namespace ParserTests
         {
             ParseResult<ExpressionToken,int> r = Parser.Parse("(2 + 2)");
             Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
             Assert.Equal(4, r.Result);
         }
 
@@ -92,7 +83,6 @@ namespace ParserTests
         {
             ParseResult<ExpressionToken,int> r = Parser.Parse("6 * (2 + 2)");
             Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
             Assert.Equal(24, r.Result);
         }
 
@@ -101,7 +91,6 @@ namespace ParserTests
         {
             ParseResult<ExpressionToken,int> r = Parser.Parse("6 * 2 + 2");
             Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
             Assert.Equal(14, r.Result);
         }
 

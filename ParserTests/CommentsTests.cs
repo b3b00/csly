@@ -47,6 +47,7 @@ namespace ParserTests
 
             string dump = lexer.ToString();
 
+
             var tokens = lexer.Tokenize(@"1
 2 // single line comment
 3.0").ToList();

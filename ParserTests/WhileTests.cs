@@ -108,8 +108,8 @@ namespace ParserTests
             Assert.IsType<BinaryOperation>(expr);
             BinaryOperation bin = expr as BinaryOperation;
             Assert.Equal(BinaryOperator.AND, bin.Operator);
-            Assert.Equal(true, (bin.Left as BoolConstant)?.Value);
-            Assert.Equal(false, (bin.Right as BoolConstant)?.Value);
+            Assert.True((bin.Left as BoolConstant)?.Value);
+            Assert.False((bin.Right as BoolConstant)?.Value);
         }
 
         [Fact]
@@ -129,7 +129,7 @@ namespace ParserTests
             WhileStatement whil = seq.Get(0) as WhileStatement;
             Expression cond = whil.Condition;
             Assert.IsType<BoolConstant>(cond);
-            Assert.Equal(true, (cond as BoolConstant).Value);
+            Assert.True((cond as BoolConstant).Value);
             Statement s = whil.BlockStmt;
             Assert.IsType<SequenceStatement>( whil.BlockStmt);
             SequenceStatement seqBlock = whil.BlockStmt as SequenceStatement;
@@ -155,7 +155,7 @@ namespace ParserTests
             IfStatement si = seq.Get(0) as IfStatement;
             Expression cond = si.Condition;
             Assert.IsType<BoolConstant>(cond);
-            Assert.Equal(true, (cond as BoolConstant).Value);
+            Assert.True((cond as BoolConstant).Value);
             Statement s = si.ThenStmt;
 
             Assert.IsType<SequenceStatement>(si.ThenStmt);
@@ -250,7 +250,7 @@ namespace ParserTests
             Assert.NotNull(result.Result);
             Interpreter interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result,true);
-            Assert.Equal(1,context.variables.Count);
+            Assert.Single(context.variables);
             Assert.True(CheckIntVariable(context, "a", 10));
             
 
