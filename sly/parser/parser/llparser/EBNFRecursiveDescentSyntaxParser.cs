@@ -240,7 +240,7 @@ namespace sly.parser.llparser
                     currentPosition = innerResult.EndingPosition;
                     lastInnerResult = innerResult;
                 }
-                stillOk = stillOk && innerResult != null && !(innerResult.IsError);
+                stillOk = stillOk && innerResult != null && !(innerResult.IsError) && currentPosition < tokens.Count;
             }
 
 
