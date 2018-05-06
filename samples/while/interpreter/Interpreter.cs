@@ -121,7 +121,7 @@ namespace csly.whileLang.interpreter
 
         public InterpreterContext Interprete(WhileAST ast, bool quiet = false)
         {
-            IsQuiet = false;
+            IsQuiet = quiet;
             evaluator = new ExpressionEvaluator(quiet);
             return Interprete(ast, new InterpreterContext());
         }
