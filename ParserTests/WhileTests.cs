@@ -298,8 +298,8 @@ namespace ParserTests
     while i < 11 do 
     ( 
     r := r * i;
-    print "".r;
-    print "".i;
+    print """".r;
+    print """".i;
     i := i + 1 );
 return r
 )";
