@@ -196,6 +196,10 @@ namespace sly.lexer
                                 {
                                     match.Properties[DerivedToken] = possibleTokens[match.Result.Value];
                                 }
+                                else
+                                {
+                                    match.Properties[DerivedToken] = identifierDerivedToken;
+                                }
                             }
                             else
                             {
@@ -286,6 +290,10 @@ namespace sly.lexer
                     {
                         match.Properties[DerivedToken] = identifierDerivedToken;
                     }
+                }
+                else
+                {
+                    match.Properties[DerivedToken] = identifierDerivedToken;
                 }
                 return match;
             };
@@ -494,7 +502,7 @@ namespace sly.lexer
             var tok = new Token<IN>();
             tok.Value = match.Result.Value;
             tok.Position = match.Result.Position;
-            tok.StringDelimiter = StringDelimiterChar;
+            tok.StringDelimiter = StringDelimiterChar;            
             tok.TokenID = (IN)match.Properties[DerivedToken];
             return tok;
         }
