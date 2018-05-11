@@ -295,6 +295,7 @@ namespace sly.lexer
                 {
                     match.Properties[DerivedToken] = identifierDerivedToken;
                 }
+
                 return match;
             };
 
