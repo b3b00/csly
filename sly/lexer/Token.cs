@@ -17,6 +17,7 @@ namespace sly.lexer
 
         public char StringDelimiter = '"';
 
+
         public TokenPosition Position { get; set; }
         public T TokenID { get; set; }
         public bool IsComment { get; set; }
@@ -24,6 +25,8 @@ namespace sly.lexer
         public bool Discarded { get; set; } = false;
 
         public CommentType CommentType {get; set;} = CommentType.No;
+
+        public bool IsEmpty {get; set;} = false;
 
         public bool IsMultiLineComment => CommentType == CommentType.Multi;
 
@@ -47,11 +50,22 @@ namespace sly.lexer
         }
 
 
+        
+
         public Token()
         {
             End = true;
             TokenID = DefaultToken;
         }
+
+        public static Token<T> Empty() {
+            var empty = new Token<T>();
+            empty.IsEmpty = true;
+            return empty;
+        }
+
+         
+
 
         public bool IsEndOfStream
         {

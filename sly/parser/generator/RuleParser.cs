@@ -58,6 +58,13 @@ namespace sly.parser.generator
             return new OneOrMoreClause<IN>(innerClause);
         }
 
+           [Production("clause : IDENTIFIER OPTION")]
+        public IClause<IN> OptionClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
+        {
+            IClause<IN> innerClause = BuildTerminalOrNonTerimal(id.Value);
+            return new OptionClause<IN>(innerClause);
+        }
+
         [Production("clause : IDENTIFIER DISCARD ")]
         public IClause<IN> SimpleDiscardedClause(Token<EbnfToken> id, Token<EbnfToken> discard)
         {

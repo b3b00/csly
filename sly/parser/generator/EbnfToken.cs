@@ -17,11 +17,13 @@ namespace sly.parser.generator
         [Lexeme("\\+")]
         ONEORMORE = 4,
         [Lexeme("[ \\t]+",true)]
-        WS = 5,        
+        WS = 5,    
+        [LexemeAttribute("^\\?")]
+        OPTION = 6,
         [LexemeAttribute("^\\[d\\]")]
-        DISCARD = 6,
+        DISCARD = 7,
         [Lexeme("[\\n\\r]+",true,true)]
-        EOL = 7
+        EOL = 8
 
     }
 
