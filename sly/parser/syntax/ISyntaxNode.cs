@@ -8,9 +8,6 @@ namespace sly.parser.syntax
 {
     public interface ISyntaxNode<IN> where IN : struct    
     {
-        bool IsTerminal();
-
-        string Dump(string tab);
-
+        
     }
 }

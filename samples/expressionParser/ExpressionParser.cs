@@ -20,8 +20,8 @@ namespace expressionparser
             return intToken.IntValue;
         }
 
-        [Production("primary: LPAREN expression RPAREN")]
-        public int Group(object discaredLParen, int groupValue ,object discardedRParen)
+        [Production("primary: LPAREN [d] expression RPAREN [d]")]
+        public int Group(int groupValue)
         {
             return groupValue;
         }

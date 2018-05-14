@@ -22,7 +22,9 @@ namespace sly.parser.generator
 
         private bool isTok;
 
-        public bool IsToken => isTok; 
+        public bool IsToken => isTok;
+
+        public bool Discarded => IsToken && TokenResult != null && TokenResult.Discarded;
 
         private bool isVal;
 
@@ -112,11 +114,7 @@ namespace sly.parser.generator
             if (n is SyntaxLeaf<IN>)
             {
                 return Visit(n as SyntaxLeaf<IN>);
-            }
-            else if (n is SyntaxEpsilon<IN>)
-            {
-                return Visit(n as SyntaxEpsilon<IN>);
-            }
+            }            
             else if (n is SyntaxNode<IN>)
             {
                 return Visit(n as SyntaxNode<IN>);
@@ -143,7 +141,10 @@ namespace sly.parser.generator
 
                     if (v.IsToken)
                     {
-                        args.Add(v.TokenResult);
+                        if (!v.Discarded)
+                        {
+                            args.Add(v.TokenResult);
+                        }
                     }
                     else if (v.IsValue)
                     {

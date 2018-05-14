@@ -36,32 +36,6 @@ namespace sly.parser.syntax
 
         public bool IsLeftAssociative => Associativity == Associativity.Left;
 
-        public bool IsRightAssociative => Associativity == Associativity.Right;
-
-        public SyntaxLeaf<IN> Operator { get {
-                SyntaxLeaf<IN> oper = null;
-                if (IsExpressionNode)
-                {
-                    int operatorIndex = -1;
-                    if (IsBinaryOperationNode) {
-                        operatorIndex = 1;
-                    }
-                    else if (IsUnaryOperationNode)
-                    {
-                        operatorIndex = 0;
-                    }
-
-                    if (operatorIndex > 0 && Children[operatorIndex] is SyntaxLeaf<IN> leaf)
-                    {
-                        oper = leaf;
-                    }
-                }
-                return oper;
-            }
-        }
- 
-        
-
         public ISyntaxNode<IN> Left
         {
             get  {
@@ -117,12 +91,7 @@ namespace sly.parser.syntax
             this.Visitor = visitor;
         }
         
-        public override string ToString()
-        {
-            string r = Name+"(\n";
-            Children.ForEach(c => r += c.ToString() + ",\n");
-            return r+"\n)";
-        }
+      
 
         public void AddChildren(List<ISyntaxNode<IN>> children)
         {
@@ -133,30 +102,7 @@ namespace sly.parser.syntax
         {
             this.Children.Add(child);
         }
-
-        public bool IsTerminal() {
-            return false;
-        }
-
-        
-
-        public string Dump(string tab)
-        {
-            StringBuilder dump = new StringBuilder();
-            string bypass = IsByPassNode ? "#BYPASS#" : "";
-            string precedence = Operation != null ? $"@{Operation.Precedence}@" : "";
-            if (IsExpressionNode)
-            {
-                dump.AppendLine($"{tab}(operation:>{Operator}< {bypass} {precedence} [");
-            }
-            else
-            {
-                dump.AppendLine($"{tab}({Name} {bypass} {precedence} [");
-            }
-            Children.ForEach(c => dump.AppendLine($"{c.Dump(tab + "\t")},"));
-            dump.AppendLine($"{tab}]");
-            return dump.ToString();
-        }
+               
 
     }
 }

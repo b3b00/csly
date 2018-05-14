@@ -38,12 +38,12 @@ namespace sly.lexer
                 currentColumn = currentIndex - currentLineStartIndex+1;
                 TokenDefinition<T> matchedDefinition = null;
                 int matchLength = 0;
-                
+              
                 foreach (var rule in tokenDefinitions)
                 {
-                    var match = rule.Regex.Match(source, currentIndex);
+                    var match = rule.Regex.Match(source.Substring(currentIndex));
                     
-                    if (match.Success && (match.Index - currentIndex) == 0)
+                    if (match.Success && match.Index == 0)
                     {
                         matchedDefinition = rule;
                         matchLength = match.Length;
@@ -53,7 +53,7 @@ namespace sly.lexer
 
                 if (matchedDefinition == null)
                 {                    
-                    throw new LexerException<T>(new LexicalError(currentLine,currentColumn, source[currentIndex]));
+                    throw new LexerException(new LexicalError(currentLine,currentColumn, source[currentIndex]));
                 }
                 else
                 {

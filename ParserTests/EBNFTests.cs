@@ -14,6 +14,47 @@ using sly.buildresult;
 namespace ParserTests
 {
 
+    public enum OptionTestToken
+    {
+
+        [Lexeme("a")]
+        a = 1,
+        [Lexeme("b")]
+        b = 2,
+        [Lexeme("c")]
+        c = 3,
+        [Lexeme("e")]
+        e = 4,
+        [Lexeme("f")]
+        f = 5,
+
+        [Lexeme("[ \\t]+", true)]
+        WS = 100,
+        [Lexeme("\\n\\r]+", true, true)]
+        EOF = 101
+    }
+
+    public class OptionTestParser{
+
+         [Production("root : a B c? ")]
+         public string root(Token<OptionTestToken> a, string b, Token<OptionTestToken> c) {
+             string r = $"R({a.StringWithoutQuotes},{b}";
+             if (c.IsEmpty) {
+                   r =  $"{r},<none>)";
+             }  
+             else {
+                    r =  $"{r},{c.Value})";
+             }  
+
+             return r;
+         }
+
+         [Production("B : b ")]
+         public string bee(Token<OptionTestToken> b) {
+             return $"B({b.Value})";
+         }
+    }
+
     public class EBNFTests
     {
 
@@ -29,14 +70,14 @@ namespace ParserTests
             e = 4,
             [Lexeme("f")]
             f = 5,
-            [Lexeme("[ \\t]+",true)]
+            [Lexeme("[ \\t]+", true)]
             WS = 100,
             [Lexeme("\\n\\r]+", true, true)]
             EOL = 101
         }
 
 
-        
+
 
 
         [Production("R : A B c ")]
@@ -72,7 +113,7 @@ namespace ParserTests
         public string A(List<Token<TokenType>> astr)
         {
             string result = "A(";
-            result += (string) astr
+            result += (string)astr
                 .Select(a => a.Value)
                 .Aggregate<string>((a1, a2) => a1 + ", " + a2);
             result += ")";
@@ -93,6 +134,8 @@ namespace ParserTests
             }
             return "B()";
         }
+
+
 
         private Parser<TokenType, string> Parser;
 
@@ -121,6 +164,16 @@ namespace ParserTests
             return result;
         }
 
+        private BuildResult<Parser<OptionTestToken, string>> BuildOptionParser()
+        {
+            OptionTestParser parserInstance = new OptionTestParser();
+            ParserBuilder<OptionTestToken, string> builder = new ParserBuilder<OptionTestToken, string>();
+
+            var result =
+                builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            return result;
+        }
+
         [Fact]
         public void TestParseBuild()
         {
@@ -128,19 +181,19 @@ namespace ParserTests
             Assert.False(buildResult.IsError);
             Parser = buildResult.Result;
             Assert.Equal(typeof(EBNFRecursiveDescentSyntaxParser<TokenType, string>), Parser.SyntaxParser.GetType());
-            Assert.Equal(4,Parser.Configuration.NonTerminals.Count);
+            Assert.Equal(4, Parser.Configuration.NonTerminals.Count);
             NonTerminal<TokenType> nt = Parser.Configuration.NonTerminals["R"];
-            Assert.Equal(2,nt.Rules.Count);
+            Assert.Equal(2, nt.Rules.Count);
             nt = Parser.Configuration.NonTerminals["A"];
-            Assert.Equal(1,nt.Rules.Count);
+            Assert.Single(nt.Rules);
             Rule<TokenType> rule = nt.Rules[0];
-            Assert.Equal(1,rule.Clauses.Count);
-            Assert.IsType(typeof(OneOrMoreClause<TokenType>), rule.Clauses[0]);
+            Assert.Single(rule.Clauses);
+            Assert.IsType<OneOrMoreClause<TokenType>>(rule.Clauses[0]);
             nt = Parser.Configuration.NonTerminals["B"];
-            Assert.Equal(1,nt.Rules.Count);
+            Assert.Single(nt.Rules);
             rule = nt.Rules[0];
-            Assert.Equal(1, rule.Clauses.Count);
-            Assert.IsType(typeof(ZeroOrMoreClause<TokenType>), rule.Clauses[0]);
+            Assert.Single(rule.Clauses);
+            Assert.IsType<ZeroOrMoreClause<TokenType>>(rule.Clauses[0]);
             ;
         }
 
@@ -155,17 +208,17 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.Equal("R(G(e,f),G(e,f))", result.Result.ToString().Replace(" ", ""));
         }
-    
 
-    [Fact]
+
+        [Fact]
         public void TestOneOrMoreWithMany()
         {
             var buildResult = BuildParser();
             Assert.False(buildResult.IsError);
             Parser = buildResult.Result;
-            ParseResult<TokenType,string> result = Parser.Parse("aaa b c");
+            ParseResult<TokenType, string> result = Parser.Parse("aaa b c");
             Assert.False(result.IsError);
-            Assert.Equal("R(A(a,a,a),B(b),c)",result.Result.ToString().Replace(" ",""));
+            Assert.Equal("R(A(a,a,a),B(b),c)", result.Result.ToString().Replace(" ", ""));
         }
 
         [Fact]
@@ -174,7 +227,7 @@ namespace ParserTests
             var buildResult = BuildParser();
             Assert.False(buildResult.IsError);
             Parser = buildResult.Result;
-            ParseResult<TokenType,string> result = Parser.Parse(" b c");
+            ParseResult<TokenType, string> result = Parser.Parse(" b c");
             Assert.True(result.IsError);
         }
 
@@ -184,7 +237,7 @@ namespace ParserTests
             var buildResult = BuildParser();
             Assert.False(buildResult.IsError);
             Parser = buildResult.Result;
-            ParseResult<TokenType,string> result = Parser.Parse("a b c");
+            ParseResult<TokenType, string> result = Parser.Parse("a b c");
             Assert.False(result.IsError);
             Assert.Equal("R(A(a),B(b),c)", result.Result.ToString().Replace(" ", ""));
         }
@@ -195,7 +248,7 @@ namespace ParserTests
             var buildResult = BuildParser();
             Assert.False(buildResult.IsError);
             Parser = buildResult.Result;
-            ParseResult<TokenType,string> result = Parser.Parse("a bb c");
+            ParseResult<TokenType, string> result = Parser.Parse("a bb c");
             Assert.False(result.IsError);
             Assert.Equal("R(A(a),B(b,b),c)", result.Result.ToString().Replace(" ", ""));
         }
@@ -206,7 +259,7 @@ namespace ParserTests
             var buildResult = BuildParser();
             Assert.False(buildResult.IsError);
             Parser = buildResult.Result;
-            ParseResult<TokenType,string> result = Parser.Parse("a  c");
+            ParseResult<TokenType, string> result = Parser.Parse("a  c");
             Assert.False(result.IsError);
             Assert.Equal("R(A(a),B(),c)", result.Result.ToString().Replace(" ", ""));
         }
@@ -219,15 +272,15 @@ namespace ParserTests
             Assert.False(buildResult.IsError);
             Parser<JsonToken, JSon> jsonParser = buildResult.Result;
 
-            ParseResult<JsonToken,JSon> result = jsonParser.Parse("[1,2,3,4]");
+            ParseResult<JsonToken, JSon> result = jsonParser.Parse("[1,2,3,4]");
             Assert.False(result.IsError);
             Assert.True(result.Result.IsList);
-            JList list = (JList) result.Result;
+            JList list = (JList)result.Result;
             Assert.Equal(4, list.Count);
-            AssertInt(list,0,1);
-            AssertInt(list,1,2);
-            AssertInt(list,2,3);
-            AssertInt(list,3,4);
+            AssertInt(list, 0, 1);
+            AssertInt(list, 1, 2);
+            AssertInt(list, 2, 3);
+            AssertInt(list, 3, 4);
         }
 
         [Fact]
@@ -236,86 +289,68 @@ namespace ParserTests
             var buildResult = BuildEbnfJsonParser();
             Assert.False(buildResult.IsError);
             Parser<JsonToken, JSon> jsonParser = buildResult.Result;
-            ParseResult<JsonToken,JSon> result = jsonParser.Parse("{\"one\":1,\"two\":2,\"three\":\"trois\" }");
+            ParseResult<JsonToken, JSon> result = jsonParser.Parse("{\"one\":1,\"two\":2,\"three\":\"trois\" }");
             Assert.False(result.IsError);
             Assert.True(result.Result.IsObject);
-            JObject o = (JObject) result.Result;
+            JObject o = (JObject)result.Result;
             Assert.Equal(3, o.Count);
-            AssertInt(o,"one",1);
-            AssertInt(o,"two",2);
-            AssertString(o,"three","trois");
+            AssertInt(o, "one", 1);
+            AssertInt(o, "two", 2);
+            AssertString(o, "three", "trois");
         }
+
+
+        [Fact]
+        public void TestNonEmptyOption() {
+            var buildResult = BuildOptionParser();
+            Assert.False(buildResult.IsError);
+            var optionParser = buildResult.Result;
+
+            var result = optionParser.Parse("a b c");
+            Assert.Equal("R(a,B(b),c)", result.Result);
+        }
+
         
+        [Fact]
+        public void TestEmptyOption() {
+            var buildResult = BuildOptionParser();
+            Assert.False(buildResult.IsError);
+            var optionParser = buildResult.Result;
+
+            var result = optionParser.Parse("a b");
+            Assert.Equal("R(a,B(b),<none>)", result.Result);
+        }
+
         private void AssertString(JObject obj, string key, string value)
         {
             Assert.True(obj.ContainsKey(key));
             Assert.True(obj[key].IsValue);
-            JValue val = (JValue) obj[key];
+            JValue val = (JValue)obj[key];
             Assert.True(val.IsString);
-            Assert.Equal(value, val.GetValue<string>() );
+            Assert.Equal(value, val.GetValue<string>());
         }
-        
+
         private void AssertInt(JObject obj, string key, int value)
         {
             Assert.True(obj.ContainsKey(key));
             Assert.True(obj[key].IsValue);
-            JValue val = (JValue) obj[key];
+            JValue val = (JValue)obj[key];
             Assert.True(val.IsInt);
-            Assert.Equal(value, val.GetValue<int>() );
+            Assert.Equal(value, val.GetValue<int>());
         }
-        
-        
-        private void AssertDouble(JObject obj, string key, double value)
-        {
-            Assert.True(obj.ContainsKey(key));
-            Assert.True(obj[key].IsValue);
-            JValue val = (JValue) obj[key];
-            Assert.True(val.IsDouble);
-            Assert.Equal(value, val.GetValue<double>() );
-        }
-        
-        
-        private void AssertString(JList list, int index, string value)
-        {
-            Assert.True(list[index].IsValue);
-            JValue val = (JValue) list[index];
-            Assert.True(val.IsString);
-            Assert.Equal(value, val.GetValue<string>() );
-        }
-        
+
+
+
+
+
         private void AssertInt(JList list, int index, int value)
         {
             Assert.True(list[index].IsValue);
-            JValue val = (JValue) list[index];
+            JValue val = (JValue)list[index];
             Assert.True(val.IsInt);
-            Assert.Equal(value, val.GetValue<int>() );
+            Assert.Equal(value, val.GetValue<int>());
         }
-        
-        
-        private void AssertDouble(JList list, int index, double value)
-        {
-            Assert.True(list[index].IsValue);
-            JValue val = (JValue) list[index];
-            Assert.True(val.IsDouble);
-            Assert.Equal(value, val.GetValue<double>() );
-        }
-        
-        
-        private void AssertBool(JList list, int index, bool value)
-        {
-            Assert.True(list[index].IsValue);
-            JValue val = (JValue) list[index];
-            Assert.True(val.IsBool);
-            Assert.Equal(value, val.GetValue<bool>() );
-        }
-        
-        
-        private void AssertObject(JList list, int index, int count)
-        {
-            Assert.True(list[index].IsObject);
-            JObject val = (JObject) list[index];
-            Assert.Equal(count, val.Count);
-        }
+
 
 
 

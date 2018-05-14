@@ -9,14 +9,10 @@ using sly.parser.generator;
 
 namespace sly.parser.llparser
 {
-    public class EBNFRecursiveDescentSyntaxParser<IN,OUT> : RecursiveDescentSyntaxParser<IN,OUT> where IN : struct
+    public class EBNFRecursiveDescentSyntaxParser<IN, OUT> : RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
     {
-        //public ParserConfiguration<T> Configuration { get; set; }
 
-        //public string StartingNonTerminal { get; set; }
-
-
-        public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<IN,OUT> configuration, string startingNonTerminal) : base(configuration,startingNonTerminal)
+        public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal) : base(configuration, startingNonTerminal)
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
@@ -25,9 +21,9 @@ namespace sly.parser.llparser
 
         #region STARTING_TOKENS
 
-        
 
-        protected override  void InitStartingTokensForRule(Dictionary<string, NonTerminal<IN>> nonTerminals, Rule<IN> rule)
+
+        protected override void InitStartingTokensForRule(Dictionary<string, NonTerminal<IN>> nonTerminals, Rule<IN> rule)
         {
             if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
             {
@@ -111,10 +107,25 @@ namespace sly.parser.llparser
             }
         }
 
+        private void InitStartingTokensWithOption(Rule<IN> rule, OptionClause<IN> optionClause,
+            Dictionary<string, NonTerminal<IN>> nonTerminals)
+        {
+            if (optionClause.Clause is TerminalClause<IN>)
+            {
+                TerminalClause<IN> term = optionClause.Clause as TerminalClause<IN>;
+                InitStartingTokensWithTerminal(rule, term);
+            }
+            else if (optionClause.Clause is NonTerminalClause<IN>)
+            {
+                NonTerminalClause<IN> nonterm = optionClause.Clause as NonTerminalClause<IN>;
+                InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
+            }
+        }
+
         #endregion
 
         #region parsing
-        
+
 
         public override SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position, string nonTerminalName)
         {
@@ -126,7 +137,7 @@ namespace sly.parser.llparser
             {
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
-                    children = new List<ISyntaxNode<IN>>();
+                    children = new List<ISyntaxNode<IN>>();                   
                     foreach (IClause<IN> clause in rule.Clauses)
                     {
                         if (clause is TerminalClause<IN>)
@@ -142,7 +153,7 @@ namespace sly.parser.llparser
                             {
                                 Token<IN> tok = tokens[currentPosition];
                                 errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,
-                                    ((TerminalClause<IN>) clause).ExpectedToken));
+                                    ((TerminalClause<IN>)clause).ExpectedToken));
                             }
                             isError = isError || termRes.IsError;
                         }
@@ -161,14 +172,16 @@ namespace sly.parser.llparser
                             }
                             isError = isError || nonTerminalResult.IsError;
                         }
-                        
+
                         else if (clause is OneOrMoreClause<IN> || clause is ZeroOrMoreClause<IN>)
                         {
                             SyntaxParseResult<IN> manyResult = null;
-                            if (clause is OneOrMoreClause<IN> oneOrMore) {
+                            if (clause is OneOrMoreClause<IN> oneOrMore)
+                            {
                                 manyResult = ParseOneOrMore(tokens, oneOrMore, currentPosition);
                             }
-                            else if (clause is ZeroOrMoreClause<IN> zeroOrMore) {
+                            else if (clause is ZeroOrMoreClause<IN> zeroOrMore)
+                            {
                                 manyResult = ParseZeroOrMore(tokens, zeroOrMore, currentPosition);
                             }
                             if (!manyResult.IsError)
@@ -181,13 +194,14 @@ namespace sly.parser.llparser
                                 if (manyResult.Errors != null && manyResult.Errors.Count > 0)
                                 {
                                     errors.AddRange(manyResult.Errors);
-                                }                                
+                                }
                             }
                             isError = isError || manyResult.IsError;
                         }
-                        if (isError)
+                        else if (clause is OptionClause<IN> option)
                         {
-                            break;
+                            var optionResult = ParseOption(tokens, option, currentPosition);
+                            children.Add(optionResult.Root);
                         }
                     }
                 }
@@ -210,7 +224,7 @@ namespace sly.parser.llparser
             return result;
         }
 
-      
+
         public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position)
         {
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
@@ -244,7 +258,7 @@ namespace sly.parser.llparser
                     currentPosition = innerResult.EndingPosition;
                     lastInnerResult = innerResult;
                 }
-                stillOk = stillOk && innerResult != null && !(innerResult.IsError);
+                stillOk = stillOk && innerResult != null && !(innerResult.IsError) && currentPosition < tokens.Count;
             }
 
 
@@ -290,12 +304,12 @@ namespace sly.parser.llparser
                 if (nextResult != null && !nextResult.IsError)
                 {
                     currentPosition = nextResult.EndingPosition;
-                    ManySyntaxNode<IN> moreChildren = (ManySyntaxNode<IN>) nextResult.Root;
+                    ManySyntaxNode<IN> moreChildren = (ManySyntaxNode<IN>)nextResult.Root;
                     manyNode.Children.AddRange(moreChildren.Children);
                 }
                 isError = false;
             }
-            
+
             else
             {
                 isError = true;
@@ -308,7 +322,49 @@ namespace sly.parser.llparser
             return result;
         }
 
-     
+        public SyntaxParseResult<IN> ParseOption(IList<Token<IN>> tokens, OptionClause<IN> clause, int position)
+        {
+            SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
+            ManySyntaxNode<IN> manyNode = new ManySyntaxNode<IN>("");
+            int currentPosition = position;
+            IClause<IN> innerClause = clause.Clause;
+
+            SyntaxParseResult<IN> innerResult = null;
+
+            if (innerClause is TerminalClause<IN>)
+            {
+                manyNode.IsManyTokens = true;
+                innerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
+            }
+            else if (innerClause is NonTerminalClause<IN>)
+            {
+                manyNode.IsManyValues = true;
+                innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
+            }
+            else
+            {
+                throw new NotImplementedException("unable to apply repeater to " + innerClause.GetType().Name);
+            }
+
+
+            if (innerResult.IsError)
+            {
+                result = new SyntaxParseResult<IN>();
+                result.IsError = false;
+                result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty());
+                result.EndingPosition = position;
+            }
+            else
+            {
+                result = innerResult;
+            }
+
+            return result;
+
+
+        }
+
+
 
         #endregion
     }

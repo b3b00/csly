@@ -11,8 +11,6 @@ namespace sly.parser.syntax
     /// <typeparam name="T"></typeparam>
     public interface IClause<T> : GrammarNode<T>
     {
-        bool Check(T nextToken);
-
         bool MayBeEmpty();
 
     }

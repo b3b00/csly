@@ -16,13 +16,6 @@ namespace sly.parser.syntax
         public ManySyntaxNode(string name) : base(name, new List<ISyntaxNode<IN>>())
         {
         }
-
-        public ManySyntaxNode(string name, List<ISyntaxNode<IN>> children) : base(name,children)
-        {
-            this.Name = name;
-            this.AddChildren(children);
-        }
-        
         
 
         public void Add(ISyntaxNode<IN> child)
@@ -30,28 +23,8 @@ namespace sly.parser.syntax
             Children.Add(child);
         }
 
-        public void AddRange(List<ISyntaxNode<IN>> children)
-        {
-            Children.AddRange(children);
-        }
 
 
-
-        public override string ToString()
-        {
-            string r = Name+"(\n";
-            Children.ForEach(c => r += c.ToString() + ",\n");
-            return r+"\n)";
-        }
-
-
-        public new string Dump(string tab)
-        {
-            StringBuilder dump = new StringBuilder();
-            dump.AppendLine($"{tab}(<{Name}>* {Children.Count} [");
-            Children.ForEach(c => dump.AppendLine($"{c.Dump(tab + "\t")},"));
-            dump.AppendLine($"{tab}]");
-            return dump.ToString();
-        }
+        
     }
 }

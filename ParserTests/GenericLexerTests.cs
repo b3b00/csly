@@ -202,13 +202,13 @@ namespace ParserTests
             Assert.Equal("3.14", tokens[1].Value);
 
             tokens = lexer.Tokenize("'that''s it'").ToList();
-            Assert.Equal(1,tokens.Count);
+            Assert.Single(tokens);
             Token<Extensions> tok = tokens[0];
             Assert.Equal(Extensions.CHAINE,tok.TokenID);
             Assert.Equal("'that's it'",tokens[0].Value);
 
             tokens = lexer.Tokenize("'et voilà'").ToList();
-            Assert.Equal(1,tokens.Count);
+            Assert.Single(tokens);
             tok = tokens[0];
             Assert.Equal(Extensions.CHAINE,tok.TokenID);
             Assert.Equal("'et voilà'",tokens[0].Value);
@@ -223,7 +223,7 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("alpha").ToList();
-            Assert.Equal(1, r.Count);
+            Assert.Single(r);
             Token<AlphaId> tok = r[0];
             Assert.Equal(AlphaId.ID, tok.TokenID);
             Assert.Equal("alpha", tok.StringWithoutQuotes);
@@ -239,7 +239,7 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("alpha123").ToList();
-            Assert.Equal(1, r.Count);
+            Assert.Single(r);
             Token<AlphaNumId> tok = r[0];
             Assert.Equal(AlphaNumId.ID, tok.TokenID);
             Assert.Equal("alpha123", tok.StringWithoutQuotes);
@@ -253,7 +253,7 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("alpha-123_").ToList();
-            Assert.Equal(1, r.Count);
+            Assert.Single(r);
             Token<AlphaNumDashId> tok = r[0];
             Assert.Equal(AlphaNumDashId.ID, tok.TokenID);
             Assert.Equal("alpha-123_", tok.StringWithoutQuotes);
@@ -267,7 +267,7 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("_alpha-123_").ToList();
-            Assert.Equal(1, r.Count);
+            Assert.Single(r);
             Token<AlphaNumDashId> tok = r[0];
             Assert.Equal(AlphaNumDashId.ID, tok.TokenID);
             Assert.Equal("_alpha-123_", tok.StringWithoutQuotes);
@@ -282,7 +282,7 @@ namespace ParserTests
             var lexer = lexerRes.Result;
             string source = "hello \\\"world ";
             var r = lexer.Tokenize($"\"{source}\"").ToList();
-            Assert.Equal(1, r.Count);
+            Assert.Single(r);
             Token<DoubleQuotedString> tok = r[0];
             Assert.Equal(DoubleQuotedString.DoubleString, tok.TokenID);
             Assert.Equal(source, tok.StringWithoutQuotes);
@@ -296,7 +296,7 @@ namespace ParserTests
             var lexer = lexerRes.Result;
             string source = "hello \\'world ";
             var r = lexer.Tokenize($"'{source}'").ToList();
-            Assert.Equal(1, r.Count);
+            Assert.Single(r);
             Token<SingleQuotedString> tok = r[0];
             Assert.Equal(SingleQuotedString.SingleString, tok.TokenID);
             Assert.Equal(source, tok.StringWithoutQuotes);
@@ -310,7 +310,7 @@ namespace ParserTests
             var lexer = lexerRes.Result;
             string source = "hello \\\"world ";
             var r = lexer.Tokenize($"\"{source}\"").ToList();
-            Assert.Equal(1, r.Count);
+            Assert.Single(r);
             Token<DefaultQuotedString> tok = r[0];
             Assert.Equal(DefaultQuotedString.DefaultString, tok.TokenID);
             Assert.Equal(source, tok.StringWithoutQuotes);
@@ -324,13 +324,13 @@ namespace ParserTests
             var lexer = lexerRes.Result as GenericLexer<SelfEscapedString>;
             Assert.NotNull(lexer);
             var tokens = lexer.Tokenize("'that''s it'").ToList();
-            Assert.Equal(1,tokens.Count);
+            Assert.Single(tokens);
             Token<SelfEscapedString> tok = tokens[0];
             Assert.Equal(SelfEscapedString.STRING,tok.TokenID);
             Assert.Equal("'that's it'",tokens[0].Value);
 
             tokens = lexer.Tokenize("'et voilà'").ToList();
-            Assert.Equal(1,tokens.Count);
+            Assert.Single(tokens);
             tok = tokens[0];
             Assert.Equal(SelfEscapedString.STRING,tok.TokenID);
             Assert.Equal("'et voilà'",tokens[0].Value);
@@ -362,10 +362,10 @@ namespace ParserTests
         {
             var lexerRes = LexerBuilder.BuildLexer<BadLetterStringDelimiter>(new BuildResult<ILexer<BadLetterStringDelimiter>>());
             Assert.True(lexerRes.IsError);
-            Assert.Equal(1, lexerRes.Errors.Count);
+            Assert.Single(lexerRes.Errors);
             var error = lexerRes.Errors[0];
             Assert.Equal(ErrorLevel.FATAL, error.Level);
-            Assert.True(error.Message.Contains("can not start with a letter"));
+            Assert.Contains("can not start with a letter",error.Message);
         }
 
         [Fact]
@@ -373,10 +373,10 @@ namespace ParserTests
         {
             var lexerRes = LexerBuilder.BuildLexer<BadEmptyStringDelimiter>(new BuildResult<ILexer<BadEmptyStringDelimiter>>());
             Assert.True(lexerRes.IsError);
-            Assert.Equal(1, lexerRes.Errors.Count);
+            Assert.Single(lexerRes.Errors);
             var error = lexerRes.Errors[0];
             Assert.Equal(ErrorLevel.FATAL, error.Level);
-            Assert.True(error.Message.Contains("must be 1 character length"));
+            Assert.Contains("must be 1 character length", error.Message);            
         }
 
         [Fact]
@@ -386,11 +386,12 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             string source = "hello world  2 + 2 ";
-            var errException = Assert.Throws<LexerException<GenericToken>>(() => lexer.Tokenize(source).ToList());
+            var errException = Assert.Throws<LexerException>(() => lexer.Tokenize(source).ToList());
             var error = errException.Error;
             Assert.Equal(0, error.Line);
             Assert.Equal(13, error.Column);
             Assert.Equal('2', error.UnexpectedChar);
+            Assert.Contains("Unrecognized symbol",error.ToString());
 
 
 

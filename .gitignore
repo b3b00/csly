@@ -27,3 +27,8 @@ packages/
 *.orig
 
 dotnet.psess
+my_app_coverage.xml
+sly.xml
+sly_coverage.xml
+ParserTests/lcov.info
+ParserTests/lcov.info.info

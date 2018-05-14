@@ -29,7 +29,7 @@ namespace ParserTests
             Assert.Null(r.Result);
             Assert.NotNull(r.Errors);
             Assert.True(r.Errors.Count > 0);
-            Assert.IsAssignableFrom(typeof(UnexpectedTokenSyntaxError<JsonToken>), r.Errors[0]);
+            Assert.IsType<UnexpectedTokenSyntaxError<JsonToken>>(r.Errors[0]);
             UnexpectedTokenSyntaxError<JsonToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
 
             Assert.Equal(JsonToken.COMMA, error?.UnexpectedToken.TokenID);
@@ -69,7 +69,7 @@ namespace ParserTests
             Assert.True(r.IsError);
             Assert.NotNull(r.Errors);
             Assert.True(r.Errors.Count > 0);
-            Assert.IsAssignableFrom(typeof(LexicalError), r.Errors[0]);
+            Assert.IsType<LexicalError>(r.Errors[0]);
             LexicalError error = r.Errors[0] as LexicalError;
             Assert.Equal(1, error.Line);
             Assert.Equal(3, error.Column);

@@ -71,7 +71,7 @@ namespace ParserTests
             JValue val = ((JValue)r.Result);
             Assert.True(val.IsBool);
             Assert.True(val.IsBool);
-            Assert.Equal(true, val.GetValue<bool>());
+            Assert.True(val.GetValue<bool>());
         }
 
         [Fact]
@@ -83,7 +83,7 @@ namespace ParserTests
             Assert.True(r.Result.IsValue);
             JValue val = ((JValue)r.Result);
             Assert.True(val.IsBool);
-            Assert.Equal(false, val.GetValue<bool>());
+            Assert.False(val.GetValue<bool>());
         }
 
         [Fact]

@@ -59,13 +59,13 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
 
-            Assert.IsAssignableFrom(typeof(SequenceStatement), result.Result);
+            Assert.IsType<SequenceStatement>(result.Result);
             SequenceStatement seq = result.Result as SequenceStatement;
-            Assert.IsAssignableFrom(typeof(AssignStatement), seq.Get(0));
+            Assert.IsType<AssignStatement>(seq.Get(0));
             AssignStatement assign = seq.Get(0) as AssignStatement;
             Assert.Equal("a", assign.VariableName);
             Expression val = assign.Value;
-            Assert.IsAssignableFrom(typeof(BinaryOperation), val);
+            Assert.IsType<BinaryOperation>(val);
             BinaryOperation bin = val as BinaryOperation;
             Assert.Equal(BinaryOperator.ADD, bin.Operator);
             Assert.Equal(1, (bin.Left as IntegerConstant)?.Value);
@@ -84,9 +84,9 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
 
-            Assert.IsAssignableFrom(typeof(SequenceStatement), result.Result);
+            Assert.IsType<SequenceStatement>(result.Result);
             SequenceStatement seq = result.Result as SequenceStatement;
-            Assert.IsAssignableFrom(typeof(SkipStatement), seq.Get(0));
+            Assert.IsType<SkipStatement>(seq.Get(0));
         }
 
         [Fact]
@@ -100,16 +100,16 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
 
-            Assert.IsAssignableFrom(typeof(SequenceStatement), result.Result);
+            Assert.IsType<SequenceStatement>(result.Result);
             SequenceStatement seq = result.Result as SequenceStatement;
-            Assert.IsAssignableFrom(typeof(PrintStatement), seq.Get(0));
+            Assert.IsType<PrintStatement>(seq.Get(0));
             PrintStatement print = seq.Get(0) as PrintStatement;
             Expression expr = print.Value;
-            Assert.IsAssignableFrom(typeof(BinaryOperation), expr);
+            Assert.IsType<BinaryOperation>(expr);
             BinaryOperation bin = expr as BinaryOperation;
             Assert.Equal(BinaryOperator.AND, bin.Operator);
-            Assert.Equal(true, (bin.Left as BoolConstant)?.Value);
-            Assert.Equal(false, (bin.Right as BoolConstant)?.Value);
+            Assert.True((bin.Left as BoolConstant)?.Value);
+            Assert.False((bin.Right as BoolConstant)?.Value);
         }
 
         [Fact]
@@ -123,18 +123,18 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
 
-            Assert.IsAssignableFrom(typeof(SequenceStatement), result.Result);
+            Assert.IsType<SequenceStatement>(result.Result);
             SequenceStatement seq = result.Result as SequenceStatement;
-            Assert.IsAssignableFrom(typeof(WhileStatement), seq.Get(0));
+            Assert.IsType<WhileStatement>(seq.Get(0));
             WhileStatement whil = seq.Get(0) as WhileStatement;
             Expression cond = whil.Condition;
-            Assert.IsAssignableFrom(typeof(BoolConstant), cond);
-            Assert.Equal(true, (cond as BoolConstant).Value);
+            Assert.IsType<BoolConstant>(cond);
+            Assert.True((cond as BoolConstant).Value);
             Statement s = whil.BlockStmt;
-            Assert.IsAssignableFrom(typeof(SequenceStatement), whil.BlockStmt);
+            Assert.IsType<SequenceStatement>( whil.BlockStmt);
             SequenceStatement seqBlock = whil.BlockStmt as SequenceStatement;
             Assert.Equal(1, seqBlock.Count);
-            Assert.IsAssignableFrom(typeof(SkipStatement), seqBlock.Get(0));
+            Assert.IsType<SkipStatement>(seqBlock.Get(0));
             ;
         }
 
@@ -149,32 +149,32 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
 
-            Assert.IsAssignableFrom(typeof(SequenceStatement), result.Result);
+            Assert.IsType<SequenceStatement>(result.Result);
             SequenceStatement seq = result.Result as SequenceStatement;
-            Assert.IsAssignableFrom(typeof(IfStatement), seq.Get(0));
+            Assert.IsType<IfStatement>(seq.Get(0));
             IfStatement si = seq.Get(0) as IfStatement;
             Expression cond = si.Condition;
-            Assert.IsAssignableFrom(typeof(BoolConstant), cond);
-            Assert.Equal(true, (cond as BoolConstant).Value);
+            Assert.IsType<BoolConstant>(cond);
+            Assert.True((cond as BoolConstant).Value);
             Statement s = si.ThenStmt;
 
-            Assert.IsAssignableFrom(typeof(SequenceStatement), si.ThenStmt);
+            Assert.IsType<SequenceStatement>(si.ThenStmt);
             SequenceStatement thenBlock = si.ThenStmt as SequenceStatement;
             Assert.Equal(1, thenBlock.Count);
-            Assert.IsAssignableFrom(typeof(AssignStatement), thenBlock.Get(0));
+            Assert.IsType<AssignStatement>(thenBlock.Get(0));
             AssignStatement thenAssign = thenBlock.Get(0) as AssignStatement;
             Assert.Equal("a", thenAssign.VariableName);
-            Assert.IsAssignableFrom(typeof(StringConstant), thenAssign.Value);
+            Assert.IsType<StringConstant>(thenAssign.Value);
             Assert.Equal("hello", (thenAssign.Value as StringConstant).Value);
             ;
 
-            Assert.IsAssignableFrom(typeof(SequenceStatement), si.ElseStmt);
+            Assert.IsType<SequenceStatement>(si.ElseStmt);
             SequenceStatement elseBlock = si.ElseStmt as SequenceStatement;
             Assert.Equal(1, elseBlock.Count);
-            Assert.IsAssignableFrom(typeof(AssignStatement), elseBlock.Get(0));
+            Assert.IsType<AssignStatement>(elseBlock.Get(0));
             AssignStatement elseAssign = elseBlock.Get(0) as AssignStatement;
             Assert.Equal("b", elseAssign.VariableName);
-            Assert.IsAssignableFrom(typeof(StringConstant), elseAssign.Value);
+            Assert.IsType<StringConstant>(elseAssign.Value);
             Assert.Equal("world", (elseAssign.Value as StringConstant).Value);
         }
 
@@ -189,14 +189,15 @@ namespace ParserTests
             ParseResult<WhileToken, WhileAST> result = parser.Parse("(skip; skip; skip)");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
-            Assert.IsAssignableFrom(typeof(SequenceStatement), result.Result);
+            Assert.IsType<SequenceStatement>(result.Result);
             SequenceStatement seq = result.Result as SequenceStatement;
             Assert.Equal(3, seq.Count);
-            Assert.IsAssignableFrom(typeof(SkipStatement), seq.Get(0));
-            Assert.IsAssignableFrom(typeof(SkipStatement), seq.Get(1));
-            Assert.IsAssignableFrom(typeof(SkipStatement), seq.Get(2));
+            Assert.IsType<SkipStatement>(seq.Get(0));
+            Assert.IsType<SkipStatement>(seq.Get(1));
+            Assert.IsType<SkipStatement>(seq.Get(2));
         }
 
+        [Fact]
         public void TestSkipAssignSequence()
         {
 
@@ -206,14 +207,14 @@ namespace ParserTests
             ParseResult<WhileToken, WhileAST> result = parser.Parse("(a:=1; b:=2; c:=3)");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
-            Assert.IsAssignableFrom(typeof(SequenceStatement), result.Result);
+            Assert.IsType<SequenceStatement>(result.Result);
             SequenceStatement seq = result.Result as SequenceStatement;
             Assert.Equal(3, seq.Count);
 
             string[] names = new string[] { "a", "b", "c" };
             for (int i = 0; i < names.Length; i++)
             {
-                Assert.IsAssignableFrom(typeof(AssignStatement), seq.Get(i));
+                Assert.IsType<AssignStatement>(seq.Get(i));
                 AssignStatement assign = seq.Get(i) as AssignStatement;
                 Assert.Equal(names[i], assign.VariableName);
                 Assert.Equal(i + 1, (assign.Value as IntegerConstant).Value);
@@ -248,8 +249,8 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
             Interpreter interpreter = new Interpreter();
-            var context = interpreter.Interprete(result.Result);
-            Assert.Equal(1,context.variables.Count);
+            var context = interpreter.Interprete(result.Result,true);
+            Assert.Single(context.variables);
             Assert.True(CheckIntVariable(context, "a", 10));
             
 
@@ -277,7 +278,7 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
             Interpreter interpreter = new Interpreter();
-            var context = interpreter.Interprete(result.Result);
+            var context = interpreter.Interprete(result.Result, true);
             Assert.Equal(2, context.variables.Count);
             Assert.True(CheckIntVariable(context, "i", 11));
             Assert.True(CheckIntVariable(context, "r", 3628800));
@@ -297,8 +298,8 @@ namespace ParserTests
     while i < 11 do 
     ( 
     r := r * i;
-    print "".r;
-    print "".i;
+    print """".r;
+    print """".i;
     i := i + 1 );
 return r
 )";

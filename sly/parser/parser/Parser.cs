@@ -60,12 +60,12 @@ namespace sly.parser
                 IList<Token<IN>> tokens = Lexer.Tokenize(source).ToList<Token<IN>>();
                 result = Parse(tokens, startingNonTerminal);
             }
-            catch(LexerException<IN> e)
+            catch(LexerException e)
             {
                 result = new ParseResult<IN,OUT>();
                 result.IsError = true;
                 result.Errors = new List<ParseError>();
-                result.Errors.Add((e as LexerException<IN>).Error);                
+                result.Errors.Add((e as LexerException).Error);                
             }
             return result;            
         }
