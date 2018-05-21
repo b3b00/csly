@@ -19,6 +19,8 @@ namespace sly.lexer
 
 
         public TokenPosition Position { get; set; }
+
+        public int PositionInTokenFlow { get; set; }
         public T TokenID { get; set; }
         public bool IsComment { get; set; }
 

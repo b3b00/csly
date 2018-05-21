@@ -58,6 +58,11 @@ namespace sly.parser
             try
             {
                 IList<Token<IN>> tokens = Lexer.Tokenize(source).ToList<Token<IN>>();
+                for (int i = 0; i < tokens.Count; i++)
+                {
+                    var token = tokens[i];
+                    token.PositionInTokenFlow = i;
+                }
                 result = Parse(tokens, startingNonTerminal);
             }
             catch(LexerException e)
