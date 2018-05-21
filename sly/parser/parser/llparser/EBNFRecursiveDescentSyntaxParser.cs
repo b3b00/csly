@@ -129,30 +129,7 @@ namespace sly.parser.llparser
 
         public override SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position, string nonTerminalName)
         {
-            if (rule.NonTerminalName == "field")
-            {
             
-                    ;
-            
-            }
-            if (rule.NonTerminalName == "struct")
-            {
-
-                ;
-
-            }
-            if (rule.NonTerminalName == "fields")
-            {
-
-                ;
-
-            }
-            if (rule.NonTerminalName == "nextFields")
-            {
-
-                ;
-
-            }
 
             int currentPosition = position;
             List<UnexpectedTokenSyntaxError<IN>> errors = new List<UnexpectedTokenSyntaxError<IN>>();

@@ -56,6 +56,7 @@ namespace sly.lexer
         {
             End = true;
             TokenID = DefaultToken;
+            Position = new TokenPosition(0, 0, 0);
         }
 
         public static Token<T> Empty() {

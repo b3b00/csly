@@ -297,7 +297,6 @@ namespace sly.parser.llparser
 
         public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, NonTerminalClause<IN> nonTermClause, int currentPosition)
         {
-
             NonTerminal<IN> nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
             bool found = false;
             bool isError = false;
@@ -311,10 +310,6 @@ namespace sly.parser.llparser
                 if (r != null && r.PossibleLeadingTokens != null)
                 {
                     allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
-                }
-                else
-                {
-                    ;
                 }
             });
             allAcceptableTokens = allAcceptableTokens.Distinct<IN>().ToList<IN>();
@@ -346,12 +341,19 @@ namespace sly.parser.llparser
                 }
                 bool other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
                 if ((innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null &&
-                     innerRuleRes.Errors.Any()) || other)
+                     !innerRuleRes.Errors.Any()) || other)
                 {
                     greaterIndex = innerRuleRes.EndingPosition;
                     innerRuleErrors.Clear();
+                    if (innerRuleRes.Errors.Count == 1 && innerRuleRes.Errors[0].Line == 1 && innerRuleRes.Errors[0].Column == 1)
+                    {
+                        var err = innerRuleRes.Errors[0];
+                        var expect = err.ExpectedTokens;
+                        ;
+                    }
                     innerRuleErrors.AddRange(innerRuleRes.Errors);
                 }
+                innerRuleErrors.AddRange(innerRuleRes.Errors);
                 allRulesInError = allRulesInError && innerRuleRes.IsError;
                 i++;
             }

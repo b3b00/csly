@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Xunit;
+using System.Text;
 using sly.parser;
 using sly.lexer;
 using sly.parser.generator;
@@ -45,11 +46,32 @@ namespace ParserTests
              else {
                     r =  $"{r},{c.Value})";
              }  
-
              return r;
          }
 
-         [Production("B : b ")]
+        [Production("root : a b? c ")]
+        public string root2(Token<OptionTestToken> a, Token<OptionTestToken> b, Token<OptionTestToken> c)
+        {
+            StringBuilder result = new StringBuilder();
+            result.Append("R(");
+            result.Append(a.StringWithoutQuotes);
+            result.Append(",");
+            if (b.IsEmpty)
+            {
+                result.Append("<none>");
+            }
+            else
+            {
+                result.Append(b.StringWithoutQuotes);
+            }
+            result.Append(",");
+            result.Append(c.StringWithoutQuotes);
+            result.Append(")");
+
+            return result.ToString();
+        }
+
+        [Production("B : b ")]
          public string bee(Token<OptionTestToken> b) {
              return $"B({b.Value})";
          }
@@ -319,6 +341,17 @@ namespace ParserTests
 
             var result = optionParser.Parse("a b");
             Assert.Equal("R(a,B(b),<none>)", result.Result);
+        }
+
+        [Fact]
+        public void TestEmptyOptionInMiddle()
+        {
+            var buildResult = BuildOptionParser();
+            Assert.False(buildResult.IsError);
+            var optionParser = buildResult.Result;
+
+            var result = optionParser.Parse("a c");
+            Assert.Equal("R(a,<none>,c)", result.Result);
         }
 
         private void AssertString(JObject obj, string key, string value)
