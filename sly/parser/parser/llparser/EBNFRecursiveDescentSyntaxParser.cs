@@ -77,7 +77,7 @@ namespace sly.parser.llparser
 
         private void InitStartingTokensWithZeroOrMore(Rule<IN> rule, ZeroOrMoreClause<IN> manyClause,
             Dictionary<string, NonTerminal<IN>> nonTerminals)
-        {
+        {            
             if (manyClause.Clause is TerminalClause<IN>)
             {
                 TerminalClause<IN> term = manyClause.Clause as TerminalClause<IN>;
@@ -140,10 +140,10 @@ namespace sly.parser.llparser
                     children = new List<ISyntaxNode<IN>>();                   
                     foreach (IClause<IN> clause in rule.Clauses)
                     {
-                        if (clause is TerminalClause<IN>)
+                        if (clause is TerminalClause<IN> termClause)
                         {
                             SyntaxParseResult<IN> termRes =
-                                ParseTerminal(tokens, clause as TerminalClause<IN>, currentPosition);
+                                ParseTerminal(tokens, termClause, currentPosition);
                             if (!termRes.IsError)
                             {
                                 children.Add(termRes.Root);
@@ -163,6 +163,7 @@ namespace sly.parser.llparser
                                 ParseNonTerminal(tokens, clause as NonTerminalClause<IN>, currentPosition);
                             if (!nonTerminalResult.IsError)
                             {
+                                errors.AddRange(nonTerminalResult.Errors);
                                 children.Add(nonTerminalResult.Root);
                                 currentPosition = nonTerminalResult.EndingPosition;
                             }
@@ -186,6 +187,7 @@ namespace sly.parser.llparser
                             }
                             if (!manyResult.IsError)
                             {
+                                errors.AddRange(manyResult.Errors);
                                 children.Add(manyResult.Root);
                                 currentPosition = manyResult.EndingPosition;
                             }
@@ -201,7 +203,12 @@ namespace sly.parser.llparser
                         else if (clause is OptionClause<IN> option)
                         {
                             var optionResult = ParseOption(tokens, option, currentPosition);
+                            currentPosition = optionResult.EndingPosition;
                             children.Add(optionResult.Root);
+                        }
+                        if (isError)
+                        {
+                            break;
                         }
                     }
                 }
@@ -226,7 +233,7 @@ namespace sly.parser.llparser
 
 
         public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position)
-        {
+        {            
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             ManySyntaxNode<IN> manyNode = new ManySyntaxNode<IN>("");
             int currentPosition = position;
@@ -234,6 +241,8 @@ namespace sly.parser.llparser
             bool stillOk = true;
 
             SyntaxParseResult<IN> lastInnerResult = null;
+
+            var innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 
             while (stillOk)
             {
@@ -258,12 +267,17 @@ namespace sly.parser.llparser
                     currentPosition = innerResult.EndingPosition;
                     lastInnerResult = innerResult;
                 }
+                else
+                {
+                    innerErrors.AddRange(innerResult.Errors);
+                }
                 stillOk = stillOk && innerResult != null && !(innerResult.IsError) && currentPosition < tokens.Count;
             }
 
 
             result.EndingPosition = currentPosition;
             result.IsError = false;
+            result.Errors= innerErrors;
             result.Root = manyNode;
             result.IsEnded = lastInnerResult != null && lastInnerResult.IsEnded;
             return result;
@@ -325,7 +339,6 @@ namespace sly.parser.llparser
         public SyntaxParseResult<IN> ParseOption(IList<Token<IN>> tokens, OptionClause<IN> clause, int position)
         {
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
-            ManySyntaxNode<IN> manyNode = new ManySyntaxNode<IN>("");
             int currentPosition = position;
             IClause<IN> innerClause = clause.Clause;
 
@@ -333,12 +346,10 @@ namespace sly.parser.llparser
 
             if (innerClause is TerminalClause<IN>)
             {
-                manyNode.IsManyTokens = true;
                 innerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
             }
             else if (innerClause is NonTerminalClause<IN>)
             {
-                manyNode.IsManyValues = true;
                 innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
             }
             else

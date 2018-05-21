@@ -21,9 +21,9 @@ namespace ParserTests
 
 
             string source = @"{
-                'one': 1,
-                'bug':{,}
-            }".Replace("'", "\"");
+    'one': 1,
+    'bug':{,}
+}".Replace("'", "\"");
             ParseResult<JsonToken,JSon> r = parser.Parse(source);
             Assert.True(r.IsError);
             Assert.Null(r.Result);
@@ -33,8 +33,8 @@ namespace ParserTests
             UnexpectedTokenSyntaxError<JsonToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
 
             Assert.Equal(JsonToken.COMMA, error?.UnexpectedToken.TokenID);
-            Assert.Equal(3, error?.Line);
-            Assert.Equal(24, error?.Column);
+            Assert.Equal(2, error?.Line);
+            Assert.Equal(13, error?.Column);
 
         }
 
@@ -49,13 +49,13 @@ namespace ParserTests
             Assert.True(r.IsError);
             Assert.NotNull(r.Errors);
             Assert.True(r.Errors.Count > 0);
-            Assert.IsAssignableFrom(typeof(UnexpectedTokenSyntaxError<ExpressionToken>), r.Errors[0]);
+            Assert.IsAssignableFrom < UnexpectedTokenSyntaxError<ExpressionToken>>(r.Errors[0]);
             UnexpectedTokenSyntaxError<ExpressionToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<ExpressionToken>;
 
             Assert.Equal(ExpressionToken.PLUS, error.UnexpectedToken.TokenID);
 
             Assert.Equal(1, error.Line);
-            Assert.Equal(10, error.Column);
+            Assert.Equal(8, error.Column);
         }
 
         [Fact]

@@ -17,14 +17,14 @@ namespace sly.parser
         public override int Line {
             get {
                 int? l = UnexpectedToken?.Position?.Line;
-                return l.HasValue ? l.Value : 0;
+                return l.HasValue ? l.Value : 1;
             }
         }
         public override int Column
         {
             get {
                 int? c = UnexpectedToken?.Position?.Column;
-                return c.HasValue ? c.Value : 0;
+                return c.HasValue ? c.Value : 1;
             }            
         }
 
@@ -51,7 +51,7 @@ namespace sly.parser
         }
 
         public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, params T[] expectedTokens) 
-        {
+        {           
             this.UnexpectedToken = unexpectedToken;
             if (expectedTokens != null)
             {

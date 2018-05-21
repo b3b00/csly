@@ -331,37 +331,35 @@ namespace ParserExample
             ;
         }
 
+
+        static void testErrors()
+        {
+            JSONParser jsonParser = new JSONParser();
+            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
+            Parser<JsonToken, JSon> parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
+
+
+            string source = @"{
+    'one': 1,
+    'bug':{,}
+}".Replace("'", "\"");
+            ParseResult<JsonToken, JSon> r = parser.Parse(source);
+
+            bool isError = r.IsError; // true
+            var root = r.Result; // null;
+            var errors = r.Errors; // !null & count > 0
+            var error = errors[0] as UnexpectedTokenSyntaxError<JsonToken>; // 
+            var token = error.UnexpectedToken.TokenID;  // comma
+            var line = error.Line; // 3
+            var column = error.Column; // 12
+
+           
+        }
+
         static void Main(string[] args)
         {
-
-            //ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
-            //Parser<JsonToken, JSon> parser = builder.BuildParser(new EbnfJsonParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            //Lexer<JsonToken> lexer = (Lexer<JsonToken>)LexerBuilder.BuildLexer<JsonToken>();
-            //Stopwatch sw = new Stopwatch();
-
-            //sw.Start();
-            //string json = File.ReadAllText("test.json");
-            //var result = lexer.Tokenize(json).ToList();
-            //sw.Stop();
-            //long milli = sw.ElapsedMilliseconds;
-            //Console.WriteLine($"wo/ optim : {milli} ms");
-            //sw.Reset();
-            //sw.Start();
-            //json = File.ReadAllText("test.json");
-            //result = lexer.Tokenize(json).ToList();
-            //sw.Stop();
-            //milli = sw.ElapsedMilliseconds;
-            //Console.WriteLine($"w/ optim : {milli} ms");
-            //TestFactorial();
-            //testLexerBuilder();
-
-
-            //testJSONLexer();
-            //testGenericLexerJSON();
-
-
-            // TestSingleComment();
-            //testGenericLexerJson();
+            testErrors();
+           
             Console.WriteLine("so what ?");
 
             ;

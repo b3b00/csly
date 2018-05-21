@@ -19,6 +19,8 @@ namespace sly.lexer
 
 
         public TokenPosition Position { get; set; }
+
+        public int PositionInTokenFlow { get; set; }
         public T TokenID { get; set; }
         public bool IsComment { get; set; }
 
@@ -56,6 +58,7 @@ namespace sly.lexer
         {
             End = true;
             TokenID = DefaultToken;
+            Position = new TokenPosition(0, 0, 0);
         }
 
         public static Token<T> Empty() {
