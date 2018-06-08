@@ -147,7 +147,7 @@ namespace sly.parser.generator
             Rule<IN> rule = new Rule<IN>();
             rule.Clauses.Add(new NonTerminalClause<IN>(lowestname));
             rule.IsByPassRule = true;
-            rule.IsExpressionRule = true;
+            rule.IsExpressionRule = true;            
             configuration.NonTerminals[entrypoint.Name] = entrypoint;
             entrypoint.Rules.Add(rule);
         }
@@ -167,7 +167,6 @@ namespace sly.parser.generator
                     rule.IsExpressionRule = true;
                     rule.SetVisitor(operation);
                     nonTerminal.Rules.Add(rule);
-
                 }
                 else if (operation.IsUnary)
                 {

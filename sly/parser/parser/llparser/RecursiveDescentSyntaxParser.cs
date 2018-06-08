@@ -222,8 +222,12 @@ namespace sly.parser.llparser
             result.Errors = errors;
             result.EndingPosition = currentPosition;
             if (!isError)
-            {
+            {                
                 SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);                
+                if (node.Name == "WhileParser_expressions__expr_10_PLUS_MINUS_OR_CONCAT_")
+                {
+                    ;
+                }
                 node = ManageExpressionRules(rule, node);
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                 {
