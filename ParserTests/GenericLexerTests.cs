@@ -392,10 +392,6 @@ namespace ParserTests
             Assert.Equal(13, error.Column);
             Assert.Equal('2', error.UnexpectedChar);
             Assert.Contains("Unrecognized symbol",error.ToString());
-
-
-
-
         }
     }
 }

@@ -5,6 +5,8 @@ using System.Net;
 using sly.parser.syntax;
 using sly.lexer;
 using System.Reflection;
+using sly.parser.parser;
+using static sly.parser.parser.ValueOptionConstructors;
 
 namespace sly.parser.generator
 {
@@ -20,14 +22,17 @@ namespace sly.parser.generator
         
         public List<Token<IN>> TokenListResult;
 
+        public ValueOption<OUT> OptionResult;
+
         private bool isTok;
+
+        public bool IsOption => OptionResult != null;
 
         public bool IsToken => isTok;
 
         public bool Discarded => IsToken && TokenResult != null && TokenResult.Discarded;
 
         private bool isVal;
-
         public bool IsValue => isVal;
 
         private bool isValueList = false;
@@ -71,6 +76,22 @@ namespace sly.parser.generator
             res.isTokenList = true;
             return res;
         }
+
+        public static SyntaxVisitorResult<IN, OUT> NewOptionSome(OUT value)
+        {
+            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            res.OptionResult = Some<OUT>(value);
+            return res;
+        }
+
+        public static SyntaxVisitorResult<IN, OUT> NewOptionNone()
+        {
+            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            res.OptionResult = None<OUT>();
+            return res;
+        }
+
+
 
         public static SyntaxVisitorResult<IN, OUT> NoneResult()
         {

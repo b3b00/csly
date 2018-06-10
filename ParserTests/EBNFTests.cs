@@ -5,12 +5,13 @@ using sly.parser;
 using sly.lexer;
 using sly.parser.generator;
 using System.Collections.Generic;
-using expressionparser;
+
 using sly.parser.llparser;
 using sly.parser.syntax;
 using jsonparser;
 using jsonparser.JsonModel;
 using sly.buildresult;
+using sly.parser.parser;
 
 namespace ParserTests
 {
@@ -36,6 +37,18 @@ namespace ParserTests
     }
 
     public class OptionTestParser{
+
+        [Production("root2 : a B? c ")]
+        public string root2(Token<OptionTestToken> a, ValueOption<string> b, Token<OptionTestToken> c)
+        {
+            StringBuilder r = new StringBuilder();
+            r.Append($"R(");
+            r.Append(a.Value);
+            r.Append(b.Match(v => $",{v}", () => ",<none>"));
+            r.Append($",{c.Value}");
+            r.Append($")");
+            return r.ToString();
+        }
 
          [Production("root : a B c? ")]
          public string root(Token<OptionTestToken> a, string b, Token<OptionTestToken> c) {
@@ -323,35 +336,59 @@ namespace ParserTests
 
 
         [Fact]
-        public void TestNonEmptyOption() {
+        public void TestNonEmptyTerminalOption() {
             var buildResult = BuildOptionParser();
             Assert.False(buildResult.IsError);
             var optionParser = buildResult.Result;
 
-            var result = optionParser.Parse("a b c");
+            var result = optionParser.Parse("a b c","root");
             Assert.Equal("R(a,B(b),c)", result.Result);
         }
 
         
         [Fact]
-        public void TestEmptyOption() {
+        public void TestEmptyTerminalOption() {
             var buildResult = BuildOptionParser();
             Assert.False(buildResult.IsError);
             var optionParser = buildResult.Result;
 
-            var result = optionParser.Parse("a b");
+            var result = optionParser.Parse("a b","root");
             Assert.Equal("R(a,B(b),<none>)", result.Result);
         }
 
         [Fact]
-        public void TestEmptyOptionInMiddle()
+        public void TestEmptyOptionTerminalInMiddle()
         {
             var buildResult = BuildOptionParser();
             Assert.False(buildResult.IsError);
             var optionParser = buildResult.Result;
 
-            var result = optionParser.Parse("a c");
+            var result = optionParser.Parse("a c","root");
             Assert.Equal("R(a,<none>,c)", result.Result);
+        }
+
+        [Fact]
+        public void TestEmptyOptionalNonTerminal()
+        {
+            var buildResult = BuildOptionParser();
+            Assert.False(buildResult.IsError);
+            var optionParser = buildResult.Result;
+
+            var result = optionParser.Parse("a c","root2");
+            Assert.False(result.IsError);
+            Assert.Equal("R(a,<none>,c)", result.Result);
+        }
+
+        [Fact]
+        public void TestNonEmptyOptionalNonTerminal()
+        {
+            var buildResult = BuildOptionParser();
+            Assert.False(buildResult.IsError);
+            var optionParser = buildResult.Result;
+
+            var result = optionParser.Parse("a b c", "root2");
+            Assert.False(result.IsError);
+            Assert.Equal("R(a,B(b),c)", result.Result);
         }
 
         private void AssertString(JObject obj, string key, string value)

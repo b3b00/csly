@@ -77,7 +77,7 @@ namespace sly.parser.llparser
 
         private void InitStartingTokensWithZeroOrMore(Rule<IN> rule, ZeroOrMoreClause<IN> manyClause,
             Dictionary<string, NonTerminal<IN>> nonTerminals)
-        {            
+        {
             if (manyClause.Clause is TerminalClause<IN>)
             {
                 TerminalClause<IN> term = manyClause.Clause as TerminalClause<IN>;
@@ -137,7 +137,7 @@ namespace sly.parser.llparser
             {
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
-                    children = new List<ISyntaxNode<IN>>();                   
+                    children = new List<ISyntaxNode<IN>>();
                     foreach (IClause<IN> clause in rule.Clauses)
                     {
                         if (clause is TerminalClause<IN> termClause)
@@ -202,7 +202,7 @@ namespace sly.parser.llparser
                         }
                         else if (clause is OptionClause<IN> option)
                         {
-                            var optionResult = ParseOption(tokens, option, currentPosition);
+                            var optionResult = ParseOption(tokens, option,rule, currentPosition);
                             currentPosition = optionResult.EndingPosition;
                             children.Add(optionResult.Root);
                         }
@@ -233,7 +233,7 @@ namespace sly.parser.llparser
 
 
         public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position)
-        {            
+        {
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             ManySyntaxNode<IN> manyNode = new ManySyntaxNode<IN>("");
             int currentPosition = position;
@@ -277,7 +277,7 @@ namespace sly.parser.llparser
 
             result.EndingPosition = currentPosition;
             result.IsError = false;
-            result.Errors= innerErrors;
+            result.Errors = innerErrors;
             result.Root = manyNode;
             result.IsEnded = lastInnerResult != null && lastInnerResult.IsEnded;
             return result;
@@ -336,13 +336,15 @@ namespace sly.parser.llparser
             return result;
         }
 
-        public SyntaxParseResult<IN> ParseOption(IList<Token<IN>> tokens, OptionClause<IN> clause, int position)
+        public SyntaxParseResult<IN> ParseOption(IList<Token<IN>> tokens, OptionClause<IN> clause, Rule<IN> rule, int position)
         {
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             int currentPosition = position;
             IClause<IN> innerClause = clause.Clause;
 
             SyntaxParseResult<IN> innerResult = null;
+
+
 
             if (innerClause is TerminalClause<IN>)
             {
@@ -360,14 +362,32 @@ namespace sly.parser.llparser
 
             if (innerResult.IsError)
             {
-                result = new SyntaxParseResult<IN>();
-                result.IsError = false;
-                result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty());
-                result.EndingPosition = position;
+                if (innerClause is TerminalClause<IN>)
+                {
+                    result = new SyntaxParseResult<IN>();
+                    result.IsError = false;
+                    result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty());
+                    result.EndingPosition = position;
+                }
+                else
+                {
+                    result = new SyntaxParseResult<IN>();
+                    result.IsError = false;
+                    List<ISyntaxNode<IN>> children = new List<ISyntaxNode<IN>>() { innerResult.Root };
+                    if (innerResult.IsError)
+                    {
+                        children.Clear();
+                    }
+                    result.Root = new OptionSyntaxNode<IN>(rule.NonTerminalName + "__" + rule.Key, children, rule.GetVisitor());
+                    result.EndingPosition = position;
+                }
             }
             else
             {
-                result = innerResult;
+                List<ISyntaxNode<IN>> children = new List<ISyntaxNode<IN>>() { innerResult.Root };
+                result.Root = new OptionSyntaxNode<IN>(rule.NonTerminalName + "__" + rule.Key, children, rule.GetVisitor());
+                result.EndingPosition = innerResult.EndingPosition;
+
             }
 
             return result;

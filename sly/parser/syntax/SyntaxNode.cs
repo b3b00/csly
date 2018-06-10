@@ -1,6 +1,6 @@
 using sly.parser.generator;
 using sly.parser.syntax;
-using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -21,6 +21,8 @@ namespace sly.parser.syntax
         public MethodInfo Visitor { get; set; }
 
         public bool IsByPassNode { get; set; } = false;
+
+        public bool IsEmpty => Children == null || !Children.Any();
 
         #region expression syntax nodes
 
