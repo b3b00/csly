@@ -77,7 +77,7 @@ namespace sly.parser.llparser
 
         private void InitStartingTokensWithZeroOrMore(Rule<IN> rule, ZeroOrMoreClause<IN> manyClause,
             Dictionary<string, NonTerminal<IN>> nonTerminals)
-        {            
+        {
             if (manyClause.Clause is TerminalClause<IN>)
             {
                 TerminalClause<IN> term = manyClause.Clause as TerminalClause<IN>;
@@ -137,7 +137,7 @@ namespace sly.parser.llparser
             {
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
-                    children = new List<ISyntaxNode<IN>>();                   
+                    children = new List<ISyntaxNode<IN>>();
                     foreach (IClause<IN> clause in rule.Clauses)
                     {
                         if (clause is TerminalClause<IN> termClause)
@@ -202,7 +202,7 @@ namespace sly.parser.llparser
                         }
                         else if (clause is OptionClause<IN> option)
                         {
-                            var optionResult = ParseOption(tokens, option, rule,currentPosition);
+                            var optionResult = ParseOption(tokens, option,rule, currentPosition);
                             currentPosition = optionResult.EndingPosition;
                             children.Add(optionResult.Root);
                         }
@@ -221,12 +221,7 @@ namespace sly.parser.llparser
             if (!isError)
             {
                 SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
-                if (node.Name == "WhileParser_expressions__expr_10_PLUS_MINUS_OR_CONCAT_")
-                {
-                    ;
-                }
                 node = ManageExpressionRules(rule, node);
-                node.Visitor = rule.GetVisitor();
                 result.Root = node;
                 result.IsEnded = currentPosition >= tokens.Count - 1
                                  || currentPosition == tokens.Count - 2 &&
@@ -238,7 +233,7 @@ namespace sly.parser.llparser
 
 
         public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position)
-        {            
+        {
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             ManySyntaxNode<IN> manyNode = new ManySyntaxNode<IN>("");
             int currentPosition = position;
@@ -282,7 +277,7 @@ namespace sly.parser.llparser
 
             result.EndingPosition = currentPosition;
             result.IsError = false;
-            result.Errors= innerErrors;
+            result.Errors = innerErrors;
             result.Root = manyNode;
             result.IsEnded = lastInnerResult != null && lastInnerResult.IsEnded;
             return result;
@@ -349,7 +344,7 @@ namespace sly.parser.llparser
 
             SyntaxParseResult<IN> innerResult = null;
 
-            
+
 
             if (innerClause is TerminalClause<IN>)
             {
@@ -383,7 +378,7 @@ namespace sly.parser.llparser
                     {
                         children.Clear();
                     }
-                    result.Root = new OptionSyntaxNode<IN>(rule.NonTerminalName + "__" + rule.Key,children,rule.GetVisitor());
+                    result.Root = new OptionSyntaxNode<IN>(rule.NonTerminalName + "__" + rule.Key, children, rule.GetVisitor());
                     result.EndingPosition = position;
                 }
             }
@@ -392,7 +387,7 @@ namespace sly.parser.llparser
                 List<ISyntaxNode<IN>> children = new List<ISyntaxNode<IN>>() { innerResult.Root };
                 result.Root = new OptionSyntaxNode<IN>(rule.NonTerminalName + "__" + rule.Key, children, rule.GetVisitor());
                 result.EndingPosition = innerResult.EndingPosition;
-                
+
             }
 
             return result;
