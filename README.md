@@ -123,6 +123,7 @@ Production rules can used :
  * [EBNF notation](https://github.com/b3b00/csly/wiki/EBNF-Parser) : using multiplier operator 
  	* zero or more : \*
     * one or more : \+
+    * zero or more (optional) : \?
 
 
 A terminal notation must exactly matche (case sensitive) an enum value.
