@@ -436,7 +436,8 @@ namespace sly.lexer
             var r = LexerFsm.Run(source, 0);
             while (r.IsSuccess)
             {
-                tokens.Add(Transcode(r));
+                var transcoded = Transcode(r);   
+                tokens.Add(transcoded);             
                 r = LexerFsm.Run(source);
                 if (r.Result.IsComment)
                 {
@@ -500,9 +501,15 @@ namespace sly.lexer
 
         public Token<IN> Transcode(FSMMatch<GenericToken> match)
         {
+            
             var tok = new Token<IN>();
-            tok.Value = match.Result.Value;
-            tok.Position = match.Result.Position;
+            var inTok = match.Result;            
+            tok.IsComment = inTok.IsComment;
+            tok.IsEmpty = inTok.IsEmpty;
+            tok.Value = inTok.Value;
+            tok.CommentType = inTok.CommentType;
+            tok.Position = inTok.Position;
+            tok.Discarded = inTok.Discarded;
             tok.StringDelimiter = StringDelimiterChar;            
             tok.TokenID = (IN)match.Properties[DerivedToken];
             return tok;
