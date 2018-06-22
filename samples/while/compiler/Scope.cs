@@ -64,7 +64,6 @@ namespace csly.whileLang.compiler
         /// <returns>true if variable is a new variable in scope</returns>
         public bool SetVariableType(string name, WhileType variableType)
         {
-            // TODO search upper scope first
             bool creation = !variables.ContainsKey(name);            
             variables[name] = variableType;
             return creation;

@@ -66,7 +66,6 @@ namespace ParserTests
 
                 var fsmBuilder = lexer.FSMBuilder;
 
-                // TODO
                 fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
                 .Transition('.', CheckDate)
                 .Mark("start_date")

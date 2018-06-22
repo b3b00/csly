@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace sly.lexer.fsm.transitioncheck
@@ -21,6 +22,7 @@ namespace sly.lexer.fsm.transitioncheck
             Precondition = precondition;
         }
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()  {
             string t = "";
             if (Precondition != null) {
