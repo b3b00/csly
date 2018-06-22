@@ -148,7 +148,7 @@ namespace ParserTests
         public string A(List<Token<TokenType>> astr)
         {
             string result = "A(";
-            result += (string)astr
+            result += astr
                 .Select(a => a.Value)
                 .Aggregate<string>((a1, a2) => a1 + ", " + a2);
             result += ")";
@@ -229,7 +229,6 @@ namespace ParserTests
             rule = nt.Rules[0];
             Assert.Single(rule.Clauses);
             Assert.IsType<ZeroOrMoreClause<TokenType>>(rule.Clauses[0]);
-            ;
         }
 
 

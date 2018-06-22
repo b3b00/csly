@@ -52,7 +52,6 @@ namespace sly.parser.llparser
                 NonTerminal<IN> nt = nonTerminals[name];
                 nt.Rules.ForEach(r => InitStartingTokensForRule(nonTerminals, r));
             }
-            return;
         }
 
         protected virtual void InitStartingTokensForRule(Dictionary<string, NonTerminal<IN>> nonTerminals, Rule<IN> rule)
@@ -81,10 +80,6 @@ namespace sly.parser.llparser
                                 rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
                             });
                             rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<IN>().ToList<IN>();
-                        }
-                        else
-                        {
-                            ;
                         }
                     }
                 }
@@ -205,10 +200,6 @@ namespace sly.parser.llparser
                             }
                             isError = isError || nonTerminalResult.IsError;
                         }
-                        else
-                        {
-                            ;
-                        }
                         if (isError)
                         {
                             break;
@@ -224,10 +215,6 @@ namespace sly.parser.llparser
             if (!isError)
             {                
                 SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);                
-                if (node.Name == "WhileParser_expressions__expr_10_PLUS_MINUS_OR_CONCAT_")
-                {
-                    ;
-                }
                 node = ManageExpressionRules(rule, node);
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                 {
@@ -282,10 +269,6 @@ namespace sly.parser.llparser
             {
                 node.Visitor = rule.GetVisitor();
             }
-            else
-            {
-                ;
-            }
             return node;
                 
         }
@@ -306,7 +289,6 @@ namespace sly.parser.llparser
         {
             NonTerminal<IN> nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
             bool found = false;
-            bool isError = false;
             List<UnexpectedTokenSyntaxError<IN>> errors = new List<UnexpectedTokenSyntaxError<IN>>();
 
             int i = 0;
@@ -327,7 +309,6 @@ namespace sly.parser.llparser
 
             if (rules.Count == 0)
             {
-                isError = true;
                 errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],
                     allAcceptableTokens.ToArray<IN>()));
             }
@@ -352,20 +333,13 @@ namespace sly.parser.llparser
                      !innerRuleRes.Errors.Any()) || other)
                 {
                     greaterIndex = innerRuleRes.EndingPosition;
-                    innerRuleErrors.Clear();
-                    if (innerRuleRes.Errors.Count == 1 && innerRuleRes.Errors[0].Line == 1 && innerRuleRes.Errors[0].Column == 1)
-                    {
-                        var err = innerRuleRes.Errors[0];
-                        var expect = err.ExpectedTokens;
-                        ;
-                    }
+                    innerRuleErrors.Clear();                    
                     innerRuleErrors.AddRange(innerRuleRes.Errors);
                 }
                 innerRuleErrors.AddRange(innerRuleRes.Errors);
                 allRulesInError = allRulesInError && innerRuleRes.IsError;
                 i++;
             }
-            isError = isError || allRulesInError;
             errors.AddRange(innerRuleErrors);
 
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();

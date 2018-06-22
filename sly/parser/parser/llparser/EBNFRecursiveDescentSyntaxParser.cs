@@ -107,20 +107,7 @@ namespace sly.parser.llparser
             }
         }
 
-        private void InitStartingTokensWithOption(Rule<IN> rule, OptionClause<IN> optionClause,
-            Dictionary<string, NonTerminal<IN>> nonTerminals)
-        {
-            if (optionClause.Clause is TerminalClause<IN>)
-            {
-                TerminalClause<IN> term = optionClause.Clause as TerminalClause<IN>;
-                InitStartingTokensWithTerminal(rule, term);
-            }
-            else if (optionClause.Clause is NonTerminalClause<IN>)
-            {
-                NonTerminalClause<IN> nonterm = optionClause.Clause as NonTerminalClause<IN>;
-                InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
-            }
-        }
+      
 
         #endregion
 

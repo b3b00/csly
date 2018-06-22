@@ -44,7 +44,7 @@ namespace jsonparser
         [Production("value : DOUBLE")]
         public object DoubleValue(Token<JsonTokenGeneric> doubleToken)
         {
-            double dbl = double.MinValue;
+            double dbl;
             try
             {
                 string[] doubleParts = doubleToken.Value.Split('.');

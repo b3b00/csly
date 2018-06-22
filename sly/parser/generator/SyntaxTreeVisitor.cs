@@ -109,13 +109,7 @@ namespace sly.parser.generator
         public object ParserVsisitorInstance { get; set; }
 
         public ParserConfiguration<IN,OUT> Configuration { get; set; }
-
-        public SyntaxTreeVisitor(ParserConfiguration<IN,OUT> conf)
-        {
-            this.ParserClass = ParserClass;
-            this.Configuration = conf;
-            this.ParserVsisitorInstance = null;
-        }
+              
 
         public SyntaxTreeVisitor(ParserConfiguration<IN,OUT> conf, object parserInstance)
         {
@@ -185,13 +179,12 @@ namespace sly.parser.generator
                     {
                         method = node.Visitor;
                         object t = (method.Invoke(ParserVsisitorInstance, args.ToArray()));
-                        //string typename = t.GetType().Name;
                         OUT res = (OUT)t;
                         result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine($"OUTCH {e.Message} calling {node.Name} =>  {method.Name}");
+                        Console.WriteLine($"OUTCH {e.Message} calling {node.Name} =>  {method?.Name}");
                     }
                 }
 
@@ -203,7 +196,6 @@ namespace sly.parser.generator
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN> leaf)
         {
             return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
-            //return leaf.Token;
         }
     }
 }
