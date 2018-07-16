@@ -59,15 +59,17 @@ namespace sly.parser.generator
                 
             }
             parser = result.Result;
-            var expressionResult = parser.BuildExpressionParser(result, rootRule);
-            if (expressionResult.IsError)
+            if (!result.IsError)
             {
-                result.AddErrors(expressionResult.Errors);
+                var expressionResult = parser.BuildExpressionParser(result, rootRule);
+                if (expressionResult.IsError)
+                {
+                    result.AddErrors(expressionResult.Errors);
+                }
+                result.Result.Configuration = expressionResult.Result;
+
+                result = CheckParser(result);
             }
-            result.Result.Configuration = expressionResult.Result;
-
-            result = CheckParser(result);
-
             return result;
         }
 
