@@ -35,14 +35,12 @@ namespace sly.parser.generator
         }
 
         [Production("clauses : clause ")]
-        public ClauseSequence<IN> SingleClause(IClause<IN> clause)
-        {
-            return new ClauseSequence<IN>(clause); 
+        public GroupClause<IN> SingleClause(ClauseSequence<IN> clauses)
+        {            
+            return new GroupClause<IN>(clauses.Clauses); 
         }
 
-
-
-       
+        
 
         [Production("clause : IDENTIFIER ZEROORMORE")]
         public IClause<IN> ZeroMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
@@ -78,6 +76,38 @@ namespace sly.parser.generator
             IClause<IN> clause = BuildTerminalOrNonTerimal(id.Value);
             return clause;
         }
+
+
+        #region  groups
+
+        
+
+
+        [Production("clause : LPAREN [d] groupclauses RPAREN [d]")] 
+        public GroupClause<IN> Group(GroupClause<IN> clauses)
+        {
+            return clauses;       
+        }
+
+        [Production("groupclauses : groupclause groupclauses")]
+
+        public object GroupClauses(IClause<IN> clause, GroupClause<IN> clauses)
+        {
+            GroupClause<IN> group = new GroupClause<IN>( clause );
+            if (clauses != null)
+            {
+                group.AddRange(clauses);
+            }
+            return group;
+        }
+
+        [Production("groupclause : IDENTIFIER ")]
+        public GroupClause<IN> GroupClause(ClauseSequence<IN> clauses)
+        {            
+            return new GroupClause<IN>(clauses.Clauses); 
+        }
+
+        #endregion
 
        
 
