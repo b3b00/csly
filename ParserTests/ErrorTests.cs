@@ -75,5 +75,50 @@ namespace ParserTests
             Assert.Equal(3, error.Column);
             Assert.Equal('@', error.UnexpectedChar);
         }
+
+        [Fact]
+        public void TestJsonSyntaxErrorMissingLastClosingBracket()
+        {
+            JSONParser jsonParser = new JSONParser();
+            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
+            Parser<JsonToken, JSon> parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
+
+            string source = "{";
+
+            ParseResult<JsonToken, JSon> r = parser.Parse(source);
+            Assert.True(r.IsError);
+            Assert.Null(r.Result);
+            Assert.NotNull(r.Errors);
+            Assert.True(r.Errors.Count > 0);
+            Assert.IsType<UnexpectedTokenSyntaxError<JsonToken>>(r.Errors[0]);
+            UnexpectedTokenSyntaxError<JsonToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
+
+            Assert.Equal((JsonToken)0, error?.UnexpectedToken.TokenID);
+            Assert.Equal(0, error?.Line);
+            Assert.Equal(0, error?.Column);
+        }
+
+        [Fact]
+        public void TestJsonEbnfSyntaxMissingLastClosingBracket()
+        {
+            EbnfJsonGenericParser jsonParser = new EbnfJsonGenericParser();
+            ParserBuilder<JsonTokenGeneric, JSon> builder = new ParserBuilder<JsonTokenGeneric, JSon>();
+            Parser<JsonTokenGeneric, JSon> Parser = builder.BuildParser(jsonParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root").Result;
+
+            string source = "{";
+
+            ParseResult<JsonTokenGeneric, JSon> r = Parser.Parse(source);
+            Assert.True(r.IsError);
+            Assert.Null(r.Result);
+            Assert.NotNull(r.Errors);
+            Assert.True(r.Errors.Count > 0);
+            Assert.IsType<UnexpectedTokenSyntaxError<JsonTokenGeneric>>(r.Errors[0]);
+            UnexpectedTokenSyntaxError<JsonTokenGeneric> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonTokenGeneric>;
+
+            Assert.Equal((JsonTokenGeneric)0, error?.UnexpectedToken.TokenID);
+            Assert.Equal(0, error?.Line);
+            Assert.Equal(0, error?.Column);
+        }
+
     }
 }
