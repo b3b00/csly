@@ -444,6 +444,7 @@ namespace sly.lexer
                     ConsumeComment(r.Result, source);
                 }
             }
+            tokens.Add(new Token<IN>()); 
             return tokens;
 
         }
