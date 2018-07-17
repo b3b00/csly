@@ -52,7 +52,7 @@ namespace ParserTests
 2 // single line comment
 3.0").ToList();
 
-            Assert.Equal(4, tokens.Count);
+            Assert.Equal(5, tokens.Count);
 
             var token1 = tokens[0];
             var token2 = tokens[1];
@@ -97,7 +97,7 @@ comment on 2 lines */ 3.0";
 
             var tokens = lexer.Tokenize(code).ToList();
 
-            Assert.Equal(4, tokens.Count);
+            Assert.Equal(5, tokens.Count);
 
             var token1 = tokens[0];
             var token2 = tokens[1];
@@ -138,7 +138,7 @@ comment on 2 lines ", token3.Value);
             List<Token<CommentsToken>> tokens = null;
             tokens = lexer.Tokenize(code).ToList();
 
-            Assert.Equal(4, tokens.Count);
+            Assert.Equal(5, tokens.Count);
 
             var token1 = tokens[0];
             var token2 = tokens[1];
@@ -182,7 +182,7 @@ comment on 2 lines ", token3.Value);
 
             var tokens = lexer.Tokenize(code).ToList();
 
-            Assert.Equal(5, tokens.Count);
+            Assert.Equal(6, tokens.Count);
 
             var token1 = tokens[0];
             var token2 = tokens[1];
@@ -233,7 +233,7 @@ comment";
 
             var tokens = lexer.Tokenize(code).ToList();
 
-            Assert.Equal(3, tokens.Count);
+            Assert.Equal(4, tokens.Count);
 
             var token1 = tokens[0];
             var token2 = tokens[1];
