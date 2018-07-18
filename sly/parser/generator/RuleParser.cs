@@ -101,6 +101,14 @@ namespace sly.parser.generator
             return group;
         }
 
+        [Production("groupclauses : groupclause")]
+
+        public object GroupClausesOne(IClause<IN> clause)
+        {
+            GroupClause<IN> group = new GroupClause<IN>( clause );            
+            return group;
+        }
+
         [Production("groupclause : IDENTIFIER ")]
         public GroupClause<IN> GroupClause(ClauseSequence<IN> clauses)
         {            
