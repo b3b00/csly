@@ -35,9 +35,9 @@ namespace sly.parser.generator
         }
 
         [Production("clauses : clause ")]
-        public GroupClause<IN> SingleClause(ClauseSequence<IN> clauses)
+        public ClauseSequence<IN> SingleClause(IClause<IN> clause)
         {            
-            return new GroupClause<IN>(clauses.Clauses); 
+            return new ClauseSequence<IN>(clause); 
         }
 
         
