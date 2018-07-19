@@ -283,7 +283,7 @@ namespace sly.parser.generator
                 }
                 if (!found)
                 {
-                    result.AddError(new ParserInitializationError(ErrorLevel.WARN, $"non terminal {nonTerminal.Name} is never used."));
+                    result.AddError(new ParserInitializationError(ErrorLevel.WARN, $"non terminal [{nonTerminal.Name}] is never used."));
                 }
             }
             return result;

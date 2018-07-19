@@ -133,7 +133,7 @@ namespace sly.parser.generator
             else if (n is SyntaxNode<IN>)
             {
                 return Visit(n as SyntaxNode<IN>);
-            }
+            }            
             else
             {
                 return null;
@@ -179,6 +179,10 @@ namespace sly.parser.generator
                     {
                         method = node.Visitor;
                         object t = (method.Invoke(ParserVsisitorInstance, args.ToArray()));
+                        if (t == null)
+                        {
+                            ;
+                        }
                         OUT res = (OUT)t;
                         result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
                     }

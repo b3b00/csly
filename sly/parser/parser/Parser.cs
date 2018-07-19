@@ -91,7 +91,7 @@ namespace sly.parser
             syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
-                OUT r  = Visitor.VisitSyntaxTree(syntaxResult.Root);
+                OUT r  = Visitor.VisitSyntaxTree(syntaxResult.Root);               
                 result.Result = r;
                 result.IsError = false;
             }

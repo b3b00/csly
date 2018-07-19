@@ -83,8 +83,8 @@ namespace sly.parser.generator
         
 
 
-        [Production("clause : LPAREN [d] groupclauses RPAREN [d]")] 
-        public GroupClause<IN> Group(GroupClause<IN> clauses)
+        [Production("clause : LPAREN  groupclauses RPAREN ")] 
+        public GroupClause<IN> Group(Token<IN> discardLeft, GroupClause<IN> clauses, Token<IN> discardRight)
         {
             return clauses;       
         }
@@ -104,15 +104,16 @@ namespace sly.parser.generator
         [Production("groupclauses : groupclause")]
 
         public object GroupClausesOne(IClause<IN> clause)
-        {
+        {            
             GroupClause<IN> group = new GroupClause<IN>( clause );            
             return group;
         }
 
         [Production("groupclause : IDENTIFIER ")]
-        public GroupClause<IN> GroupClause(ClauseSequence<IN> clauses)
-        {            
-            return new GroupClause<IN>(clauses.Clauses); 
+        public GroupClause<IN> GroupClause(Token<IN> id)
+        {
+            IClause<IN> clause = BuildTerminalOrNonTerimal(id.Value, true);
+            return new GroupClause<IN>(clause); 
         }
 
         #endregion
