@@ -21,7 +21,65 @@ namespace sly.parser.llparser
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
+            ComputeSubRules(configuration);
             InitializeStartingTokens(Configuration, startingNonTerminal);
+        }
+
+        public ParserConfiguration<IN, OUT> ComputeSubRules(ParserConfiguration<IN, OUT> configuration)
+        {
+            List<NonTerminal<IN>> newNonTerms = new List<NonTerminal<IN>>();
+            foreach(var nonTerm in configuration.NonTerminals)
+            {
+                foreach (var rule in nonTerm.Value.Rules)
+                {
+                    var newclauses = new List<IClause<IN>>();
+                    if (rule.ContainsSubRule)
+                    {
+                        foreach(IClause<IN> clause in rule.Clauses)
+                        {
+                            if (clause is GroupClause<IN> group)
+                            {
+                                NonTerminal<IN> newNonTerm = CreateSubRule(group);
+                                newNonTerms.Add(newNonTerm);
+                                IClause<IN> newClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                newclauses.Add(newClause);
+                            }                           
+                            if (clause is ManyClause<IN> many)
+                            {
+                                if (many.Clause is GroupClause<IN> manyGroup)
+                                {
+                                    NonTerminal<IN> newNonTerm = CreateSubRule(manyGroup);
+                                    newNonTerms.Add(newNonTerm);
+                                    many.Clause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                    newclauses.Add(many);
+                                }
+
+                            }
+                            else
+                            {
+                                newclauses.Add(clause);
+                            }
+                        }
+                    }
+                }
+            }
+            newNonTerms.ForEach(nonTerm => configuration.AddNonTerminal(nonTerm));
+            return configuration;
+        }
+
+        public NonTerminal<IN> CreateSubRule(GroupClause<IN> group)
+        {
+            // TODO create new dynamic non term
+            string subRuleNonTerminalName = group.Clauses.Select(c => c.ToString()).Aggregate<string>((string c1, string c2) => $"{c1.ToString()}-{c2.ToString()}");
+            NonTerminal<IN> nonTerminal = new NonTerminal<IN>(subRuleNonTerminalName);
+            // TODO create new dynamic rule for new non term, mark it as subrul
+            Rule<IN> subRule = new Rule<IN>();
+            subRule.Clauses = group.Clauses;
+            subRule.IsSubRule = true;
+            nonTerminal.Rules.Add(subRule);
+            nonTerminal.IsSubRule = true;
+
+            return nonTerminal;
         }
 
         #region STARTING_TOKENS
