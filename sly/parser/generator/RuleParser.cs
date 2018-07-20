@@ -84,10 +84,23 @@ namespace sly.parser.generator
 
 
         [Production("clause : LPAREN  groupclauses RPAREN ")] 
-        public GroupClause<IN> Group(Token<IN> discardLeft, GroupClause<IN> clauses, Token<IN> discardRight)
+        public GroupClause<IN> Group(Token<EbnfToken> discardLeft, GroupClause<IN> clauses, Token<EbnfToken> discardRight)
         {
             return clauses;       
         }
+
+        [Production("clause : LPAREN  groupclauses RPAREN ONEORMORE ")]
+        public IClause<IN> GroupOneOrMore(Token<EbnfToken> discardLeft, GroupClause<IN> clauses, Token<EbnfToken> discardRight, Token<EbnfToken> oneZeroOrMore)
+        {
+            return new OneOrMoreClause<IN>(clauses);
+        }
+
+        [Production("clause : LPAREN  groupclauses RPAREN ZEROORMORE ")]
+        public IClause<IN> GroupZeroOrMore(Token<EbnfToken> discardLeft, GroupClause<IN> clauses, Token<EbnfToken> discardRight, Token<EbnfToken> discardZeroOrMore)
+        {
+            return new ZeroOrMoreClause<IN>(clauses);
+        }
+
 
         [Production("groupclauses : groupclause groupclauses")]
 
@@ -110,15 +123,22 @@ namespace sly.parser.generator
         }
 
         [Production("groupclause : IDENTIFIER ")]
-        public GroupClause<IN> GroupClause(Token<IN> id)
+        public GroupClause<IN> GroupClause(Token<EbnfToken> id)
         {
             IClause<IN> clause = BuildTerminalOrNonTerimal(id.Value, true);
             return new GroupClause<IN>(clause); 
         }
 
+        [Production("groupclause : IDENTIFIER DISCARD ")]
+        public GroupClause<IN> GroupClauseDiscarded(Token<EbnfToken> id, Token<EbnfToken> discarded)
+        {
+            IClause<IN> clause = BuildTerminalOrNonTerimal(id.Value, true);
+            return new GroupClause<IN>(clause);
+        }
+
         #endregion
 
-       
+
 
 
 

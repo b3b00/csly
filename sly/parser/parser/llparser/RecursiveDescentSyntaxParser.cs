@@ -223,8 +223,12 @@ namespace sly.parser.llparser
                     result.Root = children[0];
                 }
                 result.Root =  node;
-                result.IsEnded = currentPosition >= tokens.Count - 1
-                                || currentPosition == tokens.Count - 2 && tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                result.IsEnded = result.EndingPosition >= tokens.Count - 1
+                                || result.EndingPosition == tokens.Count - 2 && tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                if (result.IsEnded)
+                {
+                    ;
+                }
                 if (rule.IsExpressionRule)
                 {
 
@@ -290,6 +294,8 @@ namespace sly.parser.llparser
 
         public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, NonTerminalClause<IN> nonTermClause, int currentPosition)
         {
+            int startPosition = currentPosition;
+            int endingPosition = 0;
             NonTerminal<IN> nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
             bool found = false;
             List<UnexpectedTokenSyntaxError<IN>> errors = new List<UnexpectedTokenSyntaxError<IN>>();
@@ -307,12 +313,12 @@ namespace sly.parser.llparser
             allAcceptableTokens = allAcceptableTokens.Distinct<IN>().ToList<IN>();
 
             List<Rule<IN>> rules = nt.Rules
-                .Where<Rule<IN>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.MayBeEmpty)
+                .Where<Rule<IN>>(r => r.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || r.MayBeEmpty)
                 .ToList<Rule<IN>>();
 
             if (rules.Count == 0)
             {
-                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],
+                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[startPosition],
                     allAcceptableTokens.ToArray<IN>()));
             }
 
@@ -320,16 +326,16 @@ namespace sly.parser.llparser
             SyntaxParseResult<IN> okResult = null;
             int greaterIndex = 0;
             bool allRulesInError = true;
-            while (!found && i < rules.Count)
+            while (i < rules.Count)
             {
                 Rule<IN> innerrule = rules[i];
-                SyntaxParseResult<IN> innerRuleRes = Parse(tokens, innerrule, currentPosition, nonTermClause.NonTerminalName);
-                if (!innerRuleRes.IsError && okResult == null)
+                SyntaxParseResult<IN> innerRuleRes = Parse(tokens, innerrule, startPosition, nonTermClause.NonTerminalName);
+                if (!innerRuleRes.IsError && okResult == null || (okResult != null && innerRuleRes.EndingPosition > okResult.EndingPosition))
                 {
                     okResult = innerRuleRes;
                     okResult.Errors = innerRuleRes.Errors;
                     found = true;
-                    currentPosition = innerRuleRes.EndingPosition;
+                    endingPosition = innerRuleRes.EndingPosition;
                 }
                 bool other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
                 if ((innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null &&

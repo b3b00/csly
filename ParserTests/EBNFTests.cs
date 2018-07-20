@@ -49,7 +49,8 @@ namespace ParserTests
         [Lexeme("[ \\t]+", true)]
         WS = 100,
         [Lexeme("\\n\\r]+", true, true)]
-        EOF = 101
+        EOL = 101,
+        EOF = 0
     }
 
     public class OptionTestParser
@@ -83,7 +84,7 @@ namespace ParserTests
         }
 
         [Production("root : a b? c ")]
-        public string root2(Token<OptionTestToken> a, Token<OptionTestToken> b, Token<OptionTestToken> c)
+        public string root(Token<OptionTestToken> a, Token<OptionTestToken> b, Token<OptionTestToken> c)
         {
             StringBuilder result = new StringBuilder();
             result.Append("R(");
@@ -104,6 +105,8 @@ namespace ParserTests
             return result.ToString();
         }
 
+
+
         [Production("B : b ")]
         public string bee(Token<OptionTestToken> b)
         {
@@ -114,8 +117,8 @@ namespace ParserTests
     public class GroupTestParser
     {
 
-        [Production("root : a (COMMA a)*")]
-        public string root(Token<OptionTestToken> a, List<Group<GroupTestToken, string>> groups)
+        [Production("root : A ( COMMA A ) ")]
+        public string root(Token<GroupTestToken> a, List<Group<GroupTestToken, string>> groups)
         {
             StringBuilder r = new StringBuilder();
             r.Append($"R(");
@@ -130,10 +133,44 @@ namespace ParserTests
             });
             return r.ToString();
         }
-        
-        
 
-}
+        [Production("root2 : A ( COMMA [d] A ) ")]
+        public string root2(Token<GroupTestToken> a, List<Group<GroupTestToken, string>> groups)
+        {
+            StringBuilder r = new StringBuilder();
+            r.Append($"R(");
+            r.Append(a.Value);
+            groups.ForEach((Group<GroupTestToken, string> group) =>
+            {
+                group.Items.ForEach((GroupItem<GroupTestToken, string> item) =>
+                {
+                    r.Append(",");
+                    r.Append(item.Value);
+                });
+            });
+            return r.ToString();
+        }
+
+        [Production("root3 : A ( COMMA [d] A )* ")]
+        public string root3(Token<GroupTestToken> a, List<Group<GroupTestToken, string>> groups)
+        {
+            StringBuilder r = new StringBuilder();
+            r.Append($"R(");
+            r.Append(a.Value);
+            groups.ForEach((Group<GroupTestToken, string> group) =>
+            {
+                group.Items.ForEach((GroupItem<GroupTestToken, string> item) =>
+                {
+                    r.Append(",");
+                    r.Append(item.Value);
+                });
+            });
+            return r.ToString();
+        }
+
+
+
+    }
 
 public class EBNFTests
 {
@@ -452,14 +489,29 @@ public class EBNFTests
     {
         var buildResult = BuildGroupParser();
         Assert.False(buildResult.IsError);
-        var optionParser = buildResult.Result;
+        // var optionParser = buildResult.Result;
 
-        var result = optionParser.Parse("a , a", "root");
-        Assert.False(result.IsError);
-        Assert.Equal("R(a,B(b),c)", result.Result);
+        // var result = optionParser.Parse("a , a", "root");
+        // Assert.False(result.IsError);
+        // Assert.Equal("R(a,B(b),c)", result.Result);
     }
 
-    private void AssertString(JObject obj, string key, string value)
+        [Fact]
+        public void TestGroupSyntaxParser()
+        {
+            var buildResult = BuildGroupParser();
+            Assert.False(buildResult.IsError);
+            var groupParser = buildResult.Result;
+            var tokens = groupParser.Lexer.Tokenize("r : a , a");
+            var syntaxResult = groupParser.SyntaxParser.Parse(tokens.ToList<Token<GroupTestToken>>());
+            // var optionParser = buildResult.Result;
+
+            // var result = optionParser.Parse("a , a", "root");
+            // Assert.False(result.IsError);
+            // Assert.Equal("R(a,B(b),c)", result.Result);
+        }
+
+        private void AssertString(JObject obj, string key, string value)
     {
         Assert.True(obj.ContainsKey(key));
         Assert.True(obj[key].IsValue);
