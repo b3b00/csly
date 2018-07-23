@@ -104,28 +104,26 @@ namespace sly.parser.generator
 
         [Production("groupclauses : groupclause groupclauses")]
 
-        public object GroupClauses(IClause<IN> clause, GroupClause<IN> clauses)
+        public object GroupClauses(GroupClause<IN> group, GroupClause<IN> groups)
         {
-            GroupClause<IN> group = new GroupClause<IN>( clause );
-            if (clauses != null)
+            if (groups != null)
             {
-                group.AddRange(clauses);
+                group.AddRange(groups);
             }
             return group;
         }
 
         [Production("groupclauses : groupclause")]
 
-        public object GroupClausesOne(IClause<IN> clause)
-        {            
-            GroupClause<IN> group = new GroupClause<IN>( clause );            
+        public object GroupClausesOne(GroupClause<IN> group)
+        {   
             return group;
         }
 
         [Production("groupclause : IDENTIFIER ")]
         public GroupClause<IN> GroupClause(Token<EbnfToken> id)
         {
-            IClause<IN> clause = BuildTerminalOrNonTerimal(id.Value, true);
+            IClause<IN> clause = BuildTerminalOrNonTerimal(id.Value);
             return new GroupClause<IN>(clause); 
         }
 

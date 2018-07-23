@@ -6,7 +6,6 @@ using sly.parser;
 using sly.lexer;
 using sly.parser.generator;
 using System.Collections.Generic;
-
 using sly.parser.llparser;
 using sly.parser.syntax;
 using jsonparser;
@@ -117,7 +116,7 @@ namespace ParserTests
     public class GroupTestParser
     {
 
-        [Production("root : A ( COMMA A ) ")]
+        [Production("rootGroup : A ( COMMA A ) ")]
         public string root(Token<GroupTestToken> a, List<Group<GroupTestToken, string>> groups)
         {
             StringBuilder r = new StringBuilder();
@@ -297,7 +296,7 @@ public class EBNFTests
         ParserBuilder<GroupTestToken, string> builder = new ParserBuilder<GroupTestToken, string>();
 
         var result =
-            builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "rootGroup");
         return result;
     }
 
@@ -446,7 +445,7 @@ public class EBNFTests
         var optionParser = buildResult.Result;
 
         var result = optionParser.Parse("a b", "root");
-        Assert.Equal("R(a,B(b),<none>)", result.Result);
+        Assert.Equal("R(a,B(b),<none>)", result.Result); 
     }
 
     [Fact]
@@ -502,8 +501,11 @@ public class EBNFTests
             var buildResult = BuildGroupParser();
             Assert.False(buildResult.IsError);
             var groupParser = buildResult.Result;
-            var tokens = groupParser.Lexer.Tokenize("r : a , a");
+            var tokens = groupParser.Lexer.Tokenize("a , a");
             var syntaxResult = groupParser.SyntaxParser.Parse(tokens.ToList<Token<GroupTestToken>>());
+            Assert.False(syntaxResult.IsError);
+            string dump = syntaxResult.Root.Dump("");
+            ;
             // var optionParser = buildResult.Result;
 
             // var result = optionParser.Parse("a , a", "root");

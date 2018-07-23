@@ -6,18 +6,17 @@ using System.Text;
 namespace sly.parser.syntax
 {
 
-    public class ManySyntaxNode<IN> : SyntaxNode<IN> where IN : struct
+    public class GroupSyntaxNode<IN> : ManySyntaxNode<IN> where IN : struct
     {
 
-        public bool IsManyTokens { get; set; }
-        
-        public bool IsManyValues { get { return !IsManyTokens; } set { IsManyTokens = !value; }}
-        
-        public ManySyntaxNode(string name) : base(name, new List<ISyntaxNode<IN>>())
+        public GroupSyntaxNode(string name) : base(name)
         {
-
         }
         
+        public GroupSyntaxNode(string name, List<ISyntaxNode<IN>> children) : this(name)
+        {
+            this.Children.AddRange(children);
+        }
 
         public void Add(ISyntaxNode<IN> child)
         {
@@ -28,7 +27,7 @@ namespace sly.parser.syntax
         {
             StringBuilder dump = new StringBuilder();
 
-            dump.AppendLine($"{tab}MANY {Name} [");
+            dump.AppendLine($"{tab}GROUP {Name} [");
             foreach (ISyntaxNode<IN> c in Children)
             {
                 dump.AppendLine(c.Dump(tab + "\t"));
@@ -38,6 +37,7 @@ namespace sly.parser.syntax
 
             return dump.ToString();
         }
+
 
 
     }

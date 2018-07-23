@@ -1,23 +1,23 @@
 ﻿using sly.lexer;
-using sly.parser;
 using sly.parser.generator;
 
 using System.Linq;
 using System.Collections.Generic;
 using sly.buildresult;
 using sly.parser.parser;
+using System.Diagnostics;
 
 namespace sly.parser
 {
-    public class Parser<IN,OUT> where IN : struct
+    public class Parser<IN, OUT> where IN : struct
     {
         public ILexer<IN> Lexer { get; set; }
         public object Instance { get; set; }
-        public ISyntaxParser<IN,OUT> SyntaxParser { get; set; }
-        public SyntaxTreeVisitor<IN,OUT> Visitor { get; set; }
-        public ParserConfiguration<IN,OUT> Configuration { get; set; }
-        
-        public Parser(ISyntaxParser<IN,OUT> syntaxParser, SyntaxTreeVisitor<IN,OUT> visitor)
+        public ISyntaxParser<IN, OUT> SyntaxParser { get; set; }
+        public SyntaxTreeVisitor<IN, OUT> Visitor { get; set; }
+        public ParserConfiguration<IN, OUT> Configuration { get; set; }
+
+        public Parser(ISyntaxParser<IN, OUT> syntaxParser, SyntaxTreeVisitor<IN, OUT> visitor)
         {
             SyntaxParser = syntaxParser;
             Visitor = visitor;
@@ -31,7 +31,7 @@ namespace sly.parser
             var exprResult = new BuildResult<ParserConfiguration<IN, OUT>>(Configuration);
             exprResult = ExpressionRulesGenerator.BuildExpressionRules<IN, OUT>(Configuration, Instance.GetType(), exprResult);
             Configuration = exprResult.Result;
-            SyntaxParser.Init(exprResult.Result,startingRule);
+            SyntaxParser.Init(exprResult.Result, startingRule);
             if (startingRule != null)
             {
                 Configuration.StartingRule = startingRule;
@@ -40,7 +40,7 @@ namespace sly.parser
             if (exprResult.IsError)
             {
                 result.AddErrors(exprResult.Errors);
-            }           
+            }
             else
             {
                 result.Result.Configuration = Configuration;
@@ -52,9 +52,9 @@ namespace sly.parser
         #endregion
 
 
-        public ParseResult<IN,OUT> Parse(string source, string startingNonTerminal = null)
+        public ParseResult<IN, OUT> Parse(string source, string startingNonTerminal = null)
         {
-            ParseResult<IN,OUT> result = null;
+            ParseResult<IN, OUT> result = null;
             try
             {
                 IList<Token<IN>> tokens = Lexer.Tokenize(source).ToList<Token<IN>>();
@@ -63,35 +63,37 @@ namespace sly.parser
                 for (int i = 0; i < tokens.Count; i++)
                 {
                     var token = tokens[i];
-                    if (!token.IsComment) {
+                    if (!token.IsComment)
+                    {
                         token.PositionInTokenFlow = position;
                         tokensWithoutComments.Add(token);
-                        position ++;
+                        position++;
                     }
-                    
+
                 }
                 result = Parse(tokensWithoutComments, startingNonTerminal);
             }
-            catch(LexerException e)
+            catch (LexerException e)
             {
-                result = new ParseResult<IN,OUT>();
+                result = new ParseResult<IN, OUT>();
                 result.IsError = true;
                 result.Errors = new List<ParseError>();
-                result.Errors.Add((e as LexerException).Error);                
+                result.Errors.Add((e as LexerException).Error);
             }
-            return result;            
+            return result;
         }
-        public ParseResult<IN,OUT> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
+        public ParseResult<IN, OUT> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
         {
-            
-            var result = new ParseResult<IN,OUT>();
 
-            var cleaner = new SyntaxTreeCleaner<IN>();            
+            var result = new ParseResult<IN, OUT>();
+
+            var cleaner = new SyntaxTreeCleaner<IN>();
             SyntaxParseResult<IN> syntaxResult = SyntaxParser.Parse(tokens, startingNonTerminal);
+            Debug.WriteLine($" syntax result ok ?:>{!syntaxResult.IsError}< ended:>{syntaxResult.IsEnded}<");
             syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
-                OUT r  = Visitor.VisitSyntaxTree(syntaxResult.Root);               
+                OUT r = Visitor.VisitSyntaxTree(syntaxResult.Root);
                 result.Result = r;
                 result.IsError = false;
             }

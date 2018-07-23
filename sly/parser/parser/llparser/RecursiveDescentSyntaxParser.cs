@@ -27,15 +27,20 @@ namespace sly.parser.llparser
 
         public ParserConfiguration<IN, OUT> ComputeSubRules(ParserConfiguration<IN, OUT> configuration)
         {
+            if (configuration.StartingRule == "rootGroup")
+            {
+                ;
+            }
+
             List<NonTerminal<IN>> newNonTerms = new List<NonTerminal<IN>>();
-            foreach(var nonTerm in configuration.NonTerminals)
+            foreach (var nonTerm in configuration.NonTerminals)
             {
                 foreach (var rule in nonTerm.Value.Rules)
                 {
                     var newclauses = new List<IClause<IN>>();
                     if (rule.ContainsSubRule)
                     {
-                        foreach(IClause<IN> clause in rule.Clauses)
+                        foreach (IClause<IN> clause in rule.Clauses)
                         {
                             if (clause is GroupClause<IN> group)
                             {
@@ -43,8 +48,8 @@ namespace sly.parser.llparser
                                 newNonTerms.Add(newNonTerm);
                                 IClause<IN> newClause = new NonTerminalClause<IN>(newNonTerm.Name);
                                 newclauses.Add(newClause);
-                            }                           
-                            if (clause is ManyClause<IN> many)
+                            }
+                            else if (clause is ManyClause<IN> many)
                             {
                                 if (many.Clause is GroupClause<IN> manyGroup)
                                 {
@@ -60,17 +65,19 @@ namespace sly.parser.llparser
                                 newclauses.Add(clause);
                             }
                         }
+                        rule.Clauses.Clear();
+                        rule.Clauses.AddRange(newclauses);
                     }
                 }
             }
-            newNonTerms.ForEach(nonTerm => configuration.AddNonTerminal(nonTerm));
+            newNonTerms.ForEach(nonTerminal => configuration.AddNonTerminalIfNotExists(nonTerminal));
             return configuration;
         }
 
         public NonTerminal<IN> CreateSubRule(GroupClause<IN> group)
         {
             // TODO create new dynamic non term
-            string subRuleNonTerminalName = group.Clauses.Select(c => c.ToString()).Aggregate<string>((string c1, string c2) => $"{c1.ToString()}-{c2.ToString()}");
+            string subRuleNonTerminalName = "GROUP-"+group.Clauses.Select(c => c.ToString()).Aggregate<string>((string c1, string c2) => $"{c1.ToString()}-{c2.ToString()}");
             NonTerminal<IN> nonTerminal = new NonTerminal<IN>(subRuleNonTerminalName);
             // TODO create new dynamic rule for new non term, mark it as subrul
             Rule<IN> subRule = new Rule<IN>();
@@ -268,13 +275,26 @@ namespace sly.parser.llparser
                 }
             }
 
+            if (nonTerminalName == "rootGroup")
+            {
+                ;
+            }
+
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             result.IsError = isError;
             result.Errors = errors;
             result.EndingPosition = currentPosition;
             if (!isError)
-            {                
-                SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);                
+            {
+                SyntaxNode<IN> node = null;
+                if (rule.IsSubRule)
+                {                    
+                    node = new GroupSyntaxNode<IN>($"{nonTerminalName}__{rule.Key}", children);
+                }
+                else
+                {                 
+                    node = new SyntaxNode<IN>($"{nonTerminalName}__{rule.Key}", children);
+                }
                 node = ManageExpressionRules(rule, node);
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                 {

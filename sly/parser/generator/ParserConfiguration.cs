@@ -13,5 +13,12 @@ namespace sly.parser.generator
         {
             NonTerminals[nonTerminal.Name] = nonTerminal;
         }
+        public void AddNonTerminalIfNotExists(NonTerminal<IN> nonTerminal)
+        {
+            if (!NonTerminals.ContainsKey(nonTerminal.Name))
+            {
+                NonTerminals[nonTerminal.Name] = nonTerminal;
+            }
+        }
     }
 }

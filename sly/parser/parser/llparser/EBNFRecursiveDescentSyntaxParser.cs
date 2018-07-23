@@ -160,6 +160,10 @@ namespace sly.parser.llparser
                             }
                             isError = isError || nonTerminalResult.IsError;
                         }
+                        else if (clause is GroupClause<IN> groupClause)
+                        {
+                            ;
+                        }
 
                         else if (clause is OneOrMoreClause<IN> || clause is ZeroOrMoreClause<IN>)
                         {
@@ -207,12 +211,25 @@ namespace sly.parser.llparser
             result.EndingPosition = currentPosition;
             if (!isError)
             {
-                SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
-                node = ManageExpressionRules(rule, node);
-                result.Root = node;
-                result.IsEnded = currentPosition >= tokens.Count - 1
-                                 || currentPosition == tokens.Count - 2 &&
-                                 tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                SyntaxNode<IN> node = null;
+                if (rule.IsSubRule)
+                {
+                    node = new GroupSyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
+                    node = ManageExpressionRules(rule, node);
+                    result.Root = node;
+                    result.IsEnded = currentPosition >= tokens.Count - 1
+                                     || currentPosition == tokens.Count - 2 &&
+                                     tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                }
+                else
+                {
+                    node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
+                    node = ManageExpressionRules(rule, node);
+                    result.Root = node;
+                    result.IsEnded = currentPosition >= tokens.Count - 1
+                                     || currentPosition == tokens.Count - 2 &&
+                                     tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                }
             }
 
             return result;

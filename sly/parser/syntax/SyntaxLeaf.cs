@@ -14,5 +14,10 @@ namespace sly.parser.syntax
         {
             this.Token = token;
         }
+
+        public string Dump(string tab)
+        {
+            return $"{tab}TOKEN[{Token}]";
+        }
     }
 }
