@@ -8,5 +8,17 @@ namespace sly.parser.generator
 
         public string StartingRule { get; set; }
         public Dictionary<string, NonTerminal<IN>> NonTerminals { get; set; }
+
+        public void AddNonTerminal(NonTerminal<IN> nonTerminal)
+        {
+            NonTerminals[nonTerminal.Name] = nonTerminal;
+        }
+        public void AddNonTerminalIfNotExists(NonTerminal<IN> nonTerminal)
+        {
+            if (!NonTerminals.ContainsKey(nonTerminal.Name))
+            {
+                NonTerminals[nonTerminal.Name] = nonTerminal;
+            }
+        }
     }
 }

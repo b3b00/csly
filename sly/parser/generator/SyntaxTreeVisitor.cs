@@ -19,10 +19,14 @@ namespace sly.parser.generator
         public OUT ValueResult;
         
         public List<OUT> ValueListResult;
-        
+
+        public List<Group<IN,OUT>> GroupListResult;
+
         public List<Token<IN>> TokenListResult;
 
         public ValueOption<OUT> OptionResult;
+
+        public Group<IN, OUT> GroupResult;
 
         private bool isTok;
 
@@ -31,19 +35,16 @@ namespace sly.parser.generator
         public bool IsToken => isTok;
 
         public bool Discarded => IsToken && TokenResult != null && TokenResult.Discarded;
+        public bool IsValue { get; private set; }
+        public bool IsValueList { get; private set; } = false;
 
-        private bool isVal;
-        public bool IsValue => isVal;
+        public bool IsGroupList { get; private set; } = false;
 
-        private bool isValueList = false;
+        public bool IsTokenList { get; private set; } = false;
 
-        public bool IsValueList => isValueList;
-        
-        private bool isTokenList = false;
+        public bool IsGroup { get; private set; } = false;
 
-        public bool IsTokenList => isTokenList;
-
-        public bool IsNone => !IsToken && !IsValue && !IsTokenList && ! IsValueList; 
+        public bool IsNone => !IsToken && !IsValue && !IsTokenList && ! IsValueList && !IsGroup && !IsGroupList; 
 
         public static SyntaxVisitorResult<IN,OUT> NewToken(Token<IN> tok)
         {
@@ -57,7 +58,7 @@ namespace sly.parser.generator
         {
             SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
             res.ValueResult = val;
-            res.isVal = true;
+            res.IsValue = true;
             return res;
         }
 
@@ -65,15 +66,23 @@ namespace sly.parser.generator
         {
             SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
             res.ValueListResult = values;
-            res.isValueList = true;
+            res.IsValueList = true;
             return res;
         }
-        
+
+        public static SyntaxVisitorResult<IN, OUT> NewGroupList(List<Group<IN,OUT>> values)
+        {
+            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            res.GroupListResult = values;
+            res.IsGroupList = true;
+            return res;
+        }
+
         public static SyntaxVisitorResult<IN, OUT> NewTokenList(List<Token<IN>> tokens)
         {
             SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
             res.TokenListResult = tokens;
-            res.isTokenList = true;
+            res.IsTokenList = true;
             return res;
         }
 
@@ -91,7 +100,13 @@ namespace sly.parser.generator
             return res;
         }
 
-
+        public static SyntaxVisitorResult<IN, OUT> NewGroup(Group<IN,OUT> group)
+        {
+            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            res.GroupResult = group;
+            res.IsGroup = true;
+            return res;
+        }
 
         public static SyntaxVisitorResult<IN, OUT> NoneResult()
         {
@@ -133,7 +148,7 @@ namespace sly.parser.generator
             else if (n is SyntaxNode<IN>)
             {
                 return Visit(n as SyntaxNode<IN>);
-            }
+            }            
             else
             {
                 return null;
@@ -179,6 +194,10 @@ namespace sly.parser.generator
                     {
                         method = node.Visitor;
                         object t = (method.Invoke(ParserVsisitorInstance, args.ToArray()));
+                        if (t == null)
+                        {
+                            ;
+                        }
                         OUT res = (OUT)t;
                         result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
                     }

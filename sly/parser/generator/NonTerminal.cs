@@ -17,5 +17,12 @@ namespace sly.parser.generator
             Name = name;
             Rules = rules;
         }
+
+        public bool IsSubRule { get; set; }
+
+        public NonTerminal(string name) : this(name, new List<Rule<IN>>())
+        {
+
+        }
     }
 }

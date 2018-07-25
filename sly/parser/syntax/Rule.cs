@@ -19,16 +19,64 @@ namespace sly.parser.syntax
         private Dictionary<IN, OperationMetaData<IN>> VisitorMethodsForOperation { get; set; }
 
         // visitor for classical rules
-        private MethodInfo Visitor { get; set; } 
-        
+        private MethodInfo Visitor { get; set; }
+
         public bool IsExpressionRule { get; set; }
 
         public string RuleString { get; }
 
+        public string Key
+        {
+
+            get
+            {
+                string k = Clauses
+                    .Select(c => c.ToString())
+                    .Aggregate<string>((c1, c2) => c1.ToString() + "_" + c2.ToString());
+                if (Clauses.Count == 1)
+                {
+                    k += "_";
+                }
+                return k;
+            }
+        }
+
+        public List<IClause<IN>> Clauses { get; set; }
+        public List<IN> PossibleLeadingTokens { get; set; }
+
         public string NonTerminalName { get; set; }
 
+        public bool ContainsSubRule
+        {
+            get
+            {               
+                if (Clauses != null && Clauses.Any())
+                {
+                    foreach(IClause<IN> clause in Clauses)
+                    {
+                        if (clause is GroupClause<IN>)
+                        {
+                            return true;
+                        }
+                        if (clause is ManyClause<IN> many)
+                        {
+                            if (many.Clause is GroupClause<IN>)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+        }
 
-        public OperationMetaData<IN> GetOperation(IN token = default(IN))
+        public bool IsSubRule { get; set; }
+        
+
+
+
+    public OperationMetaData<IN> GetOperation(IN token = default(IN))
         {
             if (IsExpressionRule)
             {
@@ -64,24 +112,7 @@ namespace sly.parser.syntax
             VisitorMethodsForOperation[operation.OperatorToken] = operation;
         }
 
-        public string Key
-        {
-
-            get
-            {
-                string k = Clauses
-                    .Select(c => c.ToString())
-                    .Aggregate<string>((c1, c2) => c1.ToString() + "_" + c2.ToString());
-                if (Clauses.Count == 1)
-                {
-                    k += "_";
-                }
-                return k;
-            }
-        }
-
-        public List<IClause<IN>> Clauses { get; set; }
-        public List<IN> PossibleLeadingTokens { get; set; }
+       
 
 
         public Rule()
@@ -89,6 +120,7 @@ namespace sly.parser.syntax
             Clauses = new List<IClause<IN>>();
             VisitorMethodsForOperation = new Dictionary<IN, OperationMetaData<IN>>();
             Visitor = null;
+            IsSubRule = false;
         }
 
         public bool MayBeEmpty { get

@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices.ComTypes;
 using jsonparser.JsonModel;
-
+using sly.parser.parser;
 
 namespace jsonparser
 {
@@ -128,11 +128,11 @@ namespace jsonparser
         }
 
 
-        [Production("listElements: value additionalValue*")]
-        public JSon listElements(JSon head, List<JSon> tail)
+        [Production("listElements: value (COMMA [d] value)*")]
+        public JSon listElements(JSon head, List<Group<JsonToken,JSon>> tail)
         {
             JList values = new JList(head);
-            values.AddRange(tail);
+            values.AddRange(tail.Select((Group<JsonToken,JSon> group) => group.Value(0)).ToList<JSon>());
             return values;
         }
 

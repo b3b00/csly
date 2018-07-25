@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using sly.parser.generator;
 using System.Reflection;
+using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace sly.parser.llparser
 {
@@ -19,7 +21,72 @@ namespace sly.parser.llparser
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
+            ComputeSubRules(configuration);
             InitializeStartingTokens(Configuration, startingNonTerminal);
+        }
+
+        public ParserConfiguration<IN, OUT> ComputeSubRules(ParserConfiguration<IN, OUT> configuration)
+        {
+           
+
+            List<NonTerminal<IN>> newNonTerms = new List<NonTerminal<IN>>();
+            foreach (var nonTerm in configuration.NonTerminals)
+            {                
+                foreach (var rule in nonTerm.Value.Rules)
+                {
+                    var newclauses = new List<IClause<IN>>();
+                    if (rule.ContainsSubRule)
+                    {
+                        foreach (IClause<IN> clause in rule.Clauses)
+                        {
+                            if (clause is GroupClause<IN> group)
+                            {
+                                NonTerminal<IN> newNonTerm = CreateSubRule(group);
+                                newNonTerms.Add(newNonTerm);
+                                NonTerminalClause<IN> newClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                newClause.IsGroup = true;
+                                newclauses.Add(newClause);
+                            }
+                            else if (clause is ManyClause<IN> many)
+                            {
+                                if (many.Clause is GroupClause<IN> manyGroup)
+                                {
+                                    NonTerminal<IN> newNonTerm = CreateSubRule(manyGroup);
+                                    newNonTerms.Add(newNonTerm);
+                                    var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                    newInnerNonTermClause.IsGroup = true;
+                                    many.Clause = newInnerNonTermClause;
+                                    newclauses.Add(many);
+                                }
+
+                            }
+                            else
+                            {
+                                newclauses.Add(clause);
+                            }
+                        }
+                        rule.Clauses.Clear();
+                        rule.Clauses.AddRange(newclauses);
+                    }
+                }
+            }
+            newNonTerms.ForEach(nonTerminal => configuration.AddNonTerminalIfNotExists(nonTerminal));
+            return configuration;
+        }
+
+        public NonTerminal<IN> CreateSubRule(GroupClause<IN> group)
+        {
+            // TODO create new dynamic non term
+            string subRuleNonTerminalName = "GROUP-"+group.Clauses.Select(c => c.ToString()).Aggregate<string>((string c1, string c2) => $"{c1.ToString()}-{c2.ToString()}");
+            NonTerminal<IN> nonTerminal = new NonTerminal<IN>(subRuleNonTerminalName);
+            // TODO create new dynamic rule for new non term, mark it as subrul
+            Rule<IN> subRule = new Rule<IN>();
+            subRule.Clauses = group.Clauses;
+            subRule.IsSubRule = true;
+            nonTerminal.Rules.Add(subRule);
+            nonTerminal.IsSubRule = true;
+
+            return nonTerminal;
         }
 
         #region STARTING_TOKENS
@@ -208,26 +275,44 @@ namespace sly.parser.llparser
                 }
             }
 
+            if (nonTerminalName == "rootGroup")
+            {
+                ;
+            }
+
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             result.IsError = isError;
             result.Errors = errors;
             result.EndingPosition = currentPosition;
             if (!isError)
-            {                
-                SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);                
+            {
+                SyntaxNode<IN> node = null;
+                if (rule.IsSubRule)
+                {                    
+                    node = new GroupSyntaxNode<IN>($"{nonTerminalName}__{rule.Key}", children);
+                }
+                else
+                {                 
+                    node = new SyntaxNode<IN>($"{nonTerminalName}__{rule.Key}", children);
+                }
                 node = ManageExpressionRules(rule, node);
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                 {
                     result.Root = children[0];
                 }
                 result.Root =  node;
-                result.IsEnded = currentPosition >= tokens.Count - 1
-                                || currentPosition == tokens.Count - 2 && tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                result.IsEnded = result.EndingPosition >= tokens.Count - 1
+                                || result.EndingPosition == tokens.Count - 2 && tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                if (result.IsEnded)
+                {
+                    ;
+                }
                 if (rule.IsExpressionRule)
                 {
 
                 }
             }
+
 
             return result;
         }
@@ -287,6 +372,8 @@ namespace sly.parser.llparser
 
         public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, NonTerminalClause<IN> nonTermClause, int currentPosition)
         {
+            int startPosition = currentPosition;
+            int endingPosition = 0;
             NonTerminal<IN> nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
             bool found = false;
             List<UnexpectedTokenSyntaxError<IN>> errors = new List<UnexpectedTokenSyntaxError<IN>>();
@@ -304,12 +391,12 @@ namespace sly.parser.llparser
             allAcceptableTokens = allAcceptableTokens.Distinct<IN>().ToList<IN>();
 
             List<Rule<IN>> rules = nt.Rules
-                .Where<Rule<IN>>(r => r.PossibleLeadingTokens.Contains(tokens[currentPosition].TokenID) || r.MayBeEmpty)
+                .Where<Rule<IN>>(r => r.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || r.MayBeEmpty)
                 .ToList<Rule<IN>>();
 
             if (rules.Count == 0)
             {
-                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],
+                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[startPosition],
                     allAcceptableTokens.ToArray<IN>()));
             }
 
@@ -317,16 +404,16 @@ namespace sly.parser.llparser
             SyntaxParseResult<IN> okResult = null;
             int greaterIndex = 0;
             bool allRulesInError = true;
-            while (!found && i < rules.Count)
+            while (i < rules.Count)
             {
                 Rule<IN> innerrule = rules[i];
-                SyntaxParseResult<IN> innerRuleRes = Parse(tokens, innerrule, currentPosition, nonTermClause.NonTerminalName);
-                if (!innerRuleRes.IsError && okResult == null)
+                SyntaxParseResult<IN> innerRuleRes = Parse(tokens, innerrule, startPosition, nonTermClause.NonTerminalName);
+                if (!innerRuleRes.IsError && okResult == null || (okResult != null && innerRuleRes.EndingPosition > okResult.EndingPosition))
                 {
                     okResult = innerRuleRes;
                     okResult.Errors = innerRuleRes.Errors;
                     found = true;
-                    currentPosition = innerRuleRes.EndingPosition;
+                    endingPosition = innerRuleRes.EndingPosition;
                 }
                 bool other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
                 if ((innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null &&

@@ -104,7 +104,22 @@ namespace sly.parser.syntax
         {
             this.Children.Add(child);
         }
-               
+
+        public virtual string Dump(string tab)
+        {
+            StringBuilder dump = new StringBuilder();
+
+            dump.AppendLine($"{tab}Node {Name} {{");
+            foreach (ISyntaxNode<IN> c in Children)
+            {
+                dump.AppendLine(c.Dump(tab + "\t"));
+            }
+
+            dump.AppendLine($"{tab}}}");
+
+            return dump.ToString();
+        }
+
 
     }
 }

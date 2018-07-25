@@ -3,9 +3,8 @@ using System.Text;
 namespace sly.parser.syntax
 {
 
-    public class ZeroOrMoreClause<T> : IClause<T>
+    public class ZeroOrMoreClause<T> : ManyClause<T>
     {
-        public IClause<T> Clause { get; set; }
         public ZeroOrMoreClause(IClause<T> clause)
         {
             Clause = clause;
@@ -16,7 +15,7 @@ namespace sly.parser.syntax
             return Clause.ToString() + "*";
         }
 
-        public bool MayBeEmpty()
+        public override bool MayBeEmpty()
         {
             return true;
         }
