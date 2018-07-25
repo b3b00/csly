@@ -444,6 +444,7 @@ namespace sly.lexer
                     ConsumeComment(r.Result, source);
                 }
             }
+            tokens.Add(new Token<IN>()); 
             return tokens;
 
         }
@@ -479,7 +480,6 @@ namespace sly.lexer
                 commentValue = source.Substring(LexerFsm.CurrentPosition, position - LexerFsm.CurrentPosition);
                 comment.Value = commentValue;
 
-                // TODO : compute new line and column
                 int newPosition = LexerFsm.CurrentPosition + commentValue.Length + MultiLineCommentEnd.Length;
 
                 var lines = EOLManager.GetLines(commentValue);

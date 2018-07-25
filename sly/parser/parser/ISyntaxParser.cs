@@ -12,7 +12,7 @@ namespace sly.parser
 
         SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null);
 
-        void Init(ParserConfiguration<IN, OUT> configurationn , string root);
+        void Init(ParserConfiguration<IN, OUT> configuration , string root);
 
     }
 }

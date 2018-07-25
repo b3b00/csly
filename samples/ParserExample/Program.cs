@@ -15,7 +15,7 @@ using sly.parser;
 using csly.whileLang.interpreter;
 using csly.whileLang.compiler;
 using sly.lexer.fsm;
-
+using sly.parser.syntax;
 
 namespace ParserExample
 {
@@ -356,9 +356,23 @@ namespace ParserExample
            
         }
 
+        static void TestRuleParser() {
+            Console.WriteLine("hum hum...");
+            RuleParser<EbnfToken> parserInstance = new RuleParser<EbnfToken>();
+            var builder = new ParserBuilder<EbnfToken,IClause<EbnfToken>>();
+            var r = builder.BuildParser(parserInstance,ParserType.LL_RECURSIVE_DESCENT,"rule");
+            //var conf = r.Result.Configuration;
+            //var clause = conf.NonTerminals["clause"];
+            //Console.WriteLine($"{r.IsError} {r.Result}");
+
+            var parser = r.Result;
+            var rule = parser.Parse("a ( b ) ","clauses" );
+            ;
+        }
+
         static void Main(string[] args)
         {
-            testErrors();
+            TestRuleParser();
            
             Console.WriteLine("so what ?");
 

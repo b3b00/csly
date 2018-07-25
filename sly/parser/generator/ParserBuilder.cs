@@ -32,7 +32,6 @@ namespace sly.parser.generator
         /// <returns></returns>
         public virtual BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType, string rootRule)
         {
-
             Parser<IN, OUT> parser = null;
             BuildResult<Parser<IN, OUT>> result = new BuildResult<Parser<IN, OUT>>();
             if (parserType == ParserType.LL_RECURSIVE_DESCENT)
@@ -59,15 +58,17 @@ namespace sly.parser.generator
                 
             }
             parser = result.Result;
-            var expressionResult = parser.BuildExpressionParser(result, rootRule);
-            if (expressionResult.IsError)
+            if (!result.IsError)
             {
-                result.AddErrors(expressionResult.Errors);
+                var expressionResult = parser.BuildExpressionParser(result, rootRule);
+                if (expressionResult.IsError)
+                {
+                    result.AddErrors(expressionResult.Errors);
+                }
+                result.Result.Configuration = expressionResult.Result;
+
+                result = CheckParser(result);
             }
-            result.Result.Configuration = expressionResult.Result;
-
-            result = CheckParser(result);
-
             return result;
         }
 
@@ -196,6 +197,9 @@ namespace sly.parser.generator
                 IN token = default(IN);                              
                 try
                 {
+
+                    
+
                     var tIn = typeof(IN);
                     bool b = Enum.TryParse<IN>(item, out token);
                     if (b)
@@ -281,7 +285,7 @@ namespace sly.parser.generator
                 }
                 if (!found)
                 {
-                    result.AddError(new ParserInitializationError(ErrorLevel.WARN, $"non terminal {nonTerminal.Name} is never used."));
+                    result.AddError(new ParserInitializationError(ErrorLevel.WARN, $"non terminal [{nonTerminal.Name}] is never used."));
                 }
             }
             return result;

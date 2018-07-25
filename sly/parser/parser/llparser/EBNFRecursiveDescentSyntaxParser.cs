@@ -16,6 +16,7 @@ namespace sly.parser.llparser
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
+            ComputeSubRules(configuration);
             InitializeStartingTokens(Configuration, startingNonTerminal);
         }
 
@@ -107,20 +108,7 @@ namespace sly.parser.llparser
             }
         }
 
-        private void InitStartingTokensWithOption(Rule<IN> rule, OptionClause<IN> optionClause,
-            Dictionary<string, NonTerminal<IN>> nonTerminals)
-        {
-            if (optionClause.Clause is TerminalClause<IN>)
-            {
-                TerminalClause<IN> term = optionClause.Clause as TerminalClause<IN>;
-                InitStartingTokensWithTerminal(rule, term);
-            }
-            else if (optionClause.Clause is NonTerminalClause<IN>)
-            {
-                NonTerminalClause<IN> nonterm = optionClause.Clause as NonTerminalClause<IN>;
-                InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
-            }
-        }
+      
 
         #endregion
 
@@ -173,6 +161,10 @@ namespace sly.parser.llparser
                             }
                             isError = isError || nonTerminalResult.IsError;
                         }
+                        else if (clause is GroupClause<IN> groupClause)
+                        {
+                            ;
+                        }
 
                         else if (clause is OneOrMoreClause<IN> || clause is ZeroOrMoreClause<IN>)
                         {
@@ -220,12 +212,25 @@ namespace sly.parser.llparser
             result.EndingPosition = currentPosition;
             if (!isError)
             {
-                SyntaxNode<IN> node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
-                node = ManageExpressionRules(rule, node);
-                result.Root = node;
-                result.IsEnded = currentPosition >= tokens.Count - 1
-                                 || currentPosition == tokens.Count - 2 &&
-                                 tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                SyntaxNode<IN> node = null;
+                if (rule.IsSubRule)
+                {
+                    node = new GroupSyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
+                    node = ManageExpressionRules(rule, node);
+                    result.Root = node;
+                    result.IsEnded = currentPosition >= tokens.Count - 1
+                                     || currentPosition == tokens.Count - 2 &&
+                                     tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                }
+                else
+                {
+                    node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
+                    node = ManageExpressionRules(rule, node);
+                    result.Root = node;
+                    result.IsEnded = currentPosition >= tokens.Count - 1
+                                     || currentPosition == tokens.Count - 2 &&
+                                     tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                }
             }
 
             return result;
@@ -252,9 +257,22 @@ namespace sly.parser.llparser
                     manyNode.IsManyTokens = true;
                     innerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
                 }
-                else if (innerClause is NonTerminalClause<IN>)
+                else if (innerClause is NonTerminalClause<IN> nonTerm)
                 {
-                    manyNode.IsManyValues = true;
+                    
+                    innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
+                    if (nonTerm.IsGroup)
+                    {
+                        manyNode.IsManyGroups = true;
+                    }
+                    else
+                    {
+                        manyNode.IsManyValues = true;
+                    }
+                }
+                else if (innerClause is GroupClause<IN>)
+                {
+                    manyNode.IsManyGroups = true;
                     innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
                 }
                 else

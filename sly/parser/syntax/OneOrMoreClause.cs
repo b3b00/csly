@@ -3,7 +3,7 @@ using System.Runtime.InteropServices.ComTypes;
 namespace sly.parser.syntax
 {
 
-    public class OneOrMoreClause<T> : IClause<T>
+    public class OneOrMoreClause<T> : ManyClause<T>
     {
         public IClause<T> Clause { get; set; }
         public OneOrMoreClause(IClause<T> clause)
@@ -17,7 +17,7 @@ namespace sly.parser.syntax
             return Clause.ToString()+"+";
         }
 
-        public bool MayBeEmpty()
+        public override bool MayBeEmpty()
         {
             return true;
         }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace sly.parser.syntax
 {
@@ -24,7 +25,14 @@ namespace sly.parser.syntax
 
         public override string ToString()
         {
-            return ExpectedToken.ToString();
+            StringBuilder b = new StringBuilder();
+            b.Append(ExpectedToken.ToString());
+            if (Discarded)
+            {
+                b.Append("[d]");
+            }
+            return b.ToString();
+            
         }
 
         public bool MayBeEmpty()

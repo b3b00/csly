@@ -18,12 +18,19 @@ namespace sly.parser.generator
         ONEORMORE = 4,
         [Lexeme("[ \\t]+",true)]
         WS = 5,    
-        [LexemeAttribute("^\\?")]
+        [Lexeme("^\\?")]
         OPTION = 6,
-        [LexemeAttribute("^\\[d\\]")]
+        [Lexeme("^\\[d\\]")]
         DISCARD = 7,
+
+        [Lexeme("^\\(")]
+        LPAREN = 8,
+
+        [Lexeme("^\\)")]
+        RPAREN = 9,
+
         [Lexeme("[\\n\\r]+",true,true)]
-        EOL = 8
+        EOL = 10
 
     }
 

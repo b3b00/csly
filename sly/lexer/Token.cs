@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace sly.lexer
 {
@@ -10,11 +11,6 @@ namespace sly.lexer
     }
     public class Token<T>
     {
-
-
-        private static T defTok;
-
-
         public char StringDelimiter = '"';
 
 
@@ -38,8 +34,8 @@ namespace sly.lexer
 
         public static T DefaultToken
         {
-            get { return defTok; }
-            set { defTok = value; }
+            get { return DefTok; }
+            set { DefTok = value; }
         }
 
 
@@ -70,13 +66,6 @@ namespace sly.lexer
          
 
 
-        public bool IsEndOfStream
-        {
-            get
-            {
-                return TokenID.Equals(DefaultToken);
-            }
-        }
 
        
 
@@ -126,7 +115,9 @@ namespace sly.lexer
 
 
         public bool End { get; set; }
+        public static T DefTok { get; set; }
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return $"{TokenID} [{Value}] @{Position}";

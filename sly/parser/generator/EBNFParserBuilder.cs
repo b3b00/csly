@@ -37,6 +37,7 @@ namespace sly.parser.generator
 
             Parser<EbnfToken,GrammarNode<IN>> grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
 
+
             BuildResult<Parser<IN, OUT>> result = new BuildResult<Parser<IN, OUT>>();
 
             ParserConfiguration<IN, OUT> configuration = null;

@@ -23,7 +23,6 @@ namespace csly.whileLang.compiler
 
         public bool SetVariableType(string name, WhileType variableType)
         {
-            // TODO search upper scope first           
             return CurrentScope.SetVariableType(name,variableType);
         }
 

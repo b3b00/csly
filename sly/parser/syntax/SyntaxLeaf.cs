@@ -9,10 +9,16 @@ namespace sly.parser.syntax
     {
 
         public Token<IN> Token {get; set;}
+        public string Name => Token.TokenID.ToString();
 
         public SyntaxLeaf(Token<IN> token)
         {
             this.Token = token;
+        }
+
+        public string Dump(string tab)
+        {
+            return $"{tab}TOKEN[{Token}]";
         }
     }
 }
