@@ -59,5 +59,10 @@ namespace sly.parser.parser
         public static implicit operator Token<IN>(GroupItem<IN,OUT> item)   {
             return item.Match((string name, Token<IN> token) => item.Token, (string name, OUT value) => default(Token<IN>));
         }
+
+        public string ToString()
+        {
+            return IsValue ? ((OUT)this).ToString() : ((Token<IN>)this).Value;
+        }
     }
 }
