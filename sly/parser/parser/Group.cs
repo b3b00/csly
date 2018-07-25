@@ -39,9 +39,37 @@ namespace sly.parser.parser
             return ItemsByName.ContainsKey(name) ? ItemsByName[name].Token : null;
         }
 
+        public void Add(string name, Token<IN> token)
+        {
+            var groupItem = new GroupItem<IN, OUT>(name,token);
+            Items.Add(groupItem);
+            ItemsByName[name] = groupItem;
+        }
+
+        public void Add(string name, OUT value)
+        {
+            var groupItem = new GroupItem<IN, OUT>(name, value);
+            Items.Add(groupItem);
+            ItemsByName[name] = groupItem;
+        }
 
 
-  
+        public string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+
+            builder.Append("GROUP(");
+            foreach(GroupItem<IN,OUT> item in Items)
+            {
+                builder.Append(item.ToString());
+                builder.Append(",");
+            }
+            builder.Append(")");
+            return builder.ToString();
+        }
+
+
+
 
 
     }

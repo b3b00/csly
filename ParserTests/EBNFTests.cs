@@ -117,24 +117,24 @@ namespace ParserTests
     {
 
         [Production("rootGroup : A ( COMMA A ) ")]
-        public string root(Token<GroupTestToken> a, List<Group<GroupTestToken, string>> groups)
+        public string root(Token<GroupTestToken> a, Group<GroupTestToken, string> group)
         {
             StringBuilder r = new StringBuilder();
             r.Append($"R(");
             r.Append(a.Value);
-            groups.ForEach((Group<GroupTestToken, string> group) =>
+            r.Append("; {");
+            group.Items.ForEach((GroupItem<GroupTestToken, string> item) =>
             {
-                group.Items.ForEach((GroupItem<GroupTestToken, string> item) =>
-                {
-                    r.Append(",");
-                    r.Append(item.Value);
-                });
+                r.Append(",");
+                r.Append(item.IsValue ? item.Value : item.Token.Value);
             });
+            r.Append("}");
+            r.Append(")");
             return r.ToString();
         }
 
-        [Production("root2 : A ( COMMA [d] A ) ")]
-        public string root2(Token<GroupTestToken> a, List<Group<GroupTestToken, string>> groups)
+        [Production("rootMany : A ( COMMA [d] A )* ")]
+        public string rootMany(Token<GroupTestToken> a, List<Group<GroupTestToken, string>> groups)
         {
             StringBuilder r = new StringBuilder();
             r.Append($"R(");
@@ -144,9 +144,10 @@ namespace ParserTests
                 group.Items.ForEach((GroupItem<GroupTestToken, string> item) =>
                 {
                     r.Append(",");
-                    r.Append(item.Value);
+                    r.Append(item.Token.Value);
                 });
             });
+            r.Append(")");
             return r.ToString();
         }
 
@@ -501,16 +502,22 @@ public class EBNFTests
             var buildResult = BuildGroupParser();
             Assert.False(buildResult.IsError);
             var groupParser = buildResult.Result;
-            var tokens = groupParser.Lexer.Tokenize("a , a");
-            var syntaxResult = groupParser.SyntaxParser.Parse(tokens.ToList<Token<GroupTestToken>>());
-            Assert.False(syntaxResult.IsError);
-            string dump = syntaxResult.Root.Dump("");
-            ;
-            // var optionParser = buildResult.Result;
+            var res = groupParser.Parse("a ,a");
 
-            // var result = optionParser.Parse("a , a", "root");
-            // Assert.False(result.IsError);
-            // Assert.Equal("R(a,B(b),c)", result.Result);
+            Assert.False(res.IsError);
+            Assert.Equal("R(a; {,,,a})", res.Result); 
+        }
+
+        [Fact]
+        public void TestGroupSyntaxManyParser()
+        {
+            var buildResult = BuildGroupParser();
+            Assert.False(buildResult.IsError);
+            var groupParser = buildResult.Result;
+            var res = groupParser.Parse("a ,a , a ,a,a", "rootMany");
+
+            Assert.False(res.IsError);
+            Assert.Equal("R(a,a,a,a,a)", res.Result); // rootMany
         }
 
         private void AssertString(JObject obj, string key, string value)

@@ -11,8 +11,10 @@ namespace sly.parser.syntax
 
         public bool IsManyTokens { get; set; }
         
-        public bool IsManyValues { get { return !IsManyTokens; } set { IsManyTokens = !value; }}
-        
+        public bool IsManyValues { get; set; }
+
+        public bool IsManyGroups { get; set; }
+
         public ManySyntaxNode(string name) : base(name, new List<ISyntaxNode<IN>>())
         {
 

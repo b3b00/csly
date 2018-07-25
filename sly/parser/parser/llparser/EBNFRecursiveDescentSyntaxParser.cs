@@ -16,6 +16,7 @@ namespace sly.parser.llparser
         {
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
+            ComputeSubRules(configuration);
             InitializeStartingTokens(Configuration, startingNonTerminal);
         }
 
@@ -256,9 +257,22 @@ namespace sly.parser.llparser
                     manyNode.IsManyTokens = true;
                     innerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
                 }
-                else if (innerClause is NonTerminalClause<IN>)
+                else if (innerClause is NonTerminalClause<IN> nonTerm)
                 {
-                    manyNode.IsManyValues = true;
+                    
+                    innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
+                    if (nonTerm.IsGroup)
+                    {
+                        manyNode.IsManyGroups = true;
+                    }
+                    else
+                    {
+                        manyNode.IsManyValues = true;
+                    }
+                }
+                else if (innerClause is GroupClause<IN>)
+                {
+                    manyNode.IsManyGroups = true;
                     innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
                 }
                 else

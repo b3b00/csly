@@ -27,14 +27,11 @@ namespace sly.parser.llparser
 
         public ParserConfiguration<IN, OUT> ComputeSubRules(ParserConfiguration<IN, OUT> configuration)
         {
-            if (configuration.StartingRule == "rootGroup")
-            {
-                ;
-            }
+           
 
             List<NonTerminal<IN>> newNonTerms = new List<NonTerminal<IN>>();
             foreach (var nonTerm in configuration.NonTerminals)
-            {
+            {                
                 foreach (var rule in nonTerm.Value.Rules)
                 {
                     var newclauses = new List<IClause<IN>>();
@@ -46,7 +43,8 @@ namespace sly.parser.llparser
                             {
                                 NonTerminal<IN> newNonTerm = CreateSubRule(group);
                                 newNonTerms.Add(newNonTerm);
-                                IClause<IN> newClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                NonTerminalClause<IN> newClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                newClause.IsGroup = true;
                                 newclauses.Add(newClause);
                             }
                             else if (clause is ManyClause<IN> many)
@@ -55,7 +53,9 @@ namespace sly.parser.llparser
                                 {
                                     NonTerminal<IN> newNonTerm = CreateSubRule(manyGroup);
                                     newNonTerms.Add(newNonTerm);
-                                    many.Clause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                    var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                    newInnerNonTermClause.IsGroup = true;
+                                    many.Clause = newInnerNonTermClause;
                                     newclauses.Add(many);
                                 }
 

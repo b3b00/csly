@@ -49,7 +49,7 @@ namespace sly.parser.syntax
         public bool ContainsSubRule
         {
             get
-            {
+            {               
                 if (Clauses != null && Clauses.Any())
                 {
                     foreach(IClause<IN> clause in Clauses)
@@ -57,6 +57,13 @@ namespace sly.parser.syntax
                         if (clause is GroupClause<IN>)
                         {
                             return true;
+                        }
+                        if (clause is ManyClause<IN> many)
+                        {
+                            if (many.Clause is GroupClause<IN>)
+                            {
+                                return true;
+                            }
                         }
                     }
                 }
