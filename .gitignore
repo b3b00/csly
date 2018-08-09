@@ -32,3 +32,8 @@ sly.xml
 sly_coverage.xml
 ParserTests/lcov.info
 ParserTests/lcov.info.info
+
+#coverage and such
+coverage.json
+ruleset1.ruleset
+opencov.bat
