@@ -101,6 +101,12 @@ namespace sly.parser.generator
             return new ZeroOrMoreClause<IN>(clauses);
         }
 
+        [Production("clause : LPAREN  groupclauses RPAREN OPTION ")]
+        public IClause<IN> GroupOptional(Token<EbnfToken> discardLeft, GroupClause<IN> group, Token<EbnfToken> discardRight, Token<EbnfToken> option)
+        {
+            return new OptionClause<IN>(group);
+        }
+
 
         [Production("groupclauses : groupclause groupclauses")]
 

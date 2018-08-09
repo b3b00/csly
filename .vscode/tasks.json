@@ -1,13 +1,15 @@
 {
-    "version": "0.1.0",
-    "command": "dotnet",
-    "isShellCommand": true,
+    "version": "2.0.0",
+    "command": "dotnet",    
     "args": [],
     "tasks": [
         {
-            "taskName": "build",
+            "label": "build",
             "command": "dotnet",
-            "isBuildCommand": true,
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
             "args": [
                 "build",
                 "${workspaceFolder}/ParserTests/ParserTests.csproj"
@@ -15,9 +17,12 @@
             "problemMatcher": "$msCompile",
         },
         {
-            "taskName": "unit tests",
+            "label": "unit tests",
             "command": "dotnet",
-            "isTestCommand": true,
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
             "args": [
                 "test",
                 "${workspaceFolder}/ParserTests/ParserTests.csproj"
@@ -25,9 +30,12 @@
             "problemMatcher": "$msCompile",                        
         },
         {
-            "taskName": "test with coverage",
+            "label": "test with coverage",
             "command": "dotnet",            
-            "isTestCommand": true,
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
             "args": [
                 "test",
                 "/p:CollectCoverage=true",

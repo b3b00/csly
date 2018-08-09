@@ -14,10 +14,6 @@ namespace sly.parser.llparser
 
         public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal) : base(configuration, startingNonTerminal)
         {
-            Configuration = configuration;
-            StartingNonTerminal = startingNonTerminal;
-            ComputeSubRules(configuration);
-            InitializeStartingTokens(Configuration, startingNonTerminal);
         }
 
         #region STARTING_TOKENS
@@ -371,7 +367,7 @@ namespace sly.parser.llparser
             else if (innerClause is NonTerminalClause<IN>)
             {
                 innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
-            }
+            }          
             else
             {
                 throw new NotImplementedException("unable to apply repeater to " + innerClause.GetType().Name);
@@ -402,6 +398,8 @@ namespace sly.parser.llparser
             }
             else
             {
+                ISyntaxNode<IN> node = innerResult.Root;
+                
                 List<ISyntaxNode<IN>> children = new List<ISyntaxNode<IN>>() { innerResult.Root };
                 result.Root = new OptionSyntaxNode<IN>(rule.NonTerminalName + "__" + rule.Key, children, rule.GetVisitor());
                 result.EndingPosition = innerResult.EndingPosition;

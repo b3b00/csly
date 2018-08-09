@@ -60,6 +60,19 @@ namespace sly.parser.llparser
                                 }
 
                             }
+                            else if (clause is OptionClause<IN> option)
+                            {
+                                if (option.Clause is GroupClause<IN> optionGroup)
+                                {
+                                    NonTerminal<IN> newNonTerm = CreateSubRule(optionGroup);
+                                    newNonTerms.Add(newNonTerm);
+                                    var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                    newInnerNonTermClause.IsGroup = true;
+                                    option.Clause = newInnerNonTermClause;
+                                    newclauses.Add(option);
+                                }
+
+                            }
                             else
                             {
                                 newclauses.Add(clause);

@@ -89,6 +89,9 @@ namespace sly.parser.generator
                 {
                     return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
                 }
+                else if (child is GroupSyntaxNode<IN> group) {
+                    return SyntaxVisitorResult<IN, OUT>.NewOptionGroupSome(innerResult.GroupResult);
+                }
                 else
                 {
                     return SyntaxVisitorResult<IN, OUT>.NewOptionSome(innerResult.ValueResult);
@@ -102,13 +105,15 @@ namespace sly.parser.generator
 
             SyntaxVisitorResult<IN, OUT> result = SyntaxVisitorResult<IN, OUT>.NoneResult();
             if (node.Visitor != null || node.IsByPassNode)
-            {
+            {               
                 List<object> args = new List<object>();
 
                 foreach (ISyntaxNode<IN> n in node.Children)
                 {
                     SyntaxVisitorResult<IN, OUT> v = Visit(n);
-
+if (node.Name == "root__a_B") {
+    ;
+}
 
                     if (v.IsToken)
                     {
@@ -124,6 +129,10 @@ namespace sly.parser.generator
                     else if (v.IsOption)
                     {
                         args.Add(v.OptionResult);
+                    }
+                    else if (v.IsOPtionGroup)
+                    {
+                        args.Add(v.OptionGroupResult);
                     }
                     else if (v.IsGroup)
                     {
