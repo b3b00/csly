@@ -14,6 +14,7 @@ namespace sly.lexer
         public char StringDelimiter = '"';
 
 
+
         public TokenPosition Position { get; set; }
 
         public int PositionInTokenFlow { get; set; }
@@ -21,6 +22,8 @@ namespace sly.lexer
         public bool IsComment { get; set; }
 
         public bool Discarded { get; set; } = false;
+
+        public bool IsEOS{get; set;} = false;
 
         public CommentType CommentType {get; set;} = CommentType.No;
 
@@ -52,6 +55,7 @@ namespace sly.lexer
 
         public Token()
         {
+            IsEOS = true;
             End = true;
             TokenID = DefaultToken;
             Position = new TokenPosition(0, 0, 0);

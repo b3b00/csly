@@ -17,7 +17,7 @@ namespace sly.lexer
 
         public override string ToString()
         {
-            return $"line {Line}, column {Column} position{Index}";
+            return $"line {Line}, column {Column}";
         }
     }
 }

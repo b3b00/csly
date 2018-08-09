@@ -25,10 +25,11 @@ namespace sly.lexer
         public IEnumerable<Token<T>> Tokenize(string source)
         {
             int currentIndex = 0;
-            List<Token<T>> tokens = new List<Token<T>>();
+            //List<Token<T>> tokens = new List<Token<T>>();
             int currentLine = 1;
             int currentColumn = 0;
             int currentLineStartIndex = 0;
+             Token<T>  previousToken = null;
 
             TokenDefinition<T> defEol = tokenDefinitions.ToList<TokenDefinition<T>>().Find(t => t.IsEndOfLine);
             T eol = defEol.TokenID;
@@ -66,8 +67,8 @@ namespace sly.lexer
                     }
                     if (!matchedDefinition.IsIgnored)
                     {                      
-
-                        yield return new Token<T>(matchedDefinition.TokenID, value, new TokenPosition(currentIndex, currentLine, currentColumn));
+                        previousToken = new Token<T>(matchedDefinition.TokenID, value, new TokenPosition(currentIndex, currentLine, currentColumn));
+                        yield return previousToken;
                     }                    
                     currentIndex += matchLength;
 
@@ -76,9 +77,11 @@ namespace sly.lexer
                 }
             }
 
+            var eos  = new Token<T>();
+            eos.Position = new TokenPosition(previousToken.Position.Index+1,previousToken.Position.Line,previousToken.Position.Column+previousToken.Value.Length);
             
 
-            yield return new Token<T>();
+            yield return eos;
         }
     }
 }
