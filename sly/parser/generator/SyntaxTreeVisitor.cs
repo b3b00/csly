@@ -26,11 +26,14 @@ namespace sly.parser.generator
 
         public ValueOption<OUT> OptionResult;
 
+        public ValueOption<Group<IN,OUT>> OptionGroupResult;
+
         public Group<IN, OUT> GroupResult;
 
         private bool isTok;
 
-        public bool IsOption => OptionResult != null;
+        public bool IsOption => OptionResult != null ;
+        public bool IsOPtionGroup =>  OptionGroupResult != null;
 
         public bool IsToken => isTok;
 
@@ -92,6 +95,15 @@ namespace sly.parser.generator
             res.OptionResult = Some<OUT>(value);
             return res;
         }
+
+         public static SyntaxVisitorResult<IN, OUT> NewOptionGroupSome(Group<IN,OUT> group)
+        {
+            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            res.OptionGroupResult = Some<Group<IN,OUT>>(group);
+            return res;
+        }
+
+        
 
         public static SyntaxVisitorResult<IN, OUT> NewOptionNone()
         {

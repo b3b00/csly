@@ -60,6 +60,19 @@ namespace sly.parser.llparser
                                 }
 
                             }
+                            else if (clause is OptionClause<IN> option)
+                            {
+                                if (option.Clause is GroupClause<IN> optionGroup)
+                                {
+                                    NonTerminal<IN> newNonTerm = CreateSubRule(optionGroup);
+                                    newNonTerms.Add(newNonTerm);
+                                    var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                    newInnerNonTermClause.IsGroup = true;
+                                    option.Clause = newInnerNonTermClause;
+                                    newclauses.Add(option);
+                                }
+
+                            }
                             else
                             {
                                 newclauses.Add(clause);
@@ -375,7 +388,6 @@ namespace sly.parser.llparser
             int startPosition = currentPosition;
             int endingPosition = 0;
             NonTerminal<IN> nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
-            bool found = false;
             List<UnexpectedTokenSyntaxError<IN>> errors = new List<UnexpectedTokenSyntaxError<IN>>();
 
             int i = 0;
@@ -412,7 +424,6 @@ namespace sly.parser.llparser
                 {
                     okResult = innerRuleRes;
                     okResult.Errors = innerRuleRes.Errors;
-                    found = true;
                     endingPosition = innerRuleRes.EndingPosition;
                 }
                 bool other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;

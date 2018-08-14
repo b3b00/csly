@@ -60,10 +60,11 @@ namespace sly.parser.syntax
                         }
                         if (clause is ManyClause<IN> many)
                         {
-                            if (many.Clause is GroupClause<IN>)
-                            {
-                                return true;
-                            }
+                            return many.Clause is GroupClause<IN>;
+                        }
+                        if (clause is OptionClause<IN> option)
+                        {
+                            return option.Clause is GroupClause<IN>;
                         }
                     }
                 }

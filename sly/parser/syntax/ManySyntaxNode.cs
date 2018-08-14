@@ -1,6 +1,7 @@
 using sly.parser.syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace sly.parser.syntax
@@ -26,6 +27,7 @@ namespace sly.parser.syntax
             Children.Add(child);
         }
 
+[ExcludeFromCodeCoverage]
         public override string Dump(string tab)
         {
             StringBuilder dump = new StringBuilder();

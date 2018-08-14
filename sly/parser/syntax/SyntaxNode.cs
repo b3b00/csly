@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
-
+using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax
 {
@@ -95,16 +95,17 @@ namespace sly.parser.syntax
         
       
 
-        public void AddChildren(List<ISyntaxNode<IN>> children)
-        {
-            this.Children.AddRange(children);
-        }
+        // public void AddChildren(List<ISyntaxNode<IN>> children)
+        // {
+        //     this.Children.AddRange(children);
+        // }
 
-        public void AddChild(ISyntaxNode<IN> child)
-        {
-            this.Children.Add(child);
-        }
+        // public void AddChild(ISyntaxNode<IN> child)
+        // {
+        //     this.Children.Add(child);
+        // }
 
+[ExcludeFromCodeCoverage]
         public virtual string Dump(string tab)
         {
             StringBuilder dump = new StringBuilder();

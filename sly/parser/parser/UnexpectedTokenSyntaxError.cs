@@ -33,7 +33,13 @@ namespace sly.parser
             get
             {
                 StringBuilder message = new StringBuilder();
-                message.Append($"unexpected \"{UnexpectedToken.Value}\" ({UnexpectedToken.TokenID}) at {UnexpectedToken.Position}.");
+                if (!UnexpectedToken.IsEOS) {
+                message.Append($"unexpected \"{UnexpectedToken.Value}\" ({UnexpectedToken.TokenID}) ");
+                }
+                else {
+                    message.Append("unexpected end of stream. ");
+                }
+                message.Append($"at {UnexpectedToken.Position}.");
                 if (ExpectedTokens != null && ExpectedTokens.Any())
                 {
                    
@@ -46,6 +52,7 @@ namespace sly.parser
                         
                     }
                 }
+                
                 return message.ToString();
             }
         }
@@ -53,6 +60,22 @@ namespace sly.parser
         public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, params T[] expectedTokens) 
         {           
             this.UnexpectedToken = unexpectedToken;
+            if (expectedTokens != null)
+            {
+                this.ExpectedTokens = new List<T>();
+                this.ExpectedTokens.AddRange(expectedTokens);
+            }
+            else
+            {
+                this.ExpectedTokens = null;
+            }
+
+        }
+
+        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, int line, int column, params T[] expectedTokens) 
+        {           
+            this.UnexpectedToken = unexpectedToken;
+            this.UnexpectedToken.Position = new TokenPosition(-1,line,column);
             if (expectedTokens != null)
             {
                 this.ExpectedTokens = new List<T>();

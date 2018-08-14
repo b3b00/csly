@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using sly.lexer;
+using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.parser
 {
@@ -60,9 +61,7 @@ namespace sly.parser.parser
             return item.Match((string name, Token<IN> token) => item.Token, (string name, OUT value) => default(Token<IN>));
         }
 
-        public string ToString()
-        {
-            return IsValue ? ((OUT)this).ToString() : ((Token<IN>)this).Value;
-        }
+        [ExcludeFromCodeCoverage]
+        public override string ToString() => IsValue ? ((OUT)this).ToString() : ((Token<IN>)this).Value;
     }
 }

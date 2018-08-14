@@ -94,8 +94,9 @@ namespace ParserTests
             UnexpectedTokenSyntaxError<JsonToken> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
 
             Assert.Equal((JsonToken)0, error?.UnexpectedToken.TokenID);
-            Assert.Equal(0, error?.Line);
-            Assert.Equal(0, error?.Column);
+            Assert.True(error.ErrorMessage.Contains("end of stream"));
+            Assert.Equal(1, error?.Line);
+            Assert.Equal(2, error?.Column);
         }
 
         [Fact]
@@ -116,8 +117,9 @@ namespace ParserTests
             UnexpectedTokenSyntaxError<JsonTokenGeneric> error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonTokenGeneric>;
 
             Assert.Equal((JsonTokenGeneric)0, error?.UnexpectedToken.TokenID);
+             Assert.True(error.ErrorMessage.Contains("end of stream"));
             Assert.Equal(0, error?.Line);
-            Assert.Equal(0, error?.Column);
+            Assert.Equal(1, error?.Column);
         }
 
     }

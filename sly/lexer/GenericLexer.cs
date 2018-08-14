@@ -444,7 +444,10 @@ namespace sly.lexer
                     ConsumeComment(r.Result, source);
                 }
             }
-            tokens.Add(new Token<IN>()); 
+            var eos  = new Token<IN>();
+            var prev = tokens.Last();
+            eos.Position = new TokenPosition(prev.Position.Index+1,prev.Position.Line,prev.Position.Column+prev.Value.Length);
+            tokens.Add(eos); 
             return tokens;
 
         }

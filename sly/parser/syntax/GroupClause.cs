@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax
 {
@@ -15,16 +16,11 @@ namespace sly.parser.syntax
             Clauses = new List<IClause<T>>() {clause};
         }
 
-        public GroupClause(List<IClause<T>> clauses)
-        {
-            Clauses = clauses;
-        }
-
         public void AddRange(GroupClause<T> clauses) {
             Clauses.AddRange(clauses.Clauses);
         }
 
-
+        [ExcludeFromCodeCoverage]
         public bool MayBeEmpty()
         {
             return true;

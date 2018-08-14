@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using sly.lexer;
 
@@ -54,7 +55,8 @@ namespace sly.parser.parser
         }
 
 
-        public string ToString()
+        [ExcludeFromCodeCoverage]
+        public override  string ToString()
         {
             StringBuilder builder = new StringBuilder();
 

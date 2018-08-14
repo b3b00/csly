@@ -5,7 +5,6 @@ namespace sly.parser.syntax
 
     public class OneOrMoreClause<T> : ManyClause<T>
     {
-        public IClause<T> Clause { get; set; }
         public OneOrMoreClause(IClause<T> clause)
         {
             Clause = clause;
