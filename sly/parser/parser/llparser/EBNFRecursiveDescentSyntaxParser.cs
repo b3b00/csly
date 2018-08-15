@@ -157,11 +157,6 @@ namespace sly.parser.llparser
                             }
                             isError = isError || nonTerminalResult.IsError;
                         }
-                        else if (clause is GroupClause<IN> groupClause)
-                        {
-                            ;
-                        }
-
                         else if (clause is OneOrMoreClause<IN> || clause is ZeroOrMoreClause<IN>)
                         {
                             SyntaxParseResult<IN> manyResult = null;

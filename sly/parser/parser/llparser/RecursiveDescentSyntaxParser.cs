@@ -288,11 +288,6 @@ namespace sly.parser.llparser
                 }
             }
 
-            if (nonTerminalName == "rootGroup")
-            {
-                ;
-            }
-
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             result.IsError = isError;
             result.Errors = errors;
