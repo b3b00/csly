@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <Description>#LY is a parser generator halfway between parser combinators and parser generator like ANTLR</Description>
     <Authors>b3b00</Authors>
     <version>2.2.1</version>
@@ -14,7 +14,7 @@
     </DocumentationFile>
     <LangVersion>7</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netcoreapp2.0|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
     <LangVersion>7</LangVersion>
   </PropertyGroup>
   <ItemGroup>
