@@ -11,9 +11,9 @@ environment:
   codecovToken:
     secure: tDNSMb2HRVQsJEgwVvuqY02+qgaKI3bw0LHSqplQKSPSRJNEkdCVnX352HoSht5t
 build_script:
-- ps: "dotnet --info\nAdd-AppveyorMessage \"build started\"\nWrite-Host \"restoring nugets\"\ndotnet restore\nAdd-AppveyorMessage \"nugets restored\"\nWrite-Host \"building solution (Release)\"\ndotnet build -c Release\nAdd-AppveyorMessage \"dotnet build success\"\nWrite-Host \"running XUnit tests and coverage\"\n\nOpenCover.Console.exe -excludebyattribute:*.ExcludeFromCoverage* -register:user -target:\"c:\\Program Files\\dotnet\\dotnet.exe\" -targetargs:\"test -f netcoreapp2.0 --logger:trx;LogFileName=results.trx /p:DebugType=full ParserTests/ParserTests.csproj\"  -output:\".\\sly_coverage.xml\" -oldStyle -filter:\"+[sly*]* -[ParserTests*]* -[samples*]*\"\ncodecov -t 0777b110-895e-466f-ad53-a0e04860c4ee -f sly_coverage.xml /p:DebugType=full \n\nAdd-AppveyorMessage \"xunit tests done\"\nWrite-Host \"packing nuget\"\ndotnet pack -c Release\nAdd-AppveyorMessage \"sly nuget packaged\""
+- ps: "dotnet --info\nAdd-AppveyorMessage \"build started\"\nWrite-Host \"restoring nugets\"\ndotnet restore\nAdd-AppveyorMessage \"nugets restored\"\nWrite-Host \"building solution (Release)\"\ndotnet build -c Release\nAdd-AppveyorMessage \"dotnet build success\"\nWrite-Host \"running XUnit tests and coverage\"\n\nOpenCover.Console.exe -excludebyattribute:*.ExcludeFromCoverage* -register:user -target:\"c:\\Program Files\\dotnet\\dotnet.exe\" -targetargs:\"test --logger:trx;LogFileName=results.trx /p:DebugType=full ParserTests/ParserTests.csproj\"  -output:\".\\sly_coverage.xml\" -oldStyle -filter:\"+[sly*]* -[ParserTests*]* -[samples*]*\"\ncodecov -t 0777b110-895e-466f-ad53-a0e04860c4ee -f sly_coverage.xml /p:DebugType=full \n\nAdd-AppveyorMessage \"xunit tests done\"\nWrite-Host \"packing nuget\"\ndotnet pack -c Release\nAdd-AppveyorMessage \"sly nuget packaged\""
 test_script:
-- ps: dotnet test -f netcoreapp2.0 ParserTests/ParserTests.csproj
+- ps: dotnet test ParserTests/ParserTests.csproj
 artifacts:
 - path: sly/bin/release/*
   name: sly
