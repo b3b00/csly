@@ -114,8 +114,8 @@ namespace csly.whileLang.parser
         #endregion
 
         #region NUMERIC OPERATIONS
-        [Operation((int)WhileTokenGeneric.PLUS, 2, Associativity.Right, 10)]
-        [Operation((int)WhileTokenGeneric.MINUS, 2, Associativity.Right, 10)]
+        [Operation((int)WhileTokenGeneric.PLUS, Affix.InFix, Associativity.Right, 10)]
+        [Operation((int)WhileTokenGeneric.MINUS, Affix.InFix, Associativity.Right, 10)]
         public WhileAST binaryTermNumericExpression(WhileAST left, Token<WhileTokenGeneric> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.ADD;
@@ -141,8 +141,8 @@ namespace csly.whileLang.parser
             return operation;
         }
 
-        [Operation((int)WhileTokenGeneric.TIMES, 2, Associativity.Right, 50)]
-        [Operation((int)WhileTokenGeneric.DIVIDE, 2, Associativity.Right, 50)]
+        [Operation((int)WhileTokenGeneric.TIMES, Affix.InFix, Associativity.Right, 50)]
+        [Operation((int)WhileTokenGeneric.DIVIDE, Affix.InFix, Associativity.Right, 50)]
         public WhileAST binaryFactorNumericExpression(WhileAST left, Token<WhileTokenGeneric> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.MULTIPLY;
@@ -168,7 +168,7 @@ namespace csly.whileLang.parser
             return operation;
         }
 
-        [Operation((int)WhileTokenGeneric.MINUS, 1, Associativity.Right, 100)]
+        [Operation((int)WhileTokenGeneric.MINUS, Affix.PreFix, Associativity.Right, 100)]
         public WhileAST unaryNumericExpression(Token<WhileTokenGeneric> operation, WhileAST value)
         {
             return new Neg(value as Expression);
@@ -181,7 +181,7 @@ namespace csly.whileLang.parser
 
         #region BOOLEAN OPERATIONS
 
-        [Operation((int)WhileTokenGeneric.OR, 2, Associativity.Right, 10)]
+        [Operation((int)WhileTokenGeneric.OR, Affix.InFix, Associativity.Right, 10)]
         public WhileAST binaryOrExpression(WhileAST left, Token<WhileTokenGeneric> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.OR;
@@ -191,7 +191,7 @@ namespace csly.whileLang.parser
             return operation;
         }
 
-        [Operation((int)WhileTokenGeneric.AND, 2, Associativity.Right, 50)]
+        [Operation((int)WhileTokenGeneric.AND, Affix.InFix, Associativity.Right, 50)]
         public WhileAST binaryAndExpression(WhileAST left, Token<WhileTokenGeneric> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.AND;
@@ -201,7 +201,7 @@ namespace csly.whileLang.parser
             return operation;
         }
 
-        [Operation((int)WhileTokenGeneric.NOT, 1, Associativity.Right, 100)]
+        [Operation((int)WhileTokenGeneric.NOT, Affix.PreFix, Associativity.Right, 100)]
         public WhileAST binaryOrExpression(Token<WhileTokenGeneric> operatorToken, WhileAST value)
         {
 
@@ -211,10 +211,10 @@ namespace csly.whileLang.parser
 
         #region COMPARISON OPERATIONS
 
-        [Operation((int)WhileTokenGeneric.LESSER, 2, Associativity.Right, 50)]
-        [Operation((int)WhileTokenGeneric.GREATER, 2, Associativity.Right, 50)]
-        [Operation((int)WhileTokenGeneric.EQUALS, 2, Associativity.Right, 50)]
-        [Operation((int)WhileTokenGeneric.DIFFERENT, 2, Associativity.Right, 50)]
+        [Operation((int)WhileTokenGeneric.LESSER, Affix.InFix, Associativity.Right, 50)]
+        [Operation((int)WhileTokenGeneric.GREATER, Affix.InFix, Associativity.Right, 50)]
+        [Operation((int)WhileTokenGeneric.EQUALS, Affix.InFix, Associativity.Right, 50)]
+        [Operation((int)WhileTokenGeneric.DIFFERENT, Affix.InFix, Associativity.Right, 50)]
         public WhileAST binaryComparisonExpression(WhileAST left, Token<WhileTokenGeneric> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.ADD;
@@ -255,7 +255,7 @@ namespace csly.whileLang.parser
 
         #region STRING OPERATIONS
 
-        [Operation((int)WhileTokenGeneric.CONCAT, 2, Associativity.Right, 10)]
+        [Operation((int)WhileTokenGeneric.CONCAT, Affix.InFix, Associativity.Right, 10)]
         public WhileAST binaryStringExpression(WhileAST left, Token<WhileTokenGeneric> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.CONCAT;

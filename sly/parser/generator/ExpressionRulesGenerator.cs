@@ -19,25 +19,25 @@ namespace sly.parser.generator
 
         public T OperatorToken { get; set; }
 
-        public int Arity { get; set; }
+        public Affix Affix { get; set; }
 
-        public bool IsBinary => Arity == 2;
+        public bool IsBinary => Affix == Affix.InFix;
 
-        public bool IsUnary => Arity == 1;
+        public bool IsUnary => Affix != Affix.InFix;
 
 
-        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, int arity, T oper)
+        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, T oper)
         {
             Precedence = precedence;
             Associativity = assoc;
             VisitorMethod = method;
             OperatorToken = oper;
-            Arity = arity;
+            Affix = affix;
         }
 
         public override string ToString()
         {
-            return $"{OperatorToken} / {Arity} : {Precedence} / {Associativity}";
+            return $"{OperatorToken} / {Affix} : {Precedence} / {Associativity}";
         }
     }
 
@@ -64,7 +64,7 @@ namespace sly.parser.generator
 
                 foreach (OperationAttribute attr in attributes)
                 {
-                    OperationMetaData<IN> operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Arity, ConvertIntToEnum<IN>(attr.Token));
+                    OperationMetaData<IN> operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, ConvertIntToEnum<IN>(attr.Token));
                     var operations = new List<OperationMetaData<IN>>();
                     if (operationsByPrecedence.ContainsKey(operation.Precedence))
                     {
@@ -135,7 +135,7 @@ namespace sly.parser.generator
                 string name = GetNonTerminalNameForPrecedence(precedence, operationsByPrecedence, operandNonTerminal);
                 string nextName = GetNonTerminalNameForPrecedence(nextPrecedence, operationsByPrecedence, operandNonTerminal);
 
-                NonTerminal<IN> nonTerminal = BuilNonTerminal<IN>(i == precedences.Count - 1, name, nextName, operations, operationsByPrecedence);
+                NonTerminal<IN> nonTerminal = BuildNonTerminal<IN>(i == precedences.Count - 1, name, nextName, operations, operationsByPrecedence);
 
                 configuration.NonTerminals[nonTerminal.Name] = nonTerminal;
             }
@@ -147,33 +147,46 @@ namespace sly.parser.generator
             Rule<IN> rule = new Rule<IN>();
             rule.Clauses.Add(new NonTerminalClause<IN>(lowestname));
             rule.IsByPassRule = true;
-            rule.IsExpressionRule = true;            
+            rule.IsExpressionRule = true;
+            rule.ExpressionAffix = Affix.NotOperator;
             configuration.NonTerminals[entrypoint.Name] = entrypoint;
             entrypoint.Rules.Add(rule);
         }
             
 
-        private static NonTerminal<IN> BuilNonTerminal<IN>(bool last, string name, string nextName, List<OperationMetaData<IN>> operations, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence) where IN : struct
+        private static NonTerminal<IN> BuildNonTerminal<IN>(bool last, string name, string nextName, List<OperationMetaData<IN>> operations, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence) where IN : struct
         {
             NonTerminal<IN> nonTerminal = new NonTerminal<IN>(name, new List<Rule<IN>>());
             foreach (OperationMetaData<IN> operation in operations)
             {
-                if (operation.IsBinary)
+                if (operation.Affix == Affix.InFix)
                 {
                     Rule<IN> rule = new Rule<IN>();
                     rule.Clauses.Add(new NonTerminalClause<IN>(nextName));
                     rule.Clauses.Add(new TerminalClause<IN>(operation.OperatorToken));
                     rule.Clauses.Add(new NonTerminalClause<IN>(name));
                     rule.IsExpressionRule = true;
+                    rule.ExpressionAffix = operation.Affix;
                     rule.SetVisitor(operation);
                     nonTerminal.Rules.Add(rule);
                 }
-                else if (operation.IsUnary)
+                else if (operation.Affix == Affix.PreFix)
                 {
                     Rule<IN> rule = new Rule<IN>();
                     rule.Clauses.Add(new TerminalClause<IN>(operation.OperatorToken));
                     rule.Clauses.Add(new NonTerminalClause<IN>(nextName));
                     rule.IsExpressionRule = true;
+                    rule.ExpressionAffix = operation.Affix;
+                    rule.SetVisitor(operation);
+                    nonTerminal.Rules.Add(rule);
+                }
+                else if (operation.Affix == Affix.PostFix)
+                {
+                    Rule<IN> rule = new Rule<IN>();
+                    rule.Clauses.Add(new NonTerminalClause<IN>(nextName));
+                    rule.Clauses.Add(new TerminalClause<IN>(operation.OperatorToken));
+                    rule.IsExpressionRule = true;
+                    rule.ExpressionAffix = operation.Affix;
                     rule.SetVisitor(operation);
                     nonTerminal.Rules.Add(rule);
                 }
@@ -182,6 +195,7 @@ namespace sly.parser.generator
             Rule<IN> rule0 = new Rule<IN>();
             rule0.Clauses.Add(new NonTerminalClause<IN>(nextName));
             rule0.IsExpressionRule = true;
+            rule0.ExpressionAffix = Affix.NotOperator;
             rule0.IsByPassRule = true;
             nonTerminal.Rules.Add(rule0);
 

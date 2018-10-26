@@ -21,26 +21,30 @@ namespace simpleExpressionParser
         // the + operator
         [Lexeme(GenericToken.SugarToken,"+")]
         PLUS = 5,
+        
+        // the ++ operator
+        [Lexeme(GenericToken.SugarToken,"++")]
+        INCREMENT = 6,
 
         // the - operator
         [Lexeme(GenericToken.SugarToken,"-")]
-        MINUS = 6,
+        MINUS = 7,
 
         // the * operator
         [Lexeme(GenericToken.SugarToken,"*")]
-        TIMES = 7,
+        TIMES = 8,
 
         //  the  / operator
         [Lexeme(GenericToken.SugarToken,"/")]
-        DIVIDE = 8,
+        DIVIDE = 9,
 
         // a left paranthesis (
         [Lexeme(GenericToken.SugarToken,"(")]
-        LPAREN = 9,
+        LPAREN = 10,
 
         // a right paranthesis )
         [Lexeme(GenericToken.SugarToken,")")]
-        RPAREN = 10,
+        RPAREN = 11,
 
     }
 }

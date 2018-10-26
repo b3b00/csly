@@ -11,8 +11,8 @@ namespace simpleExpressionParser
     {
         
       
-        [Operation((int)ExpressionToken.PLUS, 2, Associativity.Right, 10)]
-        [Operation((int)ExpressionToken.MINUS, 2, Associativity.Left, 10)]
+        [Operation((int)ExpressionToken.PLUS, Affix.InFix, Associativity.Right, 10)]
+        [Operation((int)ExpressionToken.MINUS, Affix.InFix, Associativity.Left, 10)]
         public int binaryTermExpression(int left, Token<ExpressionToken> operation, int right)
         {
             int result = 0;
@@ -33,8 +33,8 @@ namespace simpleExpressionParser
         }
 
         
-        [Operation((int)ExpressionToken.TIMES, 2, Associativity.Right, 50)]
-        [Operation((int)ExpressionToken.DIVIDE, 2, Associativity.Left, 50)]
+        [Operation((int)ExpressionToken.TIMES, Affix.InFix, Associativity.Right, 50)]
+        [Operation((int)ExpressionToken.DIVIDE, Affix.InFix, Associativity.Left, 50)]
         public int binaryFactorExpression(int left, Token<ExpressionToken> operation, int right)
         {
             int result = 0;
@@ -55,10 +55,21 @@ namespace simpleExpressionParser
         }
 
 
-        [Operation((int)ExpressionToken.MINUS, 1, Associativity.Right, 100)]
-        public  int unaryExpression(Token<ExpressionToken> operation, int value)
+        [Operation((int)ExpressionToken.MINUS, Affix.PreFix, Associativity.Right, 100)]
+        public  int preFixExpression(Token<ExpressionToken> operation, int value)
         {
             return -value;
+        }
+        
+        [Operation((int)ExpressionToken.FACTORIAL, Affix.PostFix, Associativity.Right, 100)]
+        public  int postFixExpression( int value, Token<ExpressionToken> operation)
+        {
+            int factorial = 1;
+            for (int i = 1; i <= value; i++)
+            {
+                factorial = factorial * i;
+            }
+            return factorial;
         }
 
         [Operand]

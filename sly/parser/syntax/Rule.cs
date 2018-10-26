@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using sly.parser.syntax;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using sly.parser.generator;
 
 namespace sly.parser.syntax
@@ -22,6 +23,8 @@ namespace sly.parser.syntax
         private MethodInfo Visitor { get; set; }
 
         public bool IsExpressionRule { get; set; }
+        
+        public Affix ExpressionAffix { get; set; }
 
         public string RuleString { get; }
 
