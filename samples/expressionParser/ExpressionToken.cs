@@ -41,6 +41,10 @@ namespace expressionparser
         // a right paranthesis )
         [Lexeme("\\)")]
         RPAREN = 10,
+        
+        [Lexeme("!")]
+        FACTORIAL = 13,
+        
 
         // a whitespace
         [Lexeme("[ \\t]+",true)]

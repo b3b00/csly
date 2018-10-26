@@ -57,7 +57,7 @@ namespace ParserTests
             Assert.Contains("TIMES", nt.Name);
             Assert.Contains("DIVIDE", nt.Name);
             nt = nonterminals[4];
-            Assert.Equal(2, nt.Rules.Count);
+            Assert.Equal(3, nt.Rules.Count);
             Assert.Contains("100", nt.Name);
             Assert.Contains("MINUS", nt.Name);
             nt = nonterminals[5];
@@ -131,6 +131,16 @@ namespace ParserTests
             Assert.False(r.IsError);
             Assert.Equal(-2, r.Result);
         }
+        
+        [Fact]
+        public void TestPostFix()
+        {
+            BuildParser();
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("10!", StartingRule);
+            Assert.False(r.IsError);
+            Assert.Equal(3628800, r.Result);
+        }
+        
 
 
         [Fact]

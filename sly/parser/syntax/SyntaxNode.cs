@@ -23,6 +23,8 @@ namespace sly.parser.syntax
         public bool IsByPassNode { get; set; } = false;
 
         public bool IsEmpty => Children == null || !Children.Any();
+        
+        public Affix ExpressionAffix { get; set; }
 
         #region expression syntax nodes
 
@@ -30,8 +32,8 @@ namespace sly.parser.syntax
 
         public bool IsExpressionNode => Operation != null;
 
-        public bool IsBinaryOperationNode => IsExpressionNode ? Operation.Arity == 2 : false;
-        public bool IsUnaryOperationNode => IsExpressionNode ? Operation.Arity == 1 : false;
+        public bool IsBinaryOperationNode => IsExpressionNode ? Operation.Affix == Affix.InFix : false;
+        public bool IsUnaryOperationNode => IsExpressionNode ? Operation.Affix != Affix.InFix : false;
         public int Precedence => IsExpressionNode ? Operation.Precedence : -1;
 
         public Associativity Associativity => IsExpressionNode && IsBinaryOperationNode ? Operation.Associativity : Associativity.None;
