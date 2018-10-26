@@ -20,7 +20,7 @@ namespace expressionparser
 
         // the + operator
         [Lexeme("\\+")]
-        PLUS = 15,
+        PLUS = 5,
 
         // the - operator
         [Lexeme("\\-")]
@@ -42,8 +42,8 @@ namespace expressionparser
         [Lexeme("\\)")]
         RPAREN = 10,
         
-        [Lexeme("\\+\\+")]
-        INCREMENT = 13,
+        [Lexeme("!")]
+        FACTORIAL = 13,
         
 
         // a whitespace

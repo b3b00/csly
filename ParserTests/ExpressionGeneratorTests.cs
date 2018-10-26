@@ -136,9 +136,9 @@ namespace ParserTests
         public void TestPostFix()
         {
             BuildParser();
-            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("1++", StartingRule);
+            ParseResult<ExpressionToken, int> r = Parser.Result.Parse("10!", StartingRule);
             Assert.False(r.IsError);
-            Assert.Equal(2, r.Result);
+            Assert.Equal(3628800, r.Result);
         }
         
 

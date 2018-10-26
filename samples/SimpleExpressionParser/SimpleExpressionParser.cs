@@ -61,10 +61,15 @@ namespace simpleExpressionParser
             return -value;
         }
         
-        [Operation((int)ExpressionToken.INCREMENT, Affix.PostFix, Associativity.Right, 100)]
+        [Operation((int)ExpressionToken.FACTORIAL, Affix.PostFix, Associativity.Right, 100)]
         public  int postFixExpression( int value, Token<ExpressionToken> operation)
         {
-            return value+1;
+            int factorial = 1;
+            for (int i = 1; i <= value; i++)
+            {
+                factorial = factorial * i;
+            }
+            return factorial;
         }
 
         [Operand]
