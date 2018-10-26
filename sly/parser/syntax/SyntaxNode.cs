@@ -23,6 +23,8 @@ namespace sly.parser.syntax
         public bool IsByPassNode { get; set; } = false;
 
         public bool IsEmpty => Children == null || !Children.Any();
+        
+        public Affix ExpressionAffix { get; set; }
 
         #region expression syntax nodes
 

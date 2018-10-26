@@ -15,9 +15,10 @@ namespace sly.parser.generator
 
     public enum Affix
     {
-        PreFix = 0,
-        InFix = 1,
-        PostFix = 2
+        NotOperator = 0,
+        PreFix = 1,
+        InFix = 2,
+        PostFix = 3
     }
     
 

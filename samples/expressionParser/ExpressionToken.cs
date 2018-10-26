@@ -20,7 +20,7 @@ namespace expressionparser
 
         // the + operator
         [Lexeme("\\+")]
-        PLUS = 5,
+        PLUS = 15,
 
         // the - operator
         [Lexeme("\\-")]
@@ -41,6 +41,10 @@ namespace expressionparser
         // a right paranthesis )
         [Lexeme("\\)")]
         RPAREN = 10,
+        
+        [Lexeme("\\+\\+")]
+        INCREMENT = 13,
+        
 
         // a whitespace
         [Lexeme("[ \\t]+",true)]

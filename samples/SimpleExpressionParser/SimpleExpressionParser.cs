@@ -56,9 +56,15 @@ namespace simpleExpressionParser
 
 
         [Operation((int)ExpressionToken.MINUS, Affix.PreFix, Associativity.Right, 100)]
-        public  int unaryExpression(Token<ExpressionToken> operation, int value)
+        public  int preFixExpression(Token<ExpressionToken> operation, int value)
         {
             return -value;
+        }
+        
+        [Operation((int)ExpressionToken.INCREMENT, Affix.PostFix, Associativity.Right, 100)]
+        public  int postFixExpression( int value, Token<ExpressionToken> operation)
+        {
+            return value+1;
         }
 
         [Operand]
