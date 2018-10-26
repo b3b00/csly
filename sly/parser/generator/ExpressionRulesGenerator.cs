@@ -19,25 +19,25 @@ namespace sly.parser.generator
 
         public T OperatorToken { get; set; }
 
-        public int Arity { get; set; }
+        public Affix Affix { get; set; }
 
-        public bool IsBinary => Arity == 2;
+        public bool IsBinary => Affix == Affix.InFix;
 
-        public bool IsUnary => Arity == 1;
+        public bool IsUnary => Affix != Affix.InFix;
 
 
-        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, int arity, T oper)
+        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, T oper)
         {
             Precedence = precedence;
             Associativity = assoc;
             VisitorMethod = method;
             OperatorToken = oper;
-            Arity = arity;
+            Affix = affix;
         }
 
         public override string ToString()
         {
-            return $"{OperatorToken} / {Arity} : {Precedence} / {Associativity}";
+            return $"{OperatorToken} / {Affix} : {Precedence} / {Associativity}";
         }
     }
 
@@ -64,7 +64,7 @@ namespace sly.parser.generator
 
                 foreach (OperationAttribute attr in attributes)
                 {
-                    OperationMetaData<IN> operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Arity, ConvertIntToEnum<IN>(attr.Token));
+                    OperationMetaData<IN> operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, ConvertIntToEnum<IN>(attr.Token));
                     var operations = new List<OperationMetaData<IN>>();
                     if (operationsByPrecedence.ContainsKey(operation.Precedence))
                     {
