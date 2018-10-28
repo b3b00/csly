@@ -157,11 +157,6 @@ namespace sly.parser.llparser
                             }
                             isError = isError || nonTerminalResult.IsError;
                         }
-                        else if (clause is GroupClause<IN> groupClause)
-                        {
-                            ;
-                        }
-
                         else if (clause is OneOrMoreClause<IN> || clause is ZeroOrMoreClause<IN>)
                         {
                             SyntaxParseResult<IN> manyResult = null;
@@ -221,6 +216,7 @@ namespace sly.parser.llparser
                 else
                 {
                     node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
+                    node.ExpressionAffix = rule.ExpressionAffix;
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
                     result.IsEnded = currentPosition >= tokens.Count - 1

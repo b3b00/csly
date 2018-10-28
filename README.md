@@ -11,7 +11,7 @@
 
 :warning: This readme is a bit out of date. Go to to the [wiki](https://github.com/b3b00/csly/wiki) for a more up to date documentation.
 
- #LY is a parser generator halfway between parser combinators and parser generator like 
+ CSLY is a parser generator halfway between parser combinators and parser generator like Yacc or ANTLR 
 
 
 ## Why? ##

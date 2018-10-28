@@ -121,8 +121,8 @@ namespace csly.whileLang.parser
         #endregion
 
         #region NUMERIC OPERATIONS
-        [Operation((int)WhileToken.PLUS, 2, Associativity.Right, 10)]
-        [Operation((int)WhileToken.MINUS, 2, Associativity.Right, 10)]
+        [Operation((int)WhileToken.PLUS, Affix.InFix, Associativity.Right, 10)]
+        [Operation((int)WhileToken.MINUS, Affix.InFix, Associativity.Right, 10)]
         public WhileAST binaryTermNumericExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.ADD;
@@ -148,8 +148,8 @@ namespace csly.whileLang.parser
             return operation;
         }
 
-        [Operation((int)WhileToken.TIMES, 2, Associativity.Right, 50)]
-        [Operation((int)WhileToken.DIVIDE, 2, Associativity.Right, 50)]
+        [Operation((int)WhileToken.TIMES, Affix.InFix, Associativity.Right, 50)]
+        [Operation((int)WhileToken.DIVIDE, Affix.InFix, Associativity.Right, 50)]
         public WhileAST binaryFactorNumericExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.MULTIPLY;
@@ -175,7 +175,7 @@ namespace csly.whileLang.parser
             return operation;
         }
 
-        [Operation((int)WhileToken.MINUS, 1, Associativity.Right, 100)]
+        [Operation((int)WhileToken.MINUS, Affix.PreFix, Associativity.Right, 100)]
         public WhileAST unaryNumericExpression(Token<WhileToken> operation, WhileAST value)
         {
             return new Neg(value as Expression);
@@ -188,7 +188,7 @@ namespace csly.whileLang.parser
 
         #region BOOLEAN OPERATIONS
 
-        [Operation((int)WhileToken.OR, 2, Associativity.Right, 10)]
+        [Operation((int)WhileToken.OR, Affix.InFix, Associativity.Right, 10)]
         public WhileAST binaryOrExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.OR;
@@ -198,7 +198,7 @@ namespace csly.whileLang.parser
             return operation;
         }
 
-        [Operation((int)WhileToken.AND, 2, Associativity.Right, 50)]
+        [Operation((int)WhileToken.AND, Affix.InFix, Associativity.Right, 50)]
         public WhileAST binaryAndExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.AND;
@@ -208,7 +208,7 @@ namespace csly.whileLang.parser
             return operation;
         }
 
-        [Operation((int)WhileToken.NOT, 1, Associativity.Right, 100)]
+        [Operation((int)WhileToken.NOT, Affix.PreFix, Associativity.Right, 100)]
         public WhileAST binaryOrExpression(Token<WhileToken> operatorToken, WhileAST value)
         {
             
@@ -218,10 +218,10 @@ namespace csly.whileLang.parser
 
         #region COMPARISON OPERATIONS
 
-        [Operation((int)WhileToken.LESSER, 2, Associativity.Right, 50)]
-        [Operation((int)WhileToken.GREATER, 2, Associativity.Right, 50)]
-        [Operation((int)WhileToken.EQUALS, 2, Associativity.Right, 50)]
-        [Operation((int)WhileToken.DIFFERENT, 2, Associativity.Right, 50)]
+        [Operation((int)WhileToken.LESSER, Affix.InFix, Associativity.Right, 50)]
+        [Operation((int)WhileToken.GREATER, Affix.InFix, Associativity.Right, 50)]
+        [Operation((int)WhileToken.EQUALS, Affix.InFix, Associativity.Right, 50)]
+        [Operation((int)WhileToken.DIFFERENT, Affix.InFix, Associativity.Right, 50)]
         public WhileAST binaryComparisonExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.ADD;
@@ -262,7 +262,7 @@ namespace csly.whileLang.parser
 
         #region STRING OPERATIONS
 
-        [Operation((int)WhileToken.CONCAT, 2, Associativity.Right, 10)]
+        [Operation((int)WhileToken.CONCAT, Affix.InFix, Associativity.Right, 10)]
         public WhileAST binaryStringExpression(WhileAST left, Token<WhileToken> operatorToken, WhileAST right)
         {
             BinaryOperator oper = BinaryOperator.CONCAT;            

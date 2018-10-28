@@ -288,11 +288,6 @@ namespace sly.parser.llparser
                 }
             }
 
-            if (nonTerminalName == "rootGroup")
-            {
-                ;
-            }
-
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>();
             result.IsError = isError;
             result.Errors = errors;
@@ -339,14 +334,23 @@ namespace sly.parser.llparser
             }
             else if (rule.IsExpressionRule && !rule.IsByPassRule)
             {
+                node.ExpressionAffix = rule.ExpressionAffix;
                 if (node.Children.Count == 3)
                 {
                     operatorIndex = 1;
                 }
                 else if (node.Children.Count == 2)
                 {
-                    operatorIndex = 0;
+                    if (node.ExpressionAffix == Affix.PreFix)
+                    {
+                        operatorIndex = 0;
+                    }
+                    else if (node.ExpressionAffix == Affix.PostFix)
+                    {
+                        operatorIndex = 1;
+                    }
                 }
+
                 if (operatorIndex >= 0)
                 {
                     if (node.Children[operatorIndex] is SyntaxLeaf<IN> operatorNode)
