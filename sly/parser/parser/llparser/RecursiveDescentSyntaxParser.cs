@@ -89,10 +89,8 @@ namespace sly.parser.llparser
 
         public NonTerminal<IN> CreateSubRule(GroupClause<IN> group)
         {
-            // TODO create new dynamic non term
             string subRuleNonTerminalName = "GROUP-"+group.Clauses.Select(c => c.ToString()).Aggregate<string>((string c1, string c2) => $"{c1.ToString()}-{c2.ToString()}");
             NonTerminal<IN> nonTerminal = new NonTerminal<IN>(subRuleNonTerminalName);
-            // TODO create new dynamic rule for new non term, mark it as subrul
             Rule<IN> subRule = new Rule<IN>();
             subRule.Clauses = group.Clauses;
             subRule.IsSubRule = true;
