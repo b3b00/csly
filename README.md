@@ -1,4 +1,4 @@
- # C# Lex Yacc #
+# C# Lex Yacc #
 
 [![Build status](https://ci.appveyor.com/api/projects/status/n9uffgkqn2qet7k9?svg=true)](https://ci.appveyor.com/project/OlivierDuhart/sly)
 ![AppVeyor tests](https://img.shields.io/appveyor/tests/OlivierDuhart/sly.svg)
