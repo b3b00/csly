@@ -150,7 +150,6 @@ namespace ParserTests
                             ((string name, Token<GroupTestToken> token) => token.Value),
                             ((string name,string val) => val))
                         );
-                    r.Append(item.Token.Value);
                 });
             });
             r.Append(")");
