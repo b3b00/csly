@@ -146,6 +146,10 @@ namespace ParserTests
                 group.Items.ForEach((GroupItem<GroupTestToken, string> item) =>
                 {
                     r.Append(",");
+                    r.Append(item.Match(
+                            ((string name, Token<GroupTestToken> token) => token.Value),
+                            ((string name,string val) => val))
+                        );
                     r.Append(item.Token.Value);
                 });
             });
