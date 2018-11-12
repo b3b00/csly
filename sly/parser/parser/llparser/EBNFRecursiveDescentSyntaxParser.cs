@@ -375,14 +375,14 @@ namespace sly.parser.llparser
                 if (innerClause is TerminalClause<IN>)
                 {
                     result = new SyntaxParseResult<IN>();
-                    result.IsError = false;
+                    result.IsError = true;
                     result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty());
                     result.EndingPosition = position;
                 }
                 else
                 {
                     result = new SyntaxParseResult<IN>();
-                    result.IsError = false;
+                    result.IsError = true;
                     List<ISyntaxNode<IN>> children = new List<ISyntaxNode<IN>>() { innerResult.Root };
                     if (innerResult.IsError)
                     {
