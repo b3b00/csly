@@ -5,57 +5,48 @@ namespace jsonparser.JsonModel
     public class JList : JSon
 
     {
+        public JList()
+        {
+            Items = new List<JSon>();
+        }
+
+        public JList(List<JSon> lst)
+        {
+            Items = lst;
+        }
+
+
+        public JList(JSon item)
+        {
+            Items = new List<JSon>();
+            Items.Add(item);
+        }
+
         public override bool IsList => true;
 
-        private List<JSon> list;
+        public List<JSon> Items { get; }
 
-        public  List<JSon> Items => list;
-        public int Count => list.Count;
+        public int Count => Items.Count;
 
         public JSon this[int index]
         {
-            get
-            {
-                return list[index];
-            }
-            set
-            {
-                list[index] = value;
-            }
-        }
-
-        public JList()
-        {
-            list = new List<JSon>();
-        }
-        
-        public JList(List<JSon> lst)
-        {
-            list = lst;
-        }
-        
-        
-        public JList(JSon item)
-        {
-            list = new List<JSon>();
-            list.Add(item);
+            get => Items[index];
+            set => Items[index] = value;
         }
 
         public void Add(JSon item)
         {
-            list.Add(item);
+            Items.Add(item);
         }
-        
+
         public void AddRange(JList items)
         {
-            list.AddRange(items.Items);
+            Items.AddRange(items.Items);
         }
-        
+
         public void AddRange(List<JSon> items)
         {
-            list.AddRange(items);
+            Items.AddRange(items);
         }
-        
-        
     }
 }

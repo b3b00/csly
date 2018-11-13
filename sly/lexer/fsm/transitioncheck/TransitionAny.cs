@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace sly.lexer.fsm.transitioncheck
+﻿namespace sly.lexer.fsm.transitioncheck
 {
     public class TransitionAny : AbstractTransitionCheck
     {
-
         public TransitionAny(char token)
         {
         }
@@ -16,12 +11,11 @@ namespace sly.lexer.fsm.transitioncheck
             Precondition = transitionPrecondition;
         }
 
-        public override string ToString()  {
-            string t = "";
-            if (Precondition != null) {
-                t = "[|] ";
-            }
-            t+="*";
+        public override string ToString()
+        {
+            var t = "";
+            if (Precondition != null) t = "[|] ";
+            t += "*";
             return t;
         }
 

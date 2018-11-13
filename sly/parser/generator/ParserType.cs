@@ -1,5 +1,4 @@
-﻿
-namespace sly.parser.generator
+﻿namespace sly.parser.generator
 {
     public enum ParserType
     {

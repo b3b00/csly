@@ -1,18 +1,16 @@
-﻿using csly.whileLang.compiler;
+﻿using System;
+using csly.whileLang.compiler;
 using sly.lexer;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Sigil;
 
 namespace csly.whileLang.model
 {
     public sealed class SkipStatement : Statement
     {
-
         public Scope CompilerScope { get; set; }
 
         public TokenPosition Position { get; set; }
+
         public string Dump(string tab)
         {
             return $"{tab}(SKIP)";

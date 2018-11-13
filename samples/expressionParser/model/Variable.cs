@@ -1,10 +1,8 @@
-﻿using System.Globalization;
-
-namespace expressionparser.model
+﻿namespace expressionparser.model
 {
     public sealed class Variable : Expression
     {
-        private string VariableName;
+        private readonly string VariableName;
 
         public Variable(string varName)
         {

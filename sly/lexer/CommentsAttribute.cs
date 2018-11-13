@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace sly.lexer
 {
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class CommentAttribute : Attribute
     {
-
-        public string SingleLineCommentStart;
+        public string MultiLineCommentEnd;
 
         public string MultiLineCommentStart;
 
-        public string MultiLineCommentEnd;
+        public string SingleLineCommentStart;
 
         public CommentAttribute(string singleLineStart, string MultiLineStart, string multiLineEnd)
         {
@@ -20,12 +17,5 @@ namespace sly.lexer
             MultiLineCommentStart = MultiLineStart;
             MultiLineCommentEnd = multiLineEnd;
         }
-
-
-
-
     }
-
-
 }
-

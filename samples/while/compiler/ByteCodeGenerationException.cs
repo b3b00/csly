@@ -4,8 +4,8 @@ namespace csly.whileLang.compiler
 {
     internal class ByteCodeGenerationException : Exception
     {
-        private string v;
         private object compilationResult;
+        private string v;
 
         public ByteCodeGenerationException()
         {

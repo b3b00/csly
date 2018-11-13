@@ -1,7 +1,6 @@
-﻿using sly.lexer;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using sly.lexer;
 
 namespace jsonparser
 {
@@ -11,49 +10,41 @@ namespace jsonparser
         {
         }
 
-
-
-
         public IEnumerable<Token<JsonToken>> Tokenize(string source)
         {
             var tokens = new List<Token<JsonToken>>();
-            int position = 0;
-            int currentLine = 1;
-            int currentColumn = 1;
-            int length = source.Length;
+            var position = 0;
+            var currentLine = 1;
+            var currentColumn = 1;
+            var length = source.Length;
 
-            int currentTokenLine = 1;
-            int currentTokenColumn = 1;
-            int currentTokenPosition = 1;
-            string currentValue = "";
+            var currentTokenLine = 1;
+            var currentTokenColumn = 1;
+            var currentTokenPosition = 1;
+            var currentValue = "";
 
-            bool InString = false;
-            bool InNum = false;
-            bool InNull = false;
-            bool InTrue = false;
-            bool InFalse = false;
-            bool NumIsDouble = false;
+            var InString = false;
+            var InNum = false;
+            var InNull = false;
+            var InTrue = false;
+            var InFalse = false;
+            var NumIsDouble = false;
 
-
-            Func<JsonToken, Token<JsonToken>> NewToken = (JsonToken tok) =>
-                {
-                    Token<JsonToken> token = new Token<JsonToken>();
-                    token.Position = new TokenPosition(currentTokenPosition, currentTokenLine, currentTokenColumn);
-                    token.Value = currentValue;
-                    token.TokenID = tok;
-                    tokens.Add(token);
-                    //currentColumn += currentValue.Length;
-                    //position++;
-                    currentValue = "";
-                    //Console.WriteLine(token.ToString());
-                    //Console.WriteLine($"{tok} /{token.Value}/ @{token.Position}");
-                    return token;
-                };
+            Func<JsonToken, Token<JsonToken>> NewToken = tok =>
+            {
+                var token = new Token<JsonToken>();
+                token.Position = new TokenPosition(currentTokenPosition, currentTokenLine, currentTokenColumn);
+                token.Value = currentValue;
+                token.TokenID = tok;
+                tokens.Add(token);
+                currentValue = "";
+                return token;
+            };
 
 
             while (position < length)
             {
-                char current = source[position];
+                var current = source[position];
                 if (InString)
                 {
                     currentValue += current;
@@ -76,22 +67,20 @@ namespace jsonparser
                         NumIsDouble = true;
                         currentValue += current;
                     }
-                    else if (Char.IsDigit(current))
+                    else if (char.IsDigit(current))
                     {
                         currentValue += current;
                         var type = NumIsDouble ? JsonToken.DOUBLE : JsonToken.INT;
-                        if (position == length-1 )
-                        {
-                            NewToken(type);
-                        }
+                        if (position == length - 1) NewToken(type);
                     }
                     else
                     {
                         InNum = false;
                         var type = NumIsDouble ? JsonToken.DOUBLE : JsonToken.INT;
                         NewToken(type);
-                        position--; // "deconsomation" du prochain char
+                        position--;
                     }
+
                     position++;
                 }
                 else if (InNull)
@@ -101,10 +90,11 @@ namespace jsonparser
                         currentValue += current;
                         if (currentValue.Length == 4)
                         {
-                            NewToken(JsonToken.NULL);                            
+                            NewToken(JsonToken.NULL);
                             InNull = false;
                         }
                     }
+
                     position++;
                 }
                 else if (InFalse)
@@ -121,7 +111,7 @@ namespace jsonparser
                         {
                             position++;
                         }
-                    }                    
+                    }
                 }
                 else if (InTrue)
                 {
@@ -134,6 +124,7 @@ namespace jsonparser
                             InFalse = false;
                         }
                     }
+
                     position++;
                 }
                 else
@@ -196,6 +187,7 @@ namespace jsonparser
                         currentValue = ";;";
                         currentColumn = 1;
                     }
+
                     currentColumn++;
                     position++;
                 }

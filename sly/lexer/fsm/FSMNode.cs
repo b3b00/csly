@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace sly.lexer.fsm
+﻿namespace sly.lexer.fsm
 {
     public class FSMNode<N>
     {
+        internal FSMNode(N value)
+        {
+            Value = value;
+        }
+
         internal N Value { get; set; }
 
         internal int Id { get; set; } = 0;
@@ -14,11 +15,5 @@ namespace sly.lexer.fsm
 
         internal bool IsStart { get; set; } = false;
         public string Mark { get; internal set; }
-
-        internal FSMNode(N value)
-        {
-            Value = value;
-        }
-        
     }
 }

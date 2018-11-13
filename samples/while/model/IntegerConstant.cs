@@ -1,14 +1,17 @@
-﻿using csly.whileLang.compiler;
+﻿using System;
+using csly.whileLang.compiler;
 using sly.lexer;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Sigil;
 
 namespace csly.whileLang.model
 {
     public class IntegerConstant : Expression
     {
+        public IntegerConstant(int value)
+        {
+            Value = value;
+        }
+
         public int Value { get; set; }
 
         public TokenPosition Position { get; set; }
@@ -16,14 +19,12 @@ namespace csly.whileLang.model
         public Scope CompilerScope { get; set; }
 
 
-        public WhileType Whiletype { get { return WhileType.INT; } set { } }
-
-        public IntegerConstant(int value)
+        public WhileType Whiletype
         {
-            Value = value;
+            get => WhileType.INT;
+            set { }
         }
 
-        
 
         public string Dump(string tab)
         {

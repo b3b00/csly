@@ -4,28 +4,19 @@ using csly.whileLang.model;
 using csly.whileLang.parser;
 using sly.parser;
 using sly.parser.generator;
-
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Collections.Generic;
 using Sigil;
 
 namespace csly.whileLang.compiler
 {
     public class WhileCompiler
     {
-
-        private Parser<WhileToken, WhileAST> whileParser;
-
-
-
+        private readonly Parser<WhileToken, WhileAST> whileParser;
 
 
         public WhileCompiler()
         {
-            WhileParser parser = new WhileParser();
-            ParserBuilder<WhileToken, WhileAST> builder = new ParserBuilder<WhileToken, WhileAST>();
+            var parser = new WhileParser();
+            var builder = new ParserBuilder<WhileToken, WhileAST>();
             var whileParserBuildResult = builder.BuildParser(parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
             whileParser = whileParserBuildResult.Result;
         }
@@ -33,7 +24,7 @@ namespace csly.whileLang.compiler
 
         private string GetNameSpace(string id)
         {
-            return $"NS{id.Replace("-","")}";
+            return $"NS{id.Replace("-", "")}";
         }
 
         private string GetClassName(string id)
@@ -44,12 +35,12 @@ namespace csly.whileLang.compiler
 
         private string GetCSharpCode(string code, string id)
         {
-            StringBuilder classCode = new StringBuilder();
+            var classCode = new StringBuilder();
             classCode.AppendLine("using System;");
             classCode.AppendLine("using csly.whileLang.compiler;");
             classCode.AppendLine($"namespace {GetNameSpace(id)} {{");
             classCode.AppendLine($"     public class {GetClassName(id)} : WhileFunction {{");
-            classCode.AppendLine($"         public void Run() {{");
+            classCode.AppendLine("         public void Run() {");
             classCode.AppendLine(code);
             classCode.AppendLine("         }");
             classCode.AppendLine("      }");
@@ -64,21 +55,20 @@ namespace csly.whileLang.compiler
 
             try
             {
-                ParseResult<WhileToken, WhileAST> result = whileParser.Parse(whileCode);
+                var result = whileParser.Parse(whileCode);
                 if (result.IsOk)
                 {
+                    var ast = result.Result;
 
-                    WhileAST ast = result.Result;
+                    var checker = new SemanticChecker();
 
-                    SemanticChecker checker = new SemanticChecker();
-
-                    CompilerContext context = checker.SemanticCheck(ast);
+                    var context = checker.SemanticCheck(ast);
 
                     sharpCode = ast.Transpile(context);
                     sharpCode = GetCSharpCode(sharpCode, Guid.NewGuid().ToString());
                 }
             }
-            catch 
+            catch
             {
                 sharpCode = null;
             }
@@ -94,17 +84,16 @@ namespace csly.whileLang.compiler
 
             try
             {
-                ParseResult<WhileToken, WhileAST> result = whileParser.Parse(whileCode);
+                var result = whileParser.Parse(whileCode);
                 if (result.IsOk)
                 {
+                    var ast = result.Result;
 
-                    WhileAST ast = result.Result;
+                    var checker = new SemanticChecker();
 
-                    SemanticChecker checker = new SemanticChecker();
+                    var context = checker.SemanticCheck(ast);
 
-                    CompilerContext context = checker.SemanticCheck(ast);
-
-                    Emit<Func<int>>  emiter = Emit<Func<int>>.NewDynamicMethod("Method"+Guid.NewGuid().ToString());
+                    var emiter = Emit<Func<int>>.NewDynamicMethod("Method" + Guid.NewGuid());
 
                     emiter = ast.EmitByteCode(context, emiter);
                     //emiter.LoadConstant(42);                    
@@ -114,7 +103,7 @@ namespace csly.whileLang.compiler
                     ;
                 }
             }
-            catch 
+            catch
             {
                 function = null;
             }
@@ -122,12 +111,5 @@ namespace csly.whileLang.compiler
 
             return function;
         }
-
-
-
-        
-
     }
 }
-
-

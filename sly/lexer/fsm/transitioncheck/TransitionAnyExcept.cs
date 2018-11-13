@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace sly.lexer.fsm.transitioncheck
 {
     public class TransitionAnyExcept : AbstractTransitionCheck
     {
-        List<char> TokenExceptions;
+        private readonly List<char> TokenExceptions;
 
         public TransitionAnyExcept(params char[] tokens)
         {
@@ -15,7 +13,7 @@ namespace sly.lexer.fsm.transitioncheck
             TokenExceptions.AddRange(tokens);
         }
 
-         public TransitionAnyExcept(TransitionPrecondition precondition,params char[] tokens)
+        public TransitionAnyExcept(TransitionPrecondition precondition, params char[] tokens)
         {
             TokenExceptions = new List<char>();
             TokenExceptions.AddRange(tokens);
@@ -23,12 +21,11 @@ namespace sly.lexer.fsm.transitioncheck
         }
 
         [ExcludeFromCodeCoverage]
-        public override string ToString()  {
-            string t = "";
-            if (Precondition != null) {
-                t = "[|] ";
-            }
-            t+=$"^({TokenExceptions.ToString()})";
+        public override string ToString()
+        {
+            var t = "";
+            if (Precondition != null) t = "[|] ";
+            t += $"^({TokenExceptions})";
             return t;
         }
 

@@ -1,14 +1,19 @@
-﻿using csly.whileLang.compiler;
-using sly.lexer;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Text;
+using csly.whileLang.compiler;
+using sly.lexer;
 using Sigil;
 
 namespace csly.whileLang.model
 {
     public class IfStatement : Statement
     {
+        public IfStatement(Expression condition, Statement thenStmt, Statement elseStmt)
+        {
+            Condition = condition;
+            ThenStmt = thenStmt;
+            ElseStmt = elseStmt;
+        }
 
         public Expression Condition { get; set; }
 
@@ -21,19 +26,12 @@ namespace csly.whileLang.model
 
         public TokenPosition Position { get; set; }
 
-        public IfStatement(Expression condition, Statement thenStmt, Statement elseStmt)
-        {
-            Condition = condition;
-            ThenStmt = thenStmt;
-            ElseStmt = elseStmt;
-        }
-
         public string Dump(string tab)
         {
-            StringBuilder dmp = new StringBuilder();
+            var dmp = new StringBuilder();
             dmp.AppendLine($"{tab}(IF");
 
-            dmp.AppendLine($"{tab+"\t"}(COND");
+            dmp.AppendLine($"{tab + "\t"}(COND");
             dmp.AppendLine(Condition.Dump("\t\t" + tab));
             dmp.AppendLine($"{tab + "\t"})");
 
@@ -51,7 +49,7 @@ namespace csly.whileLang.model
 
         public string Transpile(CompilerContext context)
         {
-            StringBuilder code = new StringBuilder();
+            var code = new StringBuilder();
             code.AppendLine($"if({Condition.Transpile(context)}) {{ ");
             code.AppendLine(ThenStmt.Transpile(context));
             code.AppendLine("}");
@@ -61,6 +59,7 @@ namespace csly.whileLang.model
                 code.AppendLine(ElseStmt.Transpile(context));
                 code.AppendLine("}");
             }
+
             return code.ToString();
         }
 

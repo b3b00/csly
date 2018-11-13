@@ -1,20 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace sly.buildresult
 {
     public class BuildResult<R>
     {
-        public List<InitializationError> Errors { get; set; }
-
-        public R Result { get; set; }
-
-
-
-        public bool IsError { get { return Errors.Where(e => e.Level != ErrorLevel.WARN).Any(); } set { } }
-
-
         public BuildResult() : this(default(R))
         {
         }
@@ -23,6 +13,17 @@ namespace sly.buildresult
         {
             Result = result;
             Errors = new List<InitializationError>();
+        }
+
+        public List<InitializationError> Errors { get; set; }
+
+        public R Result { get; set; }
+
+
+        public bool IsError
+        {
+            get { return Errors.Where(e => e.Level != ErrorLevel.WARN).Any(); }
+            set { }
         }
 
         public void AddError(InitializationError error)

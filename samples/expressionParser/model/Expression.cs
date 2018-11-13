@@ -1,6 +1,4 @@
-﻿using System.Threading;
-
-namespace expressionparser.model
+﻿namespace expressionparser.model
 {
     public interface Expression
     {

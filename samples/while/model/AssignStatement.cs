@@ -1,48 +1,43 @@
-﻿using csly.whileLang.compiler;
-using sly.lexer;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Text;
+using csly.whileLang.compiler;
+using sly.lexer;
 using Sigil;
 
 namespace csly.whileLang.model
 {
     public class AssignStatement : Statement
     {
-
-        public string VariableName { get; set; }
-
-        public Expression Value { get; set; }
-
-        private Scope scope;
-        public Scope CompilerScope { get { return scope; }  set { scope = value; } }
-
-        public TokenPosition Position { get; set; }
-        public bool IsVariableCreation { get; internal set; }
-
         public AssignStatement(string variableName, Expression value)
         {
             VariableName = variableName;
             Value = value;
         }
 
+        public string VariableName { get; set; }
+
+        public Expression Value { get; set; }
+        public bool IsVariableCreation { get; internal set; }
+        public Scope CompilerScope { get; set; }
+
+        public TokenPosition Position { get; set; }
+
         public string Dump(string tab)
         {
-            StringBuilder dmp = new StringBuilder();
+            var dmp = new StringBuilder();
             dmp.AppendLine($"{tab}(ASSIGN");
             dmp.AppendLine($"{tab}\t{VariableName}");
-            dmp.AppendLine(Value.Dump(tab+"\t"));
+            dmp.AppendLine(Value.Dump(tab + "\t"));
             dmp.AppendLine($"{tab})");
             return dmp.ToString();
         }
 
         public string Transpile(CompilerContext context)
         {
-            StringBuilder code = new StringBuilder();
+            var code = new StringBuilder();
             if (IsVariableCreation)
-            {
-                code.AppendLine($"{TypeConverter.WhileToCSharp(this.CompilerScope.GetVariableType(VariableName))} {VariableName};");
-            }
+                code.AppendLine(
+                    $"{TypeConverter.WhileToCSharp(CompilerScope.GetVariableType(VariableName))} {VariableName};");
             code.AppendLine($"{VariableName} = {Value.Transpile(context)};");
             return code.ToString();
         }
@@ -51,17 +46,13 @@ namespace csly.whileLang.model
         {
             Local local = null;
             if (IsVariableCreation)
-            {
-                local = emiter.DeclareLocal(TypeConverter.WhileToType(CompilerScope.GetVariableType(VariableName)), VariableName);
-            }
+                local = emiter.DeclareLocal(TypeConverter.WhileToType(CompilerScope.GetVariableType(VariableName)),
+                    VariableName);
             else
-            {
                 local = emiter.Locals[VariableName];
-            }
-            Value.EmitByteCode(context,emiter);
+            Value.EmitByteCode(context, emiter);
             emiter.StoreLocal(local);
             return emiter;
-
         }
     }
 }

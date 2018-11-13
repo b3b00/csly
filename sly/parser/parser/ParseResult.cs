@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace sly.parser
 {
-    public class ParseResult<IN,OUT>
+    public class ParseResult<IN, OUT>
     {
-
         public OUT Result { get; set; }
 
         public bool IsError { get; set; }
@@ -14,6 +11,5 @@ namespace sly.parser
         public bool IsOk => !IsError;
 
         public List<ParseError> Errors { get; set; }
-               
     }
 }

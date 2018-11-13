@@ -1,57 +1,42 @@
-﻿using sly.lexer;
-using sly.parser.generator;
+﻿using System;
 using System.Collections.Generic;
-using expressionparser;
-using System;
-using System.Linq;
-using System.Reflection;
-using System.IO;
-using jsonparser.JsonModel;
-using jsonparser;
 using System.Diagnostics;
-using csly.whileLang.parser;
-using csly.whileLang.model;
-using sly.parser;
-using csly.whileLang.interpreter;
+using System.IO;
+using System.Linq;
 using csly.whileLang.compiler;
+using csly.whileLang.interpreter;
+using csly.whileLang.model;
+using csly.whileLang.parser;
+using jsonparser;
+using jsonparser.JsonModel;
+using sly.lexer;
 using sly.lexer.fsm;
+using sly.parser;
+using sly.parser.generator;
 using sly.parser.syntax;
 
 namespace ParserExample
 {
-
     public enum TokenType
     {
-        [Lexeme("a")]
-        a = 1,
-        [Lexeme("b")]
-        b = 2,
-        [Lexeme("c")]
-        c = 3,
-        [Lexeme("z")]
-        z = 26,
-        [Lexeme("r")]
-        r = 21,
-        [Lexeme("[ \\t]+",true)]
-        WS = 100,
-        [Lexeme("[\\r\\n]+",true,true)]
-        EOL = 101
+        [Lexeme("a")] a = 1,
+        [Lexeme("b")] b = 2,
+        [Lexeme("c")] c = 3,
+        [Lexeme("z")] z = 26,
+        [Lexeme("r")] r = 21,
+        [Lexeme("[ \\t]+", true)] WS = 100,
+        [Lexeme("[\\r\\n]+", true, true)] EOL = 101
     }
 
 
-    
-
-   
-
-    class Program
+    internal class Program
     {
-
         [Production("R : A b c ")]
         [Production("R : Rec b c ")]
         public static object R(List<object> args)
         {
-            string result = "R(";
-            result += args[0].ToString() + ",";
+            var result = "R(";
+            result += args[0] + ",";
             result += (args[1] as Token<TokenType>).Value + ",";
             result += (args[2] as Token<TokenType>).Value;
             result += ")";
@@ -62,7 +47,7 @@ namespace ParserExample
         [Production("A : z ")]
         public static object A(List<object> args)
         {
-            string result = "A(";
+            var result = "A(";
             result += (args[0] as Token<TokenType>).Value;
             result += ")";
             return result;
@@ -74,51 +59,47 @@ namespace ParserExample
         {
             if (args.Count == 2)
             {
-                
-                string r = "Rec(" + (args[0] as Token<TokenType>).Value + "," + args[1].ToString() + ")";
+                var r = "Rec(" + (args[0] as Token<TokenType>).Value + "," + args[1] + ")";
                 return r;
                 ;
             }
-            else
-            {
-                return "_";
-                ;
-            }
+
+            return "_";
+            ;
         }
 
 
-        static void TestFactorial()
+        private static void TestFactorial()
         {
-
-            WhileParser whileParser = new WhileParser();
-            ParserBuilder<WhileToken, WhileAST> builder = new ParserBuilder<WhileToken, WhileAST>();
+            var whileParser = new WhileParser();
+            var builder = new ParserBuilder<WhileToken, WhileAST>();
             var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
             ;
 
-            string program = @"
+            var program = @"
 (
     r:=1;
     i:=1;
     while i < 11 do 
-    ("; 
-        program += "\nprint \"r=\".r;\n";
+    (";
+            program += "\nprint \"r=\".r;\n";
             program += "r := r * i;\n";
             program += "print \"r=\".r;\n";
             program += "print \"i=\".i;\n";
             program += "i := i + 1 \n);\n";
             program += "return r)\n";
-            ParseResult<WhileToken, WhileAST> result = Parser.Result.Parse(program);
-            Interpreter interpreter = new Interpreter();
+            var result = Parser.Result.Parse(program);
+            var interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result);
 
             var compiler = new WhileCompiler();
-            string code = compiler.TranspileToCSharp(program);
+            var code = compiler.TranspileToCSharp(program);
             var f = compiler.CompileToFunction(program);
             ;
         }
 
 
-        static void testLexerBuilder()
+        private static void testLexerBuilder()
         {
             var builder = new FSMLexerBuilder<JsonToken>();
 
@@ -133,21 +114,21 @@ namespace ParserExample
             builder.Mark("start");
 
 
-
             // string literal
             builder.Transition('\"')
                 .Mark("in_string")
-                .ExceptTransitionTo(new char[] { '\"', '\\' }, "in_string")
+                .ExceptTransitionTo(new[] {'\"', '\\'}, "in_string")
                 .Transition('\\')
                 .Mark("escape")
-                .AnyTransitionTo(' ',"in_string")
+                .AnyTransitionTo(' ', "in_string")
                 .Transition('\"')
                 .End(JsonToken.STRING)
                 .Mark("string_end")
-                .CallBack((FSMMatch<JsonToken> match) => {
+                .CallBack(match =>
+                {
                     match.Result.Value = match.Result.Value.ToUpper();
                     return match;
-            } );
+                });
 
             // accolades
             builder.GoTo("start")
@@ -179,43 +160,38 @@ namespace ParserExample
 
             //numeric
             builder.GoTo("start")
-            .RangeTransition('0', '9')
-            .Mark("in_int")
-            .RangeTransitionTo('0', '9', "in_int")
-            .End(JsonToken.INT)
-            .Transition('.')
-            .Mark("start_double")
-            .RangeTransition('0', '9')
-            .Mark("in_double")
-            .RangeTransitionTo('0', '9', "in_double")
-            .End(JsonToken.DOUBLE);
+                .RangeTransition('0', '9')
+                .Mark("in_int")
+                .RangeTransitionTo('0', '9', "in_int")
+                .End(JsonToken.INT)
+                .Transition('.')
+                .Mark("start_double")
+                .RangeTransition('0', '9')
+                .Mark("in_double")
+                .RangeTransitionTo('0', '9', "in_double")
+                .End(JsonToken.DOUBLE);
 
 
-            string code = "{\n\"d\" : 42.42 ,\n\"i\" : 42 ,\n\"s\" : \"quarante-deux\",\n\"s2\":\"a\\\"b\"\n}";
+            var code = "{\n\"d\" : 42.42 ,\n\"i\" : 42 ,\n\"s\" : \"quarante-deux\",\n\"s2\":\"a\\\"b\"\n}";
             //code = File.ReadAllText("test.json");
             var lex = builder.Fsm;
-            var r = lex.Run(code,0);
-            string total = "";
+            var r = lex.Run(code, 0);
+            var total = "";
             while (r.IsSuccess)
             {
-                string msg = $"{r.Result.TokenID} : {r.Result.Value} @{r.Result.Position}";
+                var msg = $"{r.Result.TokenID} : {r.Result.Value} @{r.Result.Position}";
                 total += msg + "\n";
                 Console.WriteLine(msg);
                 r = lex.Run(code);
             }
-
-            
         }
 
-        
 
-        static void testGenericLexerWhile()
+        private static void testGenericLexerWhile()
         {
-           
-
             var sw = new Stopwatch();
-           
-            string source = @"
+
+            var source = @"
 (
     r:=1;
     i:=1;
@@ -227,12 +203,11 @@ namespace ParserExample
     i := i + 1 )
 )";
 
-           
 
             sw.Reset();
             sw.Start();
-            WhileParserGeneric wpg = new WhileParserGeneric();
-            ParserBuilder <WhileTokenGeneric, WhileAST > wbuilderGen = new ParserBuilder<WhileTokenGeneric, WhileAST>();
+            var wpg = new WhileParserGeneric();
+            var wbuilderGen = new ParserBuilder<WhileTokenGeneric, WhileAST>();
             var buildResultgen = wbuilderGen.BuildParser(wpg, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
             var parserGen = buildResultgen.Result;
             var rGen = parserGen.Parse(source);
@@ -243,7 +218,6 @@ namespace ParserExample
                 var interpreter = new Interpreter();
                 var ctx = interpreter.Interprete(rGen.Result);
                 ;
-                
             }
             else
             {
@@ -254,27 +228,22 @@ namespace ParserExample
             ;
         }
 
-        static void testGenericLexerJson()
+        private static void testGenericLexerJson()
         {
-
-
             var sw = new Stopwatch();
 
-            string source =File.ReadAllText("test.json");
+            var source = File.ReadAllText("test.json");
 
-            EbnfJsonParser wp = new EbnfJsonParser();
+            var wp = new EbnfJsonParser();
             sw.Reset();
             sw.Start();
-            ParserBuilder<JsonToken, JSon> wbuilder = new ParserBuilder<JsonToken, JSon>();
+            var wbuilder = new ParserBuilder<JsonToken, JSon>();
             var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
             var parser = buildResult.Result;
             var r = parser.Parse(source);
             sw.Stop();
             Console.WriteLine($"json regex parser : {sw.ElapsedMilliseconds} ms");
-            if (r.IsError)
-            {
-                r.Errors.ForEach(e => Console.WriteLine(e.ToString()));
-            }
+            if (r.IsError) r.Errors.ForEach(e => Console.WriteLine(e.ToString()));
 
 
             sw.Reset();
@@ -290,96 +259,88 @@ namespace ParserExample
 
             sw.Reset();
             sw.Start();
-            EbnfJsonGenericParser wpg = new EbnfJsonGenericParser();
-            ParserBuilder<JsonTokenGeneric, JSon> wbuilderGen = new ParserBuilder<JsonTokenGeneric, JSon>();
+            var wpg = new EbnfJsonGenericParser();
+            var wbuilderGen = new ParserBuilder<JsonTokenGeneric, JSon>();
             var buildResultgen = wbuilderGen.BuildParser(wpg, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
             var parserGen = buildResultgen.Result;
             var rGen = parserGen.Parse(source);
             sw.Stop();
             Console.WriteLine($"json generic parser : {sw.ElapsedMilliseconds} ms");
-            if (rGen.IsError)
-            {
-                rGen.Errors.ForEach(e => Console.WriteLine(e.ToString()));
-            }
+            if (rGen.IsError) rGen.Errors.ForEach(e => Console.WriteLine(e.ToString()));
 
 
             ;
         }
 
-        static void testJSONLexer()
+        private static void testJSONLexer()
         {
-            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
+            var builder = new ParserBuilder<JsonToken, JSon>();
             var parser = builder.BuildParser(new JSONParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
 
-            string source = "{ \"k\" : 1;\"k2\" : 1.1;\"k3\" : null;\"k4\" : false}";
+            var source = "{ \"k\" : 1;\"k2\" : 1.1;\"k3\" : null;\"k4\" : false}";
             //source = File.ReadAllText("test.json");
-            JSONLexer lexer = new JSONLexer();
-            Stopwatch sw = new Stopwatch();
+            var lexer = new JSONLexer();
+            var sw = new Stopwatch();
             sw.Start();
             var tokens = lexer.Tokenize(source);
             sw.Stop();
             Console.WriteLine($"hard coded lexer {tokens.Count()} tokens in {sw.ElapsedMilliseconds}ms");
             var sw2 = new Stopwatch();
-            int start = DateTime.Now.Millisecond;
-            sw2.Start();                        
+            var start = DateTime.Now.Millisecond;
+            sw2.Start();
             tokens = parser.Result.Lexer.Tokenize(source).ToList();
             sw2.Stop();
-            int end = DateTime.Now.Millisecond;
-            Console.WriteLine($"old lexer {tokens.Count()} tokens in {sw2.ElapsedMilliseconds}ms / {end-start}ms");
+            var end = DateTime.Now.Millisecond;
+            Console.WriteLine($"old lexer {tokens.Count()} tokens in {sw2.ElapsedMilliseconds}ms / {end - start}ms");
 
 
             ;
         }
 
 
-        static void testErrors()
+        private static void testErrors()
         {
-            JSONParser jsonParser = new JSONParser();
-            ParserBuilder<JsonToken, JSon> builder = new ParserBuilder<JsonToken, JSon>();
-            Parser<JsonToken, JSon> parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
+            var jsonParser = new JSONParser();
+            var builder = new ParserBuilder<JsonToken, JSon>();
+            var parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
 
 
-            string source = @"{
+            var source = @"{
     'one': 1,
     'bug':{,}
 }".Replace("'", "\"");
-            ParseResult<JsonToken, JSon> r = parser.Parse(source);
+            var r = parser.Parse(source);
 
-            bool isError = r.IsError; // true
+            var isError = r.IsError; // true
             var root = r.Result; // null;
             var errors = r.Errors; // !null & count > 0
             var error = errors[0] as UnexpectedTokenSyntaxError<JsonToken>; // 
-            var token = error.UnexpectedToken.TokenID;  // comma
+            var token = error.UnexpectedToken.TokenID; // comma
             var line = error.Line; // 3
             var column = error.Column; // 12
-
-           
         }
 
-        static void TestRuleParser() {
+        private static void TestRuleParser()
+        {
             Console.WriteLine("hum hum...");
-            RuleParser<EbnfToken> parserInstance = new RuleParser<EbnfToken>();
-            var builder = new ParserBuilder<EbnfToken,IClause<EbnfToken>>();
-            var r = builder.BuildParser(parserInstance,ParserType.LL_RECURSIVE_DESCENT,"rule");
-            //var conf = r.Result.Configuration;
-            //var clause = conf.NonTerminals["clause"];
-            //Console.WriteLine($"{r.IsError} {r.Result}");
-
+            var parserInstance = new RuleParser<EbnfToken>();
+            var builder = new ParserBuilder<EbnfToken, IClause<EbnfToken>>();
+            var r = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "rule");
+            
             var parser = r.Result;
-            var rule = parser.Parse("a ( b ) ","clauses" );
+            var rule = parser.Parse("a ( b ) ", "clauses");
             ;
         }
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             TestRuleParser();
-           
+
+            Console.WriteLine("***********************************************");
+
             Console.WriteLine("so what ?");
 
             ;
-
         }
     }
 }
-
-

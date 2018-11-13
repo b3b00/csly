@@ -1,14 +1,18 @@
-﻿using csly.whileLang.compiler;
-using sly.lexer;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Text;
+using csly.whileLang.compiler;
+using sly.lexer;
 using Sigil;
 
 namespace csly.whileLang.model
 {
     public class WhileStatement : Statement
     {
+        public WhileStatement(Expression condition, Statement blockStmt)
+        {
+            Condition = condition;
+            BlockStmt = blockStmt;
+        }
 
         public Expression Condition { get; set; }
 
@@ -18,15 +22,9 @@ namespace csly.whileLang.model
 
         public TokenPosition Position { get; set; }
 
-        public WhileStatement(Expression condition, Statement blockStmt)
-        {
-            Condition = condition;
-            BlockStmt = blockStmt;            
-        }
-
         public string Dump(string tab)
         {
-            StringBuilder dmp = new StringBuilder();
+            var dmp = new StringBuilder();
             dmp.AppendLine($"{tab}(WHILE");
 
             dmp.AppendLine($"{tab + "\t"}(COND");
@@ -43,10 +41,10 @@ namespace csly.whileLang.model
 
         public string Transpile(CompilerContext context)
         {
-            StringBuilder code = new StringBuilder();
+            var code = new StringBuilder();
             code.AppendLine($"while({Condition.Transpile(context)}) {{ ");
             code.AppendLine(BlockStmt.Transpile(context));
-            code.AppendLine("}");            
+            code.AppendLine("}");
             return code.ToString();
         }
 
@@ -54,11 +52,11 @@ namespace csly.whileLang.model
         {
             var loopLabel = emiter.DefineLabel();
             var outLabel = emiter.DefineLabel();
-            
+
             emiter.MarkLabel(loopLabel);
             Condition.EmitByteCode(context, emiter);
-            emiter.BranchIfFalse(outLabel);            
-            BlockStmt.EmitByteCode(context, emiter);            
+            emiter.BranchIfFalse(outLabel);
+            BlockStmt.EmitByteCode(context, emiter);
             emiter.Branch(loopLabel);
             emiter.MarkLabel(outLabel);
             return emiter;
