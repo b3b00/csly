@@ -80,7 +80,20 @@ namespace sly.parser
             return result;
         }
 
+
+        public ParseResult<IN, OUT> Parse(IList<Token<IN>> tokens) {
+            return ParseWithContext(tokens,null, null);
+        }
+
+        public ParseResult<IN, OUT> Parse(IList<Token<IN>> tokens, object context) {
+            return ParseWithContext(tokens, context, null);
+        }
+
         public ParseResult<IN, OUT> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
+        {
+            return ParseWithContext(tokens,null,startingNonTerminal);
+        }
+        public ParseResult<IN, OUT> ParseWithContext(IList<Token<IN>> tokens, object parsingContext = null, string startingNonTerminal = null)
         {
             var result = new ParseResult<IN, OUT>();
 
