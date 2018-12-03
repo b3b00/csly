@@ -144,7 +144,7 @@ namespace sly.parser.generator
         protected virtual SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN> n, object context = null)
         {
             if (n is SyntaxLeaf<IN>)
-                return Visit(n as SyntaxLeaf<IN>, context);
+                return Visit(n as SyntaxLeaf<IN>);
             if (n is SyntaxNode<IN>)
                 return Visit(n as SyntaxNode<IN>, context);
             return null;
