@@ -7,13 +7,16 @@ using csly.whileLang.compiler;
 using csly.whileLang.interpreter;
 using csly.whileLang.model;
 using csly.whileLang.parser;
+using expressionparser;
 using jsonparser;
 using jsonparser.JsonModel;
+using simpleExpressionParser;
 using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser;
 using sly.parser.generator;
 using sly.parser.syntax;
+using sly.buildresult;
 
 namespace ParserExample
 {
@@ -332,9 +335,37 @@ namespace ParserExample
             ;
         }
 
+
+        public static BuildResult<Parser<ExpressionToken, int>> buildSimpleExpressionParserWithContext()
+        {
+            
+           
+                var StartingRule = $"{typeof(SimpleExpressionParserWithContext).Name}_expressions";
+                var parserInstance = new SimpleExpressionParserWithContext();
+                var builder = new ParserBuilder<ExpressionToken, int>();
+                var Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+                return Parser;
+        }
+
+        public static void TestContextualParser()
+        {
+            var buildResult = buildSimpleExpressionParserWithContext();
+            if (buildResult.IsError)
+            {
+                buildResult.Errors.ForEach(e =>
+                {
+                    Console.WriteLine(e.Level + " - "+e.Message);
+                });
+                return;
+            }
+            var parser = buildResult.Result;
+            var res = parser.ParseWithContext("2 + a", new Dictionary<string, int> {{"a", 2}});
+            Console.WriteLine($"result : ok:>{res.IsOk}< value:>{res.Result}<");
+        }
+
         private static void Main(string[] args)
         {
-            TestRuleParser();
+            TestContextualParser();
 
             Console.WriteLine("***********************************************");
 

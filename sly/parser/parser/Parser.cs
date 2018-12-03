@@ -48,7 +48,14 @@ namespace sly.parser
         #endregion
 
 
+
         public ParseResult<IN, OUT> Parse(string source, string startingNonTerminal = null)
+        {
+            return ParseWithContext(source,null,startingNonTerminal);
+        }
+        
+        
+        public ParseResult<IN, OUT> ParseWithContext(string source, object context, string startingNonTerminal = null)
         {
             ParseResult<IN, OUT> result = null;
             try
@@ -67,7 +74,7 @@ namespace sly.parser
                     }
                 }
 
-                result = Parse(tokensWithoutComments, startingNonTerminal);
+                result = ParseWithContext(tokensWithoutComments, context, startingNonTerminal);
             }
             catch (LexerException e)
             {
@@ -81,18 +88,8 @@ namespace sly.parser
         }
 
 
-        public ParseResult<IN, OUT> Parse(IList<Token<IN>> tokens) {
-            return ParseWithContext(tokens,null, null);
-        }
-
-        public ParseResult<IN, OUT> Parse(IList<Token<IN>> tokens, object context) {
-            return ParseWithContext(tokens, context, null);
-        }
-
-        public ParseResult<IN, OUT> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
-        {
-            return ParseWithContext(tokens,null,startingNonTerminal);
-        }
+       
+        
         public ParseResult<IN, OUT> ParseWithContext(IList<Token<IN>> tokens, object parsingContext = null, string startingNonTerminal = null)
         {
             var result = new ParseResult<IN, OUT>();
@@ -103,7 +100,7 @@ namespace sly.parser
             syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
-                var r = Visitor.VisitSyntaxTree(syntaxResult.Root);
+                var r = Visitor.VisitSyntaxTree(syntaxResult.Root,parsingContext);
                 result.Result = r;
                 result.IsError = false;
             }

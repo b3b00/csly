@@ -183,6 +183,10 @@ namespace sly.parser.generator
                     MethodInfo method = null;
                     try
                     {
+                        if (!(context is NoContext))
+                        {
+                            args.Add(context);
+                        }
                         method = node.Visitor;
                         var t = method?.Invoke(ParserVsisitorInstance, args.ToArray());
                         var res = (OUT) t;
