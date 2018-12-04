@@ -51,7 +51,7 @@ namespace sly.parser
 
         public ParseResult<IN, OUT> Parse(string source, string startingNonTerminal = null)
         {
-            return ParseWithContext(source,null,startingNonTerminal);
+            return ParseWithContext(source,new NoContext(),startingNonTerminal);
         }
         
         
