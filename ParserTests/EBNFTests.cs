@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using expressionparser;
 using jsonparser;
 using jsonparser.JsonModel;
+using simpleExpressionParser;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser;
@@ -563,5 +565,34 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.Equal("R(A(a),B(b),c)", result.Result.Replace(" ", ""));
         }
+        
+        
+        
+        #region CONTEXTS
+        
+        private BuildResult<Parser<ExpressionToken, int>> buildSimpleExpressionParserWithContext()
+        {
+            var startingRule = $"{typeof(SimpleExpressionParserWithContext).Name}_expressions";
+            var parserInstance = new SimpleExpressionParserWithContext();
+            var builder = new ParserBuilder<ExpressionToken, int>();
+            var parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, startingRule);
+            return parser;
+        }
+
+        [Fact]
+        public void TestContextualParsing()
+        {
+            var buildResult = buildSimpleExpressionParserWithContext();
+            
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
+            var res = parser.ParseWithContext("2 + a", new Dictionary<string, int> {{"a", 2}});
+            Assert.True(res.IsOk);
+            Assert.Equal(4,res.Result);
+        }
+        
+        
+        #endregion
+        
     }
 }
