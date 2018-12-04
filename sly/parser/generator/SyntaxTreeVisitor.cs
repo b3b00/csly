@@ -135,22 +135,22 @@ namespace sly.parser.generator
 
         public ParserConfiguration<IN, OUT> Configuration { get; set; }
 
-        public OUT VisitSyntaxTree(ISyntaxNode<IN> root)
+        public OUT VisitSyntaxTree(ISyntaxNode<IN> root, object context = null)
         {
-            var result = Visit(root);
+            var result = Visit(root, context);
             return result.ValueResult;
         }
 
-        protected virtual SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN> n)
+        protected virtual SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN> n, object context = null)
         {
             if (n is SyntaxLeaf<IN>)
                 return Visit(n as SyntaxLeaf<IN>);
             if (n is SyntaxNode<IN>)
-                return Visit(n as SyntaxNode<IN>);
+                return Visit(n as SyntaxNode<IN>, context);
             return null;
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node, object context = null)
         {
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
             if (node.Visitor != null || node.IsByPassNode)
@@ -159,7 +159,7 @@ namespace sly.parser.generator
                 var i = 0;
                 foreach (var n in node.Children)
                 {
-                    var v = Visit(n);
+                    var v = Visit(n,context);
 
 
                     if (v.IsToken)
@@ -183,6 +183,10 @@ namespace sly.parser.generator
                     MethodInfo method = null;
                     try
                     {
+                        if (!(context is NoContext))
+                        {
+                            args.Add(context);
+                        }
                         method = node.Visitor;
                         var t = method?.Invoke(ParserVsisitorInstance, args.ToArray());
                         var res = (OUT) t;

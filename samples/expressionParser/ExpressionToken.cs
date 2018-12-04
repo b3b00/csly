@@ -36,6 +36,8 @@ namespace expressionparser
         // a whitespace
         [Lexeme("[ \\t]+", true)] WS = 11,
 
-        [Lexeme("[\\n\\r]+", true, true)] EOL = 12
+        [Lexeme("[\\n\\r]+", true, true)] EOL = 12,
+        
+        
     }
 }
