@@ -1,14 +1,16 @@
-﻿using csly.whileLang.compiler;
+﻿using System;
+using csly.whileLang.compiler;
 using sly.lexer;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Sigil;
 
 namespace csly.whileLang.model
 {
     public class BoolConstant : Expression
     {
+        public BoolConstant(bool value)
+        {
+            Value = value;
+        }
 
         public bool Value { get; set; }
 
@@ -17,11 +19,10 @@ namespace csly.whileLang.model
 
         public TokenPosition Position { get; set; }
 
-        public WhileType Whiletype { get { return WhileType.BOOL; } set { } }
-
-        public BoolConstant(bool value)
+        public WhileType Whiletype
         {
-            Value = value;
+            get => WhileType.BOOL;
+            set { }
         }
 
         public string Dump(string tab)

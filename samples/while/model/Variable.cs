@@ -1,25 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using sly.lexer;
 using csly.whileLang.compiler;
+using sly.lexer;
 using Sigil;
 
 namespace csly.whileLang.model
 {
     public class Variable : Expression
     {
+        public Variable(string name)
+        {
+            Name = name;
+        }
+
         public string Name { get; }
         public Scope CompilerScope { get; set; }
 
         public TokenPosition Position { get; set; }
 
         public WhileType Whiletype { get; set; }
-
-        public Variable(string name)
-        {
-            Name = name;
-        }
 
         public string Dump(string tab)
         {
@@ -37,5 +35,4 @@ namespace csly.whileLang.model
             return emiter;
         }
     }
-
 }

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace sly.lexer
+﻿namespace sly.lexer
 {
     public class TokenPosition
     {
@@ -11,9 +9,9 @@ namespace sly.lexer
             Column = column;
         }
 
-        public int Column { get; private set; }
-        public int Index { get; private set; }
-        public int Line { get; private set; }
+        public int Column { get; }
+        public int Index { get; }
+        public int Line { get; }
 
         public override string ToString()
         {

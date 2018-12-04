@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace sly.parser.generator
 {
@@ -9,10 +7,9 @@ namespace sly.parser.generator
         public ParserConfigurationException() : base("unable to configure parser")
         {
         }
+
         public ParserConfigurationException(string message) : base(message)
         {
         }
-
-        
     }
 }

@@ -1,24 +1,11 @@
-﻿using sly.lexer;
+﻿using expressionparser.model;
+using sly.lexer;
 using sly.parser.generator;
-using expressionparser.model;
-
-
 
 namespace expressionparser
 {
-   
-
-
     public class VariableExpressionParser
     {
-
-
-
-       
-
-
-
-
         [Production("primary: INT")]
         public Expression PrimaryNumber(Token<ExpressionToken> intToken)
         {
@@ -32,26 +19,22 @@ namespace expressionparser
         }
 
         [Production("primary: LPAREN expression RPAREN")]
-        public Expression Group(object discaredLParen, Expression groupValue ,object discardedRParen)
+        public Expression Group(object discaredLParen, Expression groupValue, object discardedRParen)
         {
             return new Group(groupValue);
         }
 
 
-
         [Production("expression : term PLUS expression")]
         [Production("expression : term MINUS expression")]
-
-        public Expression Expression(Expression left, Token<ExpressionToken> operatorToken, Expression  right)
+        public Expression Expression(Expression left, Token<ExpressionToken> operatorToken, Expression right)
         {
-            return new BinaryOperation(left,operatorToken.TokenID,right);
-
-          
+            return new BinaryOperation(left, operatorToken.TokenID, right);
         }
 
         [Production("expression : term")]
         public Expression Expression_Term(Expression termValue)
-        {           
+        {
             return termValue;
         }
 
@@ -59,7 +42,7 @@ namespace expressionparser
         [Production("term : factor DIVIDE term")]
         public Expression Term(Expression left, Token<ExpressionToken> operatorToken, Expression right)
         {
-            return new BinaryOperation(left,operatorToken.TokenID,right);
+            return new BinaryOperation(left, operatorToken.TokenID, right);
         }
 
         [Production("term : factor")]
@@ -73,15 +56,11 @@ namespace expressionparser
         {
             return primValue;
         }
+
         [Production("factor : MINUS factor")]
         public Expression Factor(Token<ExpressionToken> minus, Expression factorValue)
-        {            
-            return new UnaryOperation(minus.TokenID,factorValue);
+        {
+            return new UnaryOperation(minus.TokenID, factorValue);
         }
-
-
-
-
     }
 }
-

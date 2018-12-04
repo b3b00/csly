@@ -1,65 +1,59 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Net;
-using sly.parser.syntax;
-using sly.lexer;
 using System.Reflection;
+using sly.lexer;
 using sly.parser.parser;
+using sly.parser.syntax;
 using static sly.parser.parser.ValueOptionConstructors;
 
 namespace sly.parser.generator
 {
-
-    public class SyntaxVisitorResult<IN,OUT> where IN : struct
+    public class SyntaxVisitorResult<IN, OUT> where IN : struct
     {
-        
-        public Token<IN> TokenResult;
-
-        public OUT ValueResult;
-        
-        public List<OUT> ValueListResult;
-
-        public List<Group<IN,OUT>> GroupListResult;
-
-        public List<Token<IN>> TokenListResult;
-
-        public ValueOption<OUT> OptionResult;
-
-        public ValueOption<Group<IN,OUT>> OptionGroupResult;
+        public List<Group<IN, OUT>> GroupListResult;
 
         public Group<IN, OUT> GroupResult;
 
-        private bool isTok;
+        public ValueOption<Group<IN, OUT>> OptionGroupResult;
 
-        public bool IsOption => OptionResult != null ;
-        public bool IsOPtionGroup =>  OptionGroupResult != null;
+        public ValueOption<OUT> OptionResult;
 
-        public bool IsToken => isTok;
+        public List<Token<IN>> TokenListResult;
+
+        public Token<IN> TokenResult;
+
+        public List<OUT> ValueListResult;
+
+        public OUT ValueResult;
+
+        public bool IsOption => OptionResult != null;
+        public bool IsOPtionGroup => OptionGroupResult != null;
+
+        public bool IsToken { get; private set; }
 
         public bool Discarded => IsToken && TokenResult != null && TokenResult.Discarded;
         public bool IsValue { get; private set; }
-        public bool IsValueList { get; private set; } = false;
+        public bool IsValueList { get; private set; }
 
-        public bool IsGroupList { get; private set; } = false;
+        public bool IsGroupList { get; private set; }
 
-        public bool IsTokenList { get; private set; } = false;
+        public bool IsTokenList { get; private set; }
 
-        public bool IsGroup { get; private set; } = false;
+        public bool IsGroup { get; private set; }
 
-        public bool IsNone => !IsToken && !IsValue && !IsTokenList && ! IsValueList && !IsGroup && !IsGroupList; 
+        public bool IsNone => !IsToken && !IsValue && !IsTokenList && !IsValueList && !IsGroup && !IsGroupList;
 
-        public static SyntaxVisitorResult<IN,OUT> NewToken(Token<IN> tok)
+        public static SyntaxVisitorResult<IN, OUT> NewToken(Token<IN> tok)
         {
-            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            var res = new SyntaxVisitorResult<IN, OUT>();
             res.TokenResult = tok;
-            res.isTok = true;
+            res.IsToken = true;
             return res;
         }
 
         public static SyntaxVisitorResult<IN, OUT> NewValue(OUT val)
         {
-            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            var res = new SyntaxVisitorResult<IN, OUT>();
             res.ValueResult = val;
             res.IsValue = true;
             return res;
@@ -67,15 +61,15 @@ namespace sly.parser.generator
 
         public static SyntaxVisitorResult<IN, OUT> NewValueList(List<OUT> values)
         {
-            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            var res = new SyntaxVisitorResult<IN, OUT>();
             res.ValueListResult = values;
             res.IsValueList = true;
             return res;
         }
 
-        public static SyntaxVisitorResult<IN, OUT> NewGroupList(List<Group<IN,OUT>> values)
+        public static SyntaxVisitorResult<IN, OUT> NewGroupList(List<Group<IN, OUT>> values)
         {
-            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            var res = new SyntaxVisitorResult<IN, OUT>();
             res.GroupListResult = values;
             res.IsGroupList = true;
             return res;
@@ -83,7 +77,7 @@ namespace sly.parser.generator
 
         public static SyntaxVisitorResult<IN, OUT> NewTokenList(List<Token<IN>> tokens)
         {
-            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            var res = new SyntaxVisitorResult<IN, OUT>();
             res.TokenListResult = tokens;
             res.IsTokenList = true;
             return res;
@@ -91,30 +85,29 @@ namespace sly.parser.generator
 
         public static SyntaxVisitorResult<IN, OUT> NewOptionSome(OUT value)
         {
-            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
-            res.OptionResult = Some<OUT>(value);
+            var res = new SyntaxVisitorResult<IN, OUT>();
+            res.OptionResult = Some(value);
             return res;
         }
 
-         public static SyntaxVisitorResult<IN, OUT> NewOptionGroupSome(Group<IN,OUT> group)
+        public static SyntaxVisitorResult<IN, OUT> NewOptionGroupSome(Group<IN, OUT> group)
         {
-            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
-            res.OptionGroupResult = Some<Group<IN,OUT>>(group);
+            var res = new SyntaxVisitorResult<IN, OUT>();
+            res.OptionGroupResult = Some(group);
             return res;
         }
 
-        
 
         public static SyntaxVisitorResult<IN, OUT> NewOptionNone()
         {
-            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            var res = new SyntaxVisitorResult<IN, OUT>();
             res.OptionResult = None<OUT>();
             return res;
         }
 
-        public static SyntaxVisitorResult<IN, OUT> NewGroup(Group<IN,OUT> group)
+        public static SyntaxVisitorResult<IN, OUT> NewGroup(Group<IN, OUT> group)
         {
-            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();
+            var res = new SyntaxVisitorResult<IN, OUT>();
             res.GroupResult = group;
             res.IsGroup = true;
             return res;
@@ -122,71 +115,56 @@ namespace sly.parser.generator
 
         public static SyntaxVisitorResult<IN, OUT> NoneResult()
         {
-            SyntaxVisitorResult<IN, OUT> res = new SyntaxVisitorResult<IN, OUT>();            
+            var res = new SyntaxVisitorResult<IN, OUT>();
             return res;
         }
-
-
     }
 
-    public class SyntaxTreeVisitor<IN,OUT> where IN : struct
+    public class SyntaxTreeVisitor<IN, OUT> where IN : struct
     {
+        public SyntaxTreeVisitor(ParserConfiguration<IN, OUT> conf, object parserInstance)
+        {
+            ParserClass = ParserClass;
+            Configuration = conf;
+            ParserVsisitorInstance = parserInstance;
+        }
+
         public Type ParserClass { get; set; }
 
         public object ParserVsisitorInstance { get; set; }
 
-        public ParserConfiguration<IN,OUT> Configuration { get; set; }
-              
+        public ParserConfiguration<IN, OUT> Configuration { get; set; }
 
-        public SyntaxTreeVisitor(ParserConfiguration<IN,OUT> conf, object parserInstance)
+        public OUT VisitSyntaxTree(ISyntaxNode<IN> root, object context = null)
         {
-            this.ParserClass = ParserClass;
-            this.Configuration = conf;
-            this.ParserVsisitorInstance = parserInstance;
-        }
-
-        public OUT VisitSyntaxTree(ISyntaxNode<IN> root)
-        {
-            SyntaxVisitorResult<IN, OUT> result = Visit(root);
+            var result = Visit(root, context);
             return result.ValueResult;
         }
 
-        protected virtual SyntaxVisitorResult<IN,OUT> Visit(ISyntaxNode<IN> n)
+        protected virtual SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN> n, object context = null)
         {
             if (n is SyntaxLeaf<IN>)
-            {
                 return Visit(n as SyntaxLeaf<IN>);
-            }            
-            else if (n is SyntaxNode<IN>)
-            {
-                return Visit(n as SyntaxNode<IN>);
-            }            
-            else
-            {
-                return null;
-            }
+            if (n is SyntaxNode<IN>)
+                return Visit(n as SyntaxNode<IN>, context);
+            return null;
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node, object context = null)
         {
-            
-            
-            SyntaxVisitorResult<IN, OUT> result = SyntaxVisitorResult<IN, OUT>.NoneResult();
+            var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
             if (node.Visitor != null || node.IsByPassNode)
-            {                
-                List<object> args = new List<object>();
-                int i = 0;
-                foreach (ISyntaxNode<IN> n in node.Children)
+            {
+                var args = new List<object>();
+                var i = 0;
+                foreach (var n in node.Children)
                 {
-                    SyntaxVisitorResult<IN,OUT> v = Visit(n);
+                    var v = Visit(n,context);
 
 
                     if (v.IsToken)
                     {
-                        if (!v.Discarded)
-                        {
-                            args.Add(v.TokenResult);
-                        }
+                        if (!v.Discarded) args.Add(v.TokenResult);
                     }
                     else if (v.IsValue)
                     {
@@ -195,32 +173,32 @@ namespace sly.parser.generator
 
                     i++;
                 }
+
                 if (node.IsByPassNode)
-                {   
-                    result = SyntaxVisitorResult<IN, OUT>.NewValue((OUT)args[0]);                    
+                {
+                    result = SyntaxVisitorResult<IN, OUT>.NewValue((OUT) args[0]);
                 }
                 else
                 {
                     MethodInfo method = null;
                     try
                     {
-                        method = node.Visitor;
-                        object t = (method.Invoke(ParserVsisitorInstance, args.ToArray()));
-                        if (t == null)
+                        if (!(context is NoContext))
                         {
-                            ;
+                            args.Add(context);
                         }
-                        OUT res = (OUT)t;
+                        method = node.Visitor;
+                        var t = method?.Invoke(ParserVsisitorInstance, args.ToArray());
+                        var res = (OUT) t;
                         result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine($"OUTCH {e.Message} calling {node.Name} =>  {method?.Name}");
+                        Console.WriteLine($"ERROR : {e.Message} calling {node.Name} =>  {method?.Name}");
                     }
                 }
-
             }
-            
+
             return result;
         }
 

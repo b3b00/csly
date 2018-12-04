@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace sly.parser.parser
 {
@@ -19,32 +17,27 @@ namespace sly.parser.parser
 
     public class ValueOption<T>
     {
-        T Value { get; }
-
-
         public ValueOption()
         {
             IsNone = true;
         }
+
         public ValueOption(T value)
         {
             IsNone = false;
             Value = value;
         }
 
-        public bool IsNone { get; private set; }
+        private T Value { get; }
+
+        public bool IsNone { get; }
         public bool IsSome => !IsNone;
 
-        public T Match(Func<T,T> some, Func<T> none)
-        {            
+        public T Match(Func<T, T> some, Func<T> none)
+        {
             if (IsSome)
-            {
                 return some(Value);
-            }
-            else
-            {
-                return none();
-            }
+            return none();
         }
     }
 }

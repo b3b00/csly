@@ -1,6 +1,7 @@
 using System;
 
-namespace sly.lexer {
+namespace sly.lexer
+{
     public class InvalidLexerException : Exception
     {
         public InvalidLexerException(string message) : base(message)

@@ -1,79 +1,41 @@
-﻿using System.Linq;
-using Xunit;
+﻿using expressionparser;
 using sly.parser;
-using sly.lexer;
 using sly.parser.generator;
-using System.Collections.Generic;
-using expressionparser;
+using Xunit;
 
 namespace ParserTests
 {
-    
     public class ExpressionTests
     {
-
-        private Parser<ExpressionToken,int> Parser;
-      
         public ExpressionTests()
         {
-            ExpressionParser parserInstance = new ExpressionParser();
-            ParserBuilder<ExpressionToken, int> builder = new ParserBuilder<ExpressionToken, int>();
+            var parserInstance = new ExpressionParser();
+            var builder = new ParserBuilder<ExpressionToken, int>();
             Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression").Result;
         }
 
-
-        [Fact]
-        public void TestSingleValue()
-        {
-            ParseResult<ExpressionToken,int> r = Parser.Parse("1");
-            Assert.False(r.IsError);
-            Assert.Equal(1, r.Result);
-        }
-
-        [Fact]
-        public void TestSingleNegativeValue()
-        {
-            ParseResult <ExpressionToken,int> r = Parser.Parse("-1");
-            Assert.False(r.IsError);
-            Assert.Equal(-1, r.Result);
-        }
-
-        [Fact]
-        public void TestTermPlus()
-        {
-            ParseResult<ExpressionToken,int> r = Parser.Parse("1 + 1");
-            Assert.False(r.IsError);
-            Assert.Equal(2, (int)r.Result);
-        }
-
-        [Fact]
-        public void TestTermMinus()
-        {
-            ParseResult<ExpressionToken,int> r = Parser.Parse("1 - 1");
-            Assert.False(r.IsError);
-            Assert.Equal(0, r.Result);
-        }
-
-        [Fact]
-        public void TestFactorTimes()
-        {
-            ParseResult<ExpressionToken,int> r = Parser.Parse("2*2");
-            Assert.False(r.IsError);
-            Assert.Equal(4, r.Result);
-        }
+        private readonly Parser<ExpressionToken, int> Parser;
 
         [Fact]
         public void TestFactorDivide()
         {
-            ParseResult<ExpressionToken,int> r = Parser.Parse("42/2");
+            var r = Parser.Parse("42/2");
             Assert.False(r.IsError);
             Assert.Equal(21, r.Result);
         }
 
         [Fact]
+        public void TestFactorTimes()
+        {
+            var r = Parser.Parse("2*2");
+            Assert.False(r.IsError);
+            Assert.Equal(4, r.Result);
+        }
+
+        [Fact]
         public void TestGroup()
         {
-            ParseResult<ExpressionToken,int> r = Parser.Parse("(2 + 2)");
+            var r = Parser.Parse("(2 + 2)");
             Assert.False(r.IsError);
             Assert.Equal(4, r.Result);
         }
@@ -81,7 +43,7 @@ namespace ParserTests
         [Fact]
         public void TestGroup2()
         {
-            ParseResult<ExpressionToken,int> r = Parser.Parse("6 * (2 + 2)");
+            var r = Parser.Parse("6 * (2 + 2)");
             Assert.False(r.IsError);
             Assert.Equal(24, r.Result);
         }
@@ -89,14 +51,42 @@ namespace ParserTests
         [Fact]
         public void TestPrecedence()
         {
-            ParseResult<ExpressionToken,int> r = Parser.Parse("6 * 2 + 2");
+            var r = Parser.Parse("6 * 2 + 2");
             Assert.False(r.IsError);
             Assert.Equal(14, r.Result);
         }
 
+        [Fact]
+        public void TestSingleNegativeValue()
+        {
+            var r = Parser.Parse("-1");
+            Assert.False(r.IsError);
+            Assert.Equal(-1, r.Result);
+        }
 
-        
 
-      
+        [Fact]
+        public void TestSingleValue()
+        {
+            var r = Parser.Parse("1");
+            Assert.False(r.IsError);
+            Assert.Equal(1, r.Result);
+        }
+
+        [Fact]
+        public void TestTermMinus()
+        {
+            var r = Parser.Parse("1 - 1");
+            Assert.False(r.IsError);
+            Assert.Equal(0, r.Result);
+        }
+
+        [Fact]
+        public void TestTermPlus()
+        {
+            var r = Parser.Parse("1 + 1");
+            Assert.False(r.IsError);
+            Assert.Equal(2, r.Result);
+        }
     }
 }

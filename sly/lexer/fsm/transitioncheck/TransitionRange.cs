@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace sly.lexer.fsm.transitioncheck
+﻿namespace sly.lexer.fsm.transitioncheck
 {
     public class TransitionRange : AbstractTransitionCheck
     {
-        char RangeStart;
-
-        char RangeEnd;
+        private readonly char RangeEnd;
+        private readonly char RangeStart;
 
         public TransitionRange(char start, char end)
         {
             RangeStart = start;
             RangeEnd = end;
         }
-
 
 
         public TransitionRange(char start, char end, TransitionPrecondition precondition)
@@ -25,12 +19,11 @@ namespace sly.lexer.fsm.transitioncheck
             Precondition = precondition;
         }
 
-        public override string ToString()  {
-            string t = "";
-            if (Precondition != null) {
-                t = "[|] ";
-            }
-            t+=$"[{RangeStart}-{RangeEnd}]";
+        public override string ToString()
+        {
+            var t = "";
+            if (Precondition != null) t = "[|] ";
+            t += $"[{RangeStart}-{RangeEnd}]";
             return t;
         }
 

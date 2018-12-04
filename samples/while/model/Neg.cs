@@ -1,30 +1,33 @@
-﻿using csly.whileLang.compiler;
-using sly.lexer;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Text;
+using csly.whileLang.compiler;
+using sly.lexer;
 using Sigil;
 
 namespace csly.whileLang.model
 {
     public class Neg : Expression
     {
+        public Neg(Expression value)
+        {
+            Value = value;
+        }
+
         public Expression Value { get; set; }
 
         public Scope CompilerScope { get; set; }
 
         public TokenPosition Position { get; set; }
 
-        public Neg(Expression value)
+        public WhileType Whiletype
         {
-            Value = value;
+            get => WhileType.INT;
+            set { }
         }
-
-        public WhileType Whiletype { get { return WhileType.INT; } set { } }
 
         public string Dump(string tab)
         {
-            StringBuilder dmp = new StringBuilder();
+            var dmp = new StringBuilder();
             dmp.AppendLine($"{tab}(NEG");
             dmp.AppendLine(Value.Dump(tab + "\t"));
             dmp.AppendLine($"{tab})");

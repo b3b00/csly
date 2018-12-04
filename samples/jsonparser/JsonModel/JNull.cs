@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace jsonparser.JsonModel
+﻿namespace jsonparser.JsonModel
 {
     public class JNull : JSon
     {
-        public override Boolean IsNull => true;
+        public override bool IsNull => true;
     }
 }

@@ -1,24 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using sly.lexer;
 using System.Diagnostics.CodeAnalysis;
+using sly.lexer;
 
 namespace sly.parser.parser
 {
-
-
     public class GroupItem<IN, OUT>
     {
         public string Name;
-
-        public Token<IN> Token { get; }
-
-        public bool IsToken { get; set; }
-
-        public OUT Value { get; set; }
-
-        public bool IsValue { get; }
 
         public GroupItem(string name)
         {
@@ -26,6 +14,7 @@ namespace sly.parser.parser
             IsToken = false;
             IsValue = false;
         }
+
         public GroupItem(string name, Token<IN> token)
         {
             Name = name;
@@ -40,28 +29,36 @@ namespace sly.parser.parser
             Value = value;
         }
 
+        public Token<IN> Token { get; }
+
+        public bool IsToken { get; set; }
+
+        public OUT Value { get; set; }
+
+        public bool IsValue { get; }
+
 
         public X Match<X>(Func<string, Token<IN>, X> fToken, Func<string, OUT, X> fValue)
         {
             if (IsToken)
-            {
                 return fToken(Name, Token);
-            }
-            else
-            {
-                return fValue(Name, Value);
-            }
+            return fValue(Name, Value);
         }
 
-        public static implicit operator OUT(GroupItem<IN,OUT> item)   {
-            return item.Match((string name, Token<IN> token) => default(OUT), (string name, OUT value) => item.Value);
+        public static implicit operator OUT(GroupItem<IN, OUT> item)
+        {
+            return item.Match((name, token) => default(OUT), (name, value) => item.Value);
         }
 
-        public static implicit operator Token<IN>(GroupItem<IN,OUT> item)   {
-            return item.Match((string name, Token<IN> token) => item.Token, (string name, OUT value) => default(Token<IN>));
+        public static implicit operator Token<IN>(GroupItem<IN, OUT> item)
+        {
+            return item.Match((name, token) => item.Token, (name, value) => default(Token<IN>));
         }
 
         [ExcludeFromCodeCoverage]
-        public override string ToString() => IsValue ? ((OUT)this).ToString() : ((Token<IN>)this).Value;
+        public override string ToString()
+        {
+            return IsValue ? ((OUT) this).ToString() : ((Token<IN>) this).Value;
+        }
     }
 }

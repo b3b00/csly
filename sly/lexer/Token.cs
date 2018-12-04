@@ -1,18 +1,36 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace sly.lexer
 {
-
-    public enum CommentType {
+    public enum CommentType
+    {
         Single,
         Multi,
         No
     }
+
     public class Token<T>
     {
         public char StringDelimiter = '"';
 
+
+        public Token(T token, string value, TokenPosition position, bool isCommentStart = false,
+            CommentType commentType = CommentType.Single)
+        {
+            TokenID = token;
+            Value = value;
+            Position = position;
+            CommentType = commentType;
+        }
+
+
+        public Token()
+        {
+            IsEOS = true;
+            End = true;
+            TokenID = DefaultToken;
+            Position = new TokenPosition(0, 0, 0);
+        }
 
 
         public TokenPosition Position { get; set; }
@@ -23,11 +41,11 @@ namespace sly.lexer
 
         public bool Discarded { get; set; } = false;
 
-        public bool IsEOS{get; set;} = false;
+        public bool IsEOS { get; set; }
 
-        public CommentType CommentType {get; set;} = CommentType.No;
+        public CommentType CommentType { get; set; } = CommentType.No;
 
-        public bool IsEmpty {get; set;} = false;
+        public bool IsEmpty { get; set; }
 
         public bool IsMultiLineComment => CommentType == CommentType.Multi;
 
@@ -37,89 +55,42 @@ namespace sly.lexer
 
         public static T DefaultToken
         {
-            get { return DefTok; }
-            set { DefTok = value; }
+            get => DefTok;
+            set => DefTok = value;
         }
 
-
-        public Token(T token, string value, TokenPosition position, bool isCommentStart = false, CommentType commentType =  CommentType.Single) 
-        {
-            TokenID = token;
-            Value = value;
-            Position = position;
-            CommentType = commentType;
-        }
-
-
-        
-
-        public Token()
-        {
-            IsEOS = true;
-            End = true;
-            TokenID = DefaultToken;
-            Position = new TokenPosition(0, 0, 0);
-        }
-
-        public static Token<T> Empty() {
-            var empty = new Token<T>();
-            empty.IsEmpty = true;
-            return empty;
-        }
-
-         
-
-
-
-       
 
         public string StringWithoutQuotes
         {
             get
             {
-                string result = Value;
-                if (StringDelimiter != (char)0 )
+                var result = Value;
+                if (StringDelimiter != (char) 0)
                 {
-                    if (result.StartsWith(StringDelimiter.ToString()))
-                    {
-                        result = result.Substring(1);
-                    }
-                    if (result.EndsWith(StringDelimiter.ToString()))
-                    {
-                        result = result.Substring(0, result.Length - 1);
-                    }
+                    if (result.StartsWith(StringDelimiter.ToString())) result = result.Substring(1);
+                    if (result.EndsWith(StringDelimiter.ToString())) result = result.Substring(0, result.Length - 1);
                 }
+
                 return result;
             }
         }
 
-        public int IntValue
-        {
-            get
-            {
-                return int.Parse(Value);
-            }
-        }
+        public int IntValue => int.Parse(Value);
 
-        public double DoubleValue
-        {
-            get
-            {
-                return double.Parse(Value);
-            }
-        }
+        public double DoubleValue => double.Parse(Value);
 
-        public char CharValue
-        {
-            get
-            {
-                return StringWithoutQuotes[0];
-            }
-        }
+        public char CharValue => StringWithoutQuotes[0];
 
 
         public bool End { get; set; }
         public static T DefTok { get; set; }
+
+        public static Token<T> Empty()
+        {
+            var empty = new Token<T>();
+            empty.IsEmpty = true;
+            return empty;
+        }
 
         [ExcludeFromCodeCoverage]
         public override string ToString()

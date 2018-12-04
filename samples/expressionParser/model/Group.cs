@@ -2,7 +2,7 @@
 {
     public class Group : Expression
     {
-        private Expression InnerExpression;
+        private readonly Expression InnerExpression;
 
         public Group(Expression expr)
         {

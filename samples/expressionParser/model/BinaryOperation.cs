@@ -2,9 +2,9 @@
 {
     public class BinaryOperation : Expression
     {
-        private Expression LeftExpresion;
-        private Expression RightExpression;
-        private ExpressionToken Operator;
+        private readonly Expression LeftExpresion;
+        private readonly ExpressionToken Operator;
+        private readonly Expression RightExpression;
 
 
         public BinaryOperation(Expression left, ExpressionToken op, Expression right)
@@ -16,12 +16,10 @@
 
         public int? Evaluate(ExpressionContext context)
         {
-            int? left = LeftExpresion.Evaluate(context);
-            int? right = RightExpression.Evaluate(context);
+            var left = LeftExpresion.Evaluate(context);
+            var right = RightExpression.Evaluate(context);
 
             if (left.HasValue && right.HasValue)
-            {
-
                 switch (Operator)
                 {
                     case ExpressionToken.PLUS:
@@ -45,7 +43,6 @@
                         return null;
                     }
                 }
-            }
             return null;
         }
     }

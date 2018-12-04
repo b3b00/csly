@@ -2,9 +2,9 @@
 {
     public class UnaryOperation : Expression
     {
-        private Expression RightExpression;
-        private ExpressionToken Operator;
-        
+        private readonly ExpressionToken Operator;
+        private readonly Expression RightExpression;
+
         public UnaryOperation(ExpressionToken op, Expression right)
         {
             Operator = op;
@@ -13,27 +13,24 @@
 
         public int? Evaluate(ExpressionContext context)
         {
-            int? right = RightExpression.Evaluate(context);
+            var right = RightExpression.Evaluate(context);
 
             if (right.HasValue)
-            {
-
                 switch (Operator)
                 {
                     case ExpressionToken.PLUS:
                     {
-                        return + right.Value;
+                        return +right.Value;
                     }
                     case ExpressionToken.MINUS:
                     {
-                        return - right.Value;
+                        return -right.Value;
                     }
                     default:
                     {
                         return null;
                     }
                 }
-            }
             return null;
         }
     }

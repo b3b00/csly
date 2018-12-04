@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace sly.parser.generator
 {
-
     public enum Associativity
     {
         None = 0,
@@ -20,11 +17,25 @@ namespace sly.parser.generator
         InFix = 2,
         PostFix = 3
     }
-    
+
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class OperationAttribute : Attribute //where IN : struct
     {
+        /// <summary>
+        ///     token as an int as attribute can not be generics.
+        /// </summary>
+        /// <param name="token">token enum as int value</param>
+        /// <param name="arity">operator arity</param>
+        /// <param name="assoc">operator aosociativity (<see cref="Associativity" />) </param>
+        /// <param name="precedence">precedence level: the greater, the higher</param>
+        public OperationAttribute(int token, Affix affix, Associativity assoc, int precedence)
+        {
+            Token = token;
+            Affix = affix;
+            Assoc = assoc;
+            Precedence = precedence;
+        }
 
         public int Token { get; set; }
 
@@ -33,19 +44,5 @@ namespace sly.parser.generator
         public Associativity Assoc { get; set; }
 
         public int Precedence { get; set; }
-
-        /// <summary>
-        /// token as an int as attribute can not be generics.
-        /// </summary>
-        /// <param name="token">token enum as int value</param>
-        /// <param name="arity">operator arity</param>
-        /// <param name="assoc">operator aosociativity (<see cref="Associativity"/>) </param>
-        /// <param name="precedence">precedence level: the greater, the higher</param>
-        public OperationAttribute(int token, Affix affix, Associativity assoc, int precedence)        {
-            Token = token;
-            Affix = affix;
-            Assoc = assoc;
-            Precedence = precedence;
-        }
     }
 }

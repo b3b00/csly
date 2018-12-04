@@ -1,8 +1,5 @@
-using System.Text;
-
 namespace sly.parser.syntax
 {
-
     public class ZeroOrMoreClause<T> : ManyClause<T>
     {
         public ZeroOrMoreClause(IClause<T> clause)
@@ -12,14 +9,12 @@ namespace sly.parser.syntax
 
         public override string ToString()
         {
-            return Clause.ToString() + "*";
+            return Clause + "*";
         }
 
         public override bool MayBeEmpty()
         {
             return true;
         }
-
-      
     }
 }

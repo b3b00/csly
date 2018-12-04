@@ -6,10 +6,6 @@ namespace csly.whileLang.compiler
     {
         public TypingException(string message) : base(message)
         {
-
         }
     }
-
-
-
 }

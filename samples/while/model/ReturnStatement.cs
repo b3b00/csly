@@ -1,20 +1,19 @@
-﻿using csly.whileLang.compiler;
-using sly.lexer;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Text;
+using csly.whileLang.compiler;
+using sly.lexer;
 using Sigil;
 
 namespace csly.whileLang.model
 {
     public class ReturnStatement : Statement
     {
-        public Expression Value { get; set; }
-
         public ReturnStatement(Expression value)
         {
             Value = value;
         }
+
+        public Expression Value { get; set; }
 
         public Scope CompilerScope { get; set; }
 
@@ -22,16 +21,15 @@ namespace csly.whileLang.model
 
         public string Dump(string tab)
         {
-            StringBuilder dmp = new StringBuilder();
+            var dmp = new StringBuilder();
             dmp.AppendLine($"{tab}(RETURN ");
-            dmp.AppendLine($"{Value.Dump("\t" + tab)}");            
+            dmp.AppendLine($"{Value.Dump("\t" + tab)}");
             dmp.AppendLine($"{tab})");
             return dmp.ToString();
         }
 
         public string Transpile(CompilerContext context)
         {
-            
             return $"return {Value.Transpile(context)};";
         }
 

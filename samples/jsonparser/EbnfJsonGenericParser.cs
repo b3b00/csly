@@ -1,21 +1,13 @@
-﻿using sly.lexer;
-using sly.parser.generator;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using jsonparser.JsonModel;
-
+using sly.lexer;
+using sly.parser.generator;
 
 namespace jsonparser
 {
     public class EbnfJsonGenericParser
     {
-
-
-
-
-
-
         #region root
 
         [Production("root : value")]
@@ -23,7 +15,6 @@ namespace jsonparser
         {
             return value;
         }
-
 
         #endregion
 
@@ -47,15 +38,12 @@ namespace jsonparser
             double dbl;
             try
             {
-                string[] doubleParts = doubleToken.Value.Split('.');
+                var doubleParts = doubleToken.Value.Split('.');
                 dbl = double.Parse(doubleParts[0]);
                 if (doubleParts.Length > 1)
                 {
-                    double decimalPart = double.Parse(doubleParts[1]);
-                    for (int i = 0; i < doubleParts[1].Length; i++)
-                    {
-                        decimalPart = decimalPart / 10.0;
-                    }
+                    var decimalPart = double.Parse(doubleParts[1]);
+                    for (var i = 0; i < doubleParts[1].Length; i++) decimalPart = decimalPart / 10.0;
                     dbl += decimalPart;
                 }
             }
@@ -107,8 +95,8 @@ namespace jsonparser
             return members;
         }
 
-
         #endregion
+
         #region LIST
 
         [Production("list: CROG CROD")]
@@ -127,7 +115,7 @@ namespace jsonparser
         [Production("listElements: value additionalValue*")]
         public JSon listElements(JSon head, List<JSon> tail)
         {
-            JList values = new JList(head);
+            var values = new JList(head);
             values.AddRange(tail);
             return values;
         }
@@ -138,23 +126,16 @@ namespace jsonparser
             return value;
         }
 
-
-
         #endregion
 
         #region PROPERTIES
 
-
-
         [Production("members: property additionalProperty*")]
         public object Members(JObject head, List<JSon> tail)
         {
-            JObject value = new JObject();
+            var value = new JObject();
             value.Merge(head);
-            foreach (JSon p in tail)
-            {
-                value.Merge((JObject)p);
-            }
+            foreach (var p in tail) value.Merge((JObject) p);
             return value;
         }
 
@@ -170,13 +151,6 @@ namespace jsonparser
             return new JObject(key.StringWithoutQuotes, value);
         }
 
-
-        
-
         #endregion
-
-
-
-
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace expressionparser.model
 {
@@ -11,18 +10,15 @@ namespace expressionparser.model
         {
             Variables = new Dictionary<string, int>();
         }
-        
-        public ExpressionContext(Dictionary<String, int> variables)
+
+        public ExpressionContext(Dictionary<string, int> variables)
         {
             Variables = variables;
         }
 
         public int? GetValue(string variable)
         {
-            if (Variables.ContainsKey(variable))
-            {
-                return Variables[variable];
-            }
+            if (Variables.ContainsKey(variable)) return Variables[variable];
             return null;
         }
     }

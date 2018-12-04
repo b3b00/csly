@@ -52,7 +52,7 @@ The full lexers documentation can be found in the
 [lexer wiki](https://github.com/b3b00/csly/wiki/Lexer)
 
 
-### full example, for a arithmetic expression parser ###
+### full example, for a arithmetic expression parser using the regex lexer
 
 Here is a lexer definition for a arithmetic expression parser using the generic lexer.
 
