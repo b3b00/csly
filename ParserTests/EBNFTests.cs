@@ -590,6 +590,18 @@ namespace ParserTests
             Assert.True(res.IsOk);
             Assert.Equal(4,res.Result);
         }
+
+        [Fact]
+        public void TestContextualParsing2()
+        {
+            var buildResult = buildSimpleExpressionParserWithContext();
+            
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
+            var res = parser.ParseWithContext("2 + a * b", new Dictionary<string, int> {{"a", 2},{"b",3}});
+            Assert.True(res.IsOk);
+            Assert.Equal(8,res.Result);
+        }
         
         
         #endregion
