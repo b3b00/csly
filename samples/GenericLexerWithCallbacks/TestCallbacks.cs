@@ -6,7 +6,7 @@ namespace GenericLexerWithCallbacks
     {
 
         [TokenCallback((int)Tokens.IDENTIFIER)]
-        public Token<Tokens> TranslateID(Token<Tokens> token)
+        public Token<Tokens> TranslateIdentifier(Token<Tokens> token)
         {
             return token;
         } 

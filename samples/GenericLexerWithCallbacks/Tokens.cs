@@ -2,6 +2,8 @@ using sly.lexer;
 
 namespace GenericLexerWithCallbacks
 {
+    
+    [CallBacks(typeof(TestCallbacks))]
     public enum Tokens
     {
         #region keywords 0 -> 19
@@ -95,5 +97,5 @@ namespace GenericLexerWithCallbacks
 
         #endregion
     }
-}
+
 }
