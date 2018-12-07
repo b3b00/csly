@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "while", "samples\while\while.csproj", "{E0375D19-488A-4D5C-83E9-683552D5F4E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericLexerWithCallbacks", "samples\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj", "{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}"
+EndProject
 
 Global
 	GlobalSection(Performance) = preSolution
@@ -129,6 +131,18 @@ Global
 		{2CA44E35-511C-48BE-8589-BE69C371E092}.Release|x64.Build.0 = Release|Any CPU
 		{2CA44E35-511C-48BE-8589-BE69C371E092}.Release|x86.ActiveCfg = Release|Any CPU
 		{2CA44E35-511C-48BE-8589-BE69C371E092}.Release|x86.Build.0 = Release|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Debug|x64.Build.0 = Debug|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Debug|x86.Build.0 = Debug|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Release|x64.ActiveCfg = Release|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Release|x64.Build.0 = Release|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Release|x86.ActiveCfg = Release|Any CPU
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -139,6 +153,7 @@ Global
 		{B8DD555A-04F0-4908-8B06-A21292648B2F} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{CA92D7D9-40AA-4B7B-BEBC-B9180CCEB7D6} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{E0375D19-488A-4D5C-83E9-683552D5F4E5} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
+		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43254130-CF3E-480E-952F-E50CA5D2E417}
