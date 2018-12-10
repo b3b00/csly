@@ -23,7 +23,7 @@ namespace sly.lexer
             {
                 var attributes = m.GetCustomAttributes().ToList();
                 var attr = attributes.Find(a => a.GetType() == typeof(TokenCallbackAttribute));
-                return attr != null;
+                return m.IsStatic && attr != null;
             }).ToList();
 
             foreach (var method in methods)
@@ -35,7 +35,12 @@ namespace sly.lexer
 
         public static void AddCallback<IN>(GenericLexer<IN> lexer, MethodInfo method, IN token) where IN : struct
         {
-            ;
+            var t = typeof(IN);
+            var rt = method.ReturnType;
+            var ps = method.GetParameters();
+            
+            var callbackDelegate = (Func<Token<IN>,Token<IN>>)Delegate.CreateDelegate(typeof(Func<Token<IN>,Token<IN>>), method);
+           lexer.AddCallBack(token,callbackDelegate);
         }
         
         

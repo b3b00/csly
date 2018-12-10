@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using sly.lexer.fsm;
 
@@ -67,6 +68,8 @@ namespace sly.lexer
         protected FSMLexer<GenericToken> LexerFsm;
         protected int StringCounter;
 
+        
+        protected Dictionary<IN,Func<Token<IN>, Token<IN>>> CallBacks = new Dictionary<IN, Func<Token<IN>, Token<IN>>>();
 
         protected char StringDelimiterChar;
 
@@ -84,8 +87,14 @@ namespace sly.lexer
         public string MultiLineCommentEnd { get; set; }
 
 
+        public void AddCallBack(IN token, Func<Token<IN>, Token<IN>> callback)
+        {
+            CallBacks[token] = callback;
+        }
+
         public void AddDefinition(TokenDefinition<IN> tokenDefinition)
         {
+            throw new NotImplementedException();
         }
 
         public IEnumerable<Token<IN>> Tokenize(string source)
