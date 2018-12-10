@@ -371,6 +371,13 @@ namespace ParserExample
             {
                 var lexer = res.Result as GenericLexer<Tokens>;
                 CallBacksBuilder.BuildCallbacks<Tokens>(lexer);
+
+                var tokens = lexer.Tokenize("aaa bbb").ToList();
+                ;
+                foreach (var token in tokens)
+                {
+                    Console.WriteLine($"{token.TokenID} - {token.Value}");
+                }
             }
             
         }

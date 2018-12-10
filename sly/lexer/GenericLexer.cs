@@ -104,8 +104,15 @@ namespace sly.lexer
             while (r.IsSuccess)
             {
                 var transcoded = Transcode(r);
+                Func<Token<IN>, Token<IN>> callback = null;
+                if (CallBacks.TryGetValue(transcoded.TokenID, out callback))
+                {
+                    transcoded = callback(transcoded);
+                }
+                
                 tokens.Add(transcoded);
                 r = LexerFsm.Run(source);
+               
                 if (r.Result.IsComment) ConsumeComment(r.Result, source);
             }
 
