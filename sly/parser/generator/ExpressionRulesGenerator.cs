@@ -64,7 +64,7 @@ namespace sly.parser.generator
                 foreach (var attr in attributes)
                 {
                     var operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix,
-                        ConvertIntToEnum<IN>(attr.Token));
+                        EnumConverter.ConvertIntToEnum<IN>(attr.Token));
                     var operations = new List<OperationMetaData<IN>>();
                     if (operationsByPrecedence.ContainsKey(operation.Precedence))
                         operations = operationsByPrecedence[operation.Precedence];
@@ -221,18 +221,6 @@ namespace sly.parser.generator
         }
 
 
-        public static IN ConvertIntToEnum<IN>(int intValue)
-        {
-            var genericType = typeof(IN);
-            if (genericType.IsEnum)
-                foreach (IN value in Enum.GetValues(genericType))
-                {
-                    var test = Enum.Parse(typeof(IN), value.ToString()) as Enum;
-                    var val = Convert.ToInt32(test);
-                    if (val == intValue) return value;
-                }
-
-            return default(IN);
-        }
+       
     }
 }

@@ -3,6 +3,7 @@ using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fsm;
 using Xunit;
+using GenericLexerWithCallbacks;
 
 namespace ParserTests
 {
@@ -355,6 +356,22 @@ namespace ParserTests
             var tok = r[0];
             Assert.Equal(SingleQuotedString.SingleString, tok.TokenID);
             Assert.Equal(source, tok.StringWithoutQuotes);
+        }
+
+        [Fact]
+        public void TestTokenCallbacks()
+        {
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CallbackTokens>>());
+            Assert.False(res.IsError);
+            var lexer = res.Result as GenericLexer<CallbackTokens>;
+            CallBacksBuilder.BuildCallbacks<CallbackTokens>(lexer);
+            
+
+            var tokens = lexer.Tokenize("aaa bbb").ToList();
+            Assert.Equal(3,tokens.Count);
+            Assert.Equal("AAA",tokens[0].Value);
+            Assert.Equal("BBB",tokens[1].Value);
+            Assert.Equal(CallbackTokens.SKIP,tokens[1].TokenID);
         }
     }
 }
