@@ -4,7 +4,7 @@ namespace GenericLexerWithCallbacks
 {
     
     [CallBacks(typeof(TestCallbacks))]
-    public enum Tokens
+    public enum CallbackTokens
     {
         #region keywords 0 -> 19
 

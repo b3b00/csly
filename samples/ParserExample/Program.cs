@@ -366,11 +366,11 @@ namespace ParserExample
 
         public static void TestTokenCallBacks()
         {
-            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Tokens>>());
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CallbackTokens>>());
             if (!res.IsError)
             {
-                var lexer = res.Result as GenericLexer<Tokens>;
-                CallBacksBuilder.BuildCallbacks<Tokens>(lexer);
+                var lexer = res.Result as GenericLexer<CallbackTokens>;
+                CallBacksBuilder.BuildCallbacks<CallbackTokens>(lexer);
 
                 var tokens = lexer.Tokenize("aaa bbb").ToList();
                 ;

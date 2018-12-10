@@ -5,10 +5,15 @@ namespace GenericLexerWithCallbacks
     public class TestCallbacks
     {
 
-        [TokenCallback((int)Tokens.IDENTIFIER)]
-        public static Token<Tokens> TranslateIdentifier(Token<Tokens> token)
+        [TokenCallback((int)CallbackTokens.IDENTIFIER)]
+        public static Token<CallbackTokens> TranslateIdentifier(Token<CallbackTokens> token)
         {
+            if (token.Value.StartsWith("b"))
+            {
+                token.TokenID = CallbackTokens.SKIP;
+            }
             token.Value = token.Value.ToUpper();
+            
             return token;
         } 
         
