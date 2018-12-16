@@ -3,6 +3,7 @@
 [![Build status](https://ci.appveyor.com/api/projects/status/n9uffgkqn2qet7k9?svg=true)](https://ci.appveyor.com/project/OlivierDuhart/sly)
 ![AppVeyor tests](https://img.shields.io/appveyor/tests/OlivierDuhart/sly.svg)
 [![codecov](https://codecov.io/gh/b3b00/csly/branch/dev/graph/badge.svg)](https://codecov.io/gh/b3b00/csly)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fb3b00%2Fcsly.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fb3b00%2Fcsly?ref=badge_shield)
 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/b3b00/sly/blob/dev/LICENSE)
@@ -361,3 +362,7 @@ Full examples are available under :
 - [expressionParser](https://github.com/b3b00/sly/blob/master/expressionParser/ExpressionParser.cs) : a mathematical expression parser
 - [While Language](https://github.com/b3b00/csly/tree/master/samples/while) : a dummy language inspired by this [parsec sample](https://wiki.haskell.org/Parsing_a_simple_imperative_language)
 - You can also look at Tests that presents a simple EBNF grammar in [EBNFTests](https://github.com/b3b00/sly/blob/master/ParserTests/EBNFTests.cs)
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fb3b00%2Fcsly.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fb3b00%2Fcsly?ref=badge_large)
