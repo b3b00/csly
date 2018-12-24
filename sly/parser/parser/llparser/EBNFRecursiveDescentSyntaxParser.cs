@@ -40,6 +40,37 @@ namespace sly.parser.llparser
                     {
                         var many = first as ZeroOrMoreClause<IN>;
                         InitStartingTokensWithZeroOrMore(rule, many, nonTerminals);
+                        // TODO consume other clauses til first non optional clause
+                        int i = 1;
+                        bool optional = first is ZeroOrMoreClause<IN> || first is OptionClause<IN>;
+                        while (i < rule.Clauses.Count && optional)
+                        {
+                            IClause<IN> clause = rule.Clauses[i];
+
+                            switch (clause)
+                            {
+                                // todo init startign token for clause
+                                case TerminalClause<IN> terminalClause:
+                                {
+                                    rule.PossibleLeadingTokens.Add(terminalClause.ExpectedToken);
+                                    break;
+                                }
+                                case NonTerminalClause<IN> terminalClause:
+                                {
+                                    InitStartingTokensForNonTerminal(nonTerminals,terminalClause.NonTerminalName);
+                                    NonTerminal<IN> nonTerminal = nonTerminals[terminalClause.NonTerminalName];
+                                    {
+                                        rule.PossibleLeadingTokens.AddRange(nonTerminal.PossibleLeadingTokens);
+                                    }
+                                    break;
+                                }
+                            }
+                            
+                            // add startig tokens of clause in rule.startingtokens
+                            
+                            optional = clause is ZeroOrMoreClause<IN> || clause is OptionClause<IN>;
+                            i++;
+                        }
                     }
                     else if (first is OneOrMoreClause<IN>)
                     {
