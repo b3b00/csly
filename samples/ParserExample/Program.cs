@@ -8,6 +8,7 @@ using csly.whileLang.interpreter;
 using csly.whileLang.model;
 using csly.whileLang.parser;
 using expressionparser;
+using GenericLexerWithCallbacks;
 using jsonparser;
 using jsonparser.JsonModel;
 using simpleExpressionParser;
@@ -363,15 +364,28 @@ namespace ParserExample
             Console.WriteLine($"result : ok:>{res.IsOk}< value:>{res.Result}<");
         }
 
+        public static void TestTokenCallBacks()
+        {
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CallbackTokens>>());
+            if (!res.IsError)
+            {
+                var lexer = res.Result as GenericLexer<CallbackTokens>;
+                CallBacksBuilder.BuildCallbacks<CallbackTokens>(lexer);
+
+                var tokens = lexer.Tokenize("aaa bbb").ToList();
+                ;
+                foreach (var token in tokens)
+                {
+                    Console.WriteLine($"{token.TokenID} - {token.Value}");
+                }
+            }
+            
+        }
+
         private static void Main(string[] args)
         {
-            TestContextualParser();
-
-            Console.WriteLine("***********************************************");
-
-            Console.WriteLine("so what ?");
-
-            ;
+            //TestContextualParser();
+            TestTokenCallBacks();
         }
     }
 }

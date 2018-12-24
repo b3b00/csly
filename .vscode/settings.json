@@ -1,4 +1,8 @@
 {
     "dotnet-test-explorer.testProjectPath": "./ParserTests",
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "editor.fontLigatures": true,
+    "editor.fontFamily": "Fira Code",
+    "azureFunctions.projectLanguage": "C#",
+    "azureFunctions.projectRuntime": "~2"
 }
