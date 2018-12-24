@@ -99,9 +99,13 @@ namespace sly.parser.llparser
 
             InitStartingTokensForNonTerminal(nts, root);
             foreach (var nt in nts.Values)
-            foreach (var rule in nt.Rules)
-                if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
-                    InitStartingTokensForRule(nts, rule);
+            {
+                foreach (var rule in nt.Rules)
+                {
+                    if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
+                        InitStartingTokensForRule(nts, rule);
+                }
+            }
         }
 
         protected virtual void InitStartingTokensForNonTerminal(Dictionary<string, NonTerminal<IN>> nonTerminals,
@@ -160,6 +164,11 @@ namespace sly.parser.llparser
 
             var rules = nt.Rules.Where(r => r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList();
 
+            if (!rules.Any())
+            {
+                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], nt.PossibleLeadingTokens.ToArray()));
+            }
+            
             var rs = new List<SyntaxParseResult<IN>>();
             foreach (var rule in rules)
             {
