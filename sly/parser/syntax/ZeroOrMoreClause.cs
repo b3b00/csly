@@ -16,5 +16,10 @@ namespace sly.parser.syntax
         {
             return true;
         }
+        
+        public override string Dump()
+        {
+            return Clause.Dump()+"*";
+        }
     }
 }

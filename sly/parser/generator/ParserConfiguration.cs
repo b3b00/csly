@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace sly.parser.generator
 {
@@ -11,6 +12,17 @@ namespace sly.parser.generator
         public void AddNonTerminalIfNotExists(NonTerminal<IN> nonTerminal)
         {
             if (!NonTerminals.ContainsKey(nonTerminal.Name)) NonTerminals[nonTerminal.Name] = nonTerminal;
+        }
+
+        public string Dump()
+        {
+            StringBuilder dump = new StringBuilder();
+            foreach (NonTerminal<IN> nonTerminal in NonTerminals.Values)
+            {
+                dump.AppendLine(nonTerminal.Dump());
+            }
+
+            return dump.ToString();
         }
     }
 }

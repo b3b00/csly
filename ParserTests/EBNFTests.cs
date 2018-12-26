@@ -207,6 +207,25 @@ namespace ParserTests
         }
         
     }
+    
+    
+    public class Bugfix104Test
+    {
+        [Production("testNonTerm : sub (COMMA[d] sub)? ")]
+        public int TestNonTerminal(List<int> options, Token<GroupTestToken> token)
+        {
+            return 1;
+        }
+
+        [Production("sub : A")]
+        public int sub(Token<GroupTestToken> token)
+        {
+            return 1;
+        }
+        
+        
+        
+    }
 
     public class EBNFTests
     {
@@ -659,6 +678,17 @@ namespace ParserTests
             Assert.NotNull(term);
             Assert.Equal(2,nonTerm.PossibleLeadingTokens.Count);
             Assert.True(term.PossibleLeadingTokens.ContainsAll(expected));
+        }
+        
+        [Fact]
+        public void TestBug104()
+        {
+            var startingRule = $"testNonTerm";
+            var parserInstance = new Bugfix104Test();
+            var builder = new ParserBuilder<GroupTestToken, int>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            string dump = builtParser.Result.Configuration.Dump();
+            ;
         }
         
         

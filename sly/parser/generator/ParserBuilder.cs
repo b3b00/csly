@@ -275,6 +275,11 @@ namespace sly.parser.generator
                     {
                         if (ntClause != null) found = found || ntClause.NonTerminalName == referenceName;
                     }
+                    else if (clause is OptionClause<IN> option)
+                    {
+                        if (option != null && option.Clause is NonTerminalClause<IN> inner)
+                            found = found || inner.NonTerminalName == referenceName;
+                    }
                     else if (clause is ZeroOrMoreClause<IN> zeroOrMore)
                     {
                         if (zeroOrMore != null && zeroOrMore.Clause is NonTerminalClause<IN> inner)
