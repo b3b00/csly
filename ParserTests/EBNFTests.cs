@@ -457,6 +457,18 @@ namespace ParserTests
             Assert.False(res.IsError);
             Assert.Equal("R(a;a)", res.Result); // rootMany
         }
+        
+        [Fact]
+        public void TestGroupSyntaxOptionParser2()
+        {
+            var buildResult = BuildGroupParser();
+            Assert.False(buildResult.IsError);
+            var groupParser = buildResult.Result;
+            var res = groupParser.Parse("a ", "rootOption");
+
+            Assert.False(res.IsError);
+            Assert.Equal("R(a;a)", res.Result); // rootMany
+        }
 
         [Fact]
         public void TestGroupSyntaxParser()
