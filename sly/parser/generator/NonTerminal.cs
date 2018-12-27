@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using sly.parser.syntax;
 
 namespace sly.parser.generator
@@ -23,5 +24,22 @@ namespace sly.parser.generator
         public bool IsSubRule { get; set; }
 
         public List<IN> PossibleLeadingTokens => Rules.SelectMany(r => r.PossibleLeadingTokens).ToList();
+
+        public string Dump()
+        {
+            StringBuilder dump = new StringBuilder();
+            
+            foreach (var rule in Rules)
+            {
+                dump.Append(Name).Append(" : ");
+                foreach (IClause<IN> clause in rule.Clauses)
+                {
+                    dump.Append(clause.Dump()).Append(" ");
+                }
+                dump.AppendLine();
+            }
+
+            return dump.ToString();
+        }
     }
 }

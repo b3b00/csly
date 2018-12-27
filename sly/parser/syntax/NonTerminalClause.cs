@@ -20,5 +20,10 @@ namespace sly.parser.syntax
         {
             return NonTerminalName;
         }
+        
+        public string Dump()
+        {
+            return NonTerminalName;
+        }
     }
 }

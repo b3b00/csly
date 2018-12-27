@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ParserTests\ParserTests.csproj" />
     <ProjectReference Include="..\expressionParser\expressionParser.csproj" />
     <ProjectReference Include="..\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj" />
     <ProjectReference Include="..\jsonparser\jsonparser.csproj" />

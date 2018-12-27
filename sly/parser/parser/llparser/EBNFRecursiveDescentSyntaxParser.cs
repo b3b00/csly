@@ -402,6 +402,7 @@ namespace sly.parser.llparser
                     if (innerResult.IsError) children.Clear();
                     result.Root = new OptionSyntaxNode<IN>(rule.NonTerminalName + "__" + rule.Key, children,
                         rule.GetVisitor());
+                    (result.Root as OptionSyntaxNode<IN>).IsGroupOption = clause.IsGroupOption;
                     result.EndingPosition = position;
                 }
             }

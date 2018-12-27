@@ -54,7 +54,17 @@ namespace sly.parser.generator
         private SyntaxVisitorResult<IN, OUT> Visit(OptionSyntaxNode<IN> node, object context = null)
         {
             var child = node.Children != null && node.Children.Any() ? node.Children[0] : null;
-            if (child == null || node.IsEmpty) return SyntaxVisitorResult<IN, OUT>.NewOptionNone();
+            if (child == null || node.IsEmpty)
+            {
+                if (node.IsGroupOption)
+                {
+                 return SyntaxVisitorResult<IN, OUT>.NewOptionGroupNone();   
+                }
+                else
+                {
+                    return SyntaxVisitorResult<IN, OUT>.NewOptionNone();
+                }
+            }
 
             var innerResult = Visit(child, context);
             if (child is SyntaxLeaf<IN> leaf)
@@ -70,11 +80,14 @@ namespace sly.parser.generator
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
             if (node.Visitor != null || node.IsByPassNode)
             {
+                
+                
                 var args = new List<object>();
 
                 foreach (var n in node.Children)
                 {
                     var v = Visit(n, context);
+                    
                     if (v.IsToken)
                     {
                         if (!v.Discarded) args.Add(v.TokenResult);
@@ -85,9 +98,11 @@ namespace sly.parser.generator
                     }
                     else if (v.IsOption)
                     {
+                       
+                        
                         args.Add(v.OptionResult);
                     }
-                    else if (v.IsOPtionGroup)
+                    else if (v.IsOptionGroup)
                     {
                         args.Add(v.OptionGroupResult);
                     }
