@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace sly.parser.syntax
@@ -29,6 +30,7 @@ namespace sly.parser.syntax
             AddRange(seq.Clauses);
         }
 
+        [ExcludeFromCodeCoverage]
         public string Dump()
         {
             return Clauses.Select(c => c.Dump()).Aggregate((string d1, string d2) => d1 + " " + d2);

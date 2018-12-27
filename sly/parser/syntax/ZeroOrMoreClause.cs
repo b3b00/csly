@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace sly.parser.syntax
 {
     public class ZeroOrMoreClause<T> : ManyClause<T>
@@ -17,6 +19,7 @@ namespace sly.parser.syntax
             return true;
         }
         
+        [ExcludeFromCodeCoverage]
         public override string Dump()
         {
             return Clause.Dump()+"*";

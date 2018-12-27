@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace sly.parser.syntax
 {
     public class NonTerminalClause<T> : IClause<T>
@@ -16,11 +18,14 @@ namespace sly.parser.syntax
             return false;
         }
 
+        
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return NonTerminalName;
         }
         
+        [ExcludeFromCodeCoverage]
         public string Dump()
         {
             return NonTerminalName;
