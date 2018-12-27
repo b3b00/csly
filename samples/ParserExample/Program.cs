@@ -11,6 +11,7 @@ using expressionparser;
 using GenericLexerWithCallbacks;
 using jsonparser;
 using jsonparser.JsonModel;
+using ParserTests;
 using simpleExpressionParser;
 using sly.lexer;
 using sly.lexer.fsm;
@@ -382,10 +383,18 @@ namespace ParserExample
             
         }
 
+        public static void test104()
+        {
+            EBNFTests tests = new EBNFTests();
+            tests.TestGroupSyntaxOptionIsNone();
+            
+        }
+
         private static void Main(string[] args)
         {
             //TestContextualParser();
-            TestTokenCallBacks();
+            //TestTokenCallBacks();
+            test104();
         }
     }
 }

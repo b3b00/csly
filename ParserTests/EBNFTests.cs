@@ -148,20 +148,17 @@ namespace ParserTests
             var builder = new StringBuilder();
             builder.Append("R(");
             builder.Append(a.Value);
-            var gg = option.Match(
+            option.Match(
                 group =>
                 {
                     var aToken = group.Token(0).Value;
                     builder.Append($";{aToken}");
-                    return group;
+                    return null;
                 },
                 () =>
                 {
-                    builder.Append(";");
-                    builder.Append("a");
-                    var g = new Group<GroupTestToken, string>();
-                    g.Add("<none>", "<none>");
-                    return g;
+                    builder.Append($";<none>");
+                    return null;
                 });
             builder.Append(")");
             return builder.ToString();
@@ -211,7 +208,7 @@ namespace ParserTests
     
     public class Bugfix104Test
     {
-        [Production("testNonTerm : sub (COMMA[d] sub)? ")]
+        [Production("testNonTerm : sub (COMMA[d] unreachable)? ")]
         public int TestNonTerminal(List<int> options, Token<GroupTestToken> token)
         {
             return 1;
@@ -219,6 +216,13 @@ namespace ParserTests
 
         [Production("sub : A")]
         public int sub(Token<GroupTestToken> token)
+        {
+            return 1;
+        }
+            
+        
+        [Production("unreachable : A")]
+        public int unreachable(Token<GroupTestToken> token)
         {
             return 1;
         }
@@ -447,7 +451,7 @@ namespace ParserTests
         }
 
         [Fact]
-        public void TestGroupSyntaxOptionParser()
+        public void TestGroupSyntaxOptionIsSome()
         {
             var buildResult = BuildGroupParser();
             Assert.False(buildResult.IsError);
@@ -459,7 +463,7 @@ namespace ParserTests
         }
         
         [Fact]
-        public void TestGroupSyntaxOptionParser2()
+        public void TestGroupSyntaxOptionIsNone()
         {
             var buildResult = BuildGroupParser();
             Assert.False(buildResult.IsError);
@@ -467,7 +471,7 @@ namespace ParserTests
             var res = groupParser.Parse("a ", "rootOption");
 
             Assert.False(res.IsError);
-            Assert.Equal("R(a;a)", res.Result); // rootMany
+            Assert.Equal("R(a;<none>)", res.Result); // rootMany
         }
 
         [Fact]
@@ -692,6 +696,8 @@ namespace ParserTests
             Assert.True(term.PossibleLeadingTokens.ContainsAll(expected));
         }
         
+        #endregion
+        
         [Fact]
         public void TestBug104()
         {
@@ -699,12 +705,12 @@ namespace ParserTests
             var parserInstance = new Bugfix104Test();
             var builder = new ParserBuilder<GroupTestToken, int>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
-            string dump = builtParser.Result.Configuration.Dump();
-            ;
+            Assert.False(builtParser.IsError);
+            Assert.False(builtParser.Errors.Any());
         }
         
         
-        #endregion
+       
         
     }
 }
