@@ -27,7 +27,7 @@ namespace sly.parser.generator
         public OUT ValueResult;
 
         public bool IsOption => OptionResult != null;
-        public bool IsOPtionGroup => OptionGroupResult != null;
+        public bool IsOptionGroup => OptionGroupResult != null;
 
         public bool IsToken { get; private set; }
 
@@ -94,6 +94,13 @@ namespace sly.parser.generator
         {
             var res = new SyntaxVisitorResult<IN, OUT>();
             res.OptionGroupResult = Some(group);
+            return res;
+        }
+        
+        public static SyntaxVisitorResult<IN, OUT> NewOptionGroupNone()
+        {
+            var res = new SyntaxVisitorResult<IN, OUT>();
+            res.OptionGroupResult = NoneGroup<IN,OUT>();
             return res;
         }
 

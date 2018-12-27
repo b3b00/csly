@@ -7,5 +7,6 @@ namespace sly.parser.syntax
     public interface IClause<T> : GrammarNode<T>
     {
         bool MayBeEmpty();
+        string Dump();
     }
 }

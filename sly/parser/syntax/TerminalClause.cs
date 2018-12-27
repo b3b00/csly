@@ -35,5 +35,10 @@ namespace sly.parser.syntax
             if (Discarded) b.Append("[d]");
             return b.ToString();
         }
+        
+        public string Dump()
+        {
+            return ExpectedToken.ToString();
+        }
     }
 }

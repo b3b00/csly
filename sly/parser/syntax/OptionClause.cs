@@ -16,7 +16,13 @@ namespace sly.parser.syntax
             return true;
         }
 
+        
         public override string ToString()
+        {
+            return $"{Clause}?";
+        }
+        
+        public string Dump()
         {
             return $"{Clause}?";
         }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace sly.parser.syntax
 {
@@ -26,6 +27,11 @@ namespace sly.parser.syntax
         public void AddRange(ClauseSequence<T> seq)
         {
             AddRange(seq.Clauses);
+        }
+
+        public string Dump()
+        {
+            return Clauses.Select(c => c.Dump()).Aggregate((string d1, string d2) => d1 + " " + d2);
         }
     }
 }
