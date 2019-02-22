@@ -1,4 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace sly.lexer
 {
@@ -75,9 +78,31 @@ namespace sly.lexer
             }
         }
 
+
+
         public int IntValue => int.Parse(Value);
 
-        public double DoubleValue => double.Parse(Value);
+        public  double DoubleValue
+        {
+            get
+            {
+                // Try parsing in the current culture
+                if (!double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.CurrentCulture,
+                        out var result) &&
+                    // Then try in US english
+                    !double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"),
+                        out result) &&
+                    // Then in neutral language
+                    !double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture,
+                        out result))
+                {
+                    result = 0.0;
+                }
+
+                return result;
+            }
+            set { }
+        }
 
         public char CharValue => StringWithoutQuotes[0];
 
