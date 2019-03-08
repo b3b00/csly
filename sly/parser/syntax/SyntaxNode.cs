@@ -27,6 +27,7 @@ namespace sly.parser.syntax
         public Affix ExpressionAffix { get; set; }
 
 
+        public bool Discarded => false;
         public string Name { get; set; }
 
 

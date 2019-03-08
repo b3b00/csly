@@ -90,7 +90,7 @@ namespace sly.parser.generator
                     
                     if (v.IsToken)
                     {
-                        if (!v.Discarded) args.Add(v.TokenResult);
+                        if (!n.Discarded) args.Add(v.TokenResult);
                     }
                     else if (v.IsValue)
                     {

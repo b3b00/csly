@@ -391,7 +391,7 @@ namespace sly.parser.llparser
                 {
                     result = new SyntaxParseResult<IN>();
                     result.IsError = true;
-                    result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty());
+                    result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(),true);
                     result.EndingPosition = position;
                 }
                 else
