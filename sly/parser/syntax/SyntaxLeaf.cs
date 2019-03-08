@@ -13,8 +13,8 @@ namespace sly.parser.syntax
         
         
 
-        public Token<IN> Token { get; set; }
-        public bool Discarded { get; }
+        public Token<IN> Token { get;  }
+        public bool Discarded { get; } = false;
         public string Name => Token.TokenID.ToString();
 
         [ExcludeFromCodeCoverage]

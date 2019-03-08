@@ -401,7 +401,7 @@ namespace ParserTests
             Assert.False(buildResult.IsError);
             var optionParser = buildResult.Result;
 
-            var result = optionParser.Parse("a c", "root");
+            var result = optionParser.Parse("a c", "root2");
             Assert.Equal("R(a,<none>,c)", result.Result);
         }
 
