@@ -270,13 +270,16 @@ namespace sly.lexer
                         return match;
                     };
 
-
                     var commentAttr = comment.Value[0];
+                    bool hasMultiLine = !string.IsNullOrWhiteSpace(commentAttr.MultiLineCommentStart);
 
                     lexer.SingleLineComment = commentAttr.SingleLineCommentStart;
-                    lexer.MultiLineCommentStart = commentAttr.MultiLineCommentStart;
-                    lexer.MultiLineCommentEnd = commentAttr.MultiLineCommentEnd;
 
+                    if (hasMultiLine)
+                    {
+                        lexer.MultiLineCommentStart = commentAttr.MultiLineCommentStart;
+                        lexer.MultiLineCommentEnd = commentAttr.MultiLineCommentEnd;
+                    }
 
                     var fsmBuilder = lexer.FSMBuilder;
                     fsmBuilder.GoTo(GenericLexer<IN>.start);
@@ -284,11 +287,15 @@ namespace sly.lexer
                     fsmBuilder.Mark(GenericLexer<IN>.single_line_comment_start);
                     fsmBuilder.End(GenericToken.Comment);
                     fsmBuilder.CallBack(callbackSingle);
-                    fsmBuilder.GoTo(GenericLexer<IN>.start);
-                    fsmBuilder.ConstantTransition(commentAttr.MultiLineCommentStart);
-                    fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
-                    fsmBuilder.End(GenericToken.Comment);
-                    fsmBuilder.CallBack(callbackMulti);
+
+                    if (hasMultiLine)
+                    {
+                        fsmBuilder.GoTo(GenericLexer<IN>.start);
+                        fsmBuilder.ConstantTransition(commentAttr.MultiLineCommentStart);
+                        fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
+                        fsmBuilder.End(GenericToken.Comment);
+                        fsmBuilder.CallBack(callbackMulti);
+                    }
                 }
 
 
