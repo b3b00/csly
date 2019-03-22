@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -36,6 +37,8 @@ namespace sly.lexer
         }
 
 
+        public readonly Memory<char> SpanValue;
+        
         public TokenPosition Position { get; set; }
 
         public int PositionInTokenFlow { get; set; }

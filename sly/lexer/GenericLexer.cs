@@ -407,36 +407,41 @@ namespace sly.lexer
 
         public void ConsumeComment(Token<GenericToken> comment, string source)
         {
-            var commentValue = "";
+            ConsumeComment(comment, source.AsMemory());
+        }
+        public void ConsumeComment(Token<GenericToken> comment, ReadOnlyMemory<char> source)
+        {
+
+            ReadOnlySpan<char> commentValue;
 
             if (comment.IsSingleLineComment)
             {
                 var position = LexerFsm.CurrentPosition;
                 commentValue = EOLManager.GetToEndOfLine(source, position);
                 position = position + commentValue.Length;
-                comment.Value = commentValue.Replace("\n", "").Replace("\r", "");
+                comment.Value = commentValue.ToString().Replace("\n", "").Replace("\r", "");
                 LexerFsm.Move(position, LexerFsm.CurrentLine + 1, 0);
             }
             else if (comment.IsMultiLineComment)
             {
                 var position = LexerFsm.CurrentPosition;
-                var end = source.IndexOf(MultiLineCommentEnd, position);
+                
+                var end = source.Span.Slice(position).IndexOf(MultiLineCommentEnd.AsSpan());
                 if (end < 0)
                     position = source.Length;
                 else
-                    position = end;
-                commentValue = source.Substring(LexerFsm.CurrentPosition, position - LexerFsm.CurrentPosition);
-                comment.Value = commentValue;
+                    position = end+position;
+                commentValue = source.Span.Slice(LexerFsm.CurrentPosition, position - LexerFsm.CurrentPosition);
+                comment.Value = commentValue.ToString();
 
                 var newPosition = LexerFsm.CurrentPosition + commentValue.Length + MultiLineCommentEnd.Length;
-
-                var lines = EOLManager.GetLines(commentValue);
+                var lines = EOLManager.GetLinesLength(commentValue);
                 var newLine = LexerFsm.CurrentLine + lines.Count - 1;
                 var newColumn = 0;
                 if (lines.Count > 1)
-                    newColumn = lines[lines.Count - 1].Length + MultiLineCommentEnd.Length;
+                    newColumn = lines.Last() + MultiLineCommentEnd.Length;
                 else
-                    newColumn = LexerFsm.CurrentColumn + lines[0].Length + MultiLineCommentEnd.Length;
+                    newColumn = LexerFsm.CurrentColumn + lines[0] + MultiLineCommentEnd.Length;
 
 
                 LexerFsm.Move(newPosition, newLine, newColumn);
