@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -177,7 +178,13 @@ namespace sly.lexer.fsm
             return Run(source, CurrentPosition);
         }
 
-        public FSMMatch<N> Run(string source, int start)
+
+        public FSMMatch<N> Run( string source, int start)
+        {
+            return Run(new ReadOnlySpan<char>(source.ToCharArray()), start);
+        }
+
+        public FSMMatch<N> Run( ReadOnlySpan<char> source, int start)
         {
             var value = "";
             var result = new FSMMatch<N>(false);
