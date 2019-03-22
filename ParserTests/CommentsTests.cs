@@ -79,29 +79,29 @@ comment on 2 lines */ 3.0";
 
             Assert.Equal(5, tokens.Count);
 
-            var token1 = tokens[0];
-            var token2 = tokens[1];
-            var token3 = tokens[2];
-            var token4 = tokens[3];
+            var intToken1 = tokens[0];
+            var intToken2 = tokens[1];
+            var multiLineCommentToken = tokens[2];
+            var doubleToken = tokens[3];
 
-            Assert.Equal(CommentsToken.INT, token1.TokenID);
-            Assert.Equal("1", token1.Value);
-            Assert.Equal(0, token1.Position.Line);
-            Assert.Equal(0, token1.Position.Column);
+            Assert.Equal(CommentsToken.INT, intToken1.TokenID);
+            Assert.Equal("1", intToken1.Value);
+            Assert.Equal(0, intToken1.Position.Line);
+            Assert.Equal(0, intToken1.Position.Column);
 
-            Assert.Equal(CommentsToken.INT, token2.TokenID);
-            Assert.Equal("2", token2.Value);
-            Assert.Equal(1, token2.Position.Line);
-            Assert.Equal(0, token2.Position.Column);
-            Assert.Equal(CommentsToken.COMMENT, token3.TokenID);
+            Assert.Equal(CommentsToken.INT, intToken2.TokenID);
+            Assert.Equal("2", intToken2.Value);
+            Assert.Equal(1, intToken2.Position.Line);
+            Assert.Equal(0, intToken2.Position.Column);
+            Assert.Equal(CommentsToken.COMMENT, multiLineCommentToken.TokenID);
             Assert.Equal(@" multi line 
-comment on 2 lines ", token3.Value);
-            Assert.Equal(1, token3.Position.Line);
-            Assert.Equal(2, token3.Position.Column);
-            Assert.Equal(CommentsToken.DOUBLE, token4.TokenID);
-            Assert.Equal("3.0", token4.Value);
-            Assert.Equal(2, token4.Position.Line);
-            Assert.Equal(22, token4.Position.Column);
+comment on 2 lines ", multiLineCommentToken.Value);
+            Assert.Equal(1, multiLineCommentToken.Position.Line);
+            Assert.Equal(2, multiLineCommentToken.Position.Column);
+            Assert.Equal(CommentsToken.DOUBLE, doubleToken.TokenID);
+            Assert.Equal("3.0", doubleToken.Value);
+            Assert.Equal(2, doubleToken.Position.Line);
+            Assert.Equal(22, doubleToken.Position.Column);
         }
 
         [Fact]
