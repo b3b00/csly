@@ -19,10 +19,16 @@ namespace sly.lexer
 
 
         public Token(T token, string value, TokenPosition position, bool isCommentStart = false,
+            CommentType commentType = CommentType.Single) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType )
+        {
+            
+        }
+        
+        public Token(T token, ReadOnlyMemory<char> value, TokenPosition position, bool isCommentStart = false,
             CommentType commentType = CommentType.Single)
         {
             TokenID = token;
-            Value = value;
+            SpanValue = value;
             Position = position;
             CommentType = commentType;
         }
@@ -37,7 +43,7 @@ namespace sly.lexer
         }
 
 
-        public readonly Memory<char> SpanValue;
+        public  ReadOnlyMemory<char> SpanValue { get; set; }
         
         public TokenPosition Position { get; set; }
 
@@ -57,7 +63,7 @@ namespace sly.lexer
 
         public bool IsSingleLineComment => CommentType == CommentType.Single;
 
-        public string Value { get; set; }
+        public string Value => SpanValue.ToString();
 
         public static T DefaultToken
         {

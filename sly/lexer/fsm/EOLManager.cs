@@ -5,32 +5,32 @@ namespace sly.lexer.fsm
 {
     public class EOLManager
     {
-        public static ReadOnlySpan<char> GetToEndOfLine(ReadOnlyMemory<char> value, int position)
+        public static ReadOnlyMemory<char> GetToEndOfLine(ReadOnlyMemory<char> value, int position)
         {
             var CurrentPosition = position;
             var spanValue = value.Span;
             var current = spanValue[CurrentPosition];
-            var end = IsEndOfLine(value.Span, CurrentPosition);
+            var end = IsEndOfLine(value, CurrentPosition);
             while (CurrentPosition < value.Length && end == EOLType.No)
             {
                 CurrentPosition++;
-                end = IsEndOfLine(value.Span, CurrentPosition);
+                end = IsEndOfLine(value, CurrentPosition);
             }
 
-            return spanValue.Slice(position, CurrentPosition - position + (end == EOLType.Windows ? 2 : 1));
+            return value.Slice(position, CurrentPosition - position + (end == EOLType.Windows ? 2 : 1));
         }
 
-        public static EOLType IsEndOfLine(ReadOnlySpan<char> value, int position)
+        public static EOLType IsEndOfLine(ReadOnlyMemory<char> value, int position)
         {
             var end = EOLType.No;
-            var n = value[position];
+            var n = value.At(position);
             if (n == '\n')
             {
                 end = EOLType.Nix;
             }
             else if (n == '\r')
             {
-                if (value[position + 1] == '\n')
+                if (value.At(position + 1) == '\n')
                     end = EOLType.Windows;
                 else
                     end = EOLType.Mac;
@@ -39,7 +39,7 @@ namespace sly.lexer.fsm
             return end;
         }
 
-        public static List<int> GetLinesLength(ReadOnlySpan<char> value)
+        public static List<int> GetLinesLength(ReadOnlyMemory<char> value)
         {
             var lineLengths = new List<int>();
             var lines = new List<string>();
