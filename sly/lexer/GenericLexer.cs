@@ -113,7 +113,7 @@ namespace sly.lexer
                 tokens.Add(transcoded);
                 r = LexerFsm.Run(source);
                
-                if (r.Result.IsComment) ConsumeComment(r.Result, source);
+                if (r.IsSuccess && r.Result.IsComment) ConsumeComment(r.Result, source);
             }
 
             var eos = new Token<IN>();
@@ -332,9 +332,9 @@ namespace sly.lexer
             NodeCallback<GenericToken> callback = match =>
             {
                 match.Properties[DerivedToken] = token;
-                var value = match.Result.Value;
+                var value = match.Result.SpanValue;
 
-                match.Result.Value = value;
+                match.Result.SpanValue = value;
                 return match;
             };
 
@@ -364,7 +364,7 @@ namespace sly.lexer
                 };
 
                 var exceptDelimiter = new[] {StringDelimiterChar};
-                var in_string = "in_string_same";
+                in_string = "in_string_same";
                 var escaped = "escaped_same";
                 var delim = "delim_same";
 
@@ -407,36 +407,41 @@ namespace sly.lexer
 
         public void ConsumeComment(Token<GenericToken> comment, string source)
         {
-            var commentValue = "";
+            ConsumeComment(comment, source.AsMemory());
+        }
+        public void ConsumeComment(Token<GenericToken> comment, ReadOnlyMemory<char> source)
+        {
+
+            ReadOnlyMemory<char> commentValue;
 
             if (comment.IsSingleLineComment)
             {
                 var position = LexerFsm.CurrentPosition;
                 commentValue = EOLManager.GetToEndOfLine(source, position);
                 position = position + commentValue.Length;
-                comment.Value = commentValue.Replace("\n", "").Replace("\r", "");
+                comment.SpanValue = commentValue;
                 LexerFsm.Move(position, LexerFsm.CurrentLine + 1, 0);
             }
             else if (comment.IsMultiLineComment)
             {
                 var position = LexerFsm.CurrentPosition;
-                var end = source.IndexOf(MultiLineCommentEnd, position);
+                
+                var end = source.Span.Slice(position).IndexOf(MultiLineCommentEnd.AsSpan());
                 if (end < 0)
                     position = source.Length;
                 else
-                    position = end;
-                commentValue = source.Substring(LexerFsm.CurrentPosition, position - LexerFsm.CurrentPosition);
-                comment.Value = commentValue;
+                    position = end+position;
+                commentValue = source.Slice(LexerFsm.CurrentPosition, position - LexerFsm.CurrentPosition);
+                comment.SpanValue = commentValue;
 
                 var newPosition = LexerFsm.CurrentPosition + commentValue.Length + MultiLineCommentEnd.Length;
-
-                var lines = EOLManager.GetLines(commentValue);
+                var lines = EOLManager.GetLinesLength(commentValue);
                 var newLine = LexerFsm.CurrentLine + lines.Count - 1;
-                var newColumn = 0;
+                int newColumn;
                 if (lines.Count > 1)
-                    newColumn = lines[lines.Count - 1].Length + MultiLineCommentEnd.Length;
+                    newColumn = lines.Last() + MultiLineCommentEnd.Length;
                 else
-                    newColumn = LexerFsm.CurrentColumn + lines[0].Length + MultiLineCommentEnd.Length;
+                    newColumn = LexerFsm.CurrentColumn + lines[0] + MultiLineCommentEnd.Length;
 
 
                 LexerFsm.Move(newPosition, newLine, newColumn);
@@ -449,7 +454,8 @@ namespace sly.lexer
             var inTok = match.Result;
             tok.IsComment = inTok.IsComment;
             tok.IsEmpty = inTok.IsEmpty;
-            tok.Value = inTok.Value;
+//            tok.Value = inTok.Value;
+            tok.SpanValue = inTok.SpanValue;
             tok.CommentType = inTok.CommentType;
             tok.Position = inTok.Position;
             tok.Discarded = inTok.Discarded;

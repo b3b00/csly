@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using sly.lexer;
+using sly.lexer.fsm;
 
 namespace jsonparser
 {
@@ -11,6 +12,11 @@ namespace jsonparser
         }
 
         public IEnumerable<Token<JsonToken>> Tokenize(string source)
+        {
+            return Tokenize(new ReadOnlyMemory<char>(source.ToCharArray()));
+        }
+
+        public IEnumerable<Token<JsonToken>> Tokenize(ReadOnlyMemory<char> source)
         {
             var tokens = new List<Token<JsonToken>>();
             var position = 0;
@@ -30,11 +36,15 @@ namespace jsonparser
             var InFalse = false;
             var NumIsDouble = false;
 
+            int tokenStartIndex = 0;
+            int tokenLength = 0;
+
             Func<JsonToken, Token<JsonToken>> NewToken = tok =>
             {
                 var token = new Token<JsonToken>();
                 token.Position = new TokenPosition(currentTokenPosition, currentTokenLine, currentTokenColumn);
-                token.Value = currentValue;
+                token.SpanValue = source.Slice(tokenStartIndex,tokenLength);
+                tokenStartIndex = tokenStartIndex + tokenLength;
                 token.TokenID = tok;
                 tokens.Add(token);
                 currentValue = "";
@@ -44,7 +54,7 @@ namespace jsonparser
 
             while (position < length)
             {
-                var current = source[position];
+                var current = source.At(position);
                 if (InString)
                 {
                     currentValue += current;

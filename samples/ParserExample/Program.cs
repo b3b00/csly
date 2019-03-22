@@ -131,7 +131,8 @@ namespace ParserExample
                 .Mark("string_end")
                 .CallBack(match =>
                 {
-                    match.Result.Value = match.Result.Value.ToUpper();
+                    string upperVAlue = match.Result.Value.ToString().ToUpper();
+                    match.Result.SpanValue = new ReadOnlyMemory<char>(upperVAlue.ToCharArray());
                     return match;
                 });
 

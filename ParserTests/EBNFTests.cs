@@ -54,7 +54,7 @@ namespace ParserTests
     public class OptionTestParser
     {
         [Production("root2 : a B? c ")]
-        public string root2(Token<OptionTestToken> a, ValueOption<string> b, Token<OptionTestToken> c)
+        public string Root2(Token<OptionTestToken> a, ValueOption<string> b, Token<OptionTestToken> c)
         {
             var r = new StringBuilder();
             r.Append("R(");
