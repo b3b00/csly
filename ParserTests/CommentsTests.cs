@@ -135,7 +135,7 @@ comment on 2 lines ", multiLineCommentToken.Value);
             Assert.Equal(1, token2.Position.Line);
             Assert.Equal(0, token2.Position.Column);
             Assert.Equal(CommentsToken.COMMENT, token3.TokenID);
-            Assert.Equal(" single line comment\r\n", token3.Value);
+            Assert.Equal(" single line comment", token3.Value.Replace("\r","").Replace("\n",""));
             Assert.Equal(1, token3.Position.Line);
             Assert.Equal(2, token3.Position.Column);
             Assert.Equal(CommentsToken.DOUBLE, token4.TokenID);
