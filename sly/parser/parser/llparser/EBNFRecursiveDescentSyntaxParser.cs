@@ -40,7 +40,6 @@ namespace sly.parser.llparser
                     {
                         var many = first as ZeroOrMoreClause<IN>;
                         InitStartingTokensWithZeroOrMore(rule, many, nonTerminals);
-                        // TODO consume other clauses til first non optional clause
                         int i = 1;
                         bool optional = first is ZeroOrMoreClause<IN> || first is OptionClause<IN>;
                         while (i < rule.Clauses.Count && optional)
@@ -48,8 +47,7 @@ namespace sly.parser.llparser
                             IClause<IN> clause = rule.Clauses[i];
 
                             switch (clause)
-                            {
-                                // todo init startign token for clause
+                            {                                
                                 case TerminalClause<IN> terminalClause:
                                 {
                                     rule.PossibleLeadingTokens.Add(terminalClause.ExpectedToken);
