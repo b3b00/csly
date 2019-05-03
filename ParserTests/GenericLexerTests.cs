@@ -393,8 +393,8 @@ namespace ParserTests
             Assert.NotNull(tokens);
             Assert.Equal(2,tokens.Count);
             var token = tokens[0];
-            Assert.Equal(Issue106.Integer,token.TokenID);
-            Assert.Equal(1,token.IntValue);
+            Assert.Equal(Issue106.Double,token.TokenID);
+            Assert.Equal(1.0,token.DoubleValue);
         }
     }
 }

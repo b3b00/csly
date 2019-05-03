@@ -154,6 +154,7 @@ namespace sly.lexer
                 if (staticTokens.ToList().Contains(GenericToken.Double))
                     FSMBuilder.Transition('.')
                         .Mark(start_double)
+                        .End(GenericToken.Double)
                         .RangeTransition('0', '9')
                         .Mark(in_double)
                         .RangeTransitionTo('0', '9', in_double)
@@ -243,6 +244,8 @@ namespace sly.lexer
                 case GenericToken.Double:
                 {
                     FSMBuilder.GoTo(in_double);
+                    FSMBuilder.CallBack(callback);
+                    FSMBuilder.GoTo(start_double);
                     FSMBuilder.CallBack(callback);
                     break;
                 }
