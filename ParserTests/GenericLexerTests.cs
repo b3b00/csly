@@ -150,6 +150,15 @@ namespace ParserTests
         ID
     }
 
+    public enum Issue106
+    {
+        [Lexeme(GenericToken.Int)]
+        Integer = 5,
+        
+        [Lexeme(GenericToken.Double)]
+        Double = 6,
+    }
+
     public class GenericLexerTests
     {
         [Fact]
@@ -365,13 +374,27 @@ namespace ParserTests
             Assert.False(res.IsError);
             var lexer = res.Result as GenericLexer<CallbackTokens>;
             CallBacksBuilder.BuildCallbacks<CallbackTokens>(lexer);
-            
+
 
             var tokens = lexer.Tokenize("aaa bbb").ToList();
-            Assert.Equal(3,tokens.Count);
-            Assert.Equal("AAA",tokens[0].Value);
-            Assert.Equal("BBB",tokens[1].Value);
-            Assert.Equal(CallbackTokens.SKIP,tokens[1].TokenID);
+            Assert.Equal(3, tokens.Count);
+            Assert.Equal("AAA", tokens[0].Value);
+            Assert.Equal("BBB", tokens[1].Value);
+            Assert.Equal(CallbackTokens.SKIP, tokens[1].TokenID);
+        }
+
+        [Fact]
+        public void TestIssue106()
+        {
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue106>>());
+            Assert.False(res.IsError);
+            var lexer = res.Result as GenericLexer<Issue106>;
+            var tokens = lexer.Tokenize("1.").ToList();
+            Assert.NotNull(tokens);
+            Assert.Equal(2,tokens.Count);
+            var token = tokens[0];
+            Assert.Equal(Issue106.Integer,token.TokenID);
+            Assert.Equal(1,token.IntValue);
         }
     }
 }
