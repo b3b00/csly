@@ -17,34 +17,6 @@ namespace sly.lexer.fsm
     
     public delegate void BuildExtension<IN>(IN token, LexemeAttribute lexem, GenericLexer<IN> lexer) where IN : struct;
 
-    public class FSMMatch<N>
-    {
-        public char StringDelimiter = '"';
-
-        public FSMMatch(bool success)
-        {
-            IsSuccess = success;
-        }
-        
-        public FSMMatch(bool success, N result, string value, TokenPosition position) : this(success,result,new ReadOnlyMemory<char>(value.ToCharArray()),position )
-        {
-           
-        }
-
-        public FSMMatch(bool success, N result, ReadOnlyMemory<char> value, TokenPosition position)
-        {
-            Properties = new Dictionary<string, object>();
-            IsSuccess = success;
-            Result = new Token<N>(result, value, position);
-        }
-
-        public Dictionary<string, object> Properties { get; set; }
-
-        public bool IsSuccess { get; set; }
-
-        public Token<N> Result { get; set; }
-    }
-
     public class FSMLexer<N>
     {
         private readonly Dictionary<int, FSMNode<N>> Nodes;
@@ -278,7 +250,7 @@ namespace sly.lexer.fsm
 
                         if (currentNode.IsEnd)
                         {
-                            var resultInter = new FSMMatch<N>(true, currentNode.Value, value, position);
+                            var resultInter = new FSMMatch<N>(true, currentNode.Value, value, position,currentNode.Id);
                             successes.Push(resultInter);
                         }
 
@@ -300,7 +272,10 @@ namespace sly.lexer.fsm
             if (successes.Any())
             {
                 result = successes.Pop();
-                if (HasCallback(lastNode)) result = Callbacks[lastNode](result);
+                if (HasCallback(result.NodeId))
+                {
+                    result = Callbacks[result.NodeId](result);
+                }
             }
 
             return result;
