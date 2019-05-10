@@ -113,7 +113,7 @@ namespace sly.parser.generator.visitor
 
         private string GetNodeLabel(SyntaxNode<IN> node)
         {
-            string label = node.ShortName;
+            string label = node.Name;
             if (node.IsExpressionNode)
             {
                 label =  node.Operation.OperatorToken.ToString();

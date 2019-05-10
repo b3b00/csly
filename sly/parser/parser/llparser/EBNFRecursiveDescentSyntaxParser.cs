@@ -224,7 +224,7 @@ namespace sly.parser.llparser
                 SyntaxNode<IN> node = null;
                 if (rule.IsSubRule)
                 {
-                    node = new GroupSyntaxNode<IN>(nonTerminalName + "__" + rule.Key, nonTerminalName, children);
+                    node = new GroupSyntaxNode<IN>(nonTerminalName, children);
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
                     result.IsEnded = currentPosition >= tokens.Count - 1
@@ -233,7 +233,7 @@ namespace sly.parser.llparser
                 }
                 else
                 {
-                    node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, nonTerminalName,  children);
+                    node = new SyntaxNode<IN>( nonTerminalName,  children);
                     node.ExpressionAffix = rule.ExpressionAffix;
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
@@ -250,7 +250,7 @@ namespace sly.parser.llparser
         public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position)
         {
             var result = new SyntaxParseResult<IN>();
-            var manyNode = new ManySyntaxNode<IN>("","");
+            var manyNode = new ManySyntaxNode<IN>("");
             var currentPosition = position;
             var innerClause = clause.Clause;
             var stillOk = true;
@@ -314,7 +314,7 @@ namespace sly.parser.llparser
         public SyntaxParseResult<IN> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN> clause, int position)
         {
             var result = new SyntaxParseResult<IN>();
-            var manyNode = new ManySyntaxNode<IN>("","");
+            var manyNode = new ManySyntaxNode<IN>("");
             var currentPosition = position;
             var innerClause = clause.Clause;
             bool isError;
@@ -399,7 +399,7 @@ namespace sly.parser.llparser
                     result.IsError = true;
                     var children = new List<ISyntaxNode<IN>> {innerResult.Root};
                     if (innerResult.IsError) children.Clear();
-                    result.Root = new OptionSyntaxNode<IN>(rule.NonTerminalName + "__" + rule.Key, rule.NonTerminalName, children,
+                    result.Root = new OptionSyntaxNode<IN>( rule.NonTerminalName, children,
                         rule.GetVisitor());
                     (result.Root as OptionSyntaxNode<IN>).IsGroupOption = clause.IsGroupOption;
                     result.EndingPosition = position;
@@ -411,7 +411,7 @@ namespace sly.parser.llparser
 
                 var children = new List<ISyntaxNode<IN>> {innerResult.Root};
                 result.Root =
-                    new OptionSyntaxNode<IN>(rule.NonTerminalName + "__" + rule.Key, rule.NonTerminalName,children, rule.GetVisitor());
+                    new OptionSyntaxNode<IN>( rule.NonTerminalName,children, rule.GetVisitor());
                 result.EndingPosition = innerResult.EndingPosition;
             }
 

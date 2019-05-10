@@ -9,10 +9,9 @@ namespace sly.parser.syntax.tree
 {
     public class SyntaxNode<IN> : ISyntaxNode<IN> where IN : struct
     {
-        public SyntaxNode(string name, string shortName, List<ISyntaxNode<IN>> children = null, MethodInfo visitor = null)
+        public SyntaxNode(string name, List<ISyntaxNode<IN>> children = null, MethodInfo visitor = null)
         {
             Name = name;
-            ShortName = shortName;
             Children = children == null ? new List<ISyntaxNode<IN>>() : children;
             Visitor = visitor;
         }
@@ -30,8 +29,6 @@ namespace sly.parser.syntax.tree
 
         public bool Discarded => false;
         public string Name { get; set; }
-        
-        public string ShortName { get; set; }
 
 
         [ExcludeFromCodeCoverage]

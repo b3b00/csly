@@ -6,11 +6,11 @@ namespace sly.parser.syntax.tree
 {
     public class GroupSyntaxNode<IN> : ManySyntaxNode<IN> where IN : struct
     {
-        public GroupSyntaxNode(string name, string shortName) : base(name,shortName)
+        public GroupSyntaxNode(string name) : base(name)
         {
         }
 
-        public GroupSyntaxNode(string name,  string shortName, List<ISyntaxNode<IN>> children) : this(name,shortName)
+        public GroupSyntaxNode(string name,  List<ISyntaxNode<IN>> children) : this(name)
         {
             Children.AddRange(children);
         }
