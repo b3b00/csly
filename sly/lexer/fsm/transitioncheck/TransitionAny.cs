@@ -1,4 +1,6 @@
-﻿namespace sly.lexer.fsm.transitioncheck
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace sly.lexer.fsm.transitioncheck
 {
     public class TransitionAny : AbstractTransitionCheck
     {
@@ -11,6 +13,7 @@
             Precondition = transitionPrecondition;
         }
 
+        [ExcludeFromCodeCoverage]
         public override string ToGraphViz()
         {
             var label = (Precondition != null) ? "[|]*" : "*";

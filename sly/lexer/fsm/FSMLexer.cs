@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -50,7 +51,7 @@ namespace sly.lexer.fsm
 
         private Dictionary<int, NodeAction> Actions { get; }
 
-
+        [ExcludeFromCodeCoverage]
         public string ToGraphViz()
         {
             var dump = new StringBuilder();

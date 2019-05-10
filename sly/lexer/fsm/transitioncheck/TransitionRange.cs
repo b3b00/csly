@@ -1,4 +1,6 @@
-﻿namespace sly.lexer.fsm.transitioncheck
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace sly.lexer.fsm.transitioncheck
 {
     public class TransitionRange : AbstractTransitionCheck
     {
@@ -19,6 +21,7 @@
             Precondition = precondition;
         }
 
+        [ExcludeFromCodeCoverage]
         public override string ToGraphViz()
         {
             var t = "";

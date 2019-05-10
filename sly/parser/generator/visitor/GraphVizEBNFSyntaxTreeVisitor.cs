@@ -6,9 +6,11 @@ using DotNetGraph;
 using sly.lexer;
 using sly.parser.parser;
 using sly.parser.syntax.tree;
+using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.generator.visitor
 {
+[ExcludeFromCodeCoverage]
     public class GraphVizEBNFSyntaxTreeVisitor<IN>  where IN : struct
     {
         public  DotGraph Graph { get; private set; }

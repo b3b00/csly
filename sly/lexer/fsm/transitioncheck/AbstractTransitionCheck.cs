@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+
 namespace sly.lexer.fsm.transitioncheck
 {
 
+    [ExcludeFromCodeCoverage]
     public static class CharExt {
 
         public static string ToEscaped(this char c) {

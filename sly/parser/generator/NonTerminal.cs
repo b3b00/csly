@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using sly.parser.syntax.grammar;
@@ -25,6 +26,7 @@ namespace sly.parser.generator
 
         public List<IN> PossibleLeadingTokens => Rules.SelectMany(r => r.PossibleLeadingTokens).ToList();
 
+        [ExcludeFromCodeCoverage]
         public string Dump()
         {
             StringBuilder dump = new StringBuilder();
