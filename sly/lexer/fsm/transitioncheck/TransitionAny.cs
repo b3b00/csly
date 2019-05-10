@@ -11,12 +11,10 @@
             Precondition = transitionPrecondition;
         }
 
-        public override string ToString()
+        public override string ToGraphViz()
         {
-            var t = "";
-            if (Precondition != null) t = "[|] ";
-            t += "*";
-            return t;
+            var label = (Precondition != null) ? "[|]*" : "*";
+            return  $@"[ label=""{label}"" ]";
         }
 
         public override bool Match(char input)

@@ -19,12 +19,12 @@
             Precondition = precondition;
         }
 
-        public override string ToString()
+        public override string ToGraphViz()
         {
             var t = "";
             if (Precondition != null) t = "[|] ";
-            t += $"[{RangeStart}-{RangeEnd}]";
-            return t;
+            t += $"[{RangeStart.ToEscaped()}-{RangeEnd.ToEscaped()}]";
+            return $@"[ label=""{t}"" ]";
         }
 
 
