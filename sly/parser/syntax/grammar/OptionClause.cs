@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace sly.parser.syntax
+namespace sly.parser.syntax.grammar
 {
     public class OptionClause<T> : IClause<T>
     {

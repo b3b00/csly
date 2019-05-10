@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Linq;
 
-namespace sly.parser.syntax
+namespace sly.parser.syntax.grammar
 {
     public class GroupClause<T> : IClause<T>
     {

@@ -1,4 +1,4 @@
-namespace sly.parser.syntax
+namespace sly.parser.syntax.grammar
 {
     /// <summary>
     ///     a clause within a grammar rule

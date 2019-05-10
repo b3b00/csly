@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace sly.parser.syntax
+namespace sly.parser.syntax.grammar
 {
     public class OneOrMoreClause<T> : ManyClause<T>
     {

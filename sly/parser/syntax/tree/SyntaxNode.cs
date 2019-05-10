@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using sly.parser.generator;
 
-namespace sly.parser.syntax
+namespace sly.parser.syntax.tree
 {
     public class SyntaxNode<IN> : ISyntaxNode<IN> where IN : struct
     {
@@ -30,16 +30,6 @@ namespace sly.parser.syntax
         public bool Discarded => false;
         public string Name { get; set; }
 
-
-        // public void AddChildren(List<ISyntaxNode<IN>> children)
-        // {
-        //     this.Children.AddRange(children);
-        // }
-
-        // public void AddChild(ISyntaxNode<IN> child)
-        // {
-        //     this.Children.Add(child);
-        // }
 
         [ExcludeFromCodeCoverage]
         public virtual string Dump(string tab)

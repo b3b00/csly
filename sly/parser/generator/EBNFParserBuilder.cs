@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using sly.buildresult;
+using sly.parser.generator.visitor;
 using sly.parser.llparser;
-using sly.parser.syntax;
+using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {

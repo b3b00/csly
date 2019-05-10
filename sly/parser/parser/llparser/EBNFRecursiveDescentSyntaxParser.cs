@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
 using sly.parser.generator;
-using sly.parser.syntax;
+using sly.parser.syntax.tree;
+using sly.parser.syntax.grammar;
 
 namespace sly.parser.llparser
 {
@@ -223,7 +224,7 @@ namespace sly.parser.llparser
                 SyntaxNode<IN> node = null;
                 if (rule.IsSubRule)
                 {
-                    node = new GroupSyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
+                    node = new GroupSyntaxNode<IN>(nonTerminalName, children);
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
                     result.IsEnded = currentPosition >= tokens.Count - 1
@@ -232,7 +233,7 @@ namespace sly.parser.llparser
                 }
                 else
                 {
-                    node = new SyntaxNode<IN>(nonTerminalName + "__" + rule.Key, children);
+                    node = new SyntaxNode<IN>( nonTerminalName,  children);
                     node.ExpressionAffix = rule.ExpressionAffix;
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
@@ -398,7 +399,7 @@ namespace sly.parser.llparser
                     result.IsError = true;
                     var children = new List<ISyntaxNode<IN>> {innerResult.Root};
                     if (innerResult.IsError) children.Clear();
-                    result.Root = new OptionSyntaxNode<IN>(rule.NonTerminalName + "__" + rule.Key, children,
+                    result.Root = new OptionSyntaxNode<IN>( rule.NonTerminalName, children,
                         rule.GetVisitor());
                     (result.Root as OptionSyntaxNode<IN>).IsGroupOption = clause.IsGroupOption;
                     result.EndingPosition = position;
@@ -410,7 +411,7 @@ namespace sly.parser.llparser
 
                 var children = new List<ISyntaxNode<IN>> {innerResult.Root};
                 result.Root =
-                    new OptionSyntaxNode<IN>(rule.NonTerminalName + "__" + rule.Key, children, rule.GetVisitor());
+                    new OptionSyntaxNode<IN>( rule.NonTerminalName,children, rule.GetVisitor());
                 result.EndingPosition = innerResult.EndingPosition;
             }
 

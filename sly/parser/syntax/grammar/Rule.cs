@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using sly.parser.generator;
 
-namespace sly.parser.syntax
+namespace sly.parser.syntax.grammar
 {
     public class Rule<IN> : GrammarNode<IN> where IN : struct
     {

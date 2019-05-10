@@ -4,9 +4,9 @@ using System.Linq;
 using System.Reflection;
 using sly.lexer;
 using sly.parser.parser;
-using sly.parser.syntax;
+using sly.parser.syntax.tree;
 
-namespace sly.parser.generator
+namespace sly.parser.generator.visitor
 {
     public class EBNFSyntaxTreeVisitor<IN, OUT> : SyntaxTreeVisitor<IN, OUT> where IN : struct
     {
