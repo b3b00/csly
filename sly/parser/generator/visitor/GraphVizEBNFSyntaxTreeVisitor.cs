@@ -15,7 +15,7 @@ namespace sly.parser.generator.visitor
 
         public GraphVizEBNFSyntaxTreeVisitor()
         {
-         Graph = new DotGraph("syntaxtree");   
+         Graph = new DotGraph("syntaxtree",true);
         }
 
         private int NodeCounter = 0;
@@ -28,10 +28,14 @@ namespace sly.parser.generator.visitor
         
         private DotNode Leaf(IN type, string value)
         {
+            string label = type.ToString();
+            label += "\n";
+            var esc = value.Replace("\"", "\\\"");
+            label += "\\\"" + esc + "\\\"";
             var node =  new DotNode(NodeCounter.ToString()) {
                 // Set all available properties
                 Shape = DotNodeShape.Doublecircle,
-                Label = type.ToString(),
+                Label = label,
                 FontColor = DotColor.Black,
                 Style = DotNodeStyle.Default,
                 Height = 0.5f
@@ -109,7 +113,7 @@ namespace sly.parser.generator.visitor
 
         private string GetNodeLabel(SyntaxNode<IN> node)
         {
-            string label = node.Name;
+            string label = node.ShortName;
             if (node.IsExpressionNode)
             {
                 label =  node.Operation.OperatorToken.ToString();

@@ -6,7 +6,7 @@ namespace sly.parser.syntax.tree
 {
     public class ManySyntaxNode<IN> : SyntaxNode<IN> where IN : struct
     {
-        public ManySyntaxNode(string name) : base(name, new List<ISyntaxNode<IN>>())
+        public ManySyntaxNode(string name, string shortName) : base(name, shortName,new List<ISyntaxNode<IN>>())
         {
         }
 

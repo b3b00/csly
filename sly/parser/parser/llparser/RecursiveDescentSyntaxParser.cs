@@ -283,9 +283,9 @@ namespace sly.parser.llparser
             {
                 SyntaxNode<IN> node = null;
                 if (rule.IsSubRule)
-                    node = new GroupSyntaxNode<IN>($"{nonTerminalName}__{rule.Key}", children);
+                    node = new GroupSyntaxNode<IN>($"{nonTerminalName}__{rule.Key}", nonTerminalName, children);
                 else
-                    node = new SyntaxNode<IN>($"{nonTerminalName}__{rule.Key}", children);
+                    node = new SyntaxNode<IN>($"{nonTerminalName}__{rule.Key}", nonTerminalName, children);
                 node = ManageExpressionRules(rule, node);
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                     result.Root = children[0];

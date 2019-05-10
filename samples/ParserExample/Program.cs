@@ -437,6 +437,7 @@ namespace ParserExample
             var graphviz = new GraphVizEBNFSyntaxTreeVisitor<WhileToken>();
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile(false);
+            File.Delete("c:\\temp\\tree.dot");
             File.AppendAllText("c:\\temp\\tree.dot", graph);
             ;
         }
