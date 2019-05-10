@@ -100,6 +100,16 @@ namespace ParserTests
         [Lexeme(GenericToken.String, "a")] Letter
     }
 
+       public enum BadEscapeStringDelimiterTooLong
+    {
+        [Lexeme(GenericToken.String, "'",";:")] toolong
+    }
+
+           public enum BadEscapeStringDelimiterLetter
+    {
+        [Lexeme(GenericToken.String, "'","a")] toolong
+    }
+
     public enum BadEmptyStringDelimiter
     {
         [Lexeme(GenericToken.String, "")] Empty
@@ -233,6 +243,28 @@ namespace ParserTests
         public void TestBadLetterStringDelimiter()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<BadLetterStringDelimiter>>());
+            Assert.True(lexerRes.IsError);
+            Assert.Single(lexerRes.Errors);
+            var error = lexerRes.Errors[0];
+            Assert.Equal(ErrorLevel.FATAL, error.Level);
+            Assert.Contains("can not start with a letter", error.Message);
+        }
+
+         [Fact]
+        public void TestBadEscapeStringDelimiterTooLong()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<BadEscapeStringDelimiterTooLong>>());
+            Assert.True(lexerRes.IsError);
+            Assert.Single(lexerRes.Errors);
+            var error = lexerRes.Errors[0];
+            Assert.Equal(ErrorLevel.FATAL, error.Level);
+            Assert.Contains("must be 1 character length", error.Message);
+        }
+
+        [Fact]
+        public void TestBadEscapeStringDelimiterLetter()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<BadEscapeStringDelimiterLetter>>());
             Assert.True(lexerRes.IsError);
             Assert.Single(lexerRes.Errors);
             var error = lexerRes.Errors[0];
