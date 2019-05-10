@@ -429,12 +429,13 @@ namespace ParserExample
 
         private static void TestGraphViz()
         {
-            var whileParser = new WhileParser();
-            var builder = new ParserBuilder<WhileToken, WhileAST>();
-            var parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
-            var result = parser.Result.Parse("(a:=0; while a < 10 do (print a; a := a +1 ))");
+            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var parserInstance = new SimpleExpressionParser();
+            var builder = new ParserBuilder<ExpressionToken, int>();
+            var parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+            var result = parser.Result.Parse("2 + 2 * 3");
             var tree = result.SyntaxTree;
-            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<WhileToken>();
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile(false);
             File.Delete("c:\\temp\\tree.dot");
