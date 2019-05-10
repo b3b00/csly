@@ -51,12 +51,12 @@ namespace sly.lexer.fsm
         private Dictionary<int, NodeAction> Actions { get; }
 
 
-        public override string ToString()
+        public string ToGraphViz()
         {
             var dump = new StringBuilder();
             foreach (var transitions in Transitions.Values)
             foreach (var transition in transitions)
-                dump.AppendLine(transition.ToString());
+                dump.AppendLine(transition.ToGraphViz(Nodes));
             return dump.ToString();
         }
 

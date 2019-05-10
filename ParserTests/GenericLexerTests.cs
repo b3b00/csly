@@ -247,11 +247,12 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var source = "hello \\\"world ";
+            var expected = "hello \"world ";
             var r = lexer.Tokenize($"\"{source}\"").ToList();
             Assert.Equal(2, r.Count);
             var tok = r[0];
             Assert.Equal(DefaultQuotedString.DefaultString, tok.TokenID);
-            Assert.Equal(source, tok.StringWithoutQuotes);
+            Assert.Equal(expected, tok.StringWithoutQuotes);
         }
 
         [Fact]
@@ -261,11 +262,12 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var source = "hello \\\"world ";
+             var expected = "hello \"world ";
             var r = lexer.Tokenize($"\"{source}\"").ToList();
             Assert.Equal(2, r.Count);
             var tok = r[0];
             Assert.Equal(DoubleQuotedString.DoubleString, tok.TokenID);
-            Assert.Equal(source, tok.StringWithoutQuotes);
+            Assert.Equal(expected, tok.StringWithoutQuotes);
         }
 
 
@@ -320,17 +322,19 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var string1 = "\"hello \\\"world \"";
+            var expectString1 = "\"hello \"world \"";
             var string2 = "'that''s it'";
+            var expectString2 = "'that's it'";
             var source1 = $"{string1} {string2}";
             var r = lexer.Tokenize(source1).ToList();
             Assert.Equal(3, r.Count);
             var tok1 = r[0];
             Assert.Equal(ManyString.STRING, tok1.TokenID);
-            Assert.Equal(string1, tok1.Value);
+            Assert.Equal(expectString1, tok1.Value);
 
             var tok2 = r[1];
             Assert.Equal(ManyString.STRING, tok2.TokenID);
-            Assert.Equal(string2, tok2.Value);
+            Assert.Equal(expectString2, tok2.Value);
         }
 
         [Fact]
@@ -360,11 +364,12 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var source = "hello \\'world ";
+            var expected = "hello 'world ";
             var r = lexer.Tokenize($"'{source}'").ToList();
             Assert.Equal(2, r.Count);
             var tok = r[0];
             Assert.Equal(SingleQuotedString.SingleString, tok.TokenID);
-            Assert.Equal(source, tok.StringWithoutQuotes);
+            Assert.Equal(expected, tok.StringWithoutQuotes);
         }
 
         [Fact]

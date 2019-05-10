@@ -16,12 +16,12 @@
             Precondition = precondition;
         }
 
-        public override string ToString()
+        public override string ToGraphViz()
         {
             var t = "";
             if (Precondition != null) t = "[|] ";
-            t += TransitionToken;
-            return t;
+             t += TransitionToken.ToEscaped();
+            return $@"[ label=""{t}"" ]";
         }
 
         public override bool Match(char input)
