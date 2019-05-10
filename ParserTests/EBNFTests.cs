@@ -12,7 +12,7 @@ using sly.parser;
 using sly.parser.generator;
 using sly.parser.llparser;
 using sly.parser.parser;
-using sly.parser.syntax;
+using sly.parser.syntax.grammar;
 using Xunit;
 
 namespace ParserTests

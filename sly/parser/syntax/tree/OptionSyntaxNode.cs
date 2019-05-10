@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace sly.parser.syntax
+namespace sly.parser.syntax.tree
 {
     public class OptionSyntaxNode<IN> : SyntaxNode<IN> where IN : struct
     {

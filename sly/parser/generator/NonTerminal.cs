@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using sly.parser.syntax;
+using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {

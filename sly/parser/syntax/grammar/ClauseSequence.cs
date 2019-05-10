@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace sly.parser.syntax
+namespace sly.parser.syntax.grammar
 {
     public class ClauseSequence<T> : IClause<T>
     {

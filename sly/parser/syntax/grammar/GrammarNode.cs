@@ -1,4 +1,4 @@
-﻿namespace sly.parser.syntax
+﻿namespace sly.parser.syntax.grammar
 {
     public interface GrammarNode<T>
     {

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using sly.parser.generator;
 
-namespace sly.parser.syntax
+namespace sly.parser.syntax.tree
 {
     public class SyntaxNode<IN> : ISyntaxNode<IN> where IN : struct
     {
