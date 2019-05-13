@@ -317,18 +317,19 @@ namespace sly.lexer
             return result;
         }
 
+
         private static Dictionary<IN, List<CommentAttribute>> GetCommentsAttribute<IN>(BuildResult<ILexer<IN>> result)
         {
             var values = Enum.GetValues(typeof(IN));
 
             var attributes = new Dictionary<IN, List<CommentAttribute>>();
-
+    
             var fields = typeof(IN).GetFields();
             foreach (Enum value in values)
             {
                 var tokenID = (IN) (object) value;
-                var enumattributes = value.GetAttributesOfType<CommentAttribute>();
-                if (enumattributes != null && enumattributes.Any()) attributes[tokenID] = enumattributes;
+                var enumAttributes = value.GetAttributesOfType<CommentAttribute>();
+                if (enumAttributes != null && enumAttributes.Any()) attributes[tokenID] = enumAttributes;
             }
 
             var commentCount = attributes.Values.ToList().Select(l => l?.Count(attr => attr.GetType() == typeof(CommentAttribute)) ?? 0).ToList().Sum();
