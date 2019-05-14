@@ -261,10 +261,9 @@ namespace sly.lexer.fsm
                     }
                     else
                     {
-                        if (lastNode == 0 && !tokenStarted && !successes.Any() && CurrentPosition < source.Length)
+                        if (!successes.Any() && CurrentPosition < source.Length)
                             throw new LexerException(new LexicalError(CurrentLine, CurrentColumn,
                                 source.At(CurrentPosition)));
-                        ;
                     }
                 }
             }

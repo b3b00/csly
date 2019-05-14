@@ -438,36 +438,29 @@ namespace ParserTests
             var lexer = res.Result as GenericLexer<Issue106>;
             var tokens = lexer.Tokenize("1.").ToList();
             Assert.NotNull(tokens);
-            Assert.Equal(2,tokens.Count);
+            Assert.Equal(2, tokens.Count);
             var token = tokens[0];
-            Assert.Equal(Issue106.Integer,token.TokenID);
-            Assert.Equal(1,token.IntValue);
+            Assert.Equal(Issue106.Integer, token.TokenID);
+            Assert.Equal(1, token.IntValue);
         }
 
         [Fact]
         public void TestIssue114()
         {
-            try
-            {
-                var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue114>>());
-                Assert.False(res.IsError);
-                var lexer = res.Result as GenericLexer<Issue114>;
-                var error = Assert.Throws(typeof(LexerException),() =>
-                {
-                    lexer?.Tokenize("// /&").ToList();
-                });
-                Assert.Equal("&", error.Source);
-                
-                error = Assert.Throws(typeof(LexerException),() =>
-                {
-                    lexer?.Tokenize("/&").ToList();
-                });
-                Assert.Equal("&", error.Source);
-            }
-            catch (Exception e)
-            {
-                ;
-            }
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue114>>());
+            Assert.False(res.IsError);
+            var lexer = res.Result as GenericLexer<Issue114>;
+            var error = Assert.Throws(typeof(LexerException), () =>
+             {
+                 lexer?.Tokenize("// /&").ToList();
+             });
+            Assert.Equal('&', ((LexerException)error).Error.UnexpectedChar);
+
+            error = Assert.Throws(typeof(LexerException), () =>
+             {
+                 lexer?.Tokenize("/&").ToList();
+             });
+            Assert.Equal('&', ((LexerException)error).Error.UnexpectedChar);
         }
     }
 }
