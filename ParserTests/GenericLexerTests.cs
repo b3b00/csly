@@ -468,6 +468,12 @@ namespace ParserTests
                  lexer?.Tokenize("&/").ToList();
              });
             Assert.Equal('&', ((LexerException)error).Error.UnexpectedChar);
+
+            error = Assert.Throws(typeof(LexerException), () =>
+             {
+                 lexer?.Tokenize("// &").ToList();
+             });
+            Assert.Equal('&', ((LexerException)error).Error.UnexpectedChar);
         }
     }
 }
