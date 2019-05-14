@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fsm;
@@ -167,6 +168,15 @@ namespace ParserTests
         
         [Lexeme(GenericToken.Double)]
         Double = 6,
+    }
+
+    public enum Issue114
+    {
+        [Lexeme(GenericToken.SugarToken, "//")]
+        First = 1,
+
+        [Lexeme(GenericToken.SugarToken, "/*")]
+        Second = 2
     }
 
     public class GenericLexerTests
@@ -432,6 +442,32 @@ namespace ParserTests
             var token = tokens[0];
             Assert.Equal(Issue106.Integer,token.TokenID);
             Assert.Equal(1,token.IntValue);
+        }
+
+        [Fact]
+        public void TestIssue114()
+        {
+            try
+            {
+                var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue114>>());
+                Assert.False(res.IsError);
+                var lexer = res.Result as GenericLexer<Issue114>;
+                var error = Assert.Throws(typeof(LexerException),() =>
+                {
+                    lexer?.Tokenize("// /&").ToList();
+                });
+                Assert.Equal("&", error.Source);
+                
+                error = Assert.Throws(typeof(LexerException),() =>
+                {
+                    lexer?.Tokenize("/&").ToList();
+                });
+                Assert.Equal("&", error.Source);
+            }
+            catch (Exception e)
+            {
+                ;
+            }
         }
     }
 }
