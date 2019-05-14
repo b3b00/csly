@@ -70,7 +70,7 @@ namespace ParserTests
                     return value;
                 };
 
-                var exceptQuote = new[] {quote};
+                var exceptQuote = new[] { quote };
                 var in_string = "in_string_same";
                 var escaped = "escaped_same";
                 var delim = "delim_same";
@@ -101,14 +101,14 @@ namespace ParserTests
         [Lexeme(GenericToken.String, "a")] Letter
     }
 
-       public enum BadEscapeStringDelimiterTooLong
+    public enum BadEscapeStringDelimiterTooLong
     {
-        [Lexeme(GenericToken.String, "'",";:")] toolong
+        [Lexeme(GenericToken.String, "'", ";:")] toolong
     }
 
-           public enum BadEscapeStringDelimiterLetter
+    public enum BadEscapeStringDelimiterLetter
     {
-        [Lexeme(GenericToken.String, "'","a")] toolong
+        [Lexeme(GenericToken.String, "'", "a")] toolong
     }
 
     public enum BadEmptyStringDelimiter
@@ -139,7 +139,8 @@ namespace ParserTests
 
     public enum ManyString
     {
-        [Lexeme(GenericToken.String, "'", "'")] [Lexeme(GenericToken.String)]
+        [Lexeme(GenericToken.String, "'", "'")]
+        [Lexeme(GenericToken.String)]
         STRING
     }
 
@@ -165,7 +166,7 @@ namespace ParserTests
     {
         [Lexeme(GenericToken.Int)]
         Integer = 5,
-        
+
         [Lexeme(GenericToken.Double)]
         Double = 6,
     }
@@ -260,7 +261,7 @@ namespace ParserTests
             Assert.Contains("can not start with a letter", error.Message);
         }
 
-         [Fact]
+        [Fact]
         public void TestBadEscapeStringDelimiterTooLong()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<BadEscapeStringDelimiterTooLong>>());
@@ -304,7 +305,7 @@ namespace ParserTests
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var source = "hello \\\"world ";
-             var expected = "hello \"world ";
+            var expected = "hello \"world ";
             var r = lexer.Tokenize($"\"{source}\"").ToList();
             Assert.Equal(2, r.Count);
             var tok = r[0];
@@ -459,6 +460,12 @@ namespace ParserTests
             error = Assert.Throws(typeof(LexerException), () =>
              {
                  lexer?.Tokenize("/&").ToList();
+             });
+            Assert.Equal('&', ((LexerException)error).Error.UnexpectedChar);
+
+            error = Assert.Throws(typeof(LexerException), () =>
+             {
+                 lexer?.Tokenize("&/").ToList();
              });
             Assert.Equal('&', ((LexerException)error).Error.UnexpectedChar);
         }
