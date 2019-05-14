@@ -682,30 +682,16 @@ comment on 2 lines ", multiLineCommentToken.Value);
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result as GenericLexer<SingleLineCommentsToken>;
 
-
             var dump = lexer.ToString();
 
-            var code = @"1
+			var error = Assert.Throws<LexerException>(() =>
+			{
+				lexer?.Tokenize(@"1
 2 /* not ending
-comment";
-
-            var tokens = lexer.Tokenize(code).ToList();
-
-            Assert.Equal(3, tokens.Count);
-
-            var token1 = tokens[0];
-            var token2 = tokens[1];
-
-            Assert.Equal(SingleLineCommentsToken.INT, token1.TokenID);
-            Assert.Equal("1", token1.Value);
-            Assert.Equal(0, token1.Position.Line);
-            Assert.Equal(0, token1.Position.Column);
-
-            Assert.Equal(SingleLineCommentsToken.INT, token2.TokenID);
-            Assert.Equal("2", token2.Value);
-            Assert.Equal(1, token2.Position.Line);
-            Assert.Equal(0, token2.Position.Column);
-        }
+comment").ToList();
+			});
+			Assert.Equal('*', error.Error.UnexpectedChar);
+		}
 
         [Fact]
         public void TestGenericMultiLineComment()
@@ -714,40 +700,16 @@ comment";
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result as GenericLexer<SingleLineCommentsToken>;
 
-
             var dump = lexer.ToString();
 
-            var code = @"1
+			var error = Assert.Throws<LexerException>(() =>
+			{
+				lexer?.Tokenize(@"1
 2 /* multi line 
-comment on 2 lines */ 3.0";
-
-            var tokens = lexer.Tokenize(code).ToList();
-
-            Assert.Equal(5, tokens.Count);
-
-            var intToken1 = tokens[0];
-            var intToken2 = tokens[1];
-            var multiLineCommentToken = tokens[2];
-            var doubleToken = tokens[3];
-
-            Assert.Equal(SingleLineCommentsToken.INT, intToken1.TokenID);
-            Assert.Equal("1", intToken1.Value);
-            Assert.Equal(0, intToken1.Position.Line);
-            Assert.Equal(0, intToken1.Position.Column);
-
-            Assert.Equal(SingleLineCommentsToken.INT, intToken2.TokenID);
-            Assert.Equal("2", intToken2.Value);
-            Assert.Equal(1, intToken2.Position.Line);
-            Assert.Equal(0, intToken2.Position.Column);
-            Assert.Equal(SingleLineCommentsToken.INT, multiLineCommentToken.TokenID);
-            Assert.Equal("2", multiLineCommentToken.Value);
-            Assert.Equal(1, multiLineCommentToken.Position.Line);
-            Assert.Equal(11, multiLineCommentToken.Position.Column);
-            Assert.Equal(SingleLineCommentsToken.DOUBLE, doubleToken.TokenID);
-            Assert.Equal("3.0", doubleToken.Value);
-            Assert.Equal(2, doubleToken.Position.Line);
-            Assert.Equal(22, doubleToken.Position.Column);
-        }
+comment on 2 lines */ 3.0").ToList();
+			});
+			Assert.Equal('*', error.Error.UnexpectedChar);
+		}
 
         [Fact]
         public void TestGenericSingleLineComment()
@@ -796,40 +758,15 @@ comment on 2 lines */ 3.0";
 
             var dump = lexer.ToString();
 
-            var code = @"1
+			var error = Assert.Throws<LexerException>(() =>
+			{
+				lexer?.Tokenize(@"1
 2 /* inner */ 3
 4
-            ";
-
-            var tokens = lexer.Tokenize(code).ToList();
-
-            Assert.Equal(5, tokens.Count);
-
-            var token1 = tokens[0];
-            var token2 = tokens[1];
-            var token3 = tokens[2];
-            var token4 = tokens[3];
-
-            Assert.Equal(SingleLineCommentsToken.INT, token1.TokenID);
-            Assert.Equal("1", token1.Value);
-            Assert.Equal(0, token1.Position.Line);
-            Assert.Equal(0, token1.Position.Column);
-
-            Assert.Equal(SingleLineCommentsToken.INT, token2.TokenID);
-            Assert.Equal("2", token2.Value);
-            Assert.Equal(1, token2.Position.Line);
-            Assert.Equal(0, token2.Position.Column);
-
-            Assert.Equal(SingleLineCommentsToken.INT, token3.TokenID);
-            Assert.Equal("3", token3.Value);
-            Assert.Equal(1, token3.Position.Line);
-            Assert.Equal(14, token3.Position.Column);
-
-            Assert.Equal(SingleLineCommentsToken.INT, token4.TokenID);
-            Assert.Equal("4", token4.Value);
-            Assert.Equal(2, token4.Position.Line);
-            Assert.Equal(0, token4.Position.Column);
-        }
+            ").ToList();
+			});
+			Assert.Equal('*', error.Error.UnexpectedChar);
+		}
 
         [Fact]
         public void TestMixedEOLComment()
@@ -839,153 +776,116 @@ comment on 2 lines */ 3.0";
             var lexer = lexerRes.Result as GenericLexer<SingleLineCommentsToken>;
 
             var dump = lexer.ToString();
-            var code = "1\n2\r\n/* multi line \rcomment on 2 lines */ 3.0";
-            List<Token<SingleLineCommentsToken>> tokens = null;
-            tokens = lexer.Tokenize(code).ToList();
 
-            Assert.Equal(5, tokens.Count);
-
-            var token1 = tokens[0];
-            var token2 = tokens[1];
-            var token3 = tokens[2];
-            var token4 = tokens[3];
-
-            Assert.Equal(SingleLineCommentsToken.INT, token1.TokenID);
-            Assert.Equal("1", token1.Value);
-            Assert.Equal(0, token1.Position.Line);
-            Assert.Equal(0, token1.Position.Column);
-
-            Assert.Equal(SingleLineCommentsToken.INT, token2.TokenID);
-            Assert.Equal("2", token2.Value);
-            Assert.Equal(1, token2.Position.Line);
-            Assert.Equal(0, token2.Position.Column);
-            Assert.Equal(SingleLineCommentsToken.INT, token3.TokenID);
-            Assert.Equal("2", token3.Value);
-            Assert.Equal(2, token3.Position.Line);
-            Assert.Equal(11, token3.Position.Column);
-            Assert.Equal(SingleLineCommentsToken.DOUBLE, token4.TokenID);
-            Assert.Equal("3.0", token4.Value);
-            Assert.Equal(3, token4.Position.Line);
-            Assert.Equal(22, token4.Position.Column);
-        }
+			var error = Assert.Throws<LexerException>(() =>
+			{
+				lexer?.Tokenize("1\n2\r\n/* multi line \rcomment on 2 lines */ 3.0").ToList();
+			});
+			Assert.Equal('*', error.Error.UnexpectedChar);
+		}
     }
 
-    public class MultiLineCommentsTest
-    {
-        [Fact]
-        public void NotEndingMultiComment()
-        {
-            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MultiLineCommentsToken>>());
-            Assert.False(lexerRes.IsError);
-            var lexer = lexerRes.Result as GenericLexer<MultiLineCommentsToken>;
+	public class MultiLineCommentsTest
+	{
+		[Fact]
+		public void NotEndingMultiComment()
+		{
+			var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MultiLineCommentsToken>>());
+			Assert.False(lexerRes.IsError);
+			var lexer = lexerRes.Result as GenericLexer<MultiLineCommentsToken>;
 
 
-            var dump = lexer.ToString();
+			var dump = lexer.ToString();
 
-            var code = @"1
+			var code = @"1
 2 /* not ending
 comment";
 
-            var tokens = lexer.Tokenize(code).ToList();
+			var tokens = lexer.Tokenize(code).ToList();
 
-            Assert.Equal(4, tokens.Count);
+			Assert.Equal(4, tokens.Count);
 
-            var token1 = tokens[0];
-            var token2 = tokens[1];
-            var token3 = tokens[2];
+			var token1 = tokens[0];
+			var token2 = tokens[1];
+			var token3 = tokens[2];
 
-            Assert.Equal(MultiLineCommentsToken.INT, token1.TokenID);
-            Assert.Equal("1", token1.Value);
-            Assert.Equal(0, token1.Position.Line);
-            Assert.Equal(0, token1.Position.Column);
+			Assert.Equal(MultiLineCommentsToken.INT, token1.TokenID);
+			Assert.Equal("1", token1.Value);
+			Assert.Equal(0, token1.Position.Line);
+			Assert.Equal(0, token1.Position.Column);
 
-            Assert.Equal(MultiLineCommentsToken.INT, token2.TokenID);
-            Assert.Equal("2", token2.Value);
-            Assert.Equal(1, token2.Position.Line);
-            Assert.Equal(0, token2.Position.Column);
+			Assert.Equal(MultiLineCommentsToken.INT, token2.TokenID);
+			Assert.Equal("2", token2.Value);
+			Assert.Equal(1, token2.Position.Line);
+			Assert.Equal(0, token2.Position.Column);
 
-            Assert.Equal(MultiLineCommentsToken.COMMENT, token3.TokenID);
-            Assert.Equal(@" not ending
+			Assert.Equal(MultiLineCommentsToken.COMMENT, token3.TokenID);
+			Assert.Equal(@" not ending
 comment", token3.Value);
-            Assert.Equal(1, token3.Position.Line);
-            Assert.Equal(2, token3.Position.Column);
-        }
+			Assert.Equal(1, token3.Position.Line);
+			Assert.Equal(2, token3.Position.Column);
+		}
 
-        [Fact]
-        public void TestGenericMultiLineComment()
-        {
-            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MultiLineCommentsToken>>());
-            Assert.False(lexerRes.IsError);
-            var lexer = lexerRes.Result as GenericLexer<MultiLineCommentsToken>;
+		[Fact]
+		public void TestGenericMultiLineComment()
+		{
+			var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MultiLineCommentsToken>>());
+			Assert.False(lexerRes.IsError);
+			var lexer = lexerRes.Result as GenericLexer<MultiLineCommentsToken>;
 
 
-            var dump = lexer.ToString();
+			var dump = lexer.ToString();
 
-            var code = @"1
+			var code = @"1
 2 /* multi line 
 comment on 2 lines */ 3.0";
 
-            var tokens = lexer.Tokenize(code).ToList();
+			var tokens = lexer.Tokenize(code).ToList();
 
-            Assert.Equal(5, tokens.Count);
+			Assert.Equal(5, tokens.Count);
 
-            var intToken1 = tokens[0];
-            var intToken2 = tokens[1];
-            var multiLineCommentToken = tokens[2];
-            var doubleToken = tokens[3];
+			var intToken1 = tokens[0];
+			var intToken2 = tokens[1];
+			var multiLineCommentToken = tokens[2];
+			var doubleToken = tokens[3];
 
-            Assert.Equal(MultiLineCommentsToken.INT, intToken1.TokenID);
-            Assert.Equal("1", intToken1.Value);
-            Assert.Equal(0, intToken1.Position.Line);
-            Assert.Equal(0, intToken1.Position.Column);
+			Assert.Equal(MultiLineCommentsToken.INT, intToken1.TokenID);
+			Assert.Equal("1", intToken1.Value);
+			Assert.Equal(0, intToken1.Position.Line);
+			Assert.Equal(0, intToken1.Position.Column);
 
-            Assert.Equal(MultiLineCommentsToken.INT, intToken2.TokenID);
-            Assert.Equal("2", intToken2.Value);
-            Assert.Equal(1, intToken2.Position.Line);
-            Assert.Equal(0, intToken2.Position.Column);
-            Assert.Equal(MultiLineCommentsToken.COMMENT, multiLineCommentToken.TokenID);
-            Assert.Equal(@" multi line 
+			Assert.Equal(MultiLineCommentsToken.INT, intToken2.TokenID);
+			Assert.Equal("2", intToken2.Value);
+			Assert.Equal(1, intToken2.Position.Line);
+			Assert.Equal(0, intToken2.Position.Column);
+			Assert.Equal(MultiLineCommentsToken.COMMENT, multiLineCommentToken.TokenID);
+			Assert.Equal(@" multi line 
 comment on 2 lines ", multiLineCommentToken.Value);
-            Assert.Equal(1, multiLineCommentToken.Position.Line);
-            Assert.Equal(2, multiLineCommentToken.Position.Column);
-            Assert.Equal(MultiLineCommentsToken.DOUBLE, doubleToken.TokenID);
-            Assert.Equal("3.0", doubleToken.Value);
-            Assert.Equal(2, doubleToken.Position.Line);
-            Assert.Equal(22, doubleToken.Position.Column);
-        }
+			Assert.Equal(1, multiLineCommentToken.Position.Line);
+			Assert.Equal(2, multiLineCommentToken.Position.Column);
+			Assert.Equal(MultiLineCommentsToken.DOUBLE, doubleToken.TokenID);
+			Assert.Equal("3.0", doubleToken.Value);
+			Assert.Equal(2, doubleToken.Position.Line);
+			Assert.Equal(22, doubleToken.Position.Column);
+		}
 
-        [Fact]
-        public void TestGenericSingleLineComment()
-        {
-            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MultiLineCommentsToken>>());
-            Assert.False(lexerRes.IsError);
-            var lexer = lexerRes.Result as GenericLexer<MultiLineCommentsToken>;
+		[Fact]
+		public void TestGenericSingleLineComment()
+		{
+			var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MultiLineCommentsToken>>());
+			Assert.False(lexerRes.IsError);
+			var lexer = lexerRes.Result as GenericLexer<MultiLineCommentsToken>;
 
-            var dump = lexer.ToString();
+			var dump = lexer.ToString();
 
-            var tokens = lexer.Tokenize(@"1
+			var error = Assert.Throws<LexerException>(() =>
+			{
+				lexer.Tokenize(@"1
 2 // single line comment
-3.0").ToList();
-
-            Assert.Equal(4, tokens.Count);
-
-            var token1 = tokens[0];
-            var token2 = tokens[1];
-            var token3 = tokens[2];
-
-            Assert.Equal(MultiLineCommentsToken.INT, token1.TokenID);
-            Assert.Equal("1", token1.Value);
-            Assert.Equal(0, token1.Position.Line);
-            Assert.Equal(0, token1.Position.Column);
-            Assert.Equal(MultiLineCommentsToken.INT, token2.TokenID);
-            Assert.Equal("2", token2.Value);
-            Assert.Equal(1, token2.Position.Line);
-            Assert.Equal(0, token2.Position.Column);
-            Assert.Equal(MultiLineCommentsToken.DOUBLE, token3.TokenID);
-            Assert.Equal("3.0", token3.Value);
-            Assert.Equal(2, token3.Position.Line);
-            Assert.Equal(0, token3.Position.Column);
-        }
+3.0");
+			});
+			Assert.Equal('/', error.Error.UnexpectedChar);
+		}
 
         [Fact]
         public void TestInnerMultiComment()

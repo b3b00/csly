@@ -450,17 +450,17 @@ namespace ParserTests
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue114>>());
             Assert.False(res.IsError);
             var lexer = res.Result as GenericLexer<Issue114>;
-            var error = Assert.Throws(typeof(LexerException), () =>
+            var error = Assert.Throws<LexerException>( () =>
              {
                  lexer?.Tokenize("// /&").ToList();
              });
-            Assert.Equal('&', ((LexerException)error).Error.UnexpectedChar);
+            Assert.Equal('&', error.Error.UnexpectedChar);
 
-            error = Assert.Throws(typeof(LexerException), () =>
+            error = Assert.Throws<LexerException>( () =>
              {
                  lexer?.Tokenize("/&").ToList();
              });
-            Assert.Equal('&', ((LexerException)error).Error.UnexpectedChar);
+            Assert.Equal('&', error.Error.UnexpectedChar);
         }
     }
 }
