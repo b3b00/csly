@@ -1,4 +1,6 @@
-﻿namespace csly.whileLang.compiler
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace csly.whileLang.compiler
 {
     public class CompilerContext
     {
@@ -13,7 +15,7 @@
 
         public Scope CurrentScope { get; protected set; }
 
-
+        [ExcludeFromCodeCoverage]
         public string Dump()
         {
             return RootScope.Dump("");

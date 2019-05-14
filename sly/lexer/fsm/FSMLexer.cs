@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -50,13 +51,13 @@ namespace sly.lexer.fsm
 
         private Dictionary<int, NodeAction> Actions { get; }
 
-
-        public override string ToString()
+        [ExcludeFromCodeCoverage]
+        public string ToGraphViz()
         {
             var dump = new StringBuilder();
             foreach (var transitions in Transitions.Values)
             foreach (var transition in transitions)
-                dump.AppendLine(transition.ToString());
+                dump.AppendLine(transition.ToGraphViz(Nodes));
             return dump.ToString();
         }
 
@@ -260,10 +261,9 @@ namespace sly.lexer.fsm
                     }
                     else
                     {
-                        if (lastNode == 0 && !tokenStarted && !successes.Any() && CurrentPosition < source.Length)
+                        if (!successes.Any() && CurrentPosition < source.Length)
                             throw new LexerException(new LexicalError(CurrentLine, CurrentColumn,
                                 source.At(CurrentPosition)));
-                        ;
                     }
                 }
             }

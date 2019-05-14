@@ -325,8 +325,10 @@ namespace sly.lexer
             StringCounter++;
 
             StringDelimiterChar = stringDelimiter[0];
+            char stringDelimiterChar = stringDelimiter[0];
 
             EscapeStringDelimiterChar = escapeDelimiterChar[0];
+            char escapeStringDelimiterChar = escapeDelimiterChar[0];
 
 
             NodeCallback<GenericToken> callback = match =>
@@ -338,51 +340,62 @@ namespace sly.lexer
                 return match;
             };
 
-            if (StringDelimiterChar != EscapeStringDelimiterChar)
+            if (stringDelimiterChar != escapeStringDelimiterChar)
             {
-                FSMBuilder.GoTo(start);
-                FSMBuilder.Transition(StringDelimiterChar)
-                    .Mark(in_string + StringCounter)
-                    .ExceptTransitionTo(new[] {StringDelimiterChar, EscapeStringDelimiterChar},
-                        in_string + StringCounter)
-                    .Transition(EscapeStringDelimiterChar)
-                    .Mark(escape_string + StringCounter)
-                    .AnyTransitionTo(' ', in_string + StringCounter)
-                    .Transition(StringDelimiterChar)
-                    .End(GenericToken.String)
-                    .Mark(string_end + StringCounter)
-                    .CallBack(callback);
-                FSMBuilder.Fsm.StringDelimiter = StringDelimiterChar;
-            }
-            else
-            {
-                NodeAction collapseDelimiter = value =>
+                 NodeAction collapseDelimiterDiff = value =>
                 {
-                    if (value.EndsWith("" + StringDelimiterChar + StringDelimiterChar))
-                        return value.Substring(0, value.Length - 2) + StringDelimiterChar;
+                    if (value.EndsWith("" + escapeStringDelimiterChar + stringDelimiterChar))
+                        return value.Substring(0, value.Length - 2) + stringDelimiterChar;
                     return value;
                 };
 
-                var exceptDelimiter = new[] {StringDelimiterChar};
+
+                FSMBuilder.GoTo(start);
+                FSMBuilder.Transition(stringDelimiterChar)
+                    .Mark(in_string + StringCounter)
+                    .ExceptTransitionTo(new[] {stringDelimiterChar, escapeStringDelimiterChar},
+                        in_string + StringCounter)
+                    .Transition(escapeStringDelimiterChar)
+                    .Mark(escape_string + StringCounter)
+                    .ExceptTransitionTo(new[] {stringDelimiterChar},in_string+StringCounter)
+                    .GoTo(escape_string + StringCounter)
+                    .TransitionTo(stringDelimiterChar,in_string+StringCounter)
+                    .Action(collapseDelimiterDiff)
+                    .Transition(stringDelimiterChar)
+                    .End(GenericToken.String)
+                    .Mark(string_end + StringCounter)
+                    .CallBack(callback);
+                FSMBuilder.Fsm.StringDelimiter = stringDelimiterChar;
+            }
+            else
+            {
+                NodeAction collapseDelimiterSame = value =>
+                {
+                    if (value.EndsWith("" + stringDelimiterChar + stringDelimiterChar))
+                        return value.Substring(0, value.Length - 2) + stringDelimiterChar;
+                    return value;
+                };
+
+                var exceptDelimiter = new[] {stringDelimiterChar};
                 in_string = "in_string_same";
                 var escaped = "escaped_same";
                 var delim = "delim_same";
 
                 FSMBuilder.GoTo(start)
-                    .Transition(StringDelimiterChar)
+                    .Transition(stringDelimiterChar)
                     .Mark(in_string + StringCounter)
                     .ExceptTransitionTo(exceptDelimiter, in_string + StringCounter)
-                    .Transition(StringDelimiterChar)
+                    .Transition(stringDelimiterChar)
                     .Mark(escaped + StringCounter)
                     .End(GenericToken.String)
                     .CallBack(callback)
-                    .Transition(StringDelimiterChar)
+                    .Transition(stringDelimiterChar)
                     .Mark(delim + StringCounter)
-                    .Action(collapseDelimiter)
+                    .Action(collapseDelimiterSame)
                     .ExceptTransitionTo(exceptDelimiter, in_string + StringCounter);
 
                 FSMBuilder.GoTo(delim + StringCounter)
-                    .TransitionTo(StringDelimiterChar, escaped + StringCounter)
+                    .TransitionTo(stringDelimiterChar, escaped + StringCounter)
                     .ExceptTransitionTo(exceptDelimiter, in_string + StringCounter);
             }
         }

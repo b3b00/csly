@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace sly.parser.generator
@@ -14,6 +15,7 @@ namespace sly.parser.generator
             if (!NonTerminals.ContainsKey(nonTerminal.Name)) NonTerminals[nonTerminal.Name] = nonTerminal;
         }
 
+        [ExcludeFromCodeCoverage]
         public string Dump()
         {
             StringBuilder dump = new StringBuilder();

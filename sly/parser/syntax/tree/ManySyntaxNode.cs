@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace sly.parser.syntax
+namespace sly.parser.syntax.tree
 {
     public class ManySyntaxNode<IN> : SyntaxNode<IN> where IN : struct
     {

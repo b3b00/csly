@@ -17,8 +17,10 @@ using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser;
 using sly.parser.generator;
-using sly.parser.syntax;
+using sly.parser.syntax.grammar;
 using sly.buildresult;
+using sly.parser.generator.visitor;
+using StackExchange.Profiling;
 
 namespace ParserExample
 {
@@ -122,7 +124,7 @@ namespace ParserExample
             // string literal
             builder.Transition('\"')
                 .Mark("in_string")
-                .ExceptTransitionTo(new[] {'\"', '\\'}, "in_string")
+                .ExceptTransitionTo(new[] { '\"', '\\' }, "in_string")
                 .Transition('\\')
                 .Mark("escape")
                 .AnyTransitionTo(' ', "in_string")
@@ -332,7 +334,7 @@ namespace ParserExample
             var parserInstance = new RuleParser<EbnfToken>();
             var builder = new ParserBuilder<EbnfToken, IClause<EbnfToken>>();
             var r = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "rule");
-            
+
             var parser = r.Result;
             var rule = parser.Parse("a ( b ) ", "clauses");
             ;
@@ -341,13 +343,13 @@ namespace ParserExample
 
         public static BuildResult<Parser<ExpressionToken, int>> buildSimpleExpressionParserWithContext()
         {
-            
-           
-                var StartingRule = $"{typeof(SimpleExpressionParserWithContext).Name}_expressions";
-                var parserInstance = new SimpleExpressionParserWithContext();
-                var builder = new ParserBuilder<ExpressionToken, int>();
-                var Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
-                return Parser;
+
+
+            var StartingRule = $"{typeof(SimpleExpressionParserWithContext).Name}_expressions";
+            var parserInstance = new SimpleExpressionParserWithContext();
+            var builder = new ParserBuilder<ExpressionToken, int>();
+            var Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+            return Parser;
         }
 
         public static void TestContextualParser()
@@ -357,12 +359,12 @@ namespace ParserExample
             {
                 buildResult.Errors.ForEach(e =>
                 {
-                    Console.WriteLine(e.Level + " - "+e.Message);
+                    Console.WriteLine(e.Level + " - " + e.Message);
                 });
                 return;
             }
             var parser = buildResult.Result;
-            var res = parser.ParseWithContext("2 + a", new Dictionary<string, int> {{"a", 2}});
+            var res = parser.ParseWithContext("2 + a", new Dictionary<string, int> { { "a", 2 } });
             Console.WriteLine($"result : ok:>{res.IsOk}< value:>{res.Result}<");
         }
 
@@ -381,21 +383,73 @@ namespace ParserExample
                     Console.WriteLine($"{token.TokenID} - {token.Value}");
                 }
             }
-            
+
         }
 
         public static void test104()
         {
             EBNFTests tests = new EBNFTests();
             tests.TestGroupSyntaxOptionIsNone();
-            
+
+        }
+
+        public static void testJSON()
+        {
+            try {
+            Console.WriteLine("starting json test.");
+
+                var instance = new EbnfJsonGenericParser();
+            var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
+            var buildResult = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            if (buildResult.IsOk)
+            {
+                Console.WriteLine("parser built.");
+                var parser = buildResult.Result;
+                var content = File.ReadAllText("test.json");
+                Console.WriteLine("test.json read.");
+                var jsonResult = parser.Parse(content);
+                Console.WriteLine("json parse done.");
+                if (jsonResult.IsOk)
+                {
+                    Console.WriteLine("YES !");
+                }
+                else
+                {
+                    Console.WriteLine("Ooh no !");
+                }
+                Console.WriteLine("Done.");
+
+            }
+            }
+            catch(Exception e) {
+                Console.WriteLine($"ERROR {e.Message} : \n {e.StackTrace}");
+            }
+
+        }
+
+        private static void TestGraphViz()
+        {
+            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var parserInstance = new SimpleExpressionParser();
+            var builder = new ParserBuilder<ExpressionToken, int>();
+            var parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+            var result = parser.Result.Parse("2 + 2 * 3");
+            var tree = result.SyntaxTree;
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
+            var root = graphviz.VisitTree(tree);
+            string graph = graphviz.Graph.Compile(false);
+            File.Delete("c:\\temp\\tree.dot");
+            File.AppendAllText("c:\\temp\\tree.dot", graph);
+            ;
         }
 
         private static void Main(string[] args)
         {
             //TestContextualParser();
             //TestTokenCallBacks();
-            test104();
+            //test104();
+            //testJSON();
+            TestGraphViz();
         }
     }
 }

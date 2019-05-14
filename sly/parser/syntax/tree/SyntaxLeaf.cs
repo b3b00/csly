@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using sly.lexer;
 
-namespace sly.parser.syntax
+namespace sly.parser.syntax.tree
 {
     public class SyntaxLeaf<IN> : ISyntaxNode<IN> where IN : struct
     {

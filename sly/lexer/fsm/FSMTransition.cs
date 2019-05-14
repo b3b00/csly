@@ -1,4 +1,5 @@
 ﻿using sly.lexer.fsm.transitioncheck;
+using System.Collections.Generic;
 
 namespace sly.lexer.fsm
 {
@@ -18,9 +19,11 @@ namespace sly.lexer.fsm
         public AbstractTransitionCheck Check { get; set; }
 
 
-        public override string ToString()
+        public string ToGraphViz<N>(Dictionary<int, FSMNode<N>> nodes)
         {
-            return $"{FromNode} - {Check} -> {ToNode}";
+            string f = nodes[FromNode].Mark;
+            string t = nodes[ToNode].Mark;
+            return $"{f} -> {t} {Check.ToGraphViz()}";
         }
 
 

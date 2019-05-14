@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using sly.parser.syntax;
+using sly.parser.syntax.tree;
 
 namespace sly.parser
 {

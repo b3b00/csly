@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace sly.parser.syntax
+namespace sly.parser.syntax.grammar
 {
     public class TerminalClause<T> : IClause<T>
     {
