@@ -19,6 +19,7 @@
 
 
   <ItemGroup>
+    <PackageReference Include="MiniProfiler" Version="4.0.165" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 

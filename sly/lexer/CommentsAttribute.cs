@@ -11,10 +11,10 @@ namespace sly.lexer
 
         public string SingleLineCommentStart;
 
-        public CommentAttribute(string singleLineStart, string MultiLineStart, string multiLineEnd)
+        public CommentAttribute(string singleLineStart, string multiLineStart, string multiLineEnd)
         {
             SingleLineCommentStart = singleLineStart;
-            MultiLineCommentStart = MultiLineStart;
+            MultiLineCommentStart = multiLineStart;
             MultiLineCommentEnd = multiLineEnd;
         }
     }
