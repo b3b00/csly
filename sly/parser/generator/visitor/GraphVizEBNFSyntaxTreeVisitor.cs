@@ -58,8 +58,8 @@ namespace sly.parser.generator.visitor
                 // Set all available properties
                 Shape = "ellipse",
                 Label = label,
-                FontColor = "Black",
-                Style = "Default",
+                FontColor = "black",
+                Style = null,
                 Height = 0.5f
             };
             NodeCounter++;
