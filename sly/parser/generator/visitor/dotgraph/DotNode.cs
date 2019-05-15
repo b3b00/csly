@@ -17,7 +17,7 @@ namespace sly.parser.generator.visitor.dotgraph
 
         public string ToGraph()
         {
-            return $@"3 [ shape={Shape} label=""{Label}""];";
+            return $@"{Name} [ shape={Shape} label=""{Label}""];";
         }
     }
 }

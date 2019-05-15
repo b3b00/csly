@@ -36,7 +36,7 @@ namespace sly.parser.generator.visitor
             label += "\\\"" + esc + "\\\"";
             var node =  new DotNode(NodeCounter.ToString()) {
                 // Set all available properties
-                Shape = "Doublecircle",
+                Shape = "doublecircle",
                 Label = label,
                 FontColor = "",
                 Style = "",
