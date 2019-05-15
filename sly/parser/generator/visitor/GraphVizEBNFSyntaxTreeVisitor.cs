@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DotNetGraph;
+using sly.parser.generator.visitor.dotgraph;
 using sly.lexer;
 using sly.parser.parser;
 using sly.parser.syntax.tree;
@@ -36,10 +36,10 @@ namespace sly.parser.generator.visitor
             label += "\\\"" + esc + "\\\"";
             var node =  new DotNode(NodeCounter.ToString()) {
                 // Set all available properties
-                Shape = DotNodeShape.Doublecircle,
+                Shape = "Doublecircle",
                 Label = label,
-                FontColor = DotColor.Black,
-                Style = DotNodeStyle.Default,
+                FontColor = "",
+                Style = "",
                 Height = 0.5f
             };
             NodeCounter++;
@@ -56,10 +56,10 @@ namespace sly.parser.generator.visitor
         {
             var node =  new DotNode(NodeCounter.ToString()) {
                 // Set all available properties
-                Shape = DotNodeShape.Ellipse,
+                Shape = "ellipse",
                 Label = label,
-                FontColor = DotColor.Black,
-                Style = DotNodeStyle.Default,
+                FontColor = "Black",
+                Style = "Default",
                 Height = 0.5f
             };
             NodeCounter++;
@@ -86,20 +86,6 @@ namespace sly.parser.generator.visitor
         private DotNode Visit(GroupSyntaxNode<IN> node)
         {
             return Visit(node as SyntaxNode<IN>);
-//            var values = new List<SyntaxVisitorResult<IN>>();
-//            foreach (var n in node.Children)
-//            {
-//                var v = Visit(n);
-//
-//                if (v.IsValue) group.Add(n.Name, v.ValueResult);
-//                if (v.IsToken)
-//                    if (!v.Discarded)
-//                        group.Add(n.Name, v.TokenResult);
-//            }
-//
-//
-//            var res = SyntaxVisitorResult<IN>.NewGroup(group);
-//            return res;
         }
 
         private DotNode Visit(OptionSyntaxNode<IN> node)
@@ -151,7 +137,7 @@ namespace sly.parser.generator.visitor
                 {
                     var edge = new DotArrow(result, c) {
                         // Set all available properties
-                        ArrowHeadShape = DotArrowShape.None
+                        ArrowHeadShape = "none"
                     };    
                     Graph.Add(edge);
                 });
