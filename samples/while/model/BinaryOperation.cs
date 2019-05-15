@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using csly.whileLang.compiler;
 using sly.lexer;
@@ -42,6 +43,7 @@ namespace csly.whileLang.model
         public TokenPosition Position { get; set; }
         public WhileType Whiletype { get; set; }
 
+        [ExcludeFromCodeCoverage]
         public string Dump(string tab)
         {
             var dmp = new StringBuilder();

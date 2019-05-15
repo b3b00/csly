@@ -1,28 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace sly.lexer.fsm
 {
-    public delegate void BuildExtension<IN>(IN token, LexemeAttribute lexem, GenericLexer<IN> lexer) where IN : struct;
+    
+    public static class MemoryExtensions {
 
-    public class FSMMatch<N>
-    {
-        public char StringDelimiter = '"';
-
-        public FSMMatch(bool success, N result = default(N), string value = null, TokenPosition position = null)
+        public static T At<T>(this ReadOnlyMemory<T> memory, int index)
         {
-            Properties = new Dictionary<string, object>();
-            IsSuccess = success;
-            Result = new Token<N>(result, value, position);
-        }
-
-        public Dictionary<string, object> Properties { get; set; }
-
-        public bool IsSuccess { get; set; }
-
-        public Token<N> Result { get; set; }
+            return memory.Span[index];
+        } 
     }
+    
+    public delegate void BuildExtension<IN>(IN token, LexemeAttribute lexem, GenericLexer<IN> lexer) where IN : struct;
 
     public class FSMLexer<N>
     {
@@ -57,13 +51,13 @@ namespace sly.lexer.fsm
 
         private Dictionary<int, NodeAction> Actions { get; }
 
-
-        public override string ToString()
+        [ExcludeFromCodeCoverage]
+        public string ToGraphViz()
         {
             var dump = new StringBuilder();
             foreach (var transitions in Transitions.Values)
             foreach (var transition in transitions)
-                dump.AppendLine(transition.ToString());
+                dump.AppendLine(transition.ToGraphViz(Nodes));
             return dump.ToString();
         }
 
@@ -177,9 +171,17 @@ namespace sly.lexer.fsm
             return Run(source, CurrentPosition);
         }
 
-        public FSMMatch<N> Run(string source, int start)
+
+        public FSMMatch<N> Run( string source, int start)
+        {
+            return Run(new ReadOnlyMemory<char>(source.ToCharArray()), start);
+        }
+
+        public FSMMatch<N> Run( ReadOnlyMemory<char> source, int start)
         {
             var value = "";
+            int tokenStartIndex = start;
+            int tokenLength = 0;
             var result = new FSMMatch<N>(false);
             var successes = new Stack<FSMMatch<N>>();
             CurrentPosition = start;
@@ -192,18 +194,18 @@ namespace sly.lexer.fsm
 
             if (CurrentPosition < source.Length)
             {
-                var currentToken = source[CurrentPosition];
+                var currentCharacter = source.At(CurrentPosition);
 
                 while (CurrentPosition < source.Length && currentNode != null)
                 {
-                    currentToken = source[CurrentPosition];
+                    currentCharacter = source.Span[CurrentPosition];
 
                     var consumeSkipped = true;
 
                     while (consumeSkipped && !tokenStarted && CurrentPosition < source.Length)
                     {
-                        currentToken = source[CurrentPosition];
-                        if (IgnoreWhiteSpace && WhiteSpaces.Contains(currentToken))
+                        currentCharacter = source.At(CurrentPosition);
+                        if (IgnoreWhiteSpace && WhiteSpaces.Contains(currentCharacter))
                         {
                             if (successes.Any())
                                 currentNode = null;
@@ -234,11 +236,12 @@ namespace sly.lexer.fsm
                     }
 
 
-                    currentNode = Move(currentNode, currentToken, value);
+                    currentNode = Move(currentNode, currentCharacter, value);
                     if (currentNode != null)
                     {
                         lastNode = currentNode.Id;
-                        value += currentToken;
+                        value += currentCharacter;
+                        tokenLength++;
 
                         if (!tokenStarted)
                         {
@@ -248,7 +251,7 @@ namespace sly.lexer.fsm
 
                         if (currentNode.IsEnd)
                         {
-                            var resultInter = new FSMMatch<N>(true, currentNode.Value, value, position);
+                            var resultInter = new FSMMatch<N>(true, currentNode.Value, value, position,currentNode.Id);
                             successes.Push(resultInter);
                         }
 
@@ -258,10 +261,9 @@ namespace sly.lexer.fsm
                     }
                     else
                     {
-                        if (lastNode == 0 && !tokenStarted && !successes.Any() && CurrentPosition < source.Length)
+                        if (!successes.Any() && CurrentPosition < source.Length)
                             throw new LexerException(new LexicalError(CurrentLine, CurrentColumn,
-                                source[CurrentPosition]));
-                        ;
+                                source.At(CurrentPosition)));
                     }
                 }
             }
@@ -270,7 +272,10 @@ namespace sly.lexer.fsm
             if (successes.Any())
             {
                 result = successes.Pop();
-                if (HasCallback(lastNode)) result = Callbacks[lastNode](result);
+                if (HasCallback(result.NodeId))
+                {
+                    result = Callbacks[result.NodeId](result);
+                }
             }
 
             return result;

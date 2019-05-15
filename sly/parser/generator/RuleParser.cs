@@ -1,6 +1,6 @@
 ﻿using System;
 using sly.lexer;
-using sly.parser.syntax;
+using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {

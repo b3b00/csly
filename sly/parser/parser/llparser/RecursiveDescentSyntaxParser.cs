@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
 using sly.parser.generator;
-using sly.parser.syntax;
+using sly.parser.syntax.tree;
+using sly.parser.syntax.grammar;
 
 namespace sly.parser.llparser
 {
@@ -282,9 +283,9 @@ namespace sly.parser.llparser
             {
                 SyntaxNode<IN> node = null;
                 if (rule.IsSubRule)
-                    node = new GroupSyntaxNode<IN>($"{nonTerminalName}__{rule.Key}", children);
+                    node = new GroupSyntaxNode<IN>(nonTerminalName, children);
                 else
-                    node = new SyntaxNode<IN>($"{nonTerminalName}__{rule.Key}", children);
+                    node = new SyntaxNode<IN>( nonTerminalName, children);
                 node = ManageExpressionRules(rule, node);
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                     result.Root = children[0];
@@ -340,14 +341,14 @@ namespace sly.parser.llparser
             return node;
         }
 
-        public SyntaxParseResult<IN> ParseTerminal(IList<Token<IN>> tokens, TerminalClause<IN> term, int position)
+        public SyntaxParseResult<IN> ParseTerminal(IList<Token<IN>> tokens, TerminalClause<IN> terminal, int position)
         {
             var result = new SyntaxParseResult<IN>();
-            result.IsError = !term.Check(tokens[position].TokenID);
+            result.IsError = !terminal.Check(tokens[position].TokenID);
             result.EndingPosition = !result.IsError ? position + 1 : position;
             var token = tokens[position];
-            token.Discarded = term.Discarded;
-            result.Root = new SyntaxLeaf<IN>(token);
+            token.Discarded = terminal.Discarded;
+            result.Root = new SyntaxLeaf<IN>(token,terminal.Discarded);
             return result;
         }
 

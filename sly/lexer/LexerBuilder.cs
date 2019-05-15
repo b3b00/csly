@@ -21,8 +21,12 @@ namespace sly.lexer
             var type = enumVal.GetType();
             var memInfo = type.GetMember(enumVal.ToString());
             var attributes = (IEnumerable<T>) memInfo[0].GetCustomAttributes(typeof(T), false);
-            if (attributes.Count() > 0)
+
+            if (attributes.Any())
+            {
                 return attributes.ToList();
+            }
+
             return new List<T>();
         }
     }
@@ -270,25 +274,42 @@ namespace sly.lexer
                         return match;
                     };
 
+                    foreach (var commentAttr in comment.Value)
+                    {
+                        bool hasSingleLine = !string.IsNullOrWhiteSpace(commentAttr.SingleLineCommentStart);
+                        bool hasMultiLine = !string.IsNullOrWhiteSpace(commentAttr.MultiLineCommentStart);
 
-                    var commentAttr = comment.Value[0];
+                        if (hasSingleLine)
+                        {
+                            lexer.SingleLineComment = commentAttr.SingleLineCommentStart;
+                        }
 
-                    lexer.SingleLineComment = commentAttr.SingleLineCommentStart;
-                    lexer.MultiLineCommentStart = commentAttr.MultiLineCommentStart;
-                    lexer.MultiLineCommentEnd = commentAttr.MultiLineCommentEnd;
+                        if (hasMultiLine)
+                        {
+                            lexer.MultiLineCommentStart = commentAttr.MultiLineCommentStart;
+                            lexer.MultiLineCommentEnd = commentAttr.MultiLineCommentEnd;
+                        }
 
+                        var fsmBuilder = lexer.FSMBuilder;
 
-                    var fsmBuilder = lexer.FSMBuilder;
-                    fsmBuilder.GoTo(GenericLexer<IN>.start);
-                    fsmBuilder.ConstantTransition(commentAttr.SingleLineCommentStart);
-                    fsmBuilder.Mark(GenericLexer<IN>.single_line_comment_start);
-                    fsmBuilder.End(GenericToken.Comment);
-                    fsmBuilder.CallBack(callbackSingle);
-                    fsmBuilder.GoTo(GenericLexer<IN>.start);
-                    fsmBuilder.ConstantTransition(commentAttr.MultiLineCommentStart);
-                    fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
-                    fsmBuilder.End(GenericToken.Comment);
-                    fsmBuilder.CallBack(callbackMulti);
+                        if (hasSingleLine)
+                        {
+                            fsmBuilder.GoTo(GenericLexer<IN>.start);
+                            fsmBuilder.ConstantTransition(commentAttr.SingleLineCommentStart);
+                            fsmBuilder.Mark(GenericLexer<IN>.single_line_comment_start);
+                            fsmBuilder.End(GenericToken.Comment);
+                            fsmBuilder.CallBack(callbackSingle);
+                        }
+
+                        if (hasMultiLine)
+                        {
+                            fsmBuilder.GoTo(GenericLexer<IN>.start);
+                            fsmBuilder.ConstantTransition(commentAttr.MultiLineCommentStart);
+                            fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
+                            fsmBuilder.End(GenericToken.Comment);
+                            fsmBuilder.CallBack(callbackMulti);
+                        }
+                    }
                 }
 
 
@@ -296,22 +317,31 @@ namespace sly.lexer
             return result;
         }
 
+
         private static Dictionary<IN, List<CommentAttribute>> GetCommentsAttribute<IN>(BuildResult<ILexer<IN>> result)
         {
             var values = Enum.GetValues(typeof(IN));
 
             var attributes = new Dictionary<IN, List<CommentAttribute>>();
-
+    
             var fields = typeof(IN).GetFields();
             foreach (Enum value in values)
             {
                 var tokenID = (IN) (object) value;
-                var enumattributes = value.GetAttributesOfType<CommentAttribute>();
-                if (enumattributes != null && enumattributes.Any()) attributes[tokenID] = enumattributes;
+                var enumAttributes = value.GetAttributesOfType<CommentAttribute>();
+                if (enumAttributes != null && enumAttributes.Any()) attributes[tokenID] = enumAttributes;
             }
 
-            var count = attributes.Values.ToList().Select(l => l != null ? l.Count : 0).ToList().Sum();
-            if (count > 1) result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many comment lexem"));
+            var commentCount = attributes.Values.ToList().Select(l => l?.Count(attr => attr.GetType() == typeof(CommentAttribute)) ?? 0).ToList().Sum();
+            var multiLineCommentCount = attributes.Values.ToList().Select(l => l?.Count(attr => attr.GetType() == typeof(MultiLineCommentAttribute)) ?? 0).ToList().Sum();
+            var singleLineCommentCount = attributes.Values.ToList().Select(l => l?.Count(attr => attr.GetType() == typeof(SingleLineCommentAttribute)) ?? 0).ToList().Sum();
+
+            if (commentCount > 1) result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many comment lexem"));
+
+            if (multiLineCommentCount > 1) result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many multi-line comment lexem"));
+            if (singleLineCommentCount > 1) result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many single-line comment lexem"));
+
+            if (commentCount > 0 && (multiLineCommentCount > 0 || singleLineCommentCount > 0)) result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "comment lexem can't be used together with single-line or multi-line comment lexems"));
 
             return attributes;
         }

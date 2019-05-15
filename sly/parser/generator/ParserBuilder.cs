@@ -4,8 +4,9 @@ using System.Linq;
 using System.Reflection;
 using sly.buildresult;
 using sly.lexer;
+using sly.parser.generator.visitor;
 using sly.parser.llparser;
-using sly.parser.syntax;
+using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {
@@ -274,6 +275,11 @@ namespace sly.parser.generator
                     if (clause is NonTerminalClause<IN> ntClause)
                     {
                         if (ntClause != null) found = found || ntClause.NonTerminalName == referenceName;
+                    }
+                    else if (clause is OptionClause<IN> option)
+                    {
+                        if (option != null && option.Clause is NonTerminalClause<IN> inner)
+                            found = found || inner.NonTerminalName == referenceName;
                     }
                     else if (clause is ZeroOrMoreClause<IN> zeroOrMore)
                     {

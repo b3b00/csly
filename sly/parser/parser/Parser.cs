@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser.generator;
 using sly.parser.parser;
+using System;
+using sly.parser.generator.visitor;
 
 namespace sly.parser
 {
@@ -101,6 +104,7 @@ namespace sly.parser
             {
                 var r = Visitor.VisitSyntaxTree(syntaxResult.Root,parsingContext);
                 result.Result = r;
+                result.SyntaxTree = syntaxResult.Root;
                 result.IsError = false;
             }
             else

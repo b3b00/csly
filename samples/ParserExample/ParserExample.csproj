@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ParserTests\ParserTests.csproj" />
     <ProjectReference Include="..\expressionParser\expressionParser.csproj" />
     <ProjectReference Include="..\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj" />
     <ProjectReference Include="..\jsonparser\jsonparser.csproj" />
@@ -30,5 +31,9 @@
     <ProjectReference Include="..\SimpleExpressionParser\SimpleExpressionParser.csproj" />
     <ProjectReference Include="..\while\while.csproj" />
   </ItemGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+     <NoWarn>1701;1702;1705;1591</NoWarn>
+</PropertyGroup>
 
 </Project>

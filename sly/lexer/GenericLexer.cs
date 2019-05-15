@@ -113,7 +113,7 @@ namespace sly.lexer
                 tokens.Add(transcoded);
                 r = LexerFsm.Run(source);
                
-                if (r.Result.IsComment) ConsumeComment(r.Result, source);
+                if (r.IsSuccess && r.Result.IsComment) ConsumeComment(r.Result, source);
             }
 
             var eos = new Token<IN>();
@@ -325,64 +325,77 @@ namespace sly.lexer
             StringCounter++;
 
             StringDelimiterChar = stringDelimiter[0];
+            char stringDelimiterChar = stringDelimiter[0];
 
             EscapeStringDelimiterChar = escapeDelimiterChar[0];
+            char escapeStringDelimiterChar = escapeDelimiterChar[0];
 
 
             NodeCallback<GenericToken> callback = match =>
             {
                 match.Properties[DerivedToken] = token;
-                var value = match.Result.Value;
+                var value = match.Result.SpanValue;
 
-                match.Result.Value = value;
+                match.Result.SpanValue = value;
                 return match;
             };
 
-            if (StringDelimiterChar != EscapeStringDelimiterChar)
+            if (stringDelimiterChar != escapeStringDelimiterChar)
             {
-                FSMBuilder.GoTo(start);
-                FSMBuilder.Transition(StringDelimiterChar)
-                    .Mark(in_string + StringCounter)
-                    .ExceptTransitionTo(new[] {StringDelimiterChar, EscapeStringDelimiterChar},
-                        in_string + StringCounter)
-                    .Transition(EscapeStringDelimiterChar)
-                    .Mark(escape_string + StringCounter)
-                    .AnyTransitionTo(' ', in_string + StringCounter)
-                    .Transition(StringDelimiterChar)
-                    .End(GenericToken.String)
-                    .Mark(string_end + StringCounter)
-                    .CallBack(callback);
-                FSMBuilder.Fsm.StringDelimiter = StringDelimiterChar;
-            }
-            else
-            {
-                NodeAction collapseDelimiter = value =>
+                 NodeAction collapseDelimiterDiff = value =>
                 {
-                    if (value.EndsWith("" + StringDelimiterChar + StringDelimiterChar))
-                        return value.Substring(0, value.Length - 2) + StringDelimiterChar;
+                    if (value.EndsWith("" + escapeStringDelimiterChar + stringDelimiterChar))
+                        return value.Substring(0, value.Length - 2) + stringDelimiterChar;
                     return value;
                 };
 
-                var exceptDelimiter = new[] {StringDelimiterChar};
-                var in_string = "in_string_same";
+
+                FSMBuilder.GoTo(start);
+                FSMBuilder.Transition(stringDelimiterChar)
+                    .Mark(in_string + StringCounter)
+                    .ExceptTransitionTo(new[] {stringDelimiterChar, escapeStringDelimiterChar},
+                        in_string + StringCounter)
+                    .Transition(escapeStringDelimiterChar)
+                    .Mark(escape_string + StringCounter)
+                    .ExceptTransitionTo(new[] {stringDelimiterChar},in_string+StringCounter)
+                    .GoTo(escape_string + StringCounter)
+                    .TransitionTo(stringDelimiterChar,in_string+StringCounter)
+                    .Action(collapseDelimiterDiff)
+                    .Transition(stringDelimiterChar)
+                    .End(GenericToken.String)
+                    .Mark(string_end + StringCounter)
+                    .CallBack(callback);
+                FSMBuilder.Fsm.StringDelimiter = stringDelimiterChar;
+            }
+            else
+            {
+                NodeAction collapseDelimiterSame = value =>
+                {
+                    if (value.EndsWith("" + stringDelimiterChar + stringDelimiterChar))
+                        return value.Substring(0, value.Length - 2) + stringDelimiterChar;
+                    return value;
+                };
+
+                var exceptDelimiter = new[] {stringDelimiterChar};
+                in_string = "in_string_same";
                 var escaped = "escaped_same";
                 var delim = "delim_same";
 
                 FSMBuilder.GoTo(start)
-                    .Transition(StringDelimiterChar)
+                    .Transition(stringDelimiterChar)
                     .Mark(in_string + StringCounter)
                     .ExceptTransitionTo(exceptDelimiter, in_string + StringCounter)
-                    .Transition(StringDelimiterChar)
+                    .Transition(stringDelimiterChar)
                     .Mark(escaped + StringCounter)
                     .End(GenericToken.String)
                     .CallBack(callback)
-                    .Transition(StringDelimiterChar)
+                    .Transition(stringDelimiterChar)
                     .Mark(delim + StringCounter)
-                    .Action(collapseDelimiter)
+                    .Action(collapseDelimiterSame)
                     .ExceptTransitionTo(exceptDelimiter, in_string + StringCounter);
 
                 FSMBuilder.GoTo(delim + StringCounter)
-                    .TransitionTo(StringDelimiterChar, escaped + StringCounter)
+                    .TransitionTo(stringDelimiterChar, escaped + StringCounter)
                     .ExceptTransitionTo(exceptDelimiter, in_string + StringCounter);
             }
         }
@@ -407,36 +420,41 @@ namespace sly.lexer
 
         public void ConsumeComment(Token<GenericToken> comment, string source)
         {
-            var commentValue = "";
+            ConsumeComment(comment, source.AsMemory());
+        }
+        public void ConsumeComment(Token<GenericToken> comment, ReadOnlyMemory<char> source)
+        {
+
+            ReadOnlyMemory<char> commentValue;
 
             if (comment.IsSingleLineComment)
             {
                 var position = LexerFsm.CurrentPosition;
                 commentValue = EOLManager.GetToEndOfLine(source, position);
                 position = position + commentValue.Length;
-                comment.Value = commentValue.Replace("\n", "").Replace("\r", "");
+                comment.SpanValue = commentValue;
                 LexerFsm.Move(position, LexerFsm.CurrentLine + 1, 0);
             }
             else if (comment.IsMultiLineComment)
             {
                 var position = LexerFsm.CurrentPosition;
-                var end = source.IndexOf(MultiLineCommentEnd, position);
+                
+                var end = source.Span.Slice(position).IndexOf(MultiLineCommentEnd.AsSpan());
                 if (end < 0)
                     position = source.Length;
                 else
-                    position = end;
-                commentValue = source.Substring(LexerFsm.CurrentPosition, position - LexerFsm.CurrentPosition);
-                comment.Value = commentValue;
+                    position = end+position;
+                commentValue = source.Slice(LexerFsm.CurrentPosition, position - LexerFsm.CurrentPosition);
+                comment.SpanValue = commentValue;
 
                 var newPosition = LexerFsm.CurrentPosition + commentValue.Length + MultiLineCommentEnd.Length;
-
-                var lines = EOLManager.GetLines(commentValue);
+                var lines = EOLManager.GetLinesLength(commentValue);
                 var newLine = LexerFsm.CurrentLine + lines.Count - 1;
-                var newColumn = 0;
+                int newColumn;
                 if (lines.Count > 1)
-                    newColumn = lines[lines.Count - 1].Length + MultiLineCommentEnd.Length;
+                    newColumn = lines.Last() + MultiLineCommentEnd.Length;
                 else
-                    newColumn = LexerFsm.CurrentColumn + lines[0].Length + MultiLineCommentEnd.Length;
+                    newColumn = LexerFsm.CurrentColumn + lines[0] + MultiLineCommentEnd.Length;
 
 
                 LexerFsm.Move(newPosition, newLine, newColumn);
@@ -449,7 +467,8 @@ namespace sly.lexer
             var inTok = match.Result;
             tok.IsComment = inTok.IsComment;
             tok.IsEmpty = inTok.IsEmpty;
-            tok.Value = inTok.Value;
+//            tok.Value = inTok.Value;
+            tok.SpanValue = inTok.SpanValue;
             tok.CommentType = inTok.CommentType;
             tok.Position = inTok.Position;
             tok.Discarded = inTok.Discarded;

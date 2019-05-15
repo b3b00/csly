@@ -12,11 +12,21 @@ using sly.parser;
 using sly.parser.generator;
 using sly.parser.llparser;
 using sly.parser.parser;
-using sly.parser.syntax;
+using sly.parser.syntax.grammar;
 using Xunit;
 
 namespace ParserTests
 {
+    
+    public static class ListExtensions {
+
+        public static bool ContainsAll<IN>(this IEnumerable<IN> list1, IEnumerable<IN> list2)
+        {
+            return list1.Intersect(list2).Count() == list1.Count();
+        } 
+    
+    }
+    
     public enum OptionTestToken
     {
         [Lexeme("a")] a = 1,
@@ -44,7 +54,7 @@ namespace ParserTests
     public class OptionTestParser
     {
         [Production("root2 : a B? c ")]
-        public string root2(Token<OptionTestToken> a, ValueOption<string> b, Token<OptionTestToken> c)
+        public string Root2(Token<OptionTestToken> a, ValueOption<string> b, Token<OptionTestToken> c)
         {
             var r = new StringBuilder();
             r.Append("R(");
@@ -138,20 +148,17 @@ namespace ParserTests
             var builder = new StringBuilder();
             builder.Append("R(");
             builder.Append(a.Value);
-            var gg = option.Match(
+            option.Match(
                 group =>
                 {
                     var aToken = group.Token(0).Value;
                     builder.Append($";{aToken}");
-                    return group;
+                    return null;
                 },
                 () =>
                 {
-                    builder.Append(";");
-                    builder.Append("a");
-                    var g = new Group<GroupTestToken, string>();
-                    g.Add("<none>", "<none>");
-                    return g;
+                    builder.Append($";<none>");
+                    return null;
                 });
             builder.Append(")");
             return builder.ToString();
@@ -173,6 +180,55 @@ namespace ParserTests
             });
             return r.ToString();
         }
+    }
+
+
+    public class Bugfix100Test
+    {
+        [Production("testNonTerm : sub* COMMA ")]
+        public int TestNonTerminal(List<int> options, Token<GroupTestToken> token)
+        {
+            return 1;
+        }
+
+        [Production("sub : A")]
+        public int sub(Token<GroupTestToken> token)
+        {
+            return 1;
+        }
+        
+        [Production("testTerm : A* COMMA")]
+        public int TestTerminal(List<Token<GroupTestToken>> options, Token<GroupTestToken> token)
+        {
+            return 1;
+        }
+        
+    }
+    
+    
+    public class Bugfix104Test
+    {
+        [Production("testNonTerm : sub (COMMA[d] unreachable)? ")]
+        public int TestNonTerminal(List<int> options, Token<GroupTestToken> token)
+        {
+            return 1;
+        }
+
+        [Production("sub : A")]
+        public int sub(Token<GroupTestToken> token)
+        {
+            return 1;
+        }
+            
+        
+        [Production("unreachable : A")]
+        public int unreachable(Token<GroupTestToken> token)
+        {
+            return 1;
+        }
+        
+        
+        
     }
 
     public class EBNFTests
@@ -345,7 +401,7 @@ namespace ParserTests
             Assert.False(buildResult.IsError);
             var optionParser = buildResult.Result;
 
-            var result = optionParser.Parse("a c", "root");
+            var result = optionParser.Parse("a c", "root2");
             Assert.Equal("R(a,<none>,c)", result.Result);
         }
 
@@ -395,7 +451,7 @@ namespace ParserTests
         }
 
         [Fact]
-        public void TestGroupSyntaxOptionParser()
+        public void TestGroupSyntaxOptionIsSome()
         {
             var buildResult = BuildGroupParser();
             Assert.False(buildResult.IsError);
@@ -404,6 +460,18 @@ namespace ParserTests
 
             Assert.False(res.IsError);
             Assert.Equal("R(a;a)", res.Result); // rootMany
+        }
+        
+        [Fact]
+        public void TestGroupSyntaxOptionIsNone()
+        {
+            var buildResult = BuildGroupParser();
+            Assert.False(buildResult.IsError);
+            var groupParser = buildResult.Result;
+            var res = groupParser.Parse("a ", "rootOption");
+
+            Assert.False(res.IsError);
+            Assert.Equal("R(a;<none>)", res.Result); // rootMany
         }
 
         [Fact]
@@ -602,9 +670,47 @@ namespace ParserTests
             Assert.True(res.IsOk);
             Assert.Equal(8,res.Result);
         }
-        
+
+        [Fact]
+        public void TestBug100()
+        {
+            var startingRule = $"testNonTerm";
+            var parserInstance = new Bugfix100Test();
+            var builder = new ParserBuilder<GroupTestToken, int>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Assert.False(builtParser.IsError);
+            Assert.NotNull(builtParser.Result);
+            Parser<GroupTestToken, int> parser = builtParser.Result as Parser<GroupTestToken, int>;
+            Assert.NotNull(parser);
+            var conf = parser.Configuration;
+            List<GroupTestToken> expected = new List<GroupTestToken>() {GroupTestToken.A,GroupTestToken.COMMA};
+            
+            var nonTerm = conf.NonTerminals["testNonTerm"] as NonTerminal<GroupTestToken>;
+            Assert.NotNull(nonTerm);
+            Assert.Equal(2,nonTerm.PossibleLeadingTokens.Count);
+            Assert.True(nonTerm.PossibleLeadingTokens.ContainsAll(expected));
+
+            var term = conf.NonTerminals["testTerm"] as NonTerminal<GroupTestToken>;
+            Assert.NotNull(term);
+            Assert.Equal(2,nonTerm.PossibleLeadingTokens.Count);
+            Assert.True(term.PossibleLeadingTokens.ContainsAll(expected));
+        }
         
         #endregion
+        
+        [Fact]
+        public void TestBug104()
+        {
+            var startingRule = $"testNonTerm";
+            var parserInstance = new Bugfix104Test();
+            var builder = new ParserBuilder<GroupTestToken, int>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Assert.False(builtParser.IsError);
+            Assert.False(builtParser.Errors.Any());
+        }
+        
+        
+       
         
     }
 }

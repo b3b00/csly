@@ -1,4 +1,5 @@
-﻿using sly.lexer;
+﻿using System;
+using sly.lexer;
 
 namespace GenericLexerWithCallbacks
 {
@@ -12,7 +13,7 @@ namespace GenericLexerWithCallbacks
             {
                 token.TokenID = CallbackTokens.SKIP;
             }
-            token.Value = token.Value.ToUpper();
+            token.SpanValue = new ReadOnlyMemory<char>(token.Value.ToUpper().ToCharArray());
             
             return token;
         } 

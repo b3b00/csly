@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace sly.lexer.fsm.transitioncheck
 {
@@ -21,12 +22,12 @@ namespace sly.lexer.fsm.transitioncheck
         }
 
         [ExcludeFromCodeCoverage]
-        public override string ToString()
+        public override string ToGraphViz()
         {
-            var t = "";
-            if (Precondition != null) t = "[|] ";
-            t += $"^({TokenExceptions})";
-            return t;
+           var label = "";
+            if (Precondition != null) label = "[|] ";
+            label += $"^({string.Join(", ",TokenExceptions.Select(c => c.ToEscaped()))})";
+            return $@"[ label=""{label}"" ]";
         }
 
         public override bool Match(char input)

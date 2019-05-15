@@ -1,4 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace sly.lexer
 {
@@ -15,10 +19,16 @@ namespace sly.lexer
 
 
         public Token(T token, string value, TokenPosition position, bool isCommentStart = false,
+            CommentType commentType = CommentType.Single) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType )
+        {
+            
+        }
+        
+        public Token(T token, ReadOnlyMemory<char> value, TokenPosition position, bool isCommentStart = false,
             CommentType commentType = CommentType.Single)
         {
             TokenID = token;
-            Value = value;
+            SpanValue = value;
             Position = position;
             CommentType = commentType;
         }
@@ -33,6 +43,8 @@ namespace sly.lexer
         }
 
 
+        public  ReadOnlyMemory<char> SpanValue { get; set; }
+        
         public TokenPosition Position { get; set; }
 
         public int PositionInTokenFlow { get; set; }
@@ -51,7 +63,7 @@ namespace sly.lexer
 
         public bool IsSingleLineComment => CommentType == CommentType.Single;
 
-        public string Value { get; set; }
+        public string Value => SpanValue.ToString();
 
         public static T DefaultToken
         {
@@ -75,9 +87,31 @@ namespace sly.lexer
             }
         }
 
+
+
         public int IntValue => int.Parse(Value);
 
-        public double DoubleValue => double.Parse(Value);
+        public  double DoubleValue
+        {
+            get
+            {
+                // Try parsing in the current culture
+                if (!double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.CurrentCulture,
+                        out var result) &&
+                    // Then try in US english
+                    !double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"),
+                        out result) &&
+                    // Then in neutral language
+                    !double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture,
+                        out result))
+                {
+                    result = 0.0;
+                }
+
+                return result;
+            }
+            set { }
+        }
 
         public char CharValue => StringWithoutQuotes[0];
 

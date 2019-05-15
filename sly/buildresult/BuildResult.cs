@@ -26,6 +26,8 @@ namespace sly.buildresult
             set { }
         }
 
+        public bool IsOk => !IsError;
+
         public void AddError(InitializationError error)
         {
             Errors.Add(error);
