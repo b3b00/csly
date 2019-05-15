@@ -6,7 +6,7 @@ using sly.lexer.fsm;
 using Xunit;
 using GenericLexerWithCallbacks;
 
-namespace ParserTests
+namespace ParserTests.lexer
 {
     public enum Extensions
     {

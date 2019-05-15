@@ -7,7 +7,7 @@ using sly.lexer;
 using sly.parser.generator;
 using Xunit;
 
-namespace ParserTests
+namespace ParserTests.lexer
 {
     public class LexerTests
     {

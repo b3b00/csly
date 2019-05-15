@@ -20,7 +20,6 @@ using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.buildresult;
 using sly.parser.generator.visitor;
-using StackExchange.Profiling;
 
 namespace ParserExample
 {

@@ -4,7 +4,7 @@ using sly.parser;
 using sly.parser.generator;
 using Xunit;
 
-namespace ParserTests
+namespace ParserTests.samples
 {
     public class JsonGenericTests
     {
