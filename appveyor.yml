@@ -1,23 +1,47 @@
 version: 1.0.{build}
 image: Visual Studio 2017
 init:
-- cmd: >-
-    choco install opencover.portable
-
-    choco install codecov
+- cmd: ''
 environment:
   nugetKey:
     secure: c1PEIupjD4bY0aJ2UYpyhayC+2VAC/5zxCzOi2dIEhKATogvn5Hlv98I9RhBPuF9
   codecovToken:
     secure: tDNSMb2HRVQsJEgwVvuqY02+qgaKI3bw0LHSqplQKSPSRJNEkdCVnX352HoSht5t
+  COVERALLS_REPO_TOKEN:
+    secure: ntYxuZR1S4QagcvXJ+rXGhJoIw0Ln556M3h6PQEwaGr/41x+JazkKeRJ8DHzHODc
 build_script:
-- ps: "dotnet --info\nAdd-AppveyorMessage \"build started\"\nWrite-Host \"restoring nugets\"\ndotnet restore\nAdd-AppveyorMessage \"nugets restored\"\nWrite-Host \"building solution (Release)\"\ndotnet build -c Release\nAdd-AppveyorMessage \"dotnet build success\"\nWrite-Host \"running XUnit tests and coverage\"\n\nOpenCover.Console.exe -excludebyattribute:*.ExcludeFromCoverage* -register:user -target:\"c:\\Program Files\\dotnet\\dotnet.exe\" -targetargs:\"test --logger:trx;LogFileName=results.trx /p:DebugType=full ParserTests/ParserTests.csproj\"  -output:\".\\sly_coverage.xml\" -oldStyle -filter:\"+[sly*]* -[ParserTests*]* -[samples*]*\"\ncodecov -t 0777b110-895e-466f-ad53-a0e04860c4ee -f sly_coverage.xml /p:DebugType=full \n\nAdd-AppveyorMessage \"xunit tests done\"\nWrite-Host \"packing nuget\"\ndotnet pack -c Release\nAdd-AppveyorMessage \"sly nuget packaged\""
+- cmd: >-
+    dotnet tool install coveralls.net  --tool-path tools
+
+
+    dotnet restore
+
+
+    dotnet build -c Release
+
+
+
+     dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:exclude=\"[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*\" ParserTests/ParserTests.csproj
+
+    echo "############################"
+
+
+
+    tools\csmacnz.coveralls.exe --opencover -i ParserTests\coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch %APPVEYOR_REPO_BRANCH% --commitId %APPVEYOR_REPO_COMMIT% --commitAuthor %APPVEYOR_REPO_COMMIT_AUTHOR%  --commitEmail %APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL% --jobId %APPVEYOR_JOB_ID%
+
+
+    echo "############################"
+
+
+    dotnet pack -c Release
 test_script:
 - ps: dotnet test ParserTests/ParserTests.csproj
 artifacts:
 - path: sly/bin/release/*
   name: sly
 - path: sly_coverage.xml
+  name: sly
+- path: coverage.opencover.xml
   name: sly
 deploy:
 - provider: NuGet

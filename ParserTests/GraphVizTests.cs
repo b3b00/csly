@@ -1,5 +1,12 @@
 using sly.parser.generator.visitor.dotgraph;
 using Xunit;
+using simpleExpressionParser;
+using expressionparser;
+using System.Collections.Generic;
+using sly.buildresult;
+using sly.parser;
+using sly.parser.generator;
+using sly.parser.generator.visitor;
 
 namespace ParserTests
 {
@@ -56,6 +63,23 @@ namespace ParserTests
             string expected =
                 @"digraph test {l1 [  label=""leaf1"" shape=doublecircle fontcolor=black height=0.50]l2 [  label=""leaf2"" shape=doublecircle fontcolor=red height=0.50]root [  label=""leaf1"" shape=ellipse fontcolor=blue height=0.50]root->l1 [  arrowshape=none];root->l2 [  arrowshape=normal];}";
             Assert.Equal(expected,actual);
+
+        }
+
+        [Fact]
+        public void SyntaxTreeGraphVizTest()
+        {
+            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var parserInstance = new SimpleExpressionParser();
+            var builder = new ParserBuilder<ExpressionToken, int>();
+            var  Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+            var result = Parser.Result.Parse("1+1");
+
+            var tree = result.SyntaxTree;
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
+            var root = graphviz.VisitTree(tree);
+            string graph = graphviz.Graph.Compile();
+
 
         }
         
