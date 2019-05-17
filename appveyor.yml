@@ -11,7 +11,12 @@ environment:
     secure: ntYxuZR1S4QagcvXJ+rXGhJoIw0Ln556M3h6PQEwaGr/41x+JazkKeRJ8DHzHODc
 build_script:
 - cmd: >-
-    dotnet tool install coveralls.net  --tool-path tools
+    dotnet tool install coveralls.net  --version 1.0.0 --tool-path tools
+
+
+
+
+    echo "tools\csmacnz.coveralls.exe --opencover -i ParserTests\coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch "%APPVEYOR_REPO_BRANCH%" --commitId "%APPVEYOR_REPO_COMMIT%" --commitAuthor "%APPVEYOR_REPO_COMMIT_AUTHOR%"  --commitEmail "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" --jobId "%APPVEYOR_JOB_ID%"
 
 
     dotnet restore
@@ -21,13 +26,13 @@ build_script:
 
 
 
+
      dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:exclude=\"[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*\" ParserTests/ParserTests.csproj
 
     echo "############################"
 
 
-
-    tools\csmacnz.coveralls.exe --opencover -i ParserTests\coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch %APPVEYOR_REPO_BRANCH% --commitId %APPVEYOR_REPO_COMMIT% --commitAuthor %APPVEYOR_REPO_COMMIT_AUTHOR%  --commitEmail %APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL% --jobId %APPVEYOR_JOB_ID%
+    tools\csmacnz.coveralls.exe --opencover -i ./ParserTests/coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch "%APPVEYOR_REPO_BRANCH%" --commitId "%APPVEYOR_REPO_COMMIT%" --commitAuthor "%APPVEYOR_REPO_COMMIT_AUTHOR%"  --commitEmail "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" --jobId "%APPVEYOR_JOB_ID%"
 
 
     echo "############################"
@@ -41,7 +46,7 @@ artifacts:
   name: sly
 - path: sly_coverage.xml
   name: sly
-- path: coverage.opencover.xml
+- path: ParserTests/coverage.opencover.xml
   name: sly
 deploy:
 - provider: NuGet
