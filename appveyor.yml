@@ -16,7 +16,6 @@ build_script:
 
 
 
-    echo "tools\csmacnz.coveralls.exe --opencover -i ParserTests\coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch "%APPVEYOR_REPO_BRANCH%" --commitId "%APPVEYOR_REPO_COMMIT%" --commitAuthor "%APPVEYOR_REPO_COMMIT_AUTHOR%"  --commitEmail "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" --jobId "%APPVEYOR_JOB_ID%" --useRelativePaths --basePath "%APPVEYOR_BUILD_FOLDER%"
 
 
     dotnet restore
@@ -32,7 +31,7 @@ build_script:
     echo "############################"
 
 
-    tools\csmacnz.coveralls.exe --opencover -i ./ParserTests/coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch "%APPVEYOR_REPO_BRANCH%" --commitId "%APPVEYOR_REPO_COMMIT%" --commitAuthor "%APPVEYOR_REPO_COMMIT_AUTHOR%"  --commitEmail "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" --jobId "%APPVEYOR_JOB_ID%" --useRelativePaths
+    tools\csmacnz.coveralls.exe --opencover -i ./ParserTests/coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch "%APPVEYOR_REPO_BRANCH%" --commitId "%APPVEYOR_REPO_COMMIT%" --commitAuthor "%APPVEYOR_REPO_COMMIT_AUTHOR%"  --commitEmail "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" --jobId "%APPVEYOR_JOB_ID%" --useRelativePaths --basePath "%APPVEYOR_BUILD_FOLDER%"
 
 
     echo "############################"
