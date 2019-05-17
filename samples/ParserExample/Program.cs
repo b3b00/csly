@@ -436,7 +436,7 @@ namespace ParserExample
             var tree = result.SyntaxTree;
             var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
             var root = graphviz.VisitTree(tree);
-            string graph = graphviz.Graph.Compile(false);
+            string graph = graphviz.Graph.Compile();
             File.Delete("c:\\temp\\tree.dot");
             File.AppendAllText("c:\\temp\\tree.dot", graph);
             ;

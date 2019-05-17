@@ -29,7 +29,7 @@ namespace sly.parser.generator.visitor.dotgraph
             edges.Add(edge);
         }
 
-        public string Compile(bool b)
+        public string Compile()
         {
             StringBuilder builder = new StringBuilder();
             builder.Append(Directed ? "digraph" : "graph");
