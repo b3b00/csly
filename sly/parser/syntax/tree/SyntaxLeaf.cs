@@ -17,10 +17,5 @@ namespace sly.parser.syntax.tree
         public bool Discarded { get; } = false;
         public string Name => Token.TokenID.ToString();
 
-        [ExcludeFromCodeCoverage]
-        public string Dump(string tab)
-        {
-            return $"{tab}TOKEN[{Token}]";
-        }
     }
 }

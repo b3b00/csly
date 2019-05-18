@@ -22,17 +22,6 @@ namespace sly.parser.syntax.tree
             Children.Add(child);
         }
 
-        [ExcludeFromCodeCoverage]
-        public override string Dump(string tab)
-        {
-            var dump = new StringBuilder();
-
-            dump.AppendLine($"{tab}MANY {Name} [");
-            foreach (var c in Children) dump.AppendLine(c.Dump(tab + "\t"));
-
-            dump.AppendLine($"{tab}]");
-
-            return dump.ToString();
-        }
+        
     }
 }
