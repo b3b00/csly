@@ -17,16 +17,14 @@ using Xunit;
 
 namespace ParserTests
 {
-    
-    public static class ListExtensions {
-
+    public static class ListExtensions
+    {
         public static bool ContainsAll<IN>(this IEnumerable<IN> list1, IEnumerable<IN> list2)
         {
             return list1.Intersect(list2).Count() == list1.Count();
-        } 
-    
+        }
     }
-    
+
     public enum OptionTestToken
     {
         [Lexeme("a")] a = 1,
@@ -196,16 +194,15 @@ namespace ParserTests
         {
             return 1;
         }
-        
+
         [Production("testTerm : A* COMMA")]
         public int TestTerminal(List<Token<GroupTestToken>> options, Token<GroupTestToken> token)
         {
             return 1;
         }
-        
     }
-    
-    
+
+
     public class Bugfix104Test
     {
         [Production("testNonTerm : sub (COMMA[d] unreachable)? ")]
@@ -219,16 +216,13 @@ namespace ParserTests
         {
             return 1;
         }
-            
-        
+
+
         [Production("unreachable : A")]
         public int unreachable(Token<GroupTestToken> token)
         {
             return 1;
         }
-        
-        
-        
     }
 
     public class EBNFTests
@@ -461,7 +455,7 @@ namespace ParserTests
             Assert.False(res.IsError);
             Assert.Equal("R(a;a)", res.Result); // rootMany
         }
-        
+
         [Fact]
         public void TestGroupSyntaxOptionIsNone()
         {
@@ -633,11 +627,10 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.Equal("R(A(a),B(b),c)", result.Result.Replace(" ", ""));
         }
-        
-        
-        
+
+
         #region CONTEXTS
-        
+
         private BuildResult<Parser<ExpressionToken, int>> buildSimpleExpressionParserWithContext()
         {
             var startingRule = $"{typeof(SimpleExpressionParserWithContext).Name}_expressions";
@@ -651,24 +644,24 @@ namespace ParserTests
         public void TestContextualParsing()
         {
             var buildResult = buildSimpleExpressionParserWithContext();
-            
+
             Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             var res = parser.ParseWithContext("2 + a", new Dictionary<string, int> {{"a", 2}});
             Assert.True(res.IsOk);
-            Assert.Equal(4,res.Result);
+            Assert.Equal(4, res.Result);
         }
 
         [Fact]
         public void TestContextualParsing2()
         {
             var buildResult = buildSimpleExpressionParserWithContext();
-            
+
             Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
-            var res = parser.ParseWithContext("2 + a * b", new Dictionary<string, int> {{"a", 2},{"b",3}});
+            var res = parser.ParseWithContext("2 + a * b", new Dictionary<string, int> {{"a", 2}, {"b", 3}});
             Assert.True(res.IsOk);
-            Assert.Equal(8,res.Result);
+            Assert.Equal(8, res.Result);
         }
 
         [Fact]
@@ -683,21 +676,21 @@ namespace ParserTests
             Parser<GroupTestToken, int> parser = builtParser.Result as Parser<GroupTestToken, int>;
             Assert.NotNull(parser);
             var conf = parser.Configuration;
-            List<GroupTestToken> expected = new List<GroupTestToken>() {GroupTestToken.A,GroupTestToken.COMMA};
-            
+            List<GroupTestToken> expected = new List<GroupTestToken>() {GroupTestToken.A, GroupTestToken.COMMA};
+
             var nonTerm = conf.NonTerminals["testNonTerm"] as NonTerminal<GroupTestToken>;
             Assert.NotNull(nonTerm);
-            Assert.Equal(2,nonTerm.PossibleLeadingTokens.Count);
+            Assert.Equal(2, nonTerm.PossibleLeadingTokens.Count);
             Assert.True(nonTerm.PossibleLeadingTokens.ContainsAll(expected));
 
             var term = conf.NonTerminals["testTerm"] as NonTerminal<GroupTestToken>;
             Assert.NotNull(term);
-            Assert.Equal(2,nonTerm.PossibleLeadingTokens.Count);
+            Assert.Equal(2, nonTerm.PossibleLeadingTokens.Count);
             Assert.True(term.PossibleLeadingTokens.ContainsAll(expected));
         }
-        
+
         #endregion
-        
+
         [Fact]
         public void TestBug104()
         {
@@ -708,9 +701,5 @@ namespace ParserTests
             Assert.False(builtParser.IsError);
             Assert.False(builtParser.Errors.Any());
         }
-        
-        
-       
-        
     }
 }

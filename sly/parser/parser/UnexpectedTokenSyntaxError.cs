@@ -22,21 +22,6 @@ namespace sly.parser
             }
         }
 
-        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, int line, int column, params T[] expectedTokens)
-        {
-            UnexpectedToken = unexpectedToken;
-            UnexpectedToken.Position = new TokenPosition(-1, line, column);
-            if (expectedTokens != null)
-            {
-                ExpectedTokens = new List<T>();
-                ExpectedTokens.AddRange(expectedTokens);
-            }
-            else
-            {
-                ExpectedTokens = null;
-            }
-        }
-
 
         public Token<T> UnexpectedToken { get; set; }
 

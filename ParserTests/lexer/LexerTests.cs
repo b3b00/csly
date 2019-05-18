@@ -28,6 +28,19 @@ namespace ParserTests.lexer
         }
 
         [Fact]
+        public void TestDoubleJsonLexing()
+        {
+            var lexer = GetJsonLexer();
+            var tokens = lexer.Tokenize("1.68");
+            Assert.NotNull(tokens);
+            var tokenList = tokens.ToList(); 
+            Assert.NotEmpty(tokenList);
+            var token = tokenList[0];
+            Assert.NotNull(token);
+            Assert.Equal(1.68, token.DoubleValue);
+        }
+        
+        [Fact]
         public void TestMultiLineExpressionLexing()
         {
             var lexer = GetExpressionLexer();
