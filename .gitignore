@@ -22,6 +22,9 @@ build/
 packages/
 .vscode/
 .vs/
+tools/
+.idea/
+*opencover*
 
 # git  shit
 *.orig
