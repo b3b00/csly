@@ -344,6 +344,27 @@ namespace ParserTests.lexer
         }
 
         [Fact]
+        public void TestExtensionsPreconditionFailure()
+        {
+            var lexerRes =
+                LexerBuilder.BuildLexer(new BuildResult<ILexer<Extensions>>(), ExtendedGenericLexer.AddExtension);
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result as GenericLexer<Extensions>;
+            Assert.NotNull(lexer);
+
+            var err = Assert.Throws<LexerException>(() => lexer.Tokenize("0.0.2018"));
+            var lexErr = err as LexerException;
+            Assert.Equal(0,lexErr.Error.Line);
+            Assert.Equal(3,lexErr.Error.Column);
+            Assert.Equal('.',lexErr.Error.UnexpectedChar);
+            ;
+
+            
+
+          
+        }
+
+        [Fact]
         public void TestLexerError()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<AlphaNumDashId>>());
