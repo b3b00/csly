@@ -96,6 +96,11 @@ namespace ParserTests.lexer
         }
     }
 
+
+    public enum StringDelimiters {
+        [Lexeme(GenericToken.String,"'","'")]
+        MyString
+    }
     public enum BadLetterStringDelimiter
     {
         [Lexeme(GenericToken.String, "a")] Letter
@@ -237,6 +242,23 @@ namespace ParserTests.lexer
             Assert.Equal(AlphaNumId.ID, tok.TokenID);
             Assert.Equal("alpha123", tok.StringWithoutQuotes);
             ;
+        }
+
+        [Fact]
+        public void TestStringDelimiters()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<StringDelimiters>>());
+            Assert.True(lexerRes.IsOk);
+            var lexer = lexerRes.Result;
+            var tokens = lexer.Tokenize("'that''s it'").ToList();
+            Assert.NotNull(tokens);
+            Assert.NotEmpty(tokens);
+            Assert.Equal(2,tokens.Count);
+            var tok = tokens[0];
+
+            Assert.Equal("'that's it'",tok.Value);
+            Assert.Equal("that's it",tok.StringWithoutQuotes);
+
         }
 
         [Fact]
