@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using sly.buildresult;
 using sly.lexer.fsm;
 
 namespace sly.lexer
@@ -97,10 +98,19 @@ namespace sly.lexer
             throw new NotImplementedException();
         }
 
-        public IEnumerable<Token<IN>> Tokenize(string source)
+        public LexerResult<IN> Tokenize(string source)
         {
+            LexerResult<IN> result = null;
             var tokens = new List<Token<IN>>();
-            var r = LexerFsm.Run(source, 0);
+            FSMMatch<GenericToken> r = null;
+            try
+            {
+                r = LexerFsm.Run(source, 0);
+            }
+            catch (LexerException lexErr)
+            {
+                return new LexerResult<IN>(lexErr.Error);
+            }
             while (r.IsSuccess)
             {
                 var transcoded = Transcode(r);
@@ -111,17 +121,23 @@ namespace sly.lexer
                 }
                 
                 tokens.Add(transcoded);
+                try {
                 r = LexerFsm.Run(source);
+                }
+                catch (LexerException lexErr)
+                {
+                    return new LexerResult<IN>(lexErr.Error);
+                }
                
                 if (r.IsSuccess && r.Result.IsComment) ConsumeComment(r.Result, source);
             }
-
+            
             var eos = new Token<IN>();
             var prev = tokens.Last();
             eos.Position = new TokenPosition(prev.Position.Index + 1, prev.Position.Line,
                 prev.Position.Column + prev.Value.Length);
             tokens.Add(eos);
-            return tokens;
+            return new LexerResult<IN>(tokens);
         }
 
 

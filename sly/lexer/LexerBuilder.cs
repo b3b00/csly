@@ -33,7 +33,7 @@ namespace sly.lexer
 
     public class LexerBuilder
     {
-        public static Dictionary<IN, List<LexemeAttribute>> GetLexemes<IN>(BuildResult<ILexer<IN>> result)
+        public static Dictionary<IN, List<LexemeAttribute>> GetLexemes<IN>(BuildResult<ILexer<IN>> result) where IN: struct
         {
             var values = Enum.GetValues(typeof(IN));
 
@@ -318,7 +318,7 @@ namespace sly.lexer
         }
 
 
-        private static Dictionary<IN, List<CommentAttribute>> GetCommentsAttribute<IN>(BuildResult<ILexer<IN>> result)
+        private static Dictionary<IN, List<CommentAttribute>> GetCommentsAttribute<IN>(BuildResult<ILexer<IN>> result) where IN : struct
         {
             var values = Enum.GetValues(typeof(IN));
 

@@ -193,9 +193,11 @@ namespace ParserTests.lexer
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<AlphaId>>());
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
-            var r = lexer.Tokenize("alpha").ToList();
-            Assert.Equal(2, r.Count);
-            var tok = r[0];
+
+            var r = lexer.Tokenize("alpha");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
             Assert.Equal(AlphaId.ID, tok.TokenID);
             Assert.Equal("alpha", tok.StringWithoutQuotes);
             ;
@@ -207,9 +209,10 @@ namespace ParserTests.lexer
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<AlphaNumDashId>>());
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
-            var r = lexer.Tokenize("alpha-123_").ToList();
-            Assert.Equal(2, r.Count);
-            var tok = r[0];
+            var r = lexer.Tokenize("alpha-123_");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
             Assert.Equal(AlphaNumDashId.ID, tok.TokenID);
             Assert.Equal("alpha-123_", tok.StringWithoutQuotes);
             ;
@@ -221,9 +224,10 @@ namespace ParserTests.lexer
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<AlphaNumDashId>>());
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
-            var r = lexer.Tokenize("_alpha-123_").ToList();
-            Assert.Equal(2, r.Count);
-            var tok = r[0];
+            var r = lexer.Tokenize("_alpha-123_");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
             Assert.Equal(AlphaNumDashId.ID, tok.TokenID);
             Assert.Equal("_alpha-123_", tok.StringWithoutQuotes);
             ;
@@ -236,9 +240,10 @@ namespace ParserTests.lexer
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<AlphaNumId>>());
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
-            var r = lexer.Tokenize("alpha123").ToList();
-            Assert.Equal(2, r.Count);
-            var tok = r[0];
+            var r = lexer.Tokenize("alpha123");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
             Assert.Equal(AlphaNumId.ID, tok.TokenID);
             Assert.Equal("alpha123", tok.StringWithoutQuotes);
             ;
@@ -250,11 +255,12 @@ namespace ParserTests.lexer
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<StringDelimiters>>());
             Assert.True(lexerRes.IsOk);
             var lexer = lexerRes.Result;
-            var tokens = lexer.Tokenize("'that''s it'").ToList();
-            Assert.NotNull(tokens);
-            Assert.NotEmpty(tokens);
-            Assert.Equal(2,tokens.Count);
-            var tok = tokens[0];
+            var r = lexer.Tokenize("'that''s it'");
+            Assert.True(r.IsOk);
+            Assert.NotNull(r.Tokens);
+            Assert.NotEmpty(r.Tokens);
+            Assert.Equal(2,r.Tokens.Count);
+            var tok = r.Tokens[0];
 
             Assert.Equal("'that's it'",tok.Value);
             Assert.Equal("that's it",tok.StringWithoutQuotes);
@@ -313,9 +319,10 @@ namespace ParserTests.lexer
             var lexer = lexerRes.Result;
             var source = "hello \\\"world ";
             var expected = "hello \"world ";
-            var r = lexer.Tokenize($"\"{source}\"").ToList();
-            Assert.Equal(2, r.Count);
-            var tok = r[0];
+            var r = lexer.Tokenize($"\"{source}\"");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
             Assert.Equal(DefaultQuotedString.DefaultString, tok.TokenID);
             Assert.Equal(expected, tok.StringWithoutQuotes);
         }
@@ -328,9 +335,10 @@ namespace ParserTests.lexer
             var lexer = lexerRes.Result;
             var source = "hello \\\"world ";
             var expected = "hello \"world ";
-            var r = lexer.Tokenize($"\"{source}\"").ToList();
-            Assert.Equal(2, r.Count);
-            var tok = r[0];
+            var r = lexer.Tokenize($"\"{source}\"");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
             Assert.Equal(DoubleQuotedString.DoubleString, tok.TokenID);
             Assert.Equal(expected, tok.StringWithoutQuotes);
         }
@@ -345,24 +353,28 @@ namespace ParserTests.lexer
             var lexer = lexerRes.Result as GenericLexer<Extensions>;
             Assert.NotNull(lexer);
 
-            var tokens = lexer.Tokenize("20.02.2018 3.14").ToList();
-            Assert.Equal(3, tokens.Count);
-            Assert.Equal(Extensions.DATE, tokens[0].TokenID);
-            Assert.Equal("20.02.2018", tokens[0].Value);
-            Assert.Equal(Extensions.DOUBLE, tokens[1].TokenID);
-            Assert.Equal("3.14", tokens[1].Value);
+            var r = lexer.Tokenize("20.02.2018 3.14");
+            Assert.True(r.IsOk);
+            
+            Assert.Equal(3, r.Tokens.Count);
+            Assert.Equal(Extensions.DATE, r.Tokens[0].TokenID);
+            Assert.Equal("20.02.2018", r.Tokens[0].Value);
+            Assert.Equal(Extensions.DOUBLE, r.Tokens[1].TokenID);
+            Assert.Equal("3.14", r.Tokens[1].Value);
 
-            tokens = lexer.Tokenize("'that''s it'").ToList();
-            Assert.Equal(2, tokens.Count);
-            var tok = tokens[0];
+            r = lexer.Tokenize("'that''s it'");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
             Assert.Equal(Extensions.CHAINE, tok.TokenID);
-            Assert.Equal("'that's it'", tokens[0].Value);
+            Assert.Equal("'that's it'", tok.Value);
 
-            tokens = lexer.Tokenize("'et voilà'").ToList();
-            Assert.Equal(2, tokens.Count);
-            tok = tokens[0];
+            r = lexer.Tokenize("'et voilà'");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            tok = r.Tokens[0];
             Assert.Equal(Extensions.CHAINE, tok.TokenID);
-            Assert.Equal("'et voilà'", tokens[0].Value);
+            Assert.Equal("'et voilà'", tok.Value);
         }
 
         [Fact]
@@ -374,16 +386,10 @@ namespace ParserTests.lexer
             var lexer = lexerRes.Result as GenericLexer<Extensions>;
             Assert.NotNull(lexer);
 
-            var err = Assert.Throws<LexerException>(() => lexer.Tokenize("0.0.2018"));
-            var lexErr = err as LexerException;
-            Assert.Equal(0,lexErr.Error.Line);
-            Assert.Equal(3,lexErr.Error.Column);
-            Assert.Equal('.',lexErr.Error.UnexpectedChar);
-            ;
-
-            
-
-          
+            var r = lexer.Tokenize("0.0.2018");
+            Assert.Equal(0,r.Error.Line);
+            Assert.Equal(3,r.Error.Column);
+            Assert.Equal('.',r.Error.UnexpectedChar);
         }
 
         [Fact]
@@ -393,8 +399,9 @@ namespace ParserTests.lexer
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result;
             var source = "hello world  2 + 2 ";
-            var errException = Assert.Throws<LexerException>(() => lexer.Tokenize(source).ToList());
-            var error = errException.Error;
+             var r = lexer.Tokenize(source);
+             Assert.True(r.IsError);
+            var error = r.Error;
             Assert.Equal(0, error.Line);
             Assert.Equal(13, error.Column);
             Assert.Equal('2', error.UnexpectedChar);
@@ -412,13 +419,14 @@ namespace ParserTests.lexer
             var string2 = "'that''s it'";
             var expectString2 = "'that's it'";
             var source1 = $"{string1} {string2}";
-            var r = lexer.Tokenize(source1).ToList();
-            Assert.Equal(3, r.Count);
-            var tok1 = r[0];
+            var r = lexer.Tokenize(source1);
+            Assert.True(r.IsOk);
+            Assert.Equal(3, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
             Assert.Equal(ManyString.STRING, tok1.TokenID);
             Assert.Equal(expectString1, tok1.Value);
 
-            var tok2 = r[1];
+            var tok2 = r.Tokens[1];
             Assert.Equal(ManyString.STRING, tok2.TokenID);
             Assert.Equal(expectString2, tok2.Value);
         }
@@ -430,13 +438,18 @@ namespace ParserTests.lexer
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result as GenericLexer<SelfEscapedString>;
             Assert.NotNull(lexer);
-            var tokens = lexer.Tokenize("'that''s it'").ToList();
+            var r = lexer.Tokenize("'that''s it'");
+            
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
             Assert.Equal(2, tokens.Count);
             var tok = tokens[0];
             Assert.Equal(SelfEscapedString.STRING, tok.TokenID);
             Assert.Equal("'that's it'", tokens[0].Value);
 
-            tokens = lexer.Tokenize("'et voilà'").ToList();
+            r = lexer.Tokenize("'et voilà'");
+            Assert.True(r.IsOk);
+            tokens = r.Tokens;
             Assert.Equal(2, tokens.Count);
             tok = tokens[0];
             Assert.Equal(SelfEscapedString.STRING, tok.TokenID);
@@ -451,9 +464,10 @@ namespace ParserTests.lexer
             var lexer = lexerRes.Result;
             var source = "hello \\'world ";
             var expected = "hello 'world ";
-            var r = lexer.Tokenize($"'{source}'").ToList();
-            Assert.Equal(2, r.Count);
-            var tok = r[0];
+            var r = lexer.Tokenize($"'{source}'");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
             Assert.Equal(SingleQuotedString.SingleString, tok.TokenID);
             Assert.Equal(expected, tok.StringWithoutQuotes);
         }
@@ -467,7 +481,9 @@ namespace ParserTests.lexer
             CallBacksBuilder.BuildCallbacks<CallbackTokens>(lexer);
 
 
-            var tokens = lexer.Tokenize("aaa bbb").ToList();
+            var r = lexer.Tokenize("aaa bbb");
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
             Assert.Equal(3, tokens.Count);
             Assert.Equal("AAA", tokens[0].Value);
             Assert.Equal("BBB", tokens[1].Value);
@@ -480,7 +496,9 @@ namespace ParserTests.lexer
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue106>>());
             Assert.False(res.IsError);
             var lexer = res.Result as GenericLexer<Issue106>;
-            var tokens = lexer.Tokenize("1.").ToList();
+            var r = lexer.Tokenize("1.");
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
             Assert.NotNull(tokens);
             Assert.Equal(2, tokens.Count);
             var token = tokens[0];
@@ -494,30 +512,25 @@ namespace ParserTests.lexer
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue114>>());
             Assert.False(res.IsError);
             var lexer = res.Result as GenericLexer<Issue114>;
-            var error = Assert.Throws<LexerException>(() =>
-             {
-                 lexer?.Tokenize("// /&").ToList();
-             });
-            Assert.Equal('&', error.Error.UnexpectedChar);
+            
+            var r = lexer?.Tokenize("// /&");
+            Assert.True(r.IsError);
+            
+            Assert.Equal('&', r.Error.UnexpectedChar);
 
-            error = Assert.Throws<LexerException>(() =>
-             {
-                 lexer?.Tokenize("/&").ToList();
-             });
+            r = lexer?.Tokenize("/&");
+            
 
-            Assert.Equal('&', error.Error.UnexpectedChar);
+            Assert.Equal('&', r.Error.UnexpectedChar);
 
-            error = Assert.Throws<LexerException>(() =>
-             {
-                 lexer?.Tokenize("&/").ToList();
-             });
-            Assert.Equal('&', error.Error.UnexpectedChar);
+            r = lexer?.Tokenize("&/");
+            Assert.True(r.IsError);
+                
+            Assert.Equal('&', r.Error.UnexpectedChar);
 
-            error = Assert.Throws<LexerException>(() =>
-             {
-                 lexer?.Tokenize("// &").ToList();
-             });
-            Assert.Equal('&', error.Error.UnexpectedChar);
+            r = lexer?.Tokenize("// &");
+            Assert.True(r.IsError);
+            Assert.Equal('&', r.Error.UnexpectedChar);
         }
     }
 }

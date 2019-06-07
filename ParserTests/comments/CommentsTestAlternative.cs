@@ -34,7 +34,9 @@ namespace ParserTests.comments
 2 /* not ending
 comment";
 
-            var tokens = lexer.Tokenize(code).ToList();
+            var r = lexer.Tokenize(code);
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
 
             Assert.Equal(4, tokens.Count);
 
@@ -73,7 +75,9 @@ comment", token3.Value);
 2 /* multi line 
 comment on 2 lines */ 3.0";
 
-            var tokens = lexer.Tokenize(code).ToList();
+            var r = lexer.Tokenize(code);
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
 
             Assert.Equal(5, tokens.Count);
 
@@ -111,9 +115,11 @@ comment on 2 lines ", multiLineCommentToken.Value);
 
             var dump = lexer.ToString();
 
-            var tokens = lexer.Tokenize(@"1
+            var r = lexer.Tokenize(@"1
 2 // single line comment
-3.0").ToList();
+3.0");
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
 
             Assert.Equal(5, tokens.Count);
 
@@ -154,7 +160,9 @@ comment on 2 lines ", multiLineCommentToken.Value);
 4
             ";
 
-            var tokens = lexer.Tokenize(code).ToList();
+            var r = lexer.Tokenize(code);
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
 
             Assert.Equal(6, tokens.Count);
 
@@ -199,8 +207,9 @@ comment on 2 lines ", multiLineCommentToken.Value);
 
             var dump = lexer.ToString();
             var code = "1\n2\r\n/* multi line \rcomment on 2 lines */ 3.0";
-            List<Token<CommentsTokenAlternative>> tokens = null;
-            tokens = lexer.Tokenize(code).ToList();
+            var r = lexer.Tokenize(code);
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
 
             Assert.Equal(5, tokens.Count);
 

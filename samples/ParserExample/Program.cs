@@ -289,17 +289,25 @@ namespace ParserExample
             var lexer = new JSONLexer();
             var sw = new Stopwatch();
             sw.Start();
-            var tokens = lexer.Tokenize(source);
-            sw.Stop();
-            Console.WriteLine($"hard coded lexer {tokens.Count()} tokens in {sw.ElapsedMilliseconds}ms");
-            var sw2 = new Stopwatch();
-            var start = DateTime.Now.Millisecond;
-            sw2.Start();
-            tokens = parser.Result.Lexer.Tokenize(source).ToList();
-            sw2.Stop();
-            var end = DateTime.Now.Millisecond;
-            Console.WriteLine($"old lexer {tokens.Count()} tokens in {sw2.ElapsedMilliseconds}ms / {end - start}ms");
-
+            var lexresult = lexer.Tokenize(source);
+            if (lexresult.IsOk)
+            {
+                var tokens = lexresult.Tokens;
+                sw.Stop();
+                Console.WriteLine($"hard coded lexer {tokens.Count()} tokens in {sw.ElapsedMilliseconds}ms");
+                var sw2 = new Stopwatch();
+                var start = DateTime.Now.Millisecond;
+                sw2.Start();
+                lexresult = parser.Result.Lexer.Tokenize(source);
+                if (lexresult.IsOk)
+                {
+                    tokens = lexresult.Tokens;
+                    sw2.Stop();
+                    var end = DateTime.Now.Millisecond;
+                    Console.WriteLine(
+                        $"old lexer {tokens.Count()} tokens in {sw2.ElapsedMilliseconds}ms / {end - start}ms");
+                }
+            }
 
             ;
         }
@@ -375,11 +383,15 @@ namespace ParserExample
                 var lexer = res.Result as GenericLexer<CallbackTokens>;
                 CallBacksBuilder.BuildCallbacks<CallbackTokens>(lexer);
 
-                var tokens = lexer.Tokenize("aaa bbb").ToList();
-                ;
-                foreach (var token in tokens)
+                var r = lexer.Tokenize("aaa bbb");
+                if (r.IsOk)
                 {
-                    Console.WriteLine($"{token.TokenID} - {token.Value}");
+                    var tokens = r.Tokens;
+                    ;
+                    foreach (var token in tokens)
+                    {
+                        Console.WriteLine($"{token.TokenID} - {token.Value}");
+                    }
                 }
             }
 

@@ -63,7 +63,16 @@ namespace sly.parser
             ParseResult<IN, OUT> result = null;
             try
             {
-                IList<Token<IN>> tokens = Lexer.Tokenize(source).ToList();
+                var lexingResult = Lexer.Tokenize(source);
+                if (lexingResult.IsError)
+                {
+                    result = new ParseResult<IN, OUT>();
+                    result.IsError = true;
+                    result.Errors = new List<ParseError>();
+                    result.Errors.Add(lexingResult.Error);
+                    return result;
+                }
+                var tokens = lexingResult.Tokens;
                 var position = 0;
                 var tokensWithoutComments = new List<Token<IN>>();
                 for (var i = 0; i < tokens.Count; i++)
