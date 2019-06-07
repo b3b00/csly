@@ -262,8 +262,12 @@ namespace sly.lexer.fsm
                     else
                     {
                         if (!successes.Any() && CurrentPosition < source.Length)
-                            throw new LexerException(new LexicalError(CurrentLine, CurrentColumn,
-                                source.At(CurrentPosition)));
+                        {
+                            var errorChar = source.Slice(CurrentPosition, 1);
+                            var errorPosition = new TokenPosition(CurrentPosition, CurrentLine, CurrentColumn);
+                            var ko = new FSMMatch<N>(false, default(N), errorChar, errorPosition, -1); 
+                            return ko;
+                        }
                     }
                 }
             }

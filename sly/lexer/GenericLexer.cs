@@ -93,24 +93,23 @@ namespace sly.lexer
             CallBacks[token] = callback;
         }
 
-        public void AddDefinition(TokenDefinition<IN> tokenDefinition)
-        {
-            throw new NotImplementedException();
-        }
+        public void AddDefinition(TokenDefinition<IN> tokenDefinition) {}
 
         public LexerResult<IN> Tokenize(string source)
         {
             LexerResult<IN> result = null;
             var tokens = new List<Token<IN>>();
             FSMMatch<GenericToken> r = null;
-            try
+            
+            r = LexerFsm.Run(source, 0);
+            if (!r.IsSuccess && !r.IsEOS)
             {
-                r = LexerFsm.Run(source, 0);
+                var resultPosition = r.Result.Position;
+                LexicalError error =
+                    new LexicalError(resultPosition.Line, resultPosition.Column, r.Result.CharValue);  
+                return new LexerResult<IN>(error);
             }
-            catch (LexerException lexErr)
-            {
-                return new LexerResult<IN>(lexErr.Error);
-            }
+            
             while (r.IsSuccess)
             {
                 var transcoded = Transcode(r);
@@ -121,14 +120,17 @@ namespace sly.lexer
                 }
                 
                 tokens.Add(transcoded);
-                try {
+                
                 r = LexerFsm.Run(source);
-                }
-                catch (LexerException lexErr)
+                if (!r.IsSuccess && !r.IsEOS)
                 {
-                    return new LexerResult<IN>(lexErr.Error);
+                    var resultPosition = r.Result.Position;
+                    LexicalError error =
+                        new LexicalError(resultPosition.Line, resultPosition.Column, r.Result.CharValue);  
+                    return new LexerResult<IN>(error);
                 }
-               
+
+
                 if (r.IsSuccess && r.Result.IsComment) ConsumeComment(r.Result, source);
             }
             
