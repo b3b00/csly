@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using sly.buildresult;
 using sly.lexer.fsm;
 
 namespace sly.lexer
@@ -92,15 +93,23 @@ namespace sly.lexer
             CallBacks[token] = callback;
         }
 
-        public void AddDefinition(TokenDefinition<IN> tokenDefinition)
-        {
-            throw new NotImplementedException();
-        }
+        public void AddDefinition(TokenDefinition<IN> tokenDefinition) {}
 
-        public IEnumerable<Token<IN>> Tokenize(string source)
+        public LexerResult<IN> Tokenize(string source)
         {
+            LexerResult<IN> result = null;
             var tokens = new List<Token<IN>>();
-            var r = LexerFsm.Run(source, 0);
+            FSMMatch<GenericToken> r = null;
+            
+            r = LexerFsm.Run(source, 0);
+            if (!r.IsSuccess && !r.IsEOS)
+            {
+                var resultPosition = r.Result.Position;
+                LexicalError error =
+                    new LexicalError(resultPosition.Line, resultPosition.Column, r.Result.CharValue);  
+                return new LexerResult<IN>(error);
+            }
+            
             while (r.IsSuccess)
             {
                 var transcoded = Transcode(r);
@@ -111,17 +120,26 @@ namespace sly.lexer
                 }
                 
                 tokens.Add(transcoded);
+                
                 r = LexerFsm.Run(source);
-               
+                if (!r.IsSuccess && !r.IsEOS)
+                {
+                    var resultPosition = r.Result.Position;
+                    LexicalError error =
+                        new LexicalError(resultPosition.Line, resultPosition.Column, r.Result.CharValue);  
+                    return new LexerResult<IN>(error);
+                }
+
+
                 if (r.IsSuccess && r.Result.IsComment) ConsumeComment(r.Result, source);
             }
-
+            
             var eos = new Token<IN>();
             var prev = tokens.Last();
             eos.Position = new TokenPosition(prev.Position.Index + 1, prev.Position.Line,
                 prev.Position.Column + prev.Value.Length);
             tokens.Add(eos);
-            return tokens;
+            return new LexerResult<IN>(tokens);
         }
 
 

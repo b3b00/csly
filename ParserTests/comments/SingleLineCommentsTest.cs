@@ -30,13 +30,12 @@ namespace ParserTests.comments
 
             var dump = lexer.ToString();
 
-            var error = Assert.Throws<LexerException>(() =>
-            {
-                lexer?.Tokenize(@"1
+            var r =lexer?.Tokenize(@"1
 2 /* multi line 
-comment on 2 lines */ 3.0").ToList();
-            });
-            Assert.Equal('*', error.Error.UnexpectedChar);
+comment on 2 lines */ 3.0");
+            Assert.True(r.IsError);
+            var tokens = r.Tokens;
+            Assert.Equal('*', r.Error.UnexpectedChar);
         }
 
         [Fact]
@@ -48,9 +47,11 @@ comment on 2 lines */ 3.0").ToList();
 
             var dump = lexer.ToString();
 
-            var tokens = lexer.Tokenize(@"1
+            var r = lexer.Tokenize(@"1
 2 // single line comment
-3.0").ToList();
+3.0");
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
 
             Assert.Equal(5, tokens.Count);
 
