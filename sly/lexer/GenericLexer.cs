@@ -97,7 +97,6 @@ namespace sly.lexer
 
         public LexerResult<IN> Tokenize(string source)
         {
-            LexerResult<IN> result = null;
             var tokens = new List<Token<IN>>();
             FSMMatch<GenericToken> r = null;
             
@@ -355,19 +354,15 @@ namespace sly.lexer
                 var value = match.Result.SpanValue;
 
                 match.Result.SpanValue = value;
+
+                // TODO collapse escaped string delimiters according to conf
+
                 return match;
             };
 
             if (stringDelimiterChar != escapeStringDelimiterChar)
             {
-                 NodeAction collapseDelimiterDiff = value =>
-                {
-                    if (value.EndsWith("" + escapeStringDelimiterChar + stringDelimiterChar))
-                        return value.Substring(0, value.Length - 2) + stringDelimiterChar;
-                    return value;
-                };
-
-
+                 
                 FSMBuilder.GoTo(start);
                 FSMBuilder.Transition(stringDelimiterChar)
                     .Mark(in_string + StringCounter)
@@ -378,7 +373,6 @@ namespace sly.lexer
                     .ExceptTransitionTo(new[] {stringDelimiterChar},in_string+StringCounter)
                     .GoTo(escape_string + StringCounter)
                     .TransitionTo(stringDelimiterChar,in_string+StringCounter)
-                    .Action(collapseDelimiterDiff)
                     .Transition(stringDelimiterChar)
                     .End(GenericToken.String)
                     .Mark(string_end + StringCounter)
@@ -386,14 +380,7 @@ namespace sly.lexer
                 FSMBuilder.Fsm.StringDelimiter = stringDelimiterChar;
             }
             else
-            {
-                NodeAction collapseDelimiterSame = value =>
-                {
-                    if (value.EndsWith("" + stringDelimiterChar + stringDelimiterChar))
-                        return value.Substring(0, value.Length - 2) + stringDelimiterChar;
-                    return value;
-                };
-
+            {                
                 var exceptDelimiter = new[] {stringDelimiterChar};
                 in_string = "in_string_same";
                 var escaped = "escaped_same";
@@ -409,7 +396,6 @@ namespace sly.lexer
                     .CallBack(callback)
                     .Transition(stringDelimiterChar)
                     .Mark(delim + StringCounter)
-                    .Action(collapseDelimiterSame)
                     .ExceptTransitionTo(exceptDelimiter, in_string + StringCounter);
 
                 FSMBuilder.GoTo(delim + StringCounter)

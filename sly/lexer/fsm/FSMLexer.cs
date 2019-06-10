@@ -30,8 +30,7 @@ namespace sly.lexer.fsm
         {
             Nodes = new Dictionary<int, FSMNode<N>>();
             Transitions = new Dictionary<int, List<FSMTransition>>();
-            Callbacks = new Dictionary<int, NodeCallback<N>>();
-            Actions = new Dictionary<int, NodeAction>();
+            Callbacks = new Dictionary<int, NodeCallback<N>>();            
             IgnoreWhiteSpace = false;
             IgnoreEOL = false;
             AggregateEOL = false;
@@ -48,8 +47,6 @@ namespace sly.lexer.fsm
 
 
         private Dictionary<int, NodeCallback<N>> Callbacks { get; }
-
-        private Dictionary<int, NodeAction> Actions { get; }
 
         [ExcludeFromCodeCoverage]
         public string ToGraphViz()
@@ -91,15 +88,6 @@ namespace sly.lexer.fsm
         }
 
 
-        internal bool HasAction(int nodeId)
-        {
-            return Actions.ContainsKey(nodeId);
-        }
-
-        internal void SetAction(int nodeId, NodeAction action)
-        {
-            Actions[nodeId] = action;
-        }
 
         #endregion
 
@@ -254,8 +242,7 @@ namespace sly.lexer.fsm
                             var resultInter = new FSMMatch<N>(true, currentNode.Value, value, position,currentNode.Id);
                             successes.Push(resultInter);
                         }
-
-                        if (HasAction(currentNode.Id)) value = Actions[currentNode.Id](value);
+                        
                         CurrentPosition++;
                         CurrentColumn++;
                     }
