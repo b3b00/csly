@@ -12,8 +12,6 @@ namespace ParserTests.lexer
     {
         [Lexeme(GenericToken.Extension)] DATE,
 
-        [Lexeme(GenericToken.Extension)] CHAINE,
-
         [Lexeme(GenericToken.Double)] DOUBLE
     }
 
@@ -54,44 +52,6 @@ namespace ParserTests.lexer
                     .RepetitionTransition(4, "[0-9]")
                     .End(GenericToken.Extension)
                     .CallBack(callback);
-            }
-            else if (token == Extensions.CHAINE)
-            {
-                NodeCallback<GenericToken> callback = match =>
-                {
-                    match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.CHAINE;
-                    return match;
-                };
-
-                var quote = '\'';
-                NodeAction collapseDelimiter = value =>
-                {
-                    if (value.EndsWith("" + quote + quote)) return value.Substring(0, value.Length - 2) + quote;
-                    return value;
-                };
-
-                var exceptQuote = new[] { quote };
-                var in_string = "in_string_same";
-                var escaped = "escaped_same";
-                var delim = "delim_same";
-
-                var fsmBuilder = lexer.FSMBuilder;
-
-                fsmBuilder.GoTo(GenericLexer<Extensions>.start)
-                    .Transition(quote)
-                    .Mark(in_string)
-                    .ExceptTransitionTo(exceptQuote, in_string)
-                    .Transition(quote)
-                    .Mark(escaped)
-                    .End(GenericToken.String)
-                    .CallBack(callback)
-                    .Transition(quote)
-                    .Mark(delim)
-                    .Action(collapseDelimiter)
-                    .ExceptTransitionTo(exceptQuote, in_string);
-                fsmBuilder.GoTo(delim)
-                    .TransitionTo(quote, escaped)
-                    .ExceptTransitionTo(exceptQuote, in_string);
             }
         }
     }
@@ -362,19 +322,6 @@ namespace ParserTests.lexer
             Assert.Equal(Extensions.DOUBLE, r.Tokens[1].TokenID);
             Assert.Equal("3.14", r.Tokens[1].Value);
 
-            r = lexer.Tokenize("'that''s it'");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
-            var tok = r.Tokens[0];
-            Assert.Equal(Extensions.CHAINE, tok.TokenID);
-            Assert.Equal("'that's it'", tok.Value);
-
-            r = lexer.Tokenize("'et voilà'");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
-            tok = r.Tokens[0];
-            Assert.Equal(Extensions.CHAINE, tok.TokenID);
-            Assert.Equal("'et voilà'", tok.Value);
         }
 
         [Fact]
