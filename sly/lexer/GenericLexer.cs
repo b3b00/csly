@@ -325,6 +325,105 @@ namespace sly.lexer
         }
 
 
+        public ReadOnlyMemory<char> diffCharEscaper(char escapeStringDelimiterChar, char stringDelimiterChar, ReadOnlyMemory<char> stringValue)
+        {
+            var value = stringValue;
+            int i = 1;
+            bool substitutionHappened = false;
+            // TODO : iterate on chars and operate substitution if needed
+            // if no subst then value stay the same 
+            bool escaping = false;
+            string r = string.Empty;
+            while (i < value.Length - 1)
+            {
+                char current = value.At(i);
+                if (current == escapeStringDelimiterChar && i < value.Length - 2)
+                {
+                    escaping = true;
+                    if (!substitutionHappened)
+                    {
+                        r = value.Slice(0, i).ToString();
+                        substitutionHappened = true;
+                    }
+                }
+                else
+                {
+                    if (escaping)
+                    {
+                        if (current != stringDelimiterChar)
+                        {
+                            r += escapeStringDelimiterChar;
+                        }
+                        escaping = false;
+                    }
+                    if (substitutionHappened)
+                    {
+                        r += current;
+                    }
+                }
+                i++;
+            }
+            if (substitutionHappened)
+            {
+                r += value.At(value.Length - 1);
+                value = r.AsMemory();
+            }
+            else
+            {
+                ;
+            }
+            return value;
+        }
+
+        public ReadOnlyMemory<char> sameCharEscaper(char escapeStringDelimiterChar, char stringDelimiterChar, ReadOnlyMemory<char> stringValue)
+        {
+            var value = stringValue;
+            int i = 1;
+            bool substitutionHappened = false;
+            // TODO : iterate on chars and operate substitution if needed
+            // if no subst then value stay the same 
+            bool escaping = false;
+            string r = string.Empty;
+            while (i < value.Length - 1)
+            {
+                char current = value.At(i);
+                if (current == escapeStringDelimiterChar && !escaping && i < value.Length - 2)
+                {
+                    escaping = true;
+                    if (!substitutionHappened)
+                    {
+                        r = value.Slice(0, i).ToString();
+                        substitutionHappened = true;
+                    }
+                }
+                else
+                {
+                    if (escaping)
+                    {
+                        // if (current != stringDelimiterChar) {
+                        r += escapeStringDelimiterChar;
+                        // }
+                        escaping = false;
+                    }
+                    else if (substitutionHappened)
+                    {
+                        r += current;
+                    }
+                }
+                i++;
+            }
+            if (substitutionHappened)
+            {
+                r += value.At(value.Length - 1);
+                value = r.AsMemory();
+            }
+            else
+            {
+                ;
+            }
+            return value;
+        }
+
         public void AddStringLexem(IN token, string stringDelimiter, string escapeDelimiterChar = "\\")
         {
             if (string.IsNullOrEmpty(stringDelimiter) || stringDelimiter.Length > 1)
@@ -349,6 +448,7 @@ namespace sly.lexer
             EscapeStringDelimiterChar = escapeDelimiterChar[0];
             char escapeStringDelimiterChar = escapeDelimiterChar[0];
 
+            
 
             NodeCallback<GenericToken> callback = match =>
             {
@@ -358,83 +458,13 @@ namespace sly.lexer
                 match.Result.SpanValue = value;
 
 
-                if (stringDelimiterChar != escapeStringDelimiterChar)                
+                if (stringDelimiterChar != escapeStringDelimiterChar)
                 {
-                    int i = 1;
-                    bool substitutionHappened = false;
-                    // TODO : iterate on chars and operate substitution if needed
-                    // if no subst then value stay the same 
-                    bool escaping = false;
-                    string r = string.Empty;                    
-                    while(i < value.Length-1) {
-                        char current = value.At(i);
-                        if (current == escapeStringDelimiterChar && i < value.Length - 2) {
-                            escaping = true;
-                            if (!substitutionHappened) {
-                                r = value.Slice(0,i).ToString();
-                                substitutionHappened = true;
-                            }                            
-                        }
-                        else {
-                            if (escaping) {
-                                if (current != stringDelimiterChar) {
-                                    r += escapeStringDelimiterChar;
-                                }
-                                escaping = false;
-                            }
-                            if (substitutionHappened) {
-                                r += current;
-                            }
-                        }
-                        i++;
-                    }
-                     if (substitutionHappened) {
-                        r += value.At(value.Length-1);
-                        value = r.AsMemory();
-                        match.Result.SpanValue = value;
-                    }
-                    else {
-                        ;
-                    }
+                    match.Result.SpanValue = diffCharEscaper(escapeStringDelimiterChar,stringDelimiterChar, match.Result.SpanValue);
                 }
                 else
-                {
-                    int i = 1;
-                    bool substitutionHappened = false;
-                    // TODO : iterate on chars and operate substitution if needed
-                    // if no subst then value stay the same 
-                    bool escaping = false;
-                    string r = string.Empty;                    
-                    while(i < value.Length-1) {
-                        char current = value.At(i);
-                        if (current == escapeStringDelimiterChar && !escaping && i < value.Length - 2) {
-                            escaping = true;
-                            if (!substitutionHappened) {
-                                r = value.Slice(0,i).ToString();
-                                substitutionHappened = true;
-                            }                            
-                        }
-                        else {
-                            if (escaping) {
-                                // if (current != stringDelimiterChar) {
-                                    r += escapeStringDelimiterChar;
-                                // }
-                                escaping = false;
-                            }
-                            else if (substitutionHappened) {
-                                r += current;
-                            }
-                        }
-                        i++;
-                    }
-                    if (substitutionHappened) {
-                        r += value.At(value.Length-1);
-                        value = r.AsMemory();
-                        match.Result.SpanValue = value;
-                    }
-                    else {
-                        ;
-                    }
+                {                   
+                    match.Result.SpanValue = sameCharEscaper(escapeStringDelimiterChar,stringDelimiterChar, match.Result.SpanValue);
                 }
 
                 return match;
