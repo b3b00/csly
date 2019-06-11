@@ -6,7 +6,7 @@ namespace sly.lexer.fsm
 {
     public delegate FSMMatch<IN> NodeCallback<IN>(FSMMatch<IN> node);
 
-    public delegate bool TransitionPrecondition(string value);
+    public delegate bool TransitionPrecondition(ReadOnlyMemory<char> value);
 
     public class FSMLexerBuilder<N>
     {

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System;
 
 namespace sly.lexer.fsm.transitioncheck
 {
@@ -20,7 +21,7 @@ namespace sly.lexer.fsm.transitioncheck
         public TransitionPrecondition Precondition { get; set; }
         public abstract bool Match(char input);
 
-        public bool Check(char input, string value)
+        public bool Check(char input, ReadOnlyMemory<char> value)
         {
             var match = true;
             if (Precondition != null) match = Precondition(value);

@@ -166,8 +166,7 @@ namespace sly.lexer.fsm
         }
 
         public FSMMatch<N> Run( ReadOnlyMemory<char> source, int start)
-        {
-            var value = "";
+        {            
             int tokenStartIndex = start;
             int tokenLength = 0;
             var result = new FSMMatch<N>(false);
@@ -221,14 +220,19 @@ namespace sly.lexer.fsm
                                 consumeSkipped = false;
                             }
                         }
+                    tokenStartIndex = CurrentPosition;
                     }
 
+if (CurrentPosition >=  source.Length) {
+    return new FSMMatch<N>(false);
+}
+                    var currentValue = source.Slice(tokenStartIndex,CurrentPosition-tokenStartIndex+1);
 
-                    currentNode = Move(currentNode, currentCharacter, value);
+
+                    currentNode = Move(currentNode, currentCharacter, currentValue);
                     if (currentNode != null)
                     {
-                        lastNode = currentNode.Id;
-                        value += currentCharacter;
+                        lastNode = currentNode.Id;                        
                         tokenLength++;
 
                         if (!tokenStarted)
@@ -239,7 +243,7 @@ namespace sly.lexer.fsm
 
                         if (currentNode.IsEnd)
                         {
-                            var resultInter = new FSMMatch<N>(true, currentNode.Value, value, position,currentNode.Id);
+                            var resultInter = new FSMMatch<N>(true, currentNode.Value, currentValue, position,currentNode.Id);
                             successes.Push(resultInter);
                         }
                         
@@ -272,7 +276,7 @@ namespace sly.lexer.fsm
             return result;
         }
 
-        protected FSMNode<N> Move(FSMNode<N> from, char token, string value)
+        protected FSMNode<N> Move(FSMNode<N> from, char token, ReadOnlyMemory<char>  value)
         {
             FSMNode<N> next = null;
             if (from != null)

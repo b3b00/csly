@@ -18,16 +18,17 @@ namespace ParserTests.lexer
 
     public static class ExtendedGenericLexer
     {
-        public static bool CheckDate(string value)
+        public static bool CheckDate(ReadOnlyMemory<char> value)
         {
             var ok = false;
-            if (value.Length == 5)
+            if (value.Length == 6)
             {
-                ok = char.IsDigit(value[0]);
-                ok = ok && char.IsDigit(value[1]);
-                ok = ok && value[2] == '.';
-                ok = ok && char.IsDigit(value[3]);
-                ok = ok && char.IsDigit(value[4]);
+                ok = char.IsDigit(value.At(0));
+                ok = ok && char.IsDigit(value.At(1));
+                ok = ok && value.At(2) == '.';
+                ok = ok && char.IsDigit(value.At(3));
+                ok = ok && char.IsDigit(value.At(4));
+                ok = ok && value.At(5) == '.';
             }
 
             return ok;
