@@ -1,4 +1,5 @@
 using System.Text;
+using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
@@ -28,6 +29,7 @@ namespace sly.parser.syntax.grammar
             return nextToken.Equals(ExpectedToken);
         }
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             var b = new StringBuilder();

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using sly.buildresult;
 using sly.lexer.fsm;
@@ -578,6 +579,7 @@ namespace sly.lexer
             return tok;
         }
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return LexerFsm.ToString();
