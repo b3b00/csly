@@ -209,7 +209,6 @@ namespace sly.lexer
                 var derived = new Dictionary<string, IN>();
                 if (derivedTokens.ContainsKey(generic)) derived = derivedTokens[generic];
                 derived[defaultIdentifierKey] = token;
-                //return;
             }
 
             if (generic == GenericToken.Double) doubleDerivedToken = token;
@@ -330,8 +329,6 @@ namespace sly.lexer
             var value = stringValue;
             int i = 1;
             bool substitutionHappened = false;
-            // TODO : iterate on chars and operate substitution if needed
-            // if no subst then value stay the same 
             bool escaping = false;
             string r = string.Empty;
             while (i < value.Length - 1)
@@ -380,8 +377,6 @@ namespace sly.lexer
             var value = stringValue;
             int i = 1;
             bool substitutionHappened = false;
-            // TODO : iterate on chars and operate substitution if needed
-            // if no subst then value stay the same 
             bool escaping = false;
             string r = string.Empty;
             while (i < value.Length - 1)
@@ -400,9 +395,7 @@ namespace sly.lexer
                 {
                     if (escaping)
                     {
-                        // if (current != stringDelimiterChar) {
                         r += escapeStringDelimiterChar;
-                        // }
                         escaping = false;
                     }
                     else if (substitutionHappened)
@@ -542,7 +535,7 @@ namespace sly.lexer
                 commentValue = EOLManager.GetToEndOfLine(source, position);
                 position = position + commentValue.Length;
                 comment.SpanValue = commentValue;
-                LexerFsm.Move(position, LexerFsm.CurrentLine + 1, 0);
+                LexerFsm.MovePosition(position, LexerFsm.CurrentLine + 1, 0);
             }
             else if (comment.IsMultiLineComment)
             {
@@ -566,7 +559,7 @@ namespace sly.lexer
                     newColumn = LexerFsm.CurrentColumn + lines[0] + MultiLineCommentEnd.Length;
 
 
-                LexerFsm.Move(newPosition, newLine, newColumn);
+                LexerFsm.MovePosition(newPosition, newLine, newColumn);
             }
         }
 

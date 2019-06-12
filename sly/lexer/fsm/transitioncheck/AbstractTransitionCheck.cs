@@ -6,14 +6,17 @@ namespace sly.lexer.fsm.transitioncheck
 {
 
     [ExcludeFromCodeCoverage]
-    public static class CharExt {
+    public static class CharExt
+    {
 
-        public static string ToEscaped(this char c) {
-            List<char> ToEscape = new List<char>() {'"','\\'};
-            if (ToEscape.Contains(c)) {
-                return "\\"+c;
+        public static string ToEscaped(this char c)
+        {
+            List<char> ToEscape = new List<char>() { '"', '\\' };
+            if (ToEscape.Contains(c))
+            {
+                return "\\" + c;
             }
-            return c+"";
+            return c + "";
         }
     }
     public abstract class AbstractTransitionCheck
@@ -29,6 +32,7 @@ namespace sly.lexer.fsm.transitioncheck
             return match;
         }
 
+        [ExcludeFromCodeCoverage]
         public abstract string ToGraphViz();
     }
 }
