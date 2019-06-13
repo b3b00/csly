@@ -96,14 +96,20 @@ namespace sly.lexer
 
         public void AddDefinition(TokenDefinition<IN> tokenDefinition) { }
 
+
         public LexerResult<IN> Tokenize(string source)
         {
-            var memorySource = source.AsMemory();
-
+//<<<<<<< HEAD
+            var memorySource = new ReadOnlyMemory<char>(source.ToCharArray());
+            return Tokenize(memorySource);
+        }
+        
+        public LexerResult<IN> Tokenize(ReadOnlyMemory<char> memorySource)
+        {
             var tokens = new List<Token<IN>>();
             FSMMatch<GenericToken> r = null;
 
-            r = LexerFsm.Run(source, 0);
+            r = LexerFsm.Run(memorySource, 0);
             if (!r.IsSuccess && !r.IsEOS)
             {
                 var resultPosition = r.Result.Position;
@@ -123,7 +129,7 @@ namespace sly.lexer
 
                 tokens.Add(transcoded);
 
-                r = LexerFsm.Run(source);
+                r = LexerFsm.Run(memorySource);
                 if (!r.IsSuccess && !r.IsEOS)
                 {
                     var resultPosition = r.Result.Position;

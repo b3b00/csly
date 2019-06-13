@@ -454,13 +454,27 @@ namespace ParserExample
             ;
         }
 
+        private static void benchLexer()
+        {
+            var content = File.ReadAllText("test.json");
+
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<JsonTokenGeneric>>());
+            ILexer<JsonTokenGeneric> BenchedLexer = null;
+            if (lexerRes != null)
+            {
+                BenchedLexer = lexerRes.Result;
+                BenchedLexer.Tokenize(content);
+            }
+        }
+
         private static void Main(string[] args)
         {
             //TestContextualParser();
             //TestTokenCallBacks();
             //test104();
             //testJSON();
-            TestGraphViz();
+//            TestGraphViz();
+            benchLexer();
         }
     }
 }
