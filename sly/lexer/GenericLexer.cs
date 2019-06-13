@@ -95,7 +95,14 @@ namespace sly.lexer
 
         public void AddDefinition(TokenDefinition<IN> tokenDefinition) {}
 
+
         public LexerResult<IN> Tokenize(string source)
+        {
+            var memorySource = new ReadOnlyMemory<char>(source.ToCharArray());
+            return Tokenize(memorySource);
+        }
+        
+        public LexerResult<IN> Tokenize(ReadOnlyMemory<char> source)
         {
             LexerResult<IN> result = null;
             var tokens = new List<Token<IN>>();

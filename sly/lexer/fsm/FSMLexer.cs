@@ -170,12 +170,19 @@ namespace sly.lexer.fsm
         {
             return Run(source, CurrentPosition);
         }
+        
+        public FSMMatch<N> Run(ReadOnlyMemory<char> source)
+        {
+            return Run(source, CurrentPosition);
+        }
 
 
         public FSMMatch<N> Run( string source, int start)
         {
             return Run(new ReadOnlyMemory<char>(source.ToCharArray()), start);
         }
+        
+        
 
         public FSMMatch<N> Run( ReadOnlyMemory<char> source, int start)
         {

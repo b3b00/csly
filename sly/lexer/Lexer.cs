@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using sly.buildresult;
 
@@ -83,6 +84,11 @@ namespace sly.lexer
 
             tokens.Add(eos);
             return new LexerResult<T>(tokens);
+        }
+
+        public LexerResult<T> Tokenize(ReadOnlyMemory<char> source)
+        {
+            throw new NotImplementedException();
         }
     }
 }

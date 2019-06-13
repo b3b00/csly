@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,6 +8,13 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.11.5" />
     <PackageReference Include="sly" Version="2.2.5.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="test.json" />
+    <Content Include="test.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

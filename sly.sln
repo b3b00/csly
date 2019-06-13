@@ -23,7 +23,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "while", "samples\while\whil
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericLexerWithCallbacks", "samples\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj", "{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}"
 EndProject
-
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bench", "bench\bench.csproj", "{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -143,6 +144,18 @@ Global
 		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Release|x64.Build.0 = Release|Any CPU
 		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Release|x86.ActiveCfg = Release|Any CPU
 		{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}.Release|x86.Build.0 = Release|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Debug|x64.Build.0 = Debug|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Debug|x86.Build.0 = Debug|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Release|x64.ActiveCfg = Release|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Release|x64.Build.0 = Release|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Release|x86.ActiveCfg = Release|Any CPU
+		{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
