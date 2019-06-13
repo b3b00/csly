@@ -1,5 +1,6 @@
 ﻿using sly.lexer.fsm.transitioncheck;
 using System.Collections.Generic;
+using System;
 
 namespace sly.lexer.fsm
 {
@@ -27,7 +28,7 @@ namespace sly.lexer.fsm
         }
 
 
-        internal bool Match(char token, string value)
+        internal bool Match(char token, ReadOnlyMemory<char> value)
         {
             return Check.Check(token, value);
         }

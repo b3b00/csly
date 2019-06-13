@@ -6,9 +6,7 @@ namespace sly.lexer.fsm
 {
     public delegate FSMMatch<IN> NodeCallback<IN>(FSMMatch<IN> node);
 
-    public delegate string NodeAction(string value);
-
-    public delegate bool TransitionPrecondition(string value);
+    public delegate bool TransitionPrecondition(ReadOnlyMemory<char> value);
 
     public class FSMLexerBuilder<N>
     {
@@ -116,12 +114,7 @@ namespace sly.lexer.fsm
             return this;
         }
 
-        public FSMLexerBuilder<N> Action(NodeAction action)
-        {
-            if (Fsm.HasState(CurrentState)) Fsm.SetAction(CurrentState, action);
-
-            return this;
-        }
+      
 
         #endregion
 

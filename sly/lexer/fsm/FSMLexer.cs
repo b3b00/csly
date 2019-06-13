@@ -7,15 +7,16 @@ using System.Text;
 
 namespace sly.lexer.fsm
 {
-    
-    public static class MemoryExtensions {
+
+    public static class MemoryExtensions
+    {
 
         public static T At<T>(this ReadOnlyMemory<T> memory, int index)
         {
             return memory.Span[index];
-        } 
+        }
     }
-    
+
     public delegate void BuildExtension<IN>(IN token, LexemeAttribute lexem, GenericLexer<IN> lexer) where IN : struct;
 
     public class FSMLexer<N>
@@ -31,7 +32,6 @@ namespace sly.lexer.fsm
             Nodes = new Dictionary<int, FSMNode<N>>();
             Transitions = new Dictionary<int, List<FSMTransition>>();
             Callbacks = new Dictionary<int, NodeCallback<N>>();
-            Actions = new Dictionary<int, NodeAction>();
             IgnoreWhiteSpace = false;
             IgnoreEOL = false;
             AggregateEOL = false;
@@ -49,15 +49,13 @@ namespace sly.lexer.fsm
 
         private Dictionary<int, NodeCallback<N>> Callbacks { get; }
 
-        private Dictionary<int, NodeAction> Actions { get; }
-
         [ExcludeFromCodeCoverage]
         public string ToGraphViz()
         {
             var dump = new StringBuilder();
             foreach (var transitions in Transitions.Values)
-            foreach (var transition in transitions)
-                dump.AppendLine(transition.ToGraphViz(Nodes));
+                foreach (var transition in transitions)
+                    dump.AppendLine(transition.ToGraphViz(Nodes));
             return dump.ToString();
         }
 
@@ -91,15 +89,6 @@ namespace sly.lexer.fsm
         }
 
 
-        internal bool HasAction(int nodeId)
-        {
-            return Actions.ContainsKey(nodeId);
-        }
-
-        internal void SetAction(int nodeId, NodeAction action)
-        {
-            Actions[nodeId] = action;
-        }
 
         #endregion
 
@@ -159,7 +148,7 @@ namespace sly.lexer.fsm
         public int CurrentLine { get; private set; }
 
 
-        public void Move(int newPosition, int newLine, int newColumn)
+        public void MovePosition(int newPosition, int newLine, int newColumn)
         {
             CurrentPosition = newPosition;
             CurrentLine = newLine;
@@ -177,16 +166,15 @@ namespace sly.lexer.fsm
         }
 
 
-        public FSMMatch<N> Run( string source, int start)
+        public FSMMatch<N> Run(string source, int start)
         {
             return Run(new ReadOnlyMemory<char>(source.ToCharArray()), start);
         }
         
         
 
-        public FSMMatch<N> Run( ReadOnlyMemory<char> source, int start)
+        public FSMMatch<N> Run(ReadOnlyMemory<char> source, int start)
         {
-            var value = "";
             int tokenStartIndex = start;
             int tokenLength = 0;
             var result = new FSMMatch<N>(false);
@@ -240,14 +228,20 @@ namespace sly.lexer.fsm
                                 consumeSkipped = false;
                             }
                         }
+                        tokenStartIndex = CurrentPosition;
                     }
 
+                    if (CurrentPosition >= source.Length)
+                    {
+                        return new FSMMatch<N>(false);
+                    }
+                    var currentValue = source.Slice(tokenStartIndex, CurrentPosition - tokenStartIndex + 1);
 
-                    currentNode = Move(currentNode, currentCharacter, value);
+
+                    currentNode = Move(currentNode, currentCharacter, currentValue);
                     if (currentNode != null)
                     {
                         lastNode = currentNode.Id;
-                        value += currentCharacter;
                         tokenLength++;
 
                         if (!tokenStarted)
@@ -258,11 +252,10 @@ namespace sly.lexer.fsm
 
                         if (currentNode.IsEnd)
                         {
-                            var resultInter = new FSMMatch<N>(true, currentNode.Value, value, position,currentNode.Id);
+                            var resultInter = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id);
                             successes.Push(resultInter);
                         }
 
-                        if (HasAction(currentNode.Id)) value = Actions[currentNode.Id](value);
                         CurrentPosition++;
                         CurrentColumn++;
                     }
@@ -272,7 +265,7 @@ namespace sly.lexer.fsm
                         {
                             var errorChar = source.Slice(CurrentPosition, 1);
                             var errorPosition = new TokenPosition(CurrentPosition, CurrentLine, CurrentColumn);
-                            var ko = new FSMMatch<N>(false, default(N), errorChar, errorPosition, -1); 
+                            var ko = new FSMMatch<N>(false, default(N), errorChar, errorPosition, -1);
                             return ko;
                         }
                     }
@@ -292,7 +285,7 @@ namespace sly.lexer.fsm
             return result;
         }
 
-        protected FSMNode<N> Move(FSMNode<N> from, char token, string value)
+        protected FSMNode<N> Move(FSMNode<N> from, char token, ReadOnlyMemory<char> value)
         {
             FSMNode<N> next = null;
             if (from != null)
