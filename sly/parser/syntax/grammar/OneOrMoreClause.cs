@@ -10,6 +10,7 @@ namespace sly.parser.syntax.grammar
         }
 
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return Clause + "+";
