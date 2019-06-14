@@ -1,23 +1,15 @@
-
 using System;
+using System.IO;
+using benchCurrent.json;
+using benchCurrent.json.JsonModel;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
-
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Toolchains.CsProj;
-
-using System.IO;
-using BenchmarkDotNet.Analysers;
-
-
 using sly.parser;
 using sly.parser.generator;
-using bench.json;
-using bench.json.model;
 
-
-
-namespace bench
+namespace benchCurrent
 {
 
     [MemoryDiagnoser]
@@ -53,7 +45,7 @@ namespace bench
             if (result.IsError)
             {
                 Console.WriteLine("ERROR");
-                result.Errors.ForEach(e => Console.WriteLine(e));
+                result.Errors.ForEach(Console.WriteLine);
             }
             else
             {

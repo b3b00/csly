@@ -1,17 +1,9 @@
 ﻿using System;
-using System.IO;
-using System.Diagnostics;
-using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Running;
-using sly;
-using sly.lexer;
-using sly.buildresult;
 
-
-
-namespace bench
+namespace benchCurrent
 {
-    class Program
+    static class Program
     {
 
         private static void BenchJson() {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace bench.json.model
+namespace benchCurrent.json.JsonModel
 {
     public class JObject : JSon
     {

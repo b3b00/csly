@@ -1,4 +1,4 @@
-﻿namespace bench.json.model
+﻿namespace benchCurrent.json.JsonModel
 {
     public class JValue : JSon
     {

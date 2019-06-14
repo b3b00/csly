@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using bench.json.model;
+using benchCurrent.json.JsonModel;
 using sly.lexer;
 using sly.parser.generator;
 using sly.parser.parser;
 
-namespace bench.json
+namespace benchCurrent.json
 {
     public class EbnfJsonParser
     {

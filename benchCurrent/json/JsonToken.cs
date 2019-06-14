@@ -1,6 +1,6 @@
 ﻿using sly.lexer;
 
-namespace bench.json
+namespace benchCurrent.json
 {
     public enum JsonToken
     {

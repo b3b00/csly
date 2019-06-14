@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using bench.json.model;
+using benchCurrent.json.JsonModel;
 using sly.lexer;
 using sly.parser.generator;
 
-namespace bench.json
+namespace benchCurrent.json
 {
     public class EbnfJsonGenericParser
     {

@@ -1,24 +1,13 @@
-using System;
-using System.Security.Cryptography;
+using System.IO;
+using benchCurrent.json;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Exporters.Csv;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Toolchains.CsProj;
-using sly.lexer;
-using sly.lexer.fsm;
-using sly.parser;
-using sly.parser.generator;
 using sly.buildresult;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
-using bench.json;
-using BenchmarkDotNet.Analysers;
-using BenchmarkDotNet.Toolchains.InProcess;
+using sly.lexer;
 
-
-namespace bench
+namespace benchCurrent
 {
 
     [MemoryDiagnoser]
