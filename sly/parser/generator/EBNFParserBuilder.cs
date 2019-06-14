@@ -18,7 +18,7 @@ namespace sly.parser.generator
             string rootRule)
         {
             var ruleparser = new RuleParser<IN>();
-            var builder = new ParserBuilder<EbnfToken, GrammarNode<IN>>();
+            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>();
 
             var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
 
@@ -34,7 +34,7 @@ namespace sly.parser.generator
             }
             catch (Exception e)
             {
-                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message));
+                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message+"\n"+e.StackTrace));
                 return result;
             }
 
@@ -89,7 +89,7 @@ namespace sly.parser.generator
         #region configuration
 
         protected virtual ParserConfiguration<IN, OUT> ExtractEbnfParserConfiguration(Type parserClass,
-            Parser<EbnfToken, GrammarNode<IN>> grammarParser)
+            Parser<EbnfTokenGeneric, GrammarNode<IN>> grammarParser)
         {
             var conf = new ParserConfiguration<IN, OUT>();
             var nonTerminals = new Dictionary<string, NonTerminal<IN>>();

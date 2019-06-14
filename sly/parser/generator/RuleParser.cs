@@ -9,7 +9,7 @@ namespace sly.parser.generator
         #region rules grammar
 
         [Production("rule : IDENTIFIER COLON clauses")]
-        public object Root(Token<EbnfToken> name, Token<EbnfToken> discarded, ClauseSequence<IN> clauses)
+        public object Root(Token<EbnfTokenGeneric> name, Token<EbnfTokenGeneric> discarded, ClauseSequence<IN> clauses)
         {
             var rule = new Rule<IN>();
             rule.NonTerminalName = name.Value;
@@ -34,35 +34,35 @@ namespace sly.parser.generator
 
 
         [Production("clause : IDENTIFIER ZEROORMORE")]
-        public IClause<IN> ZeroMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
+        public IClause<IN> ZeroMoreClause(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> discarded)
         {
             var innerClause = BuildTerminalOrNonTerimal(id.Value, true);
             return new ZeroOrMoreClause<IN>(innerClause);
         }
 
         [Production("clause : IDENTIFIER ONEORMORE")]
-        public IClause<IN> OneMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
+        public IClause<IN> OneMoreClause(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> discarded)
         {
             var innerClause = BuildTerminalOrNonTerimal(id.Value);
             return new OneOrMoreClause<IN>(innerClause);
         }
 
         [Production("clause : IDENTIFIER OPTION")]
-        public IClause<IN> OptionClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
+        public IClause<IN> OptionClause(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> discarded)
         {
             var innerClause = BuildTerminalOrNonTerimal(id.Value);
             return new OptionClause<IN>(innerClause);
         }
 
         [Production("clause : IDENTIFIER DISCARD ")]
-        public IClause<IN> SimpleDiscardedClause(Token<EbnfToken> id, Token<EbnfToken> discard)
+        public IClause<IN> SimpleDiscardedClause(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> discard)
         {
             var clause = BuildTerminalOrNonTerimal(id.Value, true);
             return clause;
         }
 
         [Production("clause : IDENTIFIER ")]
-        public IClause<IN> SimpleClause(Token<EbnfToken> id)
+        public IClause<IN> SimpleClause(Token<EbnfTokenGeneric> id)
         {
             var clause = BuildTerminalOrNonTerimal(id.Value);
             return clause;
@@ -72,29 +72,29 @@ namespace sly.parser.generator
         #region  groups
 
         [Production("clause : LPAREN  groupclauses RPAREN ")]
-        public GroupClause<IN> Group(Token<EbnfToken> discardLeft, GroupClause<IN> clauses,
-            Token<EbnfToken> discardRight)
+        public GroupClause<IN> Group(Token<EbnfTokenGeneric> discardLeft, GroupClause<IN> clauses,
+            Token<EbnfTokenGeneric> discardRight)
         {
             return clauses;
         }
 
         [Production("clause : LPAREN  groupclauses RPAREN ONEORMORE ")]
-        public IClause<IN> GroupOneOrMore(Token<EbnfToken> discardLeft, GroupClause<IN> clauses,
-            Token<EbnfToken> discardRight, Token<EbnfToken> oneZeroOrMore)
+        public IClause<IN> GroupOneOrMore(Token<EbnfTokenGeneric> discardLeft, GroupClause<IN> clauses,
+            Token<EbnfTokenGeneric> discardRight, Token<EbnfTokenGeneric> oneZeroOrMore)
         {
             return new OneOrMoreClause<IN>(clauses);
         }
 
         [Production("clause : LPAREN  groupclauses RPAREN ZEROORMORE ")]
-        public IClause<IN> GroupZeroOrMore(Token<EbnfToken> discardLeft, GroupClause<IN> clauses,
-            Token<EbnfToken> discardRight, Token<EbnfToken> discardZeroOrMore)
+        public IClause<IN> GroupZeroOrMore(Token<EbnfTokenGeneric> discardLeft, GroupClause<IN> clauses,
+            Token<EbnfTokenGeneric> discardRight, Token<EbnfTokenGeneric> discardZeroOrMore)
         {
             return new ZeroOrMoreClause<IN>(clauses);
         }
 
         [Production("clause : LPAREN  groupclauses RPAREN OPTION ")]
-        public IClause<IN> GroupOptional(Token<EbnfToken> discardLeft, GroupClause<IN> group,
-            Token<EbnfToken> discardRight, Token<EbnfToken> option)
+        public IClause<IN> GroupOptional(Token<EbnfTokenGeneric> discardLeft, GroupClause<IN> group,
+            Token<EbnfTokenGeneric> discardRight, Token<EbnfTokenGeneric> option)
         {
             return new OptionClause<IN>(group);
         }
@@ -114,14 +114,14 @@ namespace sly.parser.generator
         }
 
         [Production("groupclause : IDENTIFIER ")]
-        public GroupClause<IN> GroupClause(Token<EbnfToken> id)
+        public GroupClause<IN> GroupClause(Token<EbnfTokenGeneric> id)
         {
             var clause = BuildTerminalOrNonTerimal(id.Value);
             return new GroupClause<IN>(clause);
         }
 
         [Production("groupclause : IDENTIFIER DISCARD ")]
-        public GroupClause<IN> GroupClauseDiscarded(Token<EbnfToken> id, Token<EbnfToken> discarded)
+        public GroupClause<IN> GroupClauseDiscarded(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> discarded)
         {
             var clause = BuildTerminalOrNonTerimal(id.Value, true);
             return new GroupClause<IN>(clause);

@@ -431,6 +431,10 @@ namespace ParserExample
                 Console.WriteLine("Done.");
 
             }
+            else
+            {
+                buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
+            }
             }
             catch(Exception e) {
                 Console.WriteLine($"ERROR {e.Message} : \n {e.StackTrace}");

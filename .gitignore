@@ -40,3 +40,4 @@ ParserTests/lcov.info.info
 coverage.json
 ruleset1.ruleset
 opencov.bat
+BenchmarkDotNet.Artifacts
