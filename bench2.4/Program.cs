@@ -23,6 +23,8 @@ namespace bench
         {
             try
             {
+
+
                 Console.WriteLine("Hello World!");
                 BenchJson();
             }
