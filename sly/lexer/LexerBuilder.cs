@@ -239,7 +239,7 @@ namespace sly.lexer
                             catch (Exception e)
                             {
                                 result.IsError = true;
-                                result.AddError(new InitializationError(ErrorLevel.FATAL, e.Message));
+                                result.AddError(new InitializationError(ErrorLevel.FATAL, e.Message+ " \n "+e.StackTrace));
                             }
                         else
                             lexer.AddStringLexem(tokenID, "\"");
