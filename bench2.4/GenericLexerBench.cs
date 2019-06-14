@@ -13,6 +13,7 @@ using sly.buildresult;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using bench.json;
 using BenchmarkDotNet.Analysers;
 using BenchmarkDotNet.Toolchains.InProcess;
 
@@ -23,7 +24,7 @@ namespace bench
     [MemoryDiagnoser]
     
     [Config(typeof(Config))]
-    public class Bench
+    public class GenericLexerBench
     {
 
 
@@ -32,11 +33,8 @@ namespace bench
             public Config()
             {
                 var baseJob = Job.MediumRun.With(CsProjCoreToolchain.Current.Value);
-                Add(baseJob.WithNuGet("sly", "2.2.5.1").WithId("2.2.5.1"));
-                Add(baseJob.WithNuGet("sly", "2.2.5.2").WithId("2.2.5.2"));
+                Add(baseJob.WithNuGet("sly", "2.4.0").WithId("2.4.0"));
                 Add(EnvironmentAnalyser.Default);
-                Add(baseJob.WithNuGet("sly", "2.2.5.3").WithId("2.2.5.3"));
-                Add(baseJob.WithNuGet("sly", "2.3.0.1").WithId("2.3.0.1"));
             }
         }
 
@@ -59,7 +57,7 @@ namespace bench
         [Benchmark]
         
         public void TestJson() {
-            var ignored = BenchedLexer.Tokenize(content).ToList();
+            var ignored = BenchedLexer.Tokenize(content);
         }
 
 

@@ -1,7 +1,6 @@
-using sly.lexer;
+﻿using sly.lexer;
 
-
-namespace bench
+namespace bench.json
 {
     public enum JsonTokenGeneric
     {
