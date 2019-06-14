@@ -21,7 +21,7 @@ namespace sly.parser.generator
     
     public enum EbnfTokenGeneric
     {
-        [Lexeme(GenericToken.Identifier)] 
+        [Lexeme(GenericToken.Identifier,IdentifierType.AlphaNumeric)] 
         IDENTIFIER = 1,
         
         [Lexeme(GenericToken.SugarToken,":")]
