@@ -9,7 +9,7 @@ namespace sly.parser.generator
         #region rules grammar
 
         [Production("rule : IDENTIFIER COLON clauses")]
-        public object Root(Token<EbnfToken> name, Token<EbnfToken> discarded, ClauseSequence<IN> clauses)
+        public object Root(Token<EbnfTokenGeneric> name, Token<EbnfTokenGeneric> discarded, ClauseSequence<IN> clauses)
         {
             var rule = new Rule<IN>();
             rule.NonTerminalName = name.Value;
@@ -34,35 +34,35 @@ namespace sly.parser.generator
 
 
         [Production("clause : IDENTIFIER ZEROORMORE")]
-        public IClause<IN> ZeroMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
+        public IClause<IN> ZeroMoreClause(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> discarded)
         {
             var innerClause = BuildTerminalOrNonTerimal(id.Value, true);
             return new ZeroOrMoreClause<IN>(innerClause);
         }
 
         [Production("clause : IDENTIFIER ONEORMORE")]
-        public IClause<IN> OneMoreClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
+        public IClause<IN> OneMoreClause(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> discarded)
         {
             var innerClause = BuildTerminalOrNonTerimal(id.Value);
             return new OneOrMoreClause<IN>(innerClause);
         }
 
         [Production("clause : IDENTIFIER OPTION")]
-        public IClause<IN> OptionClause(Token<EbnfToken> id, Token<EbnfToken> discarded)
+        public IClause<IN> OptionClause(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> discarded)
         {
             var innerClause = BuildTerminalOrNonTerimal(id.Value);
             return new OptionClause<IN>(innerClause);
         }
 
         [Production("clause : IDENTIFIER DISCARD ")]
-        public IClause<IN> SimpleDiscardedClause(Token<EbnfToken> id, Token<EbnfToken> discard)
+        public IClause<IN> SimpleDiscardedClause(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> discard)
         {
             var clause = BuildTerminalOrNonTerimal(id.Value, true);
             return clause;
         }
 
         [Production("clause : IDENTIFIER ")]
-        public IClause<IN> SimpleClause(Token<EbnfToken> id)
+        public IClause<IN> SimpleClause(Token<EbnfTokenGeneric> id)
         {
             var clause = BuildTerminalOrNonTerimal(id.Value);
             return clause;
