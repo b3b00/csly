@@ -203,6 +203,7 @@ namespace sly.lexer
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
             BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result) where IN : struct
         {
+            result = CheckStringAndCharTokens(attributes, result);
             var statics = GetGenericTokensAndIdentifierType(attributes);
             var Extensions = new Dictionary<IN, LexemeAttribute>();
             var lexer = new GenericLexer<IN>(statics.idType, extensionBuilder, statics.tokens.ToArray());
@@ -243,6 +244,29 @@ namespace sly.lexer
                             }
                         else
                             lexer.AddStringLexem(tokenID, "\"");
+                    }
+                    if (lexem.IsChar) {
+                        if (lexem.GenericTokenParameters != null && lexem.GenericTokenParameters.Length > 0)
+                            try
+                            {
+                                var delimiter = lexem.GenericTokenParameters[0];
+                                if (lexem.GenericTokenParameters.Length > 1)
+                                {
+                                    var escape = lexem.GenericTokenParameters[1];
+                                    lexer.AddCharLexem(tokenID, delimiter, escape);
+                                }
+                                else
+                                {
+                                    lexer.AddCharLexem(tokenID, delimiter);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                result.IsError = true;
+                                result.AddError(new InitializationError(ErrorLevel.FATAL, e.Message));
+                            }
+                        else
+                            lexer.AddCharLexem(tokenID, "'");
                     }
 
                     if (lexem.IsExtension) Extensions[tokenID] = lexem;
@@ -314,6 +338,41 @@ namespace sly.lexer
 
 
             result.Result = lexer;
+            return result;
+        }
+        
+        private static BuildResult<ILexer<IN>> CheckStringAndCharTokens<IN>(
+            Dictionary<IN, List<LexemeAttribute>> attributes, BuildResult<ILexer<IN>> result) where IN : struct
+        {
+            var allLexemes = attributes.Values.SelectMany(a => a);
+            var charLexemes = allLexemes.Where(a => a.IsChar);
+            var stringLexems = allLexemes.Where(a => a.IsString);
+
+            var allDelimiters = allLexemes.Where(a => a.IsString || a.IsChar).Select(a =>
+            {
+
+                if (a.GenericTokenParameters != null && a.GenericTokenParameters.Any())
+                {
+                    return a.GenericTokenParameters[0];
+                }
+
+                return null;
+            }).ToList();
+            ;
+
+            var doublons = allDelimiters.GroupBy(x => x)
+                .Where(g => g.Count() > 1)
+                .Select(y => new { Element = y.Key, Counter = y.Count() })
+                .ToList();
+
+            if (doublons == null || !doublons.Any()) return result;
+            foreach (var doublon in doublons)
+            {
+                var error = new LexerInitializationError(ErrorLevel.FATAL,
+                    $"char or string lexeme dilimiter {doublon.Element} is used {doublon.Counter} times. This will results in lexing conflicts");
+                result.Errors.Add(error);
+            }
+
             return result;
         }
 
