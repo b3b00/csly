@@ -35,6 +35,19 @@ namespace ParserExample
     }
 
 
+    public enum CharTokens {
+        [Lexeme(GenericToken.Char,"'","\\")]
+        [Lexeme(GenericToken.Char,"|","\\")]
+        MyChar,
+
+        [Lexeme(GenericToken.Char,"|","\\")]
+        OtherChar,
+
+        [Lexeme(GenericToken.String,"'","\\")]
+        MyString
+    }
+
+    
     internal class Program
     {
         [Production("R : A b c ")]
@@ -470,6 +483,31 @@ namespace ParserExample
                 BenchedLexer.Tokenize(content);
             }
         }
+        
+        private static void TestChars()
+        {
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CharTokens>>());
+            if (res.IsOk)
+            {
+                var lexer = res.Result as GenericLexer<CharTokens>;
+
+                var dump = lexer.ToString();
+                var graph = lexer.ToGraphViz();
+                Console.WriteLine(graph);
+                var source = "'\\''";
+                Console.WriteLine(source);
+                var res2 = lexer.Tokenize(source);
+                Console.WriteLine($"{res2.IsOk} - {res2.Tokens[0].Value}");
+            }
+            else
+            {
+                var errors = string.Join('\n',res.Errors.Select(e => e.Level + " - " + e.Message).ToList());
+                Console.WriteLine("error building lexer : ");
+                Console.WriteLine(errors);
+            }
+
+            ;
+        }
 
         private static void Main(string[] args)
         {
@@ -477,8 +515,9 @@ namespace ParserExample
             //TestTokenCallBacks();
             //test104();
             //testJSON();
-//            TestGraphViz();
-            benchLexer();
+            TestGraphViz();
+            //TestGraphViz();
+            TestChars();
         }
     }
 }
