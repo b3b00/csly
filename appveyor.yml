@@ -1,63 +1,58 @@
 version: 1.0.{build}
 image: Visual Studio 2017
 init:
-- cmd: ''
+  - cmd: ''
 environment:
   nugetKey:
-    secure: c1PEIupjD4bY0aJ2UYpyhayC+2VAC/5zxCzOi2dIEhKATogvn5Hlv98I9RhBPuF9
+    secure: GEFbl9g/FE7orhOvIoMK2+zrBG/nBF9gHY05MNLn6huILu5W6HoEC16wlWPLAWQZ
   codecovToken:
     secure: tDNSMb2HRVQsJEgwVvuqY02+qgaKI3bw0LHSqplQKSPSRJNEkdCVnX352HoSht5t
   COVERALLS_REPO_TOKEN:
     secure: ntYxuZR1S4QagcvXJ+rXGhJoIw0Ln556M3h6PQEwaGr/41x+JazkKeRJ8DHzHODc
 build_script:
-- cmd: >-
-    dotnet tool install coveralls.net  --version 1.0.0 --tool-path tools
+  - cmd: >-
+      dotnet tool install coveralls.net  --version 1.0.0 --tool-path tools
 
 
 
 
+      echo "tools\csmacnz.coveralls.exe --opencover -i ParserTests\coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch "%APPVEYOR_REPO_BRANCH%" --commitId "%APPVEYOR_REPO_COMMIT%" --commitAuthor "%APPVEYOR_REPO_COMMIT_AUTHOR%"  --commitEmail "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" --jobId "%APPVEYOR_JOB_ID%" --useRelativePaths --basePath "%APPVEYOR_BUILD_FOLDER%"
 
 
-    dotnet restore
+      dotnet restore
 
 
-    dotnet build -c Release
+      dotnet build -c Release
 
 
 
 
-     dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:exclude=\"[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*\" ParserTests/ParserTests.csproj
+       dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:exclude=\"[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*\" ParserTests/ParserTests.csproj
 
-    echo "############################"
-
-
-    tools\csmacnz.coveralls.exe --opencover -i ./ParserTests/coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch "%APPVEYOR_REPO_BRANCH%" --commitId "%APPVEYOR_REPO_COMMIT%" --commitAuthor "%APPVEYOR_REPO_COMMIT_AUTHOR%"  --commitEmail "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" --jobId "%APPVEYOR_JOB_ID%" --useRelativePaths --basePath "%APPVEYOR_BUILD_FOLDER%"
+      echo "############################"
 
 
-    echo "############################"
+      tools\csmacnz.coveralls.exe --opencover -i ./ParserTests/coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch "%APPVEYOR_REPO_BRANCH%" --commitId "%APPVEYOR_REPO_COMMIT%" --commitAuthor "%APPVEYOR_REPO_COMMIT_AUTHOR%"  --commitEmail "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" --jobId "%APPVEYOR_JOB_ID%"
 
 
-    dotnet pack -c Release
+      echo "############################"
+
+
+      dotnet pack -c Release
 test_script:
-- ps: dotnet test ParserTests/ParserTests.csproj
+  - ps: dotnet test ParserTests/ParserTests.csproj
 artifacts:
-- path: sly/bin/release/*
-  name: sly
-- path: sly_coverage.xml
-  name: sly
-- path: ParserTests/coverage.opencover.xml
-  name: sly
-deploy:
-- provider: NuGet
-  api_key:
-    secure: PCuI3NV6AClcmvaVZ+ZKP5pMe6eNZvNEYeMFQZYm4Cm0lxnrNHtHVqe6kjKDLZBJ
-  skip_symbols: true
-  on:
-    branch: dev
+  - path: sly/bin/release/*
+    name: sly
+  - path: sly_coverage.xml
+    name: sly
+  - path: ParserTests/coverage.opencover.xml
+    name: sly
+deploy: off
 notifications:
-- provider: Email
-  to:
-  - olivier.duhart@gmail.com
-  on_build_success: true
-  on_build_failure: true
-  on_build_status_changed: true
+  - provider: Email
+    to:
+      - olivier.duhart@gmail.com
+    on_build_success: true
+    on_build_failure: true
+    on_build_status_changed: true
