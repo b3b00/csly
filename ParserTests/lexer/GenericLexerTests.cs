@@ -56,6 +56,23 @@ namespace ParserTests.lexer
             }
         }
     }
+    
+    public enum CharTokens {
+        [Lexeme(GenericToken.Char,"'","\\")]
+        MyChar
+    }
+
+    public enum CharTokensConflicts{
+        [Lexeme(GenericToken.Char,"'","\\")]
+        [Lexeme(GenericToken.Char,"|","\\")]
+        MyChar,
+
+        [Lexeme(GenericToken.Char,"|","\\")]
+        OtherChar,
+
+        [Lexeme(GenericToken.String,"'","\\")]
+        MyString
+    }
 
 
     public enum StringDelimiters {
@@ -436,6 +453,42 @@ namespace ParserTests.lexer
             Assert.Equal("AAA", tokens[0].Value);
             Assert.Equal("BBB", tokens[1].Value);
             Assert.Equal(CallbackTokens.SKIP, tokens[1].TokenID);
+        }
+        
+        [Fact]
+        public void TestCharTokens()
+        {
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CharTokens>>());
+            Assert.False(res.IsError);
+            var lexer = res.Result as GenericLexer<CharTokens>;
+            var dump = lexer.ToString();
+            var grpah = lexer.ToGraphViz();
+
+            Assert.NotNull(lexer);
+            var res1 = lexer.Tokenize("'c'");
+            Assert.False(res1.IsError);
+            Assert.Equal(2, res1.Tokens.Count);
+            Token<CharTokens> token = res1.Tokens[0];
+            Assert.Equal('c', token.CharValue);
+            Assert.Equal(CharTokens.MyChar, token.TokenID);
+            var lastToken = res1.Tokens.Last();
+
+            var source = "'\\''";
+            var res2 = lexer.Tokenize(source);
+            Assert.False(res2.IsError);
+            Assert.Equal(2, res2.Tokens.Count);
+            token = res2.Tokens[0];
+            Assert.Equal(source, token.Value); // TODO ?
+            Assert.Equal(CharTokens.MyChar, token.TokenID);
+        }
+
+        [Fact]
+        public void TestCharTokenDelimiterConflict()
+        {
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CharTokensConflicts>>());
+            Assert.True(res.IsError);
+            Assert.Equal(2,res.Errors.Count);
+
         }
 
         [Fact]

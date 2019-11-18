@@ -16,6 +16,8 @@ namespace sly.lexer
     public class Token<T>
     {
         public char StringDelimiter = '"';
+        
+        public char CharDelimiter ='\'';
 
 
         public Token(T token, string value, TokenPosition position, bool isCommentStart = false,
@@ -113,7 +115,22 @@ namespace sly.lexer
             set { }
         }
 
-        public char CharValue => StringWithoutQuotes[0];
+        public char CharValue  {
+            get
+            {
+                var result = Value;
+                if (CharDelimiter != (char) 0)
+                {
+                    if (result.StartsWith(CharDelimiter.ToString()))  {
+                        result = result.Substring(1);
+                    }
+                    if (result.EndsWith(CharDelimiter.ToString())) {
+                        result = result.Substring(0, result.Length - 1);
+                    }
+                }
+                return result[0];
+            }
+        } 
 
 
         public bool End { get; set; }

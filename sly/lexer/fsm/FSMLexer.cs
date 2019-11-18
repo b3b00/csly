@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace sly.lexer.fsm
@@ -306,7 +305,10 @@ namespace sly.lexer.fsm
                             i++;
                         }
 
-                        if (match) next = Nodes[transition.ToNode];
+                        if (match)
+                        {
+                            next = Nodes[transition.ToNode];
+                        }
                     }
                 }
 

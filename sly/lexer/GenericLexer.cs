@@ -15,6 +15,7 @@ namespace sly.lexer
         Double,
         KeyWord,
         String,
+        Char,
         SugarToken,
 
         Extension,
@@ -44,6 +45,10 @@ namespace sly.lexer
     {
         public static string in_string = "in_string";
         public static string string_end = "string_end";
+        public static string start_char = "start_char";
+        public static string escapeChar_char = "escapeChar_char";
+        public static string in_char = "in_char";
+        public static string end_char = "char_end";
         public static string start = "start";
         public static string in_int = "in_int";
         public static string start_double = "start_double";
@@ -53,6 +58,7 @@ namespace sly.lexer
         public static string DerivedToken = "derivedToken";
         public static string defaultIdentifierKey = "identifier";
         public static string escape_string = "escape_string";
+        public static string escape_char = "escape_char";
 
         public static string single_line_comment_start = "single_line_comment_start";
 
@@ -69,6 +75,7 @@ namespace sly.lexer
 
         protected FSMLexer<GenericToken> LexerFsm;
         protected int StringCounter;
+        protected int CharCounter;
 
 
         protected Dictionary<IN, Func<Token<IN>, Token<IN>>> CallBacks = new Dictionary<IN, Func<Token<IN>, Token<IN>>>();
@@ -513,6 +520,55 @@ namespace sly.lexer
                     .ExceptTransitionTo(exceptDelimiter, in_string + StringCounter);
             }
         }
+        
+        public void AddCharLexem(IN token, string charDelimiter, string escapeDelimiterChar = "\\")
+        {
+            if (string.IsNullOrEmpty(charDelimiter) || charDelimiter.Length > 1)
+                throw new InvalidLexerException(
+                    $"bad lexem {charDelimiter} :  CharToken lexeme delimiter char <{token.ToString()}> must be 1 character length.");
+            if (char.IsLetterOrDigit(charDelimiter[0]))
+                throw new InvalidLexerException(
+                    $"bad lexem {charDelimiter} :  CharToken lexeme delimiter char <{token.ToString()}> can not start with a letter.");
+
+            if (string.IsNullOrEmpty(escapeDelimiterChar) || escapeDelimiterChar.Length > 1)
+                throw new InvalidLexerException(
+                    $"bad lexem {escapeDelimiterChar} :  CharToken lexeme escape char  <{token.ToString()}> must be 1 character length.");
+            if (char.IsLetterOrDigit(escapeDelimiterChar[0]))
+                throw new InvalidLexerException(
+                    $"bad lexem {escapeDelimiterChar} :  CharToken lexeme escape char lexeme <{token.ToString()}> can not start with a letter.");
+
+            CharCounter++;
+
+            char charDelimiterChar = charDelimiter[0];
+
+            char escapeChar = escapeDelimiterChar[0];
+
+
+            NodeCallback<GenericToken> callback = match =>
+            {
+                match.Properties[DerivedToken] = token;
+                var value = match.Result.SpanValue;
+
+                match.Result.SpanValue = value;
+                return match;
+            };
+
+            FSMBuilder.GoTo(start);
+            FSMBuilder.Transition(charDelimiterChar)
+                .Mark(start_char+"_"+CharCounter)
+                .ExceptTransition(new[] { charDelimiterChar, escapeChar })
+                .Mark(in_char+"_"+CharCounter)
+                .Transition(charDelimiterChar)
+                .Mark(end_char+"_"+CharCounter)
+                .End(GenericToken.Char)
+                .CallBack(callback)
+                .GoTo(start_char+"_"+CharCounter)
+                .Transition(escapeChar)
+                .Mark(escapeChar_char+"_"+CharCounter)
+                .AnyTransitionTo('*',in_char+"_"+CharCounter)
+                .CallBack(callback);
+            FSMBuilder.Fsm.StringDelimiter = charDelimiterChar;
+        }
 
         public void AddSugarLexem(IN token, string specialValue)
         {
@@ -589,6 +645,11 @@ namespace sly.lexer
         public override string ToString()
         {
             return LexerFsm.ToString();
+        }
+        
+        public string ToGraphViz()
+        {
+            return LexerFsm.ToGraphViz();
         }
     }
 }
