@@ -109,8 +109,6 @@ namespace ParserTests.lexer
 
             var linePositions = tokens.Take(9).Select(tok => tok.Position.Line).ToList();
             Assert.Equal(expectedLinePositions, linePositions);
-
-            ;
         }
 
         [Fact]
@@ -165,8 +163,6 @@ namespace ParserTests.lexer
 
             var columnPositions = tokens.Take(9).Select(tok => tok.Position.Column).ToList();
             Assert.Equal(expectedColumnPositions, columnPositions);
-
-            ;
         }
     }
 }

@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using sly.parser.generator;
 
 namespace sly.parser.syntax.tree

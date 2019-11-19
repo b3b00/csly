@@ -68,7 +68,6 @@ namespace ParserTests
             var warnMessage = warnings[0].Message;
             Assert.True(warnMessage.Contains(BadTokens.MissingLexeme.ToString()) &&
                         warnMessage.Contains("not have Lexeme"));
-            ;
         }
     }
 }

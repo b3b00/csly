@@ -1,12 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using sly.parser.generator.visitor.dotgraph;
-using sly.lexer;
-using sly.parser.parser;
-using sly.parser.syntax.tree;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using sly.parser.generator.visitor.dotgraph;
+using sly.parser.syntax.tree;
 
 namespace sly.parser.generator.visitor
 {

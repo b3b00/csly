@@ -1,4 +1,3 @@
-using System.Linq;
 using sly.buildresult;
 using sly.lexer;
 using Xunit;

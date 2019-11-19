@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using sly.buildresult;
 
 namespace sly.lexer
 {
@@ -29,9 +27,6 @@ namespace sly.lexer
             var currentColumn = 0;
             var currentLineStartIndex = 0;
             Token<T> previousToken = null;
-
-            var defEol = tokenDefinitions.ToList().Find(t => t.IsEndOfLine);
-            var eol = defEol.TokenID;
 
             while (currentIndex < source.Length)
             {
@@ -72,9 +67,6 @@ namespace sly.lexer
                 }
 
                 currentIndex += matchLength;
-
-
-                ;
             }
 
             var eos = new Token<T>();

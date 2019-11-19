@@ -1,12 +1,9 @@
-using sly.parser.generator.visitor.dotgraph;
-using Xunit;
-using simpleExpressionParser;
 using expressionparser;
-using System.Collections.Generic;
-using sly.buildresult;
-using sly.parser;
+using simpleExpressionParser;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
+using sly.parser.generator.visitor.dotgraph;
+using Xunit;
 
 namespace ParserTests
 {

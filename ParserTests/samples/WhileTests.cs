@@ -21,7 +21,6 @@ namespace ParserTests.samples
                 var whileParser = new WhileParser();
                 var builder = new ParserBuilder<WhileToken, WhileAST>();
                 Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
-                ;
             }
 
             return Parser;
@@ -80,7 +79,6 @@ namespace ParserTests.samples
             var result = parser.Parse("(a:=0; while a < 10 do (print a; a := a +1 ))");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
-            ;
         }
 
         [Fact]
@@ -96,9 +94,6 @@ namespace ParserTests.samples
             var context = interpreter.Interprete(result.Result, true);
             Assert.Single(context.variables);
             Assert.True(CheckIntVariable(context, "a", 10));
-
-
-            ;
         }
 
         [Fact]
@@ -126,9 +121,6 @@ namespace ParserTests.samples
             Assert.Equal(2, context.variables.Count);
             Assert.True(CheckIntVariable(context, "i", 11));
             Assert.True(CheckIntVariable(context, "r", 3628800));
-
-
-            ;
         }
 
 
@@ -152,7 +144,6 @@ return r
             Assert.NotNull(func);
             var f = func();
             Assert.Equal(3628800, f);
-            ;
         }
 
         [Fact]
@@ -182,7 +173,6 @@ return r
             Assert.Equal("a", thenAssign.VariableName);
             Assert.IsType<StringConstant>(thenAssign.Value);
             Assert.Equal("hello", (thenAssign.Value as StringConstant).Value);
-            ;
 
             Assert.IsType<SequenceStatement>(si.ElseStmt);
             var elseBlock = si.ElseStmt as SequenceStatement;
@@ -216,7 +206,6 @@ return r
             var seqBlock = whil.BlockStmt as SequenceStatement;
             Assert.Equal(1, seqBlock.Count);
             Assert.IsType<SkipStatement>(seqBlock.Get(0));
-            ;
         }
 
         [Fact]

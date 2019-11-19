@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using sly.buildresult;
 using sly.lexer.fsm;
 
 namespace sly.lexer
@@ -247,7 +246,6 @@ namespace sly.lexer
                                 match.Properties[DerivedToken] = identifierDerivedToken;
                             }
 
-                        ;
                             break;
                         }
                     case GenericToken.Int:
@@ -379,10 +377,7 @@ namespace sly.lexer
                 r += value.At(value.Length - 1);
                 value = r.AsMemory();
             }
-            else
-            {
-                ;
-            }
+
             return value;
         }
 
@@ -424,10 +419,7 @@ namespace sly.lexer
                 r += value.At(value.Length - 1);
                 value = r.AsMemory();
             }
-            else
-            {
-                ;
-            }
+
             return value;
         }
 

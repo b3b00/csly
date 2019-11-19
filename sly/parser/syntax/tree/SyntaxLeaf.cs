@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using sly.lexer;
 
 namespace sly.parser.syntax.tree
@@ -14,7 +13,7 @@ namespace sly.parser.syntax.tree
         
 
         public Token<IN> Token { get;  }
-        public bool Discarded { get; } = false;
+        public bool Discarded { get; }
         public string Name => Token.TokenID.ToString();
 
     }

@@ -178,7 +178,6 @@ namespace ParserTests.lexer
             var tok = r.Tokens[0];
             Assert.Equal(AlphaId.ID, tok.TokenID);
             Assert.Equal("alpha", tok.StringWithoutQuotes);
-            ;
         }
 
         [Fact]
@@ -193,7 +192,6 @@ namespace ParserTests.lexer
             var tok = r.Tokens[0];
             Assert.Equal(AlphaNumDashId.ID, tok.TokenID);
             Assert.Equal("alpha-123_", tok.StringWithoutQuotes);
-            ;
         }
 
         [Fact]
@@ -208,9 +206,7 @@ namespace ParserTests.lexer
             var tok = r.Tokens[0];
             Assert.Equal(AlphaNumDashId.ID, tok.TokenID);
             Assert.Equal("_alpha-123_", tok.StringWithoutQuotes);
-            ;
         }
-
 
         [Fact]
         public void TestAlphaNumId()
@@ -224,7 +220,6 @@ namespace ParserTests.lexer
             var tok = r.Tokens[0];
             Assert.Equal(AlphaNumId.ID, tok.TokenID);
             Assert.Equal("alpha123", tok.StringWithoutQuotes);
-            ;
         }
 
         [Fact]
@@ -443,7 +438,7 @@ namespace ParserTests.lexer
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CallbackTokens>>());
             Assert.False(res.IsError);
             var lexer = res.Result as GenericLexer<CallbackTokens>;
-            CallBacksBuilder.BuildCallbacks<CallbackTokens>(lexer);
+            CallBacksBuilder.BuildCallbacks(lexer);
 
 
             var r = lexer.Tokenize("aaa bbb");

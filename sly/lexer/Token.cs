@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace sly.lexer
 {
@@ -98,13 +96,13 @@ namespace sly.lexer
             get
             {
                 // Try parsing in the current culture
-                if (!double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.CurrentCulture,
+                if (!double.TryParse(Value, NumberStyles.Any, CultureInfo.CurrentCulture,
                         out var result) &&
                     // Then try in US english
-                    !double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"),
+                    !double.TryParse(Value, NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"),
                         out result) &&
                     // Then in neutral language
-                    !double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture,
+                    !double.TryParse(Value, NumberStyles.Any, CultureInfo.InvariantCulture,
                         out result))
                 {
                     result = 0.0;

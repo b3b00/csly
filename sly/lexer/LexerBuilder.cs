@@ -62,8 +62,6 @@ namespace sly.lexer
                                 result?.AddError(new LexerInitializationError(ErrorLevel.WARN,
                                     $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
                         }
-
-                ;
             }
 
             return attributes;
@@ -173,8 +171,6 @@ namespace sly.lexer
                         result.AddError(new LexerInitializationError(ErrorLevel.WARN,
                             $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have"));
                 }
-
-                ;
             }
 
             result.Result = lexer;
@@ -358,12 +354,11 @@ namespace sly.lexer
 
                 return null;
             }).ToList();
-            ;
 
             var doublons = allDelimiters.GroupBy(x => x)
-                .Where(g => g.Count() > 1)
-                .Select(y => new { Element = y.Key, Counter = y.Count() })
-                .ToList();
+                                        .Where(g => g.Count() > 1)
+                                        .Select(y => new { Element = y.Key, Counter = y.Count() })
+                                        .ToList();
 
             if (doublons == null || !doublons.Any()) return result;
             foreach (var doublon in doublons)
@@ -411,7 +406,6 @@ namespace sly.lexer
             if (extensionBuilder != null)
                 foreach (var attr in Extensions)
                     extensionBuilder(attr.Key, attr.Value, lexer);
-            ;
         }
     }
 }

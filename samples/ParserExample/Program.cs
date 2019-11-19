@@ -80,11 +80,9 @@ namespace ParserExample
             {
                 var r = "Rec(" + (args[0] as Token<TokenType>).Value + "," + args[1] + ")";
                 return r;
-                ;
             }
 
             return "_";
-            ;
         }
 
 
@@ -93,7 +91,6 @@ namespace ParserExample
             var whileParser = new WhileParser();
             var builder = new ParserBuilder<WhileToken, WhileAST>();
             var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
-            ;
 
             var program = @"
 (
@@ -114,7 +111,6 @@ namespace ParserExample
             var compiler = new WhileCompiler();
             var code = compiler.TranspileToCSharp(program);
             var f = compiler.CompileToFunction(program);
-            ;
         }
 
 
@@ -237,15 +233,11 @@ namespace ParserExample
             {
                 var interpreter = new Interpreter();
                 var ctx = interpreter.Interprete(rGen.Result);
-                ;
             }
             else
             {
                 rGen.Errors.ForEach(e => Console.WriteLine(e.ToString()));
             }
-
-
-            ;
         }
 
         private static void testGenericLexerJson()
@@ -287,9 +279,6 @@ namespace ParserExample
             sw.Stop();
             Console.WriteLine($"json generic parser : {sw.ElapsedMilliseconds} ms");
             if (rGen.IsError) rGen.Errors.ForEach(e => Console.WriteLine(e.ToString()));
-
-
-            ;
         }
 
         private static void testJSONLexer()
@@ -321,8 +310,6 @@ namespace ParserExample
                         $"old lexer {tokens.Count()} tokens in {sw2.ElapsedMilliseconds}ms / {end - start}ms");
                 }
             }
-
-            ;
         }
 
 
@@ -357,7 +344,6 @@ namespace ParserExample
 
             var parser = r.Result;
             var rule = parser.Parse("a ( b ) ", "clauses");
-            ;
         }
 
 
@@ -394,13 +380,12 @@ namespace ParserExample
             if (!res.IsError)
             {
                 var lexer = res.Result as GenericLexer<CallbackTokens>;
-                CallBacksBuilder.BuildCallbacks<CallbackTokens>(lexer);
+                CallBacksBuilder.BuildCallbacks(lexer);
 
                 var r = lexer.Tokenize("aaa bbb");
                 if (r.IsOk)
                 {
                     var tokens = r.Tokens;
-                    ;
                     foreach (var token in tokens)
                     {
                         Console.WriteLine($"{token.TokenID} - {token.Value}");
@@ -468,7 +453,6 @@ namespace ParserExample
             string graph = graphviz.Graph.Compile();
             File.Delete("c:\\temp\\tree.dot");
             File.AppendAllText("c:\\temp\\tree.dot", graph);
-            ;
         }
 
         private static void benchLexer()
@@ -505,8 +489,6 @@ namespace ParserExample
                 Console.WriteLine("error building lexer : ");
                 Console.WriteLine(errors);
             }
-
-            ;
         }
 
         private static void Main(string[] args)
