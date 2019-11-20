@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using sly.lexer.fsm.transitioncheck;
 
 namespace sly.lexer.fsm
@@ -165,18 +166,58 @@ namespace sly.lexer.fsm
             return this;
         }
 
+
+        private (string constant, List<(char start, char end)> ranges) ParseRepeatedPattern(string pattern)
+        {
+            string toParse = pattern;
+            if (toParse.StartsWith("[") && toParse.EndsWith("]"))
+            {
+                bool isPattern = true;
+                List<(char start, char end)> ranges = new List<(char start, char end)>();
+                toParse = toParse.Substring(1, toParse.Length - 2);
+                var rangesItems = toParse.Split(new char[]{','});
+                int i = 0;
+                while (i < rangesItems.Length && isPattern)
+                {
+                    var item = rangesItems[i];
+                    isPattern = item.Length == 3 && item[1] == '-';
+                    if (isPattern)
+                    {
+                        ranges.Add((item[0],item[2]));
+                    }
+                    i++;
+                }
+
+                if (isPattern)
+                {
+                    return (null, ranges);
+                }
+                
+            }
+            return (pattern, null);
+        }
+        
         public FSMLexerBuilder<N> RepetitionTransition(int count, string pattern,
             TransitionPrecondition precondition = null)
         {
+            var parsedPattern = ParseRepeatedPattern(pattern);
+            
             if (count > 0 && !string.IsNullOrEmpty(pattern))
             {
-                if (pattern.StartsWith("[") && pattern.EndsWith("]") && pattern.Contains("-") && pattern.Length == 5)
+                if (parsedPattern.ranges != null && parsedPattern.ranges.Any())
                 {
-                    var start = pattern[1];
-                    var end = pattern[3];
-                    RangeTransition(start, end, precondition);
-                    for (var i = 1; i < count; i++) RangeTransition(start, end);
+                    for (int i = 0; i < count; i++)
+                    {
+                        MultiRangeTransition(precondition, parsedPattern.ranges.ToArray());
+                    }
                 }
+//                if (pattern.StartsWith("[") && pattern.EndsWith("]") && pattern.Contains("-") && pattern.Length == 5)
+//                {
+//                    var start = pattern[1];
+//                    var end = pattern[3];
+//                    RangeTransition(start, end, precondition);
+//                    for (var i = 1; i < count; i++) RangeTransition(start, end);
+//                }
                 else
                 {
                     ConstantTransition(pattern, precondition);
@@ -199,6 +240,17 @@ namespace sly.lexer.fsm
             return RangeTransitionTo(start, end, Fsm.NewNodeId, precondition);
         }
 
+        public FSMLexerBuilder<N> MultiRangeTransition(params (char start, char end)[] ranges)
+        {
+            return MultiRangeTransitionTo(Fsm.NewNodeId,ranges);
+        }
+
+        public FSMLexerBuilder<N> MultiRangeTransition(TransitionPrecondition precondition , params (char start, char end)[] ranges)
+        {
+            return MultiRangeTransitionTo(Fsm.NewNodeId, precondition, ranges);
+        }
+        
+        
 
         public FSMLexerBuilder<N> ExceptTransition(char[] exceptions)
         {
@@ -220,6 +272,9 @@ namespace sly.lexer.fsm
             return AnyTransitionTo(input, Fsm.NewNodeId, precondition);
         }
 
+        #endregion
+        
+        #region DIRECTED TRANSITIONS
 
         public FSMLexerBuilder<N> TransitionTo(char input, int toNode)
         {
@@ -242,6 +297,40 @@ namespace sly.lexer.fsm
             return this;
         }
 
+        public FSMLexerBuilder<N> RepetitionTransitionTo(string toNodeMark, int count, string pattern,
+            TransitionPrecondition precondition = null)
+        {
+            var toNode = Marks[toNodeMark];
+            return RepetitionTransitionTo(toNode, count,pattern,precondition);
+        }
+
+        public FSMLexerBuilder<N> RepetitionTransitionTo(int toNode, int count, string pattern,
+            TransitionPrecondition precondition = null)
+        {
+            var parsedPattern = ParseRepeatedPattern(pattern);
+            
+            if (count > 0 && !string.IsNullOrEmpty(pattern))
+            {
+                if (parsedPattern.ranges != null && parsedPattern.ranges.Any())
+                {
+                    for (int i = 0; i < count-1; i++)
+                    {
+                        MultiRangeTransition(precondition, parsedPattern.ranges.ToArray());
+                    }
+                    MultiRangeTransitionTo(toNode, precondition, parsedPattern.ranges.ToArray());
+                }
+                else
+                {
+                    ConstantTransition(pattern, precondition);
+                    for (var i = 1; i < count; i++) ConstantTransition(pattern);
+                    ConstantTransition(pattern, precondition);
+                }
+            }
+
+            return this;
+        }
+        
+        
 
         public FSMLexerBuilder<N> RangeTransitionTo(char start, char end, int toNode)
         {
@@ -263,6 +352,38 @@ namespace sly.lexer.fsm
             CurrentState = toNode;
             return this;
         }
+        
+        #region multi range directed
+        
+        public FSMLexerBuilder<N> MultiRangeTransitionTo(int toNode, params (char start, char end)[] ranges)
+        {
+            AbstractTransitionCheck checker = new TransitionMultiRange(ranges);
+            if (!Fsm.HasState(toNode)) Fsm.AddNode();
+            var transition = new FSMTransition(checker, CurrentState, toNode);
+            Fsm.AddTransition(transition);
+            CurrentState = toNode;
+            return this;
+        }
+
+        public FSMLexerBuilder<N> MultiRangeTransitionTo(int toNode,
+            TransitionPrecondition precondition, params (char start, char end)[] ranges)
+        {
+            AbstractTransitionCheck checker = new TransitionMultiRange(precondition, ranges);
+            if (!Fsm.HasState(toNode)) Fsm.AddNode();
+            var transition = new FSMTransition(checker, CurrentState, toNode);
+            Fsm.AddTransition(transition);
+            CurrentState = toNode;
+            return this;
+        }
+        
+        public FSMLexerBuilder<N> MultiRangeTransitionTo(string toNodeMark, params (char start, char end)[] ranges)
+        {
+            var toNode = Marks[toNodeMark];
+            return MultiRangeTransitionTo(toNode,ranges);
+        }
+
+        
+        #endregion
 
 
         public FSMLexerBuilder<N> ExceptTransitionTo(char[] exceptions, int toNode)
@@ -355,7 +476,9 @@ namespace sly.lexer.fsm
             var toNode = Marks[toNodeMark];
             return AnyTransitionTo(input, toNode, precondition);
         }
+        
+        #endregion
     }
 
-    #endregion
+    
 }
