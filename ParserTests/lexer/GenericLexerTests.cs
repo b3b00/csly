@@ -478,7 +478,15 @@ namespace ParserTests.lexer
             Assert.False(res2.IsError);
             Assert.Equal(2, res2.Tokens.Count);
             token = res2.Tokens[0];
-            Assert.Equal(source, token.Value); // TODO ?
+            Assert.Equal(source, token.Value); 
+            Assert.Equal(CharTokens.MyChar, token.TokenID);
+            
+            var sourceU = "'\\u0066'";
+            var res3 = lexer.Tokenize(sourceU);
+            Assert.False(res3.IsError);
+            Assert.Equal(2, res3.Tokens.Count);
+            token = res3.Tokens[0];
+            Assert.Equal(sourceU, token.Value); 
             Assert.Equal(CharTokens.MyChar, token.TokenID);
         }
 
