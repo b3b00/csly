@@ -37,14 +37,14 @@ namespace ParserExample
 
     public enum CharTokens {
         [Lexeme(GenericToken.Char,"'","\\")]
-        [Lexeme(GenericToken.Char,"|","\\")]
+//        [Lexeme(GenericToken.Char,"|","\\")]
         MyChar,
 
-        [Lexeme(GenericToken.Char,"|","\\")]
-        OtherChar,
-
-        [Lexeme(GenericToken.String,"'","\\")]
-        MyString
+//        [Lexeme(GenericToken.Char,"|","\\")]
+//        OtherChar,
+//
+//        [Lexeme(GenericToken.String,"'","\\")]
+//        MyString
     }
 
     
@@ -498,6 +498,9 @@ namespace ParserExample
                 Console.WriteLine(source);
                 var res2 = lexer.Tokenize(source);
                 Console.WriteLine($"{res2.IsOk} - {res2.Tokens[0].Value}");
+                var sourceU = "'\\u0066'";
+                var res3 = lexer.Tokenize(sourceU);
+                Console.WriteLine($"{res3.IsOk} - {res3.Tokens[0].Value}");
             }
             else
             {

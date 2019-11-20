@@ -47,6 +47,7 @@ namespace sly.lexer
         public static string string_end = "string_end";
         public static string start_char = "start_char";
         public static string escapeChar_char = "escapeChar_char";
+        public static string unicode_char = "unicode_char";
         public static string in_char = "in_char";
         public static string end_char = "char_end";
         public static string start = "start";
@@ -565,9 +566,16 @@ namespace sly.lexer
                 .GoTo(start_char+"_"+CharCounter)
                 .Transition(escapeChar)
                 .Mark(escapeChar_char+"_"+CharCounter)
-                .AnyTransitionTo('*',in_char+"_"+CharCounter)
+                .ExceptTransitionTo(new char[]{'u'},in_char+"_"+CharCounter)
                 .CallBack(callback);
             FSMBuilder.Fsm.StringDelimiter = charDelimiterChar;
+            
+            // TODO : unicode transitions
+            FSMBuilder = FSMBuilder.GoTo(escapeChar_char + "_" + CharCounter)
+            .Transition('u')
+            .Mark(unicode_char+"_"+CharCounter)
+            .RepetitionTransitionTo(in_char + "_" + CharCounter,4,"[0-9,a-z,A-Z]");
+
         }
 
         public void AddSugarLexem(IN token, string specialValue)
