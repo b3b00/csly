@@ -145,6 +145,17 @@ namespace ParserTests.lexer
         ID
     }
 
+    public enum CustomId
+    {
+        EOS,
+        
+        [Lexeme(GenericToken.Identifier, IdentifierType.Custom, "A-Za-z", "-_0-9A-Za-z")]
+        ID,
+        
+        [Lexeme(GenericToken.SugarToken, "-", "_")]
+        OTHER
+    }
+
     [Lexer(IgnoreWS = false)]
     public enum IgnoreWS
     {
@@ -218,7 +229,7 @@ namespace ParserTests.lexer
             Assert.Single(r.Tokens);
             var tok = r.Tokens[0];
             Assert.Equal(Empty.EOS, tok.TokenID);
-            Assert.Equal("",        tok.StringWithoutQuotes);
+            Assert.Equal("",        tok.Value);
         }
 
         [Fact]
@@ -232,7 +243,7 @@ namespace ParserTests.lexer
             Assert.Single(r.Tokens);
             var tok = r.Tokens[0];
             Assert.Equal(Empty.EOS, tok.TokenID);
-            Assert.Equal("",        tok.StringWithoutQuotes);
+            Assert.Equal("",        tok.Value);
         }
 
         [Fact]
@@ -293,6 +304,46 @@ namespace ParserTests.lexer
         }
 
         [Fact]
+        public void TestCustomId()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<CustomId>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("a_-Bc ZyX-_");
+            Assert.True(r.IsOk);
+            Assert.Equal(3, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
+            Assert.Equal(CustomId.ID, tok1.TokenID);
+            Assert.Equal("a_-Bc",     tok1.Value);
+            var tok2 = r.Tokens[1];
+            Assert.Equal(CustomId.ID, tok2.TokenID);
+            Assert.Equal("ZyX-_",     tok2.Value);
+        }
+
+        [Fact]
+        public void TestCustomIdWithOther()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<CustomId>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("_b_ -C-");
+            Assert.True(r.IsOk);
+            Assert.Equal(5, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
+            Assert.Equal(CustomId.OTHER, tok1.TokenID);
+            Assert.Equal("_",            tok1.Value);
+            var tok2 = r.Tokens[1];
+            Assert.Equal(CustomId.ID, tok2.TokenID);
+            Assert.Equal("b_",        tok2.Value);
+            var tok3 = r.Tokens[2];
+            Assert.Equal(CustomId.OTHER, tok3.TokenID);
+            Assert.Equal("-",            tok3.Value);
+            var tok4 = r.Tokens[3];
+            Assert.Equal(CustomId.ID, tok4.TokenID);
+            Assert.Equal("C-",        tok4.Value);
+        }
+
+        [Fact]
         public void TestIgnoreWS()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<IgnoreWS>>());
@@ -303,7 +354,7 @@ namespace ParserTests.lexer
             Assert.Equal(2, r.Tokens.Count);
             var tok = r.Tokens[0];
             Assert.Equal(IgnoreWS.WS, tok.TokenID);
-            Assert.Equal(" ", tok.StringWithoutQuotes);
+            Assert.Equal(" ", tok.Value);
         }
 
         [Fact]
@@ -317,7 +368,7 @@ namespace ParserTests.lexer
             Assert.Equal(2, r.Tokens.Count);
             var tok = r.Tokens[0];
             Assert.Equal(IgnoreEOL.EOL, tok.TokenID);
-            Assert.Equal("\n", tok.StringWithoutQuotes);
+            Assert.Equal("\n", tok.Value);
         }
 
         [Fact]
@@ -331,7 +382,7 @@ namespace ParserTests.lexer
             Assert.Equal(2, r.Tokens.Count);
             var tok = r.Tokens[0];
             Assert.Equal(WhiteSpace.TAB, tok.TokenID);
-            Assert.Equal("\t",           tok.StringWithoutQuotes);
+            Assert.Equal("\t",           tok.Value);
         }
 
         [Fact]
@@ -345,10 +396,10 @@ namespace ParserTests.lexer
             Assert.Equal(3, r.Tokens.Count);
             var tok1 = r.Tokens[0];
             Assert.Equal(KeyWord.KEYWORD, tok1.TokenID);
-            Assert.Equal("keyword",       tok1.StringWithoutQuotes);
+            Assert.Equal("keyword",       tok1.Value);
             var tok2 = r.Tokens[1];
             Assert.Equal(default(KeyWord), tok2.TokenID);
-            Assert.Equal("KeYwOrD",        tok2.StringWithoutQuotes);
+            Assert.Equal("KeYwOrD",        tok2.Value);
         }
 
         [Fact]
@@ -362,10 +413,10 @@ namespace ParserTests.lexer
             Assert.Equal(3, r.Tokens.Count);
             var tok1 = r.Tokens[0];
             Assert.Equal(KeyWordIgnoreCase.KEYWORD, tok1.TokenID);
-            Assert.Equal("keyword",                 tok1.StringWithoutQuotes);
+            Assert.Equal("keyword",                 tok1.Value);
             var tok2 = r.Tokens[1];
             Assert.Equal(KeyWordIgnoreCase.KEYWORD, tok2.TokenID);
-            Assert.Equal("KeYwOrD",                 tok2.StringWithoutQuotes);
+            Assert.Equal("KeYwOrD",                 tok2.Value);
         }
 
         [Fact]

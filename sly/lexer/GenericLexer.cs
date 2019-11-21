@@ -26,7 +26,8 @@ namespace sly.lexer
     {
         Alpha,
         AlphaNumeric,
-        AlphaNumericDash
+        AlphaNumericDash,
+        Custom
     }
 
     public enum EOLType
@@ -61,6 +62,10 @@ namespace sly.lexer
             public char[] WhiteSpace { get; set; }
             
             public bool KeyWordIgnoreCase { get; set; }
+            
+            public IEnumerable<char[]> IdentifierStartPattern { get; set; }
+            
+            public IEnumerable<char[]> IdentifierRestPattern { get; set; }
 
             public BuildExtension<IN> ExtensionBuilder { get; set; }
 
@@ -208,7 +213,7 @@ namespace sly.lexer
 
             if (staticTokens.Contains(GenericToken.Identifier) || staticTokens.Contains(GenericToken.KeyWord))
             {
-                InitializeIdentifier(config.IdType);
+                InitializeIdentifier(config);
             }
 
             // numeric
@@ -232,24 +237,80 @@ namespace sly.lexer
         }
 
 
-        private void InitializeIdentifier(IdentifierType idType = IdentifierType.Alpha)
+        private void InitializeIdentifier(Config config)
         {
             // identifier
-            FSMBuilder.GoTo(start).RangeTransition('a', 'z').Mark(in_identifier)
-                .End(GenericToken.Identifier);
-
-            FSMBuilder.GoTo(start).RangeTransitionTo('A', 'Z', in_identifier).RangeTransitionTo('a', 'z', in_identifier)
-                .RangeTransitionTo('A', 'Z', in_identifier).End(GenericToken.Identifier);
-
-            if (idType == IdentifierType.AlphaNumeric || idType == IdentifierType.AlphaNumericDash)
+            if (config.IdType == IdentifierType.Custom)
             {
-                FSMBuilder.GoTo(in_identifier).RangeTransitionTo('0', '9', in_identifier);
+                var marked = false;
+                foreach (var pattern in config.IdentifierStartPattern)
+                {
+                    FSMBuilder.GoTo(start);
+                    if (pattern.Length == 1)
+                    {
+                        if (marked)
+                        {
+                            FSMBuilder.TransitionTo(pattern[0], in_identifier);
+                        }
+                        else
+                        {
+                            FSMBuilder.Transition(pattern[0]).Mark(in_identifier).End(GenericToken.Identifier);
+                            marked = true;
+                        }
+                    }
+                    else
+                    {
+                        if (marked)
+                        {
+                            FSMBuilder.RangeTransitionTo(pattern[0], pattern[1], in_identifier);
+                        }
+                        else
+                        {
+                            FSMBuilder.RangeTransition(pattern[0], pattern[1]).Mark(in_identifier).End(GenericToken.Identifier);
+                            marked = true;
+                        }
+                    }
+                }
+
+                foreach (var pattern in config.IdentifierRestPattern)
+                {
+                    if (pattern.Length == 1)
+                    {
+                        FSMBuilder.TransitionTo(pattern[0], in_identifier);
+                    }
+                    else
+                    {
+                        FSMBuilder.RangeTransitionTo(pattern[0], pattern[1], in_identifier);
+                    }
+                }
             }
-            
-            if (idType == IdentifierType.AlphaNumericDash)
+            else
             {
-                FSMBuilder.GoTo(in_identifier).TransitionTo('-', in_identifier).TransitionTo('_', in_identifier);
-                FSMBuilder.GoTo(start).TransitionTo('_', in_identifier);
+                FSMBuilder
+                    .GoTo(start)
+                    .RangeTransition('a', 'z')
+                    .Mark(in_identifier)
+                    .GoTo(start)
+                    .RangeTransitionTo('A', 'Z', in_identifier)
+                    .RangeTransitionTo('a', 'z', in_identifier)
+                    .RangeTransitionTo('A', 'Z', in_identifier)
+                    .End(GenericToken.Identifier);
+
+                if (config.IdType == IdentifierType.AlphaNumeric || config.IdType == IdentifierType.AlphaNumericDash)
+                {
+                    FSMBuilder
+                        .GoTo(in_identifier)
+                        .RangeTransitionTo('0', '9', in_identifier);
+                }
+            
+                if (config.IdType == IdentifierType.AlphaNumericDash)
+                {
+                    FSMBuilder
+                        .GoTo(start)
+                        .TransitionTo('_', in_identifier)
+                        .TransitionTo('_', in_identifier)
+                        .TransitionTo('-', in_identifier);
+                }
             }
         }
 

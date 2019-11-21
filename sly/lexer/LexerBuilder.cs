@@ -159,14 +159,43 @@ namespace sly.lexer
                 if (lexeme.IsIdentifier)
                 {
                     config.IdType = lexeme.IdentifierType;
+                    if (lexeme.IdentifierType == IdentifierType.Custom)
+                    {
+                        config.IdentifierStartPattern = ParseIdentifierPattern(lexeme.IdentifierStartPattern);
+                        config.IdentifierRestPattern = ParseIdentifierPattern(lexeme.IdentifierRestPattern);
+                    }
                 }
             }
 
             return (config, statics.Distinct().ToArray());
         }
+        
+        private static IEnumerable<char[]> ParseIdentifierPattern(string pattern)
+        {
+            var index = 0;
+            while (index < pattern.Length)
+            {
+                if (index <= pattern.Length - 3 && pattern[index + 1] == '-')
+                {
+                    if (pattern[index] < pattern[index + 2])
+                    {
+                        yield return new[] { pattern[index], pattern[index + 2] };
+                    }
+                    else
+                    {
+                        yield return new[] { pattern[index + 2], pattern[index] };
+                    }
+                    index += 3;
+                }
+                else
+                {
+                    yield return new[] { pattern[index++] };
+                }
+            }
+        }
 
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
-            BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result) where IN : struct
+                                                                     BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result) where IN : struct
         {
             result = CheckStringAndCharTokens(attributes, result);
             var (config, tokens) = GetConfigAndGenericTokens(attributes);
