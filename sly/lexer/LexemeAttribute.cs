@@ -37,7 +37,10 @@ namespace sly.lexer
         public bool IsLineEnding { get; set; }
 
 
-        public bool IsStaticGeneric => (GenericTokenParameters == null || GenericTokenParameters.Length == 0) &&
+        public bool HasGenericTokenParameters => GenericTokenParameters != null && GenericTokenParameters.Length > 0;
+
+        // TODO Should GenericToken.Char be excluded from static generic also?
+        public bool IsStaticGeneric => !HasGenericTokenParameters &&
                                        GenericToken != GenericToken.String && GenericToken != GenericToken.Extension;
 
         public bool IsKeyWord => GenericToken == GenericToken.KeyWord;

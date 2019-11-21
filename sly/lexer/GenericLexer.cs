@@ -42,33 +42,33 @@ namespace sly.lexer
 
     public class GenericLexer<IN> : ILexer<IN> where IN : struct
     {
-        public static string in_string = "in_string";
-        public static string string_end = "string_end";
-        public static string start_char = "start_char";
-        public static string escapeChar_char = "escapeChar_char";
-        public static string unicode_char = "unicode_char";
-        public static string in_char = "in_char";
-        public static string end_char = "char_end";
-        public static string start = "start";
-        public static string in_int = "in_int";
-        public static string start_double = "start_double";
-        public static string in_double = "in_double";
-        public static string in_identifier = "in_identifier";
-        public static string token_property = "token";
-        public static string DerivedToken = "derivedToken";
-        public static string defaultIdentifierKey = "identifier";
-        public static string escape_string = "escape_string";
-        public static string escape_char = "escape_char";
+        public const string in_string = "in_string";
+        public const string string_end = "string_end";
+        public const string start_char = "start_char";
+        public const string escapeChar_char = "escapeChar_char";
+        public const string unicode_char = "unicode_char";
+        public const string in_char = "in_char";
+        public const string end_char = "char_end";
+        public const string start = "start";
+        public const string in_int = "in_int";
+        public const string start_double = "start_double";
+        public const string in_double = "in_double";
+        public const string in_identifier = "in_identifier";
+        public const string token_property = "token";
+        public const string DerivedToken = "derivedToken";
+        public const string defaultIdentifierKey = "identifier";
+        public const string escape_string = "escape_string";
+        public const string escape_char = "escape_char";
 
-        public static string single_line_comment_start = "single_line_comment_start";
+        public const string single_line_comment_start = "single_line_comment_start";
 
-        public static string multi_line_comment_start = "multi_line_comment_start";
+        public const string multi_line_comment_start = "multi_line_comment_start";
 
-        protected Dictionary<GenericToken, Dictionary<string, IN>> derivedTokens;
+        protected readonly Dictionary<GenericToken, Dictionary<string, IN>> derivedTokens;
         protected IN doubleDerivedToken;
         protected char EscapeStringDelimiterChar;
 
-        protected BuildExtension<IN> ExtensionBuilder;
+        protected readonly BuildExtension<IN> ExtensionBuilder;
         public FSMLexerBuilder<GenericToken> FSMBuilder;
         protected IN identifierDerivedToken;
         protected IN intDerivedToken;
@@ -106,7 +106,6 @@ namespace sly.lexer
 
         public LexerResult<IN> Tokenize(string source)
         {
-//<<<<<<< HEAD
             var memorySource = new ReadOnlyMemory<char>(source.ToCharArray());
             return Tokenize(memorySource);
         }
@@ -114,22 +113,19 @@ namespace sly.lexer
         public LexerResult<IN> Tokenize(ReadOnlyMemory<char> memorySource)
         {
             var tokens = new List<Token<IN>>();
-            FSMMatch<GenericToken> r = null;
 
-            r = LexerFsm.Run(memorySource, 0);
+            var r = LexerFsm.Run(memorySource, 0);
             if (!r.IsSuccess && !r.IsEOS)
             {
-                var resultPosition = r.Result.Position;
-                LexicalError error =
-                    new LexicalError(resultPosition.Line, resultPosition.Column, r.Result.CharValue);
+                var result = r.Result;
+                var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
                 return new LexerResult<IN>(error);
             }
 
             while (r.IsSuccess)
             {
                 var transcoded = Transcode(r);
-                Func<Token<IN>, Token<IN>> callback = null;
-                if (CallBacks.TryGetValue(transcoded.TokenID, out callback))
+                if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
                 {
                     transcoded = callback(transcoded);
                 }
@@ -139,12 +135,10 @@ namespace sly.lexer
                 r = LexerFsm.Run(memorySource);
                 if (!r.IsSuccess && !r.IsEOS)
                 {
-                    var resultPosition = r.Result.Position;
-                    LexicalError error =
-                        new LexicalError(resultPosition.Line, resultPosition.Column, r.Result.CharValue);
+                    var result = r.Result;
+                    var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
                     return new LexerResult<IN>(error);
                 }
-
 
                 if (r.IsSuccess && r.Result.IsComment) ConsumeComment(r.Result, memorySource);
             }
@@ -173,18 +167,20 @@ namespace sly.lexer
             // start machine definition
             FSMBuilder.Mark(start);
 
-            if (staticTokens.ToList().Contains(GenericToken.Identifier) ||
-                staticTokens.ToList().Contains(GenericToken.KeyWord)) InitializeIdentifier(idType);
+            if (staticTokens.Contains(GenericToken.Identifier) || staticTokens.Contains(GenericToken.KeyWord))
+            {
+                InitializeIdentifier(idType);
+            }
 
-            //numeric
-            if (staticTokens.ToList().Contains(GenericToken.Int) || staticTokens.ToList().Contains(GenericToken.Double))
+            // numeric
+            if (staticTokens.Contains(GenericToken.Int) || staticTokens.Contains(GenericToken.Double))
             {
                 FSMBuilder = FSMBuilder.GoTo(start)
                     .RangeTransition('0', '9')
                     .Mark(in_int)
                     .RangeTransitionTo('0', '9', in_int)
                     .End(GenericToken.Int);
-                if (staticTokens.ToList().Contains(GenericToken.Double))
+                if (staticTokens.Contains(GenericToken.Double))
                     FSMBuilder.Transition('.')
                         .Mark(start_double)
                         .RangeTransition('0', '9')
@@ -217,17 +213,6 @@ namespace sly.lexer
 
         public void AddLexeme(GenericToken generic, IN token)
         {
-            if (generic == GenericToken.Identifier)
-            {
-                identifierDerivedToken = token;
-                var derived = new Dictionary<string, IN>();
-                if (derivedTokens.ContainsKey(generic)) derived = derivedTokens[generic];
-                derived[defaultIdentifierKey] = token;
-            }
-
-            if (generic == GenericToken.Double) doubleDerivedToken = token;
-            if (generic == GenericToken.Int) intDerivedToken = token;
-
             NodeCallback<GenericToken> callback = match =>
             {
                 switch (match.Result.TokenID)
@@ -273,18 +258,21 @@ namespace sly.lexer
             {
                 case GenericToken.Double:
                     {
+                        doubleDerivedToken = token;
                         FSMBuilder.GoTo(in_double);
                         FSMBuilder.CallBack(callback);
                         break;
                     }
                 case GenericToken.Int:
                     {
+                        intDerivedToken = token;
                         FSMBuilder.GoTo(in_int);
                         FSMBuilder.CallBack(callback);
                         break;
                     }
                 case GenericToken.Identifier:
                     {
+                        identifierDerivedToken = token;
                         FSMBuilder.GoTo(in_identifier);
                         FSMBuilder.CallBack(callback);
                         break;
@@ -294,19 +282,18 @@ namespace sly.lexer
 
         public void AddLexeme(GenericToken genericToken, IN token, string specialValue)
         {
-            switch (genericToken)
+            if (genericToken == GenericToken.SugarToken)
             {
-                case GenericToken.SugarToken:
-                    {
-                        AddSugarLexem(token, specialValue);
-                        break;
-                    }
+                AddSugarLexem(token, specialValue);
             }
 
-            var tokensForGeneric = new Dictionary<string, IN>();
-            if (derivedTokens.ContainsKey(genericToken)) tokensForGeneric = derivedTokens[genericToken];
+            if (!derivedTokens.TryGetValue(genericToken, out var tokensForGeneric))
+            {
+                tokensForGeneric = new Dictionary<string, IN>();
+                derivedTokens[genericToken] = tokensForGeneric;
+            }
+
             tokensForGeneric[specialValue] = token;
-            derivedTokens[genericToken] = tokensForGeneric;
         }
 
         public void AddKeyWord(IN token, string keyword)
@@ -340,13 +327,13 @@ namespace sly.lexer
         public ReadOnlyMemory<char> diffCharEscaper(char escapeStringDelimiterChar, char stringDelimiterChar, ReadOnlyMemory<char> stringValue)
         {
             var value = stringValue;
-            int i = 1;
-            bool substitutionHappened = false;
-            bool escaping = false;
-            string r = string.Empty;
+            var i = 1;
+            var substitutionHappened = false;
+            var escaping = false;
+            var r = string.Empty;
             while (i < value.Length - 1)
             {
-                char current = value.At(i);
+                var current = value.At(i);
                 if (current == escapeStringDelimiterChar && i < value.Length - 2)
                 {
                     escaping = true;
@@ -443,10 +430,10 @@ namespace sly.lexer
             StringCounter++;
 
             StringDelimiterChar = stringDelimiter[0];
-            char stringDelimiterChar = stringDelimiter[0];
+            var stringDelimiterChar = stringDelimiter[0];
 
             EscapeStringDelimiterChar = escapeDelimiterChar[0];
-            char escapeStringDelimiterChar = escapeDelimiterChar[0];
+            var escapeStringDelimiterChar = escapeDelimiterChar[0];
 
             
 
@@ -492,7 +479,7 @@ namespace sly.lexer
             else
             {
                 var exceptDelimiter = new[] { stringDelimiterChar };
-                in_string = "in_string_same";
+                var in_string = "in_string_same";
                 var escaped = "escaped_same";
                 var delim = "delim_same";
 
@@ -532,9 +519,9 @@ namespace sly.lexer
 
             CharCounter++;
 
-            char charDelimiterChar = charDelimiter[0];
+            var charDelimiterChar = charDelimiter[0];
 
-            char escapeChar = escapeDelimiterChar[0];
+            var escapeChar = escapeDelimiterChar[0];
 
 
             NodeCallback<GenericToken> callback = match =>
