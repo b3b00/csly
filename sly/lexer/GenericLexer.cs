@@ -42,6 +42,27 @@ namespace sly.lexer
 
     public class GenericLexer<IN> : ILexer<IN> where IN : struct
     {
+        public class Config
+        {
+            public Config()
+            {
+                IdType = IdentifierType.Alpha;
+                IgnoreEOL = true;
+                IgnoreWS = true;
+                WhiteSpace = new[] { ' ', '\t' };
+            }
+
+            public IdentifierType IdType { get; set; }
+
+            public bool IgnoreEOL { get; set; }
+
+            public bool IgnoreWS { get; set; }
+
+            public char[] WhiteSpace { get; set; }
+
+            public BuildExtension<IN> ExtensionBuilder { get; set; }
+        }
+
         public const string in_string = "in_string";
         public const string string_end = "string_end";
         public const string start_char = "start_char";
@@ -82,19 +103,24 @@ namespace sly.lexer
 
         protected char StringDelimiterChar;
 
-        public GenericLexer(IdentifierType idType = IdentifierType.Alpha, BuildExtension<IN> extensionBuilder = null,
-            params GenericToken[] staticTokens)
+        public GenericLexer(IdentifierType idType = IdentifierType.Alpha,
+                            BuildExtension<IN> extensionBuilder = null,
+                            params GenericToken[] staticTokens)
+            : this(new Config { IdType = idType, ExtensionBuilder = extensionBuilder }, staticTokens)
+        { }
+
+        public GenericLexer(Config config, GenericToken[] staticTokens)
         {
-            InitializeStaticLexer(idType, staticTokens);
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
-            ExtensionBuilder = extensionBuilder;
+            ExtensionBuilder = config.ExtensionBuilder;
+            InitializeStaticLexer(config, staticTokens);
         }
 
         public string SingleLineComment { get; set; }
+
         public string MultiLineCommentStart { get; set; }
 
         public string MultiLineCommentEnd { get; set; }
-
 
         public void AddCallBack(IN token, Func<Token<IN>, Token<IN>> callback)
         {
@@ -152,24 +178,23 @@ namespace sly.lexer
         }
 
 
-        private void InitializeStaticLexer(IdentifierType idType = IdentifierType.Alpha,
-            params GenericToken[] staticTokens)
+        private void InitializeStaticLexer(Config config, GenericToken[] staticTokens)
         {
             FSMBuilder = new FSMLexerBuilder<GenericToken>();
             StringCounter = 0;
 
             // conf
-            FSMBuilder.IgnoreWS()
-                .WhiteSpace(' ')
-                .WhiteSpace('\t')
-                .IgnoreEOL();
+            FSMBuilder
+                .IgnoreWS(config.IgnoreWS)
+                .WhiteSpace(config.WhiteSpace)
+                .IgnoreEOL(config.IgnoreEOL);
 
             // start machine definition
             FSMBuilder.Mark(start);
 
             if (staticTokens.Contains(GenericToken.Identifier) || staticTokens.Contains(GenericToken.KeyWord))
             {
-                InitializeIdentifier(idType);
+                InitializeIdentifier(config.IdType);
             }
 
             // numeric
@@ -545,7 +570,7 @@ namespace sly.lexer
                 .GoTo(start_char+"_"+CharCounter)
                 .Transition(escapeChar)
                 .Mark(escapeChar_char+"_"+CharCounter)
-                .ExceptTransitionTo(new char[]{'u'},in_char+"_"+CharCounter)
+                .ExceptTransitionTo(new[] { 'u' }, in_char + "_" + CharCounter)
                 .CallBack(callback);
             FSMBuilder.Fsm.StringDelimiter = charDelimiterChar;
             

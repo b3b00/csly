@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using sly.buildresult;
 using sly.lexer.fsm;
 
@@ -138,30 +139,39 @@ namespace sly.lexer
             return result;
         }
 
-        private static (GenericToken[] tokens, IdentifierType idType) GetGenericTokensAndIdentifierType<IN>(
-            Dictionary<IN, List<LexemeAttribute>> attributes)
+        private static (GenericLexer<IN>.Config, GenericToken[]) GetConfigAndGenericTokens<IN>(IDictionary<IN, List<LexemeAttribute>> attributes)
+            where IN : struct
         {
+            var config = new GenericLexer<IN>.Config();
+            var lexerAttribute = typeof(IN).GetCustomAttribute<LexerAttribute>();
+            if (lexerAttribute != null)
+            {
+                config.IgnoreWS = lexerAttribute.IgnoreWS;
+                config.IgnoreEOL = lexerAttribute.IgnoreEOL;
+                config.WhiteSpace = lexerAttribute.WhiteSpace;
+            }
+
             var statics = new List<GenericToken>();
-            var idType = IdentifierType.Alpha;
             foreach (var lexeme in attributes.Values.SelectMany(list => list))
             {
                 statics.Add(lexeme.GenericToken);
                 if (lexeme.IsIdentifier)
                 {
-                    idType = lexeme.IdentifierType;
+                    config.IdType = lexeme.IdentifierType;
                 }
             }
 
-            return (statics.Distinct().ToArray(), idType);
+            return (config, statics.Distinct().ToArray());
         }
 
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
             BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result) where IN : struct
         {
             result = CheckStringAndCharTokens(attributes, result);
-            var (tokens, idType) = GetGenericTokensAndIdentifierType(attributes);
+            var (config, tokens) = GetConfigAndGenericTokens(attributes);
+            config.ExtensionBuilder = extensionBuilder;
+            var lexer = new GenericLexer<IN>(config, tokens);
             var Extensions = new Dictionary<IN, LexemeAttribute>();
-            var lexer = new GenericLexer<IN>(idType, extensionBuilder, tokens);
             foreach (var pair in attributes)
             {
                 var tokenID = pair.Key;

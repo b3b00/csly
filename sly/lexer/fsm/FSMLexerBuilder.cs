@@ -71,22 +71,34 @@ namespace sly.lexer.fsm
 
         #region special chars
 
-        public FSMLexerBuilder<N> IgnoreWS()
+        public FSMLexerBuilder<N> IgnoreWS(bool ignore = true)
         {
-            Fsm.IgnoreWhiteSpace = true;
+            Fsm.IgnoreWhiteSpace = ignore;
             return this;
         }
 
-        public FSMLexerBuilder<N> IgnoreEOL()
+        public FSMLexerBuilder<N> IgnoreEOL(bool ignore = true)
         {
-            Fsm.IgnoreEOL = true;
+            Fsm.IgnoreEOL = ignore;
             return this;
         }
 
-
-        public FSMLexerBuilder<N> WhiteSpace(char spacechar)
+        public FSMLexerBuilder<N> WhiteSpace(char spaceChar)
         {
-            Fsm.WhiteSpaces.Add(spacechar);
+            Fsm.WhiteSpaces.Add(spaceChar);
+            return this;
+        }
+
+        public FSMLexerBuilder<N> WhiteSpace(char[] spaceChars)
+        {
+            if (spaceChars != null)
+            {
+                foreach (var spaceChar in spaceChars)
+                {
+                    Fsm.WhiteSpaces.Add(spaceChar);
+                }
+            }
+
             return this;
         }
 

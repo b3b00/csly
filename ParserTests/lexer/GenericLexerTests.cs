@@ -145,6 +145,27 @@ namespace ParserTests.lexer
         ID
     }
 
+    [Lexer(IgnoreWS = false)]
+    public enum IgnoreWS
+    {
+        [Lexeme(GenericToken.SugarToken, " ")]
+        WS
+    }
+
+    [Lexer(IgnoreEOL = false)]
+    public enum IgnoreEOL
+    {
+        [Lexeme(GenericToken.SugarToken, "\n")]
+        EOL
+    }
+
+    [Lexer(WhiteSpace = new[] { ' ' })]
+    public enum WhiteSpace
+    {
+        [Lexeme(GenericToken.SugarToken, "\t")]
+        TAB
+    }
+
     public enum Issue106
     {
         [Lexeme(GenericToken.Int)]
@@ -220,6 +241,48 @@ namespace ParserTests.lexer
             var tok = r.Tokens[0];
             Assert.Equal(AlphaNumId.ID, tok.TokenID);
             Assert.Equal("alpha123", tok.StringWithoutQuotes);
+        }
+
+        [Fact]
+        public void TestIgnoreWS()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<IgnoreWS>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("\n \n");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
+            Assert.Equal(IgnoreWS.WS, tok.TokenID);
+            Assert.Equal(" ", tok.StringWithoutQuotes);
+        }
+
+        [Fact]
+        public void TestIgnoreEOL()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<IgnoreEOL>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize(" \n ");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
+            Assert.Equal(IgnoreEOL.EOL, tok.TokenID);
+            Assert.Equal("\n", tok.StringWithoutQuotes);
+        }
+
+        [Fact]
+        public void TestWhiteSpace()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<WhiteSpace>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize(" \t ");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
+            Assert.Equal(WhiteSpace.TAB, tok.TokenID);
+            Assert.Equal("\t", tok.StringWithoutQuotes);
         }
 
         [Fact]
