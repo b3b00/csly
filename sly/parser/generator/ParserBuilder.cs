@@ -187,7 +187,6 @@ namespace sly.parser.generator
                     if (b)
                     {
                         isTerminal = true;
-                        ;
                     }
 
                     //token = (IN)Enum.Parse(tIn , item);

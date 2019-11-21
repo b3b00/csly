@@ -139,7 +139,6 @@ namespace sly.parser.generator
             if (b)
             {
                 isTerminal = true;
-                ;
             }
 
             if (isTerminal)

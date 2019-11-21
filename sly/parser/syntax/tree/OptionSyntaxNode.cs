@@ -9,8 +9,6 @@ namespace sly.parser.syntax.tree
         
         public OptionSyntaxNode(string name, List<ISyntaxNode<IN>> children = null, MethodInfo visitor = null) : base(
             name, children, visitor)
-        {
-            ;
-        }
+        { }
     }
 }

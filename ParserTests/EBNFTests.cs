@@ -426,7 +426,6 @@ namespace ParserTests
             {
                 var stack = e.StackTrace;
                 var message = e.Message;
-                ;
             }
 
             Assert.True(r.IsError);
@@ -673,17 +672,17 @@ namespace ParserTests
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
             Assert.False(builtParser.IsError);
             Assert.NotNull(builtParser.Result);
-            Parser<GroupTestToken, int> parser = builtParser.Result as Parser<GroupTestToken, int>;
+            var parser = builtParser.Result;
             Assert.NotNull(parser);
             var conf = parser.Configuration;
-            List<GroupTestToken> expected = new List<GroupTestToken>() {GroupTestToken.A, GroupTestToken.COMMA};
+            var expected = new List<GroupTestToken>() {GroupTestToken.A, GroupTestToken.COMMA};
 
-            var nonTerm = conf.NonTerminals["testNonTerm"] as NonTerminal<GroupTestToken>;
+            var nonTerm = conf.NonTerminals["testNonTerm"];
             Assert.NotNull(nonTerm);
             Assert.Equal(2, nonTerm.PossibleLeadingTokens.Count);
             Assert.True(nonTerm.PossibleLeadingTokens.ContainsAll(expected));
 
-            var term = conf.NonTerminals["testTerm"] as NonTerminal<GroupTestToken>;
+            var term = conf.NonTerminals["testTerm"];
             Assert.NotNull(term);
             Assert.Equal(2, nonTerm.PossibleLeadingTokens.Count);
             Assert.True(term.PossibleLeadingTokens.ContainsAll(expected));

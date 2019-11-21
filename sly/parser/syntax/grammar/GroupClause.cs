@@ -29,7 +29,7 @@ namespace sly.parser.syntax.grammar
         {
             StringBuilder dump = new StringBuilder();
             dump.Append("( ");
-            dump.Append(Clauses.Select(c => c.Dump()).Aggregate((string d1, string d2) => d1 + " " + d2));
+            dump.Append(Clauses.Select(c => c.Dump()).Aggregate((d1, d2) => d1 + " " + d2));
             dump.Append(" )");
             return dump.ToString();
         }

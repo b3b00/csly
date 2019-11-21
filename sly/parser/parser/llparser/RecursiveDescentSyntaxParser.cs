@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
 using sly.parser.generator;
-using sly.parser.syntax.tree;
 using sly.parser.syntax.grammar;
+using sly.parser.syntax.tree;
 
 namespace sly.parser.llparser
 {
