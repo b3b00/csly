@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
+using GenericLexerWithCallbacks;
 using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fsm;
 using Xunit;
-using GenericLexerWithCallbacks;
 
 namespace ParserTests.lexer
 {
@@ -145,6 +145,59 @@ namespace ParserTests.lexer
         ID
     }
 
+    public enum CustomId
+    {
+        EOS,
+        
+        [Lexeme(GenericToken.Identifier, IdentifierType.Custom, "A-Za-z", "-_0-9A-Za-z")]
+        ID,
+        
+        [Lexeme(GenericToken.SugarToken, "-", "_")]
+        OTHER
+    }
+
+    [Lexer(IgnoreWS = false)]
+    public enum IgnoreWS
+    {
+        [Lexeme(GenericToken.SugarToken, " ")]
+        WS
+    }
+
+    [Lexer(IgnoreEOL = false)]
+    public enum IgnoreEOL
+    {
+        [Lexeme(GenericToken.SugarToken, "\n")]
+        EOL
+    }
+
+    [Lexer(WhiteSpace = new[] { ' ' })]
+    public enum WhiteSpace
+    {
+        [Lexeme(GenericToken.SugarToken, "\t")]
+        TAB 
+    }
+
+    public enum Empty
+    {
+        EOS,
+        
+        [Lexeme(GenericToken.Identifier)]
+        ID
+    }
+
+    public enum KeyWord
+    {
+        [Lexeme(GenericToken.KeyWord, "keyword")]
+        KEYWORD = 1
+    }
+
+    [Lexer(KeyWordIgnoreCase = true)]
+    public enum KeyWordIgnoreCase
+    {
+        [Lexeme(GenericToken.KeyWord, "keyword")]
+        KEYWORD = 1
+    }
+
     public enum Issue106
     {
         [Lexeme(GenericToken.Int)]
@@ -165,6 +218,34 @@ namespace ParserTests.lexer
 
     public class GenericLexerTests
     {
+        [Fact]
+        public void TestEmptyInput()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<Empty>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("");
+            Assert.True(r.IsOk);
+            Assert.Single(r.Tokens);
+            var tok = r.Tokens[0];
+            Assert.Equal(Empty.EOS, tok.TokenID);
+            Assert.Equal("",        tok.Value);
+        }
+
+        [Fact]
+        public void TestIgnoredInput()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<Empty>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize(" \t\n ");
+            Assert.True(r.IsOk);
+            Assert.Single(r.Tokens);
+            var tok = r.Tokens[0];
+            Assert.Equal(Empty.EOS, tok.TokenID);
+            Assert.Equal("",        tok.Value);
+        }
+
         [Fact]
         public void TestAlphaId()
         {
@@ -220,6 +301,122 @@ namespace ParserTests.lexer
             var tok = r.Tokens[0];
             Assert.Equal(AlphaNumId.ID, tok.TokenID);
             Assert.Equal("alpha123", tok.StringWithoutQuotes);
+        }
+
+        [Fact]
+        public void TestCustomId()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<CustomId>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("a_-Bc ZyX-_");
+            Assert.True(r.IsOk);
+            Assert.Equal(3, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
+            Assert.Equal(CustomId.ID, tok1.TokenID);
+            Assert.Equal("a_-Bc",     tok1.Value);
+            var tok2 = r.Tokens[1];
+            Assert.Equal(CustomId.ID, tok2.TokenID);
+            Assert.Equal("ZyX-_",     tok2.Value);
+        }
+
+        [Fact]
+        public void TestCustomIdWithOther()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<CustomId>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("_b_ -C-");
+            Assert.True(r.IsOk);
+            Assert.Equal(5, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
+            Assert.Equal(CustomId.OTHER, tok1.TokenID);
+            Assert.Equal("_",            tok1.Value);
+            var tok2 = r.Tokens[1];
+            Assert.Equal(CustomId.ID, tok2.TokenID);
+            Assert.Equal("b_",        tok2.Value);
+            var tok3 = r.Tokens[2];
+            Assert.Equal(CustomId.OTHER, tok3.TokenID);
+            Assert.Equal("-",            tok3.Value);
+            var tok4 = r.Tokens[3];
+            Assert.Equal(CustomId.ID, tok4.TokenID);
+            Assert.Equal("C-",        tok4.Value);
+        }
+
+        [Fact]
+        public void TestIgnoreWS()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<IgnoreWS>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("\n \n");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
+            Assert.Equal(IgnoreWS.WS, tok.TokenID);
+            Assert.Equal(" ", tok.Value);
+        }
+
+        [Fact]
+        public void TestIgnoreEOL()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<IgnoreEOL>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize(" \n ");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
+            Assert.Equal(IgnoreEOL.EOL, tok.TokenID);
+            Assert.Equal("\n", tok.Value);
+        }
+
+        [Fact]
+        public void TestWhiteSpace()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<WhiteSpace>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize(" \t ");
+            Assert.True(r.IsOk);
+            Assert.Equal(2, r.Tokens.Count);
+            var tok = r.Tokens[0];
+            Assert.Equal(WhiteSpace.TAB, tok.TokenID);
+            Assert.Equal("\t",           tok.Value);
+        }
+
+        [Fact]
+        public void TestKeyWord()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<KeyWord>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("keyword KeYwOrD");
+            Assert.True(r.IsOk);
+            Assert.Equal(3, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
+            Assert.Equal(KeyWord.KEYWORD, tok1.TokenID);
+            Assert.Equal("keyword",       tok1.Value);
+            var tok2 = r.Tokens[1];
+            Assert.Equal(default(KeyWord), tok2.TokenID);
+            Assert.Equal("KeYwOrD",        tok2.Value);
+        }
+
+        [Fact]
+        public void TestKeyWordIgnoreCase()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<KeyWordIgnoreCase>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("keyword KeYwOrD");
+            Assert.True(r.IsOk);
+            Assert.Equal(3, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
+            Assert.Equal(KeyWordIgnoreCase.KEYWORD, tok1.TokenID);
+            Assert.Equal("keyword",                 tok1.Value);
+            var tok2 = r.Tokens[1];
+            Assert.Equal(KeyWordIgnoreCase.KEYWORD, tok2.TokenID);
+            Assert.Equal("KeYwOrD",                 tok2.Value);
         }
 
         [Fact]
