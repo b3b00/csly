@@ -149,6 +149,7 @@ namespace sly.lexer
                 config.IgnoreWS = lexerAttribute.IgnoreWS;
                 config.IgnoreEOL = lexerAttribute.IgnoreEOL;
                 config.WhiteSpace = lexerAttribute.WhiteSpace;
+                config.KeyWordIgnoreCase = lexerAttribute.KeyWordIgnoreCase;
             }
 
             var statics = new List<GenericToken>();

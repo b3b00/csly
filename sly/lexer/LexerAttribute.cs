@@ -13,6 +13,8 @@ namespace sly.lexer
 
         private char[] whiteSpace;
 
+        private bool? keyWordIgnoreCase;
+
         public bool IgnoreWS
         {
             get => ignoreWS ?? Defaults.IgnoreWS;
@@ -29,6 +31,12 @@ namespace sly.lexer
         {
             get => whiteSpace ?? Defaults.WhiteSpace;
             set => whiteSpace = value;
+        }
+
+        public bool KeyWordIgnoreCase
+        {
+            get => keyWordIgnoreCase ?? Defaults.KeyWordIgnoreCase;
+            set => keyWordIgnoreCase = value;
         }
     }
 }

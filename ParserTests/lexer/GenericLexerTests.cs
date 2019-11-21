@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
+using GenericLexerWithCallbacks;
 using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fsm;
 using Xunit;
-using GenericLexerWithCallbacks;
 
 namespace ParserTests.lexer
 {
@@ -174,6 +174,19 @@ namespace ParserTests.lexer
         ID
     }
 
+    public enum KeyWord
+    {
+        [Lexeme(GenericToken.KeyWord, "keyword")]
+        KEYWORD = 1
+    }
+
+    [Lexer(KeyWordIgnoreCase = true)]
+    public enum KeyWordIgnoreCase
+    {
+        [Lexeme(GenericToken.KeyWord, "keyword")]
+        KEYWORD = 1
+    }
+
     public enum Issue106
     {
         [Lexeme(GenericToken.Int)]
@@ -318,7 +331,41 @@ namespace ParserTests.lexer
             Assert.Equal(2, r.Tokens.Count);
             var tok = r.Tokens[0];
             Assert.Equal(WhiteSpace.TAB, tok.TokenID);
-            Assert.Equal("\t", tok.StringWithoutQuotes);
+            Assert.Equal("\t",           tok.StringWithoutQuotes);
+        }
+
+        [Fact]
+        public void TestKeyWord()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<KeyWord>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("keyword KeYwOrD");
+            Assert.True(r.IsOk);
+            Assert.Equal(3, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
+            Assert.Equal(KeyWord.KEYWORD, tok1.TokenID);
+            Assert.Equal("keyword",       tok1.StringWithoutQuotes);
+            var tok2 = r.Tokens[1];
+            Assert.Equal(default(KeyWord), tok2.TokenID);
+            Assert.Equal("KeYwOrD",        tok2.StringWithoutQuotes);
+        }
+
+        [Fact]
+        public void TestKeyWordIgnoreCase()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<KeyWordIgnoreCase>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("keyword KeYwOrD");
+            Assert.True(r.IsOk);
+            Assert.Equal(3, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
+            Assert.Equal(KeyWordIgnoreCase.KEYWORD, tok1.TokenID);
+            Assert.Equal("keyword",                 tok1.StringWithoutQuotes);
+            var tok2 = r.Tokens[1];
+            Assert.Equal(KeyWordIgnoreCase.KEYWORD, tok2.TokenID);
+            Assert.Equal("KeYwOrD",                 tok2.StringWithoutQuotes);
         }
 
         [Fact]
