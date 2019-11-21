@@ -163,7 +163,15 @@ namespace ParserTests.lexer
     public enum WhiteSpace
     {
         [Lexeme(GenericToken.SugarToken, "\t")]
-        TAB
+        TAB 
+    }
+
+    public enum Empty
+    {
+        EOS,
+        
+        [Lexeme(GenericToken.Identifier)]
+        ID
     }
 
     public enum Issue106
@@ -186,6 +194,34 @@ namespace ParserTests.lexer
 
     public class GenericLexerTests
     {
+        [Fact]
+        public void TestEmptyInput()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<Empty>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("");
+            Assert.True(r.IsOk);
+            Assert.Single(r.Tokens);
+            var tok = r.Tokens[0];
+            Assert.Equal(Empty.EOS, tok.TokenID);
+            Assert.Equal("",        tok.StringWithoutQuotes);
+        }
+
+        [Fact]
+        public void TestIgnoredInput()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<Empty>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize(" \t\n ");
+            Assert.True(r.IsOk);
+            Assert.Single(r.Tokens);
+            var tok = r.Tokens[0];
+            Assert.Equal(Empty.EOS, tok.TokenID);
+            Assert.Equal("",        tok.StringWithoutQuotes);
+        }
+
         [Fact]
         public void TestAlphaId()
         {

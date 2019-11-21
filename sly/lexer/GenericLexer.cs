@@ -170,9 +170,16 @@ namespace sly.lexer
             }
 
             var eos = new Token<IN>();
-            var prev = tokens.Last();
-            eos.Position = new TokenPosition(prev.Position.Index + 1, prev.Position.Line,
-                prev.Position.Column + prev.Value.Length);
+            var prev = tokens.LastOrDefault();
+            if (prev == null)
+            {
+                eos.Position = new TokenPosition(1, 0, 0);
+            }
+            else
+            {
+                eos.Position = new TokenPosition(prev.Position.Index + 1, prev.Position.Line,
+                    prev.Position.Column + prev.Value.Length);
+            }
             tokens.Add(eos);
             return new LexerResult<IN>(tokens);
         }
