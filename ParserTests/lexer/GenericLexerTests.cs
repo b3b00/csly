@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using GenericLexerWithCallbacks;
 using sly.buildresult;
 using sly.lexer;
@@ -34,7 +35,6 @@ namespace ParserTests.lexer
             return ok;
         }
 
-
         public static void AddExtension(Extensions token, LexemeAttribute lexem, GenericLexer<Extensions> lexer)
         {
             if (token == Extensions.DATE)
@@ -56,7 +56,7 @@ namespace ParserTests.lexer
             }
         }
     }
-    
+
     public enum CharTokens {
         [Lexeme(GenericToken.Char,"'","\\")]
         MyChar
@@ -148,10 +148,10 @@ namespace ParserTests.lexer
     public enum CustomId
     {
         EOS,
-        
+
         [Lexeme(GenericToken.Identifier, IdentifierType.Custom, "A-Za-z", "-_0-9A-Za-z")]
         ID,
-        
+
         [Lexeme(GenericToken.SugarToken, "-", "_")]
         OTHER
     }
@@ -174,13 +174,13 @@ namespace ParserTests.lexer
     public enum WhiteSpace
     {
         [Lexeme(GenericToken.SugarToken, "\t")]
-        TAB 
+        TAB
     }
 
     public enum Empty
     {
         EOS,
-        
+
         [Lexeme(GenericToken.Identifier)]
         ID
     }
@@ -205,6 +205,9 @@ namespace ParserTests.lexer
 
         [Lexeme(GenericToken.Double)]
         Double = 6,
+
+        [Lexeme(GenericToken.SugarToken, ".")]
+        Period
     }
 
     public enum Issue114
@@ -214,6 +217,30 @@ namespace ParserTests.lexer
 
         [Lexeme(GenericToken.SugarToken, "/*")]
         Second = 2
+    }
+
+    // Test that the FSMLexer properly backtracks.
+    public enum Issue137
+    {
+        [Lexeme(GenericToken.SugarToken, ".")]
+        A = 1,
+        [Lexeme(GenericToken.SugarToken, "-")]
+        B,
+        [Lexeme(GenericToken.SugarToken, "-+")]
+        C,
+        [Lexeme(GenericToken.SugarToken, "---")]
+        E,
+    }
+
+    // Test that the FSMLexer properly terminates, without skipping tokens.
+    public enum Issue138
+    {
+        [Lexeme(GenericToken.SugarToken, "..")]
+        A = 1,
+        [Lexeme(GenericToken.SugarToken, "-")]
+        B,
+        [Lexeme(GenericToken.SugarToken, "---")]
+        C,
     }
 
     public class GenericLexerTests
@@ -525,7 +552,7 @@ namespace ParserTests.lexer
 
             var r = lexer.Tokenize("20.02.2018 3.14");
             Assert.True(r.IsOk);
-            
+
             Assert.Equal(3, r.Tokens.Count);
             Assert.Equal(Extensions.DATE, r.Tokens[0].TokenID);
             Assert.Equal("20.02.2018", r.Tokens[0].Value);
@@ -596,7 +623,7 @@ namespace ParserTests.lexer
             var lexer = lexerRes.Result as GenericLexer<SelfEscapedString>;
             Assert.NotNull(lexer);
             var r = lexer.Tokenize("'that''s it'");
-            
+
             Assert.True(r.IsOk);
             var tokens = r.Tokens;
             Assert.Equal(2, tokens.Count);
@@ -646,7 +673,7 @@ namespace ParserTests.lexer
             Assert.Equal("BBB", tokens[1].Value);
             Assert.Equal(CallbackTokens.SKIP, tokens[1].TokenID);
         }
-        
+
         [Fact]
         public void TestCharTokens()
         {
@@ -670,15 +697,15 @@ namespace ParserTests.lexer
             Assert.False(res2.IsError);
             Assert.Equal(2, res2.Tokens.Count);
             token = res2.Tokens[0];
-            Assert.Equal(source, token.Value); 
+            Assert.Equal(source, token.Value);
             Assert.Equal(CharTokens.MyChar, token.TokenID);
-            
+
             var sourceU = "'\\u0066'";
             var res3 = lexer.Tokenize(sourceU);
             Assert.False(res3.IsError);
             Assert.Equal(2, res3.Tokens.Count);
             token = res3.Tokens[0];
-            Assert.Equal(sourceU, token.Value); 
+            Assert.Equal(sourceU, token.Value);
             Assert.Equal(CharTokens.MyChar, token.TokenID);
         }
 
@@ -701,10 +728,12 @@ namespace ParserTests.lexer
             Assert.True(r.IsOk);
             var tokens = r.Tokens;
             Assert.NotNull(tokens);
-            Assert.Equal(2, tokens.Count);
+            Assert.Equal(3, tokens.Count);
             var token = tokens[0];
             Assert.Equal(Issue106.Integer, token.TokenID);
             Assert.Equal(1, token.IntValue);
+            token = tokens[1];
+            Assert.Equal(Issue106.Period, token.TokenID);
         }
 
         [Fact]
@@ -713,25 +742,62 @@ namespace ParserTests.lexer
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue114>>());
             Assert.False(res.IsError);
             var lexer = res.Result as GenericLexer<Issue114>;
-            
+
             var r = lexer?.Tokenize("// /&");
             Assert.True(r.IsError);
-            
+
             Assert.Equal('&', r.Error.UnexpectedChar);
 
             r = lexer?.Tokenize("/&");
-            
+
 
             Assert.Equal('&', r.Error.UnexpectedChar);
 
             r = lexer?.Tokenize("&/");
             Assert.True(r.IsError);
-                
+
             Assert.Equal('&', r.Error.UnexpectedChar);
 
             r = lexer?.Tokenize("// &");
             Assert.True(r.IsError);
             Assert.Equal('&', r.Error.UnexpectedChar);
+        }
+
+        [Fact]
+        public void TestIssue137()
+        {
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue137>>());
+            Assert.False(res.IsError);
+            var lexer = res.Result;
+
+            var result = lexer.Tokenize("--+");
+            Assert.True(result.IsOk);
+            Assert.Equal("BC0", ToTokens(result));
+
+            result = lexer.Tokenize("--.");
+            Assert.True(result.IsOk);
+            Assert.Equal("BBA0", ToTokens(result));
+        }
+
+        [Fact]
+        public void TestIssue138()
+        {
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue138>>());
+            Assert.False(res.IsError);
+            var lexer = res.Result;
+
+            var result = lexer.Tokenize(".");
+            Assert.True(result.IsError);
+            Assert.Equal("Lexical Error : Unrecognized symbol '.' at  (line 0, column 0).", result.Error.ErrorMessage);
+
+            result = lexer.Tokenize("--");
+            Assert.True(result.IsOk);
+            Assert.Equal("BB0", ToTokens(result));
+        }
+
+        private static string ToTokens<T>(LexerResult<T> result) where T : struct
+        {
+            return result.Tokens.Aggregate(new StringBuilder(), (buf, token) => buf.Append(token.TokenID)).ToString();
         }
     }
 }
