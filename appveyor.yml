@@ -1,64 +1,66 @@
 version: 1.0.{build}
-image: Visual Studio 2017
-init:
-- cmd: ''
+
+image:
+  - Ubuntu
+  - Visual Studio 2019
+
 environment:
+  CONFIGURATION: Release
   nugetKey:
     secure: jlkQ4lJxiapfC87YZMljFZbeROpo26F7wbEB7q+xn5xWlAyfOvy/SNrji8a5uKap
   codecovToken:
     secure: tDNSMb2HRVQsJEgwVvuqY02+qgaKI3bw0LHSqplQKSPSRJNEkdCVnX352HoSht5t
   COVERALLS_REPO_TOKEN:
     secure: ntYxuZR1S4QagcvXJ+rXGhJoIw0Ln556M3h6PQEwaGr/41x+JazkKeRJ8DHzHODc
+
+
+# Instll coverall.net only on Windows
+install:
+  - cmd: dotnet tool install coveralls.net --global --version 1.0.0
+
+
 build_script:
-- cmd: >-
-    dotnet tool install coveralls.net  --version 1.0.0 --tool-path tools
+  - ps: dotnet build -c $env:CONFIGURATION
 
 
+after_build:
+  - ps: dotnet pack -c $env:CONFIGURATION sly
 
 
-    echo "tools\csmacnz.coveralls.exe --opencover -i ParserTests\coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch "%APPVEYOR_REPO_BRANCH%" --commitId "%APPVEYOR_REPO_COMMIT%" --commitAuthor "%APPVEYOR_REPO_COMMIT_AUTHOR%"  --commitEmail "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" --jobId "%APPVEYOR_JOB_ID%" --useRelativePaths --basePath "%APPVEYOR_BUILD_FOLDER%"
-
-
-    dotnet restore
-
-
-    dotnet build -c Release
-
-
-
-
-     dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:exclude=\"[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*\" ParserTests/ParserTests.csproj
-
-    echo "############################"
-
-
-    tools\csmacnz.coveralls.exe --opencover -i ./ParserTests/coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch "%APPVEYOR_REPO_BRANCH%" --commitId "%APPVEYOR_REPO_COMMIT%" --commitAuthor "%APPVEYOR_REPO_COMMIT_AUTHOR%"  --commitEmail "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" --jobId "%APPVEYOR_JOB_ID%"
-
-
-    echo "############################"
-
-
-    dotnet pack -c Release
+# Run coverage on Windows
 test_script:
-- ps: dotnet test ParserTests/ParserTests.csproj
+  - sh: dotnet test -c $CONFIGURATION --no-build
+  - cmd: dotnet test -c %CONFIGURATION% --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:exclude=\"[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*\" ParserTests/ParserTests.csproj
+
+
+# Publish coverage to Coverall on Windows
+after_test:
+  - ps: |
+      if ($isWindows) {
+        csmacnz.Coveralls --opencover -i ./ParserTests/coverage.opencover.xml --repoToken 4I3WBzHay1o8YwAH4xRskEHbi5w71atBP --commitBranch "%APPVEYOR_REPO_BRANCH%" --commitId "%APPVEYOR_REPO_COMMIT%" --commitAuthor "%APPVEYOR_REPO_COMMIT_AUTHOR%"  --commitEmail "%APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL%" --jobId "%APPVEYOR_JOB_ID%"
+      }
+
+
 artifacts:
-- path: sly/bin/release/*
-  name: sly
-- path: sly_coverage.xml
-  name: sly
-- path: ParserTests/coverage.opencover.xml
-  name: sly
+  - path: sly/bin/$(CONFIGURATION)/*.nupkg
+    name: sly
+
+
+# Deploy nuget package from Windows
 deploy:
-- provider: NuGet
-  api_key:
-    secure: jlkQ4lJxiapfC87YZMljFZbeROpo26F7wbEB7q+xn5xWlAyfOvy/SNrji8a5uKap
-  skip_symbols: true
-  on:
-    branch: dev
+  - provider: NuGet
+    skip_symbols: true
+    api_key:
+      secure: jlkQ4lJxiapfC87YZMljFZbeROpo26F7wbEB7q+xn5xWlAyfOvy/SNrji8a5uKap
+    on:
+      branch: dev
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+
+
 notifications:
-- provider: Email
-  to:
-  - olivier.duhart@gmail.com
-  on_build_success: true
-  on_build_failure: true
-  on_build_status_changed: true
+  - provider: Email
+    to:
+      - olivier.duhart@gmail.com
+    on_build_success: true
+    on_build_failure: true
+    on_build_status_changed: true

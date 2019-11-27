@@ -1,0 +1,10 @@
+<Project>
+
+  <ItemGroup Condition=" '$(LangVersion)' == '8.0' and '$(TargetFramework)' != 'netcoreapp3.0' " >
+    <Compile Include="$(MSBuildThisFileDirectory)/csharp8.0-polyfill/Index.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)/csharp8.0-polyfill/Range.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)/csharp8.0-polyfill/RuntimeHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)/csharp8.0-polyfill/NullableAttributes.cs" />
+  </ItemGroup>
+
+</Project>
