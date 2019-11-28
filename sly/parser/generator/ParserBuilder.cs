@@ -118,7 +118,7 @@ namespace sly.parser.generator
         }
 
 
-        protected BuildResult<ILexer<IN>> BuildLexer()
+        protected virtual BuildResult<ILexer<IN>> BuildLexer()
         {
             var lexer = LexerBuilder.BuildLexer(new BuildResult<ILexer<IN>>());
             return lexer;
