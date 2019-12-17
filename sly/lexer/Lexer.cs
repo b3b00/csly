@@ -82,5 +82,10 @@ namespace sly.lexer
         {
             throw new NotImplementedException();
         }
+        
+        public void ResetLexer()
+        {
+            
+        }
     }
 }

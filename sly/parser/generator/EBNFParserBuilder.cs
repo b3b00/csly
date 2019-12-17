@@ -34,7 +34,7 @@ namespace sly.parser.generator
             }
             catch (Exception e)
             {
-                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message+"\n"+e.StackTrace));
+                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message));
                 return result;
             }
 
@@ -128,6 +128,7 @@ namespace sly.parser.generator
                             .Errors
                             .Select(e => e.ErrorMessage)
                             .Aggregate((e1, e2) => e1 + "\n" + e2);
+                        message = $"rule error [{ruleString}] : {message}";
                         throw new ParserConfigurationException(message);
                     }
                 }
