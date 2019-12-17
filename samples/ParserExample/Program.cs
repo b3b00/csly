@@ -405,34 +405,33 @@ namespace ParserExample
         public static void testJSON()
         {
             try {
-            Console.WriteLine("starting json test.");
 
                 var instance = new EbnfJsonGenericParser();
             var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
             var buildResult = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            if (buildResult.IsOk)
-            {
-                Console.WriteLine("parser built.");
-                var parser = buildResult.Result;
-                var content = File.ReadAllText("test.json");
-                Console.WriteLine("test.json read.");
-                var jsonResult = parser.Parse(content);
-                Console.WriteLine("json parse done.");
-                if (jsonResult.IsOk)
-                {
-                    Console.WriteLine("YES !");
-                }
-                else
-                {
-                    Console.WriteLine("Ooh no !");
-                }
-                Console.WriteLine("Done.");
-
-            }
-            else
-            {
-                buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
-            }
+            // if (buildResult.IsOk)
+            // {
+            //     Console.WriteLine("parser built.");
+            //     var parser = buildResult.Result;
+            //     var content = File.ReadAllText("test.json");
+            //     Console.WriteLine("test.json read.");
+            //     var jsonResult = parser.Parse(content);
+            //     Console.WriteLine("json parse done.");
+            //     if (jsonResult.IsOk)
+            //     {
+            //         Console.WriteLine("YES !");
+            //     }
+            //     else
+            //     {
+            //         Console.WriteLine("Ooh no !");
+            //     }
+            //     Console.WriteLine("Done.");
+            //
+            // }
+            // else
+            // {
+            //     buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
+            // }
             }
             catch(Exception e) {
                 Console.WriteLine($"ERROR {e.Message} : \n {e.StackTrace}");
@@ -494,15 +493,61 @@ namespace ParserExample
             }
         }
 
+        private static void TestGrammarParser()
+        {
+            string productionRule = "clauses : clause (COMMA [D] clause)*";
+            var ruleparser = new RuleParser<TestGrammarToken>();
+            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<TestGrammarToken>>();
+            var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
+            var result = grammarParser.Parse(productionRule);
+            grammarParser.Lexer.ResetLexer();
+            //(grammarParser.Lexer as GenericLexer<TestGrammarToken>).ResetLexer();
+            Console.WriteLine($"alors ? {string.Join('\n',result.Errors.Select(e => e.ErrorMessage))}");
+            result = grammarParser.Parse(productionRule);
+            Console.WriteLine($"alors ? {string.Join('\n',result.Errors.Select(e => e.ErrorMessage))}");
+            ;
+            
+            Console.WriteLine("starting");
+            ErroneousGrammar parserInstance = new ErroneousGrammar();
+            Console.WriteLine("new instance");
+
+            var builder2 = new ParserBuilder<TestGrammarToken, object>();
+            Console.WriteLine("builder");
+
+            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"rule");
+            Console.WriteLine($"built : {Parser.IsOk}");
+
+            
+        }
+
         private static void Main(string[] args)
         {
             //TestContextualParser();
             //TestTokenCallBacks();
             //test104();
             //testJSON();
-            TestGraphViz();
+            TestGrammarParser();
+            // TestGraphViz();
             //TestGraphViz();
-            TestChars();
+            //TestChars();
+
         }
     }
+
+    public enum TestGrammarToken
+    {
+        [Lexeme(GenericToken.SugarToken,",")]
+        COMMA = 1
+    }
+
+    public class ErroneousGrammar
+    {
+        [Production("clauses : clause (COMMA [D] clause)*")]
+
+            public object test()
+            {
+                return null;
+            }    
+    }
+    
 }
