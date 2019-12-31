@@ -520,17 +520,101 @@ namespace ParserExample
             
         }
 
+
+        public static void TestScript()
+        {
+            var parserInstance = new ScriptParser();
+            var builder = new ParserBuilder<ScriptToken, object>();
+            var parserBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "test");
+            if (parserBuild.IsOk)
+            {
+                var parser = parserBuild.Result;
+                string ok1 = @"|B|study(""Name or something"", overlay)|E|";
+                string ok2 = "|B|test(close, 123, open)|E|";
+                string kw = "|B|test(kw=123)|E|";
+                string ko1 = "|B|test2(a, b, c=100)|E|";
+                string ko2 = "|B|plotshape(data, style=shapexcross)|E|";
+
+                // var r = parser.Parse(ok1);
+                // r = parser.Parse(ok2);
+                // r = parser.Parse(kw);
+                // var r = parser.Parse("a, b, c=100", "fun_actual_args2");
+                // var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
+                
+                var r = parser.Parse(ko1);
+                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
+                var root = graphviz.VisitTree(r.SyntaxTree);
+                var graph = graphviz.Graph.Compile();
+                r = parser.Parse(ko2);
+            }
+            else
+            {
+                foreach (var e in parserBuild.Errors)
+                {
+                    Console.WriteLine(e.Level+ " - " + e.Message);
+                }
+            }
+        }
+        
+        public static void TestScriptRight()
+        {
+            var parserInstance = new ScriptParserRight();
+            var builder = new ParserBuilder<ScriptToken, object>();
+            var parserBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "test");
+            if (parserBuild.IsOk)
+            {
+                var parser = parserBuild.Result;
+                string ok1 = @"|B|study(""Name or something"", overlay)|E|";
+                string ok2 = "|B|test(close, 123, open)|E|";
+                string kw = "|B|test(kw=123)|E|";
+                string ko1 = "|B|test2(a, b, c=100, d=200)|E|";
+                string ko2 = "|B|plotshape(data, style=shapexcross)|E|";
+                string ko3 = "|B|plotshape(data = default, style=shapexcross)|E|";
+                string badmixko = "|B|plotshape(data = default, t, y=20)|E|";
+
+                // var r = parser.Parse(ok1);
+                // r = parser.Parse(ok2);
+                // r = parser.Parse(kw);
+                var r = parser.Parse("a, b, c=100, d= 200", "fun_actual_args");
+                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
+                var root1 = graphviz.VisitTree(r.SyntaxTree);
+                var graph1 =  graphviz.Graph.Compile();
+                
+                r = parser.Parse(ko1);
+                graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
+                var root = graphviz.VisitTree(r.SyntaxTree);
+                var graph = graphviz.Graph.Compile();
+                r = parser.Parse(ko3);
+                graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
+                root = graphviz.VisitTree(r.SyntaxTree);
+                graph = graphviz.Graph.Compile();
+                r = parser.Parse(badmixko);
+                graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
+                root = graphviz.VisitTree(r.SyntaxTree);
+                graph = graphviz.Graph.Compile();
+            }
+            else
+            {
+                foreach (var e in parserBuild.Errors)
+                {
+                    Console.WriteLine(e.Level+ " - " + e.Message);
+                }
+            }
+        }
+
         private static void Main(string[] args)
         {
             //TestContextualParser();
             //TestTokenCallBacks();
             //test104();
             //testJSON();
-            TestGrammarParser();
+           //TestGrammarParser();
             // TestGraphViz();
-            //TestGraphViz();
-            //TestChars();
 
+            // TestGraphViz();
+//            TestChars();
+            TestScript();
+            TestScriptRight();
         }
     }
 
