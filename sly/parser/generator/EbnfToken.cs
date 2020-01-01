@@ -44,5 +44,15 @@ namespace sly.parser.generator
         
         [Lexeme(GenericToken.SugarToken,")")]
         RPAREN = 9,
+        
+        [Lexeme(GenericToken.SugarToken,"|")]
+        OR = 10,
+        
+        [Lexeme(GenericToken.SugarToken,"[")]
+        LCROG = 11,
+        
+        [Lexeme(GenericToken.SugarToken,"]")]
+        RCROG = 12,
+        
     }
 }
