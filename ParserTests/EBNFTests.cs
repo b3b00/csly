@@ -203,6 +203,15 @@ namespace ParserTests
     }
 
 
+    public class AlternateChoiceTest
+    {
+        [Production("choice : [ a | b | c]")]
+        public string Choice(Token<OptionTestToken> c)
+        {
+            return c.Value;
+        }
+    }
+    
     public class Bugfix104Test
     {
         [Production("testNonTerm : sub (COMMA[d] unreachable)? ")]
@@ -294,6 +303,8 @@ namespace ParserTests
 
             return "B()";
         }
+
+       
 
 
         private Parser<TokenType, string> Parser;
@@ -696,6 +707,17 @@ namespace ParserTests
             var startingRule = $"testNonTerm";
             var parserInstance = new Bugfix104Test();
             var builder = new ParserBuilder<GroupTestToken, int>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Assert.False(builtParser.IsError);
+            Assert.False(builtParser.Errors.Any());
+        }
+
+        [Fact]
+        public void TestAlternateChoice()
+        {
+            var startingRule = $"choice";
+            var parserInstance = new AlternateChoiceTest();
+            var builder = new ParserBuilder<OptionTestToken, string>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
             Assert.False(builtParser.IsError);
             Assert.False(builtParser.Errors.Any());
