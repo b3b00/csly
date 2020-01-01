@@ -72,14 +72,15 @@ namespace sly.parser.generator
         public IClause<IN> ChoicesOne(Token<EbnfTokenGeneric> head)
         {
             // TODO
-            return null;
+            var choice = BuildTerminalOrNonTerimal(head.Value);
+            return new ChoiceClause<IN>(choice);
         }
         
         [Production("choices : IDENTIFIER OR choices ")]
-        public IClause<IN> ChoicesMany(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> dicardOr, IClause<IN> tail)
+        public IClause<IN> ChoicesMany(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> dicardOr, ChoiceClause<IN> tail)
         {
-            // TODO
-            return null;
+            var headClause = BuildTerminalOrNonTerimal(head.Value); 
+            return new ChoiceClause<IN>(headClause,tail.Choices);
         }
         
 
