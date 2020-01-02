@@ -17,65 +17,76 @@ namespace sly.parser.llparser
 
         #region STARTING_TOKENS
 
-        protected override void InitStartingTokensForRule(Dictionary<string, NonTerminal<IN>> nonTerminals,
-            Rule<IN> rule)
+        protected override void InitStartingTokensForRuleExtensions(IClause<IN> first, Rule<IN> rule,
+            Dictionary<string, NonTerminal<IN>> nonTerminals)
         {
-            if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
+            
+            if (first is TerminalClause<IN>)
             {
-                rule.PossibleLeadingTokens = new List<IN>();
-                if (rule.Clauses.Count > 0)
+                var term = first as TerminalClause<IN>;
+
+                InitStartingTokensWithTerminal(rule, term);
+            }
+            else if (first is NonTerminalClause<IN>)
+            {
+                var nonterm = first as NonTerminalClause<IN>;
+                InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
+            }
+            else if (first is ZeroOrMoreClause<IN>)
+            {
+                var many = first as ZeroOrMoreClause<IN>;
+                InitStartingTokensWithZeroOrMore(rule, many, nonTerminals);
+                int i = 1;
+                bool optional = true;
+                while (i < rule.Clauses.Count && optional)
                 {
-                    var first = rule.Clauses[0];
-                    if (first is TerminalClause<IN>)
-                    {
-                        var term = first as TerminalClause<IN>;
+                    IClause<IN> clause = rule.Clauses[i];
 
-                        InitStartingTokensWithTerminal(rule, term);
-                    }
-                    else if (first is NonTerminalClause<IN>)
+                    switch (clause)
                     {
-                        var nonterm = first as NonTerminalClause<IN>;
-                        InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
-                    }
-                    else if (first is ZeroOrMoreClause<IN>)
-                    {
-                        var many = first as ZeroOrMoreClause<IN>;
-                        InitStartingTokensWithZeroOrMore(rule, many, nonTerminals);
-                        int i = 1;
-                        bool optional = first is ZeroOrMoreClause<IN> || first is OptionClause<IN>;
-                        while (i < rule.Clauses.Count && optional)
+                        case TerminalClause<IN> terminalClause:
                         {
-                            IClause<IN> clause = rule.Clauses[i];
-
-                            switch (clause)
-                            {                                
-                                case TerminalClause<IN> terminalClause:
-                                {
-                                    rule.PossibleLeadingTokens.Add(terminalClause.ExpectedToken);
-                                    break;
-                                }
-                                case NonTerminalClause<IN> terminalClause:
-                                {
-                                    InitStartingTokensForNonTerminal(nonTerminals,terminalClause.NonTerminalName);
-                                    NonTerminal<IN> nonTerminal = nonTerminals[terminalClause.NonTerminalName];
-                                    {
-                                        rule.PossibleLeadingTokens.AddRange(nonTerminal.PossibleLeadingTokens);
-                                    }
-                                    break;
-                                }
+                            rule.PossibleLeadingTokens.Add(terminalClause.ExpectedToken);
+                            break;
+                        }
+                        case NonTerminalClause<IN> terminalClause:
+                        {
+                            InitStartingTokensForNonTerminal(nonTerminals, terminalClause.NonTerminalName);
+                            NonTerminal<IN> nonTerminal = nonTerminals[terminalClause.NonTerminalName];
+                            {
+                                rule.PossibleLeadingTokens.AddRange(nonTerminal.PossibleLeadingTokens);
                             }
-                            
-                            // add startig tokens of clause in rule.startingtokens
-                            
-                            optional = clause is ZeroOrMoreClause<IN> || clause is OptionClause<IN>;
-                            i++;
+                            break;
                         }
                     }
-                    else if (first is OneOrMoreClause<IN>)
-                    {
-                        var many = first as OneOrMoreClause<IN>;
-                        InitStartingTokensWithOneOrMore(rule, many, nonTerminals);
-                    }
+
+                    // add startig tokens of clause in rule.startingtokens
+                    optional = clause is ZeroOrMoreClause<IN> || clause is OptionClause<IN>;
+                    i++;
+                }
+            }
+            else if (first is OneOrMoreClause<IN>)
+            {
+                var many = first as OneOrMoreClause<IN>;
+                InitStartingTokensWithOneOrMore(rule, many, nonTerminals);
+            }
+            else if (first is ChoiceClause<IN> choice)
+            {
+                InitStartingTokensWithChoice(rule, choice, nonTerminals);
+            }
+        }
+
+        private void InitStartingTokensWithChoice(Rule<IN> rule, ChoiceClause<IN> choice,Dictionary<string, NonTerminal<IN>> nonTerminals)
+        {
+            foreach (var alternate in choice.Choices)
+            {
+                if (alternate is TerminalClause<IN> term)
+                {
+                    InitStartingTokensWithTerminal(rule,term);
+                }
+                else if (alternate is NonTerminalClause<IN> nonTerminal)
+                {
+                    InitStartingTokensWithNonTerminal(rule,nonTerminal,nonTerminals);
                 }
             }
         }

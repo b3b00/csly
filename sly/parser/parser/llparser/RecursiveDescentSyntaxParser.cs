@@ -118,7 +118,7 @@ namespace sly.parser.llparser
             }
         }
 
-        protected virtual void InitStartingTokensForRule(Dictionary<string, NonTerminal<IN>> nonTerminals,
+        protected void InitStartingTokensForRule(Dictionary<string, NonTerminal<IN>> nonTerminals,
             Rule<IN> rule)
         {
             if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
@@ -127,15 +127,13 @@ namespace sly.parser.llparser
                 if (rule.Clauses.Count > 0)
                 {
                     var first = rule.Clauses[0];
-                    if (first is TerminalClause<IN>)
+                    if (first is TerminalClause<IN> term)
                     {
-                        var term = first as TerminalClause<IN>;
                         rule.PossibleLeadingTokens.Add(term.ExpectedToken);
                         rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
                     }
-                    else
+                    else if (first  is NonTerminalClause<IN> nonterm)
                     {
-                        var nonterm = first as NonTerminalClause<IN>;
                         InitStartingTokensForNonTerminal(nonTerminals, nonterm.NonTerminalName);
                         if (nonTerminals.ContainsKey(nonterm.NonTerminalName))
                         {
@@ -147,8 +145,17 @@ namespace sly.parser.llparser
                             rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
                         }
                     }
+                    else
+                    {
+                        InitStartingTokensForRuleExtensions(first,rule,nonTerminals);
+                    }
                 }
             }
+        }
+
+        protected virtual void InitStartingTokensForRuleExtensions(IClause<IN> first, Rule<IN> rule,
+            Dictionary<string, NonTerminal<IN>> nonTerminals)
+        {
         }
 
         #endregion
