@@ -61,8 +61,14 @@ namespace sly.parser.generator
             return clause;
         }
         
-        [Production("clause : LCROG  choices RCROG  ")]
-        public IClause<IN> AlternateClause(Token<EbnfTokenGeneric> discardleft, IClause<IN> choices, Token<EbnfTokenGeneric> discardright)
+        [Production("clause : choiceclause")]
+        public IClause<IN> AlternateClause(IClause<IN> choices)
+        {
+            return choices;
+        }
+        
+        [Production("choiceclause : LCROG  choices RCROG  ")]
+        public IClause<IN> AlternateChoices(Token<EbnfTokenGeneric> discardleft, IClause<IN> choices, Token<EbnfTokenGeneric> discardright)
         {
             // TODO
             return choices;
@@ -99,6 +105,25 @@ namespace sly.parser.generator
             Token<EbnfTokenGeneric> discardRight)
         {
             return clauses;
+        }
+        
+        [Production("clause : choiceclause ONEORMORE ")]
+        public IClause<IN> ChoiceOneOrMore(ChoiceClause<IN> choices,Token<EbnfTokenGeneric> discardOneOrMore)
+        {
+            return new OneOrMoreClause<IN>(choices);
+        }
+
+        [Production("clause : choiceclause ZEROORMORE ")]
+        public IClause<IN> ChoiceZeroOrMore(ChoiceClause<IN> choices,Token<EbnfTokenGeneric> discardZeroOrMore)
+        {
+            return new ZeroOrMoreClause<IN>(choices);
+        }
+        
+
+        [Production("clause : choiceclause OPTION ")]
+        public IClause<IN> ChoiceOptional(ChoiceClause<IN> choices,Token<EbnfTokenGeneric> discardOption)
+        {
+            return new OptionClause<IN>(choices);
         }
 
         [Production("clause : LPAREN  groupclauses RPAREN ONEORMORE ")]
