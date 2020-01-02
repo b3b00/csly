@@ -32,10 +32,9 @@ namespace sly.parser.llparser
                 var nonterm = first as NonTerminalClause<IN>;
                 InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
             }
-            else if (first is ZeroOrMoreClause<IN>)
+            else if (first is ZeroOrMoreClause<IN> zeroOrMore)
             {
-                var many = first as ZeroOrMoreClause<IN>;
-                InitStartingTokensWithZeroOrMore(rule, many, nonTerminals);
+                InitStartingTokensWithZeroOrMore(rule, zeroOrMore, nonTerminals);
                 int i = 1;
                 bool optional = true;
                 while (i < rule.Clauses.Count && optional)
@@ -56,6 +55,11 @@ namespace sly.parser.llparser
                             {
                                 rule.PossibleLeadingTokens.AddRange(nonTerminal.PossibleLeadingTokens);
                             }
+                            break;
+                        }
+                        case ChoiceClause<IN> choice:
+                        {
+                            InitStartingTokensWithChoice(rule, choice, nonTerminals);
                             break;
                         }
                     }
@@ -113,32 +117,34 @@ namespace sly.parser.llparser
         private void InitStartingTokensWithZeroOrMore(Rule<IN> rule, ZeroOrMoreClause<IN> manyClause,
             Dictionary<string, NonTerminal<IN>> nonTerminals)
         {
-            if (manyClause.Clause is TerminalClause<IN>)
+            if (manyClause.Clause is TerminalClause<IN> term)
             {
-                var term = manyClause.Clause as TerminalClause<IN>;
-
                 InitStartingTokensWithTerminal(rule, term);
             }
-            else if (manyClause.Clause is NonTerminalClause<IN>)
+            else if (manyClause.Clause is NonTerminalClause<IN> nonTerm)
             {
-                var nonterm = manyClause.Clause as NonTerminalClause<IN>;
-                InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
+                InitStartingTokensWithNonTerminal(rule, nonTerm, nonTerminals);
+            }
+            else if (manyClause.Clause is ChoiceClause<IN> choice)
+            {
+                InitStartingTokensWithChoice(rule,choice,nonTerminals);
             }
         }
 
         private void InitStartingTokensWithOneOrMore(Rule<IN> rule, OneOrMoreClause<IN> manyClause,
             Dictionary<string, NonTerminal<IN>> nonTerminals)
         {
-            if (manyClause.Clause is TerminalClause<IN>)
+            if (manyClause.Clause is TerminalClause<IN> term)
             {
-                var term = manyClause.Clause as TerminalClause<IN>;
-
                 InitStartingTokensWithTerminal(rule, term);
             }
-            else if (manyClause.Clause is NonTerminalClause<IN>)
+            else if (manyClause.Clause is NonTerminalClause<IN> nonterm)
             {
-                var nonterm = manyClause.Clause as NonTerminalClause<IN>;
                 InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
+            }
+            else if (manyClause.Clause is ChoiceClause<IN> choice)
+            {
+                InitStartingTokensWithChoice(rule, choice, nonTerminals);
             }
         }
 
@@ -223,7 +229,7 @@ namespace sly.parser.llparser
                         }
                         else if (clause is ChoiceClause<IN> choice)
                         {
-                            var optionResult = ParseChoice(tokens, choice, rule, currentPosition);
+                            var optionResult = ParseChoice(tokens, choice, currentPosition);
                             currentPosition = optionResult.EndingPosition;
                             children.Add(optionResult.Root);
                         }
@@ -279,10 +285,10 @@ namespace sly.parser.llparser
             while (stillOk)
             {
                 SyntaxParseResult<IN> innerResult = null;
-                if (innerClause is TerminalClause<IN>)
+                if (innerClause is TerminalClause<IN> term)
                 {
                     manyNode.IsManyTokens = true;
-                    innerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
+                    innerResult = ParseTerminal(tokens, term, currentPosition);
                 }
                 else if (innerClause is NonTerminalClause<IN> nonTerm)
                 {
@@ -296,6 +302,12 @@ namespace sly.parser.llparser
                 {
                     manyNode.IsManyGroups = true;
                     innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
+                }
+                else if (innerClause is ChoiceClause<IN> choice)
+                {
+                    manyNode.IsManyTokens = choice.IsTerminalChoice;
+                    manyNode.IsManyValues = choice.IsNonTerminalChoice;
+                    innerResult = ParseChoice(tokens, choice, currentPosition);
                 }
                 else
                 {
@@ -316,7 +328,7 @@ namespace sly.parser.llparser
                     }
                 }
 
-                stillOk = stillOk && innerResult != null && !innerResult.IsError && currentPosition < tokens.Count;
+                stillOk =  innerResult != null && !innerResult.IsError && currentPosition < tokens.Count;
             }
 
 
@@ -393,10 +405,15 @@ namespace sly.parser.llparser
             SyntaxParseResult<IN> innerResult = null;
 
 
-            if (innerClause is TerminalClause<IN>)
-                innerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
-            else if (innerClause is NonTerminalClause<IN>)
-                innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
+            if (innerClause is TerminalClause<IN> term)
+                innerResult = ParseTerminal(tokens, term, currentPosition);
+            else if (innerClause is NonTerminalClause<IN> nonTerm)
+                innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
+            else if (innerClause is ChoiceClause<IN> choice)
+            {
+                innerResult = ParseChoice(tokens, choice, currentPosition);
+            }
+                
             else
                 throw new InvalidOperationException("unable to apply repeater to " + innerClause.GetType().Name);
 
@@ -409,6 +426,16 @@ namespace sly.parser.llparser
                     result.IsError = true;
                     result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(),false);
                     result.EndingPosition = position;
+                }
+                else if (innerClause is ChoiceClause<IN> choiceClause)
+                {
+                    if (choiceClause.IsTerminalChoice)
+                    {
+                        result = new SyntaxParseResult<IN>();
+                        result.IsError = false;
+                        result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(),false);
+                        result.EndingPosition = position;
+                    }
                 }
                 else
                 {
@@ -435,7 +462,7 @@ namespace sly.parser.llparser
             return result;
         }
         
-        public SyntaxParseResult<IN> ParseChoice(IList<Token<IN>> tokens, ChoiceClause<IN> choice, Rule<IN> rule,
+        public SyntaxParseResult<IN> ParseChoice(IList<Token<IN>> tokens, ChoiceClause<IN> choice, 
             int position)
         {
             var currentPosition = position;

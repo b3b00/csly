@@ -98,8 +98,6 @@ namespace sly.parser.generator.visitor
                     }
                     else if (v.IsOption)
                     {
-                       
-                        
                         args.Add(v.OptionResult);
                     }
                     else if (v.IsOptionGroup)
