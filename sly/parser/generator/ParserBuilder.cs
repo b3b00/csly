@@ -342,9 +342,7 @@ namespace sly.parser.generator
                         {
                             if (clause is ChoiceClause<IN> choice)
                             {
-                                bool allTerminals = choice.Choices.Select(c => c is TerminalClause<IN>).Aggregate((x, y) => x && y);
-                                bool allNonTerminals = choice.Choices.Select(c => c is NonTerminalClause<IN>).Aggregate((x, y) => x && y);
-                                if (!allNonTerminals && !allTerminals)
+                                if (!choice.IsTerminalChoice && !choice.IsNonTerminalChoice)
                                 {
                                     result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
                                         $"{rule.ToString()} contains {choice.ToString()} with mixed terminal and nonterminal."));
