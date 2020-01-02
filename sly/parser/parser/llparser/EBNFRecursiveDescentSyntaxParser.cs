@@ -221,6 +221,12 @@ namespace sly.parser.llparser
                             currentPosition = optionResult.EndingPosition;
                             children.Add(optionResult.Root);
                         }
+                        else if (clause is ChoiceClause<IN> choice)
+                        {
+                            var optionResult = ParseChoice(tokens, choice, rule, currentPosition);
+                            currentPosition = optionResult.EndingPosition;
+                            children.Add(optionResult.Root);
+                        }
 
                         if (isError) break;
                     }
@@ -424,6 +430,34 @@ namespace sly.parser.llparser
                 result.Root =
                     new OptionSyntaxNode<IN>( rule.NonTerminalName,children, rule.GetVisitor());
                 result.EndingPosition = innerResult.EndingPosition;
+            }
+
+            return result;
+        }
+        
+        public SyntaxParseResult<IN> ParseChoice(IList<Token<IN>> tokens, ChoiceClause<IN> choice, Rule<IN> rule,
+            int position)
+        {
+            var currentPosition = position;
+            SyntaxParseResult<IN> result = new SyntaxParseResult<IN>()
+            {
+                IsError = true,
+                IsEnded = false,
+                EndingPosition = currentPosition
+            };
+
+            foreach (var alternate in choice.Choices)
+            {
+                if (alternate is TerminalClause<IN> terminalAlternate)
+                    result = ParseTerminal(tokens, terminalAlternate, currentPosition);
+                else if (alternate is NonTerminalClause<IN> nonTerminalAlternate)
+                    result = ParseNonTerminal(tokens, nonTerminalAlternate, currentPosition);
+                else
+                    throw new InvalidOperationException("unable to apply repeater inside  " + choice.GetType().Name);
+                if (result.IsOk)
+                {
+                    return result;
+                }
             }
 
             return result;

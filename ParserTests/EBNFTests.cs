@@ -721,6 +721,14 @@ namespace ParserTests
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
             Assert.False(builtParser.IsError);
             Assert.False(builtParser.Errors.Any());
+            var parseResult = builtParser.Result.Parse("a", "choice");
+            Assert.True(parseResult.IsOk);
+            parseResult = builtParser.Result.Parse("b", "choice");
+            Assert.True(parseResult.IsOk);
+            parseResult = builtParser.Result.Parse("b", "choice");
+            Assert.True(parseResult.IsOk);
+            parseResult = builtParser.Result.Parse("d", "choice");
+            Assert.False(parseResult.IsOk);
         }
     }
 }
