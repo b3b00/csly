@@ -342,11 +342,12 @@ namespace sly.parser.generator
                         {
                             if (clause is ChoiceClause<IN> choice)
                             {
-                                bool allTheSame = choice.Choices.Select(c => c is TerminalClause<IN>).Aggregate((x, y) => x && y);
-                                if (!allTheSame)
+                                bool allTerminals = choice.Choices.Select(c => c is TerminalClause<IN>).Aggregate((x, y) => x && y);
+                                bool allNonTerminals = choice.Choices.Select(c => c is NonTerminalClause<IN>).Aggregate((x, y) => x && y);
+                                if (!allNonTerminals && !allTerminals)
                                 {
                                     result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                        $"{rule.RuleString} contains {choice.ToString()} with mixed terminal and nonterminal."));
+                                        $"{rule.ToString()} contains {choice.ToString()} with mixed terminal and nonterminal."));
                                 }
                             } 
                         }
