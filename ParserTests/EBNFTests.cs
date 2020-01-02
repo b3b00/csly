@@ -231,9 +231,9 @@ namespace ParserTests
     public class AlternateChoiceTestNonTerminal
     {
         [Production("choice : [ A | B | C]")]
-        public string Choice(Token<OptionTestToken> c)
+        public string Choice(string c)
         {
-            return c.Value;
+            return c;
         }
 
         [Production("C : c")]
@@ -767,10 +767,13 @@ namespace ParserTests
             Assert.False(builtParser.Errors.Any());
             var parseResult = builtParser.Result.Parse("a", "choice");
             Assert.True(parseResult.IsOk);
+            Assert.Equal("a",parseResult.Result);
             parseResult = builtParser.Result.Parse("b", "choice");
             Assert.True(parseResult.IsOk);
-            parseResult = builtParser.Result.Parse("b", "choice");
+            Assert.Equal("b",parseResult.Result);
+            parseResult = builtParser.Result.Parse("c", "choice");
             Assert.True(parseResult.IsOk);
+            Assert.Equal("c",parseResult.Result);
             parseResult = builtParser.Result.Parse("d", "choice");
             Assert.False(parseResult.IsOk);
         }
@@ -786,10 +789,13 @@ namespace ParserTests
             Assert.False(builtParser.Errors.Any());
             var parseResult = builtParser.Result.Parse("a", "choice");
             Assert.True(parseResult.IsOk);
+            Assert.Equal("A(a)",parseResult.Result);
             parseResult = builtParser.Result.Parse("b", "choice");
             Assert.True(parseResult.IsOk);
+            Assert.Equal("B(b)",parseResult.Result);
             parseResult = builtParser.Result.Parse("c", "choice");
             Assert.True(parseResult.IsOk);
+            Assert.Equal("C(c)",parseResult.Result);
             parseResult = builtParser.Result.Parse("d", "choice");
             Assert.False(parseResult.IsOk);
         }
