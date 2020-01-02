@@ -212,6 +212,22 @@ namespace ParserTests
         }
     }
     
+    public class AlternateChoiceTestError
+    {
+        [Production("choice : [ a | b | C]")]
+        public string Choice(Token<OptionTestToken> c)
+        {
+            return c.Value;
+        }
+
+        [Production("C : c")]
+        public string C(Token<OptionTestToken> c)
+        {
+            return c.Value;
+        }
+        
+    }
+    
     public class Bugfix104Test
     {
         [Production("testNonTerm : sub (COMMA[d] unreachable)? ")]
@@ -729,6 +745,19 @@ namespace ParserTests
             Assert.True(parseResult.IsOk);
             parseResult = builtParser.Result.Parse("d", "choice");
             Assert.False(parseResult.IsOk);
+        }
+
+        [Fact]
+        public void TestAlternateChoiceErrorMixedTerminalAndNonTerminal()
+        {
+            var startingRule = $"choice";
+            var parserInstance = new AlternateChoiceTestError();
+            var builder = new ParserBuilder<OptionTestToken, string>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Assert.True(builtParser.IsError);
+            Assert.Single(builtParser.Errors);
+            Assert.Contains("mixed", builtParser.Errors.First().Message);
+            
         }
     }
 }
