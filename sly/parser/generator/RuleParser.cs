@@ -60,6 +60,29 @@ namespace sly.parser.generator
             var clause = BuildTerminalOrNonTerimal(id.Value, true);
             return clause;
         }
+        
+        [Production("clause : LCROG  choices RCROG  ")]
+        public IClause<IN> AlternateClause(Token<EbnfTokenGeneric> discardleft, IClause<IN> choices, Token<EbnfTokenGeneric> discardright)
+        {
+            // TODO
+            return choices;
+        }
+        
+        [Production("choices : IDENTIFIER  ")]
+        public IClause<IN> ChoicesOne(Token<EbnfTokenGeneric> head)
+        {
+            // TODO
+            var choice = BuildTerminalOrNonTerimal(head.Value);
+            return new ChoiceClause<IN>(choice);
+        }
+        
+        [Production("choices : IDENTIFIER OR choices ")]
+        public IClause<IN> ChoicesMany(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> dicardOr, ChoiceClause<IN> tail)
+        {
+            var headClause = BuildTerminalOrNonTerimal(head.Value); 
+            return new ChoiceClause<IN>(headClause,tail.Choices);
+        }
+        
 
         [Production("clause : IDENTIFIER ")]
         public IClause<IN> SimpleClause(Token<EbnfTokenGeneric> id)

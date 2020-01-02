@@ -228,6 +228,7 @@ namespace sly.parser.generator
             var checkers = new List<ParserChecker<IN, OUT>>();
             checkers.Add(CheckUnreachable);
             checkers.Add(CheckNotFound);
+            checkers.Add(CheckAlternates);
 
             if (result.Result != null && !result.IsError)
                 foreach (var checker in checkers)
@@ -273,27 +274,39 @@ namespace sly.parser.generator
                     var clause = rule.Clauses[iClause];
                     if (clause is NonTerminalClause<IN> ntClause)
                     {
-                        if (ntClause != null) found = found || ntClause.NonTerminalName == referenceName;
+                        found = ntClause.NonTerminalName == referenceName;
                     }
                     else if (clause is OptionClause<IN> option)
                     {
-                        if (option != null && option.Clause is NonTerminalClause<IN> inner)
-                            found = found || inner.NonTerminalName == referenceName;
+                        if (option.Clause is NonTerminalClause<IN> inner)
+                            found = inner.NonTerminalName == referenceName;
                     }
                     else if (clause is ZeroOrMoreClause<IN> zeroOrMore)
                     {
-                        if (zeroOrMore != null && zeroOrMore.Clause is NonTerminalClause<IN> inner)
-                            found = found || inner.NonTerminalName == referenceName;
+                        if (zeroOrMore.Clause is NonTerminalClause<IN> inner)
+                            found = inner.NonTerminalName == referenceName;
                     }
                     else if (clause is OneOrMoreClause<IN> oneOrMore)
                     {
-                        if (oneOrMore != null && oneOrMore.Clause is NonTerminalClause<IN> inner)
-                            found = found || inner.NonTerminalName == referenceName;
+                        if (oneOrMore.Clause is NonTerminalClause<IN> inner)
+                            found = inner.NonTerminalName == referenceName;
+                    }
+                    else if (clause is ChoiceClause<IN> choice)
+                    {
+
+                        int i = 0;
+                        while (i < choice.Choices.Count && !found)
+                        {
+                            if (choice.Choices[i] is NonTerminalClause<IN> nonTerm)
+                            {
+                                found = nonTerm.NonTerminalName == referenceName;
+                            }
+                            i++;
+                        }
                     }
 
                     iClause++;
                 }
-
                 iRule++;
             }
 
@@ -311,6 +324,37 @@ namespace sly.parser.generator
                     if (!conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
                         result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
                             $"{ntClause.NonTerminalName} references from {rule.RuleString} does not exist."));
+            return result;
+        }
+        
+        private static BuildResult<Parser<IN, OUT>> CheckAlternates(BuildResult<Parser<IN, OUT>> result,
+            NonTerminal<IN> nonTerminal)
+        {
+            var conf = result.Result.Configuration;
+            var found = false;
+            if (nonTerminal.Name != conf.StartingRule)
+            {
+                foreach (var nt in result.Result.Configuration.NonTerminals.Values.ToList())
+                {
+                    foreach (var rule in nt.Rules)
+                    {
+                        foreach (var clause in rule.Clauses)
+                        {
+                            if (clause is ChoiceClause<IN> choice)
+                            {
+                                bool allTerminals = choice.Choices.Select(c => c is TerminalClause<IN>).Aggregate((x, y) => x && y);
+                                bool allNonTerminals = choice.Choices.Select(c => c is NonTerminalClause<IN>).Aggregate((x, y) => x && y);
+                                if (!allNonTerminals && !allTerminals)
+                                {
+                                    result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
+                                        $"{rule.ToString()} contains {choice.ToString()} with mixed terminal and nonterminal."));
+                                }
+                            } 
+                        }
+                    }
+                }
+            }
+
             return result;
         }
 

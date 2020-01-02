@@ -45,6 +45,7 @@ namespace sly.parser.generator.visitor
 
         public DotNode VisitTree(ISyntaxNode<IN> root)
         {
+            Graph = new DotGraph("syntaxtree",true);
             return Visit(root);
         }
 
