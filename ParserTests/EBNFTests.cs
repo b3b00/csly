@@ -242,6 +242,19 @@ namespace ParserTests
         }
     }
     
+    public class AlternateChoiceTestOptionDiscardedTerminal
+    {
+        [Production("choice : [ a | b | c] [ b | c] [d]")]
+        public string Choice(Token<OptionTestToken> first)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append(first.Value);
+
+            
+            return builder.ToString();
+        }
+    }
+    
     public class AlternateChoiceTestError
     {
         [Production("choice : [ a | b | C]")]
@@ -861,6 +874,23 @@ namespace ParserTests
             parseResult = builtParser.Result.Parse("a", "choice");
             Assert.True(parseResult.IsOk);
             Assert.Equal("a,<none>",parseResult.Result);
+        }
+        
+        [Fact]
+        public void TestAlternateChoiceOptionDiscardedTerminal()
+        {
+            var startingRule = $"choice";
+            var parserInstance = new AlternateChoiceTestOptionDiscardedTerminal();
+            var builder = new ParserBuilder<OptionTestToken, string>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Assert.False(builtParser.IsError);
+            Assert.False(builtParser.Errors.Any());
+            var parseResult = builtParser.Result.Parse("a b", "choice");
+            Assert.True(parseResult.IsOk);
+            Assert.Equal("a",parseResult.Result);
+            parseResult = builtParser.Result.Parse("a", "choice");
+            Assert.True(parseResult.IsOk);
+            Assert.Equal("a",parseResult.Result);
         }
 
         [Fact]
