@@ -62,7 +62,7 @@ namespace sly.parser.generator
         }
 
         [Production("clause : choiceclause DISCARD")]
-        public IClause<IN> AlternateDiscardedClause(ChoiceClause<IN> choices, Token<IN> discarded)
+        public IClause<IN> AlternateDiscardedClause(ChoiceClause<IN> choices, Token<EbnfTokenGeneric> discarded)
         {
             choices.IsDiscarded = true;
             return choices;
