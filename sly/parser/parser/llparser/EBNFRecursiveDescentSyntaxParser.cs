@@ -219,7 +219,7 @@ namespace sly.parser.llparser
                                     errors.AddRange(manyResult.Errors);
                             }
 
-                            isError = isError || manyResult.IsError;
+                            isError = manyResult.IsError;
                         }
                         else if (clause is OptionClause<IN> option)
                         {
@@ -231,6 +231,13 @@ namespace sly.parser.llparser
                         {
                             var optionResult = ParseChoice(tokens, choice, currentPosition);
                             currentPosition = optionResult.EndingPosition;
+                            if (optionResult.IsError && optionResult.Errors != null && optionResult.Errors.Count > 0)
+                            {
+                                errors.AddRange(optionResult.Errors);
+                            }
+
+                            isError = optionResult.IsError;
+
                             children.Add(optionResult.Root);
                         }
 

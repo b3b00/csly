@@ -889,8 +889,10 @@ namespace ParserTests
             Assert.True(parseResult.IsOk);
             Assert.Equal("a",parseResult.Result);
             parseResult = builtParser.Result.Parse("a", "choice");
-            Assert.True(parseResult.IsOk);
-            Assert.Equal("a",parseResult.Result);
+            Assert.True(parseResult.IsError);
+            Assert.Single(parseResult.Errors);
+            Assert.Contains("unexpected end of stream", parseResult.Errors[0].ErrorMessage);
+
         }
 
         [Fact]
