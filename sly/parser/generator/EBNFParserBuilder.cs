@@ -113,6 +113,7 @@ namespace sly.parser.generator
                     if (!parseResult.IsError)
                     {
                         var rule = (Rule<IN>) parseResult.Result;
+                        rule.RuleString = ruleString;
                         rule.SetVisitor(m);
                         NonTerminal<IN> nonT = null;
                         if (!nonTerminals.ContainsKey(rule.NonTerminalName))
