@@ -332,22 +332,22 @@ namespace sly.parser.generator
         {
             var conf = result.Result.Configuration;
             var found = false;
-            if (nonTerminal.Name != conf.StartingRule)
+
+            foreach (var rule in nonTerminal.Rules)
             {
-                foreach (var nt in result.Result.Configuration.NonTerminals.Values.ToList())
+                foreach (var clause in rule.Clauses)
                 {
-                    foreach (var rule in nt.Rules)
+                    if (clause is ChoiceClause<IN> choice)
                     {
-                        foreach (var clause in rule.Clauses)
+                        if (!choice.IsTerminalChoice && !choice.IsNonTerminalChoice)
                         {
-                            if (clause is ChoiceClause<IN> choice)
-                            {
-                                if (!choice.IsTerminalChoice && !choice.IsNonTerminalChoice)
-                                {
-                                    result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                        $"{rule.ToString()} contains {choice.ToString()} with mixed terminal and nonterminal."));
-                                }
-                            } 
+                            result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
+                                $"{rule.RuleString} contains {choice.ToString()} with mixed terminal and nonterminal."));
+                        }
+                        else if (choice.IsDiscarded && choice.IsNonTerminalChoice)
+                        {
+                            result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
+                                $"{rule.RuleString} : {choice.ToString()} can not be marked as discarded as it is a non terminal choice."));
                         }
                     }
                 }

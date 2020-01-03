@@ -257,10 +257,22 @@ namespace ParserTests
     
     public class AlternateChoiceTestError
     {
-        [Production("choice : [ a | b | C]")]
+        [Production("choice : [ a | b | C | D]")]
         public string Choice(Token<OptionTestToken> c)
         {
             return c.Value;
+        }
+        
+        [Production("D : [ E | C] [d]")]
+        public string D(Token<OptionTestToken> d)
+        {
+            return d.Value;
+        }
+        
+        [Production("E : e")]
+        public string E(Token<OptionTestToken> e)
+        {
+            return e.Value;
         }
 
         [Production("C : c")]
@@ -903,8 +915,9 @@ namespace ParserTests
             var builder = new ParserBuilder<OptionTestToken, string>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
             Assert.True(builtParser.IsError);
-            Assert.Single(builtParser.Errors);
-            Assert.Contains("mixed", builtParser.Errors.First().Message);
+            Assert.Equal(2,builtParser.Errors.Count);
+            Assert.Contains("mixed", builtParser.Errors[0].Message);
+            Assert.Contains("discarded", builtParser.Errors[1].Message);
             
         }
     }
