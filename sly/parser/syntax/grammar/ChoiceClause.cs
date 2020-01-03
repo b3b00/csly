@@ -6,6 +6,8 @@ namespace sly.parser.syntax.grammar
 {
     public class ChoiceClause<T> : IClause<T>
     {
+
+        public bool IsDiscarded { get; set; } = false;
         public bool IsTerminalChoice => Choices.Select(c => c is TerminalClause<T>).Aggregate((x, y) => x && y);
         public bool IsNonTerminalChoice => Choices.Select(c => c is NonTerminalClause<T>).Aggregate((x, y) => x && y);
             

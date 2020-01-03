@@ -60,13 +60,21 @@ namespace sly.parser.generator
             var clause = BuildTerminalOrNonTerimal(id.Value, true);
             return clause;
         }
-        
-        [Production("clause : choiceclause")]
-        public IClause<IN> AlternateClause(IClause<IN> choices)
+
+        [Production("clause : choiceclause DISCARD")]
+        public IClause<IN> AlternateDiscardedClause(ChoiceClause<IN> choices, Token<IN> discarded)
         {
+            choices.IsDiscarded = true;
             return choices;
         }
         
+        [Production("clause : choiceclause")]
+        public IClause<IN> AlternateClause(ChoiceClause<IN> choices)
+        {
+            choices.IsDiscarded = false;
+            return choices;
+        }
+
         [Production("choiceclause : LCROG  choices RCROG  ")]
         public IClause<IN> AlternateChoices(Token<EbnfTokenGeneric> discardleft, IClause<IN> choices, Token<EbnfTokenGeneric> discardright)
         {
@@ -83,7 +91,7 @@ namespace sly.parser.generator
         }
         
         [Production("choices : IDENTIFIER OR choices ")]
-        public IClause<IN> ChoicesMany(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> dicardOr, ChoiceClause<IN> tail)
+        public IClause<IN> ChoicesMany(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> discardOr, ChoiceClause<IN> tail)
         {
             var headClause = BuildTerminalOrNonTerimal(head.Value); 
             return new ChoiceClause<IN>(headClause,tail.Choices);
