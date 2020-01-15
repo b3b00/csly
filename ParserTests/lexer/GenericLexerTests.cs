@@ -5,6 +5,7 @@ using GenericLexerWithCallbacks;
 using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fsm;
+using sly.parser.generator;
 using Xunit;
 
 namespace ParserTests.lexer
