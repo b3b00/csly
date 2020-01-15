@@ -529,17 +529,8 @@ namespace ParserExample
             if (parserBuild.IsOk)
             {
                 var parser = parserBuild.Result;
-                string ok1 = @"|B|study(""Name or something"", overlay)|E|";
-                string ok2 = "|B|test(close, 123, open)|E|";
-                string kw = "|B|test(kw=123)|E|";
                 string ko1 = "|B|test2(a, b, c=100)|E|";
                 string ko2 = "|B|plotshape(data, style=shapexcross)|E|";
-
-                // var r = parser.Parse(ok1);
-                // r = parser.Parse(ok2);
-                // r = parser.Parse(kw);
-                // var r = parser.Parse("a, b, c=100", "fun_actual_args2");
-                // var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
                 
                 var r = parser.Parse(ko1);
                 var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
