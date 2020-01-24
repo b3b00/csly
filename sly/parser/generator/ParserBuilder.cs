@@ -332,7 +332,6 @@ namespace sly.parser.generator
             NonTerminal<IN> nonTerminal)
         {
             var conf = result.Result.Configuration;
-            var found = false;
 
             foreach (var rule in nonTerminal.Rules)
             {

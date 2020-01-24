@@ -431,7 +431,7 @@ namespace sly.parser.llparser
             {
                 result.IsError = true;
                 result.Errors = errors;
-                greaterIndex = errors.Select(e => e.UnexpectedToken.PositionInTokenFlow).Max();
+                greaterIndex = errors.Count > 0 ? errors.Select(e => e.UnexpectedToken.PositionInTokenFlow).Max() : 0;
                 result.EndingPosition = greaterIndex;
             }
 
