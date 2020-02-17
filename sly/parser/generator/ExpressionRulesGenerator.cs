@@ -65,8 +65,16 @@ namespace sly.parser.generator
 
                 foreach (var attr in attributes)
                 {
-                    var operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix,
-                        EnumConverter.ConvertIntToEnum<IN>(attr.Token));
+                    IN oper = default(IN);
+                    if (attr.IsIntToken)
+                    {
+                        oper = EnumConverter.ConvertIntToEnum<IN>(attr.IntToken);
+                    }
+                    else if (attr.IsStringToken)
+                    {
+                        oper = EnumConverter.ConvertStringToEnum<IN>(attr.StringToken);
+                    }
+                    var operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix,oper);
                     var operations = new List<OperationMetaData<IN>>();
                     if (operationsByPrecedence.ContainsKey(operation.Precedence))
                         operations = operationsByPrecedence[operation.Precedence];
