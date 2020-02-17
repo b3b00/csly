@@ -1,4 +1,5 @@
 using System;
+using sly.parser.generator;
 
 namespace sly
 {
@@ -19,6 +20,16 @@ namespace sly
                 }
 
             return default(IN);
+        }
+
+        public static IN ConvertStringToEnum<IN>(string name)  where IN : struct
+        {
+            IN token = default(IN);
+            if (!Enum.TryParse(name, out token))
+            {
+                throw new ParserConfigurationException($"bad enum name {name} on Operation definition.");
+            }
+            return token;
         }
     }
 }
