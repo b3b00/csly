@@ -32,7 +32,7 @@ namespace sly.parser.generator.visitor.dotgraph
         public string ToGraph()
         {
             var builder = new StringBuilder();
-            builder.Append($"{source.Name}->{destination.Name} [ ");
+            builder.Append($"{source.Name}->{destination?.Name} [ ");
 
             builder.Append(Attribute("arrowshape", ArrowHeadShape));
             

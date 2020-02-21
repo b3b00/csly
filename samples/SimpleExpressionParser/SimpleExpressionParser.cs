@@ -7,10 +7,10 @@ namespace simpleExpressionParser
     public class SimpleExpressionParser
     {
         [Operation((int) ExpressionToken.PLUS, Affix.InFix, Associativity.Right, 10)]
-        [Operation((int) ExpressionToken.MINUS, Affix.InFix, Associativity.Left, 10)]
-        public int BinaryTermExpression(int left, Token<ExpressionToken> operation, int right)
+        [Operation("MINUS", Affix.InFix, Associativity.Left, 10)]
+        public double BinaryTermExpression(double left, Token<ExpressionToken> operation, double right)
         {
-            var result = 0;
+            double result = 0;
             switch (operation.TokenID)
             {
                 case ExpressionToken.PLUS:
@@ -30,10 +30,10 @@ namespace simpleExpressionParser
 
 
         [Operation((int) ExpressionToken.TIMES, Affix.InFix, Associativity.Right, 50)]
-        [Operation((int) ExpressionToken.DIVIDE, Affix.InFix, Associativity.Left, 50)]
-        public int BinaryFactorExpression(int left, Token<ExpressionToken> operation, int right)
+        [Operation("DIVIDE", Affix.InFix, Associativity.Left, 50)]
+        public double BinaryFactorExpression(double left, Token<ExpressionToken> operation, double right)
         {
-            var result = 0;
+            double result = 0;
             switch (operation.TokenID)
             {
                 case ExpressionToken.TIMES:
@@ -53,13 +53,13 @@ namespace simpleExpressionParser
 
 
         [Operation((int) ExpressionToken.MINUS, Affix.PreFix, Associativity.Right, 100)]
-        public int PreFixExpression(Token<ExpressionToken> operation, int value)
+        public double PreFixExpression(Token<ExpressionToken> operation, double value)
         {
             return -value;
         }
 
         [Operation((int) ExpressionToken.FACTORIAL, Affix.PostFix, Associativity.Right, 100)]
-        public int PostFixExpression(int value, Token<ExpressionToken> operation)
+        public double PostFixExpression(double value, Token<ExpressionToken> operation)
         {
             var factorial = 1;
             for (var i = 1; i <= value; i++) factorial = factorial * i;
@@ -68,20 +68,26 @@ namespace simpleExpressionParser
 
         [Operand]
         [Production("operand : primary_value")]
-        public int OperandValue(int value)
+        public double OperandValue(double value)
         {
             return value;
         }
 
 
-        [Production("primary_value : INT")]
-        public int OperandInt(Token<ExpressionToken> value)
+        [Production("primary_value : DOUBLE")]
+        public double OperandDouble(Token<ExpressionToken> value)
         {
-            return value.IntValue;
+            return value.DoubleValue;
+        }
+        
+        [Production("primary_value : INT")]
+        public double OperandInt(Token<ExpressionToken> value)
+        {
+            return value.DoubleValue;
         }
 
         [Production("primary_value : LPAREN SimpleExpressionParser_expressions RPAREN")]
-        public int OperandParens(Token<ExpressionToken> lparen, int value, Token<ExpressionToken> rparen)
+        public double OperandParens(Token<ExpressionToken> lparen, double value, Token<ExpressionToken> rparen)
         {
             return value;
         }

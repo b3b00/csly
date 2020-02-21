@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using sly.parser.generator;
 
 namespace sly.parser.syntax.tree
@@ -29,20 +27,6 @@ namespace sly.parser.syntax.tree
 
         public bool Discarded => false;
         public string Name { get; set; }
-
-
-        [ExcludeFromCodeCoverage]
-        public virtual string Dump(string tab)
-        {
-            var dump = new StringBuilder();
-
-            dump.AppendLine($"{tab}Node {Name} {{");
-            foreach (var c in Children) dump.AppendLine(c.Dump(tab + "\t"));
-
-            dump.AppendLine($"{tab}}}");
-
-            return dump.ToString();
-        }
 
         #region expression syntax nodes
 

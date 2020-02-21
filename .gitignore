@@ -15,13 +15,15 @@ TestResults
 
 [Dd]ebug/
 [Rr]elease/
-x64/
 build/
 [Bb]in/
 [Oo]bj/
 packages/
 .vscode/
 .vs/
+tools/
+.idea/
+*opencover*
 
 # git  shit
 *.orig
@@ -37,3 +39,4 @@ ParserTests/lcov.info.info
 coverage.json
 ruleset1.ruleset
 opencov.bat
+BenchmarkDotNet.Artifacts

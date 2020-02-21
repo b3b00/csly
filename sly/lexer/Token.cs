@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace sly.lexer
 {
@@ -16,6 +14,8 @@ namespace sly.lexer
     public class Token<T>
     {
         public char StringDelimiter = '"';
+        
+        public char CharDelimiter ='\'';
 
 
         public Token(T token, string value, TokenPosition position, bool isCommentStart = false,
@@ -96,13 +96,13 @@ namespace sly.lexer
             get
             {
                 // Try parsing in the current culture
-                if (!double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.CurrentCulture,
+                if (!double.TryParse(Value, NumberStyles.Any, CultureInfo.CurrentCulture,
                         out var result) &&
                     // Then try in US english
-                    !double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"),
+                    !double.TryParse(Value, NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"),
                         out result) &&
                     // Then in neutral language
-                    !double.TryParse(Value, System.Globalization.NumberStyles.Any, CultureInfo.InvariantCulture,
+                    !double.TryParse(Value, NumberStyles.Any, CultureInfo.InvariantCulture,
                         out result))
                 {
                     result = 0.0;
@@ -113,7 +113,22 @@ namespace sly.lexer
             set { }
         }
 
-        public char CharValue => StringWithoutQuotes[0];
+        public char CharValue  {
+            get
+            {
+                var result = Value;
+                if (CharDelimiter != (char) 0)
+                {
+                    if (result.StartsWith(CharDelimiter.ToString()))  {
+                        result = result.Substring(1);
+                    }
+                    if (result.EndsWith(CharDelimiter.ToString())) {
+                        result = result.Substring(0, result.Length - 1);
+                    }
+                }
+                return result[0];
+            }
+        } 
 
 
         public bool End { get; set; }

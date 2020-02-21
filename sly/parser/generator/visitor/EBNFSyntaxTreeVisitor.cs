@@ -98,8 +98,6 @@ namespace sly.parser.generator.visitor
                     }
                     else if (v.IsOption)
                     {
-                       
-                        
                         args.Add(v.OptionResult);
                     }
                     else if (v.IsOptionGroup)
@@ -133,6 +131,11 @@ namespace sly.parser.generator.visitor
                     MethodInfo method = null;
                     try
                     {
+                        if (!(context is NoContext))
+                        {
+                            args.Add(context);
+                        }
+
                         if (method == null) method = node.Visitor;
                         var t = method.Invoke(ParserVsisitorInstance, args.ToArray());
                         var res = (OUT) t;

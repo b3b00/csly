@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace sly.parser.syntax.tree
 {
@@ -15,18 +13,5 @@ namespace sly.parser.syntax.tree
             Children.AddRange(children);
         }
 
-
-        [ExcludeFromCodeCoverage]
-        public override string Dump(string tab)
-        {
-            var dump = new StringBuilder();
-
-            dump.AppendLine($"{tab}GROUP {Name} [");
-            foreach (var c in Children) dump.AppendLine(c.Dump(tab + "\t"));
-
-            dump.AppendLine($"{tab}]");
-
-            return dump.ToString();
-        }
     }
 }

@@ -5,6 +5,5 @@
         
         bool Discarded { get;  }
         string Name { get; }
-        string Dump(string tab);
     }
 }

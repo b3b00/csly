@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using sly.buildresult;
+using sly.lexer.fsm;
 using sly.parser.generator.visitor;
 using sly.parser.llparser;
 using sly.parser.syntax.grammar;
@@ -15,10 +16,10 @@ namespace sly.parser.generator
     internal class EBNFParserBuilder<IN, OUT> : ParserBuilder<IN, OUT> where IN : struct
     {
         public override BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType,
-            string rootRule)
+            string rootRule, BuildExtension<IN> extensionBuilder = null)
         {
             var ruleparser = new RuleParser<IN>();
-            var builder = new ParserBuilder<EbnfToken, GrammarNode<IN>>();
+            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>();
 
             var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
 
@@ -89,7 +90,7 @@ namespace sly.parser.generator
         #region configuration
 
         protected virtual ParserConfiguration<IN, OUT> ExtractEbnfParserConfiguration(Type parserClass,
-            Parser<EbnfToken, GrammarNode<IN>> grammarParser)
+            Parser<EbnfTokenGeneric, GrammarNode<IN>> grammarParser)
         {
             var conf = new ParserConfiguration<IN, OUT>();
             var nonTerminals = new Dictionary<string, NonTerminal<IN>>();
@@ -113,6 +114,7 @@ namespace sly.parser.generator
                     if (!parseResult.IsError)
                     {
                         var rule = (Rule<IN>) parseResult.Result;
+                        rule.RuleString = ruleString;
                         rule.SetVisitor(m);
                         NonTerminal<IN> nonT = null;
                         if (!nonTerminals.ContainsKey(rule.NonTerminalName))
@@ -128,6 +130,7 @@ namespace sly.parser.generator
                             .Errors
                             .Select(e => e.ErrorMessage)
                             .Aggregate((e1, e2) => e1 + "\n" + e2);
+                        message = $"rule error [{ruleString}] : {message}";
                         throw new ParserConfigurationException(message);
                     }
                 }

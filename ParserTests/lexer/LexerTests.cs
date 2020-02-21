@@ -28,11 +28,26 @@ namespace ParserTests.lexer
         }
 
         [Fact]
+        public void TestDoubleJsonLexing()
+        {
+            var lexer = GetJsonLexer();
+            var tokens = lexer.Tokenize("1.68");
+            Assert.NotNull(tokens);
+            var tokenList = tokens.Tokens; 
+            Assert.NotEmpty(tokenList);
+            var token = tokenList[0];
+            Assert.NotNull(token);
+            Assert.Equal(1.68, token.DoubleValue);
+        }
+        
+        [Fact]
         public void TestMultiLineExpressionLexing()
         {
             var lexer = GetExpressionLexer();
             var expr = "1 + 2 \n* 3";
-            var tokens = lexer.Tokenize(expr).ToList();
+            var r = lexer.Tokenize(expr);
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
             Assert.Equal(6, tokens.Count);
             var expectedTokensID = new List<ExpressionToken>
             {
@@ -65,7 +80,9 @@ namespace ParserTests.lexer
             var json = "{ \"propi\": 12 \n" +
                        ", \"props\":\"val\" }";
             var lexer = GetJsonLexer();
-            var tokens = lexer.Tokenize(json).ToList();
+            var r = lexer.Tokenize(json);
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
             Assert.Equal(10, tokens.Count);
             var expectedTokensID = new List<JsonToken>
             {
@@ -92,8 +109,6 @@ namespace ParserTests.lexer
 
             var linePositions = tokens.Take(9).Select(tok => tok.Position.Line).ToList();
             Assert.Equal(expectedLinePositions, linePositions);
-
-            ;
         }
 
         [Fact]
@@ -101,7 +116,9 @@ namespace ParserTests.lexer
         {
             var lexer = GetExpressionLexer();
             var expr = "1 + 2 * 3";
-            var tokens = lexer.Tokenize(expr).ToList();
+            var r = lexer.Tokenize(expr);
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
             Assert.Equal(6, tokens.Count);
             var expectedTokensID = new List<ExpressionToken>
             {
@@ -126,7 +143,9 @@ namespace ParserTests.lexer
         {
             var json = "{ \"propi\": 12 , \"props\":\"val\" }";
             var lexer = GetJsonLexer();
-            var tokens = lexer.Tokenize(json).ToList();
+            var r = lexer.Tokenize(json);
+            Assert.True(r.IsOk);
+            var tokens = r.Tokens;
             Assert.Equal(10, tokens.Count);
             var expectedTokensID = new List<JsonToken>
             {
@@ -144,8 +163,6 @@ namespace ParserTests.lexer
 
             var columnPositions = tokens.Take(9).Select(tok => tok.Position.Column).ToList();
             Assert.Equal(expectedColumnPositions, columnPositions);
-
-            ;
         }
     }
 }

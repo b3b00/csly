@@ -1,13 +1,10 @@
 ﻿
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser.generator;
-using sly.parser.parser;
-using System;
 using sly.parser.generator.visitor;
+using sly.parser.parser;
 
 namespace sly.parser
 {
@@ -56,43 +53,45 @@ namespace sly.parser
         {
             return ParseWithContext(source,new NoContext(),startingNonTerminal);
         }
-        
-        
+
+
         public ParseResult<IN, OUT> ParseWithContext(string source, object context, string startingNonTerminal = null)
         {
             ParseResult<IN, OUT> result = null;
-            try
-            {
-                IList<Token<IN>> tokens = Lexer.Tokenize(source).ToList();
-                var position = 0;
-                var tokensWithoutComments = new List<Token<IN>>();
-                for (var i = 0; i < tokens.Count; i++)
-                {
-                    var token = tokens[i];
-                    if (!token.IsComment)
-                    {
-                        token.PositionInTokenFlow = position;
-                        tokensWithoutComments.Add(token);
-                        position++;
-                    }
-                }
-
-                result = ParseWithContext(tokensWithoutComments, context, startingNonTerminal);
-            }
-            catch (LexerException e)
+            Lexer.ResetLexer();
+            var lexingResult = Lexer.Tokenize(source);
+            if (lexingResult.IsError)
             {
                 result = new ParseResult<IN, OUT>();
                 result.IsError = true;
                 result.Errors = new List<ParseError>();
-                result.Errors.Add(e.Error);
+                result.Errors.Add(lexingResult.Error);
+                return result;
             }
+
+            var tokens = lexingResult.Tokens;
+            var position = 0;
+            var tokensWithoutComments = new List<Token<IN>>();
+            for (var i = 0; i < tokens.Count; i++)
+            {
+                var token = tokens[i];
+                if (!token.IsComment)
+                {
+                    token.PositionInTokenFlow = position;
+                    tokensWithoutComments.Add(token);
+                    position++;
+                }
+            }
+
+            result = ParseWithContext(tokensWithoutComments, context, startingNonTerminal);
+
 
             return result;
         }
 
 
-       
-        
+
+
         public ParseResult<IN, OUT> ParseWithContext(IList<Token<IN>> tokens, object parsingContext = null, string startingNonTerminal = null)
         {
             var result = new ParseResult<IN, OUT>();

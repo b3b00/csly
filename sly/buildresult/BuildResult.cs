@@ -6,8 +6,7 @@ namespace sly.buildresult
     public class BuildResult<R>
     {
         public BuildResult() : this(default(R))
-        {
-        }
+        { }
 
         public BuildResult(R result)
         {
@@ -15,15 +14,13 @@ namespace sly.buildresult
             Errors = new List<InitializationError>();
         }
 
-        public List<InitializationError> Errors { get; set; }
+        public List<InitializationError> Errors { get; }
 
         public R Result { get; set; }
 
-
         public bool IsError
         {
-            get { return Errors.Where(e => e.Level != ErrorLevel.WARN).Any(); }
-            set { }
+            get { return Errors.Any(e => e.Level != ErrorLevel.WARN); }
         }
 
         public bool IsOk => !IsError;

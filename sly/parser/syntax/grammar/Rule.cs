@@ -27,7 +27,7 @@ namespace sly.parser.syntax.grammar
 
         public Affix ExpressionAffix { get; set; }
 
-        public string RuleString { get; }
+        public string RuleString { get; set;  }
 
         public string Key
         {

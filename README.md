@@ -1,13 +1,13 @@
 # C# Lex Yacc #
 
 [![Build status](https://ci.appveyor.com/api/projects/status/n9uffgkqn2qet7k9?svg=true)](https://ci.appveyor.com/project/OlivierDuhart/sly)
-![AppVeyor tests](https://img.shields.io/appveyor/tests/OlivierDuhart/sly.svg)
-[![codecov](https://codecov.io/gh/b3b00/csly/branch/dev/graph/badge.svg)](https://codecov.io/gh/b3b00/csly)
+![AppVeyor tests (compact)](https://img.shields.io/appveyor/tests/OlivierDuhart/sly.svg?compact_message)
+[![coveralls](https://coveralls.io/repos/github/b3b00/csly/badge.svg?branch=dev)](https://coveralls.io/github/b3b00/csly?branch=dev)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fb3b00%2Fcsly.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fb3b00%2Fcsly?ref=badge_shield)
 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/b3b00/sly/blob/dev/LICENSE)
-![NuGet](https://img.shields.io/nuget/v/sly.svg)
+[![NuGet](https://img.shields.io/nuget/v/sly.svg)](https://www.nuget.org/packages/sly)
 
 
 :warning: This readme is a bit out of date. Go to to the [wiki](https://github.com/b3b00/csly/wiki) for a more up to date documentation.

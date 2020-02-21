@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 
 namespace sly.lexer
 {
@@ -7,7 +7,7 @@ namespace sly.lexer
     ///     T is the token type
     /// </summary>
     /// <typeparam name="T">T is the enum Token type</typeparam>
-    public class Lexer<T> : ILexer<T>
+    public class Lexer<T> : ILexer<T> where T : struct
     {
         private readonly IList<TokenDefinition<T>> tokenDefinitions = new List<TokenDefinition<T>>();
 
@@ -17,17 +17,16 @@ namespace sly.lexer
         }
 
 
-        public IEnumerable<Token<T>> Tokenize(string source)
+        public LexerResult<T> Tokenize(string source)
         {
+            List<Token<T>> tokens = new List<Token<T>>();
+            
             var currentIndex = 0;
             //List<Token<T>> tokens = new List<Token<T>>();
             var currentLine = 1;
             var currentColumn = 0;
             var currentLineStartIndex = 0;
             Token<T> previousToken = null;
-
-            var defEol = tokenDefinitions.ToList().Find(t => t.IsEndOfLine);
-            var eol = defEol.TokenID;
 
             while (currentIndex < source.Length)
             {
@@ -49,7 +48,7 @@ namespace sly.lexer
 
                 if (matchedDefinition == null)
                 {
-                    throw new LexerException(new LexicalError(currentLine, currentColumn, source[currentIndex]));
+                    return new LexerResult<T>(new LexicalError(currentLine, currentColumn, source[currentIndex]));
                 }
 
                 var value = source.Substring(currentIndex, matchLength);
@@ -64,13 +63,10 @@ namespace sly.lexer
                 {
                     previousToken = new Token<T>(matchedDefinition.TokenID, value,
                         new TokenPosition(currentIndex, currentLine, currentColumn));
-                    yield return previousToken;
+                    tokens.Add(previousToken);
                 }
 
                 currentIndex += matchLength;
-
-
-                ;
             }
 
             var eos = new Token<T>();
@@ -78,7 +74,18 @@ namespace sly.lexer
                 previousToken.Position.Column + previousToken.Value.Length);
 
 
-            yield return eos;
+            tokens.Add(eos);
+            return new LexerResult<T>(tokens);
+        }
+
+        public LexerResult<T> Tokenize(ReadOnlyMemory<char> source)
+        {
+            throw new NotImplementedException();
+        }
+        
+        public void ResetLexer()
+        {
+            
         }
     }
 }

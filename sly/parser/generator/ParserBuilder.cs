@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using sly.buildresult;
 using sly.lexer;
+using sly.lexer.fsm;
 using sly.parser.generator.visitor;
 using sly.parser.llparser;
 using sly.parser.syntax.grammar;
@@ -34,7 +35,7 @@ namespace sly.parser.generator
         ///     <param name="rootRule">the name of the root non terminal of the grammar</param>
         ///     <returns></returns>
         public virtual BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType,
-            string rootRule)
+            string rootRule, BuildExtension<IN> extensionBuilder = null)
         {
             Parser<IN, OUT> parser = null;
             var result = new BuildResult<Parser<IN, OUT>>();
@@ -45,7 +46,7 @@ namespace sly.parser.generator
                 var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                 var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
                 parser = new Parser<IN, OUT>(syntaxParser, visitor);
-                var lexerResult = BuildLexer();
+                var lexerResult = BuildLexer(extensionBuilder);
                 parser.Lexer = lexerResult.Result;
                 if (lexerResult.IsError) result.AddErrors(lexerResult.Errors);
                 parser.Instance = parserInstance;
@@ -118,9 +119,9 @@ namespace sly.parser.generator
         }
 
 
-        protected BuildResult<ILexer<IN>> BuildLexer()
+        protected virtual BuildResult<ILexer<IN>> BuildLexer(BuildExtension<IN> extensionBuilder =  null)
         {
-            var lexer = LexerBuilder.BuildLexer(new BuildResult<ILexer<IN>>());
+            var lexer = LexerBuilder.BuildLexer(new BuildResult<ILexer<IN>>(), extensionBuilder);
             return lexer;
         }
 
@@ -187,7 +188,6 @@ namespace sly.parser.generator
                     if (b)
                     {
                         isTerminal = true;
-                        ;
                     }
 
                     //token = (IN)Enum.Parse(tIn , item);
@@ -229,6 +229,7 @@ namespace sly.parser.generator
             var checkers = new List<ParserChecker<IN, OUT>>();
             checkers.Add(CheckUnreachable);
             checkers.Add(CheckNotFound);
+            checkers.Add(CheckAlternates);
 
             if (result.Result != null && !result.IsError)
                 foreach (var checker in checkers)
@@ -274,27 +275,39 @@ namespace sly.parser.generator
                     var clause = rule.Clauses[iClause];
                     if (clause is NonTerminalClause<IN> ntClause)
                     {
-                        if (ntClause != null) found = found || ntClause.NonTerminalName == referenceName;
+                        found = ntClause.NonTerminalName == referenceName;
                     }
                     else if (clause is OptionClause<IN> option)
                     {
-                        if (option != null && option.Clause is NonTerminalClause<IN> inner)
-                            found = found || inner.NonTerminalName == referenceName;
+                        if (option.Clause is NonTerminalClause<IN> inner)
+                            found = inner.NonTerminalName == referenceName;
                     }
                     else if (clause is ZeroOrMoreClause<IN> zeroOrMore)
                     {
-                        if (zeroOrMore != null && zeroOrMore.Clause is NonTerminalClause<IN> inner)
-                            found = found || inner.NonTerminalName == referenceName;
+                        if (zeroOrMore.Clause is NonTerminalClause<IN> inner)
+                            found = inner.NonTerminalName == referenceName;
                     }
                     else if (clause is OneOrMoreClause<IN> oneOrMore)
                     {
-                        if (oneOrMore != null && oneOrMore.Clause is NonTerminalClause<IN> inner)
-                            found = found || inner.NonTerminalName == referenceName;
+                        if (oneOrMore.Clause is NonTerminalClause<IN> inner)
+                            found = inner.NonTerminalName == referenceName;
+                    }
+                    else if (clause is ChoiceClause<IN> choice)
+                    {
+
+                        int i = 0;
+                        while (i < choice.Choices.Count && !found)
+                        {
+                            if (choice.Choices[i] is NonTerminalClause<IN> nonTerm)
+                            {
+                                found = nonTerm.NonTerminalName == referenceName;
+                            }
+                            i++;
+                        }
                     }
 
                     iClause++;
                 }
-
                 iRule++;
             }
 
@@ -312,6 +325,34 @@ namespace sly.parser.generator
                     if (!conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
                         result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
                             $"{ntClause.NonTerminalName} references from {rule.RuleString} does not exist."));
+            return result;
+        }
+        
+        private static BuildResult<Parser<IN, OUT>> CheckAlternates(BuildResult<Parser<IN, OUT>> result,
+            NonTerminal<IN> nonTerminal)
+        {
+            var conf = result.Result.Configuration;
+
+            foreach (var rule in nonTerminal.Rules)
+            {
+                foreach (var clause in rule.Clauses)
+                {
+                    if (clause is ChoiceClause<IN> choice)
+                    {
+                        if (!choice.IsTerminalChoice && !choice.IsNonTerminalChoice)
+                        {
+                            result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
+                                $"{rule.RuleString} contains {choice.ToString()} with mixed terminal and nonterminal."));
+                        }
+                        else if (choice.IsDiscarded && choice.IsNonTerminalChoice)
+                        {
+                            result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
+                                $"{rule.RuleString} : {choice.ToString()} can not be marked as discarded as it is a non terminal choice."));
+                        }
+                    }
+                }
+            }
+
             return result;
         }
 

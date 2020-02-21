@@ -11,12 +11,12 @@ namespace jsonparser
         {
         }
 
-        public IEnumerable<Token<JsonToken>> Tokenize(string source)
+        public LexerResult<JsonToken> Tokenize(string source)
         {
             return Tokenize(new ReadOnlyMemory<char>(source.ToCharArray()));
         }
 
-        public IEnumerable<Token<JsonToken>> Tokenize(ReadOnlyMemory<char> source)
+        public LexerResult<JsonToken> Tokenize(ReadOnlyMemory<char> source)
         {
             var tokens = new List<Token<JsonToken>>();
             var position = 0;
@@ -202,9 +202,11 @@ namespace jsonparser
                     position++;
                 }
             }
+            return new LexerResult<JsonToken>(tokens);
+        }
 
-
-            return tokens;
+        public void ResetLexer()
+        {
         }
     }
 }

@@ -100,7 +100,6 @@ namespace csly.whileLang.compiler
                     //emiter.Return();
                     function = emiter.CreateDelegate();
                     object res = function.Invoke();
-                    ;
                 }
             }
             catch
