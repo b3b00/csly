@@ -114,95 +114,6 @@ namespace ParserExample
         }
 
 
-        private static void testLexerBuilder()
-        {
-            var builder = new FSMLexerBuilder<JsonToken>();
-
-
-            // conf
-            builder.IgnoreWS()
-                .WhiteSpace(' ')
-                .WhiteSpace('\t')
-                .IgnoreEOL();
-
-            // start machine definition
-            builder.Mark("start");
-
-
-            // string literal
-            builder.Transition('\"')
-                .Mark("in_string")
-                .ExceptTransitionTo(new[] { '\"', '\\' }, "in_string")
-                .Transition('\\')
-                .Mark("escape")
-                .AnyTransitionTo(' ', "in_string")
-                .Transition('\"')
-                .End(JsonToken.STRING)
-                .Mark("string_end")
-                .CallBack(match =>
-                {
-                    string upperVAlue = match.Result.Value.ToString().ToUpper();
-                    match.Result.SpanValue = new ReadOnlyMemory<char>(upperVAlue.ToCharArray());
-                    return match;
-                });
-
-            // accolades
-            builder.GoTo("start")
-                .Transition('{')
-                .End(JsonToken.ACCG);
-
-            builder.GoTo("start")
-                .Transition('}')
-                .End(JsonToken.ACCD);
-
-            // corchets
-            builder.GoTo("start")
-                .Transition('[')
-                .End(JsonToken.CROG);
-
-            builder.GoTo("start")
-                .Transition(']')
-                .End(JsonToken.CROD);
-
-            // 2 points
-            builder.GoTo("start")
-                .Transition(':')
-                .End(JsonToken.COLON);
-
-            // comma
-            builder.GoTo("start")
-                .Transition(',')
-                .End(JsonToken.COMMA);
-
-            //numeric
-            builder.GoTo("start")
-                .RangeTransition('0', '9')
-                .Mark("in_int")
-                .RangeTransitionTo('0', '9', "in_int")
-                .End(JsonToken.INT)
-                .Transition('.')
-                .Mark("start_double")
-                .RangeTransition('0', '9')
-                .Mark("in_double")
-                .RangeTransitionTo('0', '9', "in_double")
-                .End(JsonToken.DOUBLE);
-
-
-            var code = "{\n\"d\" : 42.42 ,\n\"i\" : 42 ,\n\"s\" : \"quarante-deux\",\n\"s2\":\"a\\\"b\"\n}";
-            //code = File.ReadAllText("test.json");
-            var lex = builder.Fsm;
-            var r = lex.Run(code, 0);
-            var total = "";
-            while (r.IsSuccess)
-            {
-                var msg = $"{r.Result.TokenID} : {r.Result.Value} @{r.Result.Position}";
-                total += msg + "\n";
-                Console.WriteLine(msg);
-                r = lex.Run(code);
-            }
-        }
-
-
         private static void testGenericLexerWhile()
         {
             var sw = new Stopwatch();
@@ -500,7 +411,6 @@ namespace ParserExample
             var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<TestGrammarToken>>();
             var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
             var result = grammarParser.Parse(productionRule);
-            grammarParser.Lexer.ResetLexer();
             //(grammarParser.Lexer as GenericLexer<TestGrammarToken>).ResetLexer();
             Console.WriteLine($"alors ? {string.Join('\n',result.Errors.Select(e => e.ErrorMessage))}");
             result = grammarParser.Parse(productionRule);
@@ -547,52 +457,26 @@ namespace ParserExample
             }
         }
         
-        public static void TestScriptRight()
-        {
-            var parserInstance = new ScriptParserRight();
-            var builder = new ParserBuilder<ScriptToken, object>();
-            var parserBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "test");
-            if (parserBuild.IsOk)
-            {
-                var parser = parserBuild.Result;
-                string ok1 = @"|B|study(""Name or something"", overlay)|E|";
-                string ok2 = "|B|test(close, 123, open)|E|";
-                string kw = "|B|test(kw=123)|E|";
-                string ko1 = "|B|test2(a, b, c=100, d=200)|E|";
-                string ko2 = "|B|plotshape(data, style=shapexcross)|E|";
-                string ko3 = "|B|plotshape(data = default, style=shapexcross)|E|";
-                string badmixko = "|B|plotshape(data = default, t, y=20)|E|";
+        
 
-                // var r = parser.Parse(ok1);
-                // r = parser.Parse(ok2);
-                // r = parser.Parse(kw);
-                var r = parser.Parse("a, b, c=100, d= 200", "fun_actual_args");
-                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
-                var root1 = graphviz.VisitTree(r.SyntaxTree);
-                var graph1 =  graphviz.Graph.Compile();
-                
-                r = parser.Parse(ko1);
-                graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
-                var root = graphviz.VisitTree(r.SyntaxTree);
-                var graph = graphviz.Graph.Compile();
-                r = parser.Parse(ko3);
-                graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
-                root = graphviz.VisitTree(r.SyntaxTree);
-                graph = graphviz.Graph.Compile();
-                r = parser.Parse(badmixko);
-                graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
-                root = graphviz.VisitTree(r.SyntaxTree);
-                graph = graphviz.Graph.Compile();
-            }
-            else
-            {
-                foreach (var e in parserBuild.Errors)
-                {
-                    Console.WriteLine(e.Level+ " - " + e.Message);
-                }
-            }
+        private static BuildResult<Parser<ExpressionToken, double>> BuildParserExpression()
+        {
+            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var parserInstance = new SimpleExpressionParser();
+            var builder = new ParserBuilder<ExpressionToken, double>();
+            return builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
         }
 
+        
+        public static void TestAssociativityFactorExpressionParser()
+        {
+            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var Parser = BuildParserExpression();
+            var r = Parser.Result.Parse("1 / 2 / 3", StartingRule);
+            Console.WriteLine($"{r.IsOk} : {r.Result}");
+            ;
+        }
+        
         private static void Main(string[] args)
         {
             //TestContextualParser();
@@ -603,9 +487,8 @@ namespace ParserExample
             // TestGraphViz();
 
             // TestGraphViz();
-//            TestChars();
-            TestScript();
-            TestScriptRight();
+            // TestChars();
+            TestAssociativityFactorExpressionParser();
         }
     }
 

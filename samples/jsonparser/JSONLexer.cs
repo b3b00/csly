@@ -42,7 +42,7 @@ namespace jsonparser
             Func<JsonToken, Token<JsonToken>> NewToken = tok =>
             {
                 var token = new Token<JsonToken>();
-                token.Position = new TokenPosition(currentTokenPosition, currentTokenLine, currentTokenColumn);
+                token.Position = new LexerPosition(currentTokenPosition, currentTokenLine, currentTokenColumn);
                 token.SpanValue = source.Slice(tokenStartIndex,tokenLength);
                 tokenStartIndex = tokenStartIndex + tokenLength;
                 token.TokenID = tok;
@@ -203,10 +203,6 @@ namespace jsonparser
                 }
             }
             return new LexerResult<JsonToken>(tokens);
-        }
-
-        public void ResetLexer()
-        {
         }
     }
 }

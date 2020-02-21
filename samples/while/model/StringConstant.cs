@@ -16,7 +16,7 @@ namespace csly.whileLang.model
 
         public Scope CompilerScope { get; set; }
 
-        public TokenPosition Position { get; set; }
+        public LexerPosition Position { get; set; }
 
         public WhileType Whiletype
         {
