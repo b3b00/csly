@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using csly.whileLang.compiler;
 using csly.whileLang.interpreter;
 using csly.whileLang.model;
@@ -88,8 +89,8 @@ namespace ParserExample
 
         private static void TestFactorial()
         {
-            var whileParser = new WhileParser();
-            var builder = new ParserBuilder<WhileToken, WhileAST>();
+            var whileParser = new WhileParserGeneric();
+            var builder = new ParserBuilder<WhileTokenGeneric, WhileAST>();
             var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
 
             var program = @"
@@ -98,19 +99,74 @@ namespace ParserExample
     i:=1;
     while i < 11 do 
     (";
-            program += "\nprint \"r=\".r;\n";
+            //program += "\nprint \"r=\".r;\n";
             program += "r := r * i;\n";
-            program += "print \"r=\".r;\n";
-            program += "print \"i=\".i;\n";
+            // program += "print \"r=\".r;\n";
+            // program += "print \"i=\".i;\n";
             program += "i := i + 1 \n);\n";
             program += "return r)\n";
-            var result = Parser.Result.Parse(program);
-            var interpreter = new Interpreter();
-            var context = interpreter.Interprete(result.Result);
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    var result = Parser.Result.Parse(program);
+                    var interpreter = new Interpreter();
+                    var context = interpreter.Interprete(result.Result);
 
-            var compiler = new WhileCompiler();
-            var code = compiler.TranspileToCSharp(program);
-            var f = compiler.CompileToFunction(program);
+                    var compiler = new WhileCompiler();
+                    var code = compiler.TranspileToCSharp(program);
+                    var f = compiler.CompileToFunction(program);
+                    int r = f();
+                    if (r != 3628800)
+                    {
+                        throw new Exception("erreur " + r);
+                    }
+                }
+                catch (Exception e)
+                {
+                    ;
+                }
+            }
+        }
+
+        private static void TestThreadsafeGeneric()
+        {
+            var whileParser = new WhileParserGeneric();
+            var builder = new ParserBuilder<WhileTokenGeneric, WhileAST>();
+            var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
+            var program = @"
+(
+    r:=1;
+    i:=1;
+    while i < 11 do 
+    (";
+            //program += "\nprint \"r=\".r;\n";
+            program += "r := r * i;\n";
+            // program += "print \"r=\".r;\n";
+            // program += "print \"i=\".i;\n";
+            program += "i := i + 1 \n);\n";
+            program += "return r)\n";
+            for (int i = 0; i < 10; i++)
+            {
+                var t = new Thread(() =>
+                {
+                    try
+                    {
+                        for (int j = 0; j < 10; j++)
+                        {
+                            Console.WriteLine($"{i}.{j}");
+                            Thread.Sleep(5);
+                            Parser.Result.Parse(program);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        ;
+                    }
+                });
+                t.Start();
+                Console.WriteLine($"thread #{i} started");
+            }
         }
 
 
@@ -488,7 +544,10 @@ namespace ParserExample
 
             // TestGraphViz();
             // TestChars();
-            TestAssociativityFactorExpressionParser();
+            //TestAssociativityFactorExpressionParser();
+            TestFactorial();
+            TestThreadsafeGeneric();
+            
         }
     }
 
