@@ -7,7 +7,7 @@ namespace csly.whileLang.model
 {
     public interface WhileAST
     {
-        TokenPosition Position { get; set; }
+        LexerPosition Position { get; set; }
 
         Scope CompilerScope { get; set; }
         string Dump(string tab);

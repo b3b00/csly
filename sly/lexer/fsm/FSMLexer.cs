@@ -12,6 +12,11 @@ namespace sly.lexer.fsm
         {
             return memory.Span[index];
         }
+        
+        public static T At<T>(this ReadOnlyMemory<T> memory, LexerPosition position)
+        {
+            return memory.Span[position.Index];
+        }
     }
 
     public delegate void BuildExtension<IN>(IN token, LexemeAttribute lexem, GenericLexer<IN> lexer) where IN : struct;
@@ -128,52 +133,31 @@ namespace sly.lexer.fsm
 
         #region run
 
-        public int CurrentPosition { get; private set; }
-        public int CurrentColumn { get; private set; }
-        public int CurrentLine { get; private set; }
-
-        public void MovePosition(int newPosition, int newLine, int newColumn)
+        
+        public FSMMatch<N> Run(string source, LexerPosition position)
         {
-            CurrentPosition = newPosition;
-            CurrentLine = newLine;
-            CurrentColumn = newColumn;
+            return Run(new ReadOnlyMemory<char>(source.ToCharArray()), position);
         }
 
-        public FSMMatch<N> Run(string source)
+        public FSMMatch<N> Run(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
-            return Run(source, CurrentPosition);
-        }
-
-        public FSMMatch<N> Run(ReadOnlyMemory<char> source)
-        {
-            return Run(source, CurrentPosition);
-        }
-
-        public FSMMatch<N> Run(string source, int start)
-        {
-            return Run(new ReadOnlyMemory<char>(source.ToCharArray()), start);
-        }
-
-        public FSMMatch<N> Run(ReadOnlyMemory<char> source, int start)
-        {
-            CurrentPosition = start;
-            ConsumeIgnored(source);
+            ConsumeIgnored(source,lexerPosition);
 
             // End of token stream
-            if (CurrentPosition >= source.Length)
+            if (lexerPosition.Index >= source.Length)
             {
                 return new FSMMatch<N>(false);
             }
 
             // Make a note of where current token starts
-            var position = new TokenPosition(CurrentPosition, CurrentLine, CurrentColumn);
+            var position = lexerPosition.Clone();
 
             FSMMatch<N> result = null;
             var currentNode = Nodes[0];
-            while (CurrentPosition < source.Length)
+            while (lexerPosition.Index < source.Length)
             {
-                var currentCharacter = source.At(CurrentPosition);
-                var currentValue = source.Slice(position.Index, CurrentPosition - position.Index + 1);
+                var currentCharacter = source.At(lexerPosition);
+                var currentValue = source.Slice(position.Index, lexerPosition.Index - position.Index + 1);
                 currentNode = Move(currentNode, currentCharacter, currentValue);
                 if (currentNode == null)
                 {
@@ -184,19 +168,19 @@ namespace sly.lexer.fsm
                 if (currentNode.IsEnd)
                 {
                     // Remember the possible match
-                    result = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id);
+                    result = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id,lexerPosition);
                 }
 
-                CurrentPosition++;
-                CurrentColumn++;
+                lexerPosition.Index++;
+                lexerPosition.Column++;
             }
 
             if (result != null)
             {
                 // Backtrack
                 var length = result.Result.Value.Length;
-                CurrentPosition = result.Result.Position.Index + length;
-                CurrentColumn = result.Result.Position.Column + length;
+                lexerPosition.Index = result.Result.Position.Index + length;
+                lexerPosition.Column = result.Result.Position.Column + length;
 
                 if (HasCallback(result.NodeId))
                 {
@@ -206,16 +190,15 @@ namespace sly.lexer.fsm
                 return result;
             }
 
-            if (CurrentPosition >= source.Length)
+            if (lexerPosition.Index >= source.Length)
             {
                 // Failed on last character, so need to backtrack
-                CurrentPosition -= 1;
-                CurrentColumn -= 1;
+                lexerPosition.Index -= 1;
+                lexerPosition.Column -= 1;
             }
 
-            var errorChar = source.Slice(CurrentPosition, 1);
-            var errorPosition = new TokenPosition(CurrentPosition, CurrentLine, CurrentColumn);
-            var ko = new FSMMatch<N>(false, default(N), errorChar, errorPosition, -1);
+            var errorChar = source.Slice(lexerPosition.Index, 1);
+            var ko = new FSMMatch<N>(false, default(N), errorChar, lexerPosition, -1,lexerPosition);
             return ko;
         }
 
@@ -237,29 +220,30 @@ namespace sly.lexer.fsm
             return null;
         }
 
-        private void ConsumeIgnored(ReadOnlyMemory<char> source)
+        private void ConsumeIgnored(ReadOnlyMemory<char> source, LexerPosition position)
         {
-            while (CurrentPosition < source.Length)
+            
+            while (position.Index < source.Length)
             {
                 if (IgnoreWhiteSpace)
                 {
-                    var currentCharacter = source.At(CurrentPosition);
+                    var currentCharacter = source.At(position.Index);
                     if (WhiteSpaces.Contains(currentCharacter))
                     {
-                        CurrentPosition++;
-                        CurrentColumn++;
+                        position.Index++;
+                        position.Column++;
                         continue;
                     }
                 }
 
                 if (IgnoreEOL)
                 {
-                    var eol = EOLManager.IsEndOfLine(source, CurrentPosition);
+                    var eol = EOLManager.IsEndOfLine(source, position.Index);
                     if (eol != EOLType.No)
                     {
-                        CurrentPosition += eol == EOLType.Windows ? 2 : 1;
-                        CurrentColumn = 0;
-                        CurrentLine++;
+                        position.Index += eol == EOLType.Windows ? 2 : 1;
+                        position.Column = 0;
+                        position.Line++;
                         continue;
                     }
                 }
@@ -270,11 +254,5 @@ namespace sly.lexer.fsm
 
         #endregion
         
-        public void Reset()
-        {
-            CurrentColumn = 0;
-            CurrentLine = 0;
-            CurrentPosition = 0;
-        }
     }
 }

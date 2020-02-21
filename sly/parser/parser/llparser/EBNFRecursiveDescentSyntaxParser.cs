@@ -284,6 +284,7 @@ namespace sly.parser.llparser
             var currentPosition = position;
             var innerClause = clause.Clause;
             var stillOk = true;
+            
 
             SyntaxParseResult<IN> lastInnerResult = null;
 
@@ -473,6 +474,7 @@ namespace sly.parser.llparser
             int position)
         {
             var currentPosition = position;
+
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>()
             {
                 IsError = true,

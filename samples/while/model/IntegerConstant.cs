@@ -14,7 +14,7 @@ namespace csly.whileLang.model
 
         public int Value { get; set; }
 
-        public TokenPosition Position { get; set; }
+        public LexerPosition Position { get; set; }
 
         public Scope CompilerScope { get; set; }
 

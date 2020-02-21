@@ -62,7 +62,7 @@ namespace sly.lexer
                 if (!matchedDefinition.IsIgnored)
                 {
                     previousToken = new Token<T>(matchedDefinition.TokenID, value,
-                        new TokenPosition(currentIndex, currentLine, currentColumn));
+                        new LexerPosition(currentIndex, currentLine, currentColumn));
                     tokens.Add(previousToken);
                 }
 
@@ -70,7 +70,7 @@ namespace sly.lexer
             }
 
             var eos = new Token<T>();
-            eos.Position = new TokenPosition(previousToken.Position.Index + 1, previousToken.Position.Line,
+            eos.Position = new LexerPosition(previousToken.Position.Index + 1, previousToken.Position.Line,
                 previousToken.Position.Column + previousToken.Value.Length);
 
 
@@ -81,11 +81,6 @@ namespace sly.lexer
         public LexerResult<T> Tokenize(ReadOnlyMemory<char> source)
         {
             throw new NotImplementedException();
-        }
-        
-        public void ResetLexer()
-        {
-            
         }
     }
 }
