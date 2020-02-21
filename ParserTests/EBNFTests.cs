@@ -740,12 +740,12 @@ namespace ParserTests
 
         #region CONTEXTS
 
-        private BuildResult<Parser<ExpressionToken, int>> buildSimpleExpressionParserWithContext()
+        private BuildResult<Parser<ExpressionToken, int>> buildSimpleExpressionParserWithContext(ParserType parserType = ParserType.LL_RECURSIVE_DESCENT)
         {
             var startingRule = $"{typeof(SimpleExpressionParserWithContext).Name}_expressions";
             var parserInstance = new SimpleExpressionParserWithContext();
             var builder = new ParserBuilder<ExpressionToken, int>();
-            var parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, startingRule);
+            var parser = builder.BuildParser(parserInstance, parserType, startingRule);
             return parser;
         }
 
@@ -765,6 +765,18 @@ namespace ParserTests
         public void TestContextualParsing2()
         {
             var buildResult = buildSimpleExpressionParserWithContext();
+
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
+            var res = parser.ParseWithContext("2 + a * b", new Dictionary<string, int> {{"a", 2}, {"b", 3}});
+            Assert.True(res.IsOk);
+            Assert.Equal(8, res.Result);
+        }
+
+        [Fact]
+        public void TestContextualParsingWithEbnf()
+        {
+            var buildResult = buildSimpleExpressionParserWithContext(ParserType.EBNF_LL_RECURSIVE_DESCENT);
 
             Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
