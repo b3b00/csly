@@ -68,7 +68,7 @@ namespace ParserTests
         {
             var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
             var parserInstance = new SimpleExpressionParser();
-            var builder = new ParserBuilder<ExpressionToken, int>();
+            var builder = new ParserBuilder<ExpressionToken, double>();
             var  Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
             var result = Parser.Result.Parse("1+1");
 
