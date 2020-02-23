@@ -200,8 +200,8 @@ namespace sly.parser.generator.visitor
                         result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
                     }
                     catch (Exception e)
-                    {
-                        Console.WriteLine($"ERROR : {e.Message} calling {node.Name} =>  {method?.Name}");
+                    {  
+                        throw new ParserConfigurationException($"ERROR : calling visitor method {method?.Name} with   {node.Name}");                     
                     }
                 }
             }
