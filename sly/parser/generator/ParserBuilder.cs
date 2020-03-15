@@ -289,8 +289,10 @@ namespace sly.parser.generator
                     }
                     else if (clause is OneOrMoreClause<IN> oneOrMore)
                     {
-                        if (oneOrMore.Clause is NonTerminalClause<IN> inner)
-                            found = inner.NonTerminalName == referenceName;
+                        if (oneOrMore.Clause is NonTerminalClause<IN> innerNonTerminal)
+                            found = innerNonTerminal.NonTerminalName == referenceName;
+                        if (oneOrMore.Clause is ChoiceClause<IN> innerChoice && innerChoice.IsNonTerminalChoice)
+                            found = innerChoice.Choices.Where(c => (c as NonTerminalClause<IN>).NonTerminalName == referenceName).Any();
                     }
                     else if (clause is ChoiceClause<IN> choice)
                     {

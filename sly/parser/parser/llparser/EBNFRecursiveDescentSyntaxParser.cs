@@ -369,6 +369,12 @@ namespace sly.parser.llparser
                 manyNode.IsManyValues = true;
                 firstInnerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
             }
+            else if (innerClause is ChoiceClause<IN> choice)
+            {
+                manyNode.IsManyTokens = choice.IsTerminalChoice;
+                manyNode.IsManyValues = choice.IsNonTerminalChoice;
+                firstInnerResult = ParseChoice(tokens, choice, currentPosition);
+            }
             else
             {
                 throw new InvalidOperationException("unable to apply repeater to " + innerClause.GetType().Name);
