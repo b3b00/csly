@@ -11,7 +11,7 @@
     <Folder Include="compiler\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Sigil" Version="4.7.0" />
+    <PackageReference Include="Sigil" Version="5.0.0" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
      <NoWarn>1701;1702;1705;1591</NoWarn>

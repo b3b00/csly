@@ -140,10 +140,7 @@ namespace ParserExample
     i:=1;
     while i < 11 do 
     (";
-            //program += "\nprint \"r=\".r;\n";
             program += "r := r * i;\n";
-            // program += "print \"r=\".r;\n";
-            // program += "print \"i=\".i;\n";
             program += "i := i + 1 \n);\n";
             program += "return r)\n";
             for (int i = 0; i < 10; i++)
