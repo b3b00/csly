@@ -532,6 +532,22 @@ namespace ParserExample
             Console.WriteLine($"{r.IsOk} : {r.Result}");
             ;
         }
+
+        public static void Test164() {
+            var Parser = BuildParserExpression();
+            var result = Parser.Result.Parse("1(1");
+            if (result.IsError)
+            {
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+            }
+
+            
+            Console.WriteLine("hey ! Rodriguez !")
+            ;
+        }
         
         private static void Main(string[] args)
         {
@@ -545,9 +561,31 @@ namespace ParserExample
             // TestGraphViz();
             // TestChars();
             //TestAssociativityFactorExpressionParser();
-            TestFactorial();
-            TestThreadsafeGeneric();
+            // TestFactorial();
+            // TestThreadsafeGeneric();
+            //Test164();
+            Test165();
+        }
+
+        public static void Test165()
+        {
+            var StartingRule = $"test_stmt";
+            var parserInstance = new Issue165Parser();
+            var builder = new ParserBuilder<Issue165Lexer, double>();
+            var parserResult = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+            var parser = parserResult.Result;
             
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            var r = parser.Parse("a=close[3] / (2 + 2)");
+            sw.Stop();
+            Console.WriteLine($"time : {sw.ElapsedMilliseconds} ms");
+            
+            sw.Start();
+            r = parser.Parse("a= close[3] / 2 + 2");
+            sw.Stop();
+            Console.WriteLine($"time : {sw.ElapsedMilliseconds} ms");
+            ;
         }
     }
 
