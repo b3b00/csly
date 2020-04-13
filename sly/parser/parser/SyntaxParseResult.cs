@@ -16,5 +16,26 @@ namespace sly.parser
         public int EndingPosition { get; set; }
 
         public bool IsEnded { get; set; }
+        
+        public List<IN> Expecting {get; set;}
+
+        public void AddExpecting(IN expected)
+        {
+            if (Expecting == null)
+            {
+                Expecting = new List<IN>();
+            }
+            Expecting.Add(expected);
+        } 
+        
+        public void AddExpectings(IEnumerable<IN> expected)
+        {
+            if (Expecting == null)
+            {
+                Expecting = new List<IN>();
+            }
+            Expecting.AddRange(expected);
+        }
+        
     }
 }
