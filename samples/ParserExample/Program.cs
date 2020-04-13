@@ -145,13 +145,14 @@ namespace ParserExample
             program += "return r)\n";
             for (int i = 0; i < 10; i++)
             {
+                int fixed_i = i; // capture fixed i
                 var t = new Thread(() =>
                 {
                     try
                     {
                         for (int j = 0; j < 10; j++)
                         {
-                            Console.WriteLine($"{i}.{j}");
+                            Console.WriteLine($"{fixed_i}.{j}");
                             Thread.Sleep(5);
                             Parser.Result.Parse(program);
                         }
@@ -162,7 +163,7 @@ namespace ParserExample
                     }
                 });
                 t.Start();
-                Console.WriteLine($"thread #{i} started");
+                Console.WriteLine($"thread #{fixed_i} started");
             }
         }
 
@@ -544,7 +545,7 @@ namespace ParserExample
             //TestAssociativityFactorExpressionParser();
             TestFactorial();
             TestThreadsafeGeneric();
-            
+
         }
     }
 
