@@ -70,8 +70,15 @@ namespace sly.lexer
             }
 
             var eos = new Token<T>();
-            eos.Position = new LexerPosition(previousToken.Position.Index + 1, previousToken.Position.Line,
-                previousToken.Position.Column + previousToken.Value.Length);
+            if (previousToken != null)
+            {
+                eos.Position = new LexerPosition(previousToken.Position.Index + 1, previousToken.Position.Line,
+                    previousToken.Position.Column + previousToken.Value.Length);
+            }
+            else
+            {
+                eos.Position = new LexerPosition(0,0,0);
+            }
 
 
             tokens.Add(eos);
