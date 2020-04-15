@@ -171,7 +171,11 @@ namespace sly.parser.generator
                 rule.Clauses.Add(InFixClauses.Count == 1 ? InFixClauses[0] : new ChoiceClause<IN>(InFixClauses));
                 rule.Clauses.Add(new NonTerminalClause<IN>(name));
 
-                InFixOps.ForEach(x => rule.SetVisitor(x));
+                InFixOps.ForEach(x =>
+                {
+                    rule.SetVisitor(x);
+                    rule.IsExpressionRule = true;
+                });
                 nonTerminal.Rules.Add(rule);
             }
 
