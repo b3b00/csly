@@ -33,11 +33,12 @@ namespace sly.parser.syntax.grammar
         {
             get
             {
-                var k = Clauses
-                    .Select(c => c.ToString())
-                    .Aggregate((c1, c2) => c1.ToString() + "_" + c2.ToString());
-                if (Clauses.Count == 1) k += "_";
-                return k;
+                var key = string.Join("_", Clauses.Select(c => c.ToString()));
+                
+                if (Clauses.Count == 1) 
+                    key += "_";
+
+                return IsExpressionRule ? key.Replace(" | ", "_") : key;
             }
         }
 
