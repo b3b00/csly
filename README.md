@@ -1,7 +1,6 @@
 # C# Lex Yacc #
 
 [![Build status](https://ci.appveyor.com/api/projects/status/n9uffgkqn2qet7k9?svg=true)](https://ci.appveyor.com/project/OlivierDuhart/sly)
-
 ![Test status](http://teststatusbadge.azurewebsites.net/api/status/mmaitre314/securestringcodegen)
 [![coveralls](https://coveralls.io/repos/github/b3b00/csly/badge.svg?branch=dev)](https://coveralls.io/github/b3b00/csly?branch=dev)
 ![.NET Core](https://github.com/b3b00/csly/workflows/.NET%20Core/badge.svg)
