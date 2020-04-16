@@ -6,13 +6,13 @@ namespace ParserTests.comments
 {
     public enum MultiLineCommentsToken
     {
-        [Lexeme(GenericToken.Int)] INT,
+        [Lexeme(GenericToken.Int)] INT = 1,
 
-        [Lexeme(GenericToken.Double)] DOUBLE,
+        [Lexeme(GenericToken.Double)] DOUBLE = 2,
 
-        [Lexeme(GenericToken.Identifier)] ID,
+        [Lexeme(GenericToken.Identifier)] ID = 3,
 
-        [MultiLineComment("/*", "*/")] COMMENT
+        [MultiLineComment("/*", "*/")] COMMENT = 4
     }
     
     public class MultiLineCommentsTest

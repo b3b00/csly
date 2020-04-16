@@ -145,7 +145,12 @@ namespace sly.lexer
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            return $"{TokenID} [{Value}] @{Position}";
+            if (!TokenID.Equals(DefaultToken))
+            {
+                return $"{TokenID} [{Value}] @{Position}";
+            }
+
+            return "<<EOS>>";
         }
     }
 }

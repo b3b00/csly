@@ -161,8 +161,16 @@ namespace sly.lexer
                 var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
                 return new LexerResult<IN>(error);
             }
+            if (r.IsSuccess && r.Result.IsComment)
+            {
+                position = r.NewPosition;
+                position = ConsumeComment(r.Result, memorySource, position);
+            }
+            else if (r.IsSuccess && !r.Result.IsComment)
+            {
+                position = r.NewPosition;
+            }
 
-            position = r.NewPosition;
             while (r.IsSuccess)
             {
                 var transcoded = Transcode(r);
