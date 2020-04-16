@@ -56,7 +56,7 @@ namespace sly.parser.generator
             else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
             {
                 var builder = new EBNFParserBuilder<IN, OUT>();
-                result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule);
+                result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,extensionBuilder);
             }
 
             parser = result.Result;
