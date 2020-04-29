@@ -11,10 +11,10 @@
 [![NuGet](https://img.shields.io/nuget/v/sly.svg)](https://www.nuget.org/packages/sly)
 
 
-:warning: This readme is a bit out of date. Go to to the [wiki](https://github.com/b3b00/csly/wiki) for a more up to date documentation.
+## TLDR; [Getting started](https://github.com/b3b00/csly/wiki/getting-started) ##
 
- CSLY is a parser generator halfway between parser combinators and parser generator like Yacc or ANTLR 
-
+a [quick getting started](https://github.com/b3b00/csly/wiki/getting-started) will guide you through the implementation of a dumb parser
+ 
 
 ## Why? ##
 
