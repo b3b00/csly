@@ -33,6 +33,14 @@ namespace ParserExample
         STRING
     }
     
+    public enum DoubleExponent {
+        [Lexeme(GenericToken.Double)]
+        DOUBLE = 1,
+        
+        [Lexeme(GenericToken.Extension)]
+        DOUBLE_EXP = 2
+    }
+    
     public enum TokenType
     {
         [Lexeme("a")] a = 1,
@@ -563,6 +571,52 @@ namespace ParserExample
             Assert.Equal(expectString2, tok2.Value);
             Assert.Equal('\'',tok2.StringDelimiter);
         }
+
+        
+        private static void AddExponentExtension(DoubleExponent token, LexemeAttribute lexem, GenericLexer<DoubleExponent> lexer) {
+            if (token == DoubleExponent.DOUBLE_EXP) {
+
+   	
+                // callback on end_exponent node 
+                NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) => 
+                {
+                    string[] items = match.Result.Value.Split(new[] {'e', 'E'});
+                    double radix = 0;
+                    double.TryParse(items[0].Replace(".",","), out radix);
+                    double exponent = 0;
+                    double.TryParse(items[1],out exponent);
+                    double value = Math.Pow(radix, exponent);
+                    match.Result.SpanValue = value.ToString().AsMemory();
+                    
+                    match.Properties[GenericLexer<DoubleExponent>.DerivedToken] = DoubleExponent.DOUBLE_EXP;
+                    return match;
+                };
+   	
+                var fsmBuilder = lexer.FSMBuilder;
+
+   	
+                fsmBuilder.GoTo(GenericLexer<DoubleExponent>.in_double) // start a in_double node
+                    .Transition(new char[] {'E','e'}) // add a transition on '.' with precondition
+                    .Transition(new char[]{'+','-'})
+                    .Mark("start_exponent_val")
+                    .RangeTransitionTo('0','9',"start_exponent_val") // first year digit
+                    .Mark("end_exponent")
+                    .End(GenericToken.Extension) // mark as ending node 
+                    .CallBack(callback); // set the ending callback
+            }
+        }
+        
+        private static void TestDoubleExponent()
+        {
+            var lex = LexerBuilder.BuildLexer<DoubleExponent>(AddExponentExtension);
+            if (lex.IsOk)
+            {
+                var one = lex.Result.Tokenize("2.0E+2");
+                ;
+                var two = lex.Result.Tokenize("4.0e-2");
+                ;
+            }
+        }
         
         private static void Main(string[] args)
         {
@@ -578,7 +632,9 @@ namespace ParserExample
             //TestAssociativityFactorExpressionParser();
             // TestFactorial();
             //TestThreadsafeGeneric();
-            TestManyString();
+            // TestManyString();
+            
+            TestDoubleExponent();
 
         }
     }
@@ -588,6 +644,8 @@ namespace ParserExample
         [Lexeme(GenericToken.SugarToken,",")]
         COMMA = 1
     }
+    
+    
 
     public class ErroneousGrammar
     {
