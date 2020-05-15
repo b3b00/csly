@@ -7,6 +7,10 @@ namespace sly.lexer.fsm
     {
         public Dictionary<string, object> Properties { get; }
 
+        public bool IsString { get; set; }
+        
+        public char StringDelimiterChar { get; set; }
+        
         public bool IsSuccess { get; }
 
         public bool IsEOS { get; }

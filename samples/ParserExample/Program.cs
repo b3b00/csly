@@ -21,9 +21,18 @@ using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.buildresult;
 using sly.parser.generator.visitor;
+using Xunit;
 
 namespace ParserExample
 {
+    
+    public enum ManyString
+    {
+        [Lexeme(GenericToken.String, "'", "'")]
+        [Lexeme(GenericToken.String)]
+        STRING
+    }
+    
     public enum TokenType
     {
         [Lexeme("a")] a = 1,
@@ -530,21 +539,46 @@ namespace ParserExample
             Console.WriteLine($"{r.IsOk} : {r.Result}");
             ;
         }
+
+        public static void TestManyString()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManyString>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var string1 = "\"hello \\\"world \"";
+            var expectString1 = "\"hello \"world \"";
+            var string2 = "'that''s it'";
+            var expectString2 = "'that's it'";
+            var source1 = $"{string1} {string2}";
+            var r = lexer.Tokenize(source1);
+            Assert.True(r.IsOk);
+            Assert.Equal(3, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
+            Assert.Equal(ManyString.STRING, tok1.TokenID);
+            Assert.Equal(expectString1, tok1.Value);
+            Assert.Equal('"',tok1.StringDelimiter);
+
+            var tok2 = r.Tokens[1];
+            Assert.Equal(ManyString.STRING, tok2.TokenID);
+            Assert.Equal(expectString2, tok2.Value);
+            Assert.Equal('\'',tok2.StringDelimiter);
+        }
         
         private static void Main(string[] args)
         {
             //TestContextualParser();
             //TestTokenCallBacks();
             //test104();
-            //testJSON();
+            // testJSON();
            //TestGrammarParser();
             // TestGraphViz();
 
             // TestGraphViz();
             // TestChars();
             //TestAssociativityFactorExpressionParser();
-            TestFactorial();
-            TestThreadsafeGeneric();
+            // TestFactorial();
+            //TestThreadsafeGeneric();
+            TestManyString();
 
         }
     }

@@ -574,7 +574,8 @@ namespace sly.lexer
 
                 match.Result.SpanValue = value;
 
-
+                match.StringDelimiterChar = stringDelimiterChar;
+                match.IsString = true;
                 if (stringDelimiterChar != escapeStringDelimiterChar)
                 {
                     match.Result.SpanValue = diffCharEscaper(escapeStringDelimiterChar,stringDelimiterChar, match.Result.SpanValue);
@@ -756,7 +757,7 @@ namespace sly.lexer
             tok.CommentType = inTok.CommentType;
             tok.Position = inTok.Position;
             tok.Discarded = inTok.Discarded;
-            tok.StringDelimiter = StringDelimiterChar;
+            tok.StringDelimiter = match.StringDelimiterChar;
             tok.TokenID = (IN) match.Properties[DerivedToken];
             tok.IsEOS = tok.TokenID.Equals(default(IN));
             return tok;
