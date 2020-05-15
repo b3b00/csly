@@ -664,10 +664,12 @@ namespace ParserTests.lexer
             var tok1 = r.Tokens[0];
             Assert.Equal(ManyString.STRING, tok1.TokenID);
             Assert.Equal(expectString1, tok1.Value);
+            Assert.Equal('"',tok1.StringDelimiter);
 
             var tok2 = r.Tokens[1];
             Assert.Equal(ManyString.STRING, tok2.TokenID);
             Assert.Equal(expectString2, tok2.Value);
+            Assert.Equal('\'',tok2.StringDelimiter);
         }
 
         [Fact]
