@@ -176,7 +176,6 @@ namespace sly.lexer
                 r = LexerFsm.Run(memorySource,position);
                 if (!r.IsSuccess && !r.IsEOS)
                 {
-                    
                     var result = r.Result;
                     var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
                     return new LexerResult<IN>(error);
@@ -186,6 +185,12 @@ namespace sly.lexer
                 {
                     position = r.NewPosition;
                     position = ConsumeComment(r.Result, memorySource, position);
+                }
+
+                if (r.IsLineEnding)
+                {
+                    position = position.Clone();
+                    position.Line++;
                 }
             }
 
@@ -679,7 +684,7 @@ namespace sly.lexer
 
         }
 
-        public void AddSugarLexem(IN token, string specialValue)
+        public void AddSugarLexem(IN token, string specialValue, bool isLineEnding = false)
         {
             if (char.IsLetter(specialValue[0]))
                 throw new InvalidLexerException(
@@ -692,7 +697,7 @@ namespace sly.lexer
 
             FSMBuilder.GoTo(start);
             for (var i = 0; i < specialValue.Length; i++) FSMBuilder.SafeTransition(specialValue[i]);
-            FSMBuilder.End(GenericToken.SugarToken)
+            FSMBuilder.End(GenericToken.SugarToken, isLineEnding)
                 .CallBack(callback);
         }
 
@@ -750,6 +755,7 @@ namespace sly.lexer
             tok.Discarded = inTok.Discarded;
             tok.StringDelimiter = StringDelimiterChar;
             tok.TokenID = (IN) match.Properties[DerivedToken];
+            tok.IsLineEnding = match.IsLineEnding;
             tok.IsEOS = tok.TokenID.Equals(default(IN));
             return tok;
         }

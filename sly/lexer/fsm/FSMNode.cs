@@ -15,5 +15,6 @@
 
         internal bool IsStart { get; set; } = false;
         public string Mark { get; internal set; }
+        public bool IsLineEnding { get; set; }
     }
 }

@@ -275,6 +275,34 @@ namespace ParserTests.lexer
         C,
     }
 
+    [Lexer(IgnoreEOL=false)]
+    public enum Issue177Generic
+    {
+        [Lexeme(GenericToken.SugarToken,"\r\n",IsLineEnding = true)]
+        EOL = 1,
+        
+        [Lexeme(GenericToken.Int)]
+        INT = 2,
+        
+        EOS = 0
+        
+    }
+    
+    [Lexer(IgnoreEOL=false)]
+    public enum Issue177Regex
+    {
+        [Lexeme("\r\n",IsLineEnding = true)]
+        EOL = 1,
+        
+        [Lexeme("\\d+")]
+        INT = 2,
+        
+        EOS = 0
+        
+    }
+    
+    
+
     public class GenericLexerTests
     {
         [Fact]
@@ -848,6 +876,32 @@ namespace ParserTests.lexer
             result = lexer.Tokenize("--");
             Assert.True(result.IsOk);
             Assert.Equal("BB0", ToTokens(result));
+        }
+
+        [Fact]
+        public void TestIssue177()
+        {
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Generic>>());
+            Assert.False(res.IsError);
+            var lexer = res.Result;
+
+            var result = lexer.Tokenize(@"1
+2
+3");
+            Assert.True(result.IsOk);
+            Assert.Equal(6,result.Tokens.Count);
+            ;
+            
+            var res2 = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Regex>>());
+            Assert.False(res.IsError);
+            var lexer2 = res.Result;
+
+            var result2 = lexer2.Tokenize(@"1
+2
+3");
+            Assert.True(result2.IsOk);
+            Assert.Equal(6,result2.Tokens.Count);
+            ;
         }
 
         private static string ToTokens<T>(LexerResult<T> result) where T : struct
