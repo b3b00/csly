@@ -187,7 +187,7 @@ namespace sly.lexer
                     position = ConsumeComment(r.Result, memorySource, position);
                 }
 
-                if (r.IsLineEnding)
+                if (r.IsLineEnding && !LexerFsm.IgnoreEOL)
                 {
                     position = position.Clone();
                     position.Line++;
