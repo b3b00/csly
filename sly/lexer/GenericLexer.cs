@@ -155,6 +155,7 @@ namespace sly.lexer
             var tokens = new List<Token<IN>>();
 
             var r = LexerFsm.Run(memorySource, new LexerPosition());
+            
             if (!r.IsSuccess && !r.IsEOS)
             {
                 var result = r.Result;
@@ -165,6 +166,7 @@ namespace sly.lexer
             position = r.NewPosition;
             while (r.IsSuccess)
             {
+                ComputePositionWhenIgnoringEOL(r, tokens);
                 var transcoded = Transcode(r);
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
                 {
@@ -185,12 +187,7 @@ namespace sly.lexer
                 {
                     position = r.NewPosition;
                     position = ConsumeComment(r.Result, memorySource, position);
-                }
-
-                if (r.IsLineEnding && !LexerFsm.IgnoreEOL)
-                {
-                    position = position.Clone();
-                    position.Line++;
+                    
                 }
             }
 
@@ -207,6 +204,28 @@ namespace sly.lexer
             }
             tokens.Add(eos);
             return new LexerResult<IN>(tokens);
+        }
+
+        private void ComputePositionWhenIgnoringEOL(FSMMatch<GenericToken> r, List<Token<IN>> tokens)
+        {
+            if (!LexerFsm.IgnoreEOL)            
+            {
+                if (r.IsLineEnding) {
+                    ;
+                }
+                var newPosition = r.Result.Position.Clone();
+                var eols = tokens.Where(t => t.IsLineEnding).ToList();
+                int line = eols.Count;
+                int column = newPosition.Index;
+                if (eols.Any())
+                {
+                    var lasteol = eols.Last();
+                    column = newPosition.Index - (lasteol.Position.Index + lasteol.Value.Length);
+                }
+                r.Result.Position.Line = line;
+                r.Result.Position.Column = column;
+                
+            }                        
         }
 
 
