@@ -885,22 +885,36 @@ namespace ParserTests.lexer
             Assert.False(res.IsError);
             var lexer = res.Result;
 
-            var result = lexer.Tokenize(@"1
-2
-3");
+            var result = lexer.Tokenize(@"1 2 
+2 3
+4 5");
             Assert.True(result.IsOk);
-            Assert.Equal(6,result.Tokens.Count);
+            Assert.Equal(9,result.Tokens.Count);
             ;
-            
-            var res2 = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Regex>>());
-            Assert.False(res.IsError);
-            var lexer2 = res.Result;
 
-            var result2 = lexer2.Tokenize(@"1
-2
-3");
-            Assert.True(result2.IsOk);
-            Assert.Equal(6,result2.Tokens.Count);
+            Action<Token<Issue177Generic>,int,int,int> assertToken = (Token<Issue177Generic> Token, int expectedLine, int expectedColumn, int expectedValue) => {
+                Assert.Equal(expectedValue,Token.IntValue);
+                Assert.Equal(expectedLine,Token.Position.Line);
+                Assert.Equal(expectedColumn,Token.Position.Column);
+            };
+            assertToken(result.Tokens[0],0,0,1);
+            assertToken(result.Tokens[1],0,2,2);
+            assertToken(result.Tokens[3],1,0,2);
+            assertToken(result.Tokens[4],1,2,3);
+            assertToken(result.Tokens[6],2,0,4);
+            assertToken(result.Tokens[7],2,2,5);
+
+//             var toks = ToTokens(result);
+            
+//             var res2 = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Regex>>());
+//             Assert.False(res.IsError);
+//             var lexer2 = res.Result;
+
+//             var result2 = lexer2.Tokenize(@"1
+// 2
+// 3");
+//             Assert.True(result2.IsOk);
+//             Assert.Equal(9,result2.Tokens.Count);
             ;
         }
 
