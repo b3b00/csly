@@ -564,29 +564,9 @@ namespace ParserExample
             // TestFactorial();
             // TestThreadsafeGeneric();
             //Test164();
-            Test165();
         }
 
-        public static void Test165()
-        {
-            var StartingRule = $"test_stmt";
-            var parserInstance = new Issue165Parser();
-            var builder = new ParserBuilder<Issue165Lexer, double>();
-            var parserResult = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
-            var parser = parserResult.Result;
-            
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            var r = parser.Parse("a=close[3] / (2 + 2)");
-            sw.Stop();
-            Console.WriteLine($"time : {sw.ElapsedMilliseconds} ms");
-            
-            sw.Start();
-            r = parser.Parse("a= close[3] / 2 + 2");
-            sw.Stop();
-            Console.WriteLine($"time : {sw.ElapsedMilliseconds} ms");
-            ;
-        }
+        
     }
 
     public enum TestGrammarToken
