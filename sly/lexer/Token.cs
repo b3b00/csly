@@ -18,15 +18,16 @@ namespace sly.lexer
         public char CharDelimiter ='\'';
 
 
-        public Token(T token, string value, TokenPosition position, bool isCommentStart = false,
+        public Token(T token, string value, LexerPosition position, bool isCommentStart = false,
             CommentType commentType = CommentType.Single) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType )
         {
             
         }
         
-        public Token(T token, ReadOnlyMemory<char> value, TokenPosition position, bool isCommentStart = false,
+        public Token(T token, ReadOnlyMemory<char> value, LexerPosition position, bool isCommentStart = false,
             CommentType commentType = CommentType.Single)
         {
+            IsEOS = false;
             TokenID = token;
             SpanValue = value;
             Position = position;
@@ -39,13 +40,13 @@ namespace sly.lexer
             IsEOS = true;
             End = true;
             TokenID = DefaultToken;
-            Position = new TokenPosition(0, 0, 0);
+            Position = new LexerPosition(0, 0, 0);
         }
 
 
         public  ReadOnlyMemory<char> SpanValue { get; set; }
         
-        public TokenPosition Position { get; set; }
+        public LexerPosition Position { get; set; }
 
         public int PositionInTokenFlow { get; set; }
         public T TokenID { get; set; }
@@ -133,6 +134,7 @@ namespace sly.lexer
 
         public bool End { get; set; }
         public static T DefTok { get; set; }
+        public bool IsLineEnding { get; set; }
 
         public static Token<T> Empty()
         {
@@ -144,7 +146,12 @@ namespace sly.lexer
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            return $"{TokenID} [{Value}] @{Position}";
+            if (!TokenID.Equals(DefaultToken))
+            {
+                return $"{TokenID} [{Value}] @{Position}";
+            }
+
+            return "<<EOS>>";
         }
     }
 }

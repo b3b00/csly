@@ -150,18 +150,31 @@ namespace sly.lexer
         
         public LexerResult<IN> Tokenize(ReadOnlyMemory<char> memorySource)
         {
+            LexerPosition position = new LexerPosition();
+            
             var tokens = new List<Token<IN>>();
 
-            var r = LexerFsm.Run(memorySource, 0);
+            var r = LexerFsm.Run(memorySource, new LexerPosition());
+            
             if (!r.IsSuccess && !r.IsEOS)
             {
                 var result = r.Result;
                 var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
                 return new LexerResult<IN>(error);
             }
+            if (r.IsSuccess && r.Result.IsComment)
+            {
+                position = r.NewPosition;
+                position = ConsumeComment(r.Result, memorySource, position);
+            }
+            else if (r.IsSuccess && !r.Result.IsComment)
+            {
+                position = r.NewPosition;
+            }
 
             while (r.IsSuccess)
             {
+                ComputePositionWhenIgnoringEOL(r, tokens);
                 var transcoded = Transcode(r);
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
                 {
@@ -170,7 +183,7 @@ namespace sly.lexer
 
                 tokens.Add(transcoded);
 
-                r = LexerFsm.Run(memorySource);
+                r = LexerFsm.Run(memorySource,position);
                 if (!r.IsSuccess && !r.IsEOS)
                 {
                     var result = r.Result;
@@ -178,22 +191,49 @@ namespace sly.lexer
                     return new LexerResult<IN>(error);
                 }
 
-                if (r.IsSuccess && r.Result.IsComment) ConsumeComment(r.Result, memorySource);
+                if (r.IsSuccess && r.Result.IsComment)
+                {
+                    position = r.NewPosition;
+                    position = ConsumeComment(r.Result, memorySource, position);
+                    
+                }
             }
 
             var eos = new Token<IN>();
             var prev = tokens.LastOrDefault();
             if (prev == null)
             {
-                eos.Position = new TokenPosition(1, 0, 0);
+                eos.Position = new LexerPosition(1, 0, 0);
             }
             else
             {
-                eos.Position = new TokenPosition(prev.Position.Index + 1, prev.Position.Line,
+                eos.Position = new LexerPosition(prev.Position.Index + 1, prev.Position.Line,
                     prev.Position.Column + prev.Value.Length);
             }
             tokens.Add(eos);
             return new LexerResult<IN>(tokens);
+        }
+
+        private void ComputePositionWhenIgnoringEOL(FSMMatch<GenericToken> r, List<Token<IN>> tokens)
+        {
+            if (!LexerFsm.IgnoreEOL)            
+            {
+                if (r.IsLineEnding) {
+                    ;
+                }
+                var newPosition = r.Result.Position.Clone();
+                var eols = tokens.Where(t => t.IsLineEnding).ToList();
+                int line = eols.Count;
+                int column = newPosition.Index;
+                if (eols.Any())
+                {
+                    var lasteol = eols.Last();
+                    column = newPosition.Index - (lasteol.Position.Index + lasteol.Value.Length);
+                }
+                r.Result.Position.Line = line;
+                r.Result.Position.Column = column;
+                
+            }                        
         }
 
 
@@ -558,7 +598,8 @@ namespace sly.lexer
 
                 match.Result.SpanValue = value;
 
-
+                match.StringDelimiterChar = stringDelimiterChar;
+                match.IsString = true;
                 if (stringDelimiterChar != escapeStringDelimiterChar)
                 {
                     match.Result.SpanValue = diffCharEscaper(escapeStringDelimiterChar,stringDelimiterChar, match.Result.SpanValue);
@@ -671,7 +712,7 @@ namespace sly.lexer
 
         }
 
-        public void AddSugarLexem(IN token, string specialValue)
+        public void AddSugarLexem(IN token, string specialValue, bool isLineEnding = false)
         {
             if (char.IsLetter(specialValue[0]))
                 throw new InvalidLexerException(
@@ -684,47 +725,50 @@ namespace sly.lexer
 
             FSMBuilder.GoTo(start);
             for (var i = 0; i < specialValue.Length; i++) FSMBuilder.SafeTransition(specialValue[i]);
-            FSMBuilder.End(GenericToken.SugarToken)
+            FSMBuilder.End(GenericToken.SugarToken, isLineEnding)
                 .CallBack(callback);
         }
 
-        public void ConsumeComment(Token<GenericToken> comment, ReadOnlyMemory<char> source)
+        public LexerPosition ConsumeComment(Token<GenericToken> comment, ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
 
             ReadOnlyMemory<char> commentValue;
 
             if (comment.IsSingleLineComment)
             {
-                var position = LexerFsm.CurrentPosition;
+                var position = lexerPosition.Index;
                 commentValue = EOLManager.GetToEndOfLine(source, position);
                 position = position + commentValue.Length;
                 comment.SpanValue = commentValue;
-                LexerFsm.MovePosition(position, LexerFsm.CurrentLine + 1, 0);
+                return new LexerPosition(position, lexerPosition.Line + 1, 0);
+                //LexerFsm.MovePosition(position, LexerFsm.CurrentLine + 1, 0);
             }
             else if (comment.IsMultiLineComment)
             {
-                var position = LexerFsm.CurrentPosition;
+                var position = lexerPosition.Index;
 
                 var end = source.Span.Slice(position).IndexOf(MultiLineCommentEnd.AsSpan());
                 if (end < 0)
                     position = source.Length;
                 else
                     position = end + position;
-                commentValue = source.Slice(LexerFsm.CurrentPosition, position - LexerFsm.CurrentPosition);
+                commentValue = source.Slice(lexerPosition.Index, position - lexerPosition.Index);
                 comment.SpanValue = commentValue;
 
-                var newPosition = LexerFsm.CurrentPosition + commentValue.Length + MultiLineCommentEnd.Length;
+                var newPosition = lexerPosition.Index + commentValue.Length + MultiLineCommentEnd.Length;
                 var lines = EOLManager.GetLinesLength(commentValue);
-                var newLine = LexerFsm.CurrentLine + lines.Count - 1;
+                var newLine = lexerPosition.Line + lines.Count - 1;
                 int newColumn;
                 if (lines.Count > 1)
                     newColumn = lines.Last() + MultiLineCommentEnd.Length;
                 else
-                    newColumn = LexerFsm.CurrentColumn + lines[0] + MultiLineCommentEnd.Length;
+                    newColumn = lexerPosition.Column + lines[0] + MultiLineCommentEnd.Length;
 
-
-                LexerFsm.MovePosition(newPosition, newLine, newColumn);
+                return new LexerPosition(newPosition, newLine, newColumn);
+                // LexerFsm.MovePosition(newPosition, newLine, newColumn);
             }
+
+            return lexerPosition;
         }
 
         public Token<IN> Transcode(FSMMatch<GenericToken> match)
@@ -737,8 +781,10 @@ namespace sly.lexer
             tok.CommentType = inTok.CommentType;
             tok.Position = inTok.Position;
             tok.Discarded = inTok.Discarded;
-            tok.StringDelimiter = StringDelimiterChar;
-            tok.TokenID = (IN)match.Properties[DerivedToken];
+            tok.StringDelimiter = match.StringDelimiterChar;
+            tok.TokenID = (IN) match.Properties[DerivedToken];
+            tok.IsLineEnding = match.IsLineEnding;
+            tok.IsEOS = tok.TokenID.Equals(default(IN));
             return tok;
         }
 
@@ -753,9 +799,5 @@ namespace sly.lexer
             return LexerFsm.ToGraphViz();
         }
         
-        public void ResetLexer()
-        {
-            LexerFsm.Reset();
-        }
     }
 }

@@ -56,7 +56,7 @@ namespace sly.parser.generator
             else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
             {
                 var builder = new EBNFParserBuilder<IN, OUT>();
-                result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule);
+                result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,extensionBuilder);
             }
 
             parser = result.Result;
@@ -289,8 +289,10 @@ namespace sly.parser.generator
                     }
                     else if (clause is OneOrMoreClause<IN> oneOrMore)
                     {
-                        if (oneOrMore.Clause is NonTerminalClause<IN> inner)
-                            found = inner.NonTerminalName == referenceName;
+                        if (oneOrMore.Clause is NonTerminalClause<IN> innerNonTerminal)
+                            found = innerNonTerminal.NonTerminalName == referenceName;
+                        if (oneOrMore.Clause is ChoiceClause<IN> innerChoice && innerChoice.IsNonTerminalChoice)
+                            found = innerChoice.Choices.Where(c => (c as NonTerminalClause<IN>).NonTerminalName == referenceName).Any();
                     }
                     else if (clause is ChoiceClause<IN> choice)
                     {

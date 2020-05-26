@@ -10,7 +10,7 @@ namespace sly.parser.syntax.tree
         public SyntaxNode(string name, List<ISyntaxNode<IN>> children = null, MethodInfo visitor = null)
         {
             Name = name;
-            Children = children == null ? new List<ISyntaxNode<IN>>() : children;
+            Children = children ?? new List<ISyntaxNode<IN>>();
             Visitor = visitor;
         }
 
@@ -34,8 +34,8 @@ namespace sly.parser.syntax.tree
 
         public bool IsExpressionNode => Operation != null;
 
-        public bool IsBinaryOperationNode => IsExpressionNode ? Operation.Affix == Affix.InFix : false;
-        public bool IsUnaryOperationNode => IsExpressionNode ? Operation.Affix != Affix.InFix : false;
+        public bool IsBinaryOperationNode => IsExpressionNode && Operation.Affix == Affix.InFix;
+        public bool IsUnaryOperationNode => IsExpressionNode && Operation.Affix != Affix.InFix;
         public int Precedence => IsExpressionNode ? Operation.Precedence : -1;
 
         public Associativity Associativity =>

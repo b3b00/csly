@@ -284,6 +284,7 @@ namespace sly.parser.llparser
             var currentPosition = position;
             var innerClause = clause.Clause;
             var stillOk = true;
+            
 
             SyntaxParseResult<IN> lastInnerResult = null;
 
@@ -367,6 +368,12 @@ namespace sly.parser.llparser
             {
                 manyNode.IsManyValues = true;
                 firstInnerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
+            }
+            else if (innerClause is ChoiceClause<IN> choice)
+            {
+                manyNode.IsManyTokens = choice.IsTerminalChoice;
+                manyNode.IsManyValues = choice.IsNonTerminalChoice;
+                firstInnerResult = ParseChoice(tokens, choice, currentPosition);
             }
             else
             {
@@ -473,6 +480,7 @@ namespace sly.parser.llparser
             int position)
         {
             var currentPosition = position;
+
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>()
             {
                 IsError = true,

@@ -58,7 +58,6 @@ namespace sly.parser
         public ParseResult<IN, OUT> ParseWithContext(string source, object context, string startingNonTerminal = null)
         {
             ParseResult<IN, OUT> result = null;
-            Lexer.ResetLexer();
             var lexingResult = Lexer.Tokenize(source);
             if (lexingResult.IsError)
             {

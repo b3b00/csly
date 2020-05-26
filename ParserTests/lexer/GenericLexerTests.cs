@@ -275,6 +275,34 @@ namespace ParserTests.lexer
         C,
     }
 
+    [Lexer(IgnoreEOL=false)]
+    public enum Issue177Generic
+    {
+        [Lexeme(GenericToken.SugarToken,"\r\n",IsLineEnding = true)]
+        EOL = 1,
+        
+        [Lexeme(GenericToken.Int)]
+        INT = 2,
+        
+        EOS = 0
+        
+    }
+    
+    [Lexer(IgnoreEOL=false)]
+    public enum Issue177Regex
+    {
+        [Lexeme("\r\n",IsLineEnding = true)]
+        EOL = 1,
+        
+        [Lexeme("\\d+")]
+        INT = 2,
+        
+        EOS = 0
+        
+    }
+    
+    
+
     public class GenericLexerTests
     {
         [Fact]
@@ -619,8 +647,7 @@ namespace ParserTests.lexer
         [Fact]
         public void TestExtensionsPreconditionFailure()
         {
-            var lexerRes =
-                LexerBuilder.BuildLexer(new BuildResult<ILexer<Extensions>>(), ExtendedGenericLexer.AddExtension);
+            var lexerRes  = LexerBuilder.BuildLexer(new BuildResult<ILexer<Extensions>>(), ExtendedGenericLexer.AddExtension);
             Assert.False(lexerRes.IsError);
             var lexer = lexerRes.Result as GenericLexer<Extensions>;
             Assert.NotNull(lexer);
@@ -664,10 +691,12 @@ namespace ParserTests.lexer
             var tok1 = r.Tokens[0];
             Assert.Equal(ManyString.STRING, tok1.TokenID);
             Assert.Equal(expectString1, tok1.Value);
+            Assert.Equal('"',tok1.StringDelimiter);
 
             var tok2 = r.Tokens[1];
             Assert.Equal(ManyString.STRING, tok2.TokenID);
             Assert.Equal(expectString2, tok2.Value);
+            Assert.Equal('\'',tok2.StringDelimiter);
         }
 
         [Fact]
@@ -848,6 +877,46 @@ namespace ParserTests.lexer
             result = lexer.Tokenize("--");
             Assert.True(result.IsOk);
             Assert.Equal("BB0", ToTokens(result));
+        }
+
+        [Fact]
+        public void TestIssue177()
+        {
+            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Generic>>());
+            Assert.False(res.IsError);
+            var lexer = res.Result;
+
+            var result = lexer.Tokenize(@"1 2 
+2 3
+4 5");
+            Assert.True(result.IsOk);
+            Assert.Equal(9,result.Tokens.Count);
+            ;
+
+            Action<Token<Issue177Generic>,int,int,int> assertToken = (Token<Issue177Generic> Token, int expectedLine, int expectedColumn, int expectedValue) => {
+                Assert.Equal(expectedValue,Token.IntValue);
+                Assert.Equal(expectedLine,Token.Position.Line);
+                Assert.Equal(expectedColumn,Token.Position.Column);
+            };
+            assertToken(result.Tokens[0],0,0,1);
+            assertToken(result.Tokens[1],0,2,2);
+            assertToken(result.Tokens[3],1,0,2);
+            assertToken(result.Tokens[4],1,2,3);
+            assertToken(result.Tokens[6],2,0,4);
+            assertToken(result.Tokens[7],2,2,5);
+
+//             var toks = ToTokens(result);
+            
+//             var res2 = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Regex>>());
+//             Assert.False(res.IsError);
+//             var lexer2 = res.Result;
+
+//             var result2 = lexer2.Tokenize(@"1
+// 2
+// 3");
+//             Assert.True(result2.IsOk);
+//             Assert.Equal(9,result2.Tokens.Count);
+            ;
         }
 
         private static string ToTokens<T>(LexerResult<T> result) where T : struct

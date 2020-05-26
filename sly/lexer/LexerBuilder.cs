@@ -232,7 +232,7 @@ namespace sly.lexer
                         {
                             foreach (var param in lexeme.GenericTokenParameters)
                             {
-                                lexer.AddSugarLexem(tokenID, param);
+                                lexer.AddSugarLexem(tokenID, param, lexeme.IsLineEnding);
                             }
                         }
 

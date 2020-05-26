@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using csly.whileLang.compiler;
 using csly.whileLang.interpreter;
 using csly.whileLang.model;
@@ -20,9 +21,26 @@ using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.buildresult;
 using sly.parser.generator.visitor;
+using Xunit;
 
 namespace ParserExample
 {
+    
+    public enum ManyString
+    {
+        [Lexeme(GenericToken.String, "'", "'")]
+        [Lexeme(GenericToken.String)]
+        STRING
+    }
+    
+    public enum DoubleExponent {
+        [Lexeme(GenericToken.Double)]
+        DOUBLE = 1,
+        
+        [Lexeme(GenericToken.Extension)]
+        DOUBLE_EXP = 2
+    }
+    
     public enum TokenType
     {
         [Lexeme("a")] a = 1,
@@ -88,8 +106,8 @@ namespace ParserExample
 
         private static void TestFactorial()
         {
-            var whileParser = new WhileParser();
-            var builder = new ParserBuilder<WhileToken, WhileAST>();
+            var whileParser = new WhileParserGeneric();
+            var builder = new ParserBuilder<WhileTokenGeneric, WhileAST>();
             var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
 
             var program = @"
@@ -98,107 +116,71 @@ namespace ParserExample
     i:=1;
     while i < 11 do 
     (";
-            program += "\nprint \"r=\".r;\n";
+            //program += "\nprint \"r=\".r;\n";
             program += "r := r * i;\n";
-            program += "print \"r=\".r;\n";
-            program += "print \"i=\".i;\n";
+            // program += "print \"r=\".r;\n";
+            // program += "print \"i=\".i;\n";
             program += "i := i + 1 \n);\n";
             program += "return r)\n";
-            var result = Parser.Result.Parse(program);
-            var interpreter = new Interpreter();
-            var context = interpreter.Interprete(result.Result);
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    var result = Parser.Result.Parse(program);
+                    var interpreter = new Interpreter();
+                    var context = interpreter.Interprete(result.Result);
 
-            var compiler = new WhileCompiler();
-            var code = compiler.TranspileToCSharp(program);
-            var f = compiler.CompileToFunction(program);
+                    var compiler = new WhileCompiler();
+                    var code = compiler.TranspileToCSharp(program);
+                    var f = compiler.CompileToFunction(program);
+                    int r = f();
+                    if (r != 3628800)
+                    {
+                        throw new Exception("erreur " + r);
+                    }
+                }
+                catch (Exception e)
+                {
+                    ;
+                }
+            }
         }
 
-
-        private static void testLexerBuilder()
+        private static void TestThreadsafeGeneric()
         {
-            var builder = new FSMLexerBuilder<JsonToken>();
-
-
-            // conf
-            builder.IgnoreWS()
-                .WhiteSpace(' ')
-                .WhiteSpace('\t')
-                .IgnoreEOL();
-
-            // start machine definition
-            builder.Mark("start");
-
-
-            // string literal
-            builder.Transition('\"')
-                .Mark("in_string")
-                .ExceptTransitionTo(new[] { '\"', '\\' }, "in_string")
-                .Transition('\\')
-                .Mark("escape")
-                .AnyTransitionTo(' ', "in_string")
-                .Transition('\"')
-                .End(JsonToken.STRING)
-                .Mark("string_end")
-                .CallBack(match =>
-                {
-                    string upperVAlue = match.Result.Value.ToString().ToUpper();
-                    match.Result.SpanValue = new ReadOnlyMemory<char>(upperVAlue.ToCharArray());
-                    return match;
-                });
-
-            // accolades
-            builder.GoTo("start")
-                .Transition('{')
-                .End(JsonToken.ACCG);
-
-            builder.GoTo("start")
-                .Transition('}')
-                .End(JsonToken.ACCD);
-
-            // corchets
-            builder.GoTo("start")
-                .Transition('[')
-                .End(JsonToken.CROG);
-
-            builder.GoTo("start")
-                .Transition(']')
-                .End(JsonToken.CROD);
-
-            // 2 points
-            builder.GoTo("start")
-                .Transition(':')
-                .End(JsonToken.COLON);
-
-            // comma
-            builder.GoTo("start")
-                .Transition(',')
-                .End(JsonToken.COMMA);
-
-            //numeric
-            builder.GoTo("start")
-                .RangeTransition('0', '9')
-                .Mark("in_int")
-                .RangeTransitionTo('0', '9', "in_int")
-                .End(JsonToken.INT)
-                .Transition('.')
-                .Mark("start_double")
-                .RangeTransition('0', '9')
-                .Mark("in_double")
-                .RangeTransitionTo('0', '9', "in_double")
-                .End(JsonToken.DOUBLE);
-
-
-            var code = "{\n\"d\" : 42.42 ,\n\"i\" : 42 ,\n\"s\" : \"quarante-deux\",\n\"s2\":\"a\\\"b\"\n}";
-            //code = File.ReadAllText("test.json");
-            var lex = builder.Fsm;
-            var r = lex.Run(code, 0);
-            var total = "";
-            while (r.IsSuccess)
+            var whileParser = new WhileParserGeneric();
+            var builder = new ParserBuilder<WhileTokenGeneric, WhileAST>();
+            var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
+            var program = @"
+(
+    r:=1;
+    i:=1;
+    while i < 11 do 
+    (";
+            program += "r := r * i;\n";
+            program += "i := i + 1 \n);\n";
+            program += "return r)\n";
+            for (int i = 0; i < 10; i++)
             {
-                var msg = $"{r.Result.TokenID} : {r.Result.Value} @{r.Result.Position}";
-                total += msg + "\n";
-                Console.WriteLine(msg);
-                r = lex.Run(code);
+                int fixed_i = i; // capture fixed i
+                var t = new Thread(() =>
+                {
+                    try
+                    {
+                        for (int j = 0; j < 10; j++)
+                        {
+                            Console.WriteLine($"{fixed_i}.{j}");
+                            Thread.Sleep(5);
+                            Parser.Result.Parse(program);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        ;
+                    }
+                });
+                t.Start();
+                Console.WriteLine($"thread #{fixed_i} started");
             }
         }
 
@@ -500,7 +482,6 @@ namespace ParserExample
             var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<TestGrammarToken>>();
             var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
             var result = grammarParser.Parse(productionRule);
-            grammarParser.Lexer.ResetLexer();
             //(grammarParser.Lexer as GenericLexer<TestGrammarToken>).ResetLexer();
             Console.WriteLine($"alors ? {string.Join('\n',result.Errors.Select(e => e.ErrorMessage))}");
             result = grammarParser.Parse(productionRule);
@@ -547,66 +528,139 @@ namespace ParserExample
             }
         }
         
-        public static void TestScriptRight()
-        {
-            var parserInstance = new ScriptParserRight();
-            var builder = new ParserBuilder<ScriptToken, object>();
-            var parserBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "test");
-            if (parserBuild.IsOk)
-            {
-                var parser = parserBuild.Result;
-                string ok1 = @"|B|study(""Name or something"", overlay)|E|";
-                string ok2 = "|B|test(close, 123, open)|E|";
-                string kw = "|B|test(kw=123)|E|";
-                string ko1 = "|B|test2(a, b, c=100, d=200)|E|";
-                string ko2 = "|B|plotshape(data, style=shapexcross)|E|";
-                string ko3 = "|B|plotshape(data = default, style=shapexcross)|E|";
-                string badmixko = "|B|plotshape(data = default, t, y=20)|E|";
+        
 
-                // var r = parser.Parse(ok1);
-                // r = parser.Parse(ok2);
-                // r = parser.Parse(kw);
-                var r = parser.Parse("a, b, c=100, d= 200", "fun_actual_args");
-                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
-                var root1 = graphviz.VisitTree(r.SyntaxTree);
-                var graph1 =  graphviz.Graph.Compile();
-                
-                r = parser.Parse(ko1);
-                graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
-                var root = graphviz.VisitTree(r.SyntaxTree);
-                var graph = graphviz.Graph.Compile();
-                r = parser.Parse(ko3);
-                graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
-                root = graphviz.VisitTree(r.SyntaxTree);
-                graph = graphviz.Graph.Compile();
-                r = parser.Parse(badmixko);
-                graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
-                root = graphviz.VisitTree(r.SyntaxTree);
-                graph = graphviz.Graph.Compile();
-            }
-            else
-            {
-                foreach (var e in parserBuild.Errors)
+        private static BuildResult<Parser<ExpressionToken, double>> BuildParserExpression()
+        {
+            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var parserInstance = new SimpleExpressionParser();
+            var builder = new ParserBuilder<ExpressionToken, double>();
+            return builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+        }
+
+        
+        public static void TestAssociativityFactorExpressionParser()
+        {
+            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var Parser = BuildParserExpression();
+            var r = Parser.Result.Parse("1 / 2 / 3", StartingRule);
+            Console.WriteLine($"{r.IsOk} : {r.Result}");
+            ;
+        }
+
+
+        public static void TestManyString()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManyString>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var string1 = "\"hello \\\"world \"";
+            var expectString1 = "\"hello \"world \"";
+            var string2 = "'that''s it'";
+            var expectString2 = "'that's it'";
+            var source1 = $"{string1} {string2}";
+            var r = lexer.Tokenize(source1);
+            Assert.True(r.IsOk);
+            Assert.Equal(3, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
+            Assert.Equal(ManyString.STRING, tok1.TokenID);
+            Assert.Equal(expectString1, tok1.Value);
+            Assert.Equal('"',tok1.StringDelimiter);
+
+            var tok2 = r.Tokens[1];
+            Assert.Equal(ManyString.STRING, tok2.TokenID);
+            Assert.Equal(expectString2, tok2.Value);
+            Assert.Equal('\'',tok2.StringDelimiter);
+        }
+
+        
+        private static void AddExponentExtension(DoubleExponent token, LexemeAttribute lexem, GenericLexer<DoubleExponent> lexer) {
+            if (token == DoubleExponent.DOUBLE_EXP) {
+
+   	
+                // callback on end_exponent node 
+                NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) => 
                 {
-                    Console.WriteLine(e.Level+ " - " + e.Message);
-                }
+                    string[] items = match.Result.Value.Split(new[] {'e', 'E'});
+                    double radix = 0;
+                    double.TryParse(items[0].Replace(".",","), out radix);
+                    double exponent = 0;
+                    double.TryParse(items[1],out exponent);
+                    double value = Math.Pow(radix, exponent);
+                    match.Result.SpanValue = value.ToString().AsMemory();
+                    
+                    match.Properties[GenericLexer<DoubleExponent>.DerivedToken] = DoubleExponent.DOUBLE_EXP;
+                    return match;
+                };
+   	
+                var fsmBuilder = lexer.FSMBuilder;
+
+   	
+                fsmBuilder.GoTo(GenericLexer<DoubleExponent>.in_double) // start a in_double node
+                    .Transition(new char[] {'E','e'}) // add a transition on '.' with precondition
+                    .Transition(new char[]{'+','-'})
+                    .Mark("start_exponent_val")
+                    .RangeTransitionTo('0','9',"start_exponent_val") // first year digit
+                    .Mark("end_exponent")
+                    .End(GenericToken.Extension) // mark as ending node 
+                    .CallBack(callback); // set the ending callback
+            }
+        }
+        
+        private static void TestDoubleExponent()
+        {
+            var lex = LexerBuilder.BuildLexer<DoubleExponent>(AddExponentExtension);
+            if (lex.IsOk)
+            {
+                var one = lex.Result.Tokenize("2.0E+2");
+                ;
+                var two = lex.Result.Tokenize("4.0e-2");
+                ;
             }
         }
 
+        public static void Test164() {
+            var Parser = BuildParserExpression();
+            var result = Parser.Result.Parse("1(1");
+            if (result.IsError)
+            {
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+            }
+
+            
+            Console.WriteLine("hey ! Rodriguez !")
+            ;
+        }
+        
         private static void Main(string[] args)
         {
             //TestContextualParser();
             //TestTokenCallBacks();
             //test104();
-            //testJSON();
+            // testJSON();
            //TestGrammarParser();
             // TestGraphViz();
 
             // TestGraphViz();
-//            TestChars();
-            TestScript();
-            TestScriptRight();
+            // TestChars();
+            //TestAssociativityFactorExpressionParser();
+
+            // TestFactorial();
+            //TestThreadsafeGeneric();
+            // TestManyString();
+            
+            TestDoubleExponent();
+
+
+            // TestFactorial();
+            // TestThreadsafeGeneric();
+            //Test164();
         }
+
+        
     }
 
     public enum TestGrammarToken
@@ -614,6 +668,8 @@ namespace ParserExample
         [Lexeme(GenericToken.SugarToken,",")]
         COMMA = 1
     }
+    
+    
 
     public class ErroneousGrammar
     {

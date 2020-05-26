@@ -388,6 +388,7 @@ namespace sly.parser.llparser
             SyntaxParseResult<IN> okResult = null;
             var greaterIndex = 0;
             var allRulesInError = true;
+            var test = new List<SyntaxParseResult<IN>>();
             while (i < rules.Count)
             {
                 var innerrule = rules[i];
@@ -399,6 +400,10 @@ namespace sly.parser.llparser
                     okResult.Errors = innerRuleRes.Errors;
                     endingPosition = innerRuleRes.EndingPosition;
                 }
+                else
+                {
+                    test.Add(innerRuleRes);
+                }
 
                 var other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
                 if (innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null &&
@@ -408,7 +413,7 @@ namespace sly.parser.llparser
                     innerRuleErrors.Clear();
                     innerRuleErrors.AddRange(innerRuleRes.Errors);
                 }
-
+               
                 innerRuleErrors.AddRange(innerRuleRes.Errors);
                 allRulesInError = allRulesInError && innerRuleRes.IsError;
                 i++;
@@ -433,8 +438,18 @@ namespace sly.parser.llparser
                 result.Errors = errors;
                 greaterIndex = errors.Count > 0 ? errors.Select(e => e.UnexpectedToken.PositionInTokenFlow).Max() : 0;
                 result.EndingPosition = greaterIndex;
+                result.AddExpectings(errors.SelectMany(e => e.ExpectedTokens));
             }
 
+            if (test.Any())
+            {
+                var terr = test.SelectMany(x => x.Errors).ToList();
+                var unexpected = terr.OfType<UnexpectedTokenSyntaxError<IN>>().ToList();
+                var expecting = unexpected.SelectMany(x => x.ExpectedTokens).ToList();
+                result.AddExpectings(expecting);
+                ;
+            }
+            
             return result;
         }
 

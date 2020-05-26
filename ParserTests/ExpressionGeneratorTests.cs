@@ -20,7 +20,7 @@ namespace ParserTests
             StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
-            Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+            Parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
         }
 
         [Fact]
@@ -76,12 +76,12 @@ namespace ParserTests
             Assert.Equal(3, nt.Rules.Count);
             Assert.Contains("primary_value", nt.Name);
             nt = nonterminals[2];
-            Assert.Equal(3, nt.Rules.Count);
+            Assert.Equal(2, nt.Rules.Count);
             Assert.Contains("10", nt.Name);
             Assert.Contains("PLUS", nt.Name);
             Assert.Contains("MINUS", nt.Name);
             nt = nonterminals[3];
-            Assert.Equal(3, nt.Rules.Count);
+            Assert.Equal(2, nt.Rules.Count);
             Assert.Contains("50", nt.Name);
             Assert.Contains("TIMES", nt.Name);
             Assert.Contains("DIVIDE", nt.Name);

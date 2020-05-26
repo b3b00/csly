@@ -1,8 +1,9 @@
 # C# Lex Yacc #
 
-[![Build status](https://ci.appveyor.com/api/projects/status/n9uffgkqn2qet7k9?svg=true)](https://ci.appveyor.com/project/OlivierDuhart/sly)
-![AppVeyor tests (compact)](https://img.shields.io/appveyor/tests/OlivierDuhart/sly.svg?compact_message)
+
+![Test status](http://teststatusbadge.azurewebsites.net/api/status/mmaitre314/securestringcodegen)
 [![coveralls](https://coveralls.io/repos/github/b3b00/csly/badge.svg?branch=dev)](https://coveralls.io/github/b3b00/csly?branch=dev)
+![.NET Core](https://github.com/b3b00/csly/workflows/.NET%20Core/badge.svg)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fb3b00%2Fcsly.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fb3b00%2Fcsly?ref=badge_shield)
 
 
@@ -10,10 +11,10 @@
 [![NuGet](https://img.shields.io/nuget/v/sly.svg)](https://www.nuget.org/packages/sly)
 
 
-:warning: This readme is a bit out of date. Go to to the [wiki](https://github.com/b3b00/csly/wiki) for a more up to date documentation.
+## TLDR; [Getting started](https://github.com/b3b00/csly/wiki/getting-started) ##
 
- CSLY is a parser generator halfway between parser combinators and parser generator like Yacc or ANTLR 
-
+a [quick getting started](https://github.com/b3b00/csly/wiki/getting-started) will guide you through the implementation of a dumb parser
+ 
 
 ## Why? ##
 
