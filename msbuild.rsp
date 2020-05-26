@@ -1,0 +1,1 @@
+/p:coverletOutput=./lcov /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:exclude="[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*" ParserTests/ParserTests.csproj
