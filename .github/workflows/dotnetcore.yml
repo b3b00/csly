@@ -20,11 +20,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.101   
-    - name: Build with dotnet -c Debug -f netcoreapp2.0
+    - name: Build with dotnet 
       run: dotnet build --configuration Release 
     - name: Test with dotnet
-      run: dotnet test -c Debug 
-      # -c Release --no-build /p:coverletOutput=./lcov /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:exclude='[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*' ParserTests/ParserTests.csproj 
+      run: dotnet test -c Debug  #uses msbuild.rsp for coverlet configuration
     - name: coveralls
       uses: coverallsapp/github-action@v1.1.1
       with:
