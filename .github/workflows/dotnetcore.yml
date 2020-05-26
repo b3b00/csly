@@ -18,9 +18,7 @@ jobs:
       with:
         dotnet-version: 3.1.101   
     - name: Build with dotnet -c Debug -f netcoreapp2.0
-      run: dotnet build --configuration Debug    
-    - name: debug test
-      run: ls ParserTests/bin/Debug/*
+      run: dotnet build --configuration Release 
     - name: Test with dotnet
       run: dotnet test -c Debug 
       # -c Release --no-build /p:coverletOutput=./lcov /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:exclude='[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*' ParserTests/ParserTests.csproj 
