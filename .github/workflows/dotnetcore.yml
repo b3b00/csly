@@ -33,7 +33,7 @@ jobs:
       with:
           VERSION_REGEX: <version>(.*)<\/version>  
           PROJECT_FILE_PATH: sly/sly.csproj
-          NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+          NUGET_KEY: ${{ secrets.NUGET_KEY }}
     - name: Create Release
       if: ${{ success() }}
       id: create_release
