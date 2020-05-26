@@ -38,7 +38,7 @@ jobs:
           NUGET_KEY: ${{ secrets.NUGET_KEY }}
           VERSION_FILE_PATH: sly/sly.csproj
     - name: Create Release
-      if: ${{ success() }}
+      if: ${{ success() && steps.publish_nuget.outputs.VERSION != '' && steps.publish_nuget.outputs.VERSION != undefined && steps.publish_nuget.outputs.VERSION != null }}
       id: create_release
       uses: actions/create-release@latest
       env:
