@@ -31,7 +31,7 @@ jobs:
    #     path-to-lcov: ./lcov 
     - name: push
       id: publish_nuget
-      uses: rohith/publish-nuget@v2
+      uses: brandedoutcast/publish-nuget@v2.5.2
       with:
           VERSION_REGEX: <version>(.*)<\/version>  
           PROJECT_FILE_PATH: sly/sly.csproj
