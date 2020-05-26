@@ -19,3 +19,38 @@ jobs:
         dotnet-version: 3.1.101   
     - name: Build with dotnet
       run: dotnet build --configuration Release
+    - name: Test with dotnet
+      run: dotnet test # -c Release --no-build /p:coverletOutput=./lcov /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:exclude='[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*' ParserTests/ParserTests.csproj 
+    #- name: coveralls
+    #  uses: coverallsapp/github-action@v1.1.1
+   #   with:
+   #     github-token: ${{ secrets.GITHUB_TOKEN }} 
+   #     path-to-lcov: ./lcov 
+    - name: push
+      id: publish_nuget
+      uses: rohith/publish-nuget@v2
+      with:
+          VERSION_REGEX: <version>(.*)<\/version>  
+          PROJECT_FILE_PATH: sly/sly.csproj
+          NUGET_KEY: ${{ secrets.NUGET_API_KEY }}
+    - name: Create Release
+      if: ${{ success() }}
+      id: create_release
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.publish_nuget.outputs.VERSION }}
+        release_name: Release ${{ steps.publish_nuget.outputs.VERSION }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.publish_nuget.outputs.PACKAGE_PATH }}
+        asset_name: ${{ steps.publish_nuget.outputs.PACKAGE_NAME }}
+        asset_content_type: application/zip
