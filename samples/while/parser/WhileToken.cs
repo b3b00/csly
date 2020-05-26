@@ -2,7 +2,7 @@
 
 namespace csly.whileLang.parser
 {
-    public enum WhileToken
+    public enum WhileToken    
     {
         #region keywords 0 -> 19
 

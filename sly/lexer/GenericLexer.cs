@@ -155,6 +155,7 @@ namespace sly.lexer
             var tokens = new List<Token<IN>>();
 
             var r = LexerFsm.Run(memorySource, new LexerPosition());
+            
             if (!r.IsSuccess && !r.IsEOS)
             {
                 var result = r.Result;
@@ -173,6 +174,7 @@ namespace sly.lexer
 
             while (r.IsSuccess)
             {
+                ComputePositionWhenIgnoringEOL(r, tokens);
                 var transcoded = Transcode(r);
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
                 {
@@ -184,7 +186,6 @@ namespace sly.lexer
                 r = LexerFsm.Run(memorySource,position);
                 if (!r.IsSuccess && !r.IsEOS)
                 {
-                    
                     var result = r.Result;
                     var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
                     return new LexerResult<IN>(error);
@@ -194,6 +195,7 @@ namespace sly.lexer
                 {
                     position = r.NewPosition;
                     position = ConsumeComment(r.Result, memorySource, position);
+                    
                 }
             }
 
@@ -210,6 +212,28 @@ namespace sly.lexer
             }
             tokens.Add(eos);
             return new LexerResult<IN>(tokens);
+        }
+
+        private void ComputePositionWhenIgnoringEOL(FSMMatch<GenericToken> r, List<Token<IN>> tokens)
+        {
+            if (!LexerFsm.IgnoreEOL)            
+            {
+                if (r.IsLineEnding) {
+                    ;
+                }
+                var newPosition = r.Result.Position.Clone();
+                var eols = tokens.Where(t => t.IsLineEnding).ToList();
+                int line = eols.Count;
+                int column = newPosition.Index;
+                if (eols.Any())
+                {
+                    var lasteol = eols.Last();
+                    column = newPosition.Index - (lasteol.Position.Index + lasteol.Value.Length);
+                }
+                r.Result.Position.Line = line;
+                r.Result.Position.Column = column;
+                
+            }                        
         }
 
 
@@ -688,7 +712,7 @@ namespace sly.lexer
 
         }
 
-        public void AddSugarLexem(IN token, string specialValue)
+        public void AddSugarLexem(IN token, string specialValue, bool isLineEnding = false)
         {
             if (char.IsLetter(specialValue[0]))
                 throw new InvalidLexerException(
@@ -701,7 +725,7 @@ namespace sly.lexer
 
             FSMBuilder.GoTo(start);
             for (var i = 0; i < specialValue.Length; i++) FSMBuilder.SafeTransition(specialValue[i]);
-            FSMBuilder.End(GenericToken.SugarToken)
+            FSMBuilder.End(GenericToken.SugarToken, isLineEnding)
                 .CallBack(callback);
         }
 
@@ -759,6 +783,7 @@ namespace sly.lexer
             tok.Discarded = inTok.Discarded;
             tok.StringDelimiter = match.StringDelimiterChar;
             tok.TokenID = (IN) match.Properties[DerivedToken];
+            tok.IsLineEnding = match.IsLineEnding;
             tok.IsEOS = tok.TokenID.Equals(default(IN));
             return tok;
         }

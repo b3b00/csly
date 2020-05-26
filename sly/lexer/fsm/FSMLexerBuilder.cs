@@ -107,7 +107,7 @@ namespace sly.lexer.fsm
 
         #region NODES
 
-        public FSMLexerBuilder<N> End(N nodeValue)
+        public FSMLexerBuilder<N> End(N nodeValue, bool isLineEnding = false)
         {
             if (Fsm.HasState(CurrentState))
             {
@@ -115,6 +115,7 @@ namespace sly.lexer.fsm
 
                 node.IsEnd = true;
                 node.Value = nodeValue;
+                node.IsLineEnding = isLineEnding;
             }
 
             return this;

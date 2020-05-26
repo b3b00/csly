@@ -548,6 +548,7 @@ namespace ParserExample
             ;
         }
 
+
         public static void TestManyString()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManyString>>());
@@ -617,6 +618,22 @@ namespace ParserExample
                 ;
             }
         }
+
+        public static void Test164() {
+            var Parser = BuildParserExpression();
+            var result = Parser.Result.Parse("1(1");
+            if (result.IsError)
+            {
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+            }
+
+            
+            Console.WriteLine("hey ! Rodriguez !")
+            ;
+        }
         
         private static void Main(string[] args)
         {
@@ -630,13 +647,20 @@ namespace ParserExample
             // TestGraphViz();
             // TestChars();
             //TestAssociativityFactorExpressionParser();
+
             // TestFactorial();
             //TestThreadsafeGeneric();
             // TestManyString();
             
             TestDoubleExponent();
 
+
+            // TestFactorial();
+            // TestThreadsafeGeneric();
+            //Test164();
         }
+
+        
     }
 
     public enum TestGrammarToken

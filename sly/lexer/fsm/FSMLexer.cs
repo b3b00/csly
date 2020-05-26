@@ -168,7 +168,7 @@ namespace sly.lexer.fsm
                 if (currentNode.IsEnd)
                 {
                     // Remember the possible match
-                    result = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id,lexerPosition);
+                    result = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id,lexerPosition, currentNode.IsLineEnding);
                 }
 
                 lexerPosition.Index++;
@@ -198,7 +198,7 @@ namespace sly.lexer.fsm
             }
 
             var errorChar = source.Slice(lexerPosition.Index, 1);
-            var ko = new FSMMatch<N>(false, default(N), errorChar, lexerPosition, -1,lexerPosition);
+            var ko = new FSMMatch<N>(false, default(N), errorChar, lexerPosition, -1,lexerPosition, false);
             return ko;
         }
 

@@ -20,18 +20,23 @@ namespace sly.lexer.fsm
         public int NodeId { get; }
 
         public LexerPosition NewPosition { get; }
+        
+        public bool IsLineEnding { get; set; }
 
         public FSMMatch(bool success)
         {
             IsSuccess = success;
             IsEOS = !success;
         }
+        
+        
 
-        public FSMMatch(bool success, N result, string value, LexerPosition position, int nodeId, LexerPosition newPosition)
-            : this(success, result, new ReadOnlyMemory<char>(value.ToCharArray()), position, nodeId,newPosition)
+        public FSMMatch(bool success, N result, string value, LexerPosition position, int nodeId, LexerPosition newPosition, bool isLineEnding)
+            : this(success, result, new ReadOnlyMemory<char>(value.ToCharArray()), position, nodeId,newPosition,isLineEnding)
         { }
 
-        public FSMMatch(bool success, N result, ReadOnlyMemory<char> value, LexerPosition position, int nodeId, LexerPosition newPosition)
+        public FSMMatch(bool success, N result, ReadOnlyMemory<char> value, LexerPosition position, int nodeId,
+            LexerPosition newPosition, bool isLineEnding)
         {
             Properties = new Dictionary<string, object>();
             IsSuccess = success;
@@ -39,6 +44,9 @@ namespace sly.lexer.fsm
             IsEOS = false;
             Result = new Token<N>(result, value, position);
             NewPosition = newPosition;
+            IsLineEnding = isLineEnding;
         }
+
+        
     }
 }

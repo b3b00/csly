@@ -134,6 +134,7 @@ namespace sly.lexer
 
         public bool End { get; set; }
         public static T DefTok { get; set; }
+        public bool IsLineEnding { get; set; }
 
         public static Token<T> Empty()
         {
