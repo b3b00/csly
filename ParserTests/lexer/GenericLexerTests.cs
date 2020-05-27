@@ -812,7 +812,7 @@ namespace ParserTests.lexer
             Assert.True(r.IsOk);
             var tokens = r.Tokens;
             Assert.NotNull(tokens);
-            Assert.Equal(3, tokens.Count);
+            Assert.Equal(2, tokens.Count);
             var token = tokens[0];
             Assert.Equal(Issue106.Integer, token.TokenID);
             Assert.Equal(1, token.IntValue);

@@ -1,1 +1,1 @@
-/p:coverletOutput=./lcov /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:exclude="[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*" ParserTests/ParserTests.csproj
+/p:coverletOutput=./lcov /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:exclude="[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*" --logger "GitHubActions;report-warnings=false" ParserTests/ParserTests.csproj 
