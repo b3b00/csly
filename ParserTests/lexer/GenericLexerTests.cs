@@ -278,9 +278,12 @@ namespace ParserTests.lexer
     [Lexer(IgnoreEOL=false)]
     public enum Issue177Generic
     {
-        [Lexeme(GenericToken.SugarToken,"\r\n",IsLineEnding = true)]
+        [Lexeme(GenericToken.SugarToken,"\n",IsLineEnding = true)]
         EOL = 1,
-        
+
+        [Lexeme(GenericToken.SugarToken,"\r\n",IsLineEnding = true)]
+        EOL_WIN = 7,
+
         [Lexeme(GenericToken.Int)]
         INT = 2,
         
