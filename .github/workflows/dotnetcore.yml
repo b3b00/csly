@@ -28,6 +28,7 @@ jobs:
       run: dotnet test -c Debug  #uses msbuild.rsp for coverlet configuration
     - name: coveralls
       uses: coverallsapp/github-action@v1.1.1
+      if: matrix.os == 'windows-latest'
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }} 
         path-to-lcov: ./ParserTests/lcov.info 
@@ -40,7 +41,7 @@ jobs:
           NUGET_KEY: ${{ secrets.NUGET_KEY }}
           VERSION_FILE_PATH: sly/sly.csproj
     - name: Create Release
-      if: ${{ success() && steps.publish_nuget.outputs.VERSION != ''  && steps.publish_nuget.outputs.VERSION != null }}
+      if: ${{ success() && matrix.os == 'windows-latest' && steps.publish_nuget.outputs.VERSION != ''  && steps.publish_nuget.outputs.VERSION != null }}
       id: create_release
       uses: actions/create-release@latest
       env:
@@ -51,7 +52,7 @@ jobs:
         draft: false
         prerelease: false
     - name: Upload Release Asset
-      if: ${{ success() && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
+      if: ${{ success() && matrix.os == 'windows-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
