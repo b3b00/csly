@@ -50,7 +50,13 @@ namespace sly.parser.generator
             parser.Configuration = configuration;
             var lexerResult = BuildLexer(extensionBuilder);
             if (lexerResult.IsError)
-                result.AddErrors(lexerResult.Errors);
+            {
+                foreach (var lexerResultError in lexerResult.Errors)
+                {
+                    result.AddError(new InitializationError(ErrorLevel.ERROR,lexerResultError.Message));
+                }
+                return result;
+            }
             else
                 parser.Lexer = lexerResult.Result;
             parser.Instance = parserInstance;

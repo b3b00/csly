@@ -75,19 +75,14 @@ namespace sly.lexer
 
             if (hasGenericLexemes && hasRegexLexemes)
             {
-                result.AddError(new LexerInitializationError(ErrorLevel.WARN,
+                result.AddError(new LexerInitializationError(ErrorLevel.ERROR,
                     "cannot mix Regex lexemes and Generic lexemes in same lexer"));
             }
             else
             {
                 if (hasRegexLexemes)
-                {
                     result = BuildRegexLexer(attributes, result);
-                }
-                else if (hasGenericLexemes)
-                {
-                    result = BuildGenericLexer(attributes, extensionBuilder, result);
-                }
+                else if (hasGenericLexemes) result = BuildGenericLexer(attributes, extensionBuilder, result);
             }
 
             return result;
@@ -96,13 +91,13 @@ namespace sly.lexer
         private static bool IsRegexLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes)
         {
             return attributes.Values.SelectMany(list => list)
-                             .Any(lexeme => !string.IsNullOrEmpty(lexeme.Pattern));
+                .Any(lexeme => !string.IsNullOrEmpty(lexeme.Pattern));
         }
 
         private static bool IsGenericLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes)
         {
             return attributes.Values.SelectMany(list => list)
-                             .Any(lexeme => lexeme.GenericToken != default(GenericToken));
+                .Any(lexeme => lexeme.GenericToken != default);
         }
 
 
