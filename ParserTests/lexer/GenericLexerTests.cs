@@ -291,6 +291,26 @@ namespace ParserTests.lexer
         
     }
     
+    [Lexer]
+    public enum Issue186MixedGenericAndRegexLexer
+    {
+        [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)]
+        ID = 1,
+
+        [Lexeme("[0-9]+")]
+        
+        INT = 2
+    }
+
+    public class Issue186MixedGenericAndRegexParser
+    {
+        [Production("root : INT")]
+        public object root(Token<Issue186MixedGenericAndRegexLexer> integer)
+        {
+            return null;
+        }
+    }
+    
     [Lexer(IgnoreEOL=false)]
     public enum Issue177Regex
     {

@@ -48,7 +48,14 @@ namespace sly.parser.generator
                 parser = new Parser<IN, OUT>(syntaxParser, visitor);
                 var lexerResult = BuildLexer(extensionBuilder);
                 parser.Lexer = lexerResult.Result;
-                if (lexerResult.IsError) result.AddErrors(lexerResult.Errors);
+                if (lexerResult.IsError)
+                {
+                    foreach (var lexerResultError in lexerResult.Errors)
+                    {
+                        result.AddError(new InitializationError(ErrorLevel.ERROR,lexerResultError.Message));
+                    }
+                    return result;
+                }
                 parser.Instance = parserInstance;
                 parser.Configuration = configuration;
                 result.Result = parser;
@@ -56,7 +63,8 @@ namespace sly.parser.generator
             else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
             {
                 var builder = new EBNFParserBuilder<IN, OUT>();
-                result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,extensionBuilder);
+                result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,
+                    extensionBuilder);
             }
 
             parser = result.Result;
