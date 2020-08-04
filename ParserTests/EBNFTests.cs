@@ -370,6 +370,47 @@ namespace ParserTests
         }
     }
 
+    [Lexer]
+    public enum Issue190Token
+    {
+        EOF = 0,
+        
+        [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)]
+        ID = 1,
+        
+        [Lexeme(GenericToken.KeyWord,"not")]
+        NOT = 2,
+        
+        [Lexeme(GenericToken.KeyWord,"true")]
+        TRUE = 3,
+        
+        [Lexeme(GenericToken.KeyWord,"false")]
+        FALSE = 4,
+        
+        [Lexeme(GenericToken.KeyWord,"yes")]
+        YES = 5,
+        
+        [Lexeme(GenericToken.KeyWord,"no")]
+        NO = 6
+        
+    }
+
+    public class Issue190parser
+    {
+        [Production("root: NOT? [TRUE | FALSE | YES | NO]")]
+        public bool BooleanValue(Token<Issue190Token> notToken, Token<Issue190Token> valueToken)
+        {
+            bool value = valueToken.TokenID == Issue190Token.YES || valueToken.TokenID == Issue190Token.TRUE;
+            if (!notToken.IsEmpty)
+            {
+                value = !value;
+            }
+
+            return value;
+        }
+
+    }
+
     public class EBNFTests
     {
         public enum TokenType
@@ -1006,6 +1047,23 @@ namespace ParserTests
             Assert.Contains("mixed", builtParser.Errors[0].Message);
             Assert.Contains("discarded", builtParser.Errors[1].Message);
             
+        }
+
+        [Fact]
+        public void TestIssue190()
+        {
+            var startingRule = $"root";
+            var parserInstance = new Issue190parser();
+            var builder = new ParserBuilder<Issue190Token, bool>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Assert.False(builtParser.IsError);
+            var parser = builtParser.Result;
+            var parserResultNotTrue = parser.Parse("not true");
+            Assert.True(parserResultNotTrue.IsOk);
+            Assert.False(parserResultNotTrue.Result);
+            var parserResultTrue = parser.Parse("yes");
+            Assert.True(parserResultTrue.IsOk);
+            Assert.True(parserResultTrue.Result);
         }
     }
 }
