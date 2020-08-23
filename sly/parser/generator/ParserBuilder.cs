@@ -366,6 +366,69 @@ namespace sly.parser.generator
             return result;
         }
 
+        private static BuildResult<Parser<IN, OUT>> CheckVisitorsSignature(BuildResult<Parser<IN, OUT>> result,
+            NonTerminal<IN> nonTerminal)
+        {
+            foreach (var rule in nonTerminal.Rules)
+            {
+                result = CheckVisitorSignature<IN,OUT>(result, rule);
+            }
+            
+            return result;
+        }
+
+        
+        private static BuildResult<Parser<IN, OUT>> CheckVisitorSignature<IN,OUT>(BuildResult<Parser<IN, OUT>> result,
+            Rule<IN> rule) where IN: struct
+        {
+            if (rule.IsExpressionRule)
+            {
+                var visitor = rule.GetVisitor();
+                var returnInfo = visitor.ReturnParameter;
+                if (!returnInfo.ParameterType.IsSubclassOf(typeof(OUT)))
+                {
+                    result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor ${visitor.Name} for rule {rule.RuleString} has incorrect return type : expectec {typeof(OUT)}, found {returnInfo.ParameterType.Name}"));
+                }
+
+                foreach (var clause in rule.Clauses)
+                {
+                    switch (clause)
+                    {
+                        case TerminalClause<IN> terminal:
+                        {
+                            break;
+                        }
+                        case NonTerminal<IN> nonTerminal:
+                        {
+                            break;
+                        }
+                        case ManyClause<IN> many:
+                        {
+                            break;
+                        }
+                        case GroupClause<IN> group:
+                        {
+                            break;
+                        }
+                        case OptionClause<IN> option:
+                        {
+                            break;
+                        }
+                        default:
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // TODO expressions  
+            }
+
+            return result;
+        }
+
         #endregion
     }
 }
