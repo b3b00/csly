@@ -29,7 +29,7 @@ namespace ParserTests
         
     }
 
-    public interface SubBadVisitor
+    public interface SubBadVisitor : BadVisitor
     {
         
     }
@@ -46,7 +46,7 @@ namespace ParserTests
     public class BadTerminalArgParser
     {
         [Production("badtermarg : A B")]
-        public SubBadVisitor BadReturn(string a, Token<BadVisitorTokens> b)
+        public SubBadVisitor BadReturn(string aArg, Token<BadVisitorTokens> bArg)
         {
             return null;
         }
@@ -134,15 +134,17 @@ namespace ParserTests
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badtermarg");
             Assert.True(result.IsError);
             Assert.Single(result.Errors);
-            Assert.Contains("incorrect return type", result.Errors.First().Message);
-            Assert.Contains("visitor BadReturn", result.Errors.First().Message);
+            //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
+            Assert.Contains("parameter aArg has incorrect type", result.Errors.First().Message);
             
-            result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badreturn");
+            result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badtermarg");
             Assert.True(result.IsError);
             Assert.Single(result.Errors);
-            Assert.Contains("incorrect return type", result.Errors.First().Message);
-            Assert.Contains("visitor BadReturn", result.Errors.First().Message);
-            ;
+            //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
+            Assert.Contains("parameter aArg has incorrect type", result.Errors.First().Message);
+            
+            
+           
         }
     }
 }
