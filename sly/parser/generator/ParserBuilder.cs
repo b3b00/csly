@@ -180,7 +180,7 @@ namespace sly.parser.generator
         private Rule<IN> BuildNonTerminal(Tuple<string, string> ntAndRule)
         {
             var rule = new Rule<IN>();
-
+            rule.RuleString = $"{ntAndRule.Item1} : {ntAndRule.Item2}";
             var clauses = new List<IClause<IN>>();
             var ruleString = ntAndRule.Item2;
             var clausesString = ruleString.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
@@ -238,6 +238,7 @@ namespace sly.parser.generator
             checkers.Add(CheckUnreachable);
             checkers.Add(CheckNotFound);
             checkers.Add(CheckAlternates);
+            checkers.Add(CheckVisitorsSignature);
 
             if (result.Result != null && !result.IsError)
                 foreach (var checker in checkers)
@@ -381,13 +382,13 @@ namespace sly.parser.generator
         private static BuildResult<Parser<IN, OUT>> CheckVisitorSignature<IN,OUT>(BuildResult<Parser<IN, OUT>> result,
             Rule<IN> rule) where IN: struct
         {
-            if (rule.IsExpressionRule)
+            if (!rule.IsExpressionRule)
             {
                 var visitor = rule.GetVisitor();
                 var returnInfo = visitor.ReturnParameter;
                 if (!returnInfo.ParameterType.IsSubclassOf(typeof(OUT)))
                 {
-                    result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor ${visitor.Name} for rule {rule.RuleString} has incorrect return type : expectec {typeof(OUT)}, found {returnInfo.ParameterType.Name}"));
+                    result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expectec {typeof(OUT)}, found {returnInfo.ParameterType.Name}"));
                 }
 
                 foreach (var clause in rule.Clauses)

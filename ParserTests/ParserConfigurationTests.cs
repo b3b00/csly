@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using expressionparser;
 using sly.buildresult;
 using sly.lexer;
@@ -13,6 +14,22 @@ namespace ParserTests
         [Lexeme("b")] Good = 2,
 
         MissingLexeme = 3
+    }
+
+    public enum Tokens
+    {
+        [Lexeme("a")] A = 1,
+        [Lexeme("b")] B = 2,
+        [Lexeme("c")] C = 3,
+    }
+    
+    public class BadReturnParser {
+
+        [Production("badreturn : A B")]
+        public string BadReturn(Token<Tokens> a, Token<Tokens> b)
+        {
+            return "toto";
+        }
     }
 
     public class ParserConfigurationTests
@@ -68,6 +85,25 @@ namespace ParserTests
             var warnMessage = warnings[0].Message;
             Assert.True(warnMessage.Contains(BadTokens.MissingLexeme.ToString()) &&
                         warnMessage.Contains("not have Lexeme"));
+        }
+
+        [Fact]
+        public void TestBadVisitorReturn()
+        {
+            var instance = new BadReturnParser();
+            ParserBuilder<Tokens,List<string>> builder = new ParserBuilder<Tokens, List<string>>();
+            var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badreturn");
+            Assert.True(result.IsError);
+            Assert.Single(result.Errors);
+            Assert.Contains("incorrect return type", result.Errors.First().Message);
+            Assert.Contains("visitor BadReturn", result.Errors.First().Message);
+            
+            result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badreturn");
+            Assert.True(result.IsError);
+            Assert.Single(result.Errors);
+            Assert.Contains("incorrect return type", result.Errors.First().Message);
+            Assert.Contains("visitor BadReturn", result.Errors.First().Message);
+            ;
         }
     }
 }
