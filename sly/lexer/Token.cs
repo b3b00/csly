@@ -39,7 +39,6 @@ namespace sly.lexer
         {
             IsEOS = true;
             End = true;
-            TokenID = DefaultToken;
             Position = new LexerPosition(0, 0, 0);
         }
 

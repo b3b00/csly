@@ -634,6 +634,24 @@ namespace ParserExample
             Console.WriteLine("hey ! Rodriguez !")
             ;
         }
+
+        public static void Test192()
+        {
+            var  parser = Issue192.CreateBlockParser();
+            var t = parser.Parse("A1   B2   ");
+            if (t.IsOk)
+            {
+                Console.WriteLine("OK");
+                ;
+            }
+            else
+            {
+                Console.WriteLine("KO");
+                t.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+                ;
+            }
+            ;
+        }
         
         private static void Main(string[] args)
         {
@@ -652,8 +670,8 @@ namespace ParserExample
             //TestThreadsafeGeneric();
             // TestManyString();
             
-            TestDoubleExponent();
-
+          //  TestDoubleExponent();
+Test192();
 
             // TestFactorial();
             // TestThreadsafeGeneric();

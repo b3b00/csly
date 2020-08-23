@@ -298,7 +298,7 @@ namespace sly.parser.llparser
                 result.Root = node;
                 result.IsEnded = result.EndingPosition >= tokens.Count - 1
                                  || result.EndingPosition == tokens.Count - 2 &&
-                                 tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                                 tokens[tokens.Count - 1].IsEOS;
                 
             }
 

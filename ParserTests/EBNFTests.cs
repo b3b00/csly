@@ -1065,5 +1065,25 @@ namespace ParserTests
             Assert.True(parserResultTrue.IsOk);
             Assert.True(parserResultTrue.Result);
         }
+
+        [Fact]
+        public void TestIssue193()
+        {
+            var builtParser = BuildParser();
+            Assert.True(builtParser.IsOk);
+            Assert.NotNull(builtParser.Result);
+            var parser = builtParser.Result;
+
+            var test = parser.Parse("a b");
+
+            Assert.True(test.IsError);
+            Assert.NotEmpty(test.Errors);
+            var containsEOSError = test.Errors.Exists(x =>
+                x is UnexpectedTokenSyntaxError<TokenType> tok && tok.UnexpectedToken.IsEOS);
+            Assert.True(containsEOSError);
+                
+            ;
+
+        }
     }
 }
