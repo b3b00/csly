@@ -16,19 +16,39 @@ namespace ParserTests
         MissingLexeme = 3
     }
 
-    public enum Tokens
+    public enum BadVisitorTokens
     {
         [Lexeme("a")] A = 1,
         [Lexeme("b")] B = 2,
         [Lexeme("c")] C = 3,
     }
+
+
+    public interface BadVisitor
+    {
+        
+    }
+
+    public interface SubBadVisitor
+    {
+        
+    }
     
-    public class BadReturnParser {
+    public class BadVisitorReturnParser {
 
         [Production("badreturn : A B")]
-        public string BadReturn(Token<Tokens> a, Token<Tokens> b)
+        public string BadReturn(Token<BadVisitorTokens> a, Token<BadVisitorTokens> b)
         {
             return "toto";
+        }
+    }
+
+    public class BadTerminalArgParser
+    {
+        [Production("badtermarg : A B")]
+        public SubBadVisitor BadReturn(string a, Token<BadVisitorTokens> b)
+        {
+            return null;
         }
     }
 
@@ -90,9 +110,28 @@ namespace ParserTests
         [Fact]
         public void TestBadVisitorReturn()
         {
-            var instance = new BadReturnParser();
-            ParserBuilder<Tokens,List<string>> builder = new ParserBuilder<Tokens, List<string>>();
+            var instance = new BadVisitorReturnParser();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badreturn");
+            Assert.True(result.IsError);
+            Assert.Single(result.Errors);
+            Assert.Contains("incorrect return type", result.Errors.First().Message);
+            Assert.Contains("visitor BadReturn", result.Errors.First().Message);
+            
+            result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badreturn");
+            Assert.True(result.IsError);
+            Assert.Single(result.Errors);
+            Assert.Contains("incorrect return type", result.Errors.First().Message);
+            Assert.Contains("visitor BadReturn", result.Errors.First().Message);
+            ;
+        }
+        
+        [Fact]
+        public void TestBadVisitorTerminalArgument()
+        {
+            var instance = new BadTerminalArgParser();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badtermarg");
             Assert.True(result.IsError);
             Assert.Single(result.Errors);
             Assert.Contains("incorrect return type", result.Errors.First().Message);

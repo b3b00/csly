@@ -372,7 +372,10 @@ namespace sly.parser.generator
         {
             foreach (var rule in nonTerminal.Rules)
             {
-                result = CheckVisitorSignature<IN,OUT>(result, rule);
+                if (!rule.IsSubRule)
+                {
+                    result = CheckVisitorSignature<IN, OUT>(result, rule);
+                }
             }
             
             return result;
@@ -385,18 +388,47 @@ namespace sly.parser.generator
             if (!rule.IsExpressionRule)
             {
                 var visitor = rule.GetVisitor();
-                var returnInfo = visitor.ReturnParameter;
-                if (!returnInfo.ParameterType.IsSubclassOf(typeof(OUT)))
+                if (visitor == null)
                 {
-                    result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expectec {typeof(OUT)}, found {returnInfo.ParameterType.Name}"));
+                    ;
+                }
+                var returnInfo = visitor.ReturnParameter;
+                var expectedReturn = typeof(OUT);
+                var foundReturn = returnInfo.ParameterType;
+                if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
+                {
+                    result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expected {typeof(OUT)}, found {returnInfo.ParameterType.Name}"));
                 }
 
-                foreach (var clause in rule.Clauses)
+                var realClauses = rule.Clauses.Where(x => !(x is TerminalClause<IN> || x is ChoiceClause<IN>) || (x is TerminalClause<IN> t && !t.Discarded) || (x is ChoiceClause<IN> c && !c.IsDiscarded) ).ToList();
+                
+                int i = 0;
+                foreach (var clause in realClauses)
                 {
+                    if (i >= visitor.GetParameters().Length)
+                    {
+                        ;
+                    }
+                    var arg = visitor.GetParameters()[i];
+                    
+                    bool next = true;
                     switch (clause)
                     {
-                        case TerminalClause<IN> terminal:
+                        case TerminalClause<IN> terminal :
                         {
+                            if (!terminal.Discarded)
+                            {
+                                var expected = typeof(Token<IN>);
+                                var found = arg.ParameterType;
+                                if (found.IsAssignableFrom(found) && found != expected) 
+                                {
+                                    result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {typeof(Token<IN>)}, found {returnInfo.ParameterType.Name}"));
+                                }
+                            }
+                            else
+                            {
+                                next = false;
+                            }
                             break;
                         }
                         case NonTerminal<IN> nonTerminal:
@@ -415,10 +447,11 @@ namespace sly.parser.generator
                         {
                             break;
                         }
-                        default:
-                        {
-                            break;
-                        }
+                    }
+
+                    if (next)
+                    {
+                        i++;
                     }
                 }
             }
