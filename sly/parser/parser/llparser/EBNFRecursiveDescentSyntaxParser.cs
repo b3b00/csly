@@ -323,7 +323,7 @@ namespace sly.parser.llparser
                     result.Root = node;
                     result.IsEnded = currentPosition >= tokens.Count - 1
                                      || currentPosition == tokens.Count - 2 &&
-                                     tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                                     tokens[tokens.Count - 1].IsEOS;
                 }
                 else
                 {
@@ -333,7 +333,7 @@ namespace sly.parser.llparser
                     result.Root = node;
                     result.IsEnded = currentPosition >= tokens.Count - 1
                                      || currentPosition == tokens.Count - 2 &&
-                                     tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                                     tokens[tokens.Count - 1].IsEOS; 
                 }
             }
 

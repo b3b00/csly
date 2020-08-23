@@ -784,7 +784,7 @@ namespace sly.lexer
             tok.StringDelimiter = match.StringDelimiterChar;
             tok.TokenID = (IN) match.Properties[DerivedToken];
             tok.IsLineEnding = match.IsLineEnding;
-            tok.IsEOS = tok.TokenID.Equals(default(IN));
+            tok.IsEOS = match.IsEOS;
             return tok;
         }
 
