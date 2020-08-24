@@ -80,6 +80,38 @@ namespace ParserTests
             return null;
         }
     }
+    
+    public class BadGroupArgParser
+    {
+        [Production("badgrouparg : ( a B )")]
+        public SubBadVisitor BadNonTermArg(string aArg )
+        {
+            return null;
+        }
+
+        [Production("a : A")]
+        public BadVisitor noTerm(Token<BadVisitorTokens> a)
+        {
+            return null;
+        }
+    }
+    
+    public class BadArgNumberParser
+    {
+        [Production("badargnumber : A B ")]
+        public SubBadVisitor BadNonTermArg(Token<BadTokens> a, Token<BadTokens> b, object somethingThatCouldBeAContext, BadVisitor extraneousArg)
+        {
+            return null;
+        }
+        
+        [Production("badargnumber2 : A B ")]
+        public SubBadVisitor BadNonTermArg(Token<BadTokens> a)
+        {
+            return null;
+        }
+
+       
+    }
 
     public class ParserConfigurationTests
     {
@@ -213,6 +245,29 @@ namespace ParserTests
             Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter cArg has incorrect type")));
             Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter dArg has incorrect type")));
            
+        }
+        
+        [Fact]
+        public void TestBadGroupArgument()
+        {
+            var instance = new BadGroupArgParser();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badgrouparg");
+            Assert.True(result.IsError);
+            Assert.Single(result.Errors);
+            Assert.Contains("parameter aArg has incorrect type",result.Errors.First().Message);
+        }
+        
+        [Fact]
+        public void TestBadArgumentNumber()
+        {
+            var instance = new BadArgNumberParser();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badargnumber");
+            Assert.True(result.IsError);
+            Assert.Equal(3, result.Errors.Count);
+            Assert.True(result.Errors.Exists(x => x.Message.Contains("visitor BadNonTermArg for rule badargnumber : A B  has incorrect argument number : expected 2, found 4")));
+            Assert.True(result.Errors.Exists(x => x.Message.Contains("visitor BadNonTermArg for rule badargnumber2 : A B  has incorrect argument number : expected 2, found 1")));
         }
     }
 }

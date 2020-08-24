@@ -402,6 +402,13 @@ namespace sly.parser.generator
                 }
 
                 var realClauses = rule.Clauses.Where(x => !(x is TerminalClause<IN> || x is ChoiceClause<IN>) || (x is TerminalClause<IN> t && !t.Discarded) || (x is ChoiceClause<IN> c && !c.IsDiscarded) ).ToList();
+
+                if (visitor.GetParameters().Length != realClauses.Count && visitor.GetParameters().Length != realClauses.Count +1)
+                {
+                    result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : expected {realClauses.Count}, found {visitor.GetParameters().Length}"));
+                    // do not go further : it will cause an out of bound error.
+                    return result;
+                }
                 
                 int i = 0;
                 foreach (var clause in realClauses)
@@ -498,6 +505,13 @@ namespace sly.parser.generator
                         }
                         case GroupClause<IN> group:
                         {
+                            Type expected = typeof(Group<IN,OUT>);
+                            Type found =  arg.ParameterType;
+                            if (!expected.IsAssignableFrom(found) && found != expected)
+                            {
+                                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {found}"));
+                            }
                             break;
                         }
                         case OptionClause<IN> option:

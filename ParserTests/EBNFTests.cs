@@ -273,9 +273,9 @@ namespace ParserTests
         }
         
         [Production("D : [ E | C] [d]")]
-        public string D(Token<OptionTestToken> d)
+        public string D()
         {
-            return d.Value;
+            return "nothing here";
         }
         
         [Production("E : e")]
