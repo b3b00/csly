@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using expressionparser;
 using sly.buildresult;
 using sly.lexer;
@@ -46,7 +45,37 @@ namespace ParserTests
     public class BadTerminalArgParser
     {
         [Production("badtermarg : A B")]
-        public SubBadVisitor BadReturn(string aArg, Token<BadVisitorTokens> bArg)
+        public SubBadVisitor BarTermArg(string aArg, Token<BadVisitorTokens> bArg)
+        {
+            return null;
+        }
+    }
+    
+    public class BadNonTerminalArgParser
+    {
+        [Production("badnontermarg : a B")]
+        public SubBadVisitor BadNonTermArg(string aArg, Token<BadVisitorTokens> bArg)
+        {
+            return null;
+        }
+
+        [Production("a : A")]
+        public BadVisitor noTerm(Token<BadVisitorTokens> a)
+        {
+            return null;
+        }
+    }
+    
+    public class BadManyArgParser
+    {
+        [Production("badmanyarg : a* B* ( a B )+ [a|b]+")]
+        public SubBadVisitor BadNonTermArg(string aArg, string bArg, string cArg, string dArg )
+        {
+            return null;
+        }
+
+        [Production("a : A")]
+        public BadVisitor noTerm(Token<BadVisitorTokens> a)
         {
             return null;
         }
@@ -144,6 +173,45 @@ namespace ParserTests
             Assert.Contains("parameter aArg has incorrect type", result.Errors.First().Message);
             
             
+           
+        }
+        
+        
+        [Fact]
+        public void TestBadVisitorNonTerminalArgument()
+        {
+            var instance = new BadNonTerminalArgParser();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badnontermarg");
+            Assert.True(result.IsError);
+            Assert.Single(result.Errors);
+            //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
+            Assert.Contains("parameter aArg has incorrect type", result.Errors.First().Message);
+            
+            result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badnontermarg");
+            Assert.True(result.IsError);
+            Assert.Single(result.Errors);
+            //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
+            Assert.Contains("parameter aArg has incorrect type", result.Errors.First().Message);
+            
+            
+           
+        }
+        
+        [Fact]
+        public void TestBadManyArgument()
+        {
+            var instance = new BadManyArgParser();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badmanyarg");
+            Assert.True(result.IsError);
+            Assert.Equal(4,result.Errors.Count);
+            
+            //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
+            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter aArg has incorrect type")));
+            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter bArg has incorrect type")));
+            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter cArg has incorrect type")));
+            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter dArg has incorrect type")));
            
         }
     }

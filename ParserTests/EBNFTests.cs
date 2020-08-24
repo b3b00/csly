@@ -351,7 +351,7 @@ namespace ParserTests
     public class Bugfix104Test
     {
         [Production("testNonTerm : sub (COMMA[d] unreachable)? ")]
-        public int TestNonTerminal(List<int> options, Token<GroupTestToken> token)
+        public int TestNonTerminal(int sub, Token<GroupTestToken> token)
         {
             return 1;
         }

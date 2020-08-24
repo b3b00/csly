@@ -7,6 +7,7 @@ using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser.generator.visitor;
 using sly.parser.llparser;
+using sly.parser.parser;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
@@ -409,34 +410,90 @@ namespace sly.parser.generator
                     {
                         ;
                     }
+
                     var arg = visitor.GetParameters()[i];
-                    
+
                     bool next = true;
                     switch (clause)
                     {
-                        case TerminalClause<IN> terminal :
+                        case TerminalClause<IN> terminal:
                         {
-                            if (!terminal.Discarded)
+                            var expected = typeof(Token<IN>);
+                            var found = arg.ParameterType;
+                            if (!expected.IsAssignableFrom(found) && found != expected)
                             {
-                                var expected = typeof(Token<IN>);
-                                var found = arg.ParameterType;
-                                if (found.IsAssignableFrom(found) && found != expected) 
-                                {
-                                    result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {typeof(Token<IN>)}, found {returnInfo.ParameterType.Name}"));
-                                }
-                            }
-                            else
-                            {
-                                next = false;
+                                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {typeof(Token<IN>)}, found {returnInfo.ParameterType.Name}"));
                             }
                             break;
                         }
-                        case NonTerminal<IN> nonTerminal:
+                        case NonTerminalClause<IN> nonTerminal:
                         {
+                            Type expected = null;
+                            var found = arg.ParameterType;
+                            if (nonTerminal.IsGroup)
+                            {
+                                expected = typeof(Group<IN,OUT>);
+                            }
+                            else
+                            {
+                                expected = typeof(OUT);
+                            }
+                            if (!expected.IsAssignableFrom(found) && found != expected)
+                            {
+                                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {found}"));
+                            }
                             break;
                         }
                         case ManyClause<IN> many:
                         {
+                            Type expected = null;
+                            Type found =  arg.ParameterType;
+                            var innerClause = many.Clause;
+                            switch (innerClause)
+                            {
+                                case TerminalClause<IN> term:
+                                {
+                                    expected = typeof(List<Token<IN>>);
+                                    break;
+                                }
+                                case NonTerminalClause<IN> nonTerm:
+                                {
+                                    if (nonTerm.IsGroup)
+                                    {
+                                        expected = typeof(List<Group<IN, OUT>>);
+                                    }
+                                    else
+                                    {
+                                        expected = typeof(List<OUT>);
+                                    }
+
+                                    break;
+                                }
+                                case GroupClause<IN> group:
+                                {
+                                    expected = typeof(Group<IN, OUT>);
+                                    break;
+                                }
+                                case ChoiceClause<IN> choice:
+                                {
+                                    if (choice.IsTerminalChoice)
+                                    {
+                                        expected = typeof(List<Token<IN>>);
+                                    }
+                                    else if (choice.IsNonTerminalChoice)
+                                    {
+                                        expected = typeof(List<OUT>);
+                                    }
+                                    break;
+                                }
+                            }
+                            if (!expected.IsAssignableFrom(found) && found != expected)
+                            {
+                                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {found}"));
+                            }
                             break;
                         }
                         case GroupClause<IN> group:
@@ -449,10 +506,7 @@ namespace sly.parser.generator
                         }
                     }
 
-                    if (next)
-                    {
-                        i++;
-                    }
+                    i++;
                 }
             }
             else
