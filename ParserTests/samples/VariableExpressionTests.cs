@@ -13,7 +13,8 @@ namespace ParserTests.samples
         {
             var parserInstance = new VariableExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, Expression>();
-            Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression").Result;
+            var build = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression"); 
+            Parser = build.Result;
         }
 
         private readonly Parser<ExpressionToken, Expression> Parser;
