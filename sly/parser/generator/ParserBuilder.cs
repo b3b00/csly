@@ -76,6 +76,14 @@ namespace sly.parser.generator
                 result.Result.Configuration = expressionResult.Result;
 
                 result = CheckParser(result);
+                if (result.IsError)
+                {
+                    result.Result = null;
+                }
+            }
+            else
+            {
+                result.Result = null;
             }
 
             return result;
@@ -375,7 +383,7 @@ namespace sly.parser.generator
             {
                 if (!rule.IsSubRule)
                 {
-                    result = CheckVisitorSignature<IN, OUT>(result, rule);
+                    result = CheckVisitorSignature(result, rule);
                 }
             }
             
@@ -383,8 +391,8 @@ namespace sly.parser.generator
         }
 
         
-        private static BuildResult<Parser<IN, OUT>> CheckVisitorSignature<IN,OUT>(BuildResult<Parser<IN, OUT>> result,
-            Rule<IN> rule) where IN: struct
+        private static BuildResult<Parser<IN, OUT>> CheckVisitorSignature(BuildResult<Parser<IN, OUT>> result,
+            Rule<IN> rule) 
         {
             if (!rule.IsExpressionRule)
             {
@@ -609,8 +617,8 @@ namespace sly.parser.generator
             return result;
         }
 
-        private static BuildResult<Parser<IN, OUT>> CheckArgType<IN, OUT>(BuildResult<Parser<IN, OUT>> result, Rule<IN> rule, Type expected, MethodInfo visitor,
-            ParameterInfo arg) where IN : struct
+        private static BuildResult<Parser<IN, OUT>> CheckArgType(BuildResult<Parser<IN, OUT>> result, Rule<IN> rule, Type expected, MethodInfo visitor,
+            ParameterInfo arg) 
         {
             if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
             {
