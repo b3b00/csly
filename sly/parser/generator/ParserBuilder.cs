@@ -422,11 +422,7 @@ namespace sly.parser.generator
                         {
                             var expected = typeof(Token<IN>);
                             var found = arg.ParameterType;
-                            if (!expected.IsAssignableFrom(found) && found != expected)
-                            {
-                                result.AddError(new InitializationError(ErrorLevel.FATAL,
-                                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {typeof(Token<IN>)}, found {returnInfo.ParameterType.Name}"));
-                            }
+                            result = CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
                         case NonTerminalClause<IN> nonTerminal:
@@ -441,11 +437,7 @@ namespace sly.parser.generator
                             {
                                 expected = typeof(OUT);
                             }
-                            if (!expected.IsAssignableFrom(found) && found != expected)
-                            {
-                                result.AddError(new InitializationError(ErrorLevel.FATAL,
-                                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {found}"));
-                            }
+                            CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
                         case ManyClause<IN> many:
@@ -491,22 +483,14 @@ namespace sly.parser.generator
                                     break;
                                 }
                             }
-                            if (!expected.IsAssignableFrom(found) && found != expected)
-                            {
-                                result.AddError(new InitializationError(ErrorLevel.FATAL,
-                                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {found}"));
-                            }
+                            result = CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
                         case GroupClause<IN> group:
                         {
                             Type expected = typeof(Group<IN,OUT>);
                             Type found =  arg.ParameterType;
-                            if (!expected.IsAssignableFrom(found) && found != expected)
-                            {
-                                result.AddError(new InitializationError(ErrorLevel.FATAL,
-                                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {found}"));
-                            }
+                            result = CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
                         case OptionClause<IN> option:
@@ -552,11 +536,7 @@ namespace sly.parser.generator
                                     break;
                                 }
                             }
-                            if (!expected.IsAssignableFrom(found) && found != expected)
-                            {
-                                result.AddError(new InitializationError(ErrorLevel.FATAL,
-                                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {found}"));
-                            }
+                            result = CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
                     }
@@ -566,7 +546,76 @@ namespace sly.parser.generator
             }
             else
             {
+                var operations = rule.GetOperations();
+                foreach (var operation in operations)
+                {
+                    var visitor = operation.VisitorMethod;
+                    var returnInfo = visitor.ReturnParameter;
+                    var expectedReturn = typeof(OUT);
+                    var foundReturn = returnInfo?.ParameterType;
+                    if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
+                    {
+                        result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expected {typeof(OUT)}, found {returnInfo.ParameterType.Name}"));
+                    }
+                    
+                    if (operation.IsUnary)
+                    {
+                        var parameters = visitor.GetParameters();
+                        if (parameters.Length != 2 && parameters.Length != 3)
+                        {
+                            result.AddError(new InitializationError(ErrorLevel.FATAL,
+                                $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : 2 or 3, found {parameters.Length}"));
+                            // do not go further : it will cause an out of bound error.
+                            return result;
+                        }
+                        if (operation.Affix == Affix.PreFix)
+                        {
+                            var token = parameters[0];
+                            result = CheckArgType(result, rule, typeof(Token<IN>), visitor, token);
+                            var value = parameters[1];
+                            result = CheckArgType(result, rule, typeof(OUT), visitor, value);
+                        }
+                        else
+                        {
+                            var token = parameters[1];
+                            result = CheckArgType(result, rule, typeof(Token<IN>), visitor, token);
+                            var value = parameters[0];
+                            result = CheckArgType(result, rule, typeof(OUT), visitor, value);
+                        }
+                    }
+                    else if (operation.IsBinary)
+                    {
+                        var parameters = visitor.GetParameters();
+                        if (parameters.Length != 3 && parameters.Length != 4)
+                        {
+                            result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : 3 or 4, found {parameters.Length}"));
+                            // do not go further : it will cause an out of bound error.
+                            return result;
+                        }
+
+                        var left = parameters[0];
+                        result = CheckArgType(result, rule, typeof(OUT),  visitor, left);
+                        var op = parameters[1];
+                        result = CheckArgType(result, rule, typeof(Token<IN>),  visitor, op);
+                        var right = parameters[2];
+                        result = CheckArgType(result, rule, typeof(OUT),  visitor, right);
+                        
+                    }
+                }
+                ;
                 // TODO expressions  
+            }
+
+            return result;
+        }
+
+        private static BuildResult<Parser<IN, OUT>> CheckArgType<IN, OUT>(BuildResult<Parser<IN, OUT>> result, Rule<IN> rule, Type expected, MethodInfo visitor,
+            ParameterInfo arg) where IN : struct
+        {
+            if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
+            {
+                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {arg.ParameterType}"));
             }
 
             return result;
