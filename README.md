@@ -29,8 +29,12 @@ SLY is highly inspired by the python lex yacc library ([PLY](http://www.dabeaz.c
 A lexer - parser chain is fully described in only 2 C# files :
  * [Lexer](#lexers) : an enum that lists all the lexems used (plus metadata to describe their patterns) ;
  * [Parser](#parsers) : a class that lists production rules and their associated actions.
+
+>#  ⚠️ CSLY is strictly typed, read carefully the [typing section](typing) to correctly write type your parser.
  
 CSLY also has an additional feature that allow to write expression parsers(boolean or numeric expressions for instance) in a very compact and efficient way. (see [expression parser](#expressions-parser))
+
+
  
 
 ## Installation ##

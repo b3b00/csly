@@ -29,13 +29,13 @@ namespace jsonparser
         }
 
         [Production("value : INT")]
-        public object IntValue(Token<JsonToken> intToken)
+        public JSon IntValue(Token<JsonToken> intToken)
         {
             return new JValue(intToken.IntValue);
         }
 
         [Production("value : DOUBLE")]
-        public object DoubleValue(Token<JsonToken> doubleToken)
+        public JSon DoubleValue(Token<JsonToken> doubleToken)
         {
             var dbl = double.MinValue;
             try
@@ -58,13 +58,13 @@ namespace jsonparser
         }
 
         [Production("value : BOOLEAN")]
-        public object BooleanValue(Token<JsonToken> boolToken)
+        public JSon BooleanValue(Token<JsonToken> boolToken)
         {
             return new JValue(bool.Parse(boolToken.Value));
         }
 
-        [Production("value : NULL")]
-        public object NullValue(object forget)
+        [Production("value : NULL[d]")]
+        public JSon NullValue()
         {
             return new JNull();
         }
@@ -85,14 +85,14 @@ namespace jsonparser
 
         #region OBJECT
 
-        [Production("object: ACCG ACCD")]
-        public JSon EmptyObjectValue(object accg, object accd)
+        [Production("object: ACCG[d] ACCD[d]")]
+        public JSon EmptyObjectValue()
         {
             return new JObject();
         }
 
-        [Production("object: ACCG members ACCD")]
-        public JSon AttributesObjectValue(object accg, JObject members, object accd)
+        [Production("object: ACCG[d] members ACCD[d]")]
+        public JSon AttributesObjectValue(JObject members)
         {
             return members;
         }
@@ -101,14 +101,14 @@ namespace jsonparser
 
         #region LIST
 
-        [Production("list: CROG CROD")]
-        public JSon EmptyList(object crog, object crod)
+        [Production("list: CROG[d] CROD[d]")]
+        public JSon EmptyList()
         {
             return new JList();
         }
 
-        [Production("list: CROG listElements CROD")]
-        public JSon List(object crog, JList elements, object crod)
+        [Production("list: CROG[d] listElements CROD[d]")]
+        public JSon List(JList elements)
         {
             return elements;
         }
@@ -133,7 +133,7 @@ namespace jsonparser
         #region PROPERTIES
 
         [Production("members: property additionalProperty*")]
-        public object Members(JObject head, List<JSon> tail)
+        public JObject Members(JObject head, List<JSon> tail)
         {
             var value = new JObject();
             value.Merge(head);
@@ -142,13 +142,13 @@ namespace jsonparser
         }
 
         [Production("additionalProperty : COMMA property")]
-        public object property(Token<JsonToken> comma, JObject property)
+        public JObject property(Token<JsonToken> comma, JObject property)
         {
             return property;
         }
 
-        [Production("property: STRING COLON value")]
-        public object property(Token<JsonToken> key, object colon, JSon value)
+        [Production("property: STRING COLON[d] value")]
+        public JObject property(Token<JsonToken> key, JSon value)
         {
             return new JObject(key.StringWithoutQuotes, value);
         }
