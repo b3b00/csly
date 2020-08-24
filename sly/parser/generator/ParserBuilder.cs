@@ -413,11 +413,6 @@ namespace sly.parser.generator
                 int i = 0;
                 foreach (var clause in realClauses)
                 {
-                    if (i >= visitor.GetParameters().Length)
-                    {
-                        ;
-                    }
-
                     var arg = visitor.GetParameters()[i];
 
                     bool next = true;
@@ -516,6 +511,52 @@ namespace sly.parser.generator
                         }
                         case OptionClause<IN> option:
                         {
+                            Type expected = null;
+                            Type found =  arg.ParameterType;
+                            var innerClause = option.Clause;
+                            switch (innerClause)
+                            {
+                                case TerminalClause<IN> term:
+                                {
+                                    expected = typeof(Token<IN>);
+                                    break;
+                                }
+                                case NonTerminalClause<IN> nonTerm:
+                                {
+                                    if (nonTerm.IsGroup)
+                                    {
+                                        expected = typeof(ValueOption<Group<IN, OUT>>);
+                                    }
+                                    else
+                                    {
+                                        expected = typeof(ValueOption<OUT>);
+                                    }
+
+                                    break;
+                                }
+                                case GroupClause<IN> group:
+                                {
+                                    expected = typeof(ValueOption<Group<IN, OUT>>);
+                                    break;
+                                }
+                                case ChoiceClause<IN> choice:
+                                {
+                                    if (choice.IsTerminalChoice)
+                                    {
+                                        expected = typeof(Token<IN>);
+                                    }
+                                    else if (choice.IsNonTerminalChoice)
+                                    {
+                                        expected = typeof(ValueOption<OUT>);
+                                    }
+                                    break;
+                                }
+                            }
+                            if (!expected.IsAssignableFrom(found) && found != expected)
+                            {
+                                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {found}"));
+                            }
                             break;
                         }
                     }
