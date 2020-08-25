@@ -37,7 +37,10 @@ namespace sly.lexer
             {
                 var tokenID = (IN) (object) value;
                 var enumAttributes = value.GetAttributesOfType<LexemeAttribute>();
-                if (enumAttributes.Length == 0)
+                var singleCommentAttributes = value.GetAttributesOfType<SingleLineCommentAttribute>();
+                var multiCommentAttributes = value.GetAttributesOfType<MultiLineCommentAttribute>();
+                var commentAttributes = value.GetAttributesOfType<CommentAttribute>();
+                if (enumAttributes.Length == 0 && singleCommentAttributes.Length == 0 && multiCommentAttributes.Length == 0 && commentAttributes.Length == 0)
                 {
                     result?.AddError(new LexerInitializationError(ErrorLevel.WARN,
                         $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
