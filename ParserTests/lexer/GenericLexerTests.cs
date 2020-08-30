@@ -10,6 +10,17 @@ using Xunit;
 
 namespace ParserTests.lexer
 {
+    public enum SameIntValuesError
+    {
+        [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)] ID = 1,
+        
+        [Lexeme(GenericToken.KeyWord,"Keyword1")]
+        keyword1 = 2,
+
+        [Lexeme(GenericToken.KeyWord,"Keyword2")]
+        keyword2 = 2,
+    }
+
     public enum Extensions
     {
         [Lexeme(GenericToken.Extension)] DATE,
@@ -940,6 +951,16 @@ namespace ParserTests.lexer
 //             Assert.True(result2.IsOk);
 //             Assert.Equal(9,result2.Tokens.Count);
             ;
+        }
+
+        [Fact]
+        public void TestSameIntValuesError()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<SameIntValuesError>>());
+            Assert.True(lexerRes.IsError);
+            Assert.Null(lexerRes.Result);
+
+
         }
 
         private static string ToTokens<T>(LexerResult<T> result) where T : struct

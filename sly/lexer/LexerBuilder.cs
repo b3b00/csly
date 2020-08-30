@@ -33,21 +33,43 @@ namespace sly.lexer
             var attributes = new Dictionary<IN, List<LexemeAttribute>>();
 
             var values = Enum.GetValues(typeof(IN));
-            foreach (Enum value in values)
+            var grouped = values.Cast<IN>().GroupBy(x => x).ToList();
+            foreach (var group in grouped)
             {
-                var tokenID = (IN) (object) value;
-                var enumAttributes = value.GetAttributesOfType<LexemeAttribute>();
-                var singleCommentAttributes = value.GetAttributesOfType<SingleLineCommentAttribute>();
-                var multiCommentAttributes = value.GetAttributesOfType<MultiLineCommentAttribute>();
-                var commentAttributes = value.GetAttributesOfType<CommentAttribute>();
-                if (enumAttributes.Length == 0 && singleCommentAttributes.Length == 0 && multiCommentAttributes.Length == 0 && commentAttributes.Length == 0)
+                
+                var v = group.Key;
+                if (group.Count() > 1)
                 {
-                    result?.AddError(new LexerInitializationError(ErrorLevel.WARN,
-                        $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
+                 
+                    Enum enumValue = Enum.Parse(typeof(IN), v.ToString()) as Enum;
+                    int intValue = Convert.ToInt32(enumValue); // x is the integer value of enum
+                    
+                    result.AddError(new InitializationError(ErrorLevel.FATAL,
+                        $"int value {intValue} is used {group.Count()} times in lexer enum   {typeof(IN)}"));
+                    
                 }
-                else
+            }
+
+            if (!result.IsError)
+            {
+
+                foreach (Enum value in values)
                 {
-                    attributes[tokenID] = enumAttributes.ToList();
+                    var tokenID = (IN) (object) value;
+                    var enumAttributes = value.GetAttributesOfType<LexemeAttribute>();
+                    var singleCommentAttributes = value.GetAttributesOfType<SingleLineCommentAttribute>();
+                    var multiCommentAttributes = value.GetAttributesOfType<MultiLineCommentAttribute>();
+                    var commentAttributes = value.GetAttributesOfType<CommentAttribute>();
+                    if (enumAttributes.Length == 0 && singleCommentAttributes.Length == 0 &&
+                        multiCommentAttributes.Length == 0 && commentAttributes.Length == 0)
+                    {
+                        result?.AddError(new LexerInitializationError(ErrorLevel.WARN,
+                            $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
+                    }
+                    else
+                    {
+                        attributes[tokenID] = enumAttributes.ToList();
+                    }
                 }
             }
 
@@ -63,8 +85,10 @@ namespace sly.lexer
             BuildExtension<IN> extensionBuilder = null) where IN : struct
         {
             var attributes = GetLexemes(result);
-
-            result = Build(attributes, result, extensionBuilder);
+            if (!result.IsError)
+            {
+                result = Build(attributes, result, extensionBuilder);
+            }
 
             return result;
         }
