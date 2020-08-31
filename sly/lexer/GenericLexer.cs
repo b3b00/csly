@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using sly.buildresult;
 using sly.lexer.fsm;
 
 namespace sly.lexer
@@ -565,31 +566,36 @@ namespace sly.lexer
             return value;
         }
 
-        public void AddStringLexem(IN token, string stringDelimiter, string escapeDelimiterChar = "\\")
+        public void AddStringLexem(IN token,  BuildResult<ILexer<IN>> result , string stringDelimiter,
+            string escapeDelimiterChar = "\\")
         {
             if (string.IsNullOrEmpty(stringDelimiter) || stringDelimiter.Length > 1)
-                throw new InvalidLexerException(
-                    $"bad lexem {stringDelimiter} :  StringToken lexeme delimiter char <{token.ToString()}> must be 1 character length.");
-            if (char.IsLetterOrDigit(stringDelimiter[0]))
-                throw new InvalidLexerException(
-                    $"bad lexem {stringDelimiter} :  StringToken lexeme delimiter char <{token.ToString()}> can not start with a letter.");
+                result.AddError(new LexerInitializationError(ErrorLevel.FATAL,$"bad lexem {stringDelimiter} :  StringToken lexeme delimiter char <{token.ToString()}> must be 1 character length.",ErrorCodes.LEXER_STRING_DELIMITER_MUST_BE_1_CHAR));
+            if (stringDelimiter.Length == 1 && char.IsLetterOrDigit(stringDelimiter[0]))
+                result.AddError(new InitializationError(ErrorLevel.FATAL, $"bad lexem {stringDelimiter} :  StringToken lexeme delimiter char <{token.ToString()}> can not start with a letter.",ErrorCodes.LEXER_STRING_DELIMITER_CANNOT_BE_LETTER_OR_DIGIT));
 
             if (string.IsNullOrEmpty(escapeDelimiterChar) || escapeDelimiterChar.Length > 1)
-                throw new InvalidLexerException(
-                    $"bad lexem {escapeDelimiterChar} :  StringToken lexeme escape char  <{token.ToString()}> must be 1 character length.");
-            if (char.IsLetterOrDigit(escapeDelimiterChar[0]))
-                throw new InvalidLexerException(
-                    $"bad lexem {escapeDelimiterChar} :  StringToken lexeme escape char lexeme <{token.ToString()}> can not start with a letter.");
+                result.AddError(new InitializationError(ErrorLevel.FATAL,$"bad lexem {escapeDelimiterChar} :  StringToken lexeme escape char  <{token.ToString()}> must be 1 character length.",ErrorCodes.LEXER_STRING_ESCAPE_CHAR_MUST_BE_1_CHAR));
+            if (escapeDelimiterChar.Length == 1 && char.IsLetterOrDigit(escapeDelimiterChar[0]))
+                result.AddError(new InitializationError(ErrorLevel.FATAL,$"bad lexem {escapeDelimiterChar} :  StringToken lexeme escape char lexeme <{token.ToString()}> can not start with a letter.",ErrorCodes.LEXER_STRING_ESCAPE_CHAR_CANNOT_BE_LETTER_OR_DIGIT));
 
-            StringCounter++;
+            StringDelimiterChar = (char)0;
+            var stringDelimiterChar = (char)0;
 
-            StringDelimiterChar = stringDelimiter[0];
-            var stringDelimiterChar = stringDelimiter[0];
-
-            EscapeStringDelimiterChar = escapeDelimiterChar[0];
-            var escapeStringDelimiterChar = escapeDelimiterChar[0];
-
+            EscapeStringDelimiterChar = (char)0;
+            var escapeStringDelimiterChar = (char)0;
             
+            if (stringDelimiter.Length == 1)
+            {
+                StringCounter++;
+
+                StringDelimiterChar = stringDelimiter[0];
+                stringDelimiterChar = stringDelimiter[0];
+
+                EscapeStringDelimiterChar = escapeDelimiterChar[0];
+                escapeStringDelimiterChar = escapeDelimiterChar[0];
+            }
+
 
             NodeCallback<GenericToken> callback = match =>
             {
@@ -656,21 +662,22 @@ namespace sly.lexer
             }
         }
         
-        public void AddCharLexem(IN token, string charDelimiter, string escapeDelimiterChar = "\\")
+        public void AddCharLexem(IN token, BuildResult<ILexer<IN>> result ,string charDelimiter, string escapeDelimiterChar = "\\")
         {
             if (string.IsNullOrEmpty(charDelimiter) || charDelimiter.Length > 1)
-                throw new InvalidLexerException(
-                    $"bad lexem {charDelimiter} :  CharToken lexeme delimiter char <{token.ToString()}> must be 1 character length.");
-            if (char.IsLetterOrDigit(charDelimiter[0]))
-                throw new InvalidLexerException(
-                    $"bad lexem {charDelimiter} :  CharToken lexeme delimiter char <{token.ToString()}> can not start with a letter.");
+               result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    $"bad lexem {charDelimiter} :  CharToken lexeme delimiter char <{token.ToString()}> must be 1 character length.",
+                    ErrorCodes.LEXER_CHAR_ESCAPE_CHAR_MUST_BE_1_CHAR));
+            if (charDelimiter.Length == 1 && char.IsLetterOrDigit(charDelimiter[0]))
+                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    $"bad lexem {charDelimiter} :  CharToken lexeme delimiter char <{token.ToString()}> can not start with a letter or digit.", ErrorCodes.LEXER_CHAR_DELIMITER_CANNOT_BE_LETTER));
 
             if (string.IsNullOrEmpty(escapeDelimiterChar) || escapeDelimiterChar.Length > 1)
-                throw new InvalidLexerException(
-                    $"bad lexem {escapeDelimiterChar} :  CharToken lexeme escape char  <{token.ToString()}> must be 1 character length.");
-            if (char.IsLetterOrDigit(escapeDelimiterChar[0]))
-                throw new InvalidLexerException(
-                    $"bad lexem {escapeDelimiterChar} :  CharToken lexeme escape char lexeme <{token.ToString()}> can not start with a letter.");
+                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    $"bad lexem {escapeDelimiterChar} :  CharToken lexeme escape char  <{token.ToString()}> must be 1 character length.",ErrorCodes.LEXER_CHAR_ESCAPE_CHAR_MUST_BE_1_CHAR));
+            if (escapeDelimiterChar.Length == 1 && char.IsLetterOrDigit(escapeDelimiterChar[0]))
+                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    $"bad lexem {escapeDelimiterChar} :  CharToken lexeme escape char lexeme <{token.ToString()}> can not start with a letter or digit.",ErrorCodes.LEXER_CHAR_ESCAPE_CHAR_CANNOT_BE_LETTER_OR_DIGIT));
 
             CharCounter++;
 
