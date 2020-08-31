@@ -235,6 +235,7 @@ namespace ParserTests
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badnontermarg");
             Assert.True(result.IsError);
             Assert.Single(result.Errors);
+            Assert.Equal(1, result.Errors.Count(x => x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
             //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
             Assert.Contains("parameter aArg has incorrect type", result.Errors.First().Message);
             
@@ -284,6 +285,7 @@ namespace ParserTests
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badargnumber");
             Assert.True(result.IsError);
             Assert.Equal(3, result.Errors.Count);
+            Assert.Equal(2, result.Errors.Count(x => x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
             Assert.True(result.Errors.Exists(x => x.Message.Contains("visitor BadNonTermArg for rule badargnumber : A B  has incorrect argument number : expected 2 or 3, found 4")));
             Assert.True(result.Errors.Exists(x => x.Message.Contains("visitor BadNonTermArg for rule badargnumber2 : A B  has incorrect argument number : expected 2 or 3, found 1")));
         }
@@ -296,6 +298,7 @@ namespace ParserTests
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badoptionarg");
             Assert.True(result.IsError);
             Assert.Equal(4,result.Errors.Count);
+            Assert.Equal(4, result.Errors.Count(x => x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
             Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter a has incorrect type")));
             Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter b has incorrect type")));
             Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter c has incorrect type")));
