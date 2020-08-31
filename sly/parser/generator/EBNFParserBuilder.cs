@@ -31,6 +31,8 @@ namespace sly.parser.generator
             try
             {
                 configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
+                LeftRecursionChecker<IN,OUT> recursionChecker = new LeftRecursionChecker<IN,OUT>();
+                LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration); 
                 configuration.StartingRule = rootRule;
             }
             catch (Exception e)

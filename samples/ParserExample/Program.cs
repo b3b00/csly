@@ -501,6 +501,18 @@ namespace ParserExample
             
         }
 
+        public static void TestRecursion()
+        {
+            var builder = new ParserBuilder<TestGrammarToken, object>();
+            Console.WriteLine("starting");
+            var  parserInstance = new RecursiveGrammar();
+            Console.WriteLine("new instance");
+
+
+            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
+            Console.WriteLine($"built : {Parser.IsOk}");
+        }
+
 
         public static void TestScript()
         {
@@ -671,7 +683,8 @@ namespace ParserExample
             // TestManyString();
             
           //  TestDoubleExponent();
-Test192();
+//Test192();
+TestRecursion();
 
             // TestFactorial();
             // TestThreadsafeGeneric();
@@ -697,6 +710,27 @@ Test192();
             {
                 return null;
             }    
+    }
+
+    public class RecursiveGrammar
+    {
+        [Production("first : second COMMA[d]")]
+        public object FirstRecurse(object o)
+        {
+            return o;
+        } 
+        
+        [Production("second : third COMMA[d]")]
+        public object SecondRecurse(object o)
+        {
+            return o;
+        }
+        
+        [Production("third : first COMMA[d]")]
+        public object ThirdRecurse(object o)
+        {
+            return o;
+        }
     }
     
 }
