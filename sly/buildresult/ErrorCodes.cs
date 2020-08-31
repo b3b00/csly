@@ -22,7 +22,7 @@ namespace sly.buildresult
         
         LEXER_CANNOT_MIX_COMMENT_AND_SINGLE_OR_MULTI = 6,
         
-        LEXER,LEXER_SAME_VALUE_USED_MANY_TIME = 7,
+        LEXER_SAME_VALUE_USED_MANY_TIME = 7,
         
         #endregion
 
