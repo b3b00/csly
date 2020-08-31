@@ -959,6 +959,8 @@ namespace ParserTests.lexer
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<SameIntValuesError>>());
             Assert.True(lexerRes.IsError);
             Assert.Null(lexerRes.Result);
+            Assert.Single(lexerRes.Errors);
+            Assert.Equal(ErrorCodes.LEXER_SAME_VALUE_USED_MANY_TIME,lexerRes.Errors.First().Code);
 
 
         }

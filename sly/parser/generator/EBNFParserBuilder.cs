@@ -35,7 +35,7 @@ namespace sly.parser.generator
             }
             catch (Exception e)
             {
-                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message));
+                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message,ErrorCodes.PARSER_UNKNOWN_ERROR));
                 return result;
             }
 
@@ -53,7 +53,7 @@ namespace sly.parser.generator
             {
                 foreach (var lexerResultError in lexerResult.Errors)
                 {
-                    result.AddError(new InitializationError(ErrorLevel.ERROR,lexerResultError.Message));
+                    result.AddError(lexerResultError);
                 }
                 return result;
             }
