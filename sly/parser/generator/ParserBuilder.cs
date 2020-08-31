@@ -51,10 +51,7 @@ namespace sly.parser.generator
                 parser.Lexer = lexerResult.Result;
                 if (lexerResult.IsError)
                 {
-                    foreach (var lexerResultError in lexerResult.Errors)
-                    {
-                        result.AddError(new InitializationError(ErrorLevel.ERROR,lexerResultError.Message));
-                    }
+                    result.Errors.AddRange(lexerResult.Errors);
                     return result;
                 }
                 parser.Instance = parserInstance;
@@ -273,7 +270,7 @@ namespace sly.parser.generator
 
                 if (!found)
                     result.AddError(new ParserInitializationError(ErrorLevel.WARN,
-                        $"non terminal [{nonTerminal.Name}] is never used."));
+                        $"non terminal [{nonTerminal.Name}] is never used.",ErrorCodes.NOT_AN_ERROR));
             }
 
             return result;
@@ -344,7 +341,7 @@ namespace sly.parser.generator
                 if (clause is NonTerminalClause<IN> ntClause)
                     if (!conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
                         result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                            $"{ntClause.NonTerminalName} references from {rule.RuleString} does not exist."));
+                            $"{ntClause.NonTerminalName} references from {rule.RuleString} does not exist.",ErrorCodes.PARSER_REFERENCE_NOT_FOUND));
             return result;
         }
         
@@ -362,12 +359,12 @@ namespace sly.parser.generator
                         if (!choice.IsTerminalChoice && !choice.IsNonTerminalChoice)
                         {
                             result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                $"{rule.RuleString} contains {choice.ToString()} with mixed terminal and nonterminal."));
+                                $"{rule.RuleString} contains {choice.ToString()} with mixed terminal and nonterminal.",ErrorCodes.PARSER_MIXED_CHOICES));
                         }
                         else if (choice.IsDiscarded && choice.IsNonTerminalChoice)
                         {
                             result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                $"{rule.RuleString} : {choice.ToString()} can not be marked as discarded as it is a non terminal choice."));
+                                $"{rule.RuleString} : {choice.ToString()} can not be marked as discarded as it is a non terminal choice.",ErrorCodes.PARSER_NON_TERMINAL_CHOICE_CANNOT_BE_DISCARDED));
                         }
                     }
                 }
@@ -406,14 +403,18 @@ namespace sly.parser.generator
                 var foundReturn = returnInfo.ParameterType;
                 if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
                 {
-                    result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expected {typeof(OUT)}, found {returnInfo.ParameterType.Name}"));
+                    result.AddError(new InitializationError(ErrorLevel.FATAL,
+                        $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expected {typeof(OUT)}, found {returnInfo.ParameterType.Name}",
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
                 }
 
                 var realClauses = rule.Clauses.Where(x => !(x is TerminalClause<IN> || x is ChoiceClause<IN>) || (x is TerminalClause<IN> t && !t.Discarded) || (x is ChoiceClause<IN> c && !c.IsDiscarded) ).ToList();
 
                 if (visitor.GetParameters().Length != realClauses.Count && visitor.GetParameters().Length != realClauses.Count +1)
                 {
-                    result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : expected {realClauses.Count}, found {visitor.GetParameters().Length}"));
+                    result.AddError(new InitializationError(ErrorLevel.FATAL,
+                        $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : expected {realClauses.Count} or {realClauses.Count+1}, found {visitor.GetParameters().Length}",
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
                     // do not go further : it will cause an out of bound error.
                     return result;
                 }
@@ -563,7 +564,7 @@ namespace sly.parser.generator
                     var foundReturn = returnInfo?.ParameterType;
                     if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
                     {
-                        result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expected {typeof(OUT)}, found {returnInfo.ParameterType.Name}"));
+                        result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expected {typeof(OUT)}, found {returnInfo.ParameterType.Name}",ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
                     }
                     
                     if (operation.IsUnary)
@@ -572,7 +573,8 @@ namespace sly.parser.generator
                         if (parameters.Length != 2 && parameters.Length != 3)
                         {
                             result.AddError(new InitializationError(ErrorLevel.FATAL,
-                                $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : 2 or 3, found {parameters.Length}"));
+                                $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : 2 or 3, found {parameters.Length}",
+                                ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
                             // do not go further : it will cause an out of bound error.
                             return result;
                         }
@@ -596,7 +598,7 @@ namespace sly.parser.generator
                         var parameters = visitor.GetParameters();
                         if (parameters.Length != 3 && parameters.Length != 4)
                         {
-                            result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : 3 or 4, found {parameters.Length}"));
+                            result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : 3 or 4, found {parameters.Length}", ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
                             // do not go further : it will cause an out of bound error.
                             return result;
                         }
@@ -623,7 +625,7 @@ namespace sly.parser.generator
             if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
             {
                 result.AddError(new InitializationError(ErrorLevel.FATAL,
-                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {arg.ParameterType}"));
+                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {arg.ParameterType}",ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
             }
 
             return result;

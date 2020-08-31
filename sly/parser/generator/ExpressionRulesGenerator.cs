@@ -111,7 +111,7 @@ namespace sly.parser.generator
             
             if (!operandMethods.Any())
             {
-                result.AddError(new ParserInitializationError(ErrorLevel.FATAL, "missing [operand] attribute"));
+                result.AddError(new ParserInitializationError(ErrorLevel.FATAL, "missing [operand] attribute",ErrorCodes.PARSER_MISSING_OPERAND));
                 throw new Exception("missing [operand] attribute");
             }
 
