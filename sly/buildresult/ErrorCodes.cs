@@ -24,6 +24,22 @@ namespace sly.buildresult
         
         LEXER_SAME_VALUE_USED_MANY_TIME = 7,
         
+        LEXER_STRING_DELIMITER_MUST_BE_1_CHAR = 8,
+        
+        LEXER_STRING_DELIMITER_CANNOT_BE_LETTER_OR_DIGIT = 9,
+        
+        LEXER_STRING_ESCAPE_CHAR_MUST_BE_1_CHAR = 10,
+        
+        LEXER_STRING_ESCAPE_CHAR_CANNOT_BE_LETTER_OR_DIGIT = 11,
+        
+        LEXER_CHAR_DELIMITER_MUST_BE_1_CHAR = 12,
+        
+        LEXER_CHAR_DELIMITER_CANNOT_BE_LETTER = 13,
+        
+        LEXER_CHAR_ESCAPE_CHAR_MUST_BE_1_CHAR = 14,
+        
+        LEXER_CHAR_ESCAPE_CHAR_CANNOT_BE_LETTER_OR_DIGIT = 15,
+        
         #endregion
 
         #region Parser

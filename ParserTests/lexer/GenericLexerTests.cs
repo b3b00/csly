@@ -566,7 +566,7 @@ namespace ParserTests.lexer
             Assert.Single(lexerRes.Errors);
             var error = lexerRes.Errors[0];
             Assert.Equal(ErrorLevel.FATAL, error.Level);
-            Assert.Contains("must be 1 character length", error.Message);
+            Assert.Equal(ErrorCodes.LEXER_STRING_DELIMITER_MUST_BE_1_CHAR, error.Code);
         }
 
         [Fact]
@@ -577,7 +577,7 @@ namespace ParserTests.lexer
             Assert.Single(lexerRes.Errors);
             var error = lexerRes.Errors[0];
             Assert.Equal(ErrorLevel.FATAL, error.Level);
-            Assert.Contains("can not start with a letter", error.Message);
+            Assert.Equal(ErrorCodes.LEXER_STRING_DELIMITER_CANNOT_BE_LETTER_OR_DIGIT, error.Code);
         }
 
         [Fact]
