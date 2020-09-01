@@ -175,6 +175,24 @@ namespace ParserTests
             return third;
         } 
         
+        
+        
+        [Production("second :  A[d]")]
+        public object SecondRecurse()
+        {
+            return null;
+        }
+        
+        [Production("third : first A[d]")]
+        public object ThirdRecurse(object o)
+        {
+            return o;
+        }
+    }
+    
+    public class EbnfRecursiveOptionGrammar
+    {
+        
         [Production("first : second? third B[d]")]
         public object FirstRecurse2(ValueOption<object> optSecond, object third)
         {
@@ -187,10 +205,38 @@ namespace ParserTests
             return null;
         }
         
-        [Production("third : first COMMA[d]")]
+        [Production("third : first A[d]")]
         public object ThirdRecurse(object o)
         {
             return o;
+        }
+    }
+    
+    public class EbnfRecursiveChoiceGrammar
+    {
+        
+        [Production("first : second? [third|fourth] B[d]")]
+        public object FirstRecurse2(ValueOption<object> optSecond, object third)
+        {
+            return null;
+        }
+        
+        [Production("second :  A[d]")]
+        public object SecondRecurse()
+        {
+            return null;
+        }
+        
+        [Production("third : first A[d]")]
+        public object ThirdRecurse(object o)
+        {
+            return o;
+        }
+        
+        [Production("fourth :  A[d]")]
+        public object fourthRecurse()
+        {
+            return null;
         }
     }
 
@@ -386,6 +432,32 @@ namespace ParserTests
         {
             var builder = new ParserBuilder<RecursivityToken, object>();
             var  parserInstance = new EbnfRecursiveGrammar();
+            
+            
+            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
+            Assert.True(Parser.IsError);
+            Assert.Single(Parser.Errors);
+            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE,Parser.Errors.First().Code);
+        }
+        
+        [Fact]
+        public void TestEbnfOptionRecursivity()
+        {
+            var builder = new ParserBuilder<RecursivityToken, object>();
+            var  parserInstance = new EbnfRecursiveOptionGrammar();
+            
+            
+            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
+            Assert.True(Parser.IsError);
+            Assert.Single(Parser.Errors);
+            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE,Parser.Errors.First().Code);
+        }
+        
+        [Fact]
+        public void TestEbnfChoiceRecursivity()
+        {
+            var builder = new ParserBuilder<RecursivityToken, object>();
+            var  parserInstance = new EbnfRecursiveChoiceGrammar();
             
             
             var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");

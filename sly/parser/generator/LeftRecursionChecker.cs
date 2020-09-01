@@ -124,19 +124,25 @@ namespace sly.parser.generator
             var leftClauses = nonTerminal.Rules.SelectMany(x => GetLeftClausesName(x, configuration)).ToList();
             foreach (var leftClause in leftClauses)
             {
-                var newNonTerminal = configuration.NonTerminals[leftClause];
-                if (newNonTerminal != null)
+                if (configuration.NonTerminals.ContainsKey(leftClause))
                 {
-                    var nPath = BuildPath(currentPath, leftClause);
-                    var (foundRRuleRecursion,recursion) = CheckLeftRecursion(configuration,newNonTerminal,nPath);
-                    if (foundRRuleRecursion)
+                    var newNonTerminal = configuration.NonTerminals[leftClause];
+                    if (newNonTerminal != null)
                     {
-                        foundRecursion = true;
-                        recursions.AddRange(recursion);
+                        var nPath = BuildPath(currentPath, leftClause);
+                        var (foundRRuleRecursion, recursion) = CheckLeftRecursion(configuration, newNonTerminal, nPath);
+                        if (foundRRuleRecursion)
+                        {
+                            foundRecursion = true;
+                            recursions.AddRange(recursion);
+                        }
+
                     }
-                    
                 }
-                
+                else
+                {
+                    ;
+                }
             }
 
             return (foundRecursion, recursions);
