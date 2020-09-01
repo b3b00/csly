@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using sly.buildresult;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
@@ -22,36 +20,128 @@ namespace sly.parser.generator
             return newPath;
         }
 
-        public static void CheckLeftRecursion(ParserConfiguration<IN, OUT> configuration)
+        public static List<string> Lst(params string[] args)
         {
+            return args.ToList();
+        }
+
+        public static List<string> GetLeftClausesName(IClause<IN> clause)
+        {
+            if (clause is NonTerminalClause<IN> nonTerminal)
+            {
+                return Lst(nonTerminal.NonTerminalName);
+            }
+
+            if (clause is ManyClause<IN> many)
+            {
+                return GetLeftClausesName(many.Clause);
+            }
+
+            if (clause is OptionClause<IN> option)
+            {
+                return GetLeftClausesName(option.Clause);
+            }
+
+            if (clause is ChoiceClause<IN> choice && choice.IsNonTerminalChoice)
+            {
+                return choice.Choices.SelectMany(x => GetLeftClausesName(x)).ToList();
+            }
+            return new List<string>();
+        }
+
+        public static List<string> GetLeftClausesName(Rule<IN> rule, ParserConfiguration<IN, OUT> configuration)
+        {
+            List<string> lefts = new List<string>();
+
+            // if (rule.Clauses.First() is NonTerminalClause<IN> firstNonTerm)
+            // {
+            //     lefts.Add(firstNonTerm);
+            //     if (firstNonTerm.MayBeEmpty())
+            //     {
+
+            int i = 0;
+            IClause<IN> current = rule.Clauses[0] as IClause<IN>;
+            var currentLefts = GetLeftClausesName(current);
+            bool stopped = false;
+            while (i < rule.Clauses.Count && ! stopped && currentLefts != null && currentLefts.Any())
+            {
+                stopped = !current.MayBeEmpty();
+                lefts.AddRange(currentLefts);
+                stopped = !current.MayBeEmpty();
+                i++;
+                if (i < rule.Clauses.Count())
+                {
+                    current = rule.Clauses[i];
+                    currentLefts = GetLeftClausesName(current);
+                }
+                else
+                {
+                    current = null;
+                    currentLefts = null;
+                }
+            }
+
+            // }
+            //}
+            return lefts;
+
+        }
+
+
+        public static (bool foundRecursion, List<List<string>> recursions) CheckLeftRecursion(ParserConfiguration<IN, OUT> configuration)
+        {
+            List<List<string>> recursions = new List<List<string>>();
+            bool foundRecursion = false;
             foreach (var nonTerminal in configuration.NonTerminals)
             {
-                CheckLeftRecursion(configuration,nonTerminal.Value, new List<string>(){nonTerminal.Key});
+                var (found,recursion) = CheckLeftRecursion(configuration,nonTerminal.Value, new List<string>(){nonTerminal.Key});
+                if (found)
+                {
+                    foundRecursion = true;
+                    recursions.AddRange(recursion);
+                }
             }
+
+           
+
+            return (foundRecursion, recursions);
         }
         
-        public static void CheckLeftRecursion(ParserConfiguration<IN,OUT> configuration,
+        public static (bool recursionFound,List<List<string>> recursion) CheckLeftRecursion(ParserConfiguration<IN,OUT> configuration,
             NonTerminal<IN> nonTerminal, List<string> currentPath)
         {
+            var foundRecursion = false;
+            List<List<string>> recursions = new List<List<string>>();
+            
             var (found,path) = FindRecursion(currentPath);
             if (found)
             {
-                throw new Exception("left recursion : "+path);
+                Console.WriteLine($"left recursion : {path}");
+                return (true,new List<List<string>>() {currentPath});
             }
             
-            var leftClauses = nonTerminal.Rules.Select(x => x.Clauses.First() as NonTerminalClause<IN>).Where(x => x != null);
+            //var leftClauses = nonTerminal.Rules.Select(x => x.Clauses.First() as NonTerminalClause<IN>).Where(x => x != null);
+            var leftClauses = nonTerminal.Rules.SelectMany(x => GetLeftClausesName(x, configuration)).ToList();
             foreach (var leftClause in leftClauses)
             {
-                var newNonTerminal = configuration.NonTerminals[leftClause.NonTerminalName];
+                var newNonTerminal = configuration.NonTerminals[leftClause];
                 if (newNonTerminal != null)
                 {
-                    var nPath = BuildPath(currentPath, leftClause.NonTerminalName);
-                    CheckLeftRecursion(configuration,newNonTerminal,nPath);
+                    var nPath = BuildPath(currentPath, leftClause);
+                    var (foundRRuleRecursion,recursion) = CheckLeftRecursion(configuration,newNonTerminal,nPath);
+                    if (foundRRuleRecursion)
+                    {
+                        foundRecursion = true;
+                        recursions.AddRange(recursion);
+                    }
+                    
                 }
                 
             }
-            
-            
+
+            return (foundRecursion, recursions);
+
+
         }
 
         private static (bool, string) FindRecursion(List<string> path)

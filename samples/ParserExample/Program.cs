@@ -21,6 +21,7 @@ using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.buildresult;
 using sly.parser.generator.visitor;
+using sly.parser.parser;
 using Xunit;
 
 namespace ParserExample
@@ -507,10 +508,37 @@ namespace ParserExample
             Console.WriteLine("starting");
             var  parserInstance = new RecursiveGrammar();
             Console.WriteLine("new instance");
-
-
+            
+            
             var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
             Console.WriteLine($"built : {Parser.IsOk}");
+            if (Parser.IsError)
+            {
+                foreach (var error in Parser.Errors)
+                {
+                    Console.WriteLine($"{error.Code} - {error.Message}");
+                }
+            }
+
+            Console.WriteLine("/-----------------------------------");
+            Console.WriteLine("/---");
+            Console.WriteLine("/-----------------------------------");
+            
+             builder = new ParserBuilder<TestGrammarToken, object>();
+            Console.WriteLine("starting");
+            var  parserInstance2 = new RecursiveGrammar2();
+            Console.WriteLine("new instance");
+
+
+             Parser = builder.BuildParser(parserInstance2,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
+            Console.WriteLine($"built : {Parser.IsOk}");
+            if (Parser.IsError)
+            {
+                foreach (var error in Parser.Errors)
+                {
+                    Console.WriteLine($"{error.Code} - {error.Message}");
+                }
+            }
         }
 
 
@@ -724,6 +752,33 @@ TestRecursion();
         public object SecondRecurse(object o)
         {
             return o;
+        }
+        
+        [Production("third : first COMMA[d]")]
+        public object ThirdRecurse(object o)
+        {
+            return o;
+        }
+    }
+    
+    public class RecursiveGrammar2
+    {
+        [Production("first : second* third COMMA[d]")]
+        public object FirstRecurse(List<object> seconds, object third)
+        {
+            return third;
+        } 
+        
+        [Production("first : second? third COMMA[d]")]
+        public object FirstRecurse2(ValueOption<object> optSecond, object third)
+        {
+            return null;
+        }
+        
+        [Production("second :  COMMA[d]")]
+        public object SecondRecurse()
+        {
+            return null;
         }
         
         [Production("third : first COMMA[d]")]

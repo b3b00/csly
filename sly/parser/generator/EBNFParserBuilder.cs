@@ -32,7 +32,15 @@ namespace sly.parser.generator
             {
                 configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
                 LeftRecursionChecker<IN,OUT> recursionChecker = new LeftRecursionChecker<IN,OUT>();
-                LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration); 
+                var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
+                if (foundRecursion)
+                {
+                    var recs = string.Join("\n", recursions.Select(x => string.Join(" > ",x)));
+                    result.AddError(new ParserInitializationError(ErrorLevel.FATAL,$"left recursion detected : {recs}",ErrorCodes.PARSER_LEFT_RECURSIVE));
+                    return result;
+
+                }
+                
                 configuration.StartingRule = rootRule;
             }
             catch (Exception e)

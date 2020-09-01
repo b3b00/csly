@@ -60,10 +60,11 @@ namespace sly.buildresult
         
         PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER = 107,
         
-        
+        PARSER_LEFT_RECURSIVE = 108,
 
         #endregion
-        
+
+
         
     }
 }
