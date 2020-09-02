@@ -14,7 +14,50 @@
 ## TLDR; [Getting started](https://github.com/b3b00/csly/wiki/getting-started) ##
 
 a [quick getting started](https://github.com/b3b00/csly/wiki/getting-started) will guide you through the implementation of a dumb parser
- 
+
+
+## CSLY special features ##
+
+CSLY provide some special features that make it easier or safer to use.
+
+### fully embedded ###
+
+CSLY has been thought to avoid any extra build step. Parser generators often need a build time step to generate target language source code that do the parse job.
+Juste include a nuget and configure your lexer/parser in pure C# code.
+
+>### CSLY does not need a build time step and easen your build / CI process
+
+### compact lexer/parser definition ### 
+
+A lexer/parser is defined with only 2 files : 
+    * a C# ```enum``` for the lexer
+    * a C# ```class``` for the parser
+
+Lexeme and parser production rules are defined with c# ```attributes``` making notation even more compact.
+this features already exists with parser combinators (like [sprache](https://github.com/sprache/Sprache) or [Eto.Parse](https://github.com/picoe/Eto.Parse)), but productions rules are defined using either [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser)  notation which I think is more natural and easier to understand for maintenance.
+
+
+>###  A full language is defined in a very compact and isolated way. 
+
+
+### strict typed ### 
+
+ CSLY is strictly typed, every parser is defines according to its input and output types. For further reading about parser typing, head to [typing section](typing) to correctly type your parser.
+
+>### This feature allows you to be more confident in input and output validity.
+
+### expression parsing ### 
+
+>### easen the writing of expression parsers, a often needed parser feature.
+
+
+### generic lexer ### 
+
+>### reuse common token definition and take avantage of a better lexer performance.
+
+>### 
+
+
 
 ## Why? ##
 
