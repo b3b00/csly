@@ -39,7 +39,7 @@ Lexeme and parser production rules are defined with c# ```attributes``` making n
 this features already exists with parser combinators (like [sprache](https://github.com/sprache/Sprache) or [Eto.Parse](https://github.com/picoe/Eto.Parse)), but productions rules are defined using either [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser)  notation which I think is more natural and easier to understand for maintenance.
 
 
->###  A full language is defined in a very compact and isolated way. 
+>###  Define languages in a very compact and isolated way. 
 
 See [Lexer](https://github.com/b3b00/csly/wiki/Lexer) for lexers definition.
 And [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser) for parser definitions.
@@ -57,14 +57,14 @@ Many language needs parsing expressions (boolean or numeric).
  So CSLY offers a way to express expression parsing using only operator tokens and precedence level.
  CSLY will then generates production rules to parse expressions. It also manages precedence and left or right associativity.
 
->### get rid of the burden of writing an expression parser.
+>### Get rid of the burden of writing an expression parser.
 
 see [expression parsing](https://github.com/b3b00/csly/wiki/expression-parsing)
 
 
 ### generic lexer ### 
 
->### reuse common token definition and take avantage of a better lexer performance.
+>### Reuse common token definition and take avantage of a better lexer performance.
 
 
 See [Generic lexer](https://github.com/b3b00/csly/wiki/GenericLexer) for generic lexer and [Lexer](https://github.com/b3b00/wiki/Lexer) for lexer general presentation.
