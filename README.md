@@ -64,16 +64,24 @@ see [expression parsing](https://github.com/b3b00/csly/wiki/expression-parsing)
 
 ### generic lexer ### 
 
+Lexemes are often similar from one language to another. So CSLY introduces a Generic Lexer that defines common lexemes that can be reused across languages. furthermore the generic has better performance than a regex based lexer.
+
 >### Reuse common token definition and take avantage of a better lexer performance.
 
 
-See [Generic lexer](https://github.com/b3b00/csly/wiki/GenericLexer) for generic lexer and [Lexer](https://github.com/b3b00/wiki/Lexer) for lexer general presentation.
+See [Generic lexer](https://github.com/b3b00/csly/wiki/GenericLexer) for generic lexer and [Lexer](https://github.com/b3b00/wiki/Lexer) for general presentation.
 
 
 ### What is and what is not CSLY ###
 
-Not a fully featured parser generator like [ANTLR](http://www.antlr.org/), do not use it to define a full featured language.
-Dedicated at small DSL ([Domain-Specific Language](https://en.wikipedia.org/wiki/Domain-specific_language))
+#### CSLY is not #### 
+
+CSLY is not a full featured parser generator like [ANTLR](http://www.antlr.org/).
+Hence you should not use it to define a full featured language (say C# or Java).
+
+#### CSLY is #### 
+
+CSLY is dedicated to small [Domain-Specific Languages](https://en.wikipedia.org/wiki/Domain-specific_language) that can easily be embedded in a C# code base. 
 
 ## Installation ##
 
