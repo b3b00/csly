@@ -44,11 +44,11 @@ this features already exists with parser combinators (like [sprache](https://git
 See [Lexer](https://github.com/b3b00/csly/wiki/Lexer) for lexers definition.
 And [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser) for parser definitions.
 
-### strict typed ### 
+### Fully and Strictly typed ### 
 
  CSLY is strictly typed, every parser is defines according to its input and output types. For further reading about parser typing, head to [typing section](typing) to correctly type your parser.
 
->### This feature allows you to be more confident in input and output validity.
+>### Be more confident in parser inputs and outputs validity.
 
 ### expression parsing ### 
 
