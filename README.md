@@ -41,6 +41,8 @@ this features already exists with parser combinators (like [sprache](https://git
 
 >###  A full language is defined in a very compact and isolated way. 
 
+See [Lexer](https://github.com/b3b00/csly/wiki/Lexer) for lexers definition.
+And [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser) for parser definitions.
 
 ### strict typed ### 
 
@@ -70,7 +72,7 @@ See [Generic lexer](https://github.com/b3b00/csly/wiki/GenericLexer) for generic
 
 ### What is and what is not CSLY ###
 
-Not a fully featured parser generator, do not use it to define a full featured language.
+Not a fully featured parser generator like [ANTLR](http://www.antlr.org/), do not use it to define a full featured language.
 Dedicated at small DSL ([Domain-Specific Language](https://en.wikipedia.org/wiki/Domain-specific_language))
 
 ## Installation ##
