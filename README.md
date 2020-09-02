@@ -13,9 +13,14 @@
 
 CSLY is highly inspired by the python lex yacc library ([PLY](http://www.dabeaz.com/ply/)) that aims at easen the writing of lexer and parser with C#.
 
-##[Getting started](https://github.com/b3b00/csly/wiki/getting-started) ##
+## Getting started ##
 
-a [quick getting started](https://github.com/b3b00/csly/wiki/getting-started) will guide you through the implementation of a dumb parser
+I your too impatient to further read this readme here is 
+a [quick getting started](https://github.com/b3b00/csly/wiki/getting-started) that will guide you through the implementation of a dumb parser.
+
+## full documentation ## 
+
+Complete documentation can be found in the [wiki](https://github.com/b3b00/csly/wiki)
 
 
 ## CSLY special features ##
