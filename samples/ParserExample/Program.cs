@@ -142,7 +142,7 @@ namespace ParserExample
                 }
                 catch (Exception e)
                 {
-                    ;
+                    Console.WriteLine($"{e.Message} : {e.StackTrace}");
                 }
             }
         }

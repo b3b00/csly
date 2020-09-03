@@ -239,6 +239,34 @@ namespace ParserTests
             return null;
         }
     }
+    
+    public class EbnfRecursiveOptionalChoiceGrammar
+    {
+        
+        [Production("first : second? [second|fourth]? third B[d]")]
+        public object FirstRecurse2(ValueOption<object> optSecond, object third)
+        {
+            return null;
+        }
+        
+        [Production("second :  A[d]")]
+        public object SecondRecurse()
+        {
+            return null;
+        }
+        
+        [Production("third : first A[d]")]
+        public object ThirdRecurse(object o)
+        {
+            return o;
+        }
+        
+        [Production("fourth :  A[d]")]
+        public object fourthRecurse()
+        {
+            return null;
+        }
+    }
 
     public class ParserConfigurationTests
     {
@@ -458,6 +486,19 @@ namespace ParserTests
         {
             var builder = new ParserBuilder<RecursivityToken, object>();
             var  parserInstance = new EbnfRecursiveChoiceGrammar();
+            
+            
+            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
+            Assert.True(Parser.IsError);
+            Assert.Single(Parser.Errors);
+            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE,Parser.Errors.First().Code);
+        }
+        
+        [Fact]
+        public void TestEbnfOptionalChoiceRecursivity()
+        {
+            var builder = new ParserBuilder<RecursivityToken, object>();
+            var  parserInstance = new EbnfRecursiveOptionalChoiceGrammar();
             
             
             var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
