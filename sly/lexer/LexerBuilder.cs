@@ -246,7 +246,7 @@ namespace sly.lexer
                         {
                             foreach (var param in lexeme.GenericTokenParameters)
                             {
-                                lexer.AddKeyWord(tokenID, param);
+                                lexer.AddKeyWord(tokenID, param, result);
                             }
                         }
 
@@ -254,7 +254,7 @@ namespace sly.lexer
                         {
                             foreach (var param in lexeme.GenericTokenParameters)
                             {
-                                lexer.AddSugarLexem(tokenID, param, lexeme.IsLineEnding);
+                                lexer.AddSugarLexem(tokenID,result, param, lexeme.IsLineEnding);
                             }
                         }
 

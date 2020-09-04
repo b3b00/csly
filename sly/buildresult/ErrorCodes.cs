@@ -40,6 +40,8 @@ namespace sly.buildresult
         
         LEXER_CHAR_ESCAPE_CHAR_CANNOT_BE_LETTER_OR_DIGIT = 15,
         
+        LEXER_SUGAR_TOKEN_CANNOT_START_WITH_LETTER = 16,
+        
         #endregion
 
         #region Parser

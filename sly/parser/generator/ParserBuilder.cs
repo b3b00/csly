@@ -424,7 +424,6 @@ namespace sly.parser.generator
                 {
                     var arg = visitor.GetParameters()[i];
 
-                    bool next = true;
                     switch (clause)
                     {
                         case TerminalClause<IN> terminal:
