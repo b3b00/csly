@@ -424,11 +424,11 @@ namespace sly.lexer
             }
         }
 
-        public void AddLexeme(GenericToken genericToken, IN token, string specialValue)
+        public void AddLexeme(GenericToken genericToken,BuildResult<ILexer<IN>> result, IN token, string specialValue)
         {
             if (genericToken == GenericToken.SugarToken)
             {
-                AddSugarLexem(token, specialValue);
+                AddSugarLexem(token, result, specialValue);
             }
 
             if (!derivedTokens.TryGetValue(genericToken, out var tokensForGeneric))
@@ -448,7 +448,7 @@ namespace sly.lexer
             tokensForGeneric[specialValue] = token;
         }
 
-        public void AddKeyWord(IN token, string keyword)
+        public void AddKeyWord(IN token, string keyword, BuildResult<ILexer<IN>> result )
         {
             NodeCallback<GenericToken> callback = match =>
             {
@@ -470,7 +470,7 @@ namespace sly.lexer
                 return match;
             };
 
-            AddLexeme(GenericToken.Identifier, token, keyword);
+            AddLexeme(GenericToken.Identifier, result, token, keyword);
             var node = FSMBuilder.GetNode(in_identifier);
             if (!FSMBuilder.Fsm.HasCallback(node.Id))
             {
@@ -719,11 +719,15 @@ namespace sly.lexer
 
         }
 
-        public void AddSugarLexem(IN token, string specialValue, bool isLineEnding = false)
+        public void AddSugarLexem(IN token, BuildResult<ILexer<IN>> buildResult, string specialValue, bool isLineEnding = false)
         {
             if (char.IsLetter(specialValue[0]))
-                throw new InvalidLexerException(
-                    $"bad lexem {specialValue} :  SugarToken lexeme <{token.ToString()}>  can not start with a letter.");
+            {
+                buildResult.AddError(new InitializationError(ErrorLevel.FATAL,
+                    $"bad lexem {specialValue} :  SugarToken lexeme <{token.ToString()}>  can not start with a letter.", ErrorCodes.LEXER_SUGAR_TOKEN_CANNOT_START_WITH_LETTER));
+                return;
+            }
+                
             NodeCallback<GenericToken> callback = match =>
             {
                 match.Properties[DerivedToken] = token;
