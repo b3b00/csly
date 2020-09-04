@@ -118,7 +118,17 @@ namespace sly.parser.llparser
                            InitStartingTokensWithOption(rule, optionClause, nonTerminals);
                            break;
                        }
-                   }
+                       case ZeroOrMoreClause<IN> zeroOrMoreClause:
+                       {
+                           InitStartingTokensWithZeroOrMore(rule,zeroOrMoreClause,nonTerminals);
+                           break;
+                       }
+                       case OneOrMoreClause<IN> oneOrMoreClause:
+                       {
+                           InitStartingTokensWithOneOrMore(rule, oneOrMoreClause, nonTerminals);
+                           break;
+                       }
+                    }
 
                    // add startig tokens of clause in rule.startingtokens
                    optional = clause is ZeroOrMoreClause<IN> || clause is OptionClause<IN>;
