@@ -83,30 +83,7 @@ namespace sly.parser.generator
 
             if (operationsByPrecedence.Count > 0)
             {
-                methods = parserClass.GetMethods().ToList();
-                var operandMethod = methods.Find(m =>
-                {
-                    var attributes = m.GetCustomAttributes().ToList();
-                    var attr = attributes.Find(a => a.GetType() == typeof(OperandAttribute));
-                    return attr != null;
-                });
-
-                string operandNonTerminal = null;
-
-                if (operandMethod == null)
-                {
-                    result.AddError(new ParserInitializationError(ErrorLevel.FATAL, "missing [operand] attribute"));
-                    throw new Exception("missing [operand] attribute");
-                }
-
-                var production =
-                    operandMethod.GetCustomAttributes().ToList()
-                        .Find(attr => attr.GetType() == typeof(ProductionAttribute)) as ProductionAttribute;
-                if (production != null)
-                {
-                    var ruleItems = production.RuleString.Split(':');
-                    if (ruleItems.Length > 0) operandNonTerminal = ruleItems[0].Trim();
-                }
+                var operandNonTerminal = GetOperandNonTerminal(parserClass,configuration, result);
 
 
                 if (operandNonTerminal != null && operationsByPrecedence.Count > 0)
@@ -116,6 +93,79 @@ namespace sly.parser.generator
 
             result.Result = configuration;
             return result;
+        }
+
+        private static string GetOperandNonTerminal<IN, OUT>(Type parserClass, ParserConfiguration<IN,OUT> configuration,
+            BuildResult<ParserConfiguration<IN, OUT>> result) where IN : struct
+        {
+            List<MethodInfo> methods;
+            methods = parserClass.GetMethods().ToList();
+            
+            var operandMethods = methods.Where(m =>
+            {
+                var attributes = m.GetCustomAttributes().ToList();
+                var attr = attributes.Find(a => a.GetType() == typeof(OperandAttribute));
+                return attr != null;
+            }).ToList();
+            
+            
+            if (!operandMethods.Any())
+            {
+                result.AddError(new ParserInitializationError(ErrorLevel.FATAL, "missing [operand] attribute",ErrorCodes.PARSER_MISSING_OPERAND));
+                throw new Exception("missing [operand] attribute");
+            }
+
+            string operandNonTerminalName = null;
+
+            if (operandMethods.Count == 1)
+            {
+                var operandMethod = operandMethods.Single();
+                
+                // TODO call GenerateExpressionParser with <ParserClassNAMe>_operand (or remove operand rule param ? )
+
+                operandNonTerminalName = GetNonTerminalNameFromProductionMethod<IN, OUT>(operandMethod);
+            }
+            else
+            {
+                // TODO 1 : generate <ParserClassNAMe>_operand production rule : operand : methods*
+                //         rule.isexpression = true
+                //         rule.isbypass = true
+                operandNonTerminalName = $"{parserClass.Name}_operand";
+                var operandNonTerminals = operandMethods.Select(x => GetNonTerminalNameFromProductionMethod<IN, OUT>(x));
+                var operandNonTerminal = new NonTerminal<IN>(operandNonTerminalName);
+                
+                
+                foreach (var operand in operandNonTerminals)
+                {
+                    if (!string.IsNullOrEmpty(operand))
+                    {
+                        var rule = new Rule<IN>()
+                        {
+                            IsByPassRule = true,
+                            IsExpressionRule = true,
+                            Clauses = new List<IClause<IN>>() {new NonTerminalClause<IN>(operand)}
+                        };
+                        operandNonTerminal.Rules.Add(rule);
+                    }
+                }
+
+                configuration.NonTerminals[operandNonTerminalName] = operandNonTerminal;
+            }
+
+            return operandNonTerminalName;
+        }
+
+        private static string GetNonTerminalNameFromProductionMethod<IN, OUT>(MethodInfo operandMethod) where IN : struct
+        {
+            string operandNonTerminal = null;
+            if (operandMethod.GetCustomAttributes().ToList()
+                .Find(attr => attr.GetType() == typeof(ProductionAttribute)) is ProductionAttribute production)
+            {
+                var ruleItems = production.RuleString.Split(':');
+                if (ruleItems.Length > 0) operandNonTerminal = ruleItems[0].Trim();
+            }
+
+            return operandNonTerminal;
         }
 
 
@@ -134,7 +184,7 @@ namespace sly.parser.generator
                 var name = GetNonTerminalNameForPrecedence(precedence, operationsByPrecedence, operandNonTerminal);
                 var nextName = GetNonTerminalNameForPrecedence(nextPrecedence, operationsByPrecedence, operandNonTerminal);
 
-                var nonTerminal = BuildNonTerminal(name, nextName, operations);
+                var nonTerminal = BuildPrecedenceNonTerminal(name, nextName, operations);
 
                 configuration.NonTerminals[nonTerminal.Name] = nonTerminal;
             }
@@ -152,7 +202,7 @@ namespace sly.parser.generator
             entrypoint.Rules.Add(rule);
         }
 
-        private static NonTerminal<IN> BuildNonTerminal<IN>(string name, string nextName, List<OperationMetaData<IN>> operations) where IN : struct
+        private static NonTerminal<IN> BuildPrecedenceNonTerminal<IN>(string name, string nextName, List<OperationMetaData<IN>> operations) where IN : struct
         {
             var nonTerminal = new NonTerminal<IN>(name, new List<Rule<IN>>());
 

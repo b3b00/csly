@@ -8,6 +8,9 @@ using Xunit;
 
 namespace ParserTests
 {
+
+    
+    
     public class ExpressionGeneratorTests
     {
         private BuildResult<Parser<ExpressionToken, double>> Parser;
@@ -187,6 +190,37 @@ namespace ParserTests
             var r = Parser.Result.Parse("-1 * 2", StartingRule);
             Assert.False(r.IsError);
             Assert.Equal(-2, r.Result);
+        }
+
+        [Fact]
+        public void TestIssue184()
+        {
+            StartingRule = $"{typeof(Issue184ParserOne).Name}_expressions";
+            var parserInstance = new Issue184ParserOne();
+            var builder = new ParserBuilder<Issue184Token, double>();
+            var issue184parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            Assert.True(issue184parser.IsOk);
+            var c = issue184parser.Result.Parse(" 2 + 2");
+            Assert.True(c.IsOk);
+            Assert.Equal(4.0,c.Result);
+            
+            
+            StartingRule = $"{typeof(Issue184Parser).Name}_expressions";
+            var parserInstance2 = new Issue184Parser();
+            var builder2 = new ParserBuilder<Issue184Token, double>();
+            var issue184parser2 = builder.BuildParser(parserInstance2, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            Assert.True(issue184parser2.IsOk);
+            var c2 = issue184parser2.Result.Parse(" 2 + 2");
+            Assert.True(c2.IsOk);
+            Assert.Equal(4.0,c2.Result);
+            
+            c2 = issue184parser2.Result.Parse(" 2 + 2 / 2");
+            Assert.True(c2.IsOk);
+            Assert.Equal(2 + 2 / 2 ,c2.Result);
+            
+            c2 = issue184parser2.Result.Parse(" 2 - 2 * 2");
+            Assert.True(c2.IsOk);
+            Assert.Equal(2 - 2 * 2 ,c2.Result);
         }
     }
 }

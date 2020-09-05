@@ -62,6 +62,11 @@ namespace sly.parser.llparser
                             InitStartingTokensWithChoice(rule, choice, nonTerminals);
                             break;
                         }
+                        case OptionClause<IN> option:
+                        {
+                            InitStartingTokensWithOption(rule, option, nonTerminals);
+                            break;
+                        }
                     }
 
                     // add startig tokens of clause in rule.startingtokens
@@ -77,6 +82,75 @@ namespace sly.parser.llparser
             else if (first is ChoiceClause<IN> choice)
             {
                 InitStartingTokensWithChoice(rule, choice, nonTerminals);
+            }
+            else if (first is OptionClause<IN> option)
+            {
+               InitStartingTokensWithOption(rule,option,nonTerminals);
+               int i = 1;
+               bool optional = true;
+               while (i < rule.Clauses.Count && optional)
+               {
+                   IClause<IN> clause = rule.Clauses[i];
+
+                   switch (clause)
+                   {
+                       case TerminalClause<IN> terminalClause:
+                       {
+                           rule.PossibleLeadingTokens.Add(terminalClause.ExpectedToken);
+                           break;
+                       }
+                       case NonTerminalClause<IN> terminalClause:
+                       {
+                           InitStartingTokensForNonTerminal(nonTerminals, terminalClause.NonTerminalName);
+                           NonTerminal<IN> nonTerminal = nonTerminals[terminalClause.NonTerminalName];
+                           {
+                               rule.PossibleLeadingTokens.AddRange(nonTerminal.PossibleLeadingTokens);
+                           }
+                           break;
+                       }
+                       case ChoiceClause<IN> choiceClause:
+                       {
+                           InitStartingTokensWithChoice(rule, choiceClause, nonTerminals);
+                           break;
+                       }
+                       case OptionClause<IN> optionClause:
+                       {
+                           InitStartingTokensWithOption(rule, optionClause, nonTerminals);
+                           break;
+                       }
+                       case ZeroOrMoreClause<IN> zeroOrMoreClause:
+                       {
+                           InitStartingTokensWithZeroOrMore(rule,zeroOrMoreClause,nonTerminals);
+                           break;
+                       }
+                       case OneOrMoreClause<IN> oneOrMoreClause:
+                       {
+                           InitStartingTokensWithOneOrMore(rule, oneOrMoreClause, nonTerminals);
+                           break;
+                       }
+                    }
+
+                   // add startig tokens of clause in rule.startingtokens
+                   optional = clause is ZeroOrMoreClause<IN> || clause is OptionClause<IN>;
+                   i++;
+               }
+            }
+        }
+
+        private void InitStartingTokensWithOption(Rule<IN> rule, OptionClause<IN> option,
+            Dictionary<string, NonTerminal<IN>> nonTerminals)
+        {
+            if (option.Clause is TerminalClause<IN> term)
+            {
+                InitStartingTokensWithTerminal(rule,term);
+            }
+            else if (option.Clause is NonTerminalClause<IN> nonTerminal)
+            {
+                InitStartingTokensWithNonTerminal(rule,nonTerminal,nonTerminals);
+            }
+            else if (option.Clause is GroupClause<IN> group)
+            {
+                // TODO XXX
             }
         }
 
@@ -259,7 +333,7 @@ namespace sly.parser.llparser
                     result.Root = node;
                     result.IsEnded = currentPosition >= tokens.Count - 1
                                      || currentPosition == tokens.Count - 2 &&
-                                     tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                                     tokens[tokens.Count - 1].IsEOS;
                 }
                 else
                 {
@@ -269,7 +343,7 @@ namespace sly.parser.llparser
                     result.Root = node;
                     result.IsEnded = currentPosition >= tokens.Count - 1
                                      || currentPosition == tokens.Count - 2 &&
-                                     tokens[tokens.Count - 1].TokenID.Equals(default(IN));
+                                     tokens[tokens.Count - 1].IsEOS; 
                 }
             }
 

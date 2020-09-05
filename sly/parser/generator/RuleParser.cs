@@ -9,7 +9,7 @@ namespace sly.parser.generator
         #region rules grammar
 
         [Production("rule : IDENTIFIER COLON clauses")]
-        public object Root(Token<EbnfTokenGeneric> name, Token<EbnfTokenGeneric> discarded, ClauseSequence<IN> clauses)
+        public GrammarNode<IN> Root(Token<EbnfTokenGeneric> name, Token<EbnfTokenGeneric> discarded, ClauseSequence<IN> clauses)
         {
             var rule = new Rule<IN>();
             rule.NonTerminalName = name.Value;
@@ -19,7 +19,7 @@ namespace sly.parser.generator
 
 
         [Production("clauses : clause clauses")]
-        public object Clauses(IClause<IN> clause, ClauseSequence<IN> clauses)
+        public GrammarNode<IN> Clauses(IClause<IN> clause, ClauseSequence<IN> clauses)
         {
             var list = new ClauseSequence<IN>(clause);
             if (clauses != null) list.AddRange(clauses);
@@ -157,14 +157,14 @@ namespace sly.parser.generator
 
 
         [Production("groupclauses : groupclause groupclauses")]
-        public object GroupClauses(GroupClause<IN> group, GroupClause<IN> groups)
+        public GroupClause<IN> GroupClauses(GroupClause<IN> group, GroupClause<IN> groups)
         {
             if (groups != null) group.AddRange(groups);
             return group;
         }
 
         [Production("groupclauses : groupclause")]
-        public object GroupClausesOne(GroupClause<IN> group)
+        public GroupClause<IN> GroupClausesOne(GroupClause<IN> group)
         {
             return group;
         }

@@ -69,7 +69,7 @@ namespace jsonparser
         }
 
         [Production("value : NULL")]
-        public JSon NullValue(object forget)
+        public JSon NullValue(Token<JsonToken> forget)
         {
             return new JNull();
         }
@@ -91,13 +91,13 @@ namespace jsonparser
         #region OBJECT
 
         [Production("object: ACCG ACCD")]
-        public JSon EmptyObjectValue(object accg, object accd)
+        public JSon EmptyObjectValue(Token<JsonToken> accg, Token<JsonToken> accd)
         {
             return new JObject();
         }
 
         [Production("object: ACCG members ACCD")]
-        public JSon AttributesObjectValue(object accg, JObject members, object accd)
+        public JSon AttributesObjectValue(Token<JsonToken> accg, JObject members, Token<JsonToken> accd)
         {
             return members;
         }
@@ -107,20 +107,20 @@ namespace jsonparser
         #region LIST
 
         [Production("list: CROG CROD")]
-        public JSon EmptyList(object crog, object crod)
+        public JSon EmptyList(Token<JsonToken> crog, Token<JsonToken> crod)
         {
             return new JList();
         }
 
         [Production("list: CROG listElements CROD")]
-        public JSon List(object crog, JList elements, object crod)
+        public JSon List(Token<JsonToken> crog, JList elements, Token<JsonToken> crod)
         {
             return elements;
         }
 
 
         [Production("listElements: value COMMA listElements")]
-        public JSon ListElementsMany(JSon value, object comma, JList tail)
+        public JSon ListElementsMany(JSon value, Token<JsonToken> comma, JList tail)
         {
             var elements = new JList(value);
             elements.AddRange(tail);
@@ -138,14 +138,14 @@ namespace jsonparser
         #region PROPERTIES
 
         [Production("property: STRING COLON value")]
-        public JSon property(Token<JsonToken> key, object colon, JSon value)
+        public JSon property(Token<JsonToken> key, Token<JsonToken> colon, JSon value)
         {
             return new JObject(key.StringWithoutQuotes, value);
         }
 
 
         [Production("members : property COMMA members")]
-        public JSon ManyMembers(JObject pair, object comma, JObject tail)
+        public JSon ManyMembers(JObject pair, Token<JsonToken> comma, JObject tail)
         {
             var members = new JObject();
             members.Merge(pair);

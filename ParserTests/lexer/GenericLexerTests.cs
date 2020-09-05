@@ -10,6 +10,17 @@ using Xunit;
 
 namespace ParserTests.lexer
 {
+    public enum SameIntValuesError
+    {
+        [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)] ID = 1,
+        
+        [Lexeme(GenericToken.KeyWord,"Keyword1")]
+        keyword1 = 2,
+
+        [Lexeme(GenericToken.KeyWord,"Keyword2")]
+        keyword2 = 2,
+    }
+
     public enum Extensions
     {
         [Lexeme(GenericToken.Extension)] DATE,
@@ -278,14 +289,37 @@ namespace ParserTests.lexer
     [Lexer(IgnoreEOL=false)]
     public enum Issue177Generic
     {
-        [Lexeme(GenericToken.SugarToken,"\r\n",IsLineEnding = true)]
+        [Lexeme(GenericToken.SugarToken,"\n",IsLineEnding = true)]
         EOL = 1,
-        
+
+        [Lexeme(GenericToken.SugarToken,"\r\n",IsLineEnding = true)]
+        EOL_WIN = 7,
+
         [Lexeme(GenericToken.Int)]
         INT = 2,
         
         EOS = 0
         
+    }
+    
+    [Lexer]
+    public enum Issue186MixedGenericAndRegexLexer
+    {
+        [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)]
+        ID = 1,
+
+        [Lexeme("[0-9]+")]
+        
+        INT = 2
+    }
+
+    public class Issue186MixedGenericAndRegexParser
+    {
+        [Production("root : INT")]
+        public object root(Token<Issue186MixedGenericAndRegexLexer> integer)
+        {
+            return null;
+        }
     }
     
     [Lexer(IgnoreEOL=false)]
@@ -532,7 +566,7 @@ namespace ParserTests.lexer
             Assert.Single(lexerRes.Errors);
             var error = lexerRes.Errors[0];
             Assert.Equal(ErrorLevel.FATAL, error.Level);
-            Assert.Contains("must be 1 character length", error.Message);
+            Assert.Equal(ErrorCodes.LEXER_STRING_DELIMITER_MUST_BE_1_CHAR, error.Code);
         }
 
         [Fact]
@@ -543,7 +577,7 @@ namespace ParserTests.lexer
             Assert.Single(lexerRes.Errors);
             var error = lexerRes.Errors[0];
             Assert.Equal(ErrorLevel.FATAL, error.Level);
-            Assert.Contains("can not start with a letter", error.Message);
+            Assert.Equal(ErrorCodes.LEXER_STRING_DELIMITER_CANNOT_BE_LETTER_OR_DIGIT, error.Code);
         }
 
         [Fact]
@@ -917,6 +951,18 @@ namespace ParserTests.lexer
 //             Assert.True(result2.IsOk);
 //             Assert.Equal(9,result2.Tokens.Count);
             ;
+        }
+
+        [Fact]
+        public void TestSameIntValuesError()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<SameIntValuesError>>());
+            Assert.True(lexerRes.IsError);
+            Assert.Null(lexerRes.Result);
+            Assert.Single(lexerRes.Errors);
+            Assert.Equal(ErrorCodes.LEXER_SAME_VALUE_USED_MANY_TIME,lexerRes.Errors.First().Code);
+
+
         }
 
         private static string ToTokens<T>(LexerResult<T> result) where T : struct

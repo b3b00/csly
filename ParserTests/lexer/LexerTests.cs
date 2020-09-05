@@ -15,7 +15,8 @@ namespace ParserTests.lexer
         {
             var jsonParser = new JSONParser();
             var builder = new ParserBuilder<JsonToken, JSon>();
-            var parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
+            var build = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            var parser = build.Result;
             return parser.Lexer;
         }
 

@@ -12,7 +12,9 @@ namespace ParserTests.samples
         {
             var jsonParser = new JSONParser();
             var builder = new ParserBuilder<JsonToken, JSon>();
-            Parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
+            var build = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
+            Assert.True(build.IsOk);
+            Parser = build.Result;
         }
 
         private static Parser<JsonToken, JSon> Parser;

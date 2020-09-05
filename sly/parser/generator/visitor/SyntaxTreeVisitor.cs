@@ -201,7 +201,7 @@ namespace sly.parser.generator.visitor
                     }
                     catch (Exception e)
                     {  
-                        throw new ParserConfigurationException($"ERROR : calling visitor method {method?.Name} with   {node.Name}");                     
+                        throw new ParserConfigurationException($"ERROR {e.Message}: calling visitor method {method?.Name} with   {node.Name}");                     
                     }
                 }
             }

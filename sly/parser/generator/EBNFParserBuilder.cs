@@ -35,7 +35,7 @@ namespace sly.parser.generator
             }
             catch (Exception e)
             {
-                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message));
+                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message,ErrorCodes.PARSER_UNKNOWN_ERROR));
                 return result;
             }
 
@@ -50,7 +50,13 @@ namespace sly.parser.generator
             parser.Configuration = configuration;
             var lexerResult = BuildLexer(extensionBuilder);
             if (lexerResult.IsError)
-                result.AddErrors(lexerResult.Errors);
+            {
+                foreach (var lexerResultError in lexerResult.Errors)
+                {
+                    result.AddError(lexerResultError);
+                }
+                return result;
+            }
             else
                 parser.Lexer = lexerResult.Result;
             parser.Instance = parserInstance;

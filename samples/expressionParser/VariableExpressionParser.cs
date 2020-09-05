@@ -19,7 +19,7 @@ namespace expressionparser
         }
 
         [Production("primary: LPAREN expression RPAREN")]
-        public Expression Group(object discaredLParen, Expression groupValue, object discardedRParen)
+        public Expression Group( Token<ExpressionToken> forget, Expression groupValue, Token<ExpressionToken> ignore)
         {
             return new Group(groupValue);
         }

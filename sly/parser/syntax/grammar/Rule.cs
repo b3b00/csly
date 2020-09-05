@@ -82,6 +82,16 @@ namespace sly.parser.syntax.grammar
 
             return null;
         }
+        
+        public List<OperationMetaData<IN>> GetOperations()
+        {
+            if (IsExpressionRule)
+            {
+                return VisitorMethodsForOperation.Values.ToList();
+            }
+
+            return null;
+        }
 
         public MethodInfo GetVisitor(IN token = default(IN))
         {

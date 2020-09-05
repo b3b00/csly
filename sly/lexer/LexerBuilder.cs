@@ -33,18 +33,43 @@ namespace sly.lexer
             var attributes = new Dictionary<IN, List<LexemeAttribute>>();
 
             var values = Enum.GetValues(typeof(IN));
-            foreach (Enum value in values)
+            var grouped = values.Cast<IN>().GroupBy(x => x).ToList();
+            foreach (var group in grouped)
             {
-                var tokenID = (IN) (object) value;
-                var enumAttributes = value.GetAttributesOfType<LexemeAttribute>();
-                if (enumAttributes.Length == 0)
+                
+                var v = group.Key;
+                if (group.Count() > 1)
                 {
-                    result?.AddError(new LexerInitializationError(ErrorLevel.WARN,
-                        $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
+                 
+                    Enum enumValue = Enum.Parse(typeof(IN), v.ToString()) as Enum;
+                    int intValue = Convert.ToInt32(enumValue); // x is the integer value of enum
+                    
+                    result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
+                        $"int value {intValue} is used {group.Count()} times in lexer enum   {typeof(IN)}",ErrorCodes.LEXER_SAME_VALUE_USED_MANY_TIME));
+                    
                 }
-                else
+            }
+
+            if (!result.IsError)
+            {
+
+                foreach (Enum value in values)
                 {
-                    attributes[tokenID] = enumAttributes.ToList();
+                    var tokenID = (IN) (object) value;
+                    var enumAttributes = value.GetAttributesOfType<LexemeAttribute>();
+                    var singleCommentAttributes = value.GetAttributesOfType<SingleLineCommentAttribute>();
+                    var multiCommentAttributes = value.GetAttributesOfType<MultiLineCommentAttribute>();
+                    var commentAttributes = value.GetAttributesOfType<CommentAttribute>();
+                    if (enumAttributes.Length == 0 && singleCommentAttributes.Length == 0 &&
+                        multiCommentAttributes.Length == 0 && commentAttributes.Length == 0)
+                    {
+                        result?.AddError(new LexerInitializationError(ErrorLevel.WARN,
+                            $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme",ErrorCodes.NOT_AN_ERROR));
+                    }
+                    else
+                    {
+                        attributes[tokenID] = enumAttributes.ToList();
+                    }
                 }
             }
 
@@ -60,8 +85,10 @@ namespace sly.lexer
             BuildExtension<IN> extensionBuilder = null) where IN : struct
         {
             var attributes = GetLexemes(result);
-
-            result = Build(attributes, result, extensionBuilder);
+            if (!result.IsError)
+            {
+                result = Build(attributes, result, extensionBuilder);
+            }
 
             return result;
         }
@@ -75,19 +102,14 @@ namespace sly.lexer
 
             if (hasGenericLexemes && hasRegexLexemes)
             {
-                result.AddError(new LexerInitializationError(ErrorLevel.WARN,
-                    "cannot mix Regex lexemes and Generic lexemes in same lexer"));
+                result.AddError(new LexerInitializationError(ErrorLevel.ERROR,
+                    "cannot mix Regex lexemes and Generic lexemes in same lexer",ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX));
             }
             else
             {
                 if (hasRegexLexemes)
-                {
                     result = BuildRegexLexer(attributes, result);
-                }
-                else if (hasGenericLexemes)
-                {
-                    result = BuildGenericLexer(attributes, extensionBuilder, result);
-                }
+                else if (hasGenericLexemes) result = BuildGenericLexer(attributes, extensionBuilder, result);
             }
 
             return result;
@@ -96,13 +118,13 @@ namespace sly.lexer
         private static bool IsRegexLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes)
         {
             return attributes.Values.SelectMany(list => list)
-                             .Any(lexeme => !string.IsNullOrEmpty(lexeme.Pattern));
+                .Any(lexeme => !string.IsNullOrEmpty(lexeme.Pattern));
         }
 
         private static bool IsGenericLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes)
         {
             return attributes.Values.SelectMany(list => list)
-                             .Any(lexeme => lexeme.GenericToken != default(GenericToken));
+                .Any(lexeme => lexeme.GenericToken != default);
         }
 
 
@@ -129,13 +151,13 @@ namespace sly.lexer
                     catch (Exception e)
                     {
                         result.AddError(new LexerInitializationError(ErrorLevel.ERROR,
-                            $"error at lexem {tokenID} : {e.Message}"));
+                            $"error at lexem {tokenID} : {e.Message}", ErrorCodes.LEXER_UNKNOWN_ERROR));
                     }
                 }
                 else if (!tokenID.Equals(default(IN)))
                 {
                     result.AddError(new LexerInitializationError(ErrorLevel.WARN,
-                        $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme"));
+                        $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme",ErrorCodes.NOT_AN_ERROR));
                 }
             }
 
@@ -224,7 +246,7 @@ namespace sly.lexer
                         {
                             foreach (var param in lexeme.GenericTokenParameters)
                             {
-                                lexer.AddKeyWord(tokenID, param);
+                                lexer.AddKeyWord(tokenID, param, result);
                             }
                         }
 
@@ -232,20 +254,20 @@ namespace sly.lexer
                         {
                             foreach (var param in lexeme.GenericTokenParameters)
                             {
-                                lexer.AddSugarLexem(tokenID, param, lexeme.IsLineEnding);
+                                lexer.AddSugarLexem(tokenID,result, param, lexeme.IsLineEnding);
                             }
                         }
 
                         if (lexeme.IsString)
                         {
                             var (delimiter, escape) = GetDelimiters(lexeme, "\"", "\\");
-                            lexer.AddStringLexem(tokenID, delimiter, escape);
+                            lexer.AddStringLexem(tokenID, result, delimiter, escape);
                         }
 
                         if (lexeme.IsChar)
                         {
                             var (delimiter, escape) = GetDelimiters(lexeme, "'", "\\");
-                            lexer.AddCharLexem(tokenID, delimiter, escape);
+                            lexer.AddCharLexem(tokenID, result, delimiter, escape);
                         }
 
                         if (lexeme.IsExtension)
@@ -255,7 +277,7 @@ namespace sly.lexer
                     }
                     catch (Exception e)
                     {
-                        result.AddError(new InitializationError(ErrorLevel.FATAL, e.Message));
+                        result.AddError(new InitializationError(ErrorLevel.FATAL, e.Message,ErrorCodes.LEXER_UNKNOWN_ERROR));
                     }
                 }
             }
@@ -350,7 +372,8 @@ namespace sly.lexer
             foreach (var duplicate in duplicates)
             {
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
-                    $"char or string lexeme dilimiter {duplicate.Element} is used {duplicate.Counter} times. This will results in lexing conflicts"));
+                    $"char or string lexeme dilimiter {duplicate.Element} is used {duplicate.Counter} times. This will results in lexing conflicts",
+                    ErrorCodes.LEXER_DUPLICATE_STRING_CHAR_DELIMITERS));
             }
 
             return result;
@@ -375,22 +398,22 @@ namespace sly.lexer
 
             if (commentCount > 1)
             {
-                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many comment lexem"));
+                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many comment lexem",ErrorCodes.LEXER_TOO_MANY_COMMNENT));
             }
 
             if (multiLineCommentCount > 1)
             {
-                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many multi-line comment lexem"));
+                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many multi-line comment lexem",ErrorCodes.LEXER_TOO_MANY_MULTILINE_COMMNENT));
             }
 
             if (singleLineCommentCount > 1)
             {
-                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many single-line comment lexem"));
+                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many single-line comment lexem",ErrorCodes.LEXER_TOO_MANY_SINGLELINE_COMMNENT));
             }
 
             if (commentCount > 0 && (multiLineCommentCount > 0 || singleLineCommentCount > 0))
             {
-                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "comment lexem can't be used together with single-line or multi-line comment lexems"));
+                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "comment lexem can't be used together with single-line or multi-line comment lexems",ErrorCodes.LEXER_CANNOT_MIX_COMMENT_AND_SINGLE_OR_MULTI));
             }
 
             return attributes;

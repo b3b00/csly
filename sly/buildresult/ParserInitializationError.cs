@@ -2,7 +2,7 @@
 {
     public class ParserInitializationError : InitializationError
     {
-        public ParserInitializationError(ErrorLevel level, string message) : base(level, message)
+        public ParserInitializationError(ErrorLevel level, string message, ErrorCodes code) : base(level, message, code)
         {
         }
     }

@@ -7,6 +7,7 @@ using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser.generator.visitor;
 using sly.parser.llparser;
+using sly.parser.parser;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
@@ -48,7 +49,11 @@ namespace sly.parser.generator
                 parser = new Parser<IN, OUT>(syntaxParser, visitor);
                 var lexerResult = BuildLexer(extensionBuilder);
                 parser.Lexer = lexerResult.Result;
-                if (lexerResult.IsError) result.AddErrors(lexerResult.Errors);
+                if (lexerResult.IsError)
+                {
+                    result.Errors.AddRange(lexerResult.Errors);
+                    return result;
+                }
                 parser.Instance = parserInstance;
                 parser.Configuration = configuration;
                 result.Result = parser;
@@ -56,7 +61,8 @@ namespace sly.parser.generator
             else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
             {
                 var builder = new EBNFParserBuilder<IN, OUT>();
-                result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,extensionBuilder);
+                result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,
+                    extensionBuilder);
             }
 
             parser = result.Result;
@@ -67,6 +73,14 @@ namespace sly.parser.generator
                 result.Result.Configuration = expressionResult.Result;
 
                 result = CheckParser(result);
+                if (result.IsError)
+                {
+                    result.Result = null;
+                }
+            }
+            else
+            {
+                result.Result = null;
             }
 
             return result;
@@ -172,7 +186,7 @@ namespace sly.parser.generator
         private Rule<IN> BuildNonTerminal(Tuple<string, string> ntAndRule)
         {
             var rule = new Rule<IN>();
-
+            rule.RuleString = $"{ntAndRule.Item1} : {ntAndRule.Item2}";
             var clauses = new List<IClause<IN>>();
             var ruleString = ntAndRule.Item2;
             var clausesString = ruleString.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
@@ -230,6 +244,7 @@ namespace sly.parser.generator
             checkers.Add(CheckUnreachable);
             checkers.Add(CheckNotFound);
             checkers.Add(CheckAlternates);
+            checkers.Add(CheckVisitorsSignature);
 
             if (result.Result != null && !result.IsError)
                 foreach (var checker in checkers)
@@ -255,7 +270,7 @@ namespace sly.parser.generator
 
                 if (!found)
                     result.AddError(new ParserInitializationError(ErrorLevel.WARN,
-                        $"non terminal [{nonTerminal.Name}] is never used."));
+                        $"non terminal [{nonTerminal.Name}] is never used.",ErrorCodes.NOT_AN_ERROR));
             }
 
             return result;
@@ -326,7 +341,7 @@ namespace sly.parser.generator
                 if (clause is NonTerminalClause<IN> ntClause)
                     if (!conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
                         result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                            $"{ntClause.NonTerminalName} references from {rule.RuleString} does not exist."));
+                            $"{ntClause.NonTerminalName} references from {rule.RuleString} does not exist.",ErrorCodes.PARSER_REFERENCE_NOT_FOUND));
             return result;
         }
         
@@ -344,15 +359,272 @@ namespace sly.parser.generator
                         if (!choice.IsTerminalChoice && !choice.IsNonTerminalChoice)
                         {
                             result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                $"{rule.RuleString} contains {choice.ToString()} with mixed terminal and nonterminal."));
+                                $"{rule.RuleString} contains {choice.ToString()} with mixed terminal and nonterminal.",ErrorCodes.PARSER_MIXED_CHOICES));
                         }
                         else if (choice.IsDiscarded && choice.IsNonTerminalChoice)
                         {
                             result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                $"{rule.RuleString} : {choice.ToString()} can not be marked as discarded as it is a non terminal choice."));
+                                $"{rule.RuleString} : {choice.ToString()} can not be marked as discarded as it is a non terminal choice.",ErrorCodes.PARSER_NON_TERMINAL_CHOICE_CANNOT_BE_DISCARDED));
                         }
                     }
                 }
+            }
+
+            return result;
+        }
+
+        private static BuildResult<Parser<IN, OUT>> CheckVisitorsSignature(BuildResult<Parser<IN, OUT>> result,
+            NonTerminal<IN> nonTerminal)
+        {
+            foreach (var rule in nonTerminal.Rules)
+            {
+                if (!rule.IsSubRule)
+                {
+                    result = CheckVisitorSignature(result, rule);
+                }
+            }
+            
+            return result;
+        }
+
+        
+        private static BuildResult<Parser<IN, OUT>> CheckVisitorSignature(BuildResult<Parser<IN, OUT>> result,
+            Rule<IN> rule) 
+        {
+            if (!rule.IsExpressionRule)
+            {
+                var visitor = rule.GetVisitor();
+                if (visitor == null)
+                {
+                    ;
+                }
+                var returnInfo = visitor.ReturnParameter;
+                var expectedReturn = typeof(OUT);
+                var foundReturn = returnInfo.ParameterType;
+                if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
+                {
+                    result.AddError(new InitializationError(ErrorLevel.FATAL,
+                        $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expected {typeof(OUT)}, found {returnInfo.ParameterType.Name}",
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
+                }
+
+                var realClauses = rule.Clauses.Where(x => !(x is TerminalClause<IN> || x is ChoiceClause<IN>) || (x is TerminalClause<IN> t && !t.Discarded) || (x is ChoiceClause<IN> c && !c.IsDiscarded) ).ToList();
+
+                if (visitor.GetParameters().Length != realClauses.Count && visitor.GetParameters().Length != realClauses.Count +1)
+                {
+                    result.AddError(new InitializationError(ErrorLevel.FATAL,
+                        $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : expected {realClauses.Count} or {realClauses.Count+1}, found {visitor.GetParameters().Length}",
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
+                    // do not go further : it will cause an out of bound error.
+                    return result;
+                }
+                
+                int i = 0;
+                foreach (var clause in realClauses)
+                {
+                    var arg = visitor.GetParameters()[i];
+
+                    switch (clause)
+                    {
+                        case TerminalClause<IN> terminal:
+                        {
+                            var expected = typeof(Token<IN>);
+                            var found = arg.ParameterType;
+                            result = CheckArgType(result, rule, expected, visitor, arg);
+                            break;
+                        }
+                        case NonTerminalClause<IN> nonTerminal:
+                        {
+                            Type expected = null;
+                            var found = arg.ParameterType;
+                            if (nonTerminal.IsGroup)
+                            {
+                                expected = typeof(Group<IN,OUT>);
+                            }
+                            else
+                            {
+                                expected = typeof(OUT);
+                            }
+                            CheckArgType(result, rule, expected, visitor, arg);
+                            break;
+                        }
+                        case ManyClause<IN> many:
+                        {
+                            Type expected = null;
+                            Type found =  arg.ParameterType;
+                            var innerClause = many.Clause;
+                            switch (innerClause)
+                            {
+                                case TerminalClause<IN> term:
+                                {
+                                    expected = typeof(List<Token<IN>>);
+                                    break;
+                                }
+                                case NonTerminalClause<IN> nonTerm:
+                                {
+                                    if (nonTerm.IsGroup)
+                                    {
+                                        expected = typeof(List<Group<IN, OUT>>);
+                                    }
+                                    else
+                                    {
+                                        expected = typeof(List<OUT>);
+                                    }
+
+                                    break;
+                                }
+                                case GroupClause<IN> group:
+                                {
+                                    expected = typeof(Group<IN, OUT>);
+                                    break;
+                                }
+                                case ChoiceClause<IN> choice:
+                                {
+                                    if (choice.IsTerminalChoice)
+                                    {
+                                        expected = typeof(List<Token<IN>>);
+                                    }
+                                    else if (choice.IsNonTerminalChoice)
+                                    {
+                                        expected = typeof(List<OUT>);
+                                    }
+                                    break;
+                                }
+                            }
+                            result = CheckArgType(result, rule, expected, visitor, arg);
+                            break;
+                        }
+                        case GroupClause<IN> group:
+                        {
+                            Type expected = typeof(Group<IN,OUT>);
+                            Type found =  arg.ParameterType;
+                            result = CheckArgType(result, rule, expected, visitor, arg);
+                            break;
+                        }
+                        case OptionClause<IN> option:
+                        {
+                            Type expected = null;
+                            Type found =  arg.ParameterType;
+                            var innerClause = option.Clause;
+                            switch (innerClause)
+                            {
+                                case TerminalClause<IN> term:
+                                {
+                                    expected = typeof(Token<IN>);
+                                    break;
+                                }
+                                case NonTerminalClause<IN> nonTerm:
+                                {
+                                    if (nonTerm.IsGroup)
+                                    {
+                                        expected = typeof(ValueOption<Group<IN, OUT>>);
+                                    }
+                                    else
+                                    {
+                                        expected = typeof(ValueOption<OUT>);
+                                    }
+
+                                    break;
+                                }
+                                case GroupClause<IN> group:
+                                {
+                                    expected = typeof(ValueOption<Group<IN, OUT>>);
+                                    break;
+                                }
+                                case ChoiceClause<IN> choice:
+                                {
+                                    if (choice.IsTerminalChoice)
+                                    {
+                                        expected = typeof(Token<IN>);
+                                    }
+                                    else if (choice.IsNonTerminalChoice)
+                                    {
+                                        expected = typeof(ValueOption<OUT>);
+                                    }
+                                    break;
+                                }
+                            }
+                            result = CheckArgType(result, rule, expected, visitor, arg);
+                            break;
+                        }
+                    }
+
+                    i++;
+                }
+            }
+            else
+            {
+                var operations = rule.GetOperations();
+                foreach (var operation in operations)
+                {
+                    var visitor = operation.VisitorMethod;
+                    var returnInfo = visitor.ReturnParameter;
+                    var expectedReturn = typeof(OUT);
+                    var foundReturn = returnInfo?.ParameterType;
+                    if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
+                    {
+                        result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expected {typeof(OUT)}, found {returnInfo.ParameterType.Name}",ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
+                    }
+                    
+                    if (operation.IsUnary)
+                    {
+                        var parameters = visitor.GetParameters();
+                        if (parameters.Length != 2 && parameters.Length != 3)
+                        {
+                            result.AddError(new InitializationError(ErrorLevel.FATAL,
+                                $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : 2 or 3, found {parameters.Length}",
+                                ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
+                            // do not go further : it will cause an out of bound error.
+                            return result;
+                        }
+                        if (operation.Affix == Affix.PreFix)
+                        {
+                            var token = parameters[0];
+                            result = CheckArgType(result, rule, typeof(Token<IN>), visitor, token);
+                            var value = parameters[1];
+                            result = CheckArgType(result, rule, typeof(OUT), visitor, value);
+                        }
+                        else
+                        {
+                            var token = parameters[1];
+                            result = CheckArgType(result, rule, typeof(Token<IN>), visitor, token);
+                            var value = parameters[0];
+                            result = CheckArgType(result, rule, typeof(OUT), visitor, value);
+                        }
+                    }
+                    else if (operation.IsBinary)
+                    {
+                        var parameters = visitor.GetParameters();
+                        if (parameters.Length != 3 && parameters.Length != 4)
+                        {
+                            result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : 3 or 4, found {parameters.Length}", ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
+                            // do not go further : it will cause an out of bound error.
+                            return result;
+                        }
+
+                        var left = parameters[0];
+                        result = CheckArgType(result, rule, typeof(OUT),  visitor, left);
+                        var op = parameters[1];
+                        result = CheckArgType(result, rule, typeof(Token<IN>),  visitor, op);
+                        var right = parameters[2];
+                        result = CheckArgType(result, rule, typeof(OUT),  visitor, right);
+                        
+                    }
+                }
+                ;
+                // TODO expressions  
+            }
+
+            return result;
+        }
+
+        private static BuildResult<Parser<IN, OUT>> CheckArgType(BuildResult<Parser<IN, OUT>> result, Rule<IN> rule, Type expected, MethodInfo visitor,
+            ParameterInfo arg) 
+        {
+            if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
+            {
+                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {arg.ParameterType}",ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
             }
 
             return result;

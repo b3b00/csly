@@ -122,21 +122,41 @@ namespace ParserTests.comments
         {
             var lexerRes6 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError6>>());
             Assert.True(lexerRes6.IsError);
-            Assert.Equal(2, lexerRes6.Errors.Count);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes6.Errors[1].Level);
-            Assert.Equal("too many comment lexem", lexerRes6.Errors[1].Message);
+            Assert.Single(lexerRes6.Errors);
+            var expectedErrors = new[]
+            {
+                "too many comment lexem"
+            };
+            foreach (var expectedError in expectedErrors)
+            {
+                Assert.True(lexerRes6.Errors.Exists(x => x.Level == ErrorLevel.FATAL && x.Message == expectedError));
+            }
 
             var lexerRes5 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError5>>());
             Assert.True(lexerRes5.IsError);
-            Assert.Equal(2, lexerRes5.Errors.Count);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes5.Errors[1].Level);
-            Assert.Equal("too many multi-line comment lexem", lexerRes5.Errors[1].Message);
+            Assert.Single(lexerRes5.Errors);
+            expectedErrors = new[]
+            {
+                "too many multi-line comment lexem"
+            };
+            foreach (var expectedError in expectedErrors)
+            {
+                Assert.True(lexerRes5.Errors.Exists(x => x.Level == ErrorLevel.FATAL && x.Message == expectedError));
+            }
+            
 
             var lexerRes4 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError4>>());
             Assert.True(lexerRes4.IsError);
-            Assert.Equal(2, lexerRes4.Errors.Count);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes4.Errors[1].Level);
-            Assert.Equal("too many single-line comment lexem", lexerRes4.Errors[1].Message);
+            Assert.Single(lexerRes4.Errors);
+            expectedErrors = new[]
+            {
+                "too many single-line comment lexem"
+            };
+            foreach (var expectedError in expectedErrors)
+            {
+                Assert.True(lexerRes4.Errors.Exists(x => x.Level == ErrorLevel.FATAL && x.Message == expectedError));
+            }
+
         }
 
         [Fact]
@@ -144,21 +164,21 @@ namespace ParserTests.comments
         {
             var lexerRes3 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError3>>());
             Assert.True(lexerRes3.IsError);
-            Assert.Equal(2, lexerRes3.Errors.Count);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes3.Errors[1].Level);
-            Assert.Equal("comment lexem can't be used together with single-line or multi-line comment lexems", lexerRes3.Errors[1].Message);
+            Assert.Single(lexerRes3.Errors);
+            Assert.Equal(ErrorLevel.FATAL, lexerRes3.Errors[0].Level);
+            Assert.Equal("comment lexem can't be used together with single-line or multi-line comment lexems", lexerRes3.Errors[0].Message);
 
             var lexerRes2 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError2>>());
             Assert.True(lexerRes2.IsError);
-            Assert.Equal(2, lexerRes2.Errors.Count);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes2.Errors[1].Level);
-            Assert.Equal("comment lexem can't be used together with single-line or multi-line comment lexems", lexerRes2.Errors[1].Message);
+            Assert.Single(lexerRes2.Errors);
+            Assert.Equal(ErrorLevel.FATAL, lexerRes2.Errors[0].Level);
+            Assert.Equal("comment lexem can't be used together with single-line or multi-line comment lexems", lexerRes2.Errors[0].Message);
 
             var lexerRes1 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError1>>());
             Assert.True(lexerRes1.IsError);
-            Assert.Equal(2, lexerRes1.Errors.Count);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes1.Errors[1].Level);
-            Assert.Equal("comment lexem can't be used together with single-line or multi-line comment lexems", lexerRes1.Errors[1].Message);
+            Assert.Single(lexerRes1.Errors);
+            Assert.Equal(ErrorLevel.FATAL, lexerRes1.Errors[0].Level);
+            Assert.Equal("comment lexem can't be used together with single-line or multi-line comment lexems", lexerRes1.Errors[0].Message);
         }
 
         [Fact]
@@ -166,39 +186,45 @@ namespace ParserTests.comments
         {
             var lexerRes10 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError10>>());
             Assert.True(lexerRes10.IsError);
-            Assert.Equal(5, lexerRes10.Errors.Count);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes10.Errors[1].Level);
-            Assert.Equal("too many comment lexem", lexerRes10.Errors[1].Message);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes10.Errors[2].Level);
-            Assert.Equal("too many multi-line comment lexem", lexerRes10.Errors[2].Message);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes10.Errors[3].Level);
-            Assert.Equal("too many single-line comment lexem", lexerRes10.Errors[3].Message);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes10.Errors[4].Level);
-            Assert.Equal("comment lexem can't be used together with single-line or multi-line comment lexems", lexerRes10.Errors[4].Message);
+            Assert.Equal(4, lexerRes10.Errors.Count);
+            var expectedErrors = new[]
+            {
+                "too many comment lexem", "too many multi-line comment lexem", "too many single-line comment lexem",
+                "comment lexem can't be used together with single-line or multi-line comment lexems"
+            };
+            foreach (var expectedError in expectedErrors)
+            {
+                Assert.True(lexerRes10.Errors.Exists(x => x.Level == ErrorLevel.FATAL && x.Message == expectedError));
+            }
+
+            expectedErrors = new[] {"too many multi-line comment lexem", "too many single-line comment lexem"};
 
             var lexerRes9 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError9>>());
             Assert.True(lexerRes9.IsError);
-            Assert.Equal(3, lexerRes9.Errors.Count);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes9.Errors[1].Level);
-            Assert.Equal("too many multi-line comment lexem", lexerRes9.Errors[1].Message);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes9.Errors[2].Level);
-            Assert.Equal("too many single-line comment lexem", lexerRes9.Errors[2].Message);
+            Assert.Equal(2, lexerRes9.Errors.Count);
+            foreach (var expectedError in expectedErrors)
+            {
+                Assert.True(lexerRes9.Errors.Exists(x => x.Level == ErrorLevel.FATAL && x.Message == expectedError));
+            }
 
+            expectedErrors = new[] {"too many multi-line comment lexem","comment lexem can't be used together with single-line or multi-line comment lexems"};
+            
             var lexerRes8 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError8>>());
             Assert.True(lexerRes8.IsError);
-            Assert.Equal(3, lexerRes8.Errors.Count);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes8.Errors[1].Level);
-            Assert.Equal("too many multi-line comment lexem", lexerRes8.Errors[1].Message);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes8.Errors[2].Level);
-            Assert.Equal("comment lexem can't be used together with single-line or multi-line comment lexems", lexerRes8.Errors[2].Message);
+            Assert.Equal(2, lexerRes8.Errors.Count);
+            foreach (var expectedError in expectedErrors)
+            {
+                Assert.True(lexerRes8.Errors.Exists(x => x.Level == ErrorLevel.FATAL && x.Message == expectedError));
+            }
 
+            expectedErrors = new[] {"too many single-line comment lexem" , "comment lexem can't be used together with single-line or multi-line comment lexems"};
             var lexerRes7 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError7>>());
             Assert.True(lexerRes7.IsError);
-            Assert.Equal(3, lexerRes7.Errors.Count);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes7.Errors[1].Level);
-            Assert.Equal("too many single-line comment lexem", lexerRes7.Errors[1].Message);
-            Assert.Equal(ErrorLevel.FATAL, lexerRes7.Errors[2].Level);
-            Assert.Equal("comment lexem can't be used together with single-line or multi-line comment lexems", lexerRes7.Errors[2].Message);
+            Assert.Equal(2, lexerRes7.Errors.Count);
+            foreach (var expectedError in expectedErrors)
+            {
+                Assert.True(lexerRes7.Errors.Exists(x => x.Level == ErrorLevel.FATAL && x.Message == expectedError));
+            }
         }
     }
 }
