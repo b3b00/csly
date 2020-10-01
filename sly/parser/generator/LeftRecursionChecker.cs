@@ -116,11 +116,9 @@ namespace sly.parser.generator
             var (found,path) = FindRecursion(currentPath);
             if (found)
             {
-                Console.WriteLine($"left recursion : {path}");
                 return (true,new List<List<string>>() {currentPath});
             }
             
-            //var leftClauses = nonTerminal.Rules.Select(x => x.Clauses.First() as NonTerminalClause<IN>).Where(x => x != null);
             var leftClauses = nonTerminal.Rules.SelectMany(x => GetLeftClausesName(x, configuration)).ToList();
             foreach (var leftClause in leftClauses)
             {
