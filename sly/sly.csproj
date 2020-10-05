@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/b3b00/sly</PackageProjectUrl>
     <RepositoryUrl>https://github.com/b3b00/sly</RepositoryUrl>
     <PackageLicenseUrl>https://github.com/b3b00/sly/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageVersion>2.6.0.6</PackageVersion>
+    <PackageVersion>2.6.1.0</PackageVersion>
     <ApplicationIcon />
     <OutputType>Library</OutputType>
     <StartupObject />
