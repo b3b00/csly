@@ -43,6 +43,14 @@ namespace sly.parser.generator
             if (parserType == ParserType.LL_RECURSIVE_DESCENT)
             {
                 var configuration = ExtractParserConfiguration(parserInstance.GetType());
+                var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
+                if (foundRecursion)
+                {
+                    var recs = string.Join("\n", recursions.Select(x => string.Join(" > ",x)));
+                    result.AddError(new ParserInitializationError(ErrorLevel.FATAL,$"left recursion detected : {recs}",ErrorCodes.PARSER_LEFT_RECURSIVE));
+                    return result;
+
+                }
                 configuration.StartingRule = rootRule;
                 var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                 var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
@@ -629,6 +637,8 @@ namespace sly.parser.generator
 
             return result;
         }
+
+       
 
         #endregion
     }
