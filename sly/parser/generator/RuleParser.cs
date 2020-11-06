@@ -183,6 +183,14 @@ namespace sly.parser.generator
             return new GroupClause<IN>(clause);
         }
 
+        [Production("groupclause : choiceclause ")]
+        public GroupClause<IN> GroupChoiceClause(ChoiceClause<IN> choices)
+        {
+            return new GroupClause<IN>(choices);
+        }
+
+
+
         #endregion
 
 

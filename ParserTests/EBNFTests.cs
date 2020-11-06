@@ -118,6 +118,29 @@ namespace ParserTests
             r.Append(")");
             return r.ToString();
         }
+        
+        [Production("rootGroupChoice : A ( [SEMICOLON | COMMA ] A ) ")]
+        public string rootGroupChoice(Token<GroupTestToken> a, Group<GroupTestToken, string> group)
+        {
+            var r = new StringBuilder();
+            r.Append("R(");
+            r.Append(a.Value);
+            r.Append(",").Append(group.Token(1).Value).Append(")");
+            return r.ToString();
+        }
+        [Production("rootGroupChoiceMany : A ( [SEMICOLON | COMMA ] A )* ")]
+        public string rootGroupChoiceMany(Token<GroupTestToken> a, List<Group<GroupTestToken, string>> groups)
+        {
+            var r = new StringBuilder();
+            r.Append("R(");
+            r.Append(a.Value);
+            groups.ForEach(group =>
+            {
+                r.Append(",").Append(group.Token(1).Value);
+            });
+            r.Append(")");
+            return r.ToString();
+        }
 
         [Production("rootMany : A ( COMMA [d] A )* ")]
         public string rootMany(Token<GroupTestToken> a, List<Group<GroupTestToken, string>> groups)
@@ -627,6 +650,34 @@ namespace ParserTests
             Assert.False(buildResult.IsError);
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ,a , a ,a,a", "rootMany");
+
+            Assert.False(res.IsError);
+            Assert.Equal("R(a,a,a,a,a)", res.Result); // rootMany
+        }
+        
+        [Fact]
+        public void TestGroupSyntaxChoicesParser()
+        {
+            var buildResult = BuildGroupParser();
+            Assert.False(buildResult.IsError);
+            var groupParser = buildResult.Result;
+            var res = groupParser.Parse("a ;a ", "rootGroupChoice");
+
+            Assert.False(res.IsError);
+            Assert.Equal("R(a,a)", res.Result); 
+            res = groupParser.Parse("a ,a ", "rootGroupChoice");
+
+            Assert.False(res.IsError);
+            Assert.Equal("R(a,a)", res.Result); // rootMany
+        }
+        
+        [Fact]
+        public void TestGroupSyntaxChoicesManyParser()
+        {
+            var buildResult = BuildGroupParser();
+            Assert.False(buildResult.IsError);
+            var groupParser = buildResult.Result;
+            var res = groupParser.Parse("a ;a,a  ; a,a ", "rootGroupChoiceMany");
 
             Assert.False(res.IsError);
             Assert.Equal("R(a,a,a,a,a)", res.Result); // rootMany
