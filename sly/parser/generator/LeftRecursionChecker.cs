@@ -46,6 +46,11 @@ namespace sly.parser.generator
             {
                 return choice.Choices.SelectMany(x => GetLeftClausesName(x)).ToList();
             }
+
+            if (clause is GroupClause<IN> group)
+            {
+                return GetLeftClausesName(group.Clauses.First());
+            }
             return new List<string>();
         }
 
@@ -120,6 +125,7 @@ namespace sly.parser.generator
             }
             
             var leftClauses = nonTerminal.Rules.SelectMany(x => GetLeftClausesName(x, configuration)).ToList();
+            
             foreach (var leftClause in leftClauses)
             {
                 if (configuration.NonTerminals.ContainsKey(leftClause))

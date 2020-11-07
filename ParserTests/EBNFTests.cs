@@ -286,15 +286,40 @@ namespace ParserTests
             return builder.ToString();
         }
     }
+
     
+    public class LeftRecWithChoiceInGroup
+    {
+        [Production("leftrec: ([leftrec | right])")]
+        public string leftrec(Group<OptionTestToken, string> opt)
+        {
+            return "";
+        }
+
+        [Production("right : a")]
+        public string right(Token<OptionTestToken> a)
+        {
+            return a.Value;
+        }
+    }
+    
+    public class AlternateChoiceInGroupTestError
+    {
+
+        [Production("choiceInGroup : a ([ a | b | C | D] a)")]
+        public string ChoiceInGroup(Token<OptionTestToken> c, Group<OptionTestToken, string> opt)
+        {
+            return c.Value;
+        }
+    }
+
     public class AlternateChoiceTestError
     {
         [Production("choice : [ a | b | C | D]")]
         public string Choice(Token<OptionTestToken> c)
         {
-            return c.Value;
+            return "choice";
         }
-        
         [Production("D : [ E | C] [d]")]
         public string D()
         {
@@ -1096,10 +1121,28 @@ namespace ParserTests
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
             Assert.True(builtParser.IsError);
             Assert.Equal(2,builtParser.Errors.Count);
-            Assert.Contains("mixed", builtParser.Errors[0].Message);
-            Assert.Contains("discarded", builtParser.Errors[1].Message);
+            Assert.Equal(ErrorCodes.PARSER_MIXED_CHOICES, builtParser.Errors[0].Code);
+            Assert.Equal(ErrorCodes.PARSER_NON_TERMINAL_CHOICE_CANNOT_BE_DISCARDED, builtParser.Errors[1].Code);
             
         }
+        
+        
+        
+        [Fact]
+        public void TestAlternateChoiceInGroupLeftRecursion()
+        {
+            var startingRule = $"choiceInGroup";
+            var parserInstance = new LeftRecWithChoiceInGroup();
+            var builder = new ParserBuilder<OptionTestToken, string>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Assert.True(builtParser.IsError);
+            Assert.Single(builtParser.Errors);
+            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE,builtParser.Errors.First().Code);
+            // Assert.Equal(1,builtParser.Errors.Count);
+            // Assert.Equal(ErrorCodes.PARSER_MIXED_CHOICES, builtParser.Errors[0].Code);
+
+        }
+
 
         [Fact]
         public void TestIssue190()
