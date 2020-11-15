@@ -15,7 +15,7 @@ CSLY is highly inspired by the python lex yacc library ([PLY](http://www.dabeaz.
 
 ## Getting started ##
 
-I your too impatient to further read this readme here is 
+If you're too impatient to further read this readme here is 
 a [quick getting started](https://github.com/b3b00/csly/wiki/getting-started) that will guide you through the implementation of a dumb parser.
 
 ## full documentation ## 
