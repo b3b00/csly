@@ -285,14 +285,14 @@ namespace sly.lexer.fsm
             return ExceptTransitionTo(exceptions, Fsm.NewNodeId, precondition);
         }
 
-        public FSMLexerBuilder<N> AnyTransition(char input)
+        public FSMLexerBuilder<N> AnyTransition()
         {
-            return AnyTransitionTo(input, Fsm.NewNodeId);
+            return AnyTransitionTo(Fsm.NewNodeId);
         }
 
-        public FSMLexerBuilder<N> AnyTransition(char input, TransitionPrecondition precondition)
+        public FSMLexerBuilder<N> AnyTransition(TransitionPrecondition precondition)
         {
-            return AnyTransitionTo(input, Fsm.NewNodeId, precondition);
+            return AnyTransitionTo(Fsm.NewNodeId, precondition);
         }
 
         #endregion
@@ -449,9 +449,9 @@ namespace sly.lexer.fsm
             return this;
         }
 
-        public FSMLexerBuilder<N> AnyTransitionTo(char input, int toNode)
+        public FSMLexerBuilder<N> AnyTransitionTo(int toNode)
         {
-            AbstractTransitionCheck checker = new TransitionAny(input);
+            AbstractTransitionCheck checker = new TransitionAny();
             if (!Fsm.HasState(toNode)) Fsm.AddNode();
             var transition = new FSMTransition(checker, CurrentState, toNode);
             Fsm.AddTransition(transition);
@@ -459,9 +459,9 @@ namespace sly.lexer.fsm
             return this;
         }
 
-        public FSMLexerBuilder<N> AnyTransitionTo(char input, int toNode, TransitionPrecondition precondition)
+        public FSMLexerBuilder<N> AnyTransitionTo(int toNode, TransitionPrecondition precondition)
         {
-            AbstractTransitionCheck checker = new TransitionAny(input, precondition);
+            AbstractTransitionCheck checker = new TransitionAny(precondition);
             if (!Fsm.HasState(toNode)) Fsm.AddNode();
             var transition = new FSMTransition(checker, CurrentState, toNode);
             Fsm.AddTransition(transition);
@@ -520,16 +520,16 @@ namespace sly.lexer.fsm
             return ExceptTransitionTo(exceptions, toNode, precondition);
         }
 
-        public FSMLexerBuilder<N> AnyTransitionTo(char input, string toNodeMark)
+        public FSMLexerBuilder<N> AnyTransitionTo(string toNodeMark)
         {
             var toNode = Marks[toNodeMark];
-            return AnyTransitionTo(input, toNode);
+            return AnyTransitionTo(toNode);
         }
 
-        public FSMLexerBuilder<N> AnyTransitionTo(char input, string toNodeMark, TransitionPrecondition precondition)
+        public FSMLexerBuilder<N> AnyTransitionTo(string toNodeMark, TransitionPrecondition precondition)
         {
             var toNode = Marks[toNodeMark];
-            return AnyTransitionTo(input, toNode, precondition);
+            return AnyTransitionTo(toNode, precondition);
         }
         
         #endregion
