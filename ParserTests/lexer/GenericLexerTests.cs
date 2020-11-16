@@ -10,6 +10,64 @@ using Xunit;
 
 namespace ParserTests.lexer
 {
+    
+    public enum Issue210Token
+    {
+        EOF = 0,
+
+        [Lexeme(GenericToken.Extension)] SPECIAL,
+        [Lexeme(GenericToken.KeyWord, "x")] X,
+        [Lexeme(GenericToken.SugarToken, "?")] QMARK,
+    }
+    public static class Issue210Extensions
+    {
+        
+        
+        public static void AddExtensions(Issue210Token token, LexemeAttribute lexem, GenericLexer<Issue210Token> lexer)
+        {
+            if (token == Issue210Token.SPECIAL || token == Issue210Token.QMARK)
+            {
+                FSMMatch<GenericToken> Callback(FSMMatch<GenericToken> match)
+                {
+                    var result = match.Result.Value;
+                    if (result.Length >= 2)
+                    {
+                        if (match.Result.Value[0] == '?' && match.Result.Value.Last() == '?')
+                        {
+                            var section = result.Substring(1, result.Length - 2);
+
+                            match.Result.SpanValue = section.AsMemory();
+                            match.Properties[GenericLexer<Issue210Token>.DerivedToken] = Issue210Token.SPECIAL;
+                            return match;
+                        }
+                        Console.WriteLine($"bad lexing {match.Result.Value}");
+                        match.Result.SpanValue = null;
+                        match.Properties[GenericLexer<Issue210Token>.DerivedToken] = default(Issue210Token);
+                        return match;
+                    }
+
+                    return match;
+                }
+
+
+
+
+                lexer.FSMBuilder.GoTo(GenericLexer<Issue210Token>.start)
+                    .Transition('?')
+                    .Mark("qmark")
+                    .ExceptTransition(new[] {'?'}) // moving to first char of a special
+                    .Mark("in_qmark") // now we are really in a potential SPECIAL
+                    .ExceptTransitionTo(new[] {'?'}, "in_qmark")
+                    .Transition('?') // ending ? of a SPECIAL
+                    .End(GenericToken.Extension) // we re done with a SPECIAL
+                    .Mark("end_qmark")
+                    .CallBack(Callback)
+                    .GoTo("qmark")
+                    .TransitionTo('?', "end_qmark");
+            }
+        }
+    }
+    
     public enum SameIntValuesError
     {
         [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)] ID = 1,
@@ -965,9 +1023,39 @@ namespace ParserTests.lexer
 
         }
 
+        [Fact]
+        public void TestIssue210()
+        {
+            var lexResult = LexerBuilder.BuildLexer<Issue210Token>(Issue210Extensions.AddExtensions);
+            Assert.True(lexResult.IsOk);
+            var lexer = lexResult.Result;
+            Assert.NotNull(lexer);
+            var r = lexer.Tokenize("?");
+            Assert.True(r.IsOk);
+            var l = ToTokens2(r);
+            Assert.Equal("QMARK[?]EOF[]",l);
+            r = lexer.Tokenize("?special?");
+            Assert.True(r.IsOk);
+            l = ToTokens2(r);
+            Assert.Equal("SPECIAL[special]EOF[]",l);
+            r = lexer.Tokenize("x?x");
+            Assert.True(r.IsOk);
+            l = ToTokens2(r);
+            Assert.Equal("X[x]QMARK[?]X[x]EOF[]",l);
+            r = lexer.Tokenize("??");
+            Assert.True(r.IsOk);
+            l = ToTokens2(r);
+            Assert.Equal("SPECIAL[]EOF[]",l);
+        }
+
         private static string ToTokens<T>(LexerResult<T> result) where T : struct
         {
             return result.Tokens.Aggregate(new StringBuilder(), (buf, token) => buf.Append(token.TokenID)).ToString();
+        }
+        
+        private static string ToTokens2<T>(LexerResult<T> result) where T : struct
+        {
+            return string.Join("",result.Tokens.Select(x => $"{x.TokenID}[{x.Value}]"));
         }
     }
 }
