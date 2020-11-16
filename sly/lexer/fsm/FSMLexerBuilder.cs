@@ -158,8 +158,16 @@ namespace sly.lexer.fsm
 
         public FSMLexerBuilder<N> Transition(char input)
         {
-            return TransitionTo(input, Fsm.NewNodeId);
+            var next = Fsm.GetNext(CurrentState, input);
+            if (next == null)
+            {
+                return TransitionTo(input, Fsm.NewNodeId);
+            }
+            CurrentState = next.Id;
+            return this;
         }
+
+        
         
         public FSMLexerBuilder<N> Transition(char[] inputs)
         {
