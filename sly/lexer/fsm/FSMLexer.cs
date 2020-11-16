@@ -220,6 +220,13 @@ namespace sly.lexer.fsm
             return null;
         }
 
+        public FSMNode<N> GetNext(int from, char token)
+        {
+            var node = Nodes[from];
+            
+            return Move(node, token, "".AsMemory());
+        }
+
         private void ConsumeIgnored(ReadOnlyMemory<char> source, LexerPosition position)
         {
             
