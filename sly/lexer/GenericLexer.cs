@@ -796,6 +796,7 @@ namespace sly.lexer
             tok.TokenID = (IN) match.Properties[DerivedToken];
             tok.IsLineEnding = match.IsLineEnding;
             tok.IsEOS = match.IsEOS;
+            tok.Notignored = match.Result.Notignored;
             return tok;
         }
 

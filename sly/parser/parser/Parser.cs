@@ -74,7 +74,7 @@ namespace sly.parser
             for (var i = 0; i < tokens.Count; i++)
             {
                 var token = tokens[i];
-                if (!token.IsComment)
+                if (!token.IsComment || token.Notignored)
                 {
                     token.PositionInTokenFlow = position;
                     tokensWithoutComments.Add(token);
