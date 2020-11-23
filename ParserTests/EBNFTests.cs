@@ -17,6 +17,73 @@ using Xunit;
 
 namespace ParserTests
 {
+    
+    [Lexer(IgnoreWS = true, IgnoreEOL = true)]
+    public enum DoNotIgnoreCommentsToken
+    {
+        [MultiLineComment("/*","*/",true)]
+        COMMENT = 1,
+
+        [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumeric)]
+        ID = 2
+    }
+
+
+    public interface DoNotIgnore
+    {
+        
+    }
+
+    public class IdentifierList : DoNotIgnore
+    {
+
+        public List<DoNotIgnoreCommentIdentifier> Ids;
+        public IdentifierList(List<DoNotIgnore> ids)
+        {
+            Ids = ids.Cast<DoNotIgnoreCommentIdentifier>().ToList();
+        }
+    }
+    
+    public class DoNotIgnoreCommentIdentifier : DoNotIgnore
+    {
+        public string Name;
+
+        public string Comment;
+
+        public bool IsCommented => !string.IsNullOrEmpty(Comment);
+
+        public DoNotIgnoreCommentIdentifier(string name)
+        {
+            Name = name;
+        }
+
+        public DoNotIgnoreCommentIdentifier(string name, string comment) : this(name)
+        {
+            Comment = comment;
+        }
+    }
+    
+    public class DoNotIgnoreCommentsParser
+    {
+        [Production("main : id *")]
+        public DoNotIgnore Main(List<DoNotIgnore> ids)
+        {
+            return new IdentifierList(ids);
+        }
+        
+        [Production("id : ID")]
+        public DoNotIgnore SimpleId(Token<DoNotIgnoreCommentsToken> token)
+        {
+            return new DoNotIgnoreCommentIdentifier(token.Value);
+        } 
+        
+        [Production("id : COMMENT ID")]
+        public DoNotIgnore CommentedId(Token<DoNotIgnoreCommentsToken> comment, Token<DoNotIgnoreCommentsToken> token)
+        {
+            return new DoNotIgnoreCommentIdentifier(token.Value, comment.Value);
+        } 
+    }
+    
     public static class ListExtensions
     {
         public static bool ContainsAll<IN>(this IEnumerable<IN> list1, IEnumerable<IN> list2)
@@ -1177,6 +1244,33 @@ namespace ParserTests
                 x is UnexpectedTokenSyntaxError<TokenType> tok && tok.UnexpectedToken.IsEOS);
             Assert.True(containsEOSError);
                 
+            ;
+
+        }
+        
+        [Fact]
+        public void TestIssue213()
+        {
+            var parserInstance = new DoNotIgnoreCommentsParser();
+            var builder = new ParserBuilder<DoNotIgnoreCommentsToken, DoNotIgnore>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
+            
+            Assert.True(builtParser.IsOk);
+            Assert.NotNull(builtParser.Result);
+            var parser = builtParser.Result;
+
+            var test = parser.Parse("a /*commented b*/b");
+
+            Assert.True(test.IsOk);
+            Assert.NotNull(test.Result);
+            Assert.IsType<IdentifierList>(test.Result);
+            var list = test.Result as IdentifierList;
+            Assert.Equal(2, list.Ids.Count);
+            Assert.False(list.Ids[0].IsCommented);
+            Assert.Equal("a",list.Ids[0].Name);
+            Assert.True(list.Ids[1].IsCommented);
+            Assert.Equal("b",list.Ids[1].Name);
+            Assert.Equal("commented b",list.Ids[1].Comment);    
             ;
 
         }

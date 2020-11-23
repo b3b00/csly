@@ -16,6 +16,7 @@ namespace sly.lexer
         public char StringDelimiter = '"';
         
         public char CharDelimiter ='\'';
+        public bool Notignored;
 
 
         public Token(T token, string value, LexerPosition position, bool isCommentStart = false,
