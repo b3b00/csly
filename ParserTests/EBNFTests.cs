@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using expressionparser;
 using jsonparser;
@@ -17,6 +18,49 @@ using Xunit;
 
 namespace ParserTests
 {
+
+    public enum EToken
+    {
+        [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumeric)]
+        ID = 1,
+        
+        [Lexeme(GenericToken.Int)]
+        INT = 2
+    }
+
+    public class Parser
+    {
+        [Production("main : ID subRuleParser INT")]
+        public object Main(Token<EToken> id, object subParsed, Token<EToken> integer)
+        {
+            // do something here
+            return null;
+        }
+
+        [Production("main : ID subRuleParser[SubParser(SubParserType) INT")]
+        public object Main(Token<EToken> id, object subParsed, Token<EToken> integer)
+        {
+            // do something here
+            return null;
+        }
+        
+        // decalre use of SubParserType class as a subParser
+        [Production("subRuleParser : SubParser(SubParserType) ")]
+        public object subParsed(object value)
+        {
+            return value;
+        }
+    }
+
+    public class SubParserType
+    {
+        [Production("submain : ID ")] // root rule
+        public object SubMain(Token<EToken> id)
+        {
+            return id.Value;
+        }
+        
+    }
     
     [Lexer(IgnoreWS = true, IgnoreEOL = true)]
     public enum DoNotIgnoreCommentsToken
