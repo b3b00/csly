@@ -20,19 +20,31 @@ namespace sly.lexer
 
 
         public Token(T token, string value, LexerPosition position, bool isCommentStart = false,
-            CommentType commentType = CommentType.Single) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType )
+            CommentType commentType = CommentType.Single, int? channel = null) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType,channel )
         {
             
         }
         
         public Token(T token, ReadOnlyMemory<char> value, LexerPosition position, bool isCommentStart = false,
-            CommentType commentType = CommentType.Single)
+            CommentType commentType = CommentType.Single, int? channel = null)
         {
             IsEOS = false;
             TokenID = token;
             SpanValue = value;
             Position = position;
             CommentType = commentType;
+            if (CommentType != CommentType.No)
+            {
+                if (channel == null)
+                {
+                    channel = 1;
+                }
+            }
+            else
+            {
+                channel = channel ?? 0;
+            }
+            Channel = channel.Value;
         }
 
 
@@ -43,6 +55,7 @@ namespace sly.lexer
             Position = new LexerPosition(0, 0, 0);
         }
 
+        public int Channel {get; set;} = 0;
 
         public  ReadOnlyMemory<char> SpanValue { get; set; }
         
@@ -148,7 +161,7 @@ namespace sly.lexer
         {
             if (!TokenID.Equals(DefaultToken))
             {
-                return $"{TokenID} [{Value}] @{Position}";
+                return $"{TokenID} [{Value}] @{Position} on channel {Channel}";
             }
 
             return "<<EOS>>";

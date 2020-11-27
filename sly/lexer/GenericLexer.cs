@@ -87,6 +87,7 @@ namespace sly.lexer
         public const string in_identifier = "in_identifier";
         public const string token_property = "token";
         public const string DerivedToken = "derivedToken";
+        public const string TokenChannel = "channel";
         public const string defaultIdentifierKey = "identifier";
         public const string escape_string = "escape_string";
         public const string escape_char = "escape_char";
@@ -96,6 +97,9 @@ namespace sly.lexer
         public const string multi_line_comment_start = "multi_line_comment_start";
 
         protected readonly Dictionary<GenericToken, Dictionary<string, IN>> derivedTokens;
+        
+        protected readonly Dictionary<GenericToken, Dictionary<string, int?>> tokenChannels;
+        
         protected IN doubleDerivedToken;
         protected char EscapeStringDelimiterChar;
 
@@ -124,6 +128,7 @@ namespace sly.lexer
         public GenericLexer(Config config, GenericToken[] staticTokens)
         {
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
+            tokenChannels = new Dictionary<GenericToken, Dictionary<string, int?>>();
             ExtensionBuilder = config.ExtensionBuilder;
             KeyWordComparer = config.KeyWordComparer;
             InitializeStaticLexer(config, staticTokens);
@@ -355,7 +360,7 @@ namespace sly.lexer
             }
         }
 
-        public void AddLexeme(GenericToken generic, IN token)
+        public void AddLexeme(GenericToken generic, IN token, int? channel)
         {
             NodeCallback<GenericToken> callback = match =>
             {
@@ -367,13 +372,21 @@ namespace sly.lexer
                             {
                                 var possibleTokens = derivedTokens[GenericToken.Identifier];
                                 if (possibleTokens.ContainsKey(match.Result.Value))
+                                {
+                                    match.Properties[TokenChannel] = channel;
                                     match.Properties[DerivedToken] = possibleTokens[match.Result.Value];
+                                    match.Result.Channel = channel?? 0;
+                                }
                                 else
+                                {
                                     match.Properties[DerivedToken] = identifierDerivedToken;
+                                    match.Properties[TokenChannel] = channel;
+                                }
                             }
                             else
                             {
                                 match.Properties[DerivedToken] = identifierDerivedToken;
+                                match.Properties[TokenChannel] = channel;
                             }
 
                             break;
@@ -381,20 +394,27 @@ namespace sly.lexer
                     case GenericToken.Int:
                         {
                             match.Properties[DerivedToken] = intDerivedToken;
+                            match.Properties[TokenChannel] = channel;
+                            match.Result.Channel = channel?? 0;
                             break;
                         }
                     case GenericToken.Double:
                         {
                             match.Properties[DerivedToken] = doubleDerivedToken;
+                            match.Properties[TokenChannel] = channel;
+                            match.Result.Channel = channel?? 0;
                             break;
                         }
                     default:
                         {
                             match.Properties[DerivedToken] = token;
+                            match.Properties[TokenChannel] = channel;
+                            match.Result.Channel = channel?? 0;
                             break;
                         }
                 }
 
+                
                 return match;
             };
 

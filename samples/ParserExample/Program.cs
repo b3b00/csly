@@ -692,6 +692,29 @@ namespace ParserExample
             }
             ;
         }
+
+        public static void TestChannels()
+        {
+            var lexerResult = LexerBuilder.BuildLexer<ChannelLexer>();
+            if (lexerResult.IsOk)
+            {
+                var lexer = lexerResult.Result;
+                var tokens = lexer.Tokenize(@"toto 
+// commentaire
+1
+id");
+                if (tokens.IsOk)
+                {
+                    var toks = tokens.Tokens;
+                    foreach (var tok in toks)
+                    {
+                        Console.WriteLine(tok);
+                    }
+                }
+                ;
+            }
+            
+        }
         
         private static void Main(string[] args)
         {
@@ -712,11 +735,12 @@ namespace ParserExample
             
           //  TestDoubleExponent();
 //Test192();
-TestRecursion();
+// TestRecursion();
 
             // TestFactorial();
             // TestThreadsafeGeneric();
             //Test164();
+            TestChannels();
         }
 
         
