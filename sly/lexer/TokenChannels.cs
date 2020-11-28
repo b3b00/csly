@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,33 +7,42 @@ namespace sly.lexer
 
     public class TokenChannel<IN>
     {
-        private List<Token<IN>> Tokens;
+        public readonly List<Token<IN>> Tokens;
+        
         public int ChannelId;
         public int Count => Tokens.Count;
 
-        public TokenChannel(List<Token<IN>> tokens)
+        public TokenChannel(List<Token<IN>> tokens, int channelId)
         {
             Tokens = tokens;
+            ChannelId = channelId;
         }
 
-        public TokenChannel() : this(new List<Token<IN>>())
+        public TokenChannel(int channelId) : this(new List<Token<IN>>(),channelId)
         {
         }
 
-        private Token<IN> GetValue(int i)
+        private Token<IN> GetToken(int i)
         {
             return Tokens[i];
         }
         
-        private void SetValue(int i, Token<IN> token)
+        private void SetToken(int i, Token<IN> token)
         {
+            if (i >= Tokens.Count)
+            {
+                for (int j = Tokens.Count; j <= i; j++)
+                {
+                    Tokens.Add(null);
+                }
+            }
             Tokens[i] = token;
         }
         
         public Token<IN> this[int key]
         {
-            get => GetValue(key);
-            set => SetValue(key,value);
+            get => GetToken(key);
+            set => SetToken(key,value);
         }
 
         public void Add(Token<IN> token)
@@ -41,40 +51,61 @@ namespace sly.lexer
         }
     }
     
-    public class TokenChannels<IN>
+    public class TokenChannels<IN> : IEnumerable<Token<IN>>
     {
         private Dictionary<int, TokenChannel<IN>> Channels;
 
+        public List<Token<IN>> Tokens => GetChannel(0).Tokens.Where(x => x != null).ToList();
+         
+        
         public readonly int ChannelId;
 
-        public TokenChannels(int channelId)
+        public TokenChannels()
         {
-            ChannelId = channelId;
             Channels = new Dictionary<int, TokenChannel<IN>>();
         }
-        
-        // private TokenChannel<IN> GetValue(int i)
-        // {
-        //     return Channels[i];
-        // }
-        //
-        // private void SetValue(int i, TokenChannel<IN> token)
-        // {
-        //     Channels[i] = token;
-        // }
 
-        public TokenChannel<IN> this[int key] => Channels[key];
-        // {
-        //     get => GetValue(key);
-        //     set => SetValue(key,value);
-        // }
+        public TokenChannels(List<Token<IN>> tokens) : this()
+        {
+            foreach (var token in tokens)
+            {
+                Add(token);
+            }
+        }
+        
+        public TokenChannel<IN> GetChannel(int i)
+        {
+            return Channels[i];
+        }
+        
+        public void SetChannel(int i, TokenChannel<IN> token)
+        {
+            Channels[i] = token;
+        }
+
+        public Token<IN> this[int index]
+        {
+            get => GetToken(index);
+            set
+            {
+            }
+        }
+
+        public int Count => GetChannel(0).Count;
+
+        private Token<IN> GetToken(int index)
+        {
+            var list = Tokens;
+            return list[index];
+        }
 
         public void Add(Token<IN> token)
         {
             TokenChannel<IN> channel = null;
             if (!TryGet(token.Channel, out channel))
             {
-                channel = new TokenChannel<IN>();
+                channel = new TokenChannel<IN>(token.Channel);
+                
                 Channels[token.Channel] = channel;
             }
 
@@ -139,6 +170,15 @@ namespace sly.lexer
         }
 
         private bool TryGet(int index, out TokenChannel<IN> channel) => Channels.TryGetValue(index, out channel);
-        
+
+        public IEnumerator<Token<IN>> GetEnumerator()
+        {
+            return Tokens.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Tokens.GetEnumerator();
+        }
     }
 }

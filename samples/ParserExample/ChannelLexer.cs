@@ -5,8 +5,6 @@ namespace ParserExample
     public enum ChannelLexer
     {
         
-        
-        
         [Lexeme(GenericToken.Identifier)] ID = 20,
         
         [Lexeme(GenericToken.KeyWord,"toto")] TOTO = 23,

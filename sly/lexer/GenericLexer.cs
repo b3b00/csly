@@ -373,20 +373,22 @@ namespace sly.lexer
                                 var possibleTokens = derivedTokens[GenericToken.Identifier];
                                 if (possibleTokens.ContainsKey(match.Result.Value))
                                 {
-                                    match.Properties[TokenChannel] = channel;
+                                    match.Properties[TokenChannel] = channel ?? 0;
                                     match.Properties[DerivedToken] = possibleTokens[match.Result.Value];
                                     match.Result.Channel = channel?? 0;
                                 }
                                 else
                                 {
                                     match.Properties[DerivedToken] = identifierDerivedToken;
-                                    match.Properties[TokenChannel] = channel;
+                                    match.Properties[TokenChannel] = channel ?? 0;
+                                    match.Result.Channel = channel ?? 0;
                                 }
                             }
                             else
                             {
                                 match.Properties[DerivedToken] = identifierDerivedToken;
-                                match.Properties[TokenChannel] = channel;
+                                match.Properties[TokenChannel] = channel ?? 0;
+                                match.Result.Channel = channel ?? 0;
                             }
 
                             break;
@@ -394,22 +396,22 @@ namespace sly.lexer
                     case GenericToken.Int:
                         {
                             match.Properties[DerivedToken] = intDerivedToken;
-                            match.Properties[TokenChannel] = channel;
-                            match.Result.Channel = channel?? 0;
+                            match.Properties[TokenChannel] = channel ?? 0;
+                            match.Result.Channel = channel ?? 0;
                             break;
                         }
                     case GenericToken.Double:
                         {
                             match.Properties[DerivedToken] = doubleDerivedToken;
-                            match.Properties[TokenChannel] = channel;
-                            match.Result.Channel = channel?? 0;
+                            match.Properties[TokenChannel] = channel ?? 0;
+                            match.Result.Channel = channel ?? 0;
                             break;
                         }
                     default:
                         {
                             match.Properties[DerivedToken] = token;
-                            match.Properties[TokenChannel] = channel;
-                            match.Result.Channel = channel?? 0;
+                            match.Properties[TokenChannel] = channel ?? 0;
+                            match.Result.Channel = channel ?? 0;
                             break;
                         }
                 }
@@ -587,7 +589,7 @@ namespace sly.lexer
         }
 
         public void AddStringLexem(IN token,  BuildResult<ILexer<IN>> result , string stringDelimiter,
-            string escapeDelimiterChar = "\\")
+            string escapeDelimiterChar = "\\", int channel = 0)
         {
             if (string.IsNullOrEmpty(stringDelimiter) || stringDelimiter.Length > 1)
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL,$"bad lexem {stringDelimiter} :  StringToken lexeme delimiter char <{token.ToString()}> must be 1 character length.",ErrorCodes.LEXER_STRING_DELIMITER_MUST_BE_1_CHAR));
@@ -620,8 +622,9 @@ namespace sly.lexer
             NodeCallback<GenericToken> callback = match =>
             {
                 match.Properties[DerivedToken] = token;
+                match.Properties[TokenChannel] = channel;
                 var value = match.Result.SpanValue;
-
+                match.Result.Channel = channel;
                 match.Result.SpanValue = value;
 
                 match.StringDelimiterChar = stringDelimiterChar;
@@ -682,7 +685,8 @@ namespace sly.lexer
             }
         }
         
-        public void AddCharLexem(IN token, BuildResult<ILexer<IN>> result ,string charDelimiter, string escapeDelimiterChar = "\\")
+        public void AddCharLexem(IN token, BuildResult<ILexer<IN>> result, string charDelimiter,
+            string escapeDelimiterChar = "\\", int channel = 0)
         {
             if (string.IsNullOrEmpty(charDelimiter) || charDelimiter.Length > 1)
                result.AddError(new InitializationError(ErrorLevel.FATAL,
@@ -709,6 +713,7 @@ namespace sly.lexer
             NodeCallback<GenericToken> callback = match =>
             {
                 match.Properties[DerivedToken] = token;
+                match.Properties[TokenChannel] = channel;
                 var value = match.Result.SpanValue;
 
                 match.Result.SpanValue = value;
@@ -739,7 +744,7 @@ namespace sly.lexer
 
         }
 
-        public void AddSugarLexem(IN token, BuildResult<ILexer<IN>> buildResult, string specialValue, bool isLineEnding = false)
+        public void AddSugarLexem(IN token, BuildResult<ILexer<IN>> buildResult, string specialValue, bool isLineEnding = false, int channel = 0)
         {
             if (char.IsLetter(specialValue[0]))
             {
@@ -751,6 +756,7 @@ namespace sly.lexer
             NodeCallback<GenericToken> callback = match =>
             {
                 match.Properties[DerivedToken] = token;
+                match.Properties[TokenChannel] = channel;
                 return match;
             };
 

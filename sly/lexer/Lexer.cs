@@ -82,6 +82,7 @@ namespace sly.lexer
 
 
             tokens.Add(eos);
+            
             return new LexerResult<T>(tokens);
         }
 

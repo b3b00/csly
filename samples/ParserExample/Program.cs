@@ -702,7 +702,8 @@ namespace ParserExample
                 var tokens = lexer.Tokenize(@"toto 
 // commentaire
 1
-id");
+id
+""string""");
                 if (tokens.IsOk)
                 {
                     var toks = tokens.Tokens;

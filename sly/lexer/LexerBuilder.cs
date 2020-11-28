@@ -289,13 +289,13 @@ namespace sly.lexer
                         if (lexeme.IsString)
                         {
                             var (delimiter, escape) = GetDelimiters(lexeme, "\"", "\\");
-                            lexer.AddStringLexem(tokenID, result, delimiter, escape);
+                            lexer.AddStringLexem(tokenID, result, delimiter, escape, lexeme.Channel ?? 0);
                         }
 
                         if (lexeme.IsChar)
                         {
                             var (delimiter, escape) = GetDelimiters(lexeme, "'", "\\");
-                            lexer.AddCharLexem(tokenID, result, delimiter, escape);
+                            lexer.AddCharLexem(tokenID, result, delimiter, escape, lexeme.Channel ?? 0);
                         }
 
                         if (lexeme.IsExtension)
