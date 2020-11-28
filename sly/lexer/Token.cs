@@ -159,7 +159,7 @@ namespace sly.lexer
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            if (!TokenID.Equals(DefaultToken))
+            if (!IsEOS)
             {
                 return $"{TokenID} [{Value}] @{Position} on channel {Channel}";
             }

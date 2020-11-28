@@ -715,8 +715,10 @@ namespace sly.lexer
                 match.Properties[DerivedToken] = token;
                 match.Properties[TokenChannel] = channel;
                 var value = match.Result.SpanValue;
-
+                match.Result.Channel = channel;
                 match.Result.SpanValue = value;
+                match.Result.IsEOS = false;
+                match.Result.CommentType = CommentType.No;
                 return match;
             };
 

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace sly.lexer
 {
@@ -48,6 +49,20 @@ namespace sly.lexer
         public void Add(Token<IN> token)
         {
             Tokens.Add(token);
+        }
+
+        public override string ToString()
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append("#" + ChannelId);
+            foreach (var token in Tokens)
+            {
+                if (token != null)
+                {
+                    builder.Append(token.ToString()).Append(" > ");
+                }
+            }
+            return builder.ToString();
         }
     }
     
@@ -112,7 +127,7 @@ namespace sly.lexer
             int index = Channels.Values.Max(x => x.Count);
             foreach (var VARIABLE in Channels.Values)
             {
-                for (int i = channel.Count; i < index; i++)
+                for (int i = channel.Count; i <= index; i++)
                 {
                     channel.Add(null);
                 }
@@ -179,6 +194,11 @@ namespace sly.lexer
         IEnumerator IEnumerable.GetEnumerator()
         {
             return Tokens.GetEnumerator();
+        }
+
+        public override string ToString()
+        {
+            return string.Join("\n", Channels.Values.Select(x => x.ToString()).ToArray());
         }
     }
 }
