@@ -817,6 +817,7 @@ namespace sly.lexer
             tok.IsLineEnding = match.IsLineEnding;
             tok.IsEOS = match.IsEOS;
             tok.Notignored = match.Result.Notignored;
+            tok.Channel = match.Result.Channel;
             return tok;
         }
 
