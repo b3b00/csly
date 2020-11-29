@@ -317,11 +317,6 @@ namespace sly.lexer
             {
                 foreach (var comment in comments)
                 {
-                    
-                    ;
-
-                   
-
                     foreach (var commentAttr in comment.Value)
                     {
                         var fsmBuilder = lexer.FSMBuilder;

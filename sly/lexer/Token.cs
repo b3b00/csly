@@ -37,7 +37,7 @@ namespace sly.lexer
             {
                 if (channel == null)
                 {
-                    channel = 0;
+                    channel = Channels.Main;
                 }
             }
             else

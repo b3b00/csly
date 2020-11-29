@@ -4,8 +4,20 @@ using System.Linq;
 
 namespace sly.lexer
 {
+
+
+
+    public static class Channels
+    {
+        public const int Main = 0;
+        public const int WhitSpace = 1;
+        public const int Comments = 2;
+    }
+    
     public class TokenChannels<IN> : IEnumerable<Token<IN>>
     {
+        
+        
         private Dictionary<int, TokenChannel<IN>> Channels;
 
         public List<Token<IN>> Tokens => GetChannel(0).Tokens.Where(x => x != null).ToList();
