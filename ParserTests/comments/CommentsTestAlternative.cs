@@ -7,13 +7,13 @@ namespace ParserTests.comments
     
     public enum CommentsTokenAlternative
     {
-        [Lexeme(GenericToken.Int)] INT,
+        [Lexeme(GenericToken.Int, channel:0)] INT,
 
-        [Lexeme(GenericToken.Double)] DOUBLE,
+        [Lexeme(GenericToken.Double, channel:0)] DOUBLE,
 
-        [Lexeme(GenericToken.Identifier)] ID,
+        [Lexeme(GenericToken.Identifier,channel:0)] ID,
 
-        [SingleLineComment("//")] [MultiLineComment("/*", "*/")] COMMENT
+        [SingleLineComment("//",channel:0)] [MultiLineComment("/*", "*/",channel:0)] COMMENT
     }
     
     public class CommentsTestAlternative

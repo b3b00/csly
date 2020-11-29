@@ -81,9 +81,9 @@ namespace ParserTests.lexer
 
     public enum Extensions
     {
-        [Lexeme(GenericToken.Extension)] DATE,
+        [Lexeme(GenericToken.Extension,channel:0)] DATE,
 
-        [Lexeme(GenericToken.Double)] DOUBLE
+        [Lexeme(GenericToken.Double,channel:0)] DOUBLE
     }
 
 

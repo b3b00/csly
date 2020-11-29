@@ -759,6 +759,7 @@ namespace sly.lexer
             {
                 match.Properties[DerivedToken] = token;
                 match.Properties[TokenChannel] = channel;
+                match.Result.Channel = channel;
                 return match;
             };
 
