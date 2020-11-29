@@ -183,7 +183,7 @@ namespace sly.lexer.fsm
                 lexerPosition.Column = result.Result.Position.Column + length;
 
                 if (HasCallback(result.NodeId))
-                {
+                {   
                     result = Callbacks[result.NodeId](result);
                 }
 

@@ -21,7 +21,7 @@ namespace ParserTests
     [Lexer(IgnoreWS = true, IgnoreEOL = true)]
     public enum DoNotIgnoreCommentsToken
     {
-        [MultiLineComment("/*","*/",true)]
+        [MultiLineComment("/*","*/",true,channel:0)]
         COMMENT = 1,
 
         [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumeric)]

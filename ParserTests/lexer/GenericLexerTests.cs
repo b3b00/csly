@@ -143,6 +143,7 @@ namespace ParserTests.lexer
                 NodeCallback<GenericToken> callback = match =>
                 {
                     match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
+                    match.Result.Channel = 0;
                     return match;
                 };
 
