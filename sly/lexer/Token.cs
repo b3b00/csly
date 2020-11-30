@@ -13,6 +13,8 @@ namespace sly.lexer
 
     public class Token<T>
     {
+        
+        
         public char StringDelimiter = '"';
         
         public char CharDelimiter ='\'';
@@ -55,13 +57,46 @@ namespace sly.lexer
             Position = new LexerPosition(0, 0, 0);
         }
 
+        public Token<T> Next(int channelId)
+        {
+            TokenChannel<T> channel = null;
+             
+            if (TokenChannels.TryGet(channelId, out channel))
+            {
+                int position = PositionInTokenFlow + 1;
+                if (position < channel.Count)
+                {
+                    return channel[position];
+                }
+            }
+            return null;
+        }
+
+        public Token<T> Previous(int channelId)
+        {
+            TokenChannel<T> channel = null;
+             
+            if (TokenChannels.TryGet(channelId, out channel))
+            {
+                int position = PositionInTokenFlow - 1;
+                if (position >= 0) 
+                {
+                    return channel[position];
+                }
+            }
+            return null;
+        }
+
         public int Channel {get; set;} = 0;
 
         public  ReadOnlyMemory<char> SpanValue { get; set; }
         
         public LexerPosition Position { get; set; }
 
+        public int PositionInTokenVisibleFlow { get; set; }
+        
         public int PositionInTokenFlow { get; set; }
+
         public T TokenID { get; set; }
         public bool IsComment { get; set; }
 
@@ -152,6 +187,8 @@ namespace sly.lexer
         public bool End { get; set; }
         public static T DefTok { get; set; }
         public bool IsLineEnding { get; set; }
+        
+        public TokenChannels<T> TokenChannels { get; set; }         
 
         public static Token<T> Empty()
         {

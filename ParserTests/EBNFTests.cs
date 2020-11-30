@@ -19,6 +19,17 @@ namespace ParserTests
 {
     
     [Lexer(IgnoreWS = true, IgnoreEOL = true)]
+    public enum DoNotIgnoreCommentsTokenWithChannels
+    {
+        [MultiLineComment("/*","*/")]
+        COMMENT = 1,
+
+        [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumeric)]
+        ID = 2
+    }
+
+    
+    [Lexer(IgnoreWS = true, IgnoreEOL = true)]
     public enum DoNotIgnoreCommentsToken
     {
         [MultiLineComment("/*","*/",true,channel:0)]
@@ -82,6 +93,28 @@ namespace ParserTests
         {
             return new DoNotIgnoreCommentIdentifier(token.Value, comment.Value);
         } 
+    }
+    
+    public class DoNotIgnoreCommentsWithChannelsParser
+    {
+        [Production("main : id *")]
+        public DoNotIgnore Main(List<DoNotIgnore> ids)
+        {
+            return new IdentifierList(ids);
+        }
+
+        [Production("id : ID")]
+        public DoNotIgnore SimpleId(Token<DoNotIgnoreCommentsTokenWithChannels> token)
+        {
+            var previous = token.Previous(Channels.Comments);
+            string comment = null;
+            if (previous != null && previous.TokenID == DoNotIgnoreCommentsTokenWithChannels.COMMENT)
+            {
+                comment = previous?.Value;
+            }
+            return new DoNotIgnoreCommentIdentifier(token.Value, comment);
+        }
+
     }
     
     public static class ListExtensions
@@ -1253,6 +1286,33 @@ namespace ParserTests
         {
             var parserInstance = new DoNotIgnoreCommentsParser();
             var builder = new ParserBuilder<DoNotIgnoreCommentsToken, DoNotIgnore>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
+            
+            Assert.True(builtParser.IsOk);
+            Assert.NotNull(builtParser.Result);
+            var parser = builtParser.Result;
+
+            var test = parser.Parse("a /*commented b*/b");
+
+            Assert.True(test.IsOk);
+            Assert.NotNull(test.Result);
+            Assert.IsType<IdentifierList>(test.Result);
+            var list = test.Result as IdentifierList;
+            Assert.Equal(2, list.Ids.Count);
+            Assert.False(list.Ids[0].IsCommented);
+            Assert.Equal("a",list.Ids[0].Name);
+            Assert.True(list.Ids[1].IsCommented);
+            Assert.Equal("b",list.Ids[1].Name);
+            Assert.Equal("commented b",list.Ids[1].Comment);    
+            ;
+
+        }
+        
+        [Fact]
+        public void TestIssue213WithChannels()
+        {
+            var parserInstance = new DoNotIgnoreCommentsWithChannelsParser();
+            var builder = new ParserBuilder<DoNotIgnoreCommentsTokenWithChannels, DoNotIgnore>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
             
             Assert.True(builtParser.IsOk);

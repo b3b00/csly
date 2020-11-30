@@ -32,9 +32,12 @@ namespace sly.lexer
 
         public TokenChannels(List<Token<IN>> tokens) : this()
         {
+            int i = 0;
             foreach (var token in tokens)
             {
+                token.PositionInTokenFlow = i;
                 Add(token);
+                i++;
             }
         }
 
@@ -71,6 +74,7 @@ namespace sly.lexer
 
         public void Add(Token<IN> token)
         {
+            token.TokenChannels = this;
             TokenChannel<IN> channel = null;
             if (!TryGet(token.Channel, out channel))
             {
@@ -147,7 +151,7 @@ namespace sly.lexer
             return null;
         }
 
-        private bool TryGet(int index, out TokenChannel<IN> channel) => Channels.TryGetValue(index, out channel);
+        public bool TryGet(int index, out TokenChannel<IN> channel) => Channels.TryGetValue(index, out channel);
 
         public IEnumerator<Token<IN>> GetEnumerator()
         {

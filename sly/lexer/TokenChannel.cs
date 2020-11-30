@@ -46,6 +46,8 @@ namespace sly.lexer
         public void Add(Token<IN> token)
         {
             Tokens.Add(token);
+            if (token != null) 
+                token.PositionInTokenFlow = Tokens.Count;
         }
 
         public override string ToString()
