@@ -25,7 +25,10 @@ namespace ParserTests
         COMMENT = 1,
 
         [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumeric)]
-        ID = 2
+        ID = 2,
+        
+        [Lexeme(GenericToken.Double, channel:101)]
+        DOUBLE = 3
     }
 
     
@@ -106,8 +109,10 @@ namespace ParserTests
         [Production("id : ID")]
         public DoNotIgnore SimpleId(Token<DoNotIgnoreCommentsTokenWithChannels> token)
         {
+            // get previous token in channel 2 (COMMENT)
             var previous = token.Previous(Channels.Comments);
             string comment = null;
+            // previous token may not be a comment so we have to check if not null
             if (previous != null && previous.TokenID == DoNotIgnoreCommentsTokenWithChannels.COMMENT)
             {
                 comment = previous?.Value;
