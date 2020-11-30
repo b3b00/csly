@@ -141,8 +141,8 @@ namespace sly.lexer.fsm
 
         public FSMMatch<N> Run(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
-            ConsumeIgnored(source,lexerPosition);
-
+            var ignoredTokens = ConsumeIgnored(source,lexerPosition);
+            
             // End of token stream
             if (lexerPosition.Index >= source.Length)
             {
@@ -187,6 +187,7 @@ namespace sly.lexer.fsm
                     result = Callbacks[result.NodeId](result);
                 }
 
+                result.IgnoredTokens = ignoredTokens;
                 return result;
             }
 
@@ -227,9 +228,9 @@ namespace sly.lexer.fsm
             return Move(node, token, "".AsMemory());
         }
 
-        private void ConsumeIgnored(ReadOnlyMemory<char> source, LexerPosition position)
+        private List<Token<N>> ConsumeIgnored(ReadOnlyMemory<char> source, LexerPosition position)
         {
-            
+            List<Token<N>> ignoredTokens = new List<Token<N>>();
             while (position.Index < source.Length)
             {
                 if (IgnoreWhiteSpace)
@@ -237,6 +238,10 @@ namespace sly.lexer.fsm
                     var currentCharacter = source.At(position.Index);
                     if (WhiteSpaces.Contains(currentCharacter))
                     {
+                        var whiteToken = new Token<N>(default(N),source.Slice(position.Index, 1), position, false, CommentType.No,
+                            Channels.WhiteSpaces);
+                        ignoredTokens.Add(whiteToken);
+                        whiteToken.IsWhiteSpace = true;
                         position.Index++;
                         position.Column++;
                         continue;
@@ -248,15 +253,23 @@ namespace sly.lexer.fsm
                     var eol = EOLManager.IsEndOfLine(source, position.Index);
                     if (eol != EOLType.No)
                     {
-                        position.Index += eol == EOLType.Windows ? 2 : 1;
+                        int length = eol == EOLType.Windows ? 2 : 1;
+                        var eolToken = new Token<N>(default(N),source.Slice(position.Index, length), position, false, CommentType.No,
+                            Channels.WhiteSpaces);
+                        eolToken.IsEOL = true;
+                        ignoredTokens.Add(eolToken);
+                        position.Index += length;
                         position.Column = 0;
                         position.Line++;
                         continue;
                     }
+                   
                 }
 
                 break;
             }
+
+            return ignoredTokens;
         }
 
         #endregion

@@ -51,7 +51,7 @@ namespace sly.lexer
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
-            builder.Append("#" + ChannelId);
+            builder.Append("#").Append(ChannelId).Append(" ");
             foreach (var token in Tokens)
             {
                 if (token != null)

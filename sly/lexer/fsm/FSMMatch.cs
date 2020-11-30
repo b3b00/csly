@@ -23,17 +23,24 @@ namespace sly.lexer.fsm
         
         public bool IsLineEnding { get; set; }
 
+        public List<Token<N>> IgnoredTokens { get; set; }
+        
         public FSMMatch(bool success)
         {
+            IgnoredTokens = new List<Token<N>>();
             IsSuccess = success;
             IsEOS = !success;
         }
-        
-        
 
-        public FSMMatch(bool success, N result, string value, LexerPosition position, int nodeId, LexerPosition newPosition, bool isLineEnding)
-            : this(success, result, new ReadOnlyMemory<char>(value.ToCharArray()), position, nodeId,newPosition,isLineEnding)
-        { }
+
+
+        public FSMMatch(bool success, N result, string value, LexerPosition position, int nodeId,
+            LexerPosition newPosition, bool isLineEnding)
+            : this(success, result, new ReadOnlyMemory<char>(value.ToCharArray()), position, nodeId, newPosition,
+                isLineEnding)
+        {
+            IgnoredTokens = new List<Token<N>>();
+        }
 
         public FSMMatch(bool success, N result, ReadOnlyMemory<char> value, LexerPosition position, int nodeId,
             LexerPosition newPosition, bool isLineEnding)
@@ -45,6 +52,7 @@ namespace sly.lexer.fsm
             Result = new Token<N>(result, value, position);
             NewPosition = newPosition;
             IsLineEnding = isLineEnding;
+            IgnoredTokens = new List<Token<N>>();
         }
 
         

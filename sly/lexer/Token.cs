@@ -22,7 +22,6 @@ namespace sly.lexer
         public Token(T token, string value, LexerPosition position, bool isCommentStart = false,
             CommentType commentType = CommentType.Single, int? channel = null) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType,channel )
         {
-            
         }
         
         public Token(T token, ReadOnlyMemory<char> value, LexerPosition position, bool isCommentStart = false,
@@ -42,8 +41,9 @@ namespace sly.lexer
             }
             else
             {
-                channel = channel ?? 0;
+                channel = channel ?? Channels.Main;
             }
+
             Channel = channel.Value;
         }
 
@@ -68,6 +68,10 @@ namespace sly.lexer
         public bool Discarded { get; set; } = false;
 
         public bool IsEOS { get; set; }
+        
+        public bool IsWhiteSpace { get; set; }
+        
+        public bool IsEOL { get; set; }
 
         public CommentType CommentType { get; set; } = CommentType.No;
 
@@ -159,12 +163,23 @@ namespace sly.lexer
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            if (!IsEOS)
+            if (IsEOS)
             {
-                return $"{TokenID} [{Value}] @{Position} on channel {Channel}";
+                return "<<EOS>>";
             }
 
-            return "<<EOS>>";
+            if (IsEOL)
+            {
+                return $"<<EOL>> @{Position} on channel {Channel}";
+            }
+            
+            if (IsWhiteSpace)
+            {
+                return $"<<WS>> @{Position} on channel {Channel}";
+            }
+
+            return $"{TokenID} [{Value.Replace("\r","").Replace("\n","")}] @{Position} on channel {Channel}";
+
         }
     }
 }

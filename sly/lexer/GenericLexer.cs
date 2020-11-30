@@ -161,6 +161,11 @@ namespace sly.lexer
             var tokens = new List<Token<IN>>();
 
             var r = LexerFsm.Run(memorySource, new LexerPosition());
+
+            var ignored = r.IgnoredTokens.Select(x =>
+                new Token<IN>(default(IN), x.SpanValue, x.Position, x.IsComment,
+                    x.CommentType, x.Channel)).ToList();
+            tokens.AddRange(ignored);
             
             if (!r.IsSuccess && !r.IsEOS)
             {
@@ -190,6 +195,17 @@ namespace sly.lexer
                 tokens.Add(transcoded);
 
                 r = LexerFsm.Run(memorySource,position);
+                ignored = r.IgnoredTokens.Select(x =>
+                {
+                    var tok =new Token<IN>(default(IN), x.SpanValue, x.Position, x.IsComment,
+                        x.CommentType, x.Channel);
+                    tok.IsEOL = x.IsEOL;
+                    tok.IsWhiteSpace = x.IsWhiteSpace;
+                    tok.IsEOS = x.IsEOS;
+                    tok.IsEmpty = x.IsEmpty;
+                    return tok;
+                }).ToList();
+                tokens.AddRange(ignored);
                 if (!r.IsSuccess && !r.IsEOS)
                 {
                     var result = r.Result;
@@ -814,6 +830,7 @@ namespace sly.lexer
         public Token<IN> Transcode(FSMMatch<GenericToken> match)
         {
             var tok = new Token<IN>();
+            var res = match.Result.ToString();
             var inTok = match.Result;
             tok.IsComment = inTok.IsComment;
             tok.IsEmpty = inTok.IsEmpty;

@@ -699,19 +699,34 @@ namespace ParserExample
             if (lexerResult.IsOk)
             {
                 var lexer = lexerResult.Result;
-                var tokens = lexer.Tokenize(@"toto 
+                var source = @"toto 
 // commentaire
 1
 id
-""string""");
+""string""";
+                var tokens = lexer.Tokenize(source);
+
+                var width = tokens.Tokens.GetChannels().Select(x => x.Tokens.Count).Max();
+                
+                List<string> headers = new List<string>();
+                
+                
+                
                 if (tokens.IsOk)
                 {
-                    var toks = tokens.Tokens;
-                    foreach (var tok in toks)
+                    foreach (var channel in tokens.Tokens.GetChannels())
                     {
-                        Console.WriteLine(tok);
+                        Console.Write($"#{channel.ChannelId};");
+                        foreach (var token in channel.Tokens)
+                        {
+                            Console.Write(token == null ? "" : token.ToString());
+                            Console.Write(";");
+                        }
+                        Console.WriteLine();
                     }
                 }
+
+                
                 ;
             }
             

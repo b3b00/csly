@@ -18,7 +18,7 @@ namespace sly.lexer
     {
         
         
-        private Dictionary<int, TokenChannel<IN>> Channels;
+        private readonly Dictionary<int, TokenChannel<IN>> Channels;
 
         public List<Token<IN>> Tokens => GetChannel(0).Tokens.Where(x => x != null).ToList();
          
@@ -36,6 +36,11 @@ namespace sly.lexer
             {
                 Add(token);
             }
+        }
+
+        public IEnumerable<TokenChannel<IN>> GetChannels()
+        {
+            return Channels.Values.OrderBy(x => x.ChannelId);
         }
         
         public TokenChannel<IN> GetChannel(int i)
@@ -70,14 +75,22 @@ namespace sly.lexer
             if (!TryGet(token.Channel, out channel))
             {
                 channel = new TokenChannel<IN>(token.Channel);
-                
+                int shift = 0;
+                if (Channels.Values.Any())
+                {
+                    shift = Channels.Values.Max(x => x.Count);
+                }
+                for (int i = 0; i < shift; i++)
+                {
+                    channel.Add(null);
+                }
                 Channels[token.Channel] = channel;
             }
 
             int index = Channels.Values.Max(x => x.Count);
             foreach (var VARIABLE in Channels.Values)
             {
-                for (int i = channel.Count; i <= index; i++)
+                for (int i = channel.Count; i < index; i++)
                 {
                     channel.Add(null);
                 }
@@ -148,6 +161,7 @@ namespace sly.lexer
 
         public override string ToString()
         {
+            var channels = Channels.Values.OrderBy(x => x.ChannelId);
             return string.Join("\n", Channels.Values.Select(x => x.ToString()).ToArray());
         }
     }
