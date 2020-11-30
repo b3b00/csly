@@ -692,6 +692,45 @@ namespace ParserExample
             }
             ;
         }
+
+        public static void TestChannels()
+        {
+            var lexerResult = LexerBuilder.BuildLexer<ChannelLexer>();
+            if (lexerResult.IsOk)
+            {
+                var lexer = lexerResult.Result;
+                var source = @"toto 
+// commentaire
+1
+id
+""string""";
+                var tokens = lexer.Tokenize(source);
+
+                var width = tokens.Tokens.GetChannels().Select(x => x.Tokens.Count).Max();
+                
+                List<string> headers = new List<string>();
+                
+                
+                
+                if (tokens.IsOk)
+                {
+                    foreach (var channel in tokens.Tokens.GetChannels())
+                    {
+                        Console.Write($"#{channel.ChannelId};");
+                        foreach (var token in channel.Tokens)
+                        {
+                            Console.Write(token == null ? "" : token.ToString());
+                            Console.Write(";");
+                        }
+                        Console.WriteLine();
+                    }
+                }
+
+                
+                ;
+            }
+            
+        }
         
         private static void Main(string[] args)
         {
@@ -712,11 +751,12 @@ namespace ParserExample
             
           //  TestDoubleExponent();
 //Test192();
-TestRecursion();
+// TestRecursion();
 
             // TestFactorial();
             // TestThreadsafeGeneric();
             //Test164();
+            TestChannels();
         }
 
         

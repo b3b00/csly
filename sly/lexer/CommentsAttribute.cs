@@ -1,5 +1,6 @@
 ﻿using System;
 
+
 namespace sly.lexer
 {
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
@@ -13,12 +14,16 @@ namespace sly.lexer
 
         public bool DoNotIgnore = false;
 
-        public CommentAttribute(string singleLineStart, string multiLineStart, string multiLineEnd, bool doNotIgnore = false)
+        public int Channel = 1;
+
+        public CommentAttribute(string singleLineStart, string multiLineStart, string multiLineEnd,
+            bool doNotIgnore = false, int channel = 1)
         {
             SingleLineCommentStart = singleLineStart;
             MultiLineCommentStart = multiLineStart;
             MultiLineCommentEnd = multiLineEnd;
             DoNotIgnore = doNotIgnore;
+            Channel = channel;
         }
     }
 }

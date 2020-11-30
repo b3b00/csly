@@ -211,8 +211,8 @@ namespace sly.parser.llparser
 
                 if (errors.Count > 0)
                 {
-                    var lastErrorPosition = errors.Select(e => e.UnexpectedToken.PositionInTokenFlow).ToList().Max();
-                    var lastErrors = errors.Where(e => e.UnexpectedToken.PositionInTokenFlow == lastErrorPosition)
+                    var lastErrorPosition = errors.Select(e => e.UnexpectedToken.PositionInTokenVisibleFlow).ToList().Max();
+                    var lastErrors = errors.Where(e => e.UnexpectedToken.PositionInTokenVisibleFlow == lastErrorPosition)
                         .ToList();
                     result.Errors = lastErrors;
                 }
@@ -436,7 +436,7 @@ namespace sly.parser.llparser
             {
                 result.IsError = true;
                 result.Errors = errors;
-                greaterIndex = errors.Count > 0 ? errors.Select(e => e.UnexpectedToken.PositionInTokenFlow).Max() : 0;
+                greaterIndex = errors.Count > 0 ? errors.Select(e => e.UnexpectedToken.PositionInTokenVisibleFlow).Max() : 0;
                 result.EndingPosition = greaterIndex;
                 result.AddExpectings(errors.SelectMany(e => e.ExpectedTokens));
             }

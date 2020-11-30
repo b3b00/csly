@@ -12,14 +12,23 @@ namespace sly.lexer
             IsLineEnding = isLineEnding;
         }
 
-        public LexemeAttribute(GenericToken generic, params string[] parameters)
+        
+        public LexemeAttribute(GenericToken generic,  params string[] parameters)
         {
+            Channel = 0;
+            GenericToken = generic;
+            GenericTokenParameters = parameters;
+        }
+        public LexemeAttribute(GenericToken generic, int channel = 0, params string[] parameters)
+        {
+            Channel = channel;
             GenericToken = generic;
             GenericTokenParameters = parameters;
         }
 
-        public LexemeAttribute(GenericToken generic, IdentifierType idType, string startPattern = null, string restPattern = null)
+        public LexemeAttribute(GenericToken generic, IdentifierType idType, string startPattern = null, string restPattern = null, int channel = 0)
         {
+            Channel = channel;
             GenericToken = generic;
             IdentifierType = idType;
             if (idType == IdentifierType.Custom)
@@ -44,6 +53,8 @@ namespace sly.lexer
         public bool IsSkippable { get; set; }
 
         public bool IsLineEnding { get; set; }
+        
+        public int? Channel { get; set; }
 
 
         public bool HasGenericTokenParameters => GenericTokenParameters != null && GenericTokenParameters.Length > 0;

@@ -87,6 +87,7 @@ namespace sly.lexer
         public const string in_identifier = "in_identifier";
         public const string token_property = "token";
         public const string DerivedToken = "derivedToken";
+        public const string TokenChannel = "channel";
         public const string defaultIdentifierKey = "identifier";
         public const string escape_string = "escape_string";
         public const string escape_char = "escape_char";
@@ -96,6 +97,9 @@ namespace sly.lexer
         public const string multi_line_comment_start = "multi_line_comment_start";
 
         protected readonly Dictionary<GenericToken, Dictionary<string, IN>> derivedTokens;
+        
+        protected readonly Dictionary<GenericToken, Dictionary<string, int?>> tokenChannels;
+        
         protected IN doubleDerivedToken;
         protected char EscapeStringDelimiterChar;
 
@@ -124,6 +128,7 @@ namespace sly.lexer
         public GenericLexer(Config config, GenericToken[] staticTokens)
         {
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
+            tokenChannels = new Dictionary<GenericToken, Dictionary<string, int?>>();
             ExtensionBuilder = config.ExtensionBuilder;
             KeyWordComparer = config.KeyWordComparer;
             InitializeStaticLexer(config, staticTokens);
@@ -156,6 +161,11 @@ namespace sly.lexer
             var tokens = new List<Token<IN>>();
 
             var r = LexerFsm.Run(memorySource, new LexerPosition());
+
+            var ignored = r.IgnoredTokens.Select(x =>
+                new Token<IN>(default(IN), x.SpanValue, x.Position, x.IsComment,
+                    x.CommentType, x.Channel)).ToList();
+            tokens.AddRange(ignored);
             
             if (!r.IsSuccess && !r.IsEOS)
             {
@@ -185,6 +195,17 @@ namespace sly.lexer
                 tokens.Add(transcoded);
 
                 r = LexerFsm.Run(memorySource,position);
+                ignored = r.IgnoredTokens.Select(x =>
+                {
+                    var tok =new Token<IN>(default(IN), x.SpanValue, x.Position, x.IsComment,
+                        x.CommentType, x.Channel);
+                    tok.IsEOL = x.IsEOL;
+                    tok.IsWhiteSpace = x.IsWhiteSpace;
+                    tok.IsEOS = x.IsEOS;
+                    tok.IsEmpty = x.IsEmpty;
+                    return tok;
+                }).ToList();
+                tokens.AddRange(ignored);
                 if (!r.IsSuccess && !r.IsEOS)
                 {
                     var result = r.Result;
@@ -355,7 +376,7 @@ namespace sly.lexer
             }
         }
 
-        public void AddLexeme(GenericToken generic, IN token)
+        public void AddLexeme(GenericToken generic, IN token, int? channel)
         {
             NodeCallback<GenericToken> callback = match =>
             {
@@ -367,13 +388,23 @@ namespace sly.lexer
                             {
                                 var possibleTokens = derivedTokens[GenericToken.Identifier];
                                 if (possibleTokens.ContainsKey(match.Result.Value))
+                                {
+                                    match.Properties[TokenChannel] = channel ?? Channels.Main;
                                     match.Properties[DerivedToken] = possibleTokens[match.Result.Value];
+                                    match.Result.Channel = channel?? Channels.Main;
+                                }
                                 else
+                                {
                                     match.Properties[DerivedToken] = identifierDerivedToken;
+                                    match.Properties[TokenChannel] = channel ?? Channels.Main;
+                                    match.Result.Channel = channel ?? Channels.Main;
+                                }
                             }
                             else
                             {
                                 match.Properties[DerivedToken] = identifierDerivedToken;
+                                match.Properties[TokenChannel] = channel ?? Channels.Main;
+                                match.Result.Channel = channel ?? Channels.Main;
                             }
 
                             break;
@@ -381,20 +412,27 @@ namespace sly.lexer
                     case GenericToken.Int:
                         {
                             match.Properties[DerivedToken] = intDerivedToken;
+                            match.Properties[TokenChannel] = channel ?? Channels.Main;
+                            match.Result.Channel = channel ?? Channels.Main;
                             break;
                         }
                     case GenericToken.Double:
                         {
                             match.Properties[DerivedToken] = doubleDerivedToken;
+                            match.Properties[TokenChannel] = channel ?? Channels.Main;
+                            match.Result.Channel = channel ?? Channels.Main;
                             break;
                         }
                     default:
                         {
                             match.Properties[DerivedToken] = token;
+                            match.Properties[TokenChannel] = channel ?? Channels.Main;
+                            match.Result.Channel = channel ?? Channels.Main;
                             break;
                         }
                 }
 
+                
                 return match;
             };
 
@@ -567,7 +605,7 @@ namespace sly.lexer
         }
 
         public void AddStringLexem(IN token,  BuildResult<ILexer<IN>> result , string stringDelimiter,
-            string escapeDelimiterChar = "\\")
+            string escapeDelimiterChar = "\\", int channel = Channels.Main)
         {
             if (string.IsNullOrEmpty(stringDelimiter) || stringDelimiter.Length > 1)
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL,$"bad lexem {stringDelimiter} :  StringToken lexeme delimiter char <{token.ToString()}> must be 1 character length.",ErrorCodes.LEXER_STRING_DELIMITER_MUST_BE_1_CHAR));
@@ -600,8 +638,9 @@ namespace sly.lexer
             NodeCallback<GenericToken> callback = match =>
             {
                 match.Properties[DerivedToken] = token;
+                match.Properties[TokenChannel] = channel;
                 var value = match.Result.SpanValue;
-
+                match.Result.Channel = channel;
                 match.Result.SpanValue = value;
 
                 match.StringDelimiterChar = stringDelimiterChar;
@@ -662,7 +701,8 @@ namespace sly.lexer
             }
         }
         
-        public void AddCharLexem(IN token, BuildResult<ILexer<IN>> result ,string charDelimiter, string escapeDelimiterChar = "\\")
+        public void AddCharLexem(IN token, BuildResult<ILexer<IN>> result, string charDelimiter,
+            string escapeDelimiterChar = "\\", int channel = Channels.Main)
         {
             if (string.IsNullOrEmpty(charDelimiter) || charDelimiter.Length > 1)
                result.AddError(new InitializationError(ErrorLevel.FATAL,
@@ -689,9 +729,12 @@ namespace sly.lexer
             NodeCallback<GenericToken> callback = match =>
             {
                 match.Properties[DerivedToken] = token;
+                match.Properties[TokenChannel] = channel;
                 var value = match.Result.SpanValue;
-
+                match.Result.Channel = channel;
                 match.Result.SpanValue = value;
+                match.Result.IsEOS = false;
+                match.Result.CommentType = CommentType.No;
                 return match;
             };
 
@@ -719,7 +762,7 @@ namespace sly.lexer
 
         }
 
-        public void AddSugarLexem(IN token, BuildResult<ILexer<IN>> buildResult, string specialValue, bool isLineEnding = false)
+        public void AddSugarLexem(IN token, BuildResult<ILexer<IN>> buildResult, string specialValue, bool isLineEnding = false, int channel = 0)
         {
             if (char.IsLetter(specialValue[0]))
             {
@@ -731,6 +774,8 @@ namespace sly.lexer
             NodeCallback<GenericToken> callback = match =>
             {
                 match.Properties[DerivedToken] = token;
+                match.Properties[TokenChannel] = channel;
+                match.Result.Channel = channel;
                 return match;
             };
 
@@ -785,6 +830,7 @@ namespace sly.lexer
         public Token<IN> Transcode(FSMMatch<GenericToken> match)
         {
             var tok = new Token<IN>();
+            var res = match.Result.ToString();
             var inTok = match.Result;
             tok.IsComment = inTok.IsComment;
             tok.IsEmpty = inTok.IsEmpty;
@@ -797,6 +843,7 @@ namespace sly.lexer
             tok.IsLineEnding = match.IsLineEnding;
             tok.IsEOS = match.IsEOS;
             tok.Notignored = match.Result.Notignored;
+            tok.Channel = match.Result.Channel;
             return tok;
         }
 

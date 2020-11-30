@@ -12,7 +12,7 @@ namespace ParserTests.comments
 
         [Lexeme(GenericToken.Identifier)] ID = 3,
 
-        [MultiLineComment("/*", "*/")] COMMENT = 4
+        [MultiLineComment("/*", "*/",channel:0)] COMMENT = 4
     }
     
     public class MultiLineCommentsTest
