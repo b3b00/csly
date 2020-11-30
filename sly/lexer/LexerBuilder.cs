@@ -144,8 +144,8 @@ namespace sly.lexer
                     {
                         foreach (var lexeme in lexemes)
                         {
-                            lexer.AddDefinition(new TokenDefinition<IN>(tokenID, lexeme.Pattern, lexeme.IsSkippable,
-                                lexeme.IsLineEnding));
+                            lexer.AddDefinition(new TokenDefinition<IN>(tokenID, lexeme.Pattern, channel:lexeme.Channel ?? Channels.Main, isIgnored:lexeme.IsSkippable,
+                                isEndOfLine:lexeme.IsLineEnding));
                         }
                     }
                     catch (Exception e)

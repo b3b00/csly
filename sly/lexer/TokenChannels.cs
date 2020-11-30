@@ -10,7 +10,7 @@ namespace sly.lexer
     public static class Channels
     {
         public const int Main = 0;
-        public const int WhitSpace = 1;
+        public const int WhiteSpaces = 1;
         public const int Comments = 2;
     }
     
