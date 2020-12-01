@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using sly.buildresult;
 using sly.lexer;
@@ -81,6 +82,9 @@ namespace sly.parser
                     position++;
                 }
             }
+            Console.WriteLine("******************************");
+            Console.WriteLine(tokens.ToCsv());
+            Console.WriteLine("******************************");
 
             result = ParseWithContext(tokensWithoutComments, context, startingNonTerminal);
 

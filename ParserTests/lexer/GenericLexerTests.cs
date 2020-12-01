@@ -1058,24 +1058,7 @@ namespace ParserTests.lexer
             Assert.Equal("SPECIAL[]EOF[]",l);
         }
 
-        [Fact]
-        public void TestIslands()
-        {
-            var lexResult = LexerBuilder.BuildLexer<IslandTokenLexer>();
-            Assert.True(lexResult.IsOk);
-            var lexer = lexResult.Result;
-            string source = @"
-id1
-`` single line island
-id2
-`multi
-line
-island`
-id3
-";
-            var result = lexer.Tokenize(source);
-            Assert.True(result.IsOk);
-        }
+       
 
         private static string ToTokens<T>(LexerResult<T> result) where T : struct
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 
 namespace sly.lexer
 {
@@ -72,7 +73,7 @@ namespace sly.lexer
             if (TokenChannels.TryGet(channelId, out channel))
             {
                 int position = PositionInTokenFlow + 1;
-                if (position < channel.Count)
+                if (position >= 0 && position < channel.Count)
                 {
                     return channel[position];
                 }
@@ -83,13 +84,30 @@ namespace sly.lexer
         public Token<T> Previous(int channelId)
         {
             TokenChannel<T> channel = null;
-             
+            Token<T> token = null;
+
+            var previousTokens = TokenChannels.Tokens.Select(x => x.PositionInTokenFlow).Where(x => x < PositionInTokenFlow);
+            if (!previousTokens.Any())
+            {
+                return null;
+            }
+
+            if (previousTokens.Last() == 0)
+            {
+                return null;
+            }
+            
             if (TokenChannels.TryGet(channelId, out channel))
             {
-                int position = PositionInTokenFlow - 1;
-                if (position >= 0) 
+                int i = PositionInTokenFlow - 1;
+                while (i >= 0 && i> previousTokens.Last())
                 {
-                    return channel[position];
+                    token = channel.Tokens[i];
+                    if (token != null)
+                    {
+                        return token;
+                    }
+                    i--;
                 }
             }
             return null;

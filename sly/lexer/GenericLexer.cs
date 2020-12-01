@@ -165,8 +165,15 @@ namespace sly.lexer
             var r = LexerFsm.Run(memorySource, new LexerPosition());
 
             var ignored = r.IgnoredTokens.Select(x =>
-                new Token<IN>(default(IN), x.SpanValue, x.Position, x.IsComment,
-                    x.CommentType, x.Channel)).ToList();
+                {
+                    var ignoredToken = new Token<IN>(default(IN), x.SpanValue, x.Position, x.IsComment,
+                        x.CommentType, x.Channel);
+                    ignoredToken.IsEOL = x.IsEOL;
+                    ignoredToken.IsWhiteSpace = x.IsWhiteSpace;
+                    ignoredToken.IsComment = x.IsComment;
+                    return ignoredToken;
+                }
+                ).ToList();
             tokens.AddRange(ignored);
             
             if (!r.IsSuccess && !r.IsEOS)

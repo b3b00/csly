@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace sly.lexer
 {
@@ -34,12 +36,30 @@ namespace sly.lexer
         public TokenChannels(List<Token<IN>> tokens) : this()
         {
             int i = 0;
+            var channels = tokens.Select(x => x.Channel).Distinct();
+            foreach (var channelId in channels)
+            {
+                var channel = new TokenChannel<IN>(channelId);
+                Channels[channelId] = channel;
+                for (int j = 0; j < tokens.Count; j++)
+                {
+                    channel.Tokens.Add(null);
+                }
+            }
+            
+            
             foreach (var token in tokens)
             {
                 token.PositionInTokenFlow = i;
-                Add(token);
+                var channel = Channels[token.Channel];
+                token.TokenChannels = this;
+                channel.Tokens[token.PositionInTokenFlow] = token;
                 i++;
             }
+
+            var csv = ToCsv();
+            
+            ;
         }
 
         public IEnumerable<TokenChannel<IN>> GetChannels()
@@ -75,6 +95,10 @@ namespace sly.lexer
 
         public void Add(Token<IN> token)
         {
+            if (token.TokenID.Equals(default(IN)))
+            {
+                ;
+            }
             token.TokenChannels = this;
             TokenChannel<IN> channel = null;
             if (!TryGet(token.Channel, out channel))
@@ -84,10 +108,10 @@ namespace sly.lexer
                 if (Channels.Values.Any())
                 {
                     shift = Channels.Values.Max(x => x.Count);
-                }
-                for (int i = 0; i < shift; i++)
-                {
-                    channel.Add(null);
+                    for (int i = 0; i < shift; i++)
+                    {
+                        channel.Add(null);
+                    }
                 }
                 Channels[token.Channel] = channel;
             }
@@ -120,7 +144,7 @@ namespace sly.lexer
                 var token = TokenInChannelAt(channel.Value, index);
                 if (token != null)
                 {
-                    return null;
+                    return token;
                 }
             }
             return null;
@@ -168,6 +192,24 @@ namespace sly.lexer
         {
             var channels = Channels.Values.OrderBy(x => x.ChannelId);
             return string.Join("\n", Channels.Values.Select(x => x.ToString()).ToArray());
+        }
+
+        public string ToCsv()
+        {
+            StringBuilder builder = new StringBuilder();
+            var channels = Channels.Values.OrderBy(x => x.ChannelId);
+            foreach (var channel in channels)
+            {
+                builder.Append($"#{channel.ChannelId} ; ");
+                foreach (var token in channel.Tokens)
+                {
+                    builder.Append(token?.ToString() ?? "null").Append(" ; ");
+                }
+
+                builder.AppendLine();
+            }
+
+            return builder.ToString();
         }
     }
 }
