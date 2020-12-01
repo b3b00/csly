@@ -24,7 +24,8 @@ namespace sly.lexer
         private readonly Dictionary<int, TokenChannel<IN>> Channels;
 
         public List<Token<IN>> Tokens => GetChannel(0).Tokens.Where(x => x != null).ToList();
-         
+
+        public int Width => Channels.Select(x => x.Value.Tokens.Count).Max();
         
         public readonly int ChannelId;
 

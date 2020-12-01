@@ -25,7 +25,7 @@ namespace ParserTests
         [MultiLineIsland("`","`",channel:Channels.Islands)] MYISLANDMULTI = 3
     }
     
-    public class IslandTokenParser
+    public class PreviousIslandTokenParser
     {
         [Production("main : id *")]
         public DoNotIgnore Main(List<DoNotIgnore> ids)
@@ -43,6 +43,30 @@ namespace ParserTests
             if (previous != null && (previous.TokenID == IslandTokenLexer.MYISLANDMULTI || previous.TokenID == IslandTokenLexer.MYISLANDSINGLE))
             {
                 island = previous?.ParsedValue?.ToString();
+            }
+            return new DoNotIgnoreCommentIdentifier(token.Value, island);
+        }
+
+    }
+    
+    public class NextIslandTokenParser
+    {
+        [Production("main : id *")]
+        public DoNotIgnore Main(List<DoNotIgnore> ids)
+        {
+            return new IdentifierList(ids);
+        }
+
+        [Production("id : ID")]
+        public DoNotIgnore SimpleId(Token<IslandTokenLexer> token)
+        {
+            // get previous token in channel 2 (COMMENT)
+            var next = token.Next(Channels.Islands);
+            string island = null;
+            // previous token may not be a comment so we have to check if not null
+            if (next != null && (next.TokenID == IslandTokenLexer.MYISLANDMULTI || next.TokenID == IslandTokenLexer.MYISLANDSINGLE))
+            {
+                island = next?.ParsedValue?.ToString();
             }
             return new DoNotIgnoreCommentIdentifier(token.Value, island);
         }
@@ -1373,9 +1397,9 @@ namespace ParserTests
         }
         
         [Fact]
-        public void TestIslands()
+        public void TestPreviousIslands()
         {
-            var parserInstance = new IslandTokenParser();
+            var parserInstance = new PreviousIslandTokenParser();
             var builder = new ParserBuilder<IslandTokenLexer, DoNotIgnore>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
             
@@ -1407,6 +1431,45 @@ id3
             Assert.True(list.Ids[2].IsCommented);
             Assert.Equal("id3",list.Ids[2].Name);
             Assert.NotEmpty(list.Ids[2].Comment);    
+        }
+        
+        
+        [Fact]
+        public void TestNextIslands()
+        {
+            var parserInstance = new NextIslandTokenParser();
+            var builder = new ParserBuilder<IslandTokenLexer, DoNotIgnore>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
+            
+            Assert.NotNull(builtParser);
+            Assert.True(builtParser.IsOk);
+            Assert.NotNull(builtParser.Result);
+            var parser = builtParser.Result;
+            
+            string source = @"
+id1
+`` single line island
+id2
+`multi
+line
+island`
+id3
+";
+            var result = parser.Parse(source);
+            Assert.True(result.IsOk);
+            Assert.NotNull(result.Result);
+            Assert.IsType<IdentifierList>(result.Result);
+            var list = result.Result as IdentifierList;
+            Assert.Equal(3, list.Ids.Count);
+            Assert.True(list.Ids[0].IsCommented);
+            Assert.Equal("id1",list.Ids[0].Name);
+            Assert.NotNull(list.Ids[0].Comment);
+            Assert.True(list.Ids[1].IsCommented);
+            Assert.Equal("id2",list.Ids[1].Name);
+            Assert.NotEmpty(list.Ids[1].Comment);    
+            Assert.False(list.Ids[2].IsCommented);
+            Assert.Equal("id3",list.Ids[2].Name);
+                
         }
     }
 }

@@ -68,14 +68,29 @@ namespace sly.lexer
 
         public Token<T> Next(int channelId)
         {
+            if (PositionInTokenFlow == TokenChannels.Width-1)
+            {
+                return null;
+            }
+            
             TokenChannel<T> channel = null;
-             
+            Token<T> token = null;
+
+            var nextTokens = TokenChannels.Tokens.Select(x => x.PositionInTokenFlow).Where(x => x > PositionInTokenFlow);
+
+            int firstIndex = nextTokens.Any() ? nextTokens.First() : TokenChannels.Width;
+            
             if (TokenChannels.TryGet(channelId, out channel))
             {
-                int position = PositionInTokenFlow + 1;
-                if (position >= 0 && position < channel.Count)
+                int i = PositionInTokenFlow + 1;
+                while (i < Math.Min(TokenChannels.Width-1,firstIndex))
                 {
-                    return channel[position];
+                    token = channel.Tokens[i];
+                    if (token != null)
+                    {
+                        return token;
+                    }
+                    i++;
                 }
             }
             return null;
@@ -83,24 +98,22 @@ namespace sly.lexer
 
         public Token<T> Previous(int channelId)
         {
-            TokenChannel<T> channel = null;
-            Token<T> token = null;
-
-            var previousTokens = TokenChannels.Tokens.Select(x => x.PositionInTokenFlow).Where(x => x < PositionInTokenFlow);
-            if (!previousTokens.Any())
-            {
-                return null;
-            }
-
-            if (previousTokens.Last() == 0)
+            if (PositionInTokenFlow == 0)
             {
                 return null;
             }
             
+            TokenChannel<T> channel = null;
+            Token<T> token = null;
+
+            var previousTokens = TokenChannels.Tokens.Select(x => x.PositionInTokenFlow).Where(x => x < PositionInTokenFlow);
+
+            int lastIndex = previousTokens.Any() ? previousTokens.Last() : 0;
+            
             if (TokenChannels.TryGet(channelId, out channel))
             {
                 int i = PositionInTokenFlow - 1;
-                while (i >= 0 && i> previousTokens.Last())
+                while (i >= Math.Max(0,lastIndex))
                 {
                     token = channel.Tokens[i];
                     if (token != null)
