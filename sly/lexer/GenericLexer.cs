@@ -20,7 +20,9 @@ namespace sly.lexer
 
         Extension,
 
-        Comment
+        Comment,
+        
+        Island
     }
 
     public enum IdentifierType
@@ -178,6 +180,11 @@ namespace sly.lexer
                 position = r.NewPosition;
                 position = ConsumeComment(r.Result, memorySource, position);
             }
+            else if (r.IsSuccess && r.Result.IsIsland)
+            {
+                position = r.NewPosition;
+                position = ConsumeIsland(r.Result, memorySource, position);
+            }
             else if (r.IsSuccess && !r.Result.IsComment)
             {
                 position = r.NewPosition;
@@ -211,6 +218,11 @@ namespace sly.lexer
                     var result = r.Result;
                     var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
                     return new LexerResult<IN>(error);
+                }
+                if (r.IsSuccess && r.Result.IsIsland)
+                {
+                    position = r.NewPosition;
+                    position = ConsumeIsland(r.Result, memorySource, position);
                 }
 
                 if (r.IsSuccess && r.Result.IsComment)
@@ -819,6 +831,50 @@ namespace sly.lexer
                     newColumn = lines.Last() + MultiLineCommentEnd.Length;
                 else
                     newColumn = lexerPosition.Column + lines[0] + MultiLineCommentEnd.Length;
+
+                return new LexerPosition(newPosition, newLine, newColumn);
+                // LexerFsm.MovePosition(newPosition, newLine, newColumn);
+            }
+
+            return lexerPosition;
+        }
+        
+        public LexerPosition ConsumeIsland(Token<GenericToken> island, ReadOnlyMemory<char> source, LexerPosition lexerPosition)
+        {
+
+            ReadOnlyMemory<char> islandValue;
+
+            if (island.IsSingleLineIsland)
+            {
+                var position = lexerPosition.Index;
+                islandValue = EOLManager.GetToEndOfLine(source, position);
+                position = position + islandValue.Length;
+                island.SpanValue = islandValue;
+                return new LexerPosition(position, lexerPosition.Line + 1, 0);
+                //LexerFsm.MovePosition(position, LexerFsm.CurrentLine + 1, 0);
+            }
+            else if (island.IsMultiLineIsland)
+            {
+                var position = lexerPosition.Index;
+
+                var end = source.Span.Slice(position).IndexOf(island.MultiLineIslandEnd.AsSpan());
+                if (end < 0)
+                    position = source.Length;
+                else
+                    position = end + position;
+                islandValue = source.Slice(lexerPosition.Index, position - lexerPosition.Index);
+                island.SpanValue = islandValue;
+
+                var newPosition = lexerPosition.Index + islandValue.Length + MultiLineCommentEnd.Length;
+                var lines = EOLManager.GetLinesLength(islandValue);
+                var newLine = lexerPosition.Line + lines.Count - 1;
+                int newColumn;
+                if (lines.Count > 1)
+                    newColumn = lines.Last() + MultiLineCommentEnd.Length;
+                else
+                    newColumn = lexerPosition.Column + lines[0] + MultiLineCommentEnd.Length;
+
+                
 
                 return new LexerPosition(newPosition, newLine, newColumn);
                 // LexerFsm.MovePosition(newPosition, newLine, newColumn);

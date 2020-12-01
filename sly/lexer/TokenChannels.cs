@@ -12,6 +12,7 @@ namespace sly.lexer
         public const int Main = 0;
         public const int WhiteSpaces = 1;
         public const int Comments = 2;
+        public const int Islands = 3;
     }
     
     public class TokenChannels<IN> : IEnumerable<Token<IN>>

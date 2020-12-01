@@ -220,7 +220,7 @@ namespace sly.lexer
             }
         }
 
-        private static NodeCallback<GenericToken> GetCallbackSingle<IN>(IN token, bool doNotIgnore, int channel) where IN : struct
+        private static NodeCallback<GenericToken> GetCommentCallbackSingle<IN>(IN token, bool doNotIgnore, int channel) where IN : struct
         {
             NodeCallback<GenericToken> callback = match =>
             {
@@ -234,7 +234,7 @@ namespace sly.lexer
             return callback;
         }
 
-        private static NodeCallback<GenericToken> GetCallbackMulti<IN>(IN token, bool doNotIgnore, int channel) where IN : struct
+        private static NodeCallback<GenericToken> GetCommentCallbackMulti<IN>(IN token, bool doNotIgnore, int channel) where IN : struct
         {
             NodeCallback<GenericToken> callbackMulti = match =>
             {
@@ -248,6 +248,24 @@ namespace sly.lexer
             return callbackMulti;
         }
         
+        
+        private static NodeCallback<GenericToken> GetIslandCallback<IN>(IN token, IslandAttribute island) where IN : struct
+        {
+            NodeCallback<GenericToken> callback = match =>
+            {
+                match.Properties[GenericLexer<IN>.DerivedToken] = token;
+                match.Result.IsComment = false;
+                match.Result.CommentType = CommentType.No;
+                match.Result.IsIsland = true;
+                match.Result.IslandType = island.IslandType;
+                match.Result.MultiLineIslandEnd = island.MultiLineIslandEnd;
+                match.Result.Channel = island.Channel;
+                return match;
+            };
+            return callback;
+        }
+        
+
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
                                                                      BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result) where IN : struct
         {
@@ -330,7 +348,7 @@ namespace sly.lexer
                             fsmBuilder.ConstantTransition(commentAttr.SingleLineCommentStart);
                             fsmBuilder.Mark(GenericLexer<IN>.single_line_comment_start);
                             fsmBuilder.End(GenericToken.Comment);
-                            fsmBuilder.CallBack(GetCallbackSingle(comment.Key,commentAttr.DoNotIgnore,commentAttr.Channel));
+                            fsmBuilder.CallBack(GetCommentCallbackSingle(comment.Key,commentAttr.DoNotIgnore,commentAttr.Channel));
                         }
 
                         var hasMultiLine = !string.IsNullOrWhiteSpace(commentAttr.MultiLineCommentStart);
@@ -343,7 +361,54 @@ namespace sly.lexer
                             fsmBuilder.ConstantTransition(commentAttr.MultiLineCommentStart);
                             fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
                             fsmBuilder.End(GenericToken.Comment);
-                            fsmBuilder.CallBack(GetCallbackMulti(comment.Key,commentAttr.DoNotIgnore,commentAttr.Channel));
+                            fsmBuilder.CallBack(GetCommentCallbackMulti(comment.Key,commentAttr.DoNotIgnore,commentAttr.Channel));
+                        }
+                    }
+                }
+            }
+
+            var islands = GetIslandsAttribute(result);
+            if (!result.IsError)
+            {
+                foreach (var island in islands)
+                {
+                    foreach (var islandAttr in island.Value)
+                    {
+                        
+                        Func<Token<IN>,Token<IN>> callback = token =>
+                        {
+                            // TODO parse Value and store result in ParsedValue
+                            token.ParsedValue = $"this is a parsed token [{token.Value}]";
+                            return token;
+                        };
+                        
+                        var fsmBuilder = lexer.FSMBuilder;
+
+                        var hasSingleLine = !string.IsNullOrWhiteSpace(islandAttr.SingleLineIslandStart);
+                        if (hasSingleLine)
+                        {
+                            lexer.SingleLineComment = islandAttr.SingleLineIslandStart;
+
+                            fsmBuilder.GoTo(GenericLexer<IN>.start);
+                            fsmBuilder.ConstantTransition(islandAttr.SingleLineIslandStart);
+                            fsmBuilder.Mark(GenericLexer<IN>.single_line_comment_start);
+                            fsmBuilder.End(GenericToken.Island);
+                            fsmBuilder.CallBack(GetIslandCallback(island.Key, islandAttr));
+                            lexer.AddCallBack(island.Key, callback);
+                        }
+
+                        var hasMultiLine = !string.IsNullOrWhiteSpace(islandAttr.MultiLineIslandStart);
+                        if (hasMultiLine)
+                        {
+                            lexer.MultiLineCommentStart = islandAttr.MultiLineIslandStart;
+                            lexer.MultiLineCommentEnd = islandAttr.MultiLineIslandEnd;
+
+                            fsmBuilder.GoTo(GenericLexer<IN>.start);
+                            fsmBuilder.ConstantTransition(islandAttr.MultiLineIslandStart);
+                            fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
+                            fsmBuilder.End(GenericToken.Island);
+                            fsmBuilder.CallBack(GetIslandCallback(island.Key, islandAttr));
+                            lexer.AddCallBack(island.Key, callback);
                         }
                     }
                 }
@@ -427,6 +492,27 @@ namespace sly.lexer
             {
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "comment lexem can't be used together with single-line or multi-line comment lexems",ErrorCodes.LEXER_CANNOT_MIX_COMMENT_AND_SINGLE_OR_MULTI));
             }
+
+            return attributes;
+        }
+
+        
+        private static Dictionary<IN, List<IslandAttribute>> GetIslandsAttribute<IN>(BuildResult<ILexer<IN>> result) where IN : struct
+        {
+            var attributes = new Dictionary<IN, List<IslandAttribute>>();
+
+            var values = Enum.GetValues(typeof(IN));
+            foreach (Enum value in values)
+            {
+                var tokenID = (IN) (object) value;
+                var enumAttributes = value.GetAttributesOfType<IslandAttribute>();
+                if (enumAttributes != null && enumAttributes.Any()) attributes[tokenID] = enumAttributes.ToList();
+            }
+
+            var commentCount = attributes.Values.Select(l => l?.Count(attr => attr.GetType() == typeof(IslandAttribute)) ?? 0).Sum();
+            var multiLineCommentCount = attributes.Values.Select(l => l?.Count(attr => attr.GetType() == typeof(MultiLineIslandAttribute)) ?? 0).Sum();
+            var singleLineCommentCount = attributes.Values.Select(l => l?.Count(attr => attr.GetType() == typeof(SingleLineIslandAttribute)) ?? 0).Sum();
+
 
             return attributes;
         }

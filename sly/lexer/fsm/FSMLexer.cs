@@ -182,7 +182,7 @@ namespace sly.lexer.fsm
                 lexerPosition.Index = result.Result.Position.Index + length;
                 lexerPosition.Column = result.Result.Position.Column + length;
 
-                if (HasCallback(result.NodeId))
+                if (HasCallback(result.NodeId) && !result.Result.IsIsland)
                 {   
                     result = Callbacks[result.NodeId](result);
                 }

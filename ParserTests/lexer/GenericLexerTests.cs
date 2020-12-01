@@ -10,6 +10,14 @@ using Xunit;
 
 namespace ParserTests.lexer
 {
+
+    public enum IslandTokenLexer
+    {
+        EOF = 0,
+        [Lexeme(GenericToken.Identifier,IdentifierType.AlphaNumeric)] ID = 1,
+        [SingleLineIsland("``",channel:Channels.Islands)] MYISLANDSINGLE = 2,
+        [MultiLineIsland("`","`",channel:Channels.Islands)] MYISLANDMULTI = 3
+    }
     
     public enum Issue210Token
     {
@@ -1048,6 +1056,25 @@ namespace ParserTests.lexer
             Assert.True(r.IsOk);
             l = ToTokens2(r);
             Assert.Equal("SPECIAL[]EOF[]",l);
+        }
+
+        [Fact]
+        public void TestIslands()
+        {
+            var lexResult = LexerBuilder.BuildLexer<IslandTokenLexer>();
+            Assert.True(lexResult.IsOk);
+            var lexer = lexResult.Result;
+            string source = @"
+id1
+`` single line island
+id2
+`multi
+line
+island`
+id3
+";
+            var result = lexer.Tokenize(source);
+            Assert.True(result.IsOk);
         }
 
         private static string ToTokens<T>(LexerResult<T> result) where T : struct

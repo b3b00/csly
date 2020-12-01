@@ -6,9 +6,16 @@ namespace sly.lexer
 {
     public enum CommentType
     {
+        No = 0,
+        Single = 1,
+        Multi = 2
+    }
+    
+    public enum IslandType
+    {
         Single,
         Multi,
-        No
+        No = 0
     }
 
     public class Token<T>
@@ -19,6 +26,7 @@ namespace sly.lexer
         
         public char CharDelimiter ='\'';
         public bool Notignored;
+        public string MultiLineIslandEnd;
 
 
         public Token(T token, string value, LexerPosition position, bool isCommentStart = false,
@@ -109,12 +117,18 @@ namespace sly.lexer
         public bool IsEOL { get; set; }
 
         public CommentType CommentType { get; set; } = CommentType.No;
+        
+        public IslandType IslandType { get; set; } = IslandType.No;
 
         public bool IsEmpty { get; set; }
 
         public bool IsMultiLineComment => CommentType == CommentType.Multi;
 
         public bool IsSingleLineComment => CommentType == CommentType.Single;
+
+        public bool IsSingleLineIsland => IslandType == IslandType.Single;
+        
+        public bool IsMultiLineIsland => IslandType == IslandType.Multi;
 
         public string Value => SpanValue.ToString();
 
@@ -188,6 +202,10 @@ namespace sly.lexer
         public static T DefTok { get; set; }
         public bool IsLineEnding { get; set; }
         
+        public bool IsIsland { get; set; }
+        
+        public object ParsedValue { get; set; }
+        
         public TokenChannels<T> TokenChannels { get; set; }         
 
         public static Token<T> Empty()
@@ -196,7 +214,7 @@ namespace sly.lexer
             empty.IsEmpty = true;
             return empty;
         }
-
+        
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
