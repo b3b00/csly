@@ -731,6 +731,11 @@ id
             }
             
         }
+
+        public static void TestDynamicParserInstance()
+        {
+            Dynamic.Test();
+        }
         
         private static void Main(string[] args)
         {
@@ -756,7 +761,8 @@ id
             // TestFactorial();
             // TestThreadsafeGeneric();
             //Test164();
-            TestChannels();
+            // TestChannels();
+            TestDynamicParserInstance();
         }
 
         
