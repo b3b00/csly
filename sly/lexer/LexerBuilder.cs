@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using sly.buildresult;
 using sly.lexer.fsm;
+using sly.parser.generator;
 
 namespace sly.lexer
 {
@@ -413,6 +414,29 @@ namespace sly.lexer
                     }
                 }
             }
+
+            var subParsers = GetSubParserAttributes(result);
+            if (!result.IsError)
+            {
+                foreach (var subParser in subParsers)
+                {
+                    IN token = subParser.Key;
+                    SubParserAttribute subParserAttribute = subParser.Value;
+                    var parser = CreateParserMethod(subParserAttribute.VisitorType, subParserAttribute.LexerType,
+                        subParserAttribute.OutputType, subParserAttribute.StartingRule);
+                    
+                    lexer.AddCallBack(token,(Token<IN> tokenToParse) =>
+                    {
+                        string source = tokenToParse.Value;
+                        var parsed = parser.parseMethod.Invoke(parser.parser, new object[] {source,subParserAttribute.StartingRule});
+                        tokenToParse.ParsedValue = parsed;
+                        return tokenToParse;
+                    });                    
+                    
+                    
+
+                }
+            }
             
             result.Result = lexer;
             return result;
@@ -517,6 +541,33 @@ namespace sly.lexer
             return attributes;
         }
 
+        private static Dictionary<IN, SubParserAttribute> GetSubParserAttributes<IN>(BuildResult<ILexer<IN>> result) where IN : struct
+        {
+            var attributes = new Dictionary<IN, SubParserAttribute>();
+
+            var values = Enum.GetValues(typeof(IN));
+            foreach (Enum value in values)
+            {
+                var tokenID = (IN) (object) value;
+                var enumAttributes = value.GetAttributesOfType<SubParserAttribute>();
+                
+                if (enumAttributes != null  && enumAttributes.Length > 1)
+                {
+                    result.AddError(new LexerInitializationError(ErrorLevel.FATAL, $"a Lexem {value} can not have many ({enumAttributes.Length}) SubParserAttributes lexems",ErrorCodes.LEXER_TOO_MANY_SUBPARSER));
+                }
+                
+                if (enumAttributes != null && enumAttributes.Length == 1) attributes[tokenID] = enumAttributes.First();
+                
+            }
+
+           
+
+
+            return attributes;
+        }
+
+        
+        
         private static void AddExtensions<IN>(Dictionary<IN, LexemeAttribute> extensions,
             BuildExtension<IN> extensionBuilder, GenericLexer<IN> lexer) where IN : struct
         {
@@ -527,6 +578,32 @@ namespace sly.lexer
                     extensionBuilder(attr.Key, attr.Value, lexer);
                 }
             }
+        }
+        
+        
+        private static (object parser, MethodInfo parseMethod) CreateParserMethod(Type visitorType, Type lexerType, Type astType, string startingRule)
+        {
+            var parserInstance = Activator.CreateInstance(visitorType);
+
+
+            var buildertype = typeof(ParserBuilder<,>);
+            var builderT = buildertype.MakeGenericType(lexerType, astType);
+            var builder = Activator.CreateInstance(builderT);
+
+
+            var method = builderT.GetMethod("BuildParser");
+            var parserResult = method.Invoke(builder,
+                new Object[] {parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule, null});
+            ;
+            var realParserResultType = parserResult.GetType();
+
+            var prop = realParserResultType.GetProperty("Result");
+            var parser = prop.GetValue(parserResult);
+            var realParserType = parser.GetType();
+
+            MethodInfo parseMethod = realParserType.GetMethod("Parse", new Type[] {typeof(string), typeof(string)});
+            ;
+            return (parser, parseMethod);
         }
     }
 }

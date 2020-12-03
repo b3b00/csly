@@ -762,10 +762,15 @@ id
             // TestThreadsafeGeneric();
             //Test164();
             // TestChannels();
-            TestDynamicParserInstance();
+            // TestDynamicParserInstance();
+            TestSubParsers();
         }
 
-        
+        private static void TestSubParsers()
+        {
+            Dynamic.TestSubParsers();
+            throw new NotImplementedException();
+        }
     }
 
     public enum TestGrammarToken

@@ -42,6 +42,8 @@ namespace sly.buildresult
         
         LEXER_SUGAR_TOKEN_CANNOT_START_WITH_LETTER = 16,
         
+        LEXER_TOO_MANY_SUBPARSER = 17,
+        
         #endregion
 
         #region Parser

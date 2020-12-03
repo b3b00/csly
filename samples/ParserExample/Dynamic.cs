@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
+using expressionparser;
 using ParserTests;
 using Sigil;
+using simpleExpressionParser;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
@@ -15,7 +18,11 @@ namespace ParserExample
     {
         EOF = 0,
         [Lexeme(GenericToken.Identifier,IdentifierType.AlphaNumeric)] ID = 1,
+        
+        [SubParser(typeof(SimpleExpressionParser),typeof(ExpressionToken),typeof(double),"SimpleExpressionParser_expressions")]
         [SingleLineIsland("``",channel:Channels.Islands)] MYISLANDSINGLE = 2,
+        
+        [SubParser(typeof(SimpleExpressionParser),typeof(ExpressionToken),typeof(double),"SimpleExpressionParser_expressions")]
         [MultiLineIsland("`","`",channel:Channels.Islands)] MYISLANDMULTI = 3
     }
 
@@ -32,12 +39,13 @@ namespace ParserExample
         {
             // get previous token in channel 2 (COMMENT)
             var previous = token.Previous(Channels.Islands);
-            string island = null;
+            double? island = null;
             // previous token may not be a comment so we have to check if not null
             if (previous != null && (previous.TokenID == DynamicLexer.MYISLANDMULTI ||
                                      previous.TokenID == DynamicLexer.MYISLANDSINGLE))
             {
-                island = previous?.ParsedValue?.ToString();
+                var result = (previous.ParsedValue as ParseResult<ExpressionToken, double>);
+                island  = result.IsOk ? result?.Result : null;
             }
 
             return new AstCommentIdentifier(token.Value, island);
@@ -63,18 +71,18 @@ namespace ParserExample
     {
         public string Name;
 
-        public string Comment;
+        public double? Value;
 
-        public bool IsCommented => !string.IsNullOrEmpty(Comment);
+        public bool IsCommented => Value.HasValue;
 
         public AstCommentIdentifier(string name)
         {
             Name = name;
         }
 
-        public AstCommentIdentifier(string name, string comment) : this(name)
+        public AstCommentIdentifier(string name, double? value) : this(name)
         {
-            Comment = comment;
+            Value = value;
         }
     }
 
@@ -82,7 +90,6 @@ namespace ParserExample
     public class Dynamic
     {
 
-       
 
         static void Create()
         {
@@ -96,7 +103,25 @@ namespace ParserExample
             var lexerType = typeof(DynamicLexer);
             var visitorType = typeof(DynamicParser);
             var astType = typeof(Ast);
+            string startingRule = "main";
+            string source = @"
+id1
+`` 1 + 1 -2 + 2
+id2
+`(9 / 3) * 1`
+id3
+";
+            
 
+            var parser = CreateParserMethod(visitorType, lexerType, astType, startingRule, out var parseMethod);
+
+            var parsed = parser.parseMethod.Invoke(parser.parser, new object[] {source, startingRule});
+
+        }
+
+        private static (object parser, MethodInfo parseMethod) CreateParserMethod(Type visitorType, Type lexerType, Type astType, string startingRule,
+            out MethodInfo parseMethod)
+        {
             var parserInstance = Activator.CreateInstance(visitorType);
 
 
@@ -107,36 +132,37 @@ namespace ParserExample
 
             var method = builderT.GetMethod("BuildParser");
             var parserResult = method.Invoke(builder,
-                new Object[] {parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main", null});
+                new Object[] {parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule, null});
             ;
             var realParserResultType = parserResult.GetType();
 
             var prop = realParserResultType.GetProperty("Result");
             var parser = prop.GetValue(parserResult);
             var realParserType = parser.GetType();
-            
-            var parseMethod = realParserType.GetMethod("Parse", new Type[] {typeof(string), typeof(string)});
+
+            parseMethod = realParserType.GetMethod("Parse", new Type[] {typeof(string), typeof(string)});
             ;
-            
-            var methods = realParserResultType.GetMethods();
-            ;
-            
-            string source = @"
+            return (parser, parseMethod);
+        }
+
+        public static void TestSubParsers()
+        {
+            var parserInstance =  new DynamicParser();
+            var Builder = new ParserBuilder<DynamicLexer, Ast>();
+            var buildResult = Builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
+            if (buildResult.IsOk && buildResult.Result != null)
+            {
+                var parser = buildResult.Result;
+                string source = @"
 id1
-`` single line island
+`` 1 + 1 -2 + 2
 id2
-`multi
-line
-island`
+`(9 / 3) * 1`
 id3
 ";
-
-            var parsed = parseMethod.Invoke(parser, new object[] {source, "main"});
-            ;
-
-
-
-
+                var result = parser.Parse(source);
+            }
+            
         }
     }
 }
