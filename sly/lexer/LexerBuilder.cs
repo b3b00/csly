@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using sly.buildresult;
 using sly.lexer.fsm;
+using sly.parser;
 using sly.parser.generator;
 
 namespace sly.lexer
@@ -441,11 +442,26 @@ namespace sly.lexer
                                 new object[] {source, subParserAttribute.StartingRule});
 
                             var resultType = parsed.GetType();
+                            var propOk = resultType.GetProperty("IsOk");
+                            var subParseOk = propOk.GetValue(parsed) as bool?;
+                            if (subParseOk.HasValue && subParseOk.Value)
+                            {
+                                
+                            
                             var propResult = resultType.GetProperty("Result");
                             var subParseResult = propResult.GetValue(parsed);                            
                             
                             tokenToParse.ParsedValue = subParseResult;
                             return tokenToParse;
+                            
+                            }
+                            else
+                            {
+                                var propErrors = resultType.GetProperty("Errors");
+                                var errors = propErrors.GetValue(parsed) as List<ParseError>;
+                                ;
+                                return null;
+                            }
                         });
                     }
                     else
