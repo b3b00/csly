@@ -378,14 +378,6 @@ namespace sly.lexer
                 {
                     foreach (var islandAttr in island.Value)
                     {
-                        
-                        Func<Token<IN>,Token<IN>> callback = token =>
-                        {
-                            // TODO parse Value and store result in ParsedValue
-                            token.ParsedValue = $"this is a parsed token [{token.Value}]";
-                            return token;
-                        };
-                        
                         var fsmBuilder = lexer.FSMBuilder;
 
                         var hasSingleLine = !string.IsNullOrWhiteSpace(islandAttr.SingleLineIslandStart);

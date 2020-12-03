@@ -4,6 +4,12 @@ namespace sly.lexer
 {
     public class LexicalError : ParseError
     {
+
+        public LexicalError(int line, int column)
+        {
+            
+        }
+        
         public LexicalError(int line, int column, char unexpectedChar)
         {
             Line = line;

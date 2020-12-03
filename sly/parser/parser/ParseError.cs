@@ -2,9 +2,9 @@
 {
     public class ParseError
     {
-        public virtual int Column { get; protected set; }
-        public virtual string ErrorMessage { get; protected set; }
-        public virtual int Line { get; protected set; }
+        public virtual int Column { get;  set; }
+        public virtual string ErrorMessage { get;  set; }
+        public virtual int Line { get;  set; }
 
 
         //public ParseError(int line, int column)

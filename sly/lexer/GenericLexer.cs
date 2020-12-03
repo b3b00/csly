@@ -235,7 +235,19 @@ namespace sly.lexer
                     else
                     {
                         var errors = result.Errors;
-                        ; // TODO
+                        ; // TODO report subparser errors , translating position ?
+                        var newErrors = errors.Select(x =>
+                        {
+                            var lexError = new LexicalError()
+                            {
+                                Line = transcoded.Position.Line + x.Line,
+                                Column = x.Column,
+                                ErrorMessage = x.ErrorMessage
+                            };
+                            
+                            return lexError;
+                        });
+                        return new LexerResult<IN>(newErrors);   
                     }
                 }
 
