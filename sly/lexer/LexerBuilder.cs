@@ -433,7 +433,7 @@ namespace sly.lexer
                     if (parserResult.IsOk)
                     {
                         var parser = parserResult.Result;
-                        lexer.AddCallBack(token, (Token<IN> tokenToParse) =>
+                        lexer.AddSubParserCallBack(token, (Token<IN> tokenToParse) =>
                         {
                             string source = tokenToParse.Value;
                             var parsed = parser.parseMethod.Invoke(parser.parser,
@@ -450,15 +450,15 @@ namespace sly.lexer
                             var subParseResult = propResult.GetValue(parsed);                            
                             
                             tokenToParse.ParsedValue = subParseResult;
-                            return tokenToParse;
-                            
+                            return new SubParserResult<IN>() {token = tokenToParse};
+
                             }
                             else
                             {
                                 var propErrors = resultType.GetProperty("Errors");
                                 var errors = propErrors.GetValue(parsed) as List<ParseError>;
                                 ;
-                                return null;
+                                return new SubParserResult<IN>() {Errors = errors};
                             }
                         });
                     }

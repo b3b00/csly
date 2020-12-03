@@ -4,9 +4,21 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using sly.buildresult;
 using sly.lexer.fsm;
+using sly.parser;
+
 
 namespace sly.lexer
 {
+
+    public class SubParserResult<IN>
+    {
+        public Token<IN> token;
+
+        public List<ParseError> Errors;
+
+        public bool IsOk => Errors == null || !Errors.Any();
+    }
+    
     public enum GenericToken
     {
         Default,
@@ -116,6 +128,8 @@ namespace sly.lexer
 
 
         protected Dictionary<IN, Func<Token<IN>, Token<IN>>> CallBacks = new Dictionary<IN, Func<Token<IN>, Token<IN>>>();
+        
+        protected Dictionary<IN, Func<Token<IN>, SubParserResult<IN>>> SubParserCallBacks = new Dictionary<IN, Func<Token<IN>, SubParserResult<IN>>>();
 
         protected char StringDelimiterChar;
 
@@ -145,6 +159,11 @@ namespace sly.lexer
         public void AddCallBack(IN token, Func<Token<IN>, Token<IN>> callback)
         {
             CallBacks[token] = callback;
+        }
+        
+        public void AddSubParserCallBack(IN token, Func<Token<IN>, SubParserResult<IN>> callback)
+        {
+            SubParserCallBacks[token] = callback;
         }
 
         public void AddDefinition(TokenDefinition<IN> tokenDefinition) { }
@@ -204,6 +223,20 @@ namespace sly.lexer
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
                 {
                     transcoded = callback(transcoded);
+                }
+                
+                if (SubParserCallBacks.TryGetValue(transcoded.TokenID, out var subparsercallback))
+                {
+                    var result = subparsercallback(transcoded);
+                    if (result.IsOk)
+                    {
+                        transcoded = result.token;
+                    }
+                    else
+                    {
+                        var errors = result.Errors;
+                        ; // TODO
+                    }
                 }
 
                 tokens.Add(transcoded);
