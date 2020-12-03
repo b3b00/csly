@@ -42,13 +42,12 @@ namespace ParserExample
         {
             // get previous token in channel 2 (COMMENT)
             var previous = token.Previous(Channels.Islands);
-            double? island = null;
+            string island = null;
             // previous token may not be a comment so we have to check if not null
             if (previous != null && (previous.TokenID == DynamicLexer.MYISLANDMULTI ||
                                      previous.TokenID == DynamicLexer.MYISLANDSINGLE))
             {
-                var result = (previous.ParsedValue as ParseResult<ExpressionToken, double>);
-                island  = result.IsOk ? result?.Result : null;
+                island  = previous.ParsedValue as string;
             }
 
             return new AstCommentIdentifier(token.Value, island);
@@ -74,16 +73,16 @@ namespace ParserExample
     {
         public string Name;
 
-        public double? Value;
+        public string Value;
 
-        public bool IsCommented => Value.HasValue;
+        public bool IsCommented => !string.IsNullOrEmpty(Value);
 
         public AstCommentIdentifier(string name)
         {
             Name = name;
         }
 
-        public AstCommentIdentifier(string name, double? value) : this(name)
+        public AstCommentIdentifier(string name, string value) : this(name)
         {
             Value = value;
         }
@@ -135,21 +134,12 @@ namespace ParserExample
             return c.Value;
         }
         
-        [Production("d : D")]
-        public string D(Token<SubToken> d)
-        {
-            return d.Value;
-        }
-        /*
-         
-         main : (a b c)*
-         a : A
-         b : B
-         c : C
-         d : D
-         
-         
-         */
+        // [Production("d : D")]
+        // public string D(Token<SubToken> d)
+        // {
+        //     return d.Value;
+        // }
+       
     }
     
     
@@ -223,12 +213,31 @@ id3
                 var parser = buildResult.Result;
                 string source = @"
 id1
-`` 1 + 1 -2 + 2
+`` aaa bbb ccc aaa bbb ccc
 id2
-`(9 / 3) * 1`
+`
+aaa bbb ccc 
+aaa bbb ccc 
+aaa bbb ccc 
+aaa bbb ccc 
+aaa bbb ccc 
+aaa bbb ccc
+`
 id3
 ";
                 var result = parser.Parse(source);
+                if (result.IsOk)
+                {
+                    var ids = (result.Result as IdentifierList).Ids;
+                    if (ids != null)
+                    {
+                        foreach (var id in ids)
+                        {
+                            string comment = id.IsCommented ? id.Value : "no comment";
+                            Console.WriteLine($"ID {id.Name} : {comment}");
+                        }
+                    }
+                }
             }
             else
             {

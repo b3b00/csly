@@ -439,7 +439,12 @@ namespace sly.lexer
                             string source = tokenToParse.Value;
                             var parsed = parser.parseMethod.Invoke(parser.parser,
                                 new object[] {source, subParserAttribute.StartingRule});
-                            tokenToParse.ParsedValue = parsed;
+
+                            var resultType = parsed.GetType();
+                            var propResult = resultType.GetProperty("Result");
+                            var subParseResult = propResult.GetValue(parsed);                            
+                            
+                            tokenToParse.ParsedValue = subParseResult;
                             return tokenToParse;
                         });
                     }
