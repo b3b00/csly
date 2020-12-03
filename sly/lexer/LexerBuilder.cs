@@ -61,8 +61,10 @@ namespace sly.lexer
                     var singleCommentAttributes = value.GetAttributesOfType<SingleLineCommentAttribute>();
                     var multiCommentAttributes = value.GetAttributesOfType<MultiLineCommentAttribute>();
                     var commentAttributes = value.GetAttributesOfType<CommentAttribute>();
+                    var islandAttributes = value.GetAttributesOfType<IslandAttribute>();
                     if (enumAttributes.Length == 0 && singleCommentAttributes.Length == 0 &&
-                        multiCommentAttributes.Length == 0 && commentAttributes.Length == 0)
+                        multiCommentAttributes.Length == 0 && commentAttributes.Length == 0 && 
+                        islandAttributes.Length == 0)
                     {
                         result?.AddError(new LexerInitializationError(ErrorLevel.WARN,
                             $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme",ErrorCodes.NOT_AN_ERROR));
@@ -621,12 +623,21 @@ namespace sly.lexer
                 ;
                 var realParserResultType = parserResult.GetType();
 
+                var propErrors = realParserResultType.GetProperty("Errors");
+                List<InitializationError> errors = propErrors.GetValue(parserResult) as List<InitializationError>;
+
+                if (errors.Any())
+                {
+                    result.Result = (null, null);
+                    result.AddErrors(errors);
+                    return result;
+                }
+                
                 var propResult = realParserResultType.GetProperty("Result");
                 var parser = propResult.GetValue(parserResult);
                 var realParserType = parser.GetType();
 
-                var propErrors = realParserResultType.GetProperty("Errors");
-                List<InitializationError> errors = propErrors.GetValue(parserResult) as List<InitializationError>;
+                
 
 
                 MethodInfo parseMethod = realParserType.GetMethod("Parse", new Type[] {typeof(string), typeof(string)});

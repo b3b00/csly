@@ -10,19 +10,22 @@ using simpleExpressionParser;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
+using sly.parser.parser;
 
 namespace ParserExample
 {
+    
+    #region UpperParser
     
     public enum DynamicLexer
     {
         EOF = 0,
         [Lexeme(GenericToken.Identifier,IdentifierType.AlphaNumeric)] ID = 1,
         
-        [SubParser(typeof(SimpleExpressionParser),typeof(ExpressionToken),typeof(double),"SimpleExpressionParser_expressions")]
+        [SubParser(typeof(SubParser),typeof(SubToken),typeof(string),"main")]
         [SingleLineIsland("``",channel:Channels.Islands)] MYISLANDSINGLE = 2,
         
-        [SubParser(typeof(SimpleExpressionParser),typeof(ExpressionToken),typeof(double),"SimpleExpressionParser_expressions")]
+        [SubParser(typeof(SubParser),typeof(SubToken),typeof(string),"main")]
         [MultiLineIsland("`","`",channel:Channels.Islands)] MYISLANDMULTI = 3
     }
 
@@ -86,6 +89,71 @@ namespace ParserExample
         }
     }
 
+    #endregion
+    
+    #region subparser
+    
+    public enum SubToken
+    {
+        [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumeric)]
+        ID = 1,
+
+        [Lexeme(GenericToken.KeyWord, "aaa")] A = 2,
+        
+        [Lexeme(GenericToken.KeyWord, "bbb")] B = 3,
+        
+        [Lexeme(GenericToken.KeyWord, "ccc")] C = 4
+
+    }
+
+    public class SubParser
+    {
+
+        [Production("main : (a b c)*")]
+        public string Main(List<Group<SubToken, string>> groups)
+        {
+            var groupsStrings = groups.Select(group => $"({group.Value(0)},{group.Value(1)},{group.Value(2)})");
+            var grps = string.Join(", ", groupsStrings);
+            return $"[{grps}]";
+        }
+
+        [Production("a : A")]
+        public string A(Token<SubToken> a)
+        {
+            return a.Value;
+        }
+        
+        [Production("b : B")]
+        public string B(Token<SubToken> b)
+        {
+            return b.Value;
+        }
+        
+        [Production("c : C")]
+        public string C(Token<SubToken> c)
+        {
+            return c.Value;
+        }
+        
+        [Production("d : D")]
+        public string D(Token<SubToken> d)
+        {
+            return d.Value;
+        }
+        /*
+         
+         main : (a b c)*
+         a : A
+         b : B
+         c : C
+         d : D
+         
+         
+         */
+    }
+    
+    
+    #endregion
 
     public class Dynamic
     {

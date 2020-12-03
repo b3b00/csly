@@ -82,9 +82,7 @@ namespace sly.parser
                     position++;
                 }
             }
-            Console.WriteLine("******************************");
-            Console.WriteLine(tokens.ToCsv());
-            Console.WriteLine("******************************");
+           
 
             result = ParseWithContext(tokensWithoutComments, context, startingNonTerminal);
 
