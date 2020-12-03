@@ -398,7 +398,6 @@ namespace sly.lexer
                             fsmBuilder.Mark(GenericLexer<IN>.single_line_comment_start);
                             fsmBuilder.End(GenericToken.Island);
                             fsmBuilder.CallBack(GetIslandCallback(island.Key, islandAttr));
-                            lexer.AddCallBack(island.Key, callback);
                         }
 
                         var hasMultiLine = !string.IsNullOrWhiteSpace(islandAttr.MultiLineIslandStart);
@@ -412,7 +411,6 @@ namespace sly.lexer
                             fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
                             fsmBuilder.End(GenericToken.Island);
                             fsmBuilder.CallBack(GetIslandCallback(island.Key, islandAttr));
-                            lexer.AddCallBack(island.Key, callback);
                         }
                     }
                 }
