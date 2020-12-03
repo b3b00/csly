@@ -1,13 +1,17 @@
 using System.Collections.Generic;
+using System.Linq;
+using sly.parser;
+
 namespace sly.lexer
 {
     public class LexerResult<IN> where IN : struct
     {
+        public LexicalError Error => Errors != null && Errors.Any() ? Errors.First() : null;
         public bool IsError { get; set; }
 
         public bool IsOk => !IsError;
         
-        public LexicalError Error { get; }
+        public List<LexicalError> Errors { get; }
         
         public TokenChannels<IN> Tokens { get; set; }
         
@@ -25,7 +29,13 @@ namespace sly.lexer
         public LexerResult(LexicalError error)
         {
             IsError = true;
-            Error = error;
+            Errors = new List<LexicalError>() { error };
+        }
+        
+        public LexerResult(List<LexicalError> errors)
+        {
+            IsError = true;
+            Errors = errors;
         }
 
         

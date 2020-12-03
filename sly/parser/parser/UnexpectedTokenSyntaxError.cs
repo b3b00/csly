@@ -34,6 +34,10 @@ namespace sly.parser
                 var l = UnexpectedToken?.Position?.Line;
                 return l.HasValue ? l.Value : 1;
             }
+            set
+            {
+                UnexpectedToken.Position.Line = value;
+            }
         }
 
         public override int Column
@@ -42,6 +46,10 @@ namespace sly.parser
             {
                 var c = UnexpectedToken?.Position?.Column;
                 return c.HasValue ? c.Value : 1;
+            }
+            set
+            {
+                UnexpectedToken.Position.Column = value;
             }
         }
 
@@ -54,7 +62,7 @@ namespace sly.parser
                     message.Append($"unexpected \"{UnexpectedToken.Value}\" ({UnexpectedToken.TokenID}) ");
                 else
                     message.Append("unexpected end of stream. ");
-                message.Append($"at {UnexpectedToken.Position}.");
+                message.Append($"at line {Line}, column {Column} ");
                 if (ExpectedTokens != null && ExpectedTokens.Any())
                 {
                     message.Append("expecting ");

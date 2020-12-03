@@ -239,6 +239,13 @@ id3
                         }
                     }
                 }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        Console.WriteLine($"{error.Line}.{error.Column} : {error.ErrorMessage}");
+                    }
+                }
             }
             else
             {

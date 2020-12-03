@@ -237,12 +237,15 @@ namespace sly.lexer
                         var errors = result.Errors;
                         ; // TODO report subparser errors , translating position ?
                         var newErrors = errors.Select(x =>
-                            new LexicalError(transcoded.Position.Line + x.Line, x.Column, x.ErrorMessage));
-                            
-                        return new LexerResult<IN>()
                         {
-                            err
-                        }   
+                                x.Column += (x.Line == 0 ? transcoded.Position.Column : 0);
+                                x.Line += transcoded.Position.Line;
+                                var message = x.ErrorMessage;
+                                var error = new LexicalError(x.Line, x.Column, x.ErrorMessage);
+                                return error;
+                        }).ToList();
+
+                        return new LexerResult<IN>(newErrors);
                     }
                 }
 
