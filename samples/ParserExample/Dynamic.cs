@@ -162,6 +162,13 @@ id3
 ";
                 var result = parser.Parse(source);
             }
+            else
+            {
+                foreach (var error in buildResult.Errors)
+                {
+                    Console.WriteLine(error.Level+" - "+error.Message);
+                }
+            }
             
         }
     }

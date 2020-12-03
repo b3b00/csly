@@ -44,6 +44,8 @@ namespace sly.buildresult
         
         LEXER_TOO_MANY_SUBPARSER = 17,
         
+        LEXER_SUB_PARSER_INITIALIZATION_ERROR = 18,
+        
         #endregion
 
         #region Parser
@@ -69,6 +71,6 @@ namespace sly.buildresult
         #endregion
 
 
-        
+       
     }
 }

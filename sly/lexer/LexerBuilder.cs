@@ -422,18 +422,37 @@ namespace sly.lexer
                 {
                     IN token = subParser.Key;
                     SubParserAttribute subParserAttribute = subParser.Value;
-                    var parser = CreateParserMethod(subParserAttribute.VisitorType, subParserAttribute.LexerType,
-                        subParserAttribute.OutputType, subParserAttribute.StartingRule);
                     
-                    lexer.AddCallBack(token,(Token<IN> tokenToParse) =>
+                    
+                        var parserResult = CreateParserMethod(subParserAttribute.VisitorType,
+                            subParserAttribute.LexerType,
+                            subParserAttribute.OutputType, subParserAttribute.StartingRule) ;
+                    
+
+                    if (parserResult.IsOk)
                     {
-                        string source = tokenToParse.Value;
-                        var parsed = parser.parseMethod.Invoke(parser.parser, new object[] {source,subParserAttribute.StartingRule});
-                        tokenToParse.ParsedValue = parsed;
-                        return tokenToParse;
-                    });                    
-                    
-                    
+                        var parser = parserResult.Result;
+                        lexer.AddCallBack(token, (Token<IN> tokenToParse) =>
+                        {
+                            string source = tokenToParse.Value;
+                            var parsed = parser.parseMethod.Invoke(parser.parser,
+                                new object[] {source, subParserAttribute.StartingRule});
+                            tokenToParse.ParsedValue = parsed;
+                            return tokenToParse;
+                        });
+                    }
+                    else
+                    {
+                        parserResult.Errors.ForEach((x => x.Message = $"SubParser ({token} : {subParserAttribute.LexerType}/{subParserAttribute.VisitorType})definition error Error on subParser for token {token}: {x.Message}"));
+                        result.AddErrors(parserResult.Errors);
+                    }
+
+                    if (result.IsError)
+                    {
+                        return result;
+                    }
+
+
 
                 }
             }
@@ -581,29 +600,53 @@ namespace sly.lexer
         }
         
         
-        private static (object parser, MethodInfo parseMethod) CreateParserMethod(Type visitorType, Type lexerType, Type astType, string startingRule)
+        private static BuildResult<(object parser, MethodInfo parseMethod)> CreateParserMethod(Type visitorType, Type lexerType, Type astType, string startingRule)
         {
-            var parserInstance = Activator.CreateInstance(visitorType);
+            BuildResult<(object parser, MethodInfo parseMethod)> result =
+                new BuildResult<(object parser, MethodInfo parseMethod)>();
+            try
+            {
+                
+
+                var parserInstance = Activator.CreateInstance(visitorType);
 
 
-            var buildertype = typeof(ParserBuilder<,>);
-            var builderT = buildertype.MakeGenericType(lexerType, astType);
-            var builder = Activator.CreateInstance(builderT);
+                var buildertype = typeof(ParserBuilder<,>);
+                var builderT = buildertype.MakeGenericType(lexerType, astType);
+                var builder = Activator.CreateInstance(builderT);
+
+                var method = builderT.GetMethod("BuildParser");
+                var parserResult = method.Invoke(builder,
+                    new Object[] {parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule, null});
+                ;
+                var realParserResultType = parserResult.GetType();
+
+                var propResult = realParserResultType.GetProperty("Result");
+                var parser = propResult.GetValue(parserResult);
+                var realParserType = parser.GetType();
+
+                var propErrors = realParserResultType.GetProperty("Errors");
+                List<InitializationError> errors = propErrors.GetValue(parserResult) as List<InitializationError>;
 
 
-            var method = builderT.GetMethod("BuildParser");
-            var parserResult = method.Invoke(builder,
-                new Object[] {parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule, null});
-            ;
-            var realParserResultType = parserResult.GetType();
-
-            var prop = realParserResultType.GetProperty("Result");
-            var parser = prop.GetValue(parserResult);
-            var realParserType = parser.GetType();
-
-            MethodInfo parseMethod = realParserType.GetMethod("Parse", new Type[] {typeof(string), typeof(string)});
-            ;
-            return (parser, parseMethod);
+                MethodInfo parseMethod = realParserType.GetMethod("Parse", new Type[] {typeof(string), typeof(string)});
+                ;
+                result.Result = (parser, parseMethod);
+                result.AddErrors(errors);
+                return result;
+            }
+            catch (Exception e)
+            {
+                if (e.InnerException != null && e.InnerException is ParserConfigurationException confException)
+                {
+                    result.Result = (null,null);
+                    var error = new InitializationError(ErrorLevel.FATAL, confException.Message,
+                        ErrorCodes.LEXER_SUB_PARSER_INITIALIZATION_ERROR);
+                    result.AddError(error);
+                    return result;
+                }
+                return null;
+            }
         }
     }
 }
