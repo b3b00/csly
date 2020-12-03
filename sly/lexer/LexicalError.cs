@@ -5,9 +5,11 @@ namespace sly.lexer
     public class LexicalError : ParseError
     {
 
-        public LexicalError(int line, int column)
+        public LexicalError(int line, int column, string errorMessage)
         {
-            
+            Line = line;
+            Column = column;
+            ErrorMessage = errorMessage;
         }
         
         public LexicalError(int line, int column, char unexpectedChar)
@@ -15,12 +17,14 @@ namespace sly.lexer
             Line = line;
             Column = column;
             UnexpectedChar = unexpectedChar;
+            ErrorMessage = $"Lexical Error : Unrecognized symbol '{UnexpectedChar}' at  (line {Line}, column {Column}).";
         }
 
         public char UnexpectedChar { get; set; }
 
-        public override string ErrorMessage =>
-            $"Lexical Error : Unrecognized symbol '{UnexpectedChar}' at  (line {Line}, column {Column}).";
+        public override string ErrorMessage { get; set; }
+    
+            
 
         public override string ToString()
         {
