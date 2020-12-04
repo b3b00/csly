@@ -54,8 +54,8 @@ namespace ParserTests
             if (previous != null && (previous.TokenID == IslandTokenLexerWithIslandParser.MYISLANDMULTI ||
                                      previous.TokenID == IslandTokenLexerWithIslandParser.MYISLANDSINGLE))
             {
-                var result = (previous.ParsedValue as ParseResult<ExpressionToken, double>);
-                island  = result.IsOk ? result?.Result : null;
+                var result = previous.ParsedValue as double?;
+                island  = (double?)result;
             }
 
             return new DoNotIgnoreCommentIdentifier(token.Value, island?.ToString());
@@ -80,7 +80,7 @@ namespace ParserTests
             // previous token may not be a comment so we have to check if not null
             if (next != null && (next.TokenID == IslandTokenLexer.MYISLANDMULTI || next.TokenID == IslandTokenLexer.MYISLANDSINGLE))
             {
-                island = next?.ParsedValue?.ToString();
+                island = "has island after" ;
             }
             return new DoNotIgnoreCommentIdentifier(token.Value, island);
         }
