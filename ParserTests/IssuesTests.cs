@@ -8,7 +8,6 @@ namespace ParserTests
     
     public enum Token218
     {
-        EOS = 0,
         [Lexeme(GenericToken.Double)]
         DOUBLE,
         [Lexeme(GenericToken.Int)]
@@ -97,7 +96,18 @@ namespace ParserTests
             var result = lexer.Tokenize("a = 0.0;");
             Assert.True(result.IsOk);
             var tokens = result.Tokens;
-            Console.WriteLine(string.Join(" ",tokens.Select(x => x.ToString())));
+            var dump = string.Join(" ", tokens.Select(x => x.ToString()));
+            int n = 0;
+            int count = 0;
+            while ((n = dump.IndexOf("<<EOS>>", n)) != -1)
+            {
+                n++;
+                count++;
+            }
+            Console.WriteLine(dump);
+            Assert.Equal(1, count);
+            var eoss = tokens.Where(x => x.IsEOS);
+            Assert.Single(eoss);
         }
         
     }
