@@ -194,14 +194,22 @@ namespace sly.parser.generator.visitor
                         {
                             args.Add(context);
                         }
+
                         method = node.Visitor;
                         var t = method?.Invoke(ParserVsisitorInstance, args.ToArray());
                         var res = (OUT) t;
                         result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
                     }
+                    catch (TargetInvocationException tie)
+                    {
+                        if (tie.InnerException != null)
+                        {
+                            throw tie.InnerException;
+                        }
+                    }
                     catch (Exception e)
                     {  
-                        throw new ParserConfigurationException($"ERROR {e.Message}: calling visitor method {method?.Name} with   {node.Name}");                     
+                        throw e;                     
                     }
                 }
             }

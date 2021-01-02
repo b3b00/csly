@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
+using sly.parser.generator;
 using Xunit;
 
 namespace ParserTests
@@ -83,6 +85,62 @@ namespace ParserTests
         [Comment("//", "/*", "*/")]
         COMMENT
     }
+
+
+    public enum Issue219Lexer
+    {
+        [Lexeme(GenericToken.Identifier, IdentifierType.Alpha)]
+        ID = 1,
+
+        [Lexeme(GenericToken.Int)] 
+        INT = 2,
+
+        [Lexeme(GenericToken.SugarToken, "=")] 
+        EQ = 3 
+    }
+    public interface I219Ast {
+    
+    }
+    
+    public class Root219 : I219Ast{
+        public List<I219Ast> Sets { get; set; }
+    }
+
+    public class Set219 : I219Ast
+    {
+        public string Id { get; set; }
+        public int Value { get; set; }
+
+        public Set219(string id, int value)
+        {
+            Id = id;
+            Value = value;
+        }
+    }
+
+    public class Exception219 : Exception
+    {
+        public Exception219(string error) : base(error)
+        {
+            
+        }
+    }
+        
+    public class Issue219Parser
+    {
+        [Production("root: set*")]
+        public I219Ast root(List<I219Ast> sets)
+        {
+            return new Root219() {Sets = sets};
+        }
+
+        [Production("set : ID EQ[d] INT")]
+        public Set219 set(Token<Issue219Lexer> id, Token<Issue219Lexer> value)
+        {
+            throw new Exception219("visitor error");
+            return new Set219(id.Value, value.IntValue);
+        }
+    }
     
     public class IssuesTests
     {
@@ -109,6 +167,19 @@ namespace ParserTests
             var eoss = tokens.Where(x => x.IsEOS);
             Assert.Single(eoss);
         }
-        
+
+
+        [Fact]
+        public static void Issue219()
+        {
+            ParserBuilder<Issue219Lexer, I219Ast> builder = new ParserBuilder<Issue219Lexer, I219Ast>();
+            Issue219Parser instance = new Issue219Parser();
+            var bres = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Assert.True(bres.IsOk);
+            var parser = bres.Result;
+            Assert.NotNull(parser);
+            var exception = Assert.Throws<Exception219>(() => parser.Parse("a = 1 b = 2 c = 3"));
+            Assert.Equal("visitor error",exception.Message);                
+        }
     }
 }
