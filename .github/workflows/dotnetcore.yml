@@ -33,7 +33,16 @@ jobs:
       if: matrix.os == 'windows-latest'
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }} 
-        path-to-lcov: ./ParserTests/lcov.info     
+        path-to-lcov: ./ParserTests/lcov.info 
+    - name: push
+      if: matrix.os == 'windows-latest'
+      id: publish_nuget
+      uses: brandedoutcast/publish-nuget@v2.5.2
+      with:
+          VERSION_REGEX: <version>(.*)<\/version>  
+          PROJECT_FILE_PATH: sly/sly.csproj
+          NUGET_KEY: ${{ secrets.NUGET_KEY }}
+          VERSION_FILE_PATH: sly/sly.csproj
     - name: Create Release
       if: ${{ success() && matrix.os == 'windows-latest' }}
       id: create_release
@@ -56,12 +65,3 @@ jobs:
         asset_path: ${{ steps.publish_nuget.outputs.PACKAGE_PATH }}
         asset_name: ${{ steps.publish_nuget.outputs.PACKAGE_NAME }}
         asset_content_type: application/zip
-    - name: push
-      if: ${{ success() && matrix.os == 'windows-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
-      id: publish_nuget
-      uses: brandedoutcast/publish-nuget@v2.5.2
-      with:
-          VERSION_REGEX: <version>(.*)<\/version>  
-          PROJECT_FILE_PATH: sly/sly.csproj
-          NUGET_KEY: ${{ secrets.NUGET_KEY }}
-          VERSION_FILE_PATH: sly/sly.csproj  
