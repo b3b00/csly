@@ -35,7 +35,7 @@ jobs:
         github-token: ${{ secrets.GITHUB_TOKEN }} 
         path-to-lcov: ./ParserTests/lcov.info     
     - name: Create Release
-      if: ${{ success() && matrix.os == 'windows-latest' && steps.publish_nuget.outputs.VERSION != ''  && steps.publish_nuget.outputs.VERSION != null }}
+      if: ${{ success() && matrix.os == 'windows-latest' }}
       id: create_release
       uses: actions/create-release@latest
       env:
