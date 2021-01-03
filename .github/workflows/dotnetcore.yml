@@ -34,7 +34,7 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }} 
         path-to-lcov: ./ParserTests/lcov.info 
-    - name: push
+    - name: publish_nuget
       if: matrix.os == 'windows-latest'
       id: publish_nuget
       uses: brandedoutcast/publish-nuget@v2.5.2
