@@ -126,7 +126,7 @@ namespace ParserTests
         }
     }
         
-    public class Issue219Parser
+    public class Issue219ParserEBNF
     {
         [Production("root: set*")]
         public I219Ast root(List<I219Ast> sets)
@@ -142,6 +142,21 @@ namespace ParserTests
         }
     }
     
+    public class Issue219ParserBNF
+    {
+        [Production("root: set")]
+        public I219Ast root(I219Ast set)
+        {
+            return new Root219() {Sets = new List<I219Ast>(){set}};
+        }
+
+        [Production("set : ID EQ INT")]
+        public Set219 set(Token<Issue219Lexer> id, Token<Issue219Lexer> eq, Token<Issue219Lexer> value)
+        {
+            throw new Exception219("visitor error");
+            return new Set219(id.Value, value.IntValue);
+        }
+    }
     public class IssuesTests
     {
 
@@ -170,15 +185,28 @@ namespace ParserTests
 
 
         [Fact]
-        public static void Issue219()
+        public static void Issue219EBNF()
         {
             ParserBuilder<Issue219Lexer, I219Ast> builder = new ParserBuilder<Issue219Lexer, I219Ast>();
-            Issue219Parser instance = new Issue219Parser();
+            Issue219ParserEBNF instance = new Issue219ParserEBNF();
             var bres = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
             Assert.True(bres.IsOk);
             var parser = bres.Result;
             Assert.NotNull(parser);
             var exception = Assert.Throws<Exception219>(() => parser.Parse("a = 1 b = 2 c = 3"));
+            Assert.Equal("visitor error",exception.Message);                
+        }
+      
+        [Fact]
+        public static void Issue219BNF()
+        {
+            ParserBuilder<Issue219Lexer, I219Ast> builder = new ParserBuilder<Issue219Lexer, I219Ast>();
+            Issue219ParserBNF instance = new Issue219ParserBNF();
+            var bres = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "root");
+            Assert.True(bres.IsOk);
+            var parser = bres.Result;
+            Assert.NotNull(parser);
+            var exception = Assert.Throws<Exception219>(() => parser.Parse("a = 1"));
             Assert.Equal("visitor error",exception.Message);                
         }
     }
