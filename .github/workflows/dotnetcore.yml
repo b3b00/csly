@@ -30,7 +30,7 @@ jobs:
     #   run: dotnet test -c Debug  #uses msbuild.rsp for coverlet configuration
     - name : test coverage with coverlet
       id: coverlet
-      uses: b3b00/coverlet-action@1.0.991
+      uses: b3b00/coverlet-action@1.0.992
       with:
         testProject: 'ParserTests/ParserTests.csproj'
         output: 'lcov.info'
