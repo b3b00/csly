@@ -26,14 +26,22 @@ jobs:
       run: dotnet clean  --configuration Release && dotnet nuget locals all --clear
     - name: Build with dotnet 
       run: dotnet build --configuration Release 
-    - name: Test with dotnet
-      run: dotnet test -c Debug  #uses msbuild.rsp for coverlet configuration
+    # - name: Test with dotnet
+    #   run: dotnet test -c Debug  #uses msbuild.rsp for coverlet configuration
+    - name : test coverage with coverlet
+      id: coverlet
+      uses: b3b00/coverlet-action@1.0.96
+      with:
+        testProject: 'ParserTests/ParserTests.csproj'
+        output: 'lcov.info'
+        outputFormat: 'lcov'
+        excludes: '[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*'
     - name: coveralls
       uses: coverallsapp/github-action@v1.1.1
       if: matrix.os == 'windows-latest'
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }} 
-        path-to-lcov: ./ParserTests/lcov.info 
+        path-to-lcov: ${{steps.coverlet.outputs.coverageFile}} 
     - name: Publish Nuget
       if: matrix.os == 'windows-latest'
       id: publish_nuget
