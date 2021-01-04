@@ -138,7 +138,6 @@ namespace ParserTests
         public Set219 set(Token<Issue219Lexer> id, Token<Issue219Lexer> value)
         {
             throw new Exception219("visitor error");
-            return new Set219(id.Value, value.IntValue);
         }
     }
     
@@ -154,7 +153,6 @@ namespace ParserTests
         public Set219 set(Token<Issue219Lexer> id, Token<Issue219Lexer> eq, Token<Issue219Lexer> value)
         {
             throw new Exception219("visitor error");
-            return new Set219(id.Value, value.IntValue);
         }
     }
     public class IssuesTests
