@@ -5,13 +5,17 @@ on:
     branches: 
       - dev
       - tech/actions 
+      - master
   pull_request:
     branches: 
       - dev
-
-jobs:
+jobs:  
   build:
-
+    env:
+      TESTS_PROJECT: 'ParserTests/ParserTests.csproj' # path to test project or solution
+      PUBLISH_NUGET: true # if true a nuget will be published on version change
+      RUN_TESTS: true # if true tests are run and coverage data is published to coveralls and a coverage report is produced.
+      MAIN_CSPROJ: 'sly/sly.csproj' # main project (for nuget packaging)
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
@@ -21,38 +25,45 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.101   
+        dotnet-version: 3.1.101      
     - name: Clean artifacts and nugets 
       run: dotnet clean  --configuration Release && dotnet nuget locals all --clear
     - name: Build with dotnet 
-      run: dotnet build --configuration Release 
-    # - name: Test with dotnet
-    #   run: dotnet test -c Debug  #uses msbuild.rsp for coverlet configuration
-    - name : test coverage with coverlet
-      id: coverlet
+      run: dotnet build --configuration Release     
+    - name: Test with dotnet
       uses: b3b00/coverlet-action@1.1.0
+      id: 'coverlet'
+      if: env.RUN_TESTS
       with:
-        testProject: 'ParserTests/ParserTests.csproj'
+        testProject: ${{env.TESTS_PROJECT}}
         output: 'lcov.info'
         outputFormat: 'lcov'
-        excludes: '[while]*,[expressionParser]*,[GenericLexerWithCallbacks]*,[jsonparser]*,[SimpleExpressionParser]*'
-    - name: coveralls
+        excludes: '[program]*'
+    - name: coveralls      
       uses: coverallsapp/github-action@v1.1.1
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-latest' && env.RUN_TESTS
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }} 
+        github-token: ${{secrets.GITHUB_TOKEN }} 
         path-to-lcov: ${{steps.coverlet.outputs.coverageFile}} 
-    - name: Publish Nuget
-      if: matrix.os == 'windows-latest'
+    - name: ReportGenerator
+      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.4
+      with:
+        reports: ${{steps.coverlet.outputs.coverageFile}} 
+        targetdir: 'coveragereport' 
+        reporttypes: 'HtmlInline;lcov' 
+        verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
+        tag: '${{ github.run_number }}_${{ github.run_id }}' 
+    - name: publish nuget
+      if: matrix.os == 'windows-latest' && env.PUBLISH_NUGET
       id: publish_nuget
       uses: brandedoutcast/publish-nuget@v2.5.2
       with:
           VERSION_REGEX: <version>(.*)<\/version>  
-          PROJECT_FILE_PATH: sly/sly.csproj
-          NUGET_KEY: ${{ secrets.NUGET_KEY }}
-          VERSION_FILE_PATH: sly/sly.csproj
+          PROJECT_FILE_PATH: ${{env.MAIN_CSPROJ}}
+          NUGET_KEY: ${{secrets.NUGET_KEY}}
+          VERSION_FILE_PATH: ${{env.MAIN_CSPROJ}}
     - name: Create Release
-      if: ${{ success() && matrix.os == 'windows-latest' &&  steps.publish_nuget.outputs.VERSION != '' && steps.publish_nuget.outputs.VERSION != null }}
+      if: ${{ success() && matrix.os == 'ubuntu-latest' && steps.publish_nuget.outputs.VERSION != ''  && steps.publish_nuget.outputs.VERSION != null }}
       id: create_release
       uses: actions/create-release@latest
       env:
@@ -63,7 +74,7 @@ jobs:
         draft: false
         prerelease: false
     - name: Upload Release Asset
-      if: ${{ success() && matrix.os == 'windows-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
+      if: ${{ success() && matrix.os == 'ubuntu-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
