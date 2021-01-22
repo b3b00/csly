@@ -14,6 +14,10 @@
             Column = column;
         }
 
+        public bool IsStartOfLine => Column == 0;
+        
+        public int CurrentIndentation { get; set; }
+
         public int Column { get; set; }
         public int Index { get; set; }
         public int Line { get; set; }

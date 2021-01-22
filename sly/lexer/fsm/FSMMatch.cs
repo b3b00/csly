@@ -11,9 +11,13 @@ namespace sly.lexer.fsm
         
         public char StringDelimiterChar { get; set; }
         
-        public bool IsSuccess { get; }
+        public bool IsSuccess { get; set; }
 
         public bool IsEOS { get; }
+        
+        public bool IsIndent { get; set; }
+        
+        public bool IsUnIndent { get; set; }
 
         public Token<N> Result { get; }
 
@@ -23,12 +27,36 @@ namespace sly.lexer.fsm
         
         public bool IsLineEnding { get; set; }
 
+        
+        
         public FSMMatch(bool success)
         {
             IsSuccess = success;
             IsEOS = !success;
         }
+
+        protected FSMMatch()
+        {
+            
+        }
+
+        public static FSMMatch<N> Indent()
+        {
+            return new FSMMatch<N>()
+            {
+                IsIndent = true,
+                IsSuccess = true
+            };
+        }
         
+        public static FSMMatch<N> UIndent()
+        {
+            return new FSMMatch<N>()
+            {
+                IsIndent = true,
+                IsSuccess = true
+            };
+        }
         
 
         public FSMMatch(bool success, N result, string value, LexerPosition position, int nodeId, LexerPosition newPosition, bool isLineEnding)

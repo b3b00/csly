@@ -101,6 +101,13 @@ namespace sly.lexer.fsm
 
             return this;
         }
+        
+        public FSMLexerBuilder<N> Indentation(bool indentAware, string indentation)
+        {
+            Fsm.IndentationAware = indentAware;
+            Fsm.Indentation = indentation;
+            return this;
+        }
 
         #endregion
 

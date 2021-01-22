@@ -47,6 +47,10 @@ namespace sly.lexer.fsm
         public bool IgnoreEOL { get; set; }
 
         public bool AggregateEOL { get; set; }
+        
+        public bool IndentationAware { get; set; }
+        
+        public string Indentation { get; set; }
 
 
         private Dictionary<int, NodeCallback<N>> Callbacks { get; }
@@ -139,8 +143,56 @@ namespace sly.lexer.fsm
             return Run(new ReadOnlyMemory<char>(source.ToCharArray()), position);
         }
 
+
+        public int ComputeIndentationSize(ReadOnlyMemory<char> source, int index)
+        {
+            int count = 0;
+            string id = source.Slice(index, Indentation.Length).ToString();
+            while (id == Indentation)
+            {
+                count++;
+                index += Indentation.Length;
+            }
+            return count;
+        }
+        
+      
+        
         public FSMMatch<N> Run(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
+
+            if (IndentationAware)
+            {
+                if (lexerPosition.IsStartOfLine)
+                {
+                    int ind = ComputeIndentationSize(source, lexerPosition.Index);
+                    if (ind >= 1)
+                    {
+                        if (ind > lexerPosition.CurrentIndentation)
+                        {
+                            // TODO : add INDENT
+                            return FSMMatch<N>.Indent();
+                        }
+                        else if (ind < lexerPosition.CurrentIndentation)
+                        {
+                            // TODO (CurrentIndent-ind) UINDENT
+                            return FSMMatch<N>.UIndent();
+                        }
+                        
+                        // TODO : move position ind*Indentation.Length;
+                        lexerPosition.Index += ind * Indentation.Length;
+                        lexerPosition.Column += ind * Indentation.Length; 
+                    }
+                }
+            }
+            // TODO here : indented language  
+            // if line start :
+            
+            // consume tabs and count them
+            // if count = previousCount +1 => add an indent token
+            // if count = previousCount -1 => add an unindent token
+            // else ....
+            
             ConsumeIgnored(source,lexerPosition);
 
             // End of token stream
@@ -229,8 +281,9 @@ namespace sly.lexer.fsm
 
         private void ConsumeIgnored(ReadOnlyMemory<char> source, LexerPosition position)
         {
-            
-            while (position.Index < source.Length)
+
+            bool eolReached = false;
+            while (position.Index < source.Length || (eolReached && IndentationAware))
             {
                 if (IgnoreWhiteSpace)
                 {
@@ -251,6 +304,11 @@ namespace sly.lexer.fsm
                         position.Index += eol == EOLType.Windows ? 2 : 1;
                         position.Column = 0;
                         position.Line++;
+                        eolReached = true;
+                        continue;
+                    }
+                    else
+                    {
                         continue;
                     }
                 }
