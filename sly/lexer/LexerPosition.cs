@@ -32,4 +32,6 @@
             return new LexerPosition(Index,Line,Column);
         }
     }
+    
+
 }

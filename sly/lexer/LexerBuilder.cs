@@ -176,6 +176,8 @@ namespace sly.lexer
                 config.IgnoreEOL = lexerAttribute.IgnoreEOL;
                 config.WhiteSpace = lexerAttribute.WhiteSpace;
                 config.KeyWordIgnoreCase = lexerAttribute.KeyWordIgnoreCase;
+                config.Indentation = lexerAttribute.Indentation;
+                config.IndentationAware = lexerAttribute.IndentationAWare;
             }
 
             var statics = new List<GenericToken>();

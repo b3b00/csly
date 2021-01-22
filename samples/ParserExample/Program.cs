@@ -692,6 +692,29 @@ namespace ParserExample
             }
             ;
         }
+
+
+        public static void TestIndentedLexer()
+        {
+            var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer>();
+            if (lexRes.IsOk)
+            {
+                var x = lexRes.Result.Tokenize("un\n\tdeux\n\t\ttrois\n\tdeux\nun");
+                if (x.IsOk)
+                {
+                    x.Tokens.ForEach(t => Console.WriteLine(t));
+                }
+                else
+                {
+                    Console.WriteLine(x.Error.ErrorMessage);
+                }
+            }
+            else
+            {
+                lexRes.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
+            
+        }
         
         private static void Main(string[] args)
         {
@@ -712,11 +735,12 @@ namespace ParserExample
             
           //  TestDoubleExponent();
 //Test192();
-TestRecursion();
+// TestRecursion();
 
             // TestFactorial();
             // TestThreadsafeGeneric();
             //Test164();
+            TestIndentedLexer();
         }
 
         

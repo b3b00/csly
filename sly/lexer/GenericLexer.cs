@@ -52,6 +52,7 @@ namespace sly.lexer
                 IgnoreEOL = true;
                 IgnoreWS = true;
                 WhiteSpace = new[] { ' ', '\t' };
+                
             }
 
             public IdentifierType IdType { get; set; }
@@ -63,6 +64,10 @@ namespace sly.lexer
             public char[] WhiteSpace { get; set; }
             
             public bool KeyWordIgnoreCase { get; set; }
+            
+            public bool IndentationAware { get; set; }
+            
+            public string Indentation { get; set; }
             
             public IEnumerable<char[]> IdentifierStartPattern { get; set; }
             
@@ -182,6 +187,7 @@ namespace sly.lexer
                     transcoded = callback(transcoded);
                 }
 
+                Console.WriteLine(transcoded);
                 tokens.Add(transcoded);
 
                 r = LexerFsm.Run(memorySource,position);
@@ -247,7 +253,10 @@ namespace sly.lexer
             FSMBuilder
                 .IgnoreWS(config.IgnoreWS)
                 .WhiteSpace(config.WhiteSpace)
-                .IgnoreEOL(config.IgnoreEOL);
+                .IgnoreEOL(config.IgnoreEOL)
+                .Indentation(config.IndentationAware, config.Indentation);
+            
+            
 
             // start machine definition
             FSMBuilder.Mark(start);
@@ -796,6 +805,8 @@ namespace sly.lexer
             tok.TokenID = (IN) match.Properties[DerivedToken];
             tok.IsLineEnding = match.IsLineEnding;
             tok.IsEOS = match.IsEOS;
+            tok.IsEOS = match.IsIndent;
+            tok.IsEOS = match.IsUnIndent;
             tok.Notignored = match.Result.Notignored;
             return tok;
         }
