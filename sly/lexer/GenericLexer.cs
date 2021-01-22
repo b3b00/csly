@@ -202,7 +202,10 @@ namespace sly.lexer
                 {
                     position = r.NewPosition;
                     position = ConsumeComment(r.Result, memorySource, position);
-                    
+                }
+                else if (r.IsSuccess && !r.Result.IsComment)
+                {
+                    position = r.NewPosition;
                 }
             }
 
@@ -802,11 +805,12 @@ namespace sly.lexer
             tok.Position = inTok.Position;
             tok.Discarded = inTok.Discarded;
             tok.StringDelimiter = match.StringDelimiterChar;
-            tok.TokenID = (IN) match.Properties[DerivedToken];
+            tok.TokenID = match.Properties.ContainsKey(DerivedToken) ? (IN) match.Properties[DerivedToken] : default(IN);
             tok.IsLineEnding = match.IsLineEnding;
             tok.IsEOS = match.IsEOS;
-            tok.IsEOS = match.IsIndent;
-            tok.IsEOS = match.IsUnIndent;
+            tok.IsIndent = match.IsIndent;
+            tok.IsUnIndent = match.IsUnIndent;
+            tok.IndentationLevel = match.IndentationLevel;
             tok.Notignored = match.Result.Notignored;
             return tok;
         }

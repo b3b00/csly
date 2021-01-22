@@ -13,6 +13,11 @@
             Line = line;
             Column = column;
         }
+        
+        public LexerPosition(int index, int line, int column, int currentIndentation) : this(index, line, column)
+        {
+            CurrentIndentation = currentIndentation;
+        }
 
         public bool IsStartOfLine => Column == 0;
         
@@ -29,7 +34,7 @@
 
         public LexerPosition Clone()
         {
-            return new LexerPosition(Index,Line,Column);
+            return new LexerPosition(Index,Line,Column,CurrentIndentation);
         }
     }
     

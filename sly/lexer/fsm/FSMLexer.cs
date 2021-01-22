@@ -152,6 +152,7 @@ namespace sly.lexer.fsm
             {
                 count++;
                 index += Indentation.Length;
+                id = source.Slice(index, Indentation.Length).ToString();
             }
             return count;
         }
@@ -163,26 +164,10 @@ namespace sly.lexer.fsm
 
             if (IndentationAware)
             {
-                if (lexerPosition.IsStartOfLine)
+                var ind = ConsumeIndents(source, lexerPosition); 
+                if (ind != null)
                 {
-                    int ind = ComputeIndentationSize(source, lexerPosition.Index);
-                    if (ind >= 1)
-                    {
-                        if (ind > lexerPosition.CurrentIndentation)
-                        {
-                            // TODO : add INDENT
-                            return FSMMatch<N>.Indent();
-                        }
-                        else if (ind < lexerPosition.CurrentIndentation)
-                        {
-                            // TODO (CurrentIndent-ind) UINDENT
-                            return FSMMatch<N>.UIndent();
-                        }
-                        
-                        // TODO : move position ind*Indentation.Length;
-                        lexerPosition.Index += ind * Indentation.Length;
-                        lexerPosition.Column += ind * Indentation.Length; 
-                    }
+                    return ind;
                 }
             }
             // TODO here : indented language  
@@ -194,6 +179,15 @@ namespace sly.lexer.fsm
             // else ....
             
             ConsumeIgnored(source,lexerPosition);
+
+            if (IndentationAware) // could start of line
+            {
+                var ind = ConsumeIndents(source, lexerPosition);
+                if (ind != null)
+                {
+                    return ind;
+                }
+            }
 
             // End of token stream
             if (lexerPosition.Index >= source.Length)
@@ -254,6 +248,42 @@ namespace sly.lexer.fsm
             return ko;
         }
 
+        private FSMMatch<N> ConsumeIndents(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
+        {
+            if (lexerPosition.IsStartOfLine)
+            {
+                int ind = ComputeIndentationSize(source, lexerPosition.Index);
+                // if (ind >= 1)
+                // {
+                if (ind > lexerPosition.CurrentIndentation)
+                {
+                    // TODO : add INDENT
+                    {
+                        var indent = FSMMatch<N>.Indent(ind);
+                        indent.NewPosition = lexerPosition.Clone();
+                        indent.NewPosition.Index += ind;
+                        indent.NewPosition.Column += ind;
+                        indent.NewPosition.CurrentIndentation = ind;
+                        return indent;
+                    }
+                }
+                else if (ind < lexerPosition.CurrentIndentation)
+                {
+                    // TODO (CurrentIndent-ind) UINDENT
+                    {
+                        var uIndent = FSMMatch<N>.UIndent(ind);
+                        uIndent.NewPosition = lexerPosition.Clone();
+                        uIndent.NewPosition.Index += ind;
+                        uIndent.NewPosition.Column += ind;
+                        uIndent.NewPosition.CurrentIndentation = ind;
+                        return uIndent;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         private FSMNode<N> Move(FSMNode<N> from, char token, ReadOnlyMemory<char> value)
         {
             if (from != null && Transitions.TryGetValue(from.Id, out var transitions))
@@ -283,7 +313,7 @@ namespace sly.lexer.fsm
         {
 
             bool eolReached = false;
-            while (position.Index < source.Length || (eolReached && IndentationAware))
+            while (position.Index < source.Length && !(eolReached && IndentationAware))
             {
                 if (IgnoreWhiteSpace)
                 {
@@ -309,7 +339,7 @@ namespace sly.lexer.fsm
                     }
                     else
                     {
-                        continue;
+                        break;
                     }
                 }
 

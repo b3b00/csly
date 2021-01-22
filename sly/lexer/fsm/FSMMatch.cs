@@ -18,12 +18,14 @@ namespace sly.lexer.fsm
         public bool IsIndent { get; set; }
         
         public bool IsUnIndent { get; set; }
+        
+        public int IndentationLevel { get; set; }
 
-        public Token<N> Result { get; }
+        public Token<N> Result { get; set; }
 
         public int NodeId { get; }
 
-        public LexerPosition NewPosition { get; }
+        public LexerPosition NewPosition { get; set; }
         
         public bool IsLineEnding { get; set; }
 
@@ -37,24 +39,28 @@ namespace sly.lexer.fsm
 
         protected FSMMatch()
         {
-            
+            Properties = new Dictionary<string, object>();
         }
 
-        public static FSMMatch<N> Indent()
+        public static FSMMatch<N> Indent(int level)
         {
             return new FSMMatch<N>()
             {
                 IsIndent = true,
-                IsSuccess = true
+                IsSuccess = true,
+                IndentationLevel = level,
+                Result = new Token<N>(){IsIndent = true},
             };
         }
         
-        public static FSMMatch<N> UIndent()
+        public static FSMMatch<N> UIndent(int level)
         {
             return new FSMMatch<N>()
             {
-                IsIndent = true,
-                IsSuccess = true
+                IsUnIndent = true,
+                IsSuccess = true,
+                IndentationLevel = level,
+                Result = new Token<N>(){IsUnIndent = true},
             };
         }
         
