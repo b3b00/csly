@@ -20,12 +20,12 @@ namespace sly.parser.syntax.grammar
 
         public bool Discarded { get; set; }
 
-        public bool MayBeEmpty()
+        public virtual bool MayBeEmpty()
         {
             return false;
         }
 
-        public bool Check(Token<T> nextToken)
+        public virtual bool Check(Token<T> nextToken)
         {
             return nextToken.TokenID.Equals(ExpectedToken);
         }
@@ -62,12 +62,12 @@ namespace sly.parser.syntax.grammar
             Discarded = discard;
         }
     
-        public bool MayBeEmpty()
+        public override  bool MayBeEmpty()
         {
             return false;
         }
     
-        public bool Check(Token<T> nextToken)
+        public override bool Check(Token<T> nextToken)
         {
             return (nextToken.IsIndent && ExpectedIndentation == IndentationType.Indent) ||
                    (nextToken.IsUnIndent && ExpectedIndentation == IndentationType.UnIndent);
