@@ -182,14 +182,15 @@ namespace sly.lexer
             {
                 ComputePositionWhenIgnoringEOL(r, tokens);
                 var transcoded = Transcode(r);
+                Console.WriteLine(transcoded);
+                
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
                 {
                     transcoded = callback(transcoded);
                 }
 
-                Console.WriteLine(transcoded);
                 tokens.Add(transcoded);
-
+               
                 r = LexerFsm.Run(memorySource,position);
                 if (!r.IsSuccess && !r.IsEOS)
                 {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Threading;
 using csly.whileLang.compiler;
 using csly.whileLang.interpreter;
@@ -697,9 +698,14 @@ namespace ParserExample
         public static void TestIndentedLexer()
         {
             var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer>();
-            if (lexRes.IsOk)
+            if (lexRes.IsOk && false)
             {
-                var x = lexRes.Result.Tokenize("un\n\tdeux\n\t\ttrois\n\tdeux\nun");
+                var x = lexRes.Result.Tokenize(@"
+un
+    deux
+        trois
+    deux
+un");
                 if (x.IsOk)
                 {
                     x.Tokens.ForEach(t => Console.WriteLine(t));
@@ -712,6 +718,34 @@ namespace ParserExample
             else
             {
                 lexRes.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
+
+            ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
+            var instance = new IndentedParser();
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            if (parserRes.IsOk)
+            {
+                string source = @"
+if truc == 1
+    un = 1
+    deux = 2
+else
+    trois = 3
+    quatre = 4
+";
+                var res = parserRes.Result.Parse(source);
+                if (res.IsOk)
+                {
+                    
+                }
+                else
+                {
+                    res.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+                }
+            }
+            else
+            {
+                parserRes.Errors.ForEach(x => Console.WriteLine(x.Message));
             }
             
         }

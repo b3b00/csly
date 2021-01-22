@@ -51,7 +51,7 @@ namespace sly.parser
             {
                 var message = new StringBuilder();
                 if (!UnexpectedToken.IsEOS)
-                    message.Append($"unexpected \"{UnexpectedToken.Value}\" ({UnexpectedToken.TokenID}) ");
+                    message.Append($"unexpected \"{UnexpectedToken.Value}\" ({UnexpectedToken.TokenID}) {UnexpectedToken.ToString()}");
                 else
                     message.Append("unexpected end of stream. ");
                 message.Append($"at {UnexpectedToken.Position}.");

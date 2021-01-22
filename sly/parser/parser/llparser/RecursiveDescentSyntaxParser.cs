@@ -350,7 +350,7 @@ namespace sly.parser.llparser
         public SyntaxParseResult<IN> ParseTerminal(IList<Token<IN>> tokens, TerminalClause<IN> terminal, int position)
         {
             var result = new SyntaxParseResult<IN>();
-            result.IsError = !terminal.Check(tokens[position].TokenID);
+            result.IsError = !terminal.Check(tokens[position]);
             result.EndingPosition = !result.IsError ? position + 1 : position;
             var token = tokens[position];
             token.Discarded = terminal.Discarded;

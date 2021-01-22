@@ -147,6 +147,10 @@ namespace sly.lexer.fsm
         public int ComputeIndentationSize(ReadOnlyMemory<char> source, int index)
         {
             int count = 0;
+            if (index + Indentation.Length > source.Length)
+            {
+                return 0;
+            }
             string id = source.Slice(index, Indentation.Length).ToString();
             while (id == Indentation)
             {
@@ -261,8 +265,8 @@ namespace sly.lexer.fsm
                     {
                         var indent = FSMMatch<N>.Indent(ind);
                         indent.NewPosition = lexerPosition.Clone();
-                        indent.NewPosition.Index += ind;
-                        indent.NewPosition.Column += ind;
+                        indent.NewPosition.Index += ind * Indentation.Length;
+                        indent.NewPosition.Column += ind * Indentation.Length;
                         indent.NewPosition.CurrentIndentation = ind;
                         return indent;
                     }
@@ -273,11 +277,16 @@ namespace sly.lexer.fsm
                     {
                         var uIndent = FSMMatch<N>.UIndent(ind);
                         uIndent.NewPosition = lexerPosition.Clone();
-                        uIndent.NewPosition.Index += ind;
-                        uIndent.NewPosition.Column += ind;
+                        uIndent.NewPosition.Index += ind * Indentation.Length;
+                        uIndent.NewPosition.Column += ind * Indentation.Length;
                         uIndent.NewPosition.CurrentIndentation = ind;
                         return uIndent;
                     }
+                }
+                else if (ind == lexerPosition.CurrentIndentation)
+                {
+                    lexerPosition.Column += ind * Indentation.Length;
+                    lexerPosition.Index += ind * Indentation.Length;
                 }
             }
 
