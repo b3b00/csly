@@ -11,6 +11,7 @@ using csly.whileLang.model;
 using csly.whileLang.parser;
 using expressionparser;
 using GenericLexerWithCallbacks;
+using indented;
 using jsonparser;
 using jsonparser.JsonModel;
 using ParserTests;
@@ -695,20 +696,25 @@ namespace ParserExample
         }
 
 
-        public static void TestIndentedLexer()
+        public static void TestIndentedLang()
         {
+            
+            string source = @"
+if truc == 1
+    un = 1
+    deux = 2
+else
+    trois = 3
+    quatre = 4
+";
+            
             var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer>();
-            if (lexRes.IsOk && false)
+            if (lexRes.IsOk )
             {
-                var x = lexRes.Result.Tokenize(@"
-un
-    deux
-        trois
-    deux
-un");
+                var x = lexRes.Result.Tokenize(source);
                 if (x.IsOk)
                 {
-                    x.Tokens.ForEach(t => Console.WriteLine(t));
+                    x.Tokens.ForEach(Console.WriteLine);
                 }
                 else
                 {
@@ -725,18 +731,12 @@ un");
             var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
             if (parserRes.IsOk)
             {
-                string source = @"
-if truc == 1
-    un = 1
-    deux = 2
-else
-    trois = 3
-    quatre = 4
-";
+                
                 var res = parserRes.Result.Parse(source);
                 if (res.IsOk)
                 {
-                    
+                    var r = res.Result;
+                    Console.WriteLine(r.Dump(""));
                 }
                 else
                 {
@@ -774,7 +774,7 @@ else
             // TestFactorial();
             // TestThreadsafeGeneric();
             //Test164();
-            TestIndentedLexer();
+            TestIndentedLang();
         }
 
         

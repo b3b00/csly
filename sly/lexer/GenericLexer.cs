@@ -182,7 +182,6 @@ namespace sly.lexer
             {
                 ComputePositionWhenIgnoringEOL(r, tokens);
                 var transcoded = Transcode(r);
-                Console.WriteLine(transcoded);
                 
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
                 {
