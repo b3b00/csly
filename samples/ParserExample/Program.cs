@@ -698,7 +698,6 @@ namespace ParserExample
 
         public static void TestIndentedLang()
         {
-            
             string source = @"
 if truc == 1
     un = 1
@@ -707,9 +706,15 @@ else
     trois = 3
     quatre = 4
 ";
-            
+
+            // IndentedTest1(source);
+            IndentedTest2(source);
+        }
+
+        private static void IndentedTest1(string source)
+        {
             var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer>();
-            if (lexRes.IsOk )
+            if (lexRes.IsOk)
             {
                 var x = lexRes.Result.Tokenize(source);
                 if (x.IsOk)
@@ -731,7 +736,6 @@ else
             var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
             if (parserRes.IsOk)
             {
-                
                 var res = parserRes.Result.Parse(source);
                 if (res.IsOk)
                 {
@@ -747,9 +751,50 @@ else
             {
                 parserRes.Errors.ForEach(x => Console.WriteLine(x.Message));
             }
-            
         }
         
+        private static void IndentedTest2(string source)
+        {
+            var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer2>();
+            if (lexRes.IsOk)
+            {
+                var x = lexRes.Result.Tokenize(source);
+                if (x.IsOk)
+                {
+                    x.Tokens.ForEach(Console.WriteLine);
+                }
+                else
+                {
+                    Console.WriteLine(x.Error.ErrorMessage);
+                }
+            }
+            else
+            {
+                lexRes.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
+
+            ParserBuilder<IndentedLangLexer2, Ast> builder = new ParserBuilder<IndentedLangLexer2, Ast>();
+            var instance = new IndentedParser2();
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            if (parserRes.IsOk)
+            {
+                var res = parserRes.Result.Parse(source);
+                if (res.IsOk)
+                {
+                    var r = res.Result;
+                    Console.WriteLine(r.Dump(""));
+                }
+                else
+                {
+                    res.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+                }
+            }
+            else
+            {
+                parserRes.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
+        }
+
         private static void Main(string[] args)
         {
             //TestContextualParser();
