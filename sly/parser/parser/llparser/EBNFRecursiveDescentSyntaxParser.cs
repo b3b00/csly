@@ -148,6 +148,10 @@ namespace sly.parser.llparser
             {
                 InitStartingTokensWithNonTerminal(rule,nonTerminal,nonTerminals);
             }
+            else if (option.Clause is ChoiceClause<IN> choice)
+            {
+                InitStartingTokensWithChoice(rule,choice,nonTerminals);
+            }
             else if (option.Clause is GroupClause<IN> group)
             {
                 // TODO XXX
