@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using sly.lexer;
 using sly.parser.generator;
+using sly.parser.parser;
 
 namespace indented
 {
@@ -19,17 +20,20 @@ namespace indented
             return new Integer(tok.IntValue);
         }
 
-        [Production("empty: EOL[d]")]
-        public Ast empty()
-        {
-            return new EmptyLine();
-        }
+        // [Production("empty: EOL[d]")]
+        // public Ast empty()
+        // {
+        //     return new EmptyLine();
+        // }
 
 
-        [Production("statement: [set|ifthenelse|empty] EOL[d]")]
-        public Ast Statement(Ast stat)
+        [Production("statement: [set|ifthenelse]? EOL[d]")]
+        public Ast Statement(ValueOption<Ast> stat)
         {
-            return stat as Statement;
+            return stat.Match(
+                x => x as Statement,
+                () => new EmptyLine()
+            );
         }
         
         [Production("set : id SET[d] int ")]
