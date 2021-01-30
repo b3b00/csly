@@ -189,9 +189,6 @@ namespace sly.lexer
                     transcoded = callback(transcoded);
                 }
 
-                Console.WriteLine(transcoded.ToString());
-                
-
                 if (transcoded.IsLineEnding)
                 {
                     ComputePositionWhenIgnoringEOL(r, tokens);
