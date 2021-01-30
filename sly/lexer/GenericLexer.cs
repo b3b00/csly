@@ -180,6 +180,7 @@ namespace sly.lexer
 
             while (r.IsSuccess)
             {
+                
                 ComputePositionWhenIgnoringEOL(r, tokens);
                 var transcoded = Transcode(r);
                 
@@ -188,8 +189,14 @@ namespace sly.lexer
                     transcoded = callback(transcoded);
                 }
 
+                Console.WriteLine(transcoded.ToString());
+                
+
+                if (transcoded.IsLineEnding)
+                {
+                    ComputePositionWhenIgnoringEOL(r, tokens);
+                }
                 tokens.Add(transcoded);
-               
                 r = LexerFsm.Run(memorySource,position);
                 if (!r.IsSuccess && !r.IsEOS)
                 {
@@ -228,21 +235,18 @@ namespace sly.lexer
         {
             if (!LexerFsm.IgnoreEOL)            
             {
-                if (r.IsLineEnding) {
-                    ;
-                }
                 var newPosition = r.Result.Position.Clone();
-                var eols = tokens.Where(t => t.IsLineEnding).ToList();
-                int line = eols.Count;
-                int column = newPosition.Index;
-                if (eols.Any())
+
+                if (r.IsLineEnding) // only compute if token is eol
                 {
-                    var lasteol = eols.Last();
-                    column = newPosition.Index - (lasteol.Position.Index + lasteol.Value.Length);
+                    var eols = tokens.Where(t => t.IsLineEnding).ToList();
+                    int line = eols.Any() ? eols.Count : 1;
+                    int column = 0;
+                    int index = newPosition.Index;
+                    r.Result.Position.Line = line-1;
+                    r.NewPosition.Line = line;
+                    r.NewPosition.Column = column;
                 }
-                r.Result.Position.Line = line;
-                r.Result.Position.Column = column;
-                
             }                        
         }
 

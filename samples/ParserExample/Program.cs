@@ -704,6 +704,7 @@ namespace ParserExample
 else
     trois = 3
     quatre = 4
+
 ";
 Console.WriteLine("********************");
 Console.WriteLine(source);

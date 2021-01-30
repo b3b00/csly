@@ -54,7 +54,7 @@ namespace indented
             return new Block(statements);
         }
         
-        [Production("ifthenelse: IF[d] cond block ELSE[d] block")]
+        [Production("ifthenelse: IF[d] cond EOL[d] block ELSE[d] EOL[d] block ")]
         public Ast ifthenelse(Cond cond, Block thenblk, Block elseblk)
         {
             return new IfThenElse(cond, thenblk, elseblk);
