@@ -20,12 +20,12 @@ namespace indented
         public string Dump(string tab)
         {
             StringBuilder builder = new StringBuilder();
-            builder.Append("IF")
+            builder.Append($"{tab}IF")
                 .AppendLine(Cond.Dump(tab))
                 .Append(Then.Dump(tab));
             if (Else != null)
             {
-                builder.AppendLine("ELSE");
+                builder.AppendLine($"{tab}ELSE");
                 builder.AppendLine(Else.Dump(tab));
             }
             

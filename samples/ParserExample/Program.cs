@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Security;
 using System.Threading;
 using csly.whileLang.compiler;
 using csly.whileLang.interpreter;
@@ -710,7 +709,7 @@ Console.WriteLine("********************");
 Console.WriteLine(source);
 Console.WriteLine("********************");
 
-            // IndentedTest1(source);
+            IndentedTest1(source);
             IndentedTest2(source);
         }
 
@@ -720,11 +719,7 @@ Console.WriteLine("********************");
             if (lexRes.IsOk)
             {
                 var x = lexRes.Result.Tokenize(source);
-                if (x.IsOk)
-                {
-                    x.Tokens.ForEach(Console.WriteLine);
-                }
-                else
+                if (x.IsError)
                 {
                     Console.WriteLine(x.Error.ErrorMessage);
                 }
@@ -762,11 +757,7 @@ Console.WriteLine("********************");
             if (lexRes.IsOk)
             {
                 var x = lexRes.Result.Tokenize(source);
-                if (x.IsOk)
-                {
-                    x.Tokens.ForEach(Console.WriteLine);
-                }
-                else
+                if (x.IsError)
                 {
                     Console.WriteLine(x.Error.ErrorMessage);
                 }

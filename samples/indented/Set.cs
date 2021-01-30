@@ -14,7 +14,7 @@ namespace indented
         
         public string Dump(string tab)
         {
-            return $"{Id.Dump(tab)} = {Value.Dump(tab)}";
+            return $"{tab}{Id.Dump(tab)} = {Value.Dump(tab)}";
         }
     }
 }

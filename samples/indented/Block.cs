@@ -18,7 +18,7 @@ namespace indented
             string newTab = tab + "\t";
             foreach (var statement in Statements)
             {
-                builder.Append(newTab).AppendLine(statement.Dump(newTab));
+                builder.AppendLine(statement.Dump(newTab));
             }
 
             return builder.ToString();
