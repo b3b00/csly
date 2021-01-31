@@ -807,16 +807,21 @@ Console.WriteLine("********************");
             // TestManyString();
             
           //  TestDoubleExponent();
-//Test192();
+Test192();
 // TestRecursion();
 
             // TestFactorial();
             // TestThreadsafeGeneric();
             //Test164();
+            //Test177();
             TestIndentedLang();
         }
 
-        
+        private static void Test177()
+        {
+            GenericLexerTests tests = new GenericLexerTests();
+            tests.TestIssue177();
+        }
     }
 
     public enum TestGrammarToken

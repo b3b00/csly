@@ -180,7 +180,6 @@ namespace sly.lexer
 
             while (r.IsSuccess)
             {
-                
                 ComputePositionWhenIgnoringEOL(r, tokens);
                 var transcoded = Transcode(r);
                 
@@ -188,7 +187,7 @@ namespace sly.lexer
                 {
                     transcoded = callback(transcoded);
                 }
-
+                
                 if (transcoded.IsLineEnding)
                 {
                     ComputePositionWhenIgnoringEOL(r, tokens);
@@ -237,11 +236,11 @@ namespace sly.lexer
                 if (r.IsLineEnding) // only compute if token is eol
                 {
                     var eols = tokens.Where(t => t.IsLineEnding).ToList();
-                    int line = eols.Any() ? eols.Count : 1;
+                    int line = eols.Any() ? eols.Count : 0;
                     int column = 0;
                     int index = newPosition.Index;
-                    r.Result.Position.Line = line-1;
-                    r.NewPosition.Line = line;
+                    // r.Result.Position.Line = line+1;
+                    r.NewPosition.Line = line+1;
                     r.NewPosition.Column = column;
                 }
             }                        
