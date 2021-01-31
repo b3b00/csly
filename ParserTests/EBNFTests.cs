@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using expressionparser;
+using indented;
 using jsonparser;
 using jsonparser.JsonModel;
 using simpleExpressionParser;
@@ -1273,6 +1274,72 @@ namespace ParserTests
             Assert.Equal("commented b",list.Ids[1].Comment);    
             ;
 
+        }
+
+        [Fact]
+        public void TestIndentedParser()
+        {
+            var source =@"if truc == 1
+    un = 1
+    deux = 2
+else
+    trois = 3
+    quatre = 4
+
+";
+            ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
+            var instance = new IndentedParser();
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Assert.True(parserRes.IsOk);
+            var parser = parserRes.Result;
+            Assert.NotNull(parser);
+            var parseResult = parser.Parse(source);
+            Assert.True(parseResult.IsOk);
+            var ast = parseResult.Result;
+            Assert.NotNull(ast);
+            Assert.IsAssignableFrom<Block>(ast);
+            Block root = ast as Block;
+            Assert.Single(root.Statements);
+            Assert.IsAssignableFrom<IfThenElse>(root.Statements.First());
+            IfThenElse ifthenelse = root.Statements.First() as IfThenElse;
+            Assert.NotNull(ifthenelse.Cond);
+            Assert.NotNull(ifthenelse.Then);
+            Assert.Equal(2,ifthenelse.Then.Statements.Count);
+            Assert.NotNull(ifthenelse.Else);
+            Assert.Equal(2,ifthenelse.Else.Statements.Count);
+        }
+        
+        [Fact]
+        public void TestIndentedParser2()
+        {
+            var source =@"if truc == 1
+    un = 1
+    deux = 2
+else
+    trois = 3
+    quatre = 4
+
+";
+            ParserBuilder<IndentedLangLexer2, Ast> builder = new ParserBuilder<IndentedLangLexer2, Ast>();
+            var instance = new IndentedParser2();
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Assert.True(parserRes.IsOk);
+            var parser = parserRes.Result;
+            Assert.NotNull(parser);
+            var parseResult = parser.Parse(source);
+            Assert.True(parseResult.IsOk);
+            var ast = parseResult.Result;
+            Assert.NotNull(ast);
+            Assert.IsAssignableFrom<Block>(ast);
+            Block root = ast as Block;
+            Assert.Single(root.Statements);
+            Assert.IsAssignableFrom<IfThenElse>(root.Statements.First());
+            IfThenElse ifthenelse = root.Statements.First() as IfThenElse;
+            Assert.NotNull(ifthenelse.Cond);
+            Assert.NotNull(ifthenelse.Then);
+            Assert.Equal(2,ifthenelse.Then.Statements.Count);
+            Assert.NotNull(ifthenelse.Else);
+            Assert.Equal(2,ifthenelse.Else.Statements.Count);
         }
     }
 }
