@@ -14,6 +14,7 @@ using indented;
 using jsonparser;
 using jsonparser.JsonModel;
 using ParserTests;
+using ParserTests.lexer;
 using simpleExpressionParser;
 using sly.lexer;
 using sly.lexer.fsm;
@@ -710,7 +711,7 @@ Console.WriteLine(source);
 Console.WriteLine("********************");
 
             IndentedTest1(source);
-            IndentedTest2(source);
+            //IndentedTest2(source);
         }
 
         private static void IndentedTest1(string source)

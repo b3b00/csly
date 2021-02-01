@@ -196,9 +196,18 @@ namespace sly.lexer
                 r = LexerFsm.Run(memorySource,position);
                 if (!r.IsSuccess && !r.IsEOS)
                 {
-                    var result = r.Result;
-                    var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
-                    return new LexerResult<IN>(error);
+                    if (r.IsIndentationError)
+                    {
+                        var result = r.Result;
+                        var error = new IndentationError(result.Position.Line, result.Position.Column);
+                        return new LexerResult<IN>(error);
+                    }
+                    else
+                    {
+                        var result = r.Result;
+                        var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
+                        return new LexerResult<IN>(error);
+                    }
                 }
 
                 if (r.IsSuccess && r.Result.IsComment)

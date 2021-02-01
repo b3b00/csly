@@ -29,6 +29,7 @@ namespace sly.lexer.fsm
         
         public bool IsLineEnding { get; set; }
 
+        public bool IsIndentationError { get; set; }
         
         
         public FSMMatch(bool success)
@@ -80,6 +81,8 @@ namespace sly.lexer.fsm
             NewPosition = newPosition;
             IsLineEnding = isLineEnding;
         }
+        
+        
 
         
     }
