@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using sly.lexer;
 using sly.parser.generator;
+using sly.parser.parser;
 
 namespace indented
 {
@@ -43,10 +44,18 @@ namespace indented
             return new Block(statements);
         }
         
-        [Production("ifthenelse: IF[d] cond block ELSE[d] block")]
-        public Ast ifthenelse(Cond cond, Block thenblk, Block elseblk)
+        [Production("ifthenelse: IF[d] cond block (ELSE[d] block)?")]
+        public Ast ifthenelse(Cond cond, Block thenblk, ValueOption<Group<IndentedLangLexer,Ast>> elseblk)
         {
-            return new IfThenElse(cond, thenblk, elseblk);
+            var eGrp = elseblk.Match(
+                x => {
+                return x;
+            }, () =>
+            {
+                return null;
+            });
+            var eBlk = eGrp?.Value(0) as Block;
+            return new IfThenElse(cond, thenblk, eBlk);
         }
 
         [Production("block : INDENT[d] statement* UINDENT[d]")]

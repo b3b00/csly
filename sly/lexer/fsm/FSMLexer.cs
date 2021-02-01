@@ -274,6 +274,7 @@ namespace sly.lexer.fsm
 
         private FSMMatch<N> ConsumeIndents(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
+            
             if (lexerPosition.IsStartOfLine)
             {
                 int ind = ComputeIndentationSize(source, lexerPosition.Index);
@@ -288,7 +289,7 @@ namespace sly.lexer.fsm
                 if (currentIndentations.Any())
                 {
                     int i = 0;
-                    
+                    int indentCharCount = 0;
                     while (i < currentIndentations.Count && indentPosition < indents.Count)
                     {
                         var current = currentIndentations[i];
@@ -302,23 +303,40 @@ namespace sly.lexer.fsm
                                 IsIndentationError = true
                             };
                             return ko;
-                            ;
                         }
                         else
                         {
-                            while (j <= current.Length && indentPosition + j < indents.Count)
+                            while (j < current.Length && indentPosition + j < indents.Count)
                             {
                                 var reference = current[j];
                                 var actual = indents[j + indentPosition];
                                 if (actual != reference)
                                 {
-                                    ;
+                                    var ko = new FSMMatch<N>(false, default(N), " ", lexerPosition, -1, lexerPosition, false)
+                                    {
+                                        IsIndentationError = true
+                                    };
+                                    return ko;
                                 }
+
+                                indentCharCount++;
 
                                 j++;
                             }
                         }
 
+                        if (indentCharCount < indents.Count)
+                        {
+                            var t = indents.Skip(indentCharCount).ToArray();
+                            var newTab = new string(t);
+                            var indent = FSMMatch<N>.Indent(lexerPosition.Indentations.Count()+1);
+                            indent.NewPosition = lexerPosition.Clone();
+                            indent.NewPosition.Index += indents.Count;
+                            indent.NewPosition.Column += indents.Count;
+                            indent.NewPosition.Indentations = indent.NewPosition.Indentations.Push(newTab);
+                            return indent;
+                            
+                        }
                         indentPosition += current.Length;
                         i++;
                     }
@@ -327,35 +345,57 @@ namespace sly.lexer.fsm
                     {
                         // TODO : UINDENT : combien ?
                         uIndentCount = currentIndentations.Count - i;
+                        
+                        var uIndent = FSMMatch<N>.UIndent(ind);
+                        uIndent.NewPosition = lexerPosition.Clone();
+                        uIndent.NewPosition.Index += ind * Indentation.Length;
+                        uIndent.NewPosition.Column += ind * Indentation.Length;
+                        uIndent.NewPosition.CurrentIndentation = ind;
+                        for (int iu = 0; iu < uIndentCount; iu++)
+                        {
+                            uIndent.NewPosition.Indentations = uIndent.NewPosition.Indentations.Pop();
+                        }
+                        return uIndent;
+                        
                         // pop currentIndentations.Count - i ?
+                        
                     }
                     else
                     {
-                        //
+                        if (i == currentIndentations.Count)
+                        {
+                            lexerPosition.Column += indents.Count;
+                            lexerPosition.Index += indents.Count;
+                            return null;
+                        }
+                        else
+                        {
+                            ;
+                        }
                         ;
                     }
+
+
                     ;
+
                 }
-
-
-                if (ind > lexerPosition.CurrentIndentation)
+                else
                 {
-                    ;
-                    // add INDENT
+                    if (indents.Any())
                     {
-                        var indent = FSMMatch<N>.Indent(ind);
+                        var indent = FSMMatch<N>.Indent(1);
                         indent.NewPosition = lexerPosition.Clone();
-                        indent.NewPosition.Index += ind * Indentation.Length;
-                        indent.NewPosition.Column += ind * Indentation.Length;
-                        indent.NewPosition.CurrentIndentation = ind;
+                        indent.NewPosition.Index += indents.Count;
+                        indent.NewPosition.Column += indents.Count;
                         indent.NewPosition.Indentations = indent.NewPosition.Indentations.Push(new string(indents.ToArray()));
                         return indent;
                     }
+                    ;
                 }
-                else if (ind < lexerPosition.CurrentIndentation)
+
+                if (ind < lexerPosition.CurrentIndentation)
                 {
-                    
-                    // add (CurrentIndent-ind)? UINDENT
+                    // TODO : manage many unindent : needs to return many tokens at once !
                     var uIndent = FSMMatch<N>.UIndent(ind);
                     uIndent.NewPosition = lexerPosition.Clone();
                     uIndent.NewPosition.Index += ind * Indentation.Length;
@@ -381,7 +421,6 @@ namespace sly.lexer.fsm
         {
             if (from != null && Transitions.TryGetValue(from.Id, out var transitions))
             {
-                // Do NOT use Linq, increases allocations AND running time
                 for (var i = 0; i < transitions.Count; ++i)
                 {
                     var transition = transitions[i];
