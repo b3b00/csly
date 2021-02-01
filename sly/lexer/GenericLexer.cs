@@ -192,6 +192,11 @@ namespace sly.lexer
                 {
                     ComputePositionWhenIgnoringEOL(r, tokens);
                 }
+
+                if (transcoded.Value == "else")
+                {
+                    ;
+                }
                 tokens.Add(transcoded);
                 r = LexerFsm.Run(memorySource,position);
                 if (!r.IsSuccess && !r.IsEOS)

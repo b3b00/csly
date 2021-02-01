@@ -277,10 +277,12 @@ namespace sly.lexer.fsm
             
             if (lexerPosition.IsStartOfLine)
             {
-                int ind = ComputeIndentationSize(source, lexerPosition.Index);
+                if (lexerPosition.Line == 6)
+                {
+                    ;
+                }
                 var indents = GetIndentations(source, lexerPosition.Index);
                 
-                // TODO : check if indents matches lexerPosition.Indentations
                 var currentIndentations = lexerPosition.Indentations.ToList();
 
                 int uIndentCount = 0;
@@ -292,7 +294,7 @@ namespace sly.lexer.fsm
                     int indentCharCount = 0;
                     while (i < currentIndentations.Count && indentPosition < indents.Count)
                     {
-                        var current = currentIndentations[i];
+                        var current = currentIndentations[currentIndentations.Count-i-1];
                         bool ok = true;
                         int j = 0;
                         if (indentPosition + current.Length > indents.Count)
@@ -345,20 +347,22 @@ namespace sly.lexer.fsm
                     {
                         // TODO : UINDENT : combien ?
                         uIndentCount = currentIndentations.Count - i;
+
+                        // 
+                        currentIndentations.Reverse();
+                        var unindented = currentIndentations.Take(i).ToList();
+                        var spaces = unindented.Select(x => x.Length).Sum();
                         
-                        var uIndent = FSMMatch<N>.UIndent(ind);
+                        var uIndent = FSMMatch<N>.UIndent(uIndentCount);
                         uIndent.NewPosition = lexerPosition.Clone();
-                        uIndent.NewPosition.Index += ind * Indentation.Length;
-                        uIndent.NewPosition.Column += ind * Indentation.Length;
-                        uIndent.NewPosition.CurrentIndentation = ind;
+                        uIndent.NewPosition.Index += spaces;
+                        uIndent.NewPosition.Column += spaces;
+                        uIndent.NewPosition.CurrentIndentation = i;
                         for (int iu = 0; iu < uIndentCount; iu++)
                         {
                             uIndent.NewPosition.Indentations = uIndent.NewPosition.Indentations.Pop();
                         }
                         return uIndent;
-                        
-                        // pop currentIndentations.Count - i ?
-                        
                     }
                     else
                     {
@@ -368,16 +372,7 @@ namespace sly.lexer.fsm
                             lexerPosition.Index += indents.Count;
                             return null;
                         }
-                        else
-                        {
-                            ;
-                        }
-                        ;
                     }
-
-
-                    ;
-
                 }
                 else
                 {
@@ -391,26 +386,7 @@ namespace sly.lexer.fsm
                         return indent;
                     }
                     ;
-                }
-
-                if (ind < lexerPosition.CurrentIndentation)
-                {
-                    // TODO : manage many unindent : needs to return many tokens at once !
-                    var uIndent = FSMMatch<N>.UIndent(ind);
-                    uIndent.NewPosition = lexerPosition.Clone();
-                    uIndent.NewPosition.Index += ind * Indentation.Length;
-                    uIndent.NewPosition.Column += ind * Indentation.Length;
-                    uIndent.NewPosition.CurrentIndentation = ind;
-                    for (int i = 0; i < uIndentCount; i++)
-                    {
-                        uIndent.NewPosition.Indentations = uIndent.NewPosition.Indentations.Pop();
-                    }
-                    return uIndent;
-                }
-                else if (ind == lexerPosition.CurrentIndentation)
-                {
-                    lexerPosition.Column += ind * Indentation.Length;
-                    lexerPosition.Index += ind * Indentation.Length;
+                    return null;
                 }
             }
 

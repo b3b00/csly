@@ -699,11 +699,14 @@ namespace ParserExample
         public static void TestIndentedLang()
         {
             string source = @"if truc == 1
-    un = 1
-    deux = 2
+  un = 1
+  deux = 2
 else
-    trois = 3
-    quatre = 4
+  if bidule ==89
+         toto = 28
+  trois = 3
+  quatre = 4
+
 
 ";
 Console.WriteLine("********************");
