@@ -1310,7 +1310,54 @@ else
         }
         
         [Fact]
-        public void TestIndentedParser2()
+        public void TestIndentedParserNestedBlocks()
+        {
+            var source =@"if truc == 1
+  un = 1
+  deux = 2
+else  
+  trois = 3
+  quatre = 4
+  if bidule ==89
+     toto = 28
+final = 9999
+";
+            ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
+            var instance = new IndentedParser();
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Assert.True(parserRes.IsOk);
+            var parser = parserRes.Result;
+            Assert.NotNull(parser);
+            var parseResult = parser.Parse(source);
+            Assert.True(parseResult.IsOk);
+            var ast = parseResult.Result;
+            Assert.NotNull(ast);
+            Assert.IsAssignableFrom<Block>(ast);
+            Block root = ast as Block;
+            Assert.Equal(2,root.Statements.Count);
+            Assert.IsAssignableFrom<IfThenElse>(root.Statements.First());
+            IfThenElse ifthenelse = root.Statements.First() as IfThenElse;
+            Assert.NotNull(ifthenelse.Cond);
+            Assert.NotNull(ifthenelse.Then);
+            Assert.Equal(2,ifthenelse.Then.Statements.Count);
+            Assert.NotNull(ifthenelse.Else);
+            Assert.Equal(3,ifthenelse.Else.Statements.Count);
+            var lastelseStatement = ifthenelse.Else.Statements.Last();
+            Assert.IsAssignableFrom<IfThenElse>(lastelseStatement);
+            var nestedIf = lastelseStatement as IfThenElse;
+            Assert.Null(nestedIf.Else);
+            Assert.NotNull(nestedIf.Then);
+
+            var lastStatement = root.Statements.Last();
+            Assert.IsAssignableFrom<Set>(lastStatement);
+            var finalSet = lastStatement as Set;
+            Assert.Equal("final",finalSet.Id.Name);
+            Assert.Equal(9999,finalSet.Value.Value);
+
+        }
+        
+        [Fact]
+        public void TestIndentedParserWithEolAwareness()
         {
             var source =@"if truc == 1
     un = 1
