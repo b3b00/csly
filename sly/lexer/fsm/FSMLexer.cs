@@ -277,10 +277,6 @@ namespace sly.lexer.fsm
             
             if (lexerPosition.IsStartOfLine)
             {
-                if (lexerPosition.Line == 6)
-                {
-                    ;
-                }
                 var indents = GetIndentations(source, lexerPosition.Index);
                 
                 var currentIndentations = lexerPosition.Indentations.ToList();

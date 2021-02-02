@@ -26,7 +26,7 @@ namespace indented
             if (Else != null)
             {
                 builder.AppendLine($"{tab}ELSE");
-                builder.AppendLine(Else.Dump(tab));
+                builder.Append(Else.Dump(tab));
             }
             
             return builder.ToString();
