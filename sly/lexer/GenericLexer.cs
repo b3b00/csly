@@ -193,6 +193,13 @@ namespace sly.lexer
                     ComputePositionWhenIgnoringEOL(r, tokens);
                 }
 
+                if (r.IsUnIndent && r.UnIndentCount > 1)
+                {
+                    for (int i = 1; i < r.UnIndentCount; i++)
+                    {
+                        tokens.Add(transcoded);
+                    }   
+                }
                 tokens.Add(transcoded);
                 r = LexerFsm.Run(memorySource,position);
                 if (!r.IsSuccess && !r.IsEOS)

@@ -349,7 +349,7 @@ namespace sly.lexer.fsm
                         var unindented = currentIndentations.Take(i).ToList();
                         var spaces = unindented.Select(x => x.Length).Sum();
                         
-                        var uIndent = FSMMatch<N>.UIndent(uIndentCount);
+                        var uIndent = FSMMatch<N>.UIndent(uIndentCount,uIndentCount);
                         uIndent.NewPosition = lexerPosition.Clone();
                         uIndent.NewPosition.Index += spaces;
                         uIndent.NewPosition.Column += spaces;

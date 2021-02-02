@@ -19,6 +19,8 @@ namespace sly.lexer.fsm
         
         public bool IsUnIndent { get; set; }
         
+        public int UnIndentCount { get; set; }
+        
         public int IndentationLevel { get; set; }
 
         public Token<N> Result { get; set; }
@@ -54,7 +56,7 @@ namespace sly.lexer.fsm
             };
         }
         
-        public static FSMMatch<N> UIndent(int level)
+        public static FSMMatch<N> UIndent(int level, int count = 1)
         {
             return new FSMMatch<N>()
             {
@@ -62,6 +64,7 @@ namespace sly.lexer.fsm
                 IsSuccess = true,
                 IndentationLevel = level,
                 Result = new Token<N>(){IsUnIndent = true, IsEOS = false},
+                UnIndentCount = count
             };
         }
         

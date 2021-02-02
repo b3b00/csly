@@ -713,6 +713,22 @@ Console.WriteLine(source);
 Console.WriteLine("********************");
 
             IndentedTest1(source);
+            
+            source = @"if truc == 1
+  un = 1
+  deux = 2
+else  
+  trois = 3
+  quatre = 4
+  if bidule ==89
+     toto = 28
+final = 9999
+";
+            Console.WriteLine("********************");
+            Console.WriteLine(source);
+            Console.WriteLine("********************");
+
+            IndentedTest1(source);            
             //IndentedTest2(source);
         }
 
