@@ -26,10 +26,12 @@ namespace ParserTests.Issue223_EarlyEos
             );
         }
 
-        [Production("primary_expression: LPAREN  expression  RPAREN")]
+        [Production("primary_expression: LPAREN SPACE? expression SPACE? RPAREN")]
         public GroupExpression PrimaryExpression(
             Token<EarlyEosToken> lParenToken,
-            Expression expression,            
+            Token<EarlyEosToken> lSpaceToken,
+            Expression expression,
+            Token<EarlyEosToken> rSpaceToken,
             Token<EarlyEosToken> rParenToken
             )
         {
@@ -64,7 +66,7 @@ namespace ParserTests.Issue223_EarlyEos
         [Production("secondary_expression: primary_expression")]
         public Expression SecondaryExpression(Expression valueExpression) => valueExpression;
 
-        [Production("secondary_expression: NOT  secondary_expression")]
+        [Production("secondary_expression: NOT SPACE[d] secondary_expression")]
         [Production("secondary_expression: PLUS secondary_expression")]
         [Production("secondary_expression: MINUS secondary_expression")]
         public Expression SecondaryExpression(
@@ -78,7 +80,7 @@ namespace ParserTests.Issue223_EarlyEos
         [Production("tertiary_expression: secondary_expression")]
         public Expression TertiaryExpression(Expression valueExpression) => valueExpression;
 
-        [Production("tertiary_expression: secondary_expression  tertiary_expression")]
+        [Production("tertiary_expression: secondary_expression SPACE[d] tertiary_expression")]
         public BinaryExpression TertiaryExpression(
             Expression leftExpression,
             Expression rightExpression)
@@ -86,8 +88,8 @@ namespace ParserTests.Issue223_EarlyEos
             return new BinaryExpression(leftExpression, BinaryOperator.AND, rightExpression);
         }
 
-        [Production("tertiary_expression: secondary_expression  AND  tertiary_expression")]
-        [Production("tertiary_expression: secondary_expression  OR  tertiary_expression")]
+        [Production("tertiary_expression: secondary_expression SPACE[d] AND SPACE[d] tertiary_expression")]
+        [Production("tertiary_expression: secondary_expression SPACE[d] OR SPACE[d] tertiary_expression")]
         public BinaryExpression BinaryExpression(
             Expression leftExpression,
             Token<EarlyEosToken> binaryOperatorToken,

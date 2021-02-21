@@ -4,8 +4,6 @@ namespace ParserTests.Issue223_EarlyEos
 {
     public enum EarlyEosToken
     {
-        
-        
         [Lexeme(@"OR")]
         OR = 1,
         [Lexeme(@"AND")]
@@ -40,7 +38,7 @@ namespace ParserTests.Issue223_EarlyEos
         [Lexeme(@"\)")]
         RPAREN,
         
-        [Lexeme(@"\s+",isSkippable:true)]
+        [Lexeme(@"\s+")]
         SPACE,
 
         [Lexeme(@"[\w\-\._@#+&/\=*~]+")]

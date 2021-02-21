@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using expressionparser;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
 using Xunit;
@@ -12,8 +13,6 @@ namespace ParserTests.Issue223_EarlyEos
         public void Early_EOS_NRE()
         {
             var queryExpression = Parse("( java AND dotnet )");
-
-            
             Assert.IsType<GroupExpression>(queryExpression);
             Assert.Equal("(java AND dotnet)", queryExpression.ToString());
         }
@@ -34,11 +33,9 @@ namespace ParserTests.Issue223_EarlyEos
 
             var queryExpression = parser.Parse(query.Trim());
             
-            GraphVizEBNFSyntaxTreeVisitor<EarlyEosToken> graphVisitor =
-                new GraphVizEBNFSyntaxTreeVisitor<EarlyEosToken>();
-            var graph = graphVisitor.VisitTree(queryExpression.SyntaxTree);
-            string gviz = graphVisitor.Graph.Compile();
-            
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<EarlyEosToken>();
+            var root = graphviz.VisitTree(queryExpression.SyntaxTree);
+            string graph = graphviz.Graph.Compile();
             ;
             
             if (queryExpression.IsError)
