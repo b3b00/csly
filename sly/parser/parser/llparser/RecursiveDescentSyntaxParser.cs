@@ -377,7 +377,7 @@ namespace sly.parser.llparser
             allAcceptableTokens = allAcceptableTokens.Distinct().ToList();
 
             var rules = nt.Rules
-                .Where(r => r.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || r.MayBeEmpty)
+                .Where(r => startPosition < tokens.Count && r.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || r.MayBeEmpty)
                 .ToList();
 
             if (rules.Count == 0)
