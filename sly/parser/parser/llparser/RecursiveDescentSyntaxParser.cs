@@ -380,9 +380,19 @@ namespace sly.parser.llparser
                 .Where(r => startPosition < tokens.Count && r.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || r.MayBeEmpty)
                 .ToList();
 
-            if (rules.Count == 0)
-                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[startPosition],
-                    allAcceptableTokens.ToArray<IN>()));
+            if (rules.Count == 0 )
+                        {
+                            if (startPosition < tokens.Count)
+                            {
+                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[startPosition],
+                                    allAcceptableTokens.ToArray<IN>()));
+                            }
+                            else // TODO check if EOS
+                            { 
+                                errors.Add(new UnexpectedTokenSyntaxError<IN>(new Token<IN>() { IsEOS = true},allAcceptableTokens.ToArray<IN>()) );
+                            }
+                                
+                        }
 
             var innerRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
             SyntaxParseResult<IN> okResult = null;
