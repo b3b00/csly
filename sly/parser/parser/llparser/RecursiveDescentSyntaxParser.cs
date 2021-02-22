@@ -395,25 +395,13 @@ namespace sly.parser.llparser
                         }
 
             var innerRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
-            SyntaxParseResult<IN> okResult = null;
             var greaterIndex = 0;
-            var allRulesInError = true;
-            var test = new List<SyntaxParseResult<IN>>();
+            var rulesResults = new List<SyntaxParseResult<IN>>();
             while (i < rules.Count)
             {
                 var innerrule = rules[i];
                 var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTermClause.NonTerminalName);
-                if (!innerRuleRes.IsError && okResult == null ||
-                    okResult != null && innerRuleRes.EndingPosition > okResult.EndingPosition)
-                {
-                    okResult = innerRuleRes;
-                    okResult.Errors = innerRuleRes.Errors;
-                    endingPosition = innerRuleRes.EndingPosition;
-                }
-                else
-                {
-                    test.Add(innerRuleRes);
-                }
+                rulesResults.Add(innerRuleRes);
 
                 var other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
                 if (innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null &&
@@ -425,39 +413,44 @@ namespace sly.parser.llparser
                 }
                
                 innerRuleErrors.AddRange(innerRuleRes.Errors);
-                allRulesInError = allRulesInError && innerRuleRes.IsError;
                 i++;
             }
 
             errors.AddRange(innerRuleErrors);
-
-            var result = new SyntaxParseResult<IN>();
-            result.Errors = errors;
-            if (okResult != null)
+            SyntaxParseResult<IN> max = null;
+            if (rulesResults.Any())
             {
-                result.Root = okResult.Root;
-                result.IsError = false;
-                result.EndingPosition = okResult.EndingPosition;
-                result.IsEnded = okResult.IsEnded;
-
-                result.Errors = errors;
+                if (rulesResults.Any(x => x.IsOk))
+                {
+                    max = rulesResults.Where(x => x.IsOk).OrderBy(x => x.EndingPosition).Last();
+                }
+                else
+                {
+                    max = rulesResults.Where(x => !x.IsOk).OrderBy(x => x.EndingPosition).Last();
+                }
             }
             else
             {
-                result.IsError = true;
-                result.Errors = errors;
-                greaterIndex = errors.Count > 0 ? errors.Select(e => e.UnexpectedToken.PositionInTokenFlow).Max() : 0;
-                result.EndingPosition = greaterIndex;
-                result.AddExpectings(errors.SelectMany(e => e.ExpectedTokens));
+                max = new SyntaxParseResult<IN>();
+                max.IsError = true;
+                max.Root = null;
+                max.IsEnded = false;
+                max.EndingPosition = currentPosition;
             }
 
-            if (test.Any())
+            var result = new SyntaxParseResult<IN>();
+            result.Errors = errors;
+            result.Root = max.Root;
+            result.EndingPosition = max.EndingPosition;
+            result.IsError = max.IsError;
+            result.IsEnded = max.IsEnded;
+            
+            if (rulesResults.Any())
             {
-                var terr = test.SelectMany(x => x.Errors).ToList();
+                var terr = rulesResults.SelectMany(x => x.Errors).ToList();
                 var unexpected = terr.OfType<UnexpectedTokenSyntaxError<IN>>().ToList();
                 var expecting = unexpected.SelectMany(x => x.ExpectedTokens).ToList();
                 result.AddExpectings(expecting);
-                ;
             }
             
             return result;
