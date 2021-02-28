@@ -196,11 +196,16 @@ namespace sly.parser.llparser
                     var lastposition = endingPositions.Max();
                     var furtherResults = rs.Where(r => r.EndingPosition == lastposition).ToList();
 
-                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastposition], null));
+                    
+                    
                     furtherResults.ForEach(r =>
                     {
                         if (r.Errors != null) errors.AddRange(r.Errors);
                     });
+                    if (!errors.Any())
+                    {
+                        errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastposition], null));
+                    }
                 }
             }
 

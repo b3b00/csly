@@ -41,7 +41,11 @@ namespace ParserTests.Issue164
             Assert.NotNull(unexpectedTokenError);
             Assert.NotNull(unexpectedTokenError.ExpectedTokens);
             Assert.NotEmpty(unexpectedTokenError.ExpectedTokens);
+            Assert.Equal(4,unexpectedTokenError.ExpectedTokens.Count);
             Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Test164Lexer.PLUS);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Test164Lexer.MINUS);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Test164Lexer.TIMES);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Test164Lexer.DIVIDE);
             ;
         }
     }
