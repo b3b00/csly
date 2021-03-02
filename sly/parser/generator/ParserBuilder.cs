@@ -619,8 +619,6 @@ namespace sly.parser.generator
                         
                     }
                 }
-                ;
-                // TODO expressions  
             }
 
             return result;
