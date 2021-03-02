@@ -5,13 +5,13 @@ using Xunit;
 
 namespace ParserTests.Issue164
 {
-    public class Issue164OptionTests
+    public class Issue164Tests
     {
-        private static Parser<TestOption164Lexer, int> BuildParser()
+        private static Parser<Test164Lexer, int> BuildParser()
         {
             var StartingRule = $"root";
-            var parserInstance = new TestOption164Parser();
-            var builder = new ParserBuilder<TestOption164Lexer, int>();
+            var parserInstance = new Test164Parser();
+            var builder = new ParserBuilder<Test164Lexer, int>();
             var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
             Assert.True(parser.IsOk);
             Assert.NotNull(parser.Result);
@@ -36,16 +36,16 @@ namespace ParserTests.Issue164
             var errors = result.Errors;
             Assert.Single(errors);
             var error = errors.First();
-            Assert.IsType<UnexpectedTokenSyntaxError<TestOption164Lexer>>(error);
-            var unexpectedTokenError = error as UnexpectedTokenSyntaxError<TestOption164Lexer>;
+            Assert.IsType<UnexpectedTokenSyntaxError<Test164Lexer>>(error);
+            var unexpectedTokenError = error as UnexpectedTokenSyntaxError<Test164Lexer>;
             Assert.NotNull(unexpectedTokenError);
             Assert.NotNull(unexpectedTokenError.ExpectedTokens);
             Assert.NotEmpty(unexpectedTokenError.ExpectedTokens);
             Assert.Equal(4,unexpectedTokenError.ExpectedTokens.Count);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == TestOption164Lexer.PLUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == TestOption164Lexer.MINUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == TestOption164Lexer.TIMES);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == TestOption164Lexer.DIVIDE);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Test164Lexer.PLUS);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Test164Lexer.MINUS);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Test164Lexer.TIMES);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Test164Lexer.DIVIDE);
             ;
         }
     }

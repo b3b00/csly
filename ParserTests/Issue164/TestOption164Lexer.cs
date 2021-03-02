@@ -2,7 +2,7 @@ using sly.lexer;
 
 namespace ParserTests.Issue164
 {
-    public enum Test164Lexer
+    public enum TestOption164Lexer
     {
         [Lexeme(GenericToken.Int)]
         INT = 0,
