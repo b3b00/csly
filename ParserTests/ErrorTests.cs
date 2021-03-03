@@ -27,7 +27,7 @@ namespace ParserTests
             Assert.Equal(ExpressionToken.PLUS, error.UnexpectedToken.TokenID);
 
             Assert.Equal(1, error.Line);
-            Assert.Equal(8, error.Column);
+            Assert.Equal(10, error.Column);
         }
 
         [Fact]
@@ -76,8 +76,8 @@ namespace ParserTests
             var error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
 
             Assert.Equal(JsonToken.COMMA, error?.UnexpectedToken.TokenID);
-            Assert.Equal(2, error?.Line);
-            Assert.Equal(13, error?.Column);
+            Assert.Equal(3, error?.Line);
+            Assert.Equal(12, error?.Column);
         }
 
         [Fact]

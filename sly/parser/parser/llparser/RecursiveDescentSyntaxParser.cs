@@ -196,11 +196,16 @@ namespace sly.parser.llparser
                     var lastposition = endingPositions.Max();
                     var furtherResults = rs.Where(r => r.EndingPosition == lastposition).ToList();
 
-                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastposition], null));
+                    
+                    
                     furtherResults.ForEach(r =>
                     {
                         if (r.Errors != null) errors.AddRange(r.Errors);
                     });
+                    if (!errors.Any())
+                    {
+                        errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastposition], null));
+                    }
                 }
             }
 
@@ -387,7 +392,7 @@ namespace sly.parser.llparser
                                 errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[startPosition],
                                     allAcceptableTokens.ToArray<IN>()));
                             }
-                            else // TODO check if EOS
+                            else 
                             { 
                                 errors.Add(new UnexpectedTokenSyntaxError<IN>(new Token<IN>() { IsEOS = true},allAcceptableTokens.ToArray<IN>()) );
                             }
@@ -408,7 +413,7 @@ namespace sly.parser.llparser
                     !innerRuleRes.Errors.Any() || other)
                 {
                     greaterIndex = innerRuleRes.EndingPosition;
-                    innerRuleErrors.Clear();
+                    //innerRuleErrors.Clear();
                     innerRuleErrors.AddRange(innerRuleRes.Errors);
                 }
                
@@ -448,7 +453,7 @@ namespace sly.parser.llparser
             if (rulesResults.Any())
             {
                 var terr = rulesResults.SelectMany(x => x.Errors).ToList();
-                var unexpected = terr.OfType<UnexpectedTokenSyntaxError<IN>>().ToList();
+                var unexpected = terr.Cast<UnexpectedTokenSyntaxError<IN>>().ToList();
                 var expecting = unexpected.SelectMany(x => x.ExpectedTokens).ToList();
                 result.AddExpectings(expecting);
             }

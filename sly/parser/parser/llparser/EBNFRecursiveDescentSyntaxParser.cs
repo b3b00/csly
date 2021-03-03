@@ -561,6 +561,7 @@ namespace sly.parser.llparser
                 IsEnded = false,
                 EndingPosition = currentPosition
             };
+             
 
             foreach (var alternate in choice.Choices)
             {
@@ -581,9 +582,16 @@ namespace sly.parser.llparser
                     }
 
                     return result;
-                }
+                }               
             }
 
+            if (result.IsError && choice.IsTerminalChoice)
+            {
+                var terminalAlternates = choice.Choices.Cast<TerminalClause<IN>>();
+                var expected = terminalAlternates.Select(x => x.ExpectedToken).ToList();
+                result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],expected.ToArray()));
+            }
+            
             return result;
         }
 
