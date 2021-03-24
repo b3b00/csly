@@ -386,18 +386,9 @@ namespace sly.parser.llparser
                 .ToList();
 
             if (rules.Count == 0 )
-                        {
-                            if (startPosition < tokens.Count)
-                            {
-                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[startPosition],
-                                    allAcceptableTokens.ToArray<IN>()));
-                            }
-                            else 
-                            { 
-                                errors.Add(new UnexpectedTokenSyntaxError<IN>(new Token<IN>() { IsEOS = true},allAcceptableTokens.ToArray<IN>()) );
-                            }
-                                
-                        }
+            {
+                return NoMatchingRuleError(tokens, currentPosition, allAcceptableTokens);
+            }
 
             var innerRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
             var greaterIndex = 0;
@@ -459,6 +450,31 @@ namespace sly.parser.llparser
             }
             
             return result;
+        }
+
+        private static SyntaxParseResult<IN> NoMatchingRuleError(IList<Token<IN>> tokens, int currentPosition, List<IN> allAcceptableTokens)
+        {
+            var noRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
+
+            if (currentPosition < tokens.Count)
+            {
+                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],
+                    allAcceptableTokens.ToArray<IN>()));
+            }
+            else
+            {
+                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(new Token<IN>() {IsEOS = true},
+                    allAcceptableTokens.ToArray<IN>()));
+            }
+
+            var error = new SyntaxParseResult<IN>();
+            error.IsError = true;
+            error.Root = null;
+            error.IsEnded = false;
+            error.Errors = noRuleErrors;
+            error.EndingPosition = currentPosition;
+
+            return error;
         }
 
         public virtual void Init(ParserConfiguration<IN, OUT> configuration, string root)
