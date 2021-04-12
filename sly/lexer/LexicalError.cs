@@ -1,4 +1,5 @@
-﻿using sly.parser;
+﻿using sly.i18n;
+using sly.parser;
 
 namespace sly.lexer
 {
@@ -9,12 +10,12 @@ namespace sly.lexer
             Line = line;
             Column = column;
             UnexpectedChar = unexpectedChar;
+            ErrorType = ErrorType.UnexpectedChar;
         }
 
         public char UnexpectedChar { get; set; }
 
-        public override string ErrorMessage =>
-            $"Lexical Error : Unrecognized symbol '{UnexpectedChar}' at  (line {Line}, column {Column}).";
+        public override string ErrorMessage => I18N.Instance.GetText(Message.UnexpectedChar,UnexpectedChar.ToString());
 
         public override string ToString()
         {

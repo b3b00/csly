@@ -1,0 +1,13 @@
+#
+#   Unexpected tokens
+#
+UnexpectedTokenExpecting=Erreur de syntaxe : "{0}" ({1}) inattendu. attendu : {2}.
+UnexpectedEosExpecting=Erreur de syntaxe : fin de fichier innatendue. attendu : {0}.
+UnexpectedToken=Erreur de syntaxe : "{0}" ({1}) inattendu.
+UnexpectedEos=Erreur de syntaxe : fin de fichier inattendue..
+
+
+#
+# lexer errors
+#
+UnexpectedChar =Erreur lexicale : caractère inattendu '{0}';

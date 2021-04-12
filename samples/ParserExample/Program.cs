@@ -20,6 +20,7 @@ using sly.parser;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.buildresult;
+using sly.i18n;
 using sly.parser.generator.visitor;
 using sly.parser.parser;
 using Xunit;
@@ -567,8 +568,19 @@ namespace ParserExample
                 }
             }
         }
-        
-        
+
+        public static void TestI18N()
+        {
+            var e = I18N.Instance.GetText("en", Message.UnexpectedEos);
+            var ee = I18N.Instance.GetText("en", Message.UnexpectedToken,"xxx",Message.UnexpectedEos.ToString());
+            var eee = I18N.Instance.GetText("en", Message.UnexpectedTokenExpecting,"xxx",Message.UnexpectedEos.ToString(),"other thing");
+            ;
+            e = I18N.Instance.GetText( Message.UnexpectedEos);
+            ee = I18N.Instance.GetText( Message.UnexpectedToken,"xxx",Message.UnexpectedEos.ToString());
+            eee = I18N.Instance.GetText(Message.UnexpectedTokenExpecting, "xxx", Message.UnexpectedEos.ToString(),
+                "autre chose");
+            ;
+        }
 
         private static BuildResult<Parser<ExpressionToken, double>> BuildParserExpression()
         {   
@@ -713,8 +725,10 @@ namespace ParserExample
 
             // TestFactorial();
             // TestThreadsafeGeneric();
-            Test164();
+            // Test164();
+            TestI18N();
         }
+        
 
         
     }

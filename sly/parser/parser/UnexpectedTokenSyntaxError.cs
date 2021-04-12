@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using sly.i18n;
 using sly.lexer;
 
 namespace sly.parser
@@ -10,6 +11,8 @@ namespace sly.parser
     {
         public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, params T[] expectedTokens)
         {
+            ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
+            
             UnexpectedToken = unexpectedToken;
             if (expectedTokens != null)
             {
@@ -49,24 +52,40 @@ namespace sly.parser
         {
             get
             {
-                var message = new StringBuilder();
-                if (!UnexpectedToken.IsEOS)
-                    message.Append($"unexpected \"{UnexpectedToken.Value}\" ({UnexpectedToken.TokenID}) ");
+                
+                Message message = Message.UnexpectedToken;
+                if (UnexpectedToken.IsEOS)
+                {
+                    message = Message.UnexpectedEos;
+                    if (ExpectedTokens != null && ExpectedTokens.Any())
+                    {
+                        message = Message.UnexpectedEosExpecting;
+                    }
+                }
                 else
-                    message.Append("unexpected end of stream. ");
-                message.Append($"at {UnexpectedToken.Position}.");
+                {
+                    message = Message.UnexpectedToken;
+                    if (ExpectedTokens != null && ExpectedTokens.Any())
+                    {
+                        message = Message.UnexpectedTokenExpecting;
+                    }
+                }
+                
+                
+                var expecting = new StringBuilder();
+                
                 if (ExpectedTokens != null && ExpectedTokens.Any())
                 {
-                    message.Append("expecting ");
+                    
 
                     foreach (var t in ExpectedTokens)
                     {
-                        message.Append(t);
-                        message.Append(", ");
+                        expecting.Append(t);
+                        expecting.Append(", ");
                     }
                 }
 
-                return message.ToString();
+                return I18N.Instance.GetText(message, UnexpectedToken.Value, UnexpectedToken.TokenID.ToString(), expecting.ToString());
             }
         }
 

@@ -1,7 +1,16 @@
 ﻿namespace sly.parser
 {
+
+    public enum ErrorType
+    {
+        UnexpectedEOS,
+        UnexpectedToken,
+        UnexpectedChar
+    }
+    
     public class ParseError
     {
+        public virtual ErrorType ErrorType { get; protected set; }
         public virtual int Column { get; protected set; }
         public virtual string ErrorMessage { get; protected set; }
         public virtual int Line { get; protected set; }
