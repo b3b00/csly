@@ -58,12 +58,6 @@ namespace sly.parser.generator
         {
             List<string> lefts = new List<string>();
 
-            // if (rule.Clauses.First() is NonTerminalClause<IN> firstNonTerm)
-            // {
-            //     lefts.Add(firstNonTerm);
-            //     if (firstNonTerm.MayBeEmpty())
-            //     {
-
             int i = 0;
             IClause<IN> current = rule.Clauses[0] as IClause<IN>;
             var currentLefts = GetLeftClausesName(current);
@@ -86,8 +80,6 @@ namespace sly.parser.generator
                 }
             }
 
-            // }
-            //}
             return lefts;
 
         }
