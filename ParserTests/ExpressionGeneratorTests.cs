@@ -34,6 +34,10 @@ namespace ParserTests
             Assert.False(r.IsError);
             Assert.Equal(1.0 / 2.0 / 3.0, r.Result);
 
+            r = Parser.Result.Parse("(1 / 2 / 3)", StartingRule);
+            Assert.False(r.IsError);
+            Assert.Equal(1.0 / 2.0 / 3.0, r.Result);
+            
 
             r = Parser.Result.Parse("1 / 2 / 3 / 4", StartingRule);
             Assert.False(r.IsError);
