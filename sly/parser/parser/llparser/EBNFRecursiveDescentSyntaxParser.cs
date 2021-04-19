@@ -148,10 +148,6 @@ namespace sly.parser.llparser
             {
                 InitStartingTokensWithNonTerminal(rule,nonTerminal,nonTerminals);
             }
-            else if (option.Clause is GroupClause<IN> group)
-            {
-                // TODO XXX
-            }
         }
 
         private void InitStartingTokensWithChoice(Rule<IN> rule, ChoiceClause<IN> choice,Dictionary<string, NonTerminal<IN>> nonTerminals)

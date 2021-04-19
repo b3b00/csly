@@ -87,7 +87,7 @@ namespace sly.lexer
 
         public LexerResult<T> Tokenize(ReadOnlyMemory<char> source)
         {
-            throw new NotImplementedException();
+            return new LexerResult<T>(new LexicalError(0, 0, '.'));
         }
     }
 }

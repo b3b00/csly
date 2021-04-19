@@ -47,8 +47,7 @@ namespace sly.lexer
 
 
         public bool HasGenericTokenParameters => GenericTokenParameters != null && GenericTokenParameters.Length > 0;
-
-        // TODO Should GenericToken.Char be excluded from static generic also?
+        
         public bool IsStaticGeneric => !HasGenericTokenParameters &&
                                        GenericToken != GenericToken.String && GenericToken != GenericToken.Extension;
 
