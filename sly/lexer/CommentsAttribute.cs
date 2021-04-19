@@ -11,11 +11,14 @@ namespace sly.lexer
 
         public string SingleLineCommentStart;
 
-        public CommentAttribute(string singleLineStart, string multiLineStart, string multiLineEnd)
+        public bool DoNotIgnore = false;
+
+        public CommentAttribute(string singleLineStart, string multiLineStart, string multiLineEnd, bool doNotIgnore = false)
         {
             SingleLineCommentStart = singleLineStart;
             MultiLineCommentStart = multiLineStart;
             MultiLineCommentEnd = multiLineEnd;
+            DoNotIgnore = doNotIgnore;
         }
     }
 }

@@ -220,6 +220,32 @@ namespace sly.lexer
             }
         }
 
+        private static NodeCallback<GenericToken> GetCallbackSingle<IN>(IN token, bool doNotIgnore) where IN : struct
+        {
+            NodeCallback<GenericToken> callback = match =>
+            {
+                match.Properties[GenericLexer<IN>.DerivedToken] = token;
+                match.Result.IsComment = true;
+                match.Result.CommentType = CommentType.Single;
+                match.Result.Notignored = doNotIgnore;
+                return match;
+            };
+            return callback;
+        }
+
+        private static NodeCallback<GenericToken> GetCallbackMulti<IN>(IN token, bool doNotIgnore) where IN : struct
+        {
+            NodeCallback<GenericToken> callbackMulti = match =>
+            {
+                match.Properties[GenericLexer<IN>.DerivedToken] = token;
+                match.Result.IsComment = true;
+                match.Result.Notignored = doNotIgnore;
+                match.Result.CommentType = CommentType.Multi;
+                return match;
+            };
+            return callbackMulti;
+        }
+        
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
                                                                      BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result) where IN : struct
         {
@@ -289,21 +315,10 @@ namespace sly.lexer
             {
                 foreach (var comment in comments)
                 {
-                    NodeCallback<GenericToken> callbackSingle = match =>
-                    {
-                        match.Properties[GenericLexer<IN>.DerivedToken] = comment.Key;
-                        match.Result.IsComment = true;
-                        match.Result.CommentType = CommentType.Single;
-                        return match;
-                    };
+                    
+                    ;
 
-                    NodeCallback<GenericToken> callbackMulti = match =>
-                    {
-                        match.Properties[GenericLexer<IN>.DerivedToken] = comment.Key;
-                        match.Result.IsComment = true;
-                        match.Result.CommentType = CommentType.Multi;
-                        return match;
-                    };
+                   
 
                     foreach (var commentAttr in comment.Value)
                     {
@@ -318,7 +333,7 @@ namespace sly.lexer
                             fsmBuilder.ConstantTransition(commentAttr.SingleLineCommentStart);
                             fsmBuilder.Mark(GenericLexer<IN>.single_line_comment_start);
                             fsmBuilder.End(GenericToken.Comment);
-                            fsmBuilder.CallBack(callbackSingle);
+                            fsmBuilder.CallBack(GetCallbackSingle(comment.Key,commentAttr.DoNotIgnore));
                         }
 
                         var hasMultiLine = !string.IsNullOrWhiteSpace(commentAttr.MultiLineCommentStart);
@@ -331,7 +346,7 @@ namespace sly.lexer
                             fsmBuilder.ConstantTransition(commentAttr.MultiLineCommentStart);
                             fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
                             fsmBuilder.End(GenericToken.Comment);
-                            fsmBuilder.CallBack(callbackMulti);
+                            fsmBuilder.CallBack(GetCallbackMulti(comment.Key,commentAttr.DoNotIgnore));
                         }
                     }
                 }

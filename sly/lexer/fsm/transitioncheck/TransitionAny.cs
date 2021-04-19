@@ -4,11 +4,11 @@ namespace sly.lexer.fsm.transitioncheck
 {
     public class TransitionAny : AbstractTransitionCheck
     {
-        public TransitionAny(char token)
+        public TransitionAny()
         {
         }
 
-        public TransitionAny(char token, TransitionPrecondition transitionPrecondition)
+        public TransitionAny(TransitionPrecondition transitionPrecondition)
         {
             Precondition = transitionPrecondition;
         }

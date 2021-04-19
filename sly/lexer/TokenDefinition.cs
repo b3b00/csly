@@ -23,7 +23,7 @@ namespace sly.lexer
         public TokenDefinition(T token, string regex, bool isIgnored = false, bool isEndOfLine = false)
         {
             TokenID = token;
-            Regex = new Regex(regex);
+            Regex = new Regex(regex, RegexOptions.Compiled);
             IsIgnored = isIgnored;
             IsEndOfLine = isEndOfLine;
         }

@@ -16,6 +16,7 @@ namespace sly.lexer
         public char StringDelimiter = '"';
         
         public char CharDelimiter ='\'';
+        public bool Notignored;
 
 
         public Token(T token, string value, LexerPosition position, bool isCommentStart = false,
@@ -145,12 +146,12 @@ namespace sly.lexer
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            if (!TokenID.Equals(DefaultToken))
+            if (IsEOS)
             {
-                return $"{TokenID} [{Value}] @{Position}";
+                return "<<EOS>>";    
             }
-
-            return "<<EOS>>";
+            return $"{TokenID} [{Value}] @{Position}";
+            
         }
     }
 }

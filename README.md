@@ -11,11 +11,11 @@
 [![NuGet](https://img.shields.io/nuget/v/sly.svg)](https://www.nuget.org/packages/sly)
 
 
-CSLY is highly inspired by the python lex yacc library ([PLY](http://www.dabeaz.com/ply/)) that aims at easen the writing of lexer and parser with C#.
+CSLY is highly inspired by the python lex yacc library ([PLY](http://www.dabeaz.com/ply/)) and aims at easen the writing of lexer and parser with C#.
 
 ## Getting started ##
 
-I your too impatient to further read this readme here is 
+If you're too impatient to further read this readme here is 
 a [quick getting started](https://github.com/b3b00/csly/wiki/getting-started) that will guide you through the implementation of a dumb parser.
 
 ## full documentation ## 

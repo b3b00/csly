@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using System.Linq;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser.generator;
@@ -74,7 +75,7 @@ namespace sly.parser
             for (var i = 0; i < tokens.Count; i++)
             {
                 var token = tokens[i];
-                if (!token.IsComment)
+                if (!token.IsComment || token.Notignored)
                 {
                     token.PositionInTokenFlow = position;
                     tokensWithoutComments.Add(token);
@@ -108,7 +109,17 @@ namespace sly.parser
             else
             {
                 result.Errors = new List<ParseError>();
-                result.Errors.AddRange(syntaxResult.Errors);
+                var unexpectedTokens = syntaxResult.Errors.Cast<UnexpectedTokenSyntaxError<IN>>().ToList();
+                var byEnding = unexpectedTokens.GroupBy(x => x.UnexpectedToken.Position).OrderBy(x => x.Key);
+                var errors = new List<ParseError>();  
+                foreach (var expecting in byEnding)
+                {
+                    var expectingTokens = expecting.SelectMany(x => x.ExpectedTokens).Distinct(); 
+                    var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, expectingTokens.ToArray());
+                    errors.Add(expected);
+                }
+                
+                result.Errors.AddRange(errors);
                 result.IsError = true;
             }
 

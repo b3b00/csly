@@ -141,9 +141,16 @@ namespace sly.parser.generator.visitor
                         var res = (OUT) t;
                         result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
                     }
+                    catch (TargetInvocationException tie)
+                    {
+                        if (tie.InnerException != null)
+                        {
+                            throw tie.InnerException;
+                        }
+                    }
                     catch (Exception e)
                     {
-                        Console.WriteLine($"OUTCH {e.Message} calling {node.Name} =>  {method.Name}");
+                        throw e;
                     }
                 }
             }
