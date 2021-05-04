@@ -9,8 +9,11 @@ namespace sly.parser
 {
     public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable
     {
-        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, params T[] expectedTokens)
+        private string I18n;
+        
+        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, string i18n=null, params T[] expectedTokens )
         {
+            I18n = i18n;
             ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
             
             UnexpectedToken = unexpectedToken;
@@ -85,7 +88,7 @@ namespace sly.parser
                     }
                 }
 
-                return I18N.Instance.GetText(message, UnexpectedToken.Value, UnexpectedToken.TokenID.ToString(), expecting.ToString());
+                return I18N.Instance.GetText(I18n,message, UnexpectedToken.Value, UnexpectedToken.TokenID.ToString(), expecting.ToString());
             }
         }
 

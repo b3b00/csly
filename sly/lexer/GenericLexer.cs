@@ -72,6 +72,8 @@ namespace sly.lexer
 
             public IEqualityComparer<string> KeyWordComparer => KeyWordIgnoreCase ? StringComparer.OrdinalIgnoreCase : null;
         }
+        
+        public string I18n { get; set; }
 
         public const string in_string = "in_string";
         public const string string_end = "string_end";
@@ -160,7 +162,7 @@ namespace sly.lexer
             if (!r.IsSuccess && !r.IsEOS)
             {
                 var result = r.Result;
-                var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
+                var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue, I18n);
                 return new LexerResult<IN>(error);
             }
             if (r.IsSuccess && r.Result.IsComment)
@@ -188,7 +190,7 @@ namespace sly.lexer
                 if (!r.IsSuccess && !r.IsEOS)
                 {
                     var result = r.Result;
-                    var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
+                    var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue, I18n); 
                     return new LexerResult<IN>(error);
                 }
 

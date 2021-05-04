@@ -12,7 +12,18 @@ namespace sly.i18n
         UnexpectedEosExpecting,
         UnexpectedToken,
         UnexpectedEos,
-        UnexpectedChar
+        UnexpectedChar,
+        
+        
+        MissingOperand,
+        ReferenceNotFound,
+        MixedChoices,
+        NonTerminalChoiceCannotBeDiscarded,
+        IncorrectVisitorReturnType,
+        IncorrectVisitorParameterType,
+        IncorrectVisitorParameterNumber,
+        LeftRecursion,
+        NonTerminalNeverUsed
     }
     
     public class I18N
