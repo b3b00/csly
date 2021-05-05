@@ -291,7 +291,7 @@ namespace ParserTests
         [Fact]
         public void TestGrammarBuildErrors()
         {
-            var parserBuilder = new ParserBuilder<ExpressionToken, int>();
+            var parserBuilder = new ParserBuilder<ExpressionToken, int>("en");
             var instance = new ParserConfigurationTests();
             var result = parserBuilder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "R");
             Assert.True(result.IsError);
@@ -327,7 +327,7 @@ namespace ParserTests
         public void TestBadVisitorReturn()
         {
             var instance = new BadVisitorReturnParser();
-            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badreturn");
             Assert.True(result.IsError);
             Assert.Single(result.Errors);
@@ -346,7 +346,7 @@ namespace ParserTests
         public void TestBadVisitorTerminalArgument()
         {
             var instance = new BadTerminalArgParser();
-            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badtermarg");
             Assert.True(result.IsError);
             Assert.Single(result.Errors);
@@ -368,7 +368,7 @@ namespace ParserTests
         public void TestBadVisitorNonTerminalArgument()
         {
             var instance = new BadNonTerminalArgParser();
-            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badnontermarg");
             Assert.True(result.IsError);
             Assert.Single(result.Errors);
@@ -390,7 +390,7 @@ namespace ParserTests
         public void TestBadManyArgument()
         {
             var instance = new BadManyArgParser();
-            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badmanyarg");
             Assert.True(result.IsError);
             Assert.Equal(4,result.Errors.Count);
@@ -407,7 +407,7 @@ namespace ParserTests
         public void TestBadGroupArgument()
         {
             var instance = new BadGroupArgParser();
-            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badgrouparg");
             Assert.True(result.IsError);
             Assert.Single(result.Errors);
@@ -418,7 +418,7 @@ namespace ParserTests
         public void TestBadArgumentNumber()
         {
             var instance = new BadArgNumberParser();
-            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badargnumber");
             Assert.True(result.IsError);
             Assert.Equal(3, result.Errors.Count);
@@ -431,7 +431,7 @@ namespace ParserTests
         public void TestBadOptionArgument()
         {
             var instance = new BadOptionArgParser();
-            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>();
+            ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badoptionarg");
             Assert.True(result.IsError);
             Assert.Equal(4,result.Errors.Count);

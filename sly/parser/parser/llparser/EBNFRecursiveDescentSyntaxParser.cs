@@ -10,8 +10,8 @@ namespace sly.parser.llparser
 {
     public class EBNFRecursiveDescentSyntaxParser<IN, OUT> : RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
     {
-        public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal)
-            : base(configuration, startingNonTerminal)
+        public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal, string i18n)
+            : base(configuration, startingNonTerminal, i18n)
         {
         }
 
@@ -256,7 +256,7 @@ namespace sly.parser.llparser
                             else
                             {
                                 var tok = tokens[currentPosition];
-                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,
+                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,I18n,
                                     ((TerminalClause<IN>) clause).ExpectedToken));
                             }
 
@@ -594,7 +594,7 @@ namespace sly.parser.llparser
             {
                 var terminalAlternates = choice.Choices.Cast<TerminalClause<IN>>();
                 var expected = terminalAlternates.Select(x => x.ExpectedToken).ToList();
-                result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],expected.ToArray()));
+                result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],I18n,expected.ToArray()));
             }
             
             return result;

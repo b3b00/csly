@@ -9,8 +9,9 @@ namespace sly.parser.llparser
 {
     public class RecursiveDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> where IN : struct
     {
-        public RecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal)
+        public RecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal, string i18n)
         {
+            I18n = i18n;
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
             ComputeSubRules(configuration);
@@ -19,6 +20,8 @@ namespace sly.parser.llparser
 
         public ParserConfiguration<IN, OUT> Configuration { get; set; }
         public string StartingNonTerminal { get; set; }
+        
+        public string I18n { get; set; }
 
         public ParserConfiguration<IN, OUT> ComputeSubRules(ParserConfiguration<IN, OUT> configuration)
         {
@@ -173,7 +176,7 @@ namespace sly.parser.llparser
 
             if (!rules.Any())
             {
-                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], nt.PossibleLeadingTokens.ToArray()));
+                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], I18n,nt.PossibleLeadingTokens.ToArray()));
             }
             
             var rs = new List<SyntaxParseResult<IN>>();
@@ -257,7 +260,7 @@ namespace sly.parser.llparser
                             else
                             {
                                 var tok = tokens[currentPosition];
-                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,
+                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,I18n,
                                     ((TerminalClause<IN>) clause).ExpectedToken));
                             }
 
@@ -452,18 +455,18 @@ namespace sly.parser.llparser
             return result;
         }
 
-        private static SyntaxParseResult<IN> NoMatchingRuleError(IList<Token<IN>> tokens, int currentPosition, List<IN> allAcceptableTokens)
+        private SyntaxParseResult<IN> NoMatchingRuleError(IList<Token<IN>> tokens, int currentPosition, List<IN> allAcceptableTokens)
         {
             var noRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 
             if (currentPosition < tokens.Count)
             {
-                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],
+                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],I18n,
                     allAcceptableTokens.ToArray<IN>()));
             }
             else
             {
-                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(new Token<IN>() {IsEOS = true},
+                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(new Token<IN>() {IsEOS = true},I18n,
                     allAcceptableTokens.ToArray<IN>()));
             }
 

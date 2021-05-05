@@ -1176,8 +1176,7 @@ namespace ParserTests
             parseResult = builtParser.Result.Parse("a", "choice");
             Assert.True(parseResult.IsError);
             Assert.Single(parseResult.Errors);
-            Assert.Contains("unexpected end of stream", parseResult.Errors[0].ErrorMessage);
-
+            Assert.Equal(ErrorType.UnexpectedEOS,parseResult.Errors[0].ErrorType);
         }
 
         [Fact]

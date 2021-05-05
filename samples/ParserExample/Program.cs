@@ -22,6 +22,7 @@ using sly.parser;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.buildresult;
+using sly.i18n;
 using sly.parser.generator.visitor;
 using sly.parser.parser;
 using Xunit;
@@ -569,8 +570,31 @@ namespace ParserExample
                 }
             }
         }
-        
-        
+
+        public static void TestI18N()
+        {
+            Console.WriteLine("****************************************");
+            Console.WriteLine("***");
+            Console.WriteLine("***          ENGLISH ");
+            Console.WriteLine("***");
+            var e = I18N.Instance.GetText("en", Message.UnexpectedEos);
+            Console.WriteLine(e);
+            var ee = I18N.Instance.GetText("en", Message.UnexpectedToken,"xxx","SOME_TOKEN");
+            Console.WriteLine(ee);
+            var eee = I18N.Instance.GetText("en", Message.UnexpectedTokenExpecting,"xxx","SOME_TOKEN","OTHER_TOKEN1, OTHER_TOKEN2, OTHER_TOKEN_3");
+            Console.WriteLine(eee);
+            Console.WriteLine("****************************************");
+            Console.WriteLine("***");
+            Console.WriteLine("***          LOCAL ");
+            Console.WriteLine("***");
+            e = I18N.Instance.GetText( Message.UnexpectedEos);
+            Console.WriteLine(e);
+            ee = I18N.Instance.GetText( Message.UnexpectedToken,"xxx","SOME_TOKEN");
+            Console.WriteLine(ee);
+            eee = I18N.Instance.GetText( Message.UnexpectedTokenExpecting,"xxx","SOME_TOKEN","OTHER_TOKEN1, OTHER_TOKEN2, OTHER_TOKEN_3");
+            Console.WriteLine(eee);
+            ;
+        }
 
         private static BuildResult<Parser<ExpressionToken, double>> BuildParserExpression()
         {   
@@ -811,32 +835,25 @@ final = 9999
             //TestTokenCallBacks();
             //test104();
             // testJSON();
-           //TestGrammarParser();
+            //TestGrammarParser();
             // TestGraphViz();
-
             // TestGraphViz();
             // TestChars();
             //TestAssociativityFactorExpressionParser();
-
             // TestFactorial();
             //TestThreadsafeGeneric();
             // TestManyString();
-            
-          //  TestDoubleExponent();
-
-
-//Test192();
-//TestRecursion();
-
-
+            //  TestDoubleExponent();
+            //Test192();
+            //TestRecursion();
             // TestFactorial();
             // TestThreadsafeGeneric();
-
-            //Test164();
             //Test177();
+            //Test164();
             TestIndentedLang();
-
+            TestI18N();
         }
+
 
         private static void Test177()
         {

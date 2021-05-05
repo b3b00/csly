@@ -4,7 +4,7 @@ namespace sly.lexer
 {
     public class IndentationError : LexicalError
     {
-        public IndentationError(int line, int column) : base(column,line,' ')
+        public IndentationError(int line, int column, string i18n) : base(column,line,' ',i18n)
         {
             Line = line;
             Column = column;

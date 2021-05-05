@@ -1,0 +1,31 @@
+#
+#   Unexpected tokens
+#
+UnexpectedTokenExpecting=Erreur de syntaxe : "{0}" ({1}) inattendu. attendu : {2}.
+UnexpectedEosExpecting=Erreur de syntaxe : fin de fichier innatendue. attendu : {0}.
+UnexpectedToken=Erreur de syntaxe : "{0}" ({1}) inattendu.
+UnexpectedEos=Erreur de syntaxe : fin de fichier inattendue..
+
+
+#
+# lexer errors
+#
+UnexpectedChar =Erreur lexicale : caractère inattendu '{0}';
+
+
+
+##############################################
+#
+#   Parser initialization
+#
+
+
+MissingOperand =attribute [operand] absent;
+ReferenceNotFound =la référence '{0}' dans la règle  '{1}' n'existe pas.
+MixedChoices =la règle '{0}' contient '{1}' qui mélange terminaux et non terminaux.
+NonTerminalChoiceCannotBeDiscarded ={0} : {1} est un non terminal et ne peut être marqué ignoré.
+IncorrectVisitorReturnType =le visiteur '{0}' de la règle '{1}' a un type de retour incorrect : attendu {2}, trouvé {3}
+IncorrectVisitorParameterType =le visiteur '{0}' de la règle '{1}' ; le paramétre '{2}' a un type incorrect : attendu {3}, trouvé {4}.
+IncorrectVisitorParameterNumber =le visiteur '{0}' de la règle '{1}' a un nombre de paramètre incorrect: attendu {2} ou {3}, trouvé {4}
+LeftRecursion =recursion ç gauche détectée : {0}
+NonTerminalNeverUsed=le non terminal [{0}] n'est jamais utilisé.

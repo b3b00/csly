@@ -6,6 +6,7 @@ using indented;
 using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fsm;
+using sly.parser;
 using sly.parser.generator;
 using Xunit;
 
@@ -764,7 +765,7 @@ namespace ParserTests.lexer
             Assert.Equal(0, error.Line);
             Assert.Equal(13, error.Column);
             Assert.Equal('2', error.UnexpectedChar);
-            Assert.Contains("Unrecognized symbol", error.ToString());
+            Assert.Equal(ErrorType.UnexpectedChar,error.ErrorType);
         }
 
         [Fact]
@@ -965,8 +966,8 @@ namespace ParserTests.lexer
 
             var result = lexer.Tokenize(".");
             Assert.True(result.IsError);
-            Assert.Equal("Lexical Error : Unrecognized symbol '.' at  (line 0, column 0).", result.Error.ErrorMessage);
-
+            Assert.Equal(ErrorType.UnexpectedChar,result.Error.ErrorType);
+            
             result = lexer.Tokenize("--");
             Assert.True(result.IsOk);
             Assert.Equal("BB0", ToTokens(result));
