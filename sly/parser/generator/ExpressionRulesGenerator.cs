@@ -120,16 +120,10 @@ namespace sly.parser.generator
             if (operandMethods.Count == 1)
             {
                 var operandMethod = operandMethods.Single();
-                
-                // TODO call GenerateExpressionParser with <ParserClassNAMe>_operand (or remove operand rule param ? )
-
                 operandNonTerminalName = GetNonTerminalNameFromProductionMethod<IN, OUT>(operandMethod);
             }
             else
             {
-                // TODO 1 : generate <ParserClassNAMe>_operand production rule : operand : methods*
-                //         rule.isexpression = true
-                //         rule.isbypass = true
                 operandNonTerminalName = $"{parserClass.Name}_operand";
                 var operandNonTerminals = operandMethods.Select(x => GetNonTerminalNameFromProductionMethod<IN, OUT>(x));
                 var operandNonTerminal = new NonTerminal<IN>(operandNonTerminalName);

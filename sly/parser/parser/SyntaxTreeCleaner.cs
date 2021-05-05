@@ -29,7 +29,8 @@ namespace sly.parser.parser
                 }
             else if (tree is SyntaxLeaf<IN> leaf)
                 need = false;
-            else if (tree is SyntaxNode<IN> node) need = node.IsExpressionNode;
+            else if (tree is SyntaxNode<IN> node) need = true;
+                
 
             return need;
         }

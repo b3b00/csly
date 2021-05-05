@@ -77,15 +77,13 @@ namespace sly.parser.generator
 
         [Production("choiceclause : LCROG  choices RCROG  ")]
         public IClause<IN> AlternateChoices(Token<EbnfTokenGeneric> discardleft, IClause<IN> choices, Token<EbnfTokenGeneric> discardright)
-        {
-            // TODO
+        {            
             return choices;
         }
         
         [Production("choices : IDENTIFIER  ")]
         public IClause<IN> ChoicesOne(Token<EbnfTokenGeneric> head)
         {
-            // TODO
             var choice = BuildTerminalOrNonTerimal(head.Value);
             return new ChoiceClause<IN>(choice);
         }

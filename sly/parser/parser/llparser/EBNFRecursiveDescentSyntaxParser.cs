@@ -156,6 +156,7 @@ namespace sly.parser.llparser
             {
                 // TODO XXX
             }
+
         }
 
         private void InitStartingTokensWithChoice(Rule<IN> rule, ChoiceClause<IN> choice,Dictionary<string, NonTerminal<IN>> nonTerminals)
@@ -307,16 +308,16 @@ namespace sly.parser.llparser
                         }
                         else if (clause is ChoiceClause<IN> choice)
                         {
-                            var optionResult = ParseChoice(tokens, choice, currentPosition);
-                            currentPosition = optionResult.EndingPosition;
-                            if (optionResult.IsError && optionResult.Errors != null && optionResult.Errors.Count > 0)
+                            var choiceResult = ParseChoice(tokens, choice, currentPosition);
+                            currentPosition = choiceResult.EndingPosition;
+                            if (choiceResult.IsError && choiceResult.Errors != null && choiceResult.Errors.Any())
                             {
-                                errors.AddRange(optionResult.Errors);
+                                errors.AddRange(choiceResult.Errors);
                             }
 
-                            isError = optionResult.IsError;
+                            isError = choiceResult.IsError;
 
-                            children.Add(optionResult.Root);
+                            children.Add(choiceResult.Root);
                         }
 
                         if (isError) break;
@@ -565,6 +566,7 @@ namespace sly.parser.llparser
                 IsEnded = false,
                 EndingPosition = currentPosition
             };
+             
 
             foreach (var alternate in choice.Choices)
             {
@@ -585,9 +587,16 @@ namespace sly.parser.llparser
                     }
 
                     return result;
-                }
+                }               
             }
 
+            if (result.IsError && choice.IsTerminalChoice)
+            {
+                var terminalAlternates = choice.Choices.Cast<TerminalClause<IN>>();
+                var expected = terminalAlternates.Select(x => x.ExpectedToken).ToList();
+                result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],expected.ToArray()));
+            }
+            
             return result;
         }
 

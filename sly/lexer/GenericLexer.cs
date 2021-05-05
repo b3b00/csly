@@ -740,7 +740,7 @@ namespace sly.lexer
                 .CallBack(callback);
             FSMBuilder.Fsm.StringDelimiter = charDelimiterChar;
             
-            // TODO : unicode transitions
+            // unicode transitions ?
             FSMBuilder = FSMBuilder.GoTo(escapeChar_char + "_" + CharCounter)
             .Transition('u')
             .Mark(unicode_char+"_"+CharCounter)

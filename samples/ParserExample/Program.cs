@@ -573,11 +573,11 @@ namespace ParserExample
         
 
         private static BuildResult<Parser<ExpressionToken, double>> BuildParserExpression()
-        {
+        {   
             var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
-            return builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+            return builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
         }
 
         
@@ -665,16 +665,13 @@ namespace ParserExample
             var Parser = BuildParserExpression();
             var result = Parser.Result.Parse("1(1");
             if (result.IsError)
-            {
+            {   
                 foreach (var error in result.Errors)
                 {
                     Console.WriteLine(error.ErrorMessage);
                 }
             }
 
-            
-            Console.WriteLine("hey ! Rodriguez !")
-            ;
         }
 
         public static void Test192()
@@ -826,14 +823,19 @@ final = 9999
             // TestManyString();
             
           //  TestDoubleExponent();
-Test192();
-// TestRecursion();
+
+
+//Test192();
+//TestRecursion();
+
 
             // TestFactorial();
             // TestThreadsafeGeneric();
+
             //Test164();
             //Test177();
             TestIndentedLang();
+
         }
 
         private static void Test177()

@@ -1,8 +1,13 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
+
+
+
 
 namespace sly.lexer
+
 {
-    public class LexerPosition
+    public class LexerPosition : IComparable
     {
 
         public LexerPosition() : this (0,0,0)
@@ -47,6 +52,26 @@ namespace sly.lexer
         public override string ToString()
         {
             return $"line {Line}, column {Column}";
+        }
+
+        public int CompareTo(object obj)
+        {
+            if (obj != null)
+            {
+                if (obj is LexerPosition position)
+                {
+                    if (Line < position.Line)
+                    {
+                        return -1;
+                    }
+                    if (Line == position.Line)
+                    {
+                        return Column.CompareTo(position.Column);
+                    }
+                }
+            }
+
+            return 1;
         }
 
         public LexerPosition Clone()
