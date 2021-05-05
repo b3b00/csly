@@ -184,7 +184,7 @@ namespace ParserTests.comments
         [Fact]
         public void MixedErrors()
         {
-            var lexerRes10 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError10>>());
+            var lexerRes10 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError10>>(),lang:"en");
             Assert.True(lexerRes10.IsError);
             Assert.Equal(4, lexerRes10.Errors.Count);
             var expectedErrors = new[]
@@ -199,7 +199,7 @@ namespace ParserTests.comments
 
             expectedErrors = new[] {"too many multi-line comment lexem", "too many single-line comment lexem"};
 
-            var lexerRes9 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError9>>());
+            var lexerRes9 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError9>>(),lang:"en");
             Assert.True(lexerRes9.IsError);
             Assert.Equal(2, lexerRes9.Errors.Count);
             foreach (var expectedError in expectedErrors)
@@ -209,7 +209,7 @@ namespace ParserTests.comments
 
             expectedErrors = new[] {"too many multi-line comment lexem","comment lexem can't be used together with single-line or multi-line comment lexems"};
             
-            var lexerRes8 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError8>>());
+            var lexerRes8 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError8>>(),lang:"en");
             Assert.True(lexerRes8.IsError);
             Assert.Equal(2, lexerRes8.Errors.Count);
             foreach (var expectedError in expectedErrors)

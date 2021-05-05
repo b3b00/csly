@@ -21,17 +21,17 @@ CannotMixGenericAndRegex=cannot mix Regex lexemes and Generic lexemes in same le
 DuplicateStringCharDelimiters=char or string lexeme delimiter {0} is used {1} times. This will results in lexing conflicts
 TooManyComment=too many comment lexem
 TooManyMultilineComment=too many multi-line comment lexem
-TooManySinglelineCommenttoo many single-line comment lexem
+TooManySingleLineComment=too many single-line comment lexem
 CannotMixCommentAndSingleOrMulti=comment lexem can't be used together with single-line or multi-line comment lexems
 SameValueUsedManyTime=int value {0} is used {1} times in lexer enum   {2}
 StringDelimiterMustBe1Char=bad lexem {0} :  StringToken lexeme delimiter char <{1}> must be 1 character length.
 StringDelimiterCannotBeLetterOrDigit=bad lexem {0} :  StringToken lexeme delimiter char <{1}> can not start with a letter.
 StringEscapeCharMustBe1Char=bad lexem {0} :  StringToken lexeme escape char  <{1}> must be 1 character length.
 StringEscapeCharCannotBeLetterOrDigit=bad lexem {0} :  StringToken lexeme escape char lexeme <{1}> can not start with a letter.
-charDelimiterMustBe1char=bad lexem {0} :  CharToken lexeme delimiter char <{1}> must be 1 character length.
-charDelimiterCannotbeLetter=bad lexem {0} :  CharToken lexeme delimiter char <{1}> can not start with a letter or digit.
-charEscapeCharMustBe1char=bad lexem {0} :  CharToken lexeme escape char  <{1}> must be 1 character length.
-charEscapeCharCannotBeLetterOrDigit=bad lexem {0} :  CharToken lexeme escape char lexeme <{1}> can not start with a letter or digit.
+CharDelimiterMustBe1Char=bad lexem {0} :  CharToken lexeme delimiter char <{1}> must be 1 character length.
+CharDelimiterCannotBeLetter=bad lexem {0} :  CharToken lexeme delimiter char <{1}> can not start with a letter or digit.
+CharEscapeCharMustBe1Char=bad lexem {0} :  CharToken lexeme escape char  <{1}> must be 1 character length.
+CharEscapeCharCannotBeLetterOrDigit=bad lexem {0} :  CharToken lexeme escape char lexeme <{1}> can not start with a letter or digit.
 SugarTokenCannotStartWithLetter=bad lexem {0} :  SugarToken lexeme <{1}>  can not start with a letter.
 
 ##############################################
