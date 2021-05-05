@@ -2,7 +2,7 @@ using sly.lexer;
 
 namespace indented
 {
-    [Lexer(Indentation = "    ",IndentationAWare = true)]
+    [Lexer(IndentationAWare = true)]
     public enum IndentedLangLexer
     {
         [Lexeme(GenericToken.Identifier, IdentifierType.Alpha)]

@@ -698,7 +698,7 @@ namespace sly.lexer
             if (string.IsNullOrEmpty(charDelimiter) || charDelimiter.Length > 1)
                result.AddError(new InitializationError(ErrorLevel.FATAL,
                     $"bad lexem {charDelimiter} :  CharToken lexeme delimiter char <{token.ToString()}> must be 1 character length.",
-                    ErrorCodes.LEXER_CHAR_ESCAPE_CHAR_MUST_BE_1_CHAR));
+                    ErrorCodes.LEXER_CHAR_DELIMITER_MUST_BE_1_CHAR));
             if (charDelimiter.Length == 1 && char.IsLetterOrDigit(charDelimiter[0]))
                 result.AddError(new InitializationError(ErrorLevel.FATAL,
                     $"bad lexem {charDelimiter} :  CharToken lexeme delimiter char <{token.ToString()}> can not start with a letter or digit.", ErrorCodes.LEXER_CHAR_DELIMITER_CANNOT_BE_LETTER));
