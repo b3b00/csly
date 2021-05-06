@@ -117,9 +117,14 @@ namespace sly.i18n
                                     translation[key] = items[1];
                                 }
                             }
+
                             line = reader.ReadLine();
                         }
                     }
+                }
+                else
+                {
+                    return Load("en");
                 }
             }
 
