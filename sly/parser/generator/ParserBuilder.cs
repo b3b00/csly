@@ -83,7 +83,7 @@ namespace sly.parser.generator
             }
             else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
             {
-                var builder = new EBNFParserBuilder<IN, OUT>();
+                var builder = new EBNFParserBuilder<IN, OUT>(I18n);
                 result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,
                     extensionBuilder);
             }
@@ -159,7 +159,7 @@ namespace sly.parser.generator
 
         protected virtual BuildResult<ILexer<IN>> BuildLexer(BuildExtension<IN> extensionBuilder =  null)
         {
-            var lexer = LexerBuilder.BuildLexer(new BuildResult<ILexer<IN>>(), extensionBuilder);
+            var lexer = LexerBuilder.BuildLexer(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n);
             return lexer;
         }
 

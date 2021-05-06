@@ -25,7 +25,7 @@ namespace sly.parser.generator
             string rootRule, BuildExtension<IN> extensionBuilder = null)
         {
             var ruleparser = new RuleParser<IN>();
-            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>();
+            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>(I18n);
 
             var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
 

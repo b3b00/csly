@@ -77,7 +77,7 @@ namespace sly.i18n
         
         public string GetText(string lang, Message key, params string[] args)
         {
-            lang = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+            lang = lang ?? CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
             IDictionary<Message, string> translation = new Dictionary<Message, string>();
             if (!Translations.TryGetValue(lang, out translation))
             {
