@@ -10,7 +10,7 @@ UnexpectedEos=Erreur de syntaxe : fin de fichier inattendue..
 #
 # lexer errors
 #
-UnexpectedChar =Erreur lexicale : caractère inattendu '{0}';
+UnexpectedChar =Erreur lexicale, ligne {1}, colonne {2} : caractère inattendu '{0}' ;
 
 
 ##########################################

@@ -177,6 +177,11 @@ while i < 11 do
 	print ""r="".r;
 	r := r * i;
 	i := i + 1;
+print ""toto"";
+    x := 123;
+    y := 456;
+    z := x * y + 1;
+    print ""z= "".z;
 return r;";
             for (int i = 0; i < 10; i++)
             {
@@ -199,6 +204,9 @@ return r;";
                     var compiler = new IndentedWhileCompiler();
                     var code = compiler.TranspileToCSharp(program);
                     var f = compiler.CompileToFunction(program);
+                    Console.WriteLine("***********************************");
+                    Console.WriteLine("***********************************");
+                    Console.WriteLine("***********************************");
                     int r = f();
                     if (r != 3628800)
                     {
