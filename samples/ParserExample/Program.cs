@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using csly.indentedWhileLang.compiler;
+using csly.indentedWhileLang.parser;
 using csly.whileLang.compiler;
 using csly.whileLang.interpreter;
 using csly.whileLang.model;
@@ -135,6 +137,67 @@ namespace ParserExample
                     var context = interpreter.Interprete(result.Result);
 
                     var compiler = new WhileCompiler();
+                    var code = compiler.TranspileToCSharp(program);
+                    var f = compiler.CompileToFunction(program);
+                    int r = f();
+                    if (r != 3628800)
+                    {
+                        throw new Exception("erreur " + r);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message} : {e.StackTrace}");
+                }
+            }
+        }
+        
+        private static void TestIndentedFactorial()
+        {
+            var whileParser = new IndentedWhileParserGeneric();
+            var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
+            var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+
+            if (Parser.IsError)
+            {
+                foreach (var error in Parser.Errors)
+                {
+                    Console.WriteLine(error.Message);
+                }
+
+                return;
+            }
+            
+            var program = 
+@"# indented factorial
+r:=1;
+i:=1;
+while i < 11 do
+	print ""i="".i;
+	print ""r="".r;
+	r := r * i;
+	i := i + 1;
+;
+return r;";
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    var result = Parser.Result.Parse(program);
+                    if (result.IsError)
+                    {
+                        foreach (var error in result.Errors)
+                        {
+                            Console.WriteLine(error.ErrorMessage);
+                        }
+
+                        return;
+                    }
+                    
+                    var interpreter = new Interpreter();
+                    var context = interpreter.Interprete(result.Result);
+
+                    var compiler = new IndentedWhileCompiler();
                     var code = compiler.TranspileToCSharp(program);
                     var f = compiler.CompileToFunction(program);
                     int r = f();
@@ -841,6 +904,7 @@ final = 9999
             // TestChars();
             //TestAssociativityFactorExpressionParser();
             // TestFactorial();
+            TestIndentedFactorial();
             //TestThreadsafeGeneric();
             // TestManyString();
             //  TestDoubleExponent();
@@ -850,8 +914,8 @@ final = 9999
             // TestThreadsafeGeneric();
             //Test177();
             //Test164();
-            TestIndentedLang();
-            TestI18N();
+            // TestIndentedLang();
+            // TestI18N();
         }
 
 

@@ -26,6 +26,7 @@ namespace sly.parser
             {
                 ExpectedTokens = null;
             }
+
         }
 
 
@@ -87,7 +88,9 @@ namespace sly.parser
                     }
                 }
 
-                return I18N.Instance.GetText(I18n,message, UnexpectedToken.Value, UnexpectedToken.TokenID.ToString(), expecting.ToString());
+                string value = UnexpectedToken.ToString();
+                
+                return I18N.Instance.GetText(I18n,message, value, UnexpectedToken.TokenID.ToString(), expecting.ToString());
             }
         }
 
