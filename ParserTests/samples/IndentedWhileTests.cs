@@ -47,7 +47,7 @@ namespace ParserTests.samples
             var buildResult = buildParser();
             Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
-            var result = parser.Parse("a:=1+1");
+            var result = parser.Parse("a:=1+1;");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
 
@@ -151,7 +151,6 @@ while i < 11 do
     print ""r="".r;
     print ""i="".i;
     i := i + 1;
-; 
 return r;";
             var compiler = new IndentedWhileCompiler();
             var func = compiler.CompileToFunction(program);

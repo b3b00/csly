@@ -177,7 +177,6 @@ while i < 11 do
 	print ""r="".r;
 	r := r * i;
 	i := i + 1;
-;
 return r;";
             for (int i = 0; i < 10; i++)
             {

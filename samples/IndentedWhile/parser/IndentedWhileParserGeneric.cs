@@ -62,74 +62,79 @@ namespace csly.indentedWhileLang.parser
 
         #endregion
 
-        #region statements
-
         
-
-        [Production("statement : block")]
-        public WhileAST statementSequence(WhileAST sequence)
+        [Production("program: sequence")]
+        public WhileAST program(WhileAST prog)
         {
-            return sequence;
+            return prog;
+        }
+        
+        #region statements
+       
+
+        [Production("block : INDENT[d] sequence UINDENT[d]")]
+        public WhileAST sequenceStatements(SequenceStatement seq)
+        {
+            return seq;
         }
 
-        [Production("block : INDENT[d] (statementPrim SEMICOLON)* UINDENT[d]")]
-        public WhileAST sequenceStatements(List<Group<IndentedWhileTokenGeneric,WhileAST>> list)
+        [Production("sequence: statementInBlock*")]
+        public WhileAST sequence(List<WhileAST> list)
         {
-            var statements = list.Select(x => x.Value(0)).Cast<Statement>().ToList();
+            var statements = list.Cast<Statement>().ToList();
             var seq = new SequenceStatement(statements); 
             return seq;
         }
 
-        [Production("additionalStatements : SEMICOLON[d] statementPrim")]
-        public WhileAST additional( WhileAST statement)
+        [Production("statementInBlock : basicStatement SEMICOLON[d]")]
+        public WhileAST basicStatementInBlock(WhileAST basic)
         {
-            return statement;
+            return basic;
         }
         
-       
+        [Production("statementInBlock : [ifthenelse | while]")]
+        public WhileAST flowControlStatementInBlock(WhileAST flowControl)
+        {
+            return flowControl;
+        }
 
-        [Production("statementPrim: IF[d] IndentedWhileParserGeneric_expressions THEN[d] block ELSE[d] block")]
+
+        [Production("ifthenelse: IF[d] IndentedWhileParserGeneric_expressions THEN[d] block ELSE[d] block")]
         public WhileAST ifStmt( WhileAST cond, WhileAST thenStmt, Statement elseStmt)
         {
             var stmt = new IfStatement(cond as Expression, thenStmt as Statement, elseStmt);
             return stmt;
         }
 
-        [Production("statementPrim: WHILE[d] IndentedWhileParserGeneric_expressions DO[d] block")]
+        [Production("while: WHILE[d] IndentedWhileParserGeneric_expressions DO[d] block")]
         public WhileAST whileStmt(WhileAST cond, WhileAST blockStmt)
         {
             var stmt = new WhileStatement(cond as Expression, blockStmt as Statement);
             return stmt;
         }
 
-        [Production("statementPrim: IDENTIFIER ASSIGN[d] IndentedWhileParserGeneric_expressions")]
+        [Production("basicStatement: IDENTIFIER ASSIGN[d] IndentedWhileParserGeneric_expressions")]
         public WhileAST assignStmt(Token<IndentedWhileTokenGeneric> variable, Expression value)
         {
             var assign = new AssignStatement(variable.StringWithoutQuotes, value);
             return assign;
         }
 
-        [Production("statementPrim: SKIP[d]")]
+        [Production("basicStatement: SKIP[d]")]
         public WhileAST skipStmt()
         {
             return new SkipStatement();
         }
         
-        [Production("statementPrim: RETURN[d] IndentedWhileParserGeneric_expressions")]
+        [Production("basicStatement: RETURN[d] IndentedWhileParserGeneric_expressions")]
         public WhileAST ReturnStmt(Expression expression)
         {
             return new ReturnStatement(expression);
         }
         
-        [Production("program: statementPrim additionalStatements*")]
-        public WhileAST program(WhileAST first, List<WhileAST> next)
-        {
-            var seq = new SequenceStatement(first as Statement);
-            seq.AddRange(next.Cast<Statement>().ToList());
-            return seq;
-        }
+        
 
-        [Production("statementPrim: PRINT[d] IndentedWhileParserGeneric_expressions")]
+        [Production("basicStatement: PRINT[d] IndentedWhileParserGeneric_expressions")]
         public WhileAST skipStmt(WhileAST expression)
         {
             return new PrintStatement(expression as Expression);
