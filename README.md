@@ -72,7 +72,7 @@ see [expression parsing](https://github.com/b3b00/csly/wiki/expression-parsing)
 Some languages use indentation to deonte blocks (think of Python or Yaml ).
 CSLY provides a way to manage this. Head to [Indented Languages](https://github.com/b3b00/csly/wiki/indented-languages)
 
->### Easily use indentation to make your language structure more readable
+>### Easily use indentation to make your language structure more readable.
 
 ### generic lexer ### 
 
