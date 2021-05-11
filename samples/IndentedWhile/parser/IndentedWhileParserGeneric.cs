@@ -69,16 +69,23 @@ namespace csly.indentedWhileLang.parser
             return prog;
         }
         
-        #region statements
-       
-
         [Production("block : INDENT[d] sequence UINDENT[d]")]
         public WhileAST sequenceStatements(SequenceStatement seq)
         {
             return seq;
         }
+        
+        #region statements
+        
+        
 
-        [Production("sequence: statementInBlock*")]
+        [Production("statement : block")]
+        public WhileAST blockStatement(WhileAST block)
+        {
+            return block;
+        }
+       
+        [Production("sequence: statement*")]
         public WhileAST sequence(List<WhileAST> list)
         {
             var statements = list.Cast<Statement>().ToList();
@@ -86,55 +93,40 @@ namespace csly.indentedWhileLang.parser
             return seq;
         }
 
-        [Production("statementInBlock : basicStatement SEMICOLON[d]")]
-        public WhileAST basicStatementInBlock(WhileAST basic)
-        {
-            return basic;
-        }
-        
-        [Production("statementInBlock : [ifthenelse | while | block]")]
-        public WhileAST flowControlStatementInBlock(WhileAST flowControl)
-        {
-            return flowControl;
-        }
-
-
-        [Production("ifthenelse: IF[d] IndentedWhileParserGeneric_expressions THEN[d] block ELSE[d] block")]
+        [Production("statement: IF[d] IndentedWhileParserGeneric_expressions THEN[d] block ELSE[d] block")]
         public WhileAST ifStmt( WhileAST cond, WhileAST thenStmt, Statement elseStmt)
         {
             var stmt = new IfStatement(cond as Expression, thenStmt as Statement, elseStmt);
             return stmt;
         }
 
-        [Production("while: WHILE[d] IndentedWhileParserGeneric_expressions DO[d] block")]
+        [Production("statement: WHILE[d] IndentedWhileParserGeneric_expressions DO[d] block")]
         public WhileAST whileStmt(WhileAST cond, WhileAST blockStmt)
         {
             var stmt = new WhileStatement(cond as Expression, blockStmt as Statement);
             return stmt;
         }
 
-        [Production("basicStatement: IDENTIFIER ASSIGN[d] IndentedWhileParserGeneric_expressions")]
+        [Production("statement: IDENTIFIER ASSIGN[d] IndentedWhileParserGeneric_expressions")]
         public WhileAST assignStmt(Token<IndentedWhileTokenGeneric> variable, Expression value)
         {
             var assign = new AssignStatement(variable.StringWithoutQuotes, value);
             return assign;
         }
 
-        [Production("basicStatement: SKIP[d]")]
+        [Production("statement: SKIP[d]")]
         public WhileAST skipStmt()
         {
             return new SkipStatement();
         }
         
-        [Production("basicStatement: RETURN[d] IndentedWhileParserGeneric_expressions")]
+        [Production("statement: RETURN[d] IndentedWhileParserGeneric_expressions")]
         public WhileAST ReturnStmt(Expression expression)
         {
             return new ReturnStatement(expression);
         }
-        
-        
 
-        [Production("basicStatement: PRINT[d] IndentedWhileParserGeneric_expressions")]
+        [Production("statement: PRINT[d] IndentedWhileParserGeneric_expressions")]
         public WhileAST skipStmt(WhileAST expression)
         {
             return new PrintStatement(expression as Expression);

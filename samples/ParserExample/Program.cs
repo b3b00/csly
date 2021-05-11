@@ -170,19 +170,21 @@ namespace ParserExample
             
             var program = 
 @"# indented factorial
-r:=1;
-i:=1;
+r:=1
+i:=1
 while i < 11 do
-	print ""i="".i;
-	print ""r="".r;
-	r := r * i;
-	i := i + 1;
-print ""toto"";
-    x := 123;
-    y := 456;
-    z := x * y + 1;
-    print ""z= "".z;
-return r;";
+	print ""i="".i
+	print ""r="".r
+	r := r * i
+	i := i + 1
+print ""toto""
+# begin a nested block
+    x := 123
+    y := 456
+    z := x * y + 1
+    print ""z= "".z
+# end of nested block
+return r";
             for (int i = 0; i < 10; i++)
             {
                 try
