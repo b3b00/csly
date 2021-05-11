@@ -92,7 +92,7 @@ namespace csly.indentedWhileLang.parser
             return basic;
         }
         
-        [Production("statementInBlock : [ifthenelse | while]")]
+        [Production("statementInBlock : [ifthenelse | while | block]")]
         public WhileAST flowControlStatementInBlock(WhileAST flowControl)
         {
             return flowControl;
