@@ -47,6 +47,10 @@ namespace sly.lexer.fsm
         public bool IgnoreEOL { get; set; }
 
         public bool AggregateEOL { get; set; }
+        
+        public bool IndentationAware { get; set; }
+        
+        public string Indentation { get; set; }
 
 
         private Dictionary<int, NodeCallback<N>> Callbacks { get; }
@@ -139,9 +143,75 @@ namespace sly.lexer.fsm
             return Run(new ReadOnlyMemory<char>(source.ToCharArray()), position);
         }
 
+
+        public int ComputeIndentationSize(ReadOnlyMemory<char> source, int index)
+        {
+            int count = 0;
+            if (index + Indentation.Length > source.Length)
+            {
+                return 0;
+            }
+            string id = source.Slice(index, Indentation.Length).ToString();
+            while (id == Indentation)
+            {
+                count++;
+                index += Indentation.Length;
+                id = source.Slice(index, Indentation.Length).ToString();
+            }
+            return count;
+        }
+
+        public List<char> GetIndentations(ReadOnlyMemory<char> source, int index)
+        {
+            List<Char> indentations = new List<char>();
+            int i = 0;
+            if (index + i >= source.Length)
+            {
+                return new List<char>();
+                ;
+            }
+            char current = source.At(index+i);
+            while (i < source.Length && (current == ' ' || current == '\t' ))
+            {
+                indentations.Add(current);
+                i++;
+                current = source.At(index+i);
+            }
+
+            return indentations;
+        }
+        
+      
+        
         public FSMMatch<N> Run(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
+
+            if (IndentationAware)
+            {
+                var ind = ConsumeIndents(source, lexerPosition); 
+                if (ind != null)
+                {
+                    return ind;
+                }
+            }
+            // TODO here : indented language  
+            // if line start :
+            
+            // consume tabs and count them
+            // if count = previousCount +1 => add an indent token
+            // if count = previousCount -1 => add an unindent token
+            // else ....
+            
             ConsumeIgnored(source,lexerPosition);
+
+            if (IndentationAware) // could start of line
+            {
+                var ind = ConsumeIndents(source, lexerPosition);
+                if (ind != null)
+                {
+                    return ind;
+                }
+            }
 
             // End of token stream
             if (lexerPosition.Index >= source.Length)
@@ -202,11 +272,142 @@ namespace sly.lexer.fsm
             return ko;
         }
 
+        private FSMMatch<N> ConsumeIndents(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
+        {
+            
+            if (lexerPosition.IsStartOfLine)
+            {
+                var indents = GetIndentations(source, lexerPosition.Index);
+                
+                var currentIndentations = lexerPosition.Indentations.ToList();
+
+                int uIndentCount = 0;
+                
+                int indentPosition = 0;
+                if (currentIndentations.Any())
+                {
+                    int i = 0;
+                    int indentCharCount = 0;
+                    while (i < currentIndentations.Count && indentPosition < indents.Count)
+                    {
+                        var current = currentIndentations[currentIndentations.Count-i-1];
+                        bool ok = true;
+                        int j = 0;
+                        if (indentPosition + current.Length > indents.Count)
+                        {
+                            // TODO : erreur d'indentation
+                            var ko = new FSMMatch<N>(false, default(N), " ", lexerPosition, -1, lexerPosition, false)
+                            {
+                                IsIndentationError = true
+                            };
+                            return ko;
+                        }
+                        else
+                        {
+                            while (j < current.Length && indentPosition + j < indents.Count)
+                            {
+                                var reference = current[j];
+                                var actual = indents[j + indentPosition];
+                                if (actual != reference)
+                                {
+                                    var ko = new FSMMatch<N>(false, default(N), " ", lexerPosition, -1, lexerPosition, false)
+                                    {
+                                        IsIndentationError = true
+                                    };
+                                    return ko;
+                                }
+
+                                indentCharCount++;
+
+                                j++;
+                            }
+                        }
+
+                        if (indentCharCount < indents.Count)
+                        {
+                            var t = indents.Skip(indentCharCount).ToArray();
+                            var newTab = new string(t);
+                            var indent = FSMMatch<N>.Indent(lexerPosition.Indentations.Count()+1);
+                            indent.Result = new Token<N>()
+                            {
+                                IsIndent = true,
+                                Position = lexerPosition.Clone()
+                            };
+                            indent.NewPosition = lexerPosition.Clone();
+                            indent.NewPosition.Index += indents.Count;
+                            indent.NewPosition.Column += indents.Count;
+                            indent.NewPosition.Indentations = indent.NewPosition.Indentations.Push(newTab);
+                            return indent;
+                            
+                        }
+                        indentPosition += current.Length;
+                        i++;
+                    }
+
+                    if (i < currentIndentations.Count)
+                    {
+                        // TODO : UINDENT : combien ?
+                        uIndentCount = currentIndentations.Count - i;
+
+                        // 
+                        currentIndentations.Reverse();
+                        var unindented = currentIndentations.Take(i).ToList();
+                        var spaces = unindented.Select(x => x.Length).Sum();
+                        
+                        var uIndent = FSMMatch<N>.UIndent(uIndentCount,uIndentCount);
+                        uIndent.Result = new Token<N>()
+                        {
+                            IsIndent = true,
+                            Position = lexerPosition.Clone()
+                        };
+                        uIndent.NewPosition = lexerPosition.Clone();
+                        uIndent.NewPosition.Index += spaces;
+                        uIndent.NewPosition.Column += spaces;
+                        uIndent.NewPosition.CurrentIndentation = i;
+                        for (int iu = 0; iu < uIndentCount; iu++)
+                        {
+                            uIndent.NewPosition.Indentations = uIndent.NewPosition.Indentations.Pop();
+                        }
+                        return uIndent;
+                    }
+                    else
+                    {
+                        if (i == currentIndentations.Count)
+                        {
+                            lexerPosition.Column += indents.Count;
+                            lexerPosition.Index += indents.Count;
+                            return null;
+                        }
+                    }
+                }
+                else
+                {
+                    if (indents.Any())
+                    {
+                        var indent = FSMMatch<N>.Indent(1);
+                        indent.Result = new Token<N>()
+                        {
+                            IsIndent = true,
+                            Position = lexerPosition.Clone()
+                        };
+                        indent.NewPosition = lexerPosition.Clone();
+                        indent.NewPosition.Index += indents.Count;
+                        indent.NewPosition.Column += indents.Count;
+                        indent.NewPosition.Indentations = indent.NewPosition.Indentations.Push(new string(indents.ToArray()));
+                        return indent;
+                    }
+                    ;
+                    return null;
+                }
+            }
+
+            return null;
+        }
+
         private FSMNode<N> Move(FSMNode<N> from, char token, ReadOnlyMemory<char> value)
         {
             if (from != null && Transitions.TryGetValue(from.Id, out var transitions))
             {
-                // Do NOT use Linq, increases allocations AND running time
                 for (var i = 0; i < transitions.Count; ++i)
                 {
                     var transition = transitions[i];
@@ -229,8 +430,9 @@ namespace sly.lexer.fsm
 
         private void ConsumeIgnored(ReadOnlyMemory<char> source, LexerPosition position)
         {
-            
-            while (position.Index < source.Length)
+
+            bool eolReached = false;
+            while (position.Index < source.Length && !(eolReached && IndentationAware))
             {
                 if (IgnoreWhiteSpace)
                 {
@@ -251,7 +453,12 @@ namespace sly.lexer.fsm
                         position.Index += eol == EOLType.Windows ? 2 : 1;
                         position.Column = 0;
                         position.Line++;
+                        eolReached = true;
                         continue;
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
 

@@ -15,6 +15,7 @@ namespace sly.lexer
 
         private bool? keyWordIgnoreCase;
 
+        
         public bool IgnoreWS
         {
             get => ignoreWS ?? Defaults.IgnoreWS;
@@ -38,5 +39,10 @@ namespace sly.lexer
             get => keyWordIgnoreCase ?? Defaults.KeyWordIgnoreCase;
             set => keyWordIgnoreCase = value;
         }
+
+        public bool IndentationAWare { get; set; } = false;
+    
+        public string Indentation { get; set; } = "";
+
     }
 }

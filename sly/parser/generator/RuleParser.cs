@@ -206,7 +206,21 @@ namespace sly.parser.generator
             if (isTerminal)
                 clause = new TerminalClause<IN>(token, discard);
             else
-                clause = new NonTerminalClause<IN>(name);
+            {
+                if (name == "INDENT")
+                {
+                    clause = new IndentTerminalClause<IN>(IndentationType.Indent,discard);
+                }
+                else if (name == "UINDENT")
+                {
+                    clause = new IndentTerminalClause<IN>(IndentationType.UnIndent,discard);
+                }
+                else
+                {
+                    clause = new NonTerminalClause<IN>(name);
+                }
+            }
+
             return clause;
         }
 

@@ -26,6 +26,8 @@
     <ProjectReference Include="..\..\ParserTests\ParserTests.csproj" />
     <ProjectReference Include="..\expressionParser\expressionParser.csproj" />
     <ProjectReference Include="..\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj" />
+    <ProjectReference Include="..\IndentedWhile\indentedWhile.csproj" />
+    <ProjectReference Include="..\indented\indented.csproj" />
     <ProjectReference Include="..\jsonparser\jsonparser.csproj" />
     <ProjectReference Include="..\..\sly\sly.csproj" />
     <ProjectReference Include="..\SimpleExpressionParser\SimpleExpressionParser.csproj" />

@@ -55,6 +55,12 @@ namespace sly.lexer
         public bool Discarded { get; set; } = false;
 
         public bool IsEOS { get; set; }
+        
+        public bool IsIndent { get; set; }
+        
+        public bool IsUnIndent { get; set; }
+        
+        public int IndentationLevel { get; set; }
 
         public CommentType CommentType { get; set; } = CommentType.No;
 
@@ -149,6 +155,16 @@ namespace sly.lexer
             if (IsEOS)
             {
                 return "<<EOS>>";    
+            }
+
+            if (IsIndent)
+            {
+                return $"<<INDENT({IndentationLevel})>> @{Position}";
+            }
+
+            if (IsUnIndent)
+            {
+                return $"<<UINDENT({IndentationLevel})>> @{Position}";
             }
             return $"{TokenID} [{Value}] @{Position}";
             

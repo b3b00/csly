@@ -9,6 +9,8 @@ namespace sly.lexer
     /// <typeparam name="T">T is the enum Token type</typeparam>
     public class Lexer<T> : ILexer<T> where T : struct
     {
+        public string I18n { get; set; }
+        
         private readonly IList<TokenDefinition<T>> tokenDefinitions = new List<TokenDefinition<T>>();
 
         public void AddDefinition(TokenDefinition<T> tokenDefinition)
@@ -48,7 +50,7 @@ namespace sly.lexer
 
                 if (matchedDefinition == null)
                 {
-                    return new LexerResult<T>(new LexicalError(currentLine, currentColumn, source[currentIndex]));
+                    return new LexerResult<T>(new LexicalError(currentLine, currentColumn, source[currentIndex],I18n));
                 }
 
                 var value = source.Substring(currentIndex, matchLength);
@@ -87,7 +89,7 @@ namespace sly.lexer
 
         public LexerResult<T> Tokenize(ReadOnlyMemory<char> source)
         {
-            return new LexerResult<T>(new LexicalError(0, 0, '.'));
+            return new LexerResult<T>(new LexicalError(0, 0, '.',I18n));
         }
     }
 }

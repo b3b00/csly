@@ -1,5 +1,6 @@
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
+using sly.lexer;
 
 namespace sly.parser.syntax.grammar
 {
@@ -19,16 +20,59 @@ namespace sly.parser.syntax.grammar
 
         public bool Discarded { get; set; }
 
-        public bool MayBeEmpty()
+        public virtual bool MayBeEmpty()
         {
             return false;
         }
 
-        public bool Check(T nextToken)
+        public virtual bool Check(Token<T> nextToken)
         {
-            return nextToken.Equals(ExpectedToken);
+            return nextToken.TokenID.Equals(ExpectedToken);
         }
 
+        [ExcludeFromCodeCoverage]
+        public override string ToString()
+        {
+            var b = new StringBuilder();
+            b.Append(ExpectedToken);
+            if (Discarded) b.Append("[d]");
+            return b.ToString();
+        }
+        
+        public string Dump()
+        {
+            return ExpectedToken.ToString();
+        }
+    }
+
+
+    public enum IndentationType
+    {
+        Indent,
+        UnIndent
+    }
+    
+    public class IndentTerminalClause<T> : TerminalClause<T>
+    {
+        private IndentationType ExpectedIndentation;
+        
+        public IndentTerminalClause(IndentationType expectedIndentation, bool discard) : base(default(T))
+        {
+            ExpectedIndentation = expectedIndentation;
+            Discarded = discard;
+        }
+    
+        public override  bool MayBeEmpty()
+        {
+            return false;
+        }
+    
+        public override bool Check(Token<T> nextToken)
+        {
+            return (nextToken.IsIndent && ExpectedIndentation == IndentationType.Indent) ||
+                   (nextToken.IsUnIndent && ExpectedIndentation == IndentationType.UnIndent);
+        }
+    
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {

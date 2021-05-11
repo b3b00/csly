@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Text;
 using GenericLexerWithCallbacks;
+using indented;
 using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fsm;
+using sly.parser;
 using sly.parser.generator;
 using Xunit;
 
@@ -763,7 +765,7 @@ namespace ParserTests.lexer
             Assert.Equal(0, error.Line);
             Assert.Equal(13, error.Column);
             Assert.Equal('2', error.UnexpectedChar);
-            Assert.Contains("Unrecognized symbol", error.ToString());
+            Assert.Equal(ErrorType.UnexpectedChar,error.ErrorType);
         }
 
         [Fact]
@@ -964,8 +966,8 @@ namespace ParserTests.lexer
 
             var result = lexer.Tokenize(".");
             Assert.True(result.IsError);
-            Assert.Equal("Lexical Error : Unrecognized symbol '.' at  (line 0, column 0).", result.Error.ErrorMessage);
-
+            Assert.Equal(ErrorType.UnexpectedChar,result.Error.ErrorType);
+            
             result = lexer.Tokenize("--");
             Assert.True(result.IsOk);
             Assert.Equal("BB0", ToTokens(result));
@@ -1046,6 +1048,60 @@ namespace ParserTests.lexer
             Assert.True(r.IsOk);
             l = ToTokens2(r);
             Assert.Equal("SPECIAL[]EOF[]",l);
+        }
+
+        [Fact]
+        public void TestIndented()
+        {
+            var source =@"if truc == 1
+    un = 1
+    deux = 2
+else
+    trois = 3
+    quatre = 4
+
+";
+            
+            var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer>();
+            Assert.True(lexRes.IsOk);
+            var lexer = lexRes.Result;
+            Assert.NotNull(lexer);
+            var tokResult = lexer.Tokenize(source);
+            Assert.True(tokResult.IsOk);
+            var tokens = tokResult.Tokens;
+            Assert.NotNull(tokens);
+            Assert.Equal(22,tokens.Count);
+            var indents = tokens.Count(x => x.IsIndent);
+            var unindents = tokens.Count(x => x.IsUnIndent);
+            Assert.Equal(2,indents);
+            Assert.Equal(2,unindents);
+        }
+        
+        [Fact]
+        public void TestIndented2()
+        {
+            var source =@"if truc == 1
+    un = 1
+    deux = 2
+else
+    trois = 3
+    quatre = 4
+
+";
+            
+            var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer2>();
+            Assert.True(lexRes.IsOk);
+            var lexer = lexRes.Result;
+            Assert.NotNull(lexer);
+            var tokResult = lexer.Tokenize(source);
+            Assert.True(tokResult.IsOk);
+            var tokens = tokResult.Tokens;
+            Assert.NotNull(tokens);
+            Assert.Equal(29,tokens.Count);
+            var indents = tokens.Count(x => x.IsIndent);
+            var unindents = tokens.Count(x => x.IsUnIndent);
+            Assert.Equal(2,indents);
+            Assert.Equal(2,unindents);
         }
 
         private static string ToTokens<T>(LexerResult<T> result) where T : struct

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using sly.buildresult;
+using sly.i18n;
 using sly.lexer.fsm;
 
 namespace sly.lexer
@@ -52,6 +53,7 @@ namespace sly.lexer
                 IgnoreEOL = true;
                 IgnoreWS = true;
                 WhiteSpace = new[] { ' ', '\t' };
+                
             }
 
             public IdentifierType IdType { get; set; }
@@ -64,6 +66,10 @@ namespace sly.lexer
             
             public bool KeyWordIgnoreCase { get; set; }
             
+            public bool IndentationAware { get; set; }
+            
+            public string Indentation { get; set; }
+            
             public IEnumerable<char[]> IdentifierStartPattern { get; set; }
             
             public IEnumerable<char[]> IdentifierRestPattern { get; set; }
@@ -72,6 +78,8 @@ namespace sly.lexer
 
             public IEqualityComparer<string> KeyWordComparer => KeyWordIgnoreCase ? StringComparer.OrdinalIgnoreCase : null;
         }
+        
+        public string I18n { get; set; }
 
         public const string in_string = "in_string";
         public const string string_end = "string_end";
@@ -160,7 +168,7 @@ namespace sly.lexer
             if (!r.IsSuccess && !r.IsEOS)
             {
                 var result = r.Result;
-                var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
+                var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue, I18n);
                 return new LexerResult<IN>(error);
             }
             if (r.IsSuccess && r.Result.IsComment)
@@ -177,26 +185,50 @@ namespace sly.lexer
             {
                 ComputePositionWhenIgnoringEOL(r, tokens);
                 var transcoded = Transcode(r);
+                
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
                 {
                     transcoded = callback(transcoded);
                 }
+                
+                if (transcoded.IsLineEnding)
+                {
+                    ComputePositionWhenIgnoringEOL(r, tokens);
+                }
 
+                if (r.IsUnIndent && r.UnIndentCount > 1)
+                {
+                    for (int i = 1; i < r.UnIndentCount; i++)
+                    {
+                        tokens.Add(transcoded);
+                    }   
+                }
                 tokens.Add(transcoded);
-
                 r = LexerFsm.Run(memorySource,position);
                 if (!r.IsSuccess && !r.IsEOS)
                 {
-                    var result = r.Result;
-                    var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue);
-                    return new LexerResult<IN>(error);
+                    if (r.IsIndentationError)
+                    {
+                        var result = r.Result;
+                        var error = new IndentationError(result.Position.Line, result.Position.Column,I18n);
+                        return new LexerResult<IN>(error);
+                    }
+                    else
+                    {
+                        var result = r.Result;
+                        var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue,I18n);
+                        return new LexerResult<IN>(error);
+                    }
                 }
 
                 if (r.IsSuccess && r.Result.IsComment)
                 {
                     position = r.NewPosition;
                     position = ConsumeComment(r.Result, memorySource, position);
-                    
+                }
+                else if (r.IsSuccess && !r.Result.IsComment)
+                {
+                    position = r.NewPosition;
                 }
             }
 
@@ -219,21 +251,18 @@ namespace sly.lexer
         {
             if (!LexerFsm.IgnoreEOL)            
             {
-                if (r.IsLineEnding) {
-                    ;
-                }
                 var newPosition = r.Result.Position.Clone();
-                var eols = tokens.Where(t => t.IsLineEnding).ToList();
-                int line = eols.Count;
-                int column = newPosition.Index;
-                if (eols.Any())
+
+                if (r.IsLineEnding) // only compute if token is eol
                 {
-                    var lasteol = eols.Last();
-                    column = newPosition.Index - (lasteol.Position.Index + lasteol.Value.Length);
+                    var eols = tokens.Where(t => t.IsLineEnding).ToList();
+                    int line = eols.Any() ? eols.Count : 0;
+                    int column = 0;
+                    int index = newPosition.Index;
+                    // r.Result.Position.Line = line+1;
+                    r.NewPosition.Line = line+1;
+                    r.NewPosition.Column = column;
                 }
-                r.Result.Position.Line = line;
-                r.Result.Position.Column = column;
-                
             }                        
         }
 
@@ -247,7 +276,10 @@ namespace sly.lexer
             FSMBuilder
                 .IgnoreWS(config.IgnoreWS)
                 .WhiteSpace(config.WhiteSpace)
-                .IgnoreEOL(config.IgnoreEOL);
+                .IgnoreEOL(config.IgnoreEOL)
+                .Indentation(config.IndentationAware, config.Indentation);
+            
+            
 
             // start machine definition
             FSMBuilder.Mark(start);
@@ -570,14 +602,22 @@ namespace sly.lexer
             string escapeDelimiterChar = "\\")
         {
             if (string.IsNullOrEmpty(stringDelimiter) || stringDelimiter.Length > 1)
-                result.AddError(new LexerInitializationError(ErrorLevel.FATAL,$"bad lexem {stringDelimiter} :  StringToken lexeme delimiter char <{token.ToString()}> must be 1 character length.",ErrorCodes.LEXER_STRING_DELIMITER_MUST_BE_1_CHAR));
+                result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
+                    I18N.Instance.GetText(I18n,Message.StringDelimiterMustBe1Char,stringDelimiter,token.ToString()),
+                    ErrorCodes.LEXER_STRING_DELIMITER_MUST_BE_1_CHAR));
             if (stringDelimiter.Length == 1 && char.IsLetterOrDigit(stringDelimiter[0]))
-                result.AddError(new InitializationError(ErrorLevel.FATAL, $"bad lexem {stringDelimiter} :  StringToken lexeme delimiter char <{token.ToString()}> can not start with a letter.",ErrorCodes.LEXER_STRING_DELIMITER_CANNOT_BE_LETTER_OR_DIGIT));
+                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    I18N.Instance.GetText(I18n,Message.StringDelimiterCannotBeLetterOrDigit,stringDelimiter,token.ToString()),
+                    ErrorCodes.LEXER_STRING_DELIMITER_CANNOT_BE_LETTER_OR_DIGIT));
 
             if (string.IsNullOrEmpty(escapeDelimiterChar) || escapeDelimiterChar.Length > 1)
-                result.AddError(new InitializationError(ErrorLevel.FATAL,$"bad lexem {escapeDelimiterChar} :  StringToken lexeme escape char  <{token.ToString()}> must be 1 character length.",ErrorCodes.LEXER_STRING_ESCAPE_CHAR_MUST_BE_1_CHAR));
+                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    I18N.Instance.GetText(I18n,Message.StringEscapeCharMustBe1Char,escapeDelimiterChar,token.ToString()),
+                    ErrorCodes.LEXER_STRING_ESCAPE_CHAR_MUST_BE_1_CHAR));
             if (escapeDelimiterChar.Length == 1 && char.IsLetterOrDigit(escapeDelimiterChar[0]))
-                result.AddError(new InitializationError(ErrorLevel.FATAL,$"bad lexem {escapeDelimiterChar} :  StringToken lexeme escape char lexeme <{token.ToString()}> can not start with a letter.",ErrorCodes.LEXER_STRING_ESCAPE_CHAR_CANNOT_BE_LETTER_OR_DIGIT));
+                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    I18N.Instance.GetText(I18n,Message.StringEscapeCharCannotBeLetterOrDigit,escapeDelimiterChar,token.ToString()),
+                    ErrorCodes.LEXER_STRING_ESCAPE_CHAR_CANNOT_BE_LETTER_OR_DIGIT));
 
             StringDelimiterChar = (char)0;
             var stringDelimiterChar = (char)0;
@@ -666,18 +706,21 @@ namespace sly.lexer
         {
             if (string.IsNullOrEmpty(charDelimiter) || charDelimiter.Length > 1)
                result.AddError(new InitializationError(ErrorLevel.FATAL,
-                    $"bad lexem {charDelimiter} :  CharToken lexeme delimiter char <{token.ToString()}> must be 1 character length.",
-                    ErrorCodes.LEXER_CHAR_ESCAPE_CHAR_MUST_BE_1_CHAR));
+                   I18N.Instance.GetText(I18n,Message.CharDelimiterMustBe1Char,charDelimiter,token.ToString()),
+                    ErrorCodes.LEXER_CHAR_DELIMITER_MUST_BE_1_CHAR));
             if (charDelimiter.Length == 1 && char.IsLetterOrDigit(charDelimiter[0]))
                 result.AddError(new InitializationError(ErrorLevel.FATAL,
-                    $"bad lexem {charDelimiter} :  CharToken lexeme delimiter char <{token.ToString()}> can not start with a letter or digit.", ErrorCodes.LEXER_CHAR_DELIMITER_CANNOT_BE_LETTER));
+                    I18N.Instance.GetText(I18n, Message.CharDelimiterCannotBeLetter,charDelimiter,token.ToString()), 
+                    ErrorCodes.LEXER_CHAR_DELIMITER_CANNOT_BE_LETTER));
 
             if (string.IsNullOrEmpty(escapeDelimiterChar) || escapeDelimiterChar.Length > 1)
                 result.AddError(new InitializationError(ErrorLevel.FATAL,
-                    $"bad lexem {escapeDelimiterChar} :  CharToken lexeme escape char  <{token.ToString()}> must be 1 character length.",ErrorCodes.LEXER_CHAR_ESCAPE_CHAR_MUST_BE_1_CHAR));
+                    I18N.Instance.GetText(I18n,Message.CharEscapeCharMustBe1Char,escapeDelimiterChar,token.ToString()),
+                    ErrorCodes.LEXER_CHAR_ESCAPE_CHAR_MUST_BE_1_CHAR));
             if (escapeDelimiterChar.Length == 1 && char.IsLetterOrDigit(escapeDelimiterChar[0]))
                 result.AddError(new InitializationError(ErrorLevel.FATAL,
-                    $"bad lexem {escapeDelimiterChar} :  CharToken lexeme escape char lexeme <{token.ToString()}> can not start with a letter or digit.",ErrorCodes.LEXER_CHAR_ESCAPE_CHAR_CANNOT_BE_LETTER_OR_DIGIT));
+                    I18N.Instance.GetText(I18n,Message.CharEscapeCharCannotBeLetterOrDigit,escapeDelimiterChar,token.ToString()),
+                    ErrorCodes.LEXER_CHAR_ESCAPE_CHAR_CANNOT_BE_LETTER_OR_DIGIT));
 
             CharCounter++;
 
@@ -724,7 +767,8 @@ namespace sly.lexer
             if (char.IsLetter(specialValue[0]))
             {
                 buildResult.AddError(new InitializationError(ErrorLevel.FATAL,
-                    $"bad lexem {specialValue} :  SugarToken lexeme <{token.ToString()}>  can not start with a letter.", ErrorCodes.LEXER_SUGAR_TOKEN_CANNOT_START_WITH_LETTER));
+                    I18N.Instance.GetText(I18n,Message.SugarTokenCannotStartWithLetter,specialValue,token.ToString()),
+                    ErrorCodes.LEXER_SUGAR_TOKEN_CANNOT_START_WITH_LETTER));
                 return;
             }
                 
@@ -793,9 +837,12 @@ namespace sly.lexer
             tok.Position = inTok.Position;
             tok.Discarded = inTok.Discarded;
             tok.StringDelimiter = match.StringDelimiterChar;
-            tok.TokenID = (IN) match.Properties[DerivedToken];
+            tok.TokenID = match.Properties.ContainsKey(DerivedToken) ? (IN) match.Properties[DerivedToken] : default(IN);
             tok.IsLineEnding = match.IsLineEnding;
             tok.IsEOS = match.IsEOS;
+            tok.IsIndent = match.IsIndent;
+            tok.IsUnIndent = match.IsUnIndent;
+            tok.IndentationLevel = match.IndentationLevel;
             tok.Notignored = match.Result.Notignored;
             return tok;
         }

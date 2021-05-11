@@ -4,15 +4,19 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using csly.indentedWhileLang.compiler;
+using csly.indentedWhileLang.parser;
 using csly.whileLang.compiler;
 using csly.whileLang.interpreter;
 using csly.whileLang.model;
 using csly.whileLang.parser;
 using expressionparser;
 using GenericLexerWithCallbacks;
+using indented;
 using jsonparser;
 using jsonparser.JsonModel;
 using ParserTests;
+using ParserTests.lexer;
 using simpleExpressionParser;
 using sly.lexer;
 using sly.lexer.fsm;
@@ -20,6 +24,7 @@ using sly.parser;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.buildresult;
+using sly.i18n;
 using sly.parser.generator.visitor;
 using sly.parser.parser;
 using Xunit;
@@ -134,6 +139,76 @@ namespace ParserExample
                     var compiler = new WhileCompiler();
                     var code = compiler.TranspileToCSharp(program);
                     var f = compiler.CompileToFunction(program);
+                    int r = f();
+                    if (r != 3628800)
+                    {
+                        throw new Exception("erreur " + r);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"{e.Message} : {e.StackTrace}");
+                }
+            }
+        }
+        
+        private static void TestIndentedFactorial()
+        {
+            var whileParser = new IndentedWhileParserGeneric();
+            var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
+            var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+
+            if (Parser.IsError)
+            {
+                foreach (var error in Parser.Errors)
+                {
+                    Console.WriteLine(error.Message);
+                }
+
+                return;
+            }
+            
+            var program = 
+@"# indented factorial
+r:=1
+i:=1
+while i < 11 do
+	print ""i="".i
+	print ""r="".r
+	r := r * i
+	i := i + 1
+print ""toto""
+# begin a nested block
+    x := 123
+    y := 456
+    z := x * y + 1
+    print ""z= "".z
+# end of nested block
+return r";
+            for (int i = 0; i < 10; i++)
+            {
+                try
+                {
+                    var result = Parser.Result.Parse(program);
+                    if (result.IsError)
+                    {
+                        foreach (var error in result.Errors)
+                        {
+                            Console.WriteLine(error.ErrorMessage);
+                        }
+
+                        return;
+                    }
+                    
+                    var interpreter = new Interpreter();
+                    var context = interpreter.Interprete(result.Result);
+
+                    var compiler = new IndentedWhileCompiler();
+                    var code = compiler.TranspileToCSharp(program);
+                    var f = compiler.CompileToFunction(program);
+                    Console.WriteLine("***********************************");
+                    Console.WriteLine("***********************************");
+                    Console.WriteLine("***********************************");
                     int r = f();
                     if (r != 3628800)
                     {
@@ -567,8 +642,31 @@ namespace ParserExample
                 }
             }
         }
-        
-        
+
+        public static void TestI18N()
+        {
+            Console.WriteLine("****************************************");
+            Console.WriteLine("***");
+            Console.WriteLine("***          ENGLISH ");
+            Console.WriteLine("***");
+            var e = I18N.Instance.GetText("en", Message.UnexpectedEos);
+            Console.WriteLine(e);
+            var ee = I18N.Instance.GetText("en", Message.UnexpectedToken,"xxx","SOME_TOKEN");
+            Console.WriteLine(ee);
+            var eee = I18N.Instance.GetText("en", Message.UnexpectedTokenExpecting,"xxx","SOME_TOKEN","OTHER_TOKEN1, OTHER_TOKEN2, OTHER_TOKEN_3");
+            Console.WriteLine(eee);
+            Console.WriteLine("****************************************");
+            Console.WriteLine("***");
+            Console.WriteLine("***          LOCAL ");
+            Console.WriteLine("***");
+            e = I18N.Instance.GetText( Message.UnexpectedEos);
+            Console.WriteLine(e);
+            ee = I18N.Instance.GetText( Message.UnexpectedToken,"xxx","SOME_TOKEN");
+            Console.WriteLine(ee);
+            eee = I18N.Instance.GetText( Message.UnexpectedTokenExpecting,"xxx","SOME_TOKEN","OTHER_TOKEN1, OTHER_TOKEN2, OTHER_TOKEN_3");
+            Console.WriteLine(eee);
+            ;
+        }
 
         private static BuildResult<Parser<ExpressionToken, double>> BuildParserExpression()
         {   
@@ -689,34 +787,152 @@ namespace ParserExample
             }
             ;
         }
+
+
+        public static void TestIndentedLang()
+        {
+            string source = @"if truc == 1
+  un = 1
+  deux = 2
+else
+  if bidule ==89
+         toto = 28
+  trois = 3
+  quatre = 4
+
+";
+Console.WriteLine("********************");
+Console.WriteLine(source);
+Console.WriteLine("********************");
+
+            IndentedTest1(source);
+            
+            source = @"if truc == 1
+  un = 1
+  deux = 2
+else  
+  trois = 3
+  quatre = 4
+  if bidule ==89
+     toto = 28
+final = 9999
+";
+            Console.WriteLine("********************");
+            Console.WriteLine(source);
+            Console.WriteLine("********************");
+
+            IndentedTest1(source);            
+            //IndentedTest2(source);
+        }
+
+        private static void IndentedTest1(string source)
+        {
+            var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer>();
+            if (lexRes.IsOk)
+            {
+                var x = lexRes.Result.Tokenize(source);
+                if (x.IsError)
+                {
+                    Console.WriteLine(x.Error.ErrorMessage);
+                }
+            }
+            else
+            {
+                lexRes.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
+
+            ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
+            var instance = new IndentedParser();
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            if (parserRes.IsOk)
+            {
+                var res = parserRes.Result.Parse(source);
+                if (res.IsOk)
+                {
+                    var r = res.Result;
+                    Console.WriteLine(r.Dump(""));
+                }
+                else
+                {
+                    res.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+                }
+            }
+            else
+            {
+                parserRes.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
+        }
         
+        private static void IndentedTest2(string source)
+        {
+            var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer2>();
+            if (lexRes.IsOk)
+            {
+                var x = lexRes.Result.Tokenize(source);
+                if (x.IsError)
+                {
+                    Console.WriteLine(x.Error.ErrorMessage);
+                }
+            }
+            else
+            {
+                lexRes.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
+
+            ParserBuilder<IndentedLangLexer2, Ast> builder = new ParserBuilder<IndentedLangLexer2, Ast>();
+            var instance = new IndentedParser2();
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            if (parserRes.IsOk)
+            {
+                var res = parserRes.Result.Parse(source);
+                if (res.IsOk)
+                {
+                    var r = res.Result;
+                    Console.WriteLine(r.Dump(""));
+                }
+                else
+                {
+                    res.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+                }
+            }
+            else
+            {
+                parserRes.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
+        }
+
         private static void Main(string[] args)
         {
             //TestContextualParser();
             //TestTokenCallBacks();
             //test104();
             // testJSON();
-           //TestGrammarParser();
+            //TestGrammarParser();
             // TestGraphViz();
-
             // TestGraphViz();
             // TestChars();
             //TestAssociativityFactorExpressionParser();
-
             // TestFactorial();
+            TestIndentedFactorial();
             //TestThreadsafeGeneric();
             // TestManyString();
-            
-          //  TestDoubleExponent();
-//Test192();
-//TestRecursion();
-
+            //  TestDoubleExponent();
+            //Test192();
+            //TestRecursion();
             // TestFactorial();
             // TestThreadsafeGeneric();
-            Test164();
+            //Test177();
+            //Test164();
+            // TestIndentedLang();
+            // TestI18N();
         }
 
-        
+
+        private static void Test177()
+        {
+            GenericLexerTests tests = new GenericLexerTests();
+            tests.TestIssue177();
+        }
     }
 
     public enum TestGrammarToken

@@ -147,7 +147,7 @@ namespace csly.whileLang.interpreter
         private void Interprete(PrintStatement ast, InterpreterContext context)
         {
             var val = evaluator.Evaluate(ast.Value, context);
-            if (!IsQuiet) Console.WriteLine(val.StringValue);
+            if (!IsQuiet) Console.WriteLine($">>>> {val.StringValue}");
         }
 
         private void Interprete(SequenceStatement ast, InterpreterContext context)

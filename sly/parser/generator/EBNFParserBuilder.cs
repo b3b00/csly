@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using sly.buildresult;
+using sly.i18n;
 using sly.lexer.fsm;
 using sly.parser.generator.visitor;
 using sly.parser.llparser;
@@ -15,11 +16,16 @@ namespace sly.parser.generator
     /// </summary>
     internal class EBNFParserBuilder<IN, OUT> : ParserBuilder<IN, OUT> where IN : struct
     {
+        
+        public EBNFParserBuilder(string i18n = null) : base(i18n)
+        {
+        }
+        
         public override BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType,
             string rootRule, BuildExtension<IN> extensionBuilder = null)
         {
             var ruleparser = new RuleParser<IN>();
-            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>();
+            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>(I18n);
 
             var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
 
@@ -36,7 +42,9 @@ namespace sly.parser.generator
                 if (foundRecursion)
                 {
                     var recs = string.Join("\n", recursions.Select(x => string.Join(" > ",x)));
-                    result.AddError(new ParserInitializationError(ErrorLevel.FATAL,$"left recursion detected : {recs}",ErrorCodes.PARSER_LEFT_RECURSIVE));
+                    result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
+                        I18N.Instance.GetText(I18n,Message.LeftRecursion,recs),
+                        ErrorCodes.PARSER_LEFT_RECURSIVE));
                     return result;
 
                 }
@@ -56,7 +64,7 @@ namespace sly.parser.generator
                 new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
             else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
                 visitor = new EBNFSyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
-            var parser = new Parser<IN, OUT>(syntaxParser, visitor);
+            var parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
             parser.Configuration = configuration;
             var lexerResult = BuildLexer(extensionBuilder);
             if (lexerResult.IsError)
@@ -84,12 +92,12 @@ namespace sly.parser.generator
             {
                 case ParserType.LL_RECURSIVE_DESCENT:
                 {
-                    parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule);
+                    parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule,I18n);
                     break;
                 }
                 case ParserType.EBNF_LL_RECURSIVE_DESCENT:
                 {
-                    parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule);
+                    parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule,I18n);
                     break;
                 }
                 default:

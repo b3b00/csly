@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using sly.buildresult;
+using sly.i18n;
 using sly.lexer.fsm;
 
 namespace sly.lexer
@@ -28,7 +29,7 @@ namespace sly.lexer
 
     public class LexerBuilder
     {
-        public static Dictionary<IN, List<LexemeAttribute>> GetLexemes<IN>(BuildResult<ILexer<IN>> result) where IN: struct
+        public static Dictionary<IN, List<LexemeAttribute>> GetLexemes<IN>(BuildResult<ILexer<IN>> result, string lang) where IN: struct
         {
             var attributes = new Dictionary<IN, List<LexemeAttribute>>();
 
@@ -45,7 +46,8 @@ namespace sly.lexer
                     int intValue = Convert.ToInt32(enumValue); // x is the integer value of enum
                     
                     result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
-                        $"int value {intValue} is used {group.Count()} times in lexer enum   {typeof(IN)}",ErrorCodes.LEXER_SAME_VALUE_USED_MANY_TIME));
+                        I18N.Instance.GetText(lang,Message.SameValueUsedManyTime,intValue.ToString(),group.Count().ToString(),typeof(IN).FullName),
+                        ErrorCodes.LEXER_SAME_VALUE_USED_MANY_TIME));
                     
                 }
             }
@@ -82,12 +84,13 @@ namespace sly.lexer
         }
 
         public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result,
-            BuildExtension<IN> extensionBuilder = null) where IN : struct
+            BuildExtension<IN> extensionBuilder = null,
+            string lang = null) where IN : struct
         {
-            var attributes = GetLexemes(result);
+            var attributes = GetLexemes(result,lang);
             if (!result.IsError)
             {
-                result = Build(attributes, result, extensionBuilder);
+                result = Build(attributes, result, extensionBuilder,lang);
             }
 
             return result;
@@ -95,7 +98,7 @@ namespace sly.lexer
 
 
         private static BuildResult<ILexer<IN>> Build<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
-            BuildResult<ILexer<IN>> result, BuildExtension<IN> extensionBuilder = null) where IN : struct
+            BuildResult<ILexer<IN>> result, BuildExtension<IN> extensionBuilder = null, string lang = null) where IN : struct
         {
             var hasRegexLexemes = IsRegexLexer(attributes);
             var hasGenericLexemes = IsGenericLexer(attributes);
@@ -103,13 +106,14 @@ namespace sly.lexer
             if (hasGenericLexemes && hasRegexLexemes)
             {
                 result.AddError(new LexerInitializationError(ErrorLevel.ERROR,
-                    "cannot mix Regex lexemes and Generic lexemes in same lexer",ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX));
+                    I18N.Instance.GetText(lang,Message.CannotMixGenericAndRegex),
+                    ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX));
             }
             else
             {
                 if (hasRegexLexemes)
-                    result = BuildRegexLexer(attributes, result);
-                else if (hasGenericLexemes) result = BuildGenericLexer(attributes, extensionBuilder, result);
+                    result = BuildRegexLexer(attributes, result,lang);
+                else if (hasGenericLexemes) result = BuildGenericLexer(attributes, extensionBuilder, result, lang);
             }
 
             return result;
@@ -129,7 +133,7 @@ namespace sly.lexer
 
 
         private static BuildResult<ILexer<IN>> BuildRegexLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
-            BuildResult<ILexer<IN>> result) where IN : struct
+            BuildResult<ILexer<IN>> result, string lang = null) where IN : struct
         {
             var lexer = new Lexer<IN>();
             foreach (var pair in attributes)
@@ -176,6 +180,8 @@ namespace sly.lexer
                 config.IgnoreEOL = lexerAttribute.IgnoreEOL;
                 config.WhiteSpace = lexerAttribute.WhiteSpace;
                 config.KeyWordIgnoreCase = lexerAttribute.KeyWordIgnoreCase;
+                config.Indentation = lexerAttribute.Indentation;
+                config.IndentationAware = lexerAttribute.IndentationAWare;
             }
 
             var statics = new List<GenericToken>();
@@ -247,9 +253,9 @@ namespace sly.lexer
         }
         
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
-                                                                     BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result) where IN : struct
+            BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result, string lang) where IN : struct
         {
-            result = CheckStringAndCharTokens(attributes, result);
+            result = CheckStringAndCharTokens(attributes, result, lang);
             var (config, tokens) = GetConfigAndGenericTokens(attributes);
             config.ExtensionBuilder = extensionBuilder;
             var lexer = new GenericLexer<IN>(config, tokens);
@@ -310,7 +316,7 @@ namespace sly.lexer
 
             AddExtensions(Extensions, extensionBuilder, lexer);
 
-            var comments = GetCommentsAttribute(result);
+            var comments = GetCommentsAttribute(result,lang);
             if (!result.IsError)
             {
                 foreach (var comment in comments)
@@ -371,7 +377,7 @@ namespace sly.lexer
         }
 
         private static BuildResult<ILexer<IN>> CheckStringAndCharTokens<IN>(
-            Dictionary<IN, List<LexemeAttribute>> attributes, BuildResult<ILexer<IN>> result) where IN : struct
+            Dictionary<IN, List<LexemeAttribute>> attributes, BuildResult<ILexer<IN>> result, string lang) where IN : struct
         {
             var allLexemes = attributes.Values.SelectMany(a => a);
 
@@ -387,7 +393,7 @@ namespace sly.lexer
             foreach (var duplicate in duplicates)
             {
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
-                    $"char or string lexeme dilimiter {duplicate.Element} is used {duplicate.Counter} times. This will results in lexing conflicts",
+                    I18N.Instance.GetText(lang,Message.DuplicateStringCharDelimiters,duplicate.Element,duplicate.Counter.ToString()),
                     ErrorCodes.LEXER_DUPLICATE_STRING_CHAR_DELIMITERS));
             }
 
@@ -395,7 +401,7 @@ namespace sly.lexer
         }
 
 
-        private static Dictionary<IN, List<CommentAttribute>> GetCommentsAttribute<IN>(BuildResult<ILexer<IN>> result) where IN : struct
+        private static Dictionary<IN, List<CommentAttribute>> GetCommentsAttribute<IN>(BuildResult<ILexer<IN>> result, string lang) where IN : struct
         {
             var attributes = new Dictionary<IN, List<CommentAttribute>>();
 
@@ -413,22 +419,29 @@ namespace sly.lexer
 
             if (commentCount > 1)
             {
-                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many comment lexem",ErrorCodes.LEXER_TOO_MANY_COMMNENT));
+                result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
+                    I18N.Instance.GetText(lang,Message.TooManyComment),
+                    ErrorCodes.LEXER_TOO_MANY_COMMNENT));
             }
 
             if (multiLineCommentCount > 1)
             {
-                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many multi-line comment lexem",ErrorCodes.LEXER_TOO_MANY_MULTILINE_COMMNENT));
+                result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
+                    I18N.Instance.GetText(lang,Message.TooManyMultilineComment),
+                    ErrorCodes.LEXER_TOO_MANY_MULTILINE_COMMNENT));
             }
 
             if (singleLineCommentCount > 1)
             {
-                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "too many single-line comment lexem",ErrorCodes.LEXER_TOO_MANY_SINGLELINE_COMMNENT));
+                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, 
+                    I18N.Instance.GetText(lang,Message.TooManySingleLineComment),ErrorCodes.LEXER_TOO_MANY_SINGLELINE_COMMNENT));
             }
 
             if (commentCount > 0 && (multiLineCommentCount > 0 || singleLineCommentCount > 0))
             {
-                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, "comment lexem can't be used together with single-line or multi-line comment lexems",ErrorCodes.LEXER_CANNOT_MIX_COMMENT_AND_SINGLE_OR_MULTI));
+                result.AddError(new LexerInitializationError(ErrorLevel.FATAL, 
+                    I18N.Instance.GetText(lang,Message.CannotMixCommentAndSingleOrMulti),
+                    ErrorCodes.LEXER_CANNOT_MIX_COMMENT_AND_SINGLE_OR_MULTI));
             }
 
             return attributes;

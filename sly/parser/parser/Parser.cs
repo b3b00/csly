@@ -11,12 +11,15 @@ namespace sly.parser
 {
     public class Parser<IN, OUT> where IN : struct
     {
-        public Parser(ISyntaxParser<IN, OUT> syntaxParser, SyntaxTreeVisitor<IN, OUT> visitor)
+        public Parser(string i18n, ISyntaxParser<IN, OUT> syntaxParser, SyntaxTreeVisitor<IN, OUT> visitor)
         {
+            I18n = i18n;
             SyntaxParser = syntaxParser;
             Visitor = visitor;
         }
 
+        public string I18n { get; set; }
+        
         public ILexer<IN> Lexer { get; set; }
         public object Instance { get; set; }
         public ISyntaxParser<IN, OUT> SyntaxParser { get; set; }
@@ -30,7 +33,8 @@ namespace sly.parser
             BuildResult<Parser<IN, OUT>> result, string startingRule = null)
         {
             var exprResult = new BuildResult<ParserConfiguration<IN, OUT>>(Configuration);
-            exprResult = ExpressionRulesGenerator.BuildExpressionRules(Configuration, Instance.GetType(), exprResult);
+            var expressionGenerator = new ExpressionRulesGenerator<IN, OUT>(I18n);
+            exprResult = expressionGenerator.BuildExpressionRules(Configuration, Instance.GetType(), exprResult);
             Configuration = exprResult.Result;
             SyntaxParser.Init(exprResult.Result, startingRule);
             if (startingRule != null)
@@ -115,7 +119,7 @@ namespace sly.parser
                 foreach (var expecting in byEnding)
                 {
                     var expectingTokens = expecting.SelectMany(x => x.ExpectedTokens).Distinct(); 
-                    var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, expectingTokens.ToArray());
+                    var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, I18n,expectingTokens.ToArray());
                     errors.Add(expected);
                 }
                 
