@@ -79,11 +79,10 @@ namespace ParserTests.samples
             Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             string program = @"
-a:=0; 
+a:=0 
 while a < 10 do 
-    print a;
-    a := a +1;
-;
+    print a
+    a := a +1
 ";
             var result = parser.Parse(program);
             Assert.False(result.IsError);
@@ -97,11 +96,10 @@ while a < 10 do
             Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             string program = @"
-a:=0; 
+a:=0 
 while a < 10 do 
-    print a;
-    a := a +1;
-;
+    print a
+    a := a +1
 ";
             var result = parser.Parse(program);
             Assert.False(result.IsError);
@@ -117,14 +115,14 @@ while a < 10 do
         {
             var program = @"
 # TestFactorialProgramExec
-r:=1;
-i:=1;
+r:=1
+i:=1
 while i < 11 do 
-    r := r * i;
-    print r;
-    print i;
-    i := i + 1; 
-;";
+    r := r * i
+    print r
+    print i
+    i := i + 1 
+";
             var buildResult = buildParser();
             Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
@@ -144,14 +142,14 @@ while i < 11 do
         {
             var program = @"
 # TestFactorialProgramExec
-r:=1;
-i:=1;
+r:=1
+i:=1
 while i < 11 do 
-    r := r * i;
-    print ""r="".r;
-    print ""i="".i;
-    i := i + 1;
-return r;";
+    r := r * i
+    print ""r="".r
+    print ""i="".i
+    i := i + 1
+return r";
             var compiler = new IndentedWhileCompiler();
             var func = compiler.CompileToFunction(program);
             Assert.NotNull(func);
@@ -168,10 +166,10 @@ return r;";
             var program = @"
 # TestIfThenElse
 if true then
-    a := ""hello"";
+    a := ""hello""
 else
-    b := ""world"";
-;";
+    b := ""world""
+";
             var result = parser.Parse(program);
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -213,8 +211,8 @@ else
             var program = @"
 # infinite loop
 while true do
-    skip;
-;";
+    skip
+";
             var result = parser.Parse(program);
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -277,9 +275,9 @@ while true do
             var buildResult = buildParser();
             Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
-            var program = @"a:=1;
-b:=2;
-c:=3;";
+            var program = @"a:=1
+b:=2
+c:=3";
             var result = parser.Parse(program);
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
@@ -305,9 +303,9 @@ c:=3;";
             Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             var result = parser.Parse(@"
-skip;
-skip;
-skip;");
+skip
+skip
+skip");
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
             Assert.IsType<SequenceStatement>(result.Result);
