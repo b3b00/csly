@@ -67,6 +67,13 @@ Many language needs parsing expressions (boolean or numeric).
 see [expression parsing](https://github.com/b3b00/csly/wiki/expression-parsing)
 
 
+### indented languages support ###
+
+Some languages use indentation to deonte blocks (think of Python or Yaml ).
+CSLY provides a way to manage this. Head to [Indented Languages](https://github.com/b3b00/csly/wiki/indented-languages)
+
+>### Easily use indentation to make your language structure more readable
+
 ### generic lexer ### 
 
 Lexemes are often similar from one language to another. So CSLY introduces a Generic Lexer that defines common lexemes that can be reused across languages. furthermore the generic has better performance than a regex based lexer.
