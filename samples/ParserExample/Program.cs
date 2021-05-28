@@ -15,6 +15,7 @@ using GenericLexerWithCallbacks;
 using indented;
 using jsonparser;
 using jsonparser.JsonModel;
+using ParserExample.sourceGenerator;
 using ParserTests;
 using ParserTests.lexer;
 using simpleExpressionParser;
@@ -913,7 +914,7 @@ final = 9999
             // TestChars();
             //TestAssociativityFactorExpressionParser();
             // TestFactorial();
-            TestIndentedFactorial();
+            // TestIndentedFactorial();
             //TestThreadsafeGeneric();
             // TestManyString();
             //  TestDoubleExponent();
@@ -925,6 +926,7 @@ final = 9999
             //Test164();
             // TestIndentedLang();
             // TestI18N();
+            EntryPoint.Basic2();
         }
 
 
