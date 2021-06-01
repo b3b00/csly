@@ -26,13 +26,17 @@ namespace sly.parser.generator
         
         public string I18n { get; set; }
 
-        public ParserBuilder(string i18n = null)
+        public ParserBuilder(string i18n)
         {
             if (string.IsNullOrEmpty(i18n))
             {
                 i18n = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
             }
             I18n = i18n;
+        }
+        
+        public ParserBuilder() : this(null)
+        {
         }
 
         /// <summary>
