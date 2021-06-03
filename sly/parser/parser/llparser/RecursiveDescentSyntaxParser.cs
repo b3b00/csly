@@ -376,20 +376,18 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
 
             var i = 0;
-
-            var allAcceptableTokens = new List<IN>();
-            nt.Rules.ForEach(r =>
-            {
-                if (r != null && r.PossibleLeadingTokens != null) allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
-            });
-            allAcceptableTokens = allAcceptableTokens.Distinct().ToList();
-
             var rules = nt.Rules
                 .Where(r => startPosition < tokens.Count && r.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || r.MayBeEmpty)
                 .ToList();
 
             if (rules.Count == 0 )
             {
+                var allAcceptableTokens = new List<IN>();
+                nt.Rules.ForEach(r =>
+                {
+                    if (r != null && r.PossibleLeadingTokens != null) allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
+                });
+                allAcceptableTokens = allAcceptableTokens.Distinct().ToList();
                 return NoMatchingRuleError(tokens, currentPosition, allAcceptableTokens);
             }
 
