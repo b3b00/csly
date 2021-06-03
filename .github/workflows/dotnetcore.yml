@@ -84,3 +84,8 @@ jobs:
         asset_path: ${{ steps.publish_nuget.outputs.PACKAGE_PATH }}
         asset_name: ${{ steps.publish_nuget.outputs.PACKAGE_NAME }}
         asset_content_type: application/zip
+    - name: refresh coverage badge
+      uses: fjogeleit/http-request-action@master
+      with:
+        url: https://camo.githubusercontent.com/12c4fcb3b21fbb2a725fc61449fb1b91e972c4c8a2baaf5904936d8e334bdbe8/68747470733a2f2f636f766572616c6c732e696f2f7265706f732f6769746875622f62336230302f63736c792f62616467652e7376673f6272616e63683d64657626736572766963653d676974687562
+        method: PURGE
