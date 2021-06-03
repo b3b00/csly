@@ -5,7 +5,8 @@
     {
         UnexpectedEOS,
         UnexpectedToken,
-        UnexpectedChar
+        UnexpectedChar,
+        IndentationError
     }
     
     public class ParseError

@@ -1,4 +1,5 @@
-﻿using csly.indentedWhileLang.compiler;
+﻿using System.Linq;
+using csly.indentedWhileLang.compiler;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.compiler;
 using csly.whileLang.interpreter;
@@ -285,7 +286,7 @@ c:=3";
             var seq = result.Result as SequenceStatement;
             Assert.Equal(3, seq.Count);
 
-            string[] names = {"a", "b", "c"};
+            string[] names = { "a", "b", "c" };
             for (var i = 0; i < names.Length; i++)
             {
                 Assert.IsType<AssignStatement>(seq.Get(i));
@@ -314,6 +315,25 @@ skip");
             Assert.IsType<SkipStatement>(seq.Get(0));
             Assert.IsType<SkipStatement>(seq.Get(1));
             Assert.IsType<SkipStatement>(seq.Get(2));
+        }
+
+
+        [Fact]
+        public void TestIndentationError()
+        {
+            var buildResult = buildParser();
+            Assert.False(buildResult.IsError);
+            var parser = buildResult.Result;
+            var result = parser.Parse(@"
+# infinite loop
+while true do
+    skip
+  skip");
+            Assert.True(result.IsError);
+            Assert.Single(result.Errors);
+            var error = result.Errors.First();
+            Assert.Equal(ErrorType.IndentationError,error.ErrorType);
+            Assert.Equal(4,error.Line);
         }
     }
 }

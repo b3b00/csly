@@ -8,6 +8,8 @@ namespace sly.lexer
         {
             Line = line;
             Column = column;
+            ErrorType = ErrorType.IndentationError;
+
         }
 
         public char UnexpectedChar { get; set; }
