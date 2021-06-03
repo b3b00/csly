@@ -334,7 +334,7 @@ while true do
             var error = result.Errors.First();
             Assert.Equal(ErrorType.IndentationError,error.ErrorType);
             Assert.Equal(4,error.Line);
-            Assert.Contains("indentation error", error.ErrorMessage);
+            Assert.Contains("Indentation error", error.ErrorMessage);
         }
     }
 }
