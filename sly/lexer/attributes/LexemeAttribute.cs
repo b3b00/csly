@@ -18,14 +18,14 @@ namespace sly.lexer
             GenericTokenParameters = parameters;
         }
 
-        public LexemeAttribute(GenericToken generic, IdentifierType idType, string startPattern = null, string restPattern = null)
+        public LexemeAttribute(GenericToken generic, IdentifierType idType, string startPattern = null, string endPattern = null)
         {
             GenericToken = generic;
             IdentifierType = idType;
             if (idType == IdentifierType.Custom)
             {
                 IdentifierStartPattern = startPattern ?? throw new ArgumentNullException(nameof(startPattern));
-                IdentifierRestPattern = restPattern ?? startPattern;
+                IdentifierRestPattern = endPattern ?? startPattern;
             }
         }
 

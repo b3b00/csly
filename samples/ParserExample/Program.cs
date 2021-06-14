@@ -913,7 +913,7 @@ final = 9999
             // TestChars();
             //TestAssociativityFactorExpressionParser();
             // TestFactorial();
-            TestIndentedFactorial();
+            // TestIndentedFactorial();
             //TestThreadsafeGeneric();
             // TestManyString();
             //  TestDoubleExponent();
@@ -925,6 +925,8 @@ final = 9999
             //Test164();
             // TestIndentedLang();
             // TestI18N();
+            // Console.ReadLine(); 
+            TestShortGeneric();
         }
 
 
@@ -932,6 +934,35 @@ final = 9999
         {
             GenericLexerTests tests = new GenericLexerTests();
             tests.TestIssue177();
+        }
+
+        private static void TestShortGeneric()
+        {
+            var build = LexerBuilder.BuildLexer<GenericShortAttributes>();
+            if (build.IsOk)
+            {
+                if (build.Result != null)
+                {
+                    var lexer = build.Result;
+                    var lexResult = lexer.Tokenize(@"1 + 2 + a + b * 8.3 hello / 'b\'jour'");
+                    if (lexResult.IsOk)
+                    {
+                        lexResult.Tokens.ForEach(x => Console.WriteLine(x));
+                    }
+                    else
+                    {
+                        Console.WriteLine(lexResult.Error.ErrorMessage);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var error in build.Errors)
+                {
+                    Console.WriteLine(error.Message);
+                }
+            }
+            ;
         }
     }
 
