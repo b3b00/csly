@@ -13,6 +13,44 @@ using Xunit;
 namespace ParserTests.lexer
 {
     
+    public enum GenericShortAttributes
+    {
+        [Double] DOUBLE = 1,
+
+        // integer        
+        [Int] INT = 3,
+
+        [AlphaId] IDENTIFIER = 4,
+
+        // the + operator
+        [Sugar("+")] PLUS = 5,
+
+        // the ++ operator
+        [Sugar("++")]
+        INCREMENT = 6,
+
+        // the - operator
+        [Sugar("-")] MINUS = 7,
+
+        // the * operator
+        [Sugar("*")] TIMES = 8,
+
+        //  the  / operator
+        [Sugar("/")] DIVIDE = 9,
+
+        // a left paranthesis (
+        [Sugar("(")] LPAREN = 10,
+
+        // a right paranthesis )
+        [Sugar(")")] RPAREN = 11,
+        
+        [String("'","\\")]
+        STRING = 12,
+        
+        [Keyword("hello")]
+        HELLO = 13
+    }
+    
     public enum Issue210Token
     {
         EOF = 0,
@@ -1102,6 +1140,27 @@ else
             var unindents = tokens.Count(x => x.IsUnIndent);
             Assert.Equal(2,indents);
             Assert.Equal(2,unindents);
+        }
+
+        [Fact]
+        public void TestGenericShortCode()
+        {
+            var build = LexerBuilder.BuildLexer<GenericShortAttributes>();
+            Assert.True(build.IsOk);
+            Assert.NotNull(build.Result);
+            var lexer = build.Result;
+            var lexResult = lexer.Tokenize(@"1 + 2 + a + b * 8.3 hello / 'b\'jour'");
+            
+            Assert.True(lexResult.IsOk);
+            var tokens = lexResult.Tokens;
+            Assert.Equal(13,tokens.Count);
+            Assert.Equal(GenericShortAttributes.INT,tokens[0].TokenID);
+            Assert.Equal(GenericShortAttributes.PLUS,tokens[3].TokenID);
+            Assert.Equal(GenericShortAttributes.IDENTIFIER,tokens[4].TokenID);
+            Assert.Equal(GenericShortAttributes.DOUBLE,tokens[8].TokenID);
+            Assert.Equal(GenericShortAttributes.HELLO,tokens[9].TokenID);
+            Assert.Equal(GenericShortAttributes.STRING,tokens[11].TokenID);
+
         }
 
         private static string ToTokens<T>(LexerResult<T> result) where T : struct

@@ -15,6 +15,7 @@ using sly.parser.llparser;
 using sly.parser.parser;
 using sly.parser.syntax.grammar;
 using Xunit;
+using String = System.String;
 
 namespace ParserTests
 {
