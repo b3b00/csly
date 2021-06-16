@@ -8,12 +8,6 @@ namespace sly.parser.parser
     {
         public string Name;
 
-        public GroupItem(string name)
-        {
-            Name = name;
-            IsToken = false;
-            IsValue = false;
-        }
 
         public GroupItem(string name, Token<IN> token)
         {

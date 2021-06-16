@@ -172,7 +172,7 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var nt = NonTerminals[start];
 
-            var rules = nt.Rules.Where(r => r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList();
+            var rules = nt.Rules.Where(r => !tokens[0].IsEOS && r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList();
 
             if (!rules.Any())
             {
@@ -243,7 +243,7 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
             var children = new List<ISyntaxNode<IN>>();
-            if (rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
+            if (!tokens[position].IsEOS && rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
                     children = new List<ISyntaxNode<IN>>();
@@ -377,7 +377,7 @@ namespace sly.parser.llparser
 
             var i = 0;
             var rules = nt.Rules
-                .Where(r => startPosition < tokens.Count && r.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || r.MayBeEmpty)
+                .Where(r => startPosition < tokens.Count && !tokens[startPosition].IsEOS && r.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || r.MayBeEmpty)
                 .ToList();
 
             if (rules.Count == 0 )

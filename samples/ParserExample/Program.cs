@@ -16,6 +16,7 @@ using indented;
 using jsonparser;
 using jsonparser.JsonModel;
 using ParserTests;
+using ParserTests.Issue239;
 using ParserTests.lexer;
 using simpleExpressionParser;
 using sly.lexer;
@@ -926,7 +927,8 @@ final = 9999
             // TestIndentedLang();
             // TestI18N();
             // Console.ReadLine(); 
-            TestShortGeneric();
+            // TestShortGeneric();
+            TestIssue239();
         }
 
 
@@ -962,6 +964,12 @@ final = 9999
                     Console.WriteLine(error.Message);
                 }
             }
+            ;
+        }
+
+        private static void TestIssue239()
+        {
+            Issue239Tests.TestOk();
             ;
         }
     }
