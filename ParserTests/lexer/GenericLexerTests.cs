@@ -125,6 +125,13 @@ namespace ParserTests.lexer
 
         [Lexeme(GenericToken.Double)] DOUBLE
     }
+    
+    public enum ShortExtensions
+    {
+        [Extension] DATE,
+
+        [Double] DOUBLE
+    }
 
 
     public class ParserUsingLexerExtensions
@@ -179,6 +186,27 @@ namespace ParserTests.lexer
         public static void AddExtension(Extensions token, LexemeAttribute lexem, GenericLexer<Extensions> lexer)
         {
             if (token == Extensions.DATE)
+            {
+                NodeCallback<GenericToken> callback = match =>
+                {
+                    match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
+                    return match;
+                };
+
+                var fsmBuilder = lexer.FSMBuilder;
+
+                fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
+                    .Transition('.', CheckDate)
+                    .Mark("start_date")
+                    .RepetitionTransition(4, "[0-9]")
+                    .End(GenericToken.Extension)
+                    .CallBack(callback);
+            }
+        }
+        
+        public static void AddShortExtension(ShortExtensions token, LexemeAttribute lexem, GenericLexer<ShortExtensions> lexer)
+        {
+            if (token == ShortExtensions.DATE)
             {
                 NodeCallback<GenericToken> callback = match =>
                 {
@@ -290,7 +318,8 @@ namespace ParserTests.lexer
     {
         EOS,
 
-        [Lexeme(GenericToken.Identifier, IdentifierType.Custom, "A-Za-z", "-_0-9A-Za-z")]
+        [CustomId("A-Za-z", "-_0-9A-Za-z")]
+        // [Lexeme(GenericToken.Identifier, IdentifierType.Custom, "A-Za-z", "-_0-9A-Za-z")]
         ID,
 
         [Lexeme(GenericToken.SugarToken, "-", "_")]
@@ -772,6 +801,26 @@ namespace ParserTests.lexer
             Assert.Equal(Extensions.DATE, r.Tokens[0].TokenID);
             Assert.Equal("20.02.2018", r.Tokens[0].Value);
             Assert.Equal(Extensions.DOUBLE, r.Tokens[1].TokenID);
+            Assert.Equal("3.14", r.Tokens[1].Value);
+
+        }
+        
+        [Fact]
+        public void TestShortExtensions()
+        {
+            var lexerRes =
+                LexerBuilder.BuildLexer(new BuildResult<ILexer<ShortExtensions>>(), ExtendedGenericLexer.AddShortExtension);
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result as GenericLexer<ShortExtensions>;
+            Assert.NotNull(lexer);
+
+            var r = lexer.Tokenize("20.02.2018 3.14");
+            Assert.True(r.IsOk);
+
+            Assert.Equal(3, r.Tokens.Count);
+            Assert.Equal(ShortExtensions.DATE, r.Tokens[0].TokenID);
+            Assert.Equal("20.02.2018", r.Tokens[0].Value);
+            Assert.Equal(ShortExtensions.DOUBLE, r.Tokens[1].TokenID);
             Assert.Equal("3.14", r.Tokens[1].Value);
 
         }
