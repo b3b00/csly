@@ -49,7 +49,7 @@ namespace ParserTests
 
             Assert.NotNull(error);
             Assert.Equal((JsonTokenGeneric) 0, error?.UnexpectedToken.TokenID);
-            Assert.Contains("end of stream", error.ErrorMessage);
+            Assert.Equal(ErrorType.UnexpectedEOS,error.ErrorType);
             Assert.Equal(0, error?.Line);
             Assert.Equal(1, error?.Column);
         }
@@ -99,7 +99,7 @@ namespace ParserTests
 
             Assert.NotNull(error);
             Assert.Equal((JsonToken) 0, error?.UnexpectedToken.TokenID);
-            Assert.Contains("end of stream", error.ErrorMessage);
+            Assert.Equal(ErrorType.UnexpectedEOS,error.ErrorType);
             Assert.Equal(1, error?.Line);
             Assert.Equal(2, error?.Column);
         }

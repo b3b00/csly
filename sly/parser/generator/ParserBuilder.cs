@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using sly.buildresult;
+using sly.i18n;
 using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser.generator.visitor;
@@ -21,6 +23,21 @@ namespace sly.parser.generator
     public class ParserBuilder<IN, OUT> where IN : struct
     {
         #region API
+        
+        public string I18n { get; set; }
+
+        public ParserBuilder(string i18n)
+        {
+            if (string.IsNullOrEmpty(i18n))
+            {
+                i18n = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+            }
+            I18n = i18n;
+        }
+        
+        public ParserBuilder() : this(null)
+        {
+        }
 
         /// <summary>
         ///     Builds a parser (lexer, syntax parser and syntax tree visitor) according to a parser definition instance
@@ -47,14 +64,16 @@ namespace sly.parser.generator
                 if (foundRecursion)
                 {
                     var recs = string.Join("\n", recursions.Select(x => string.Join(" > ",x)));
-                    result.AddError(new ParserInitializationError(ErrorLevel.FATAL,$"left recursion detected : {recs}",ErrorCodes.PARSER_LEFT_RECURSIVE));
+                    result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
+                        I18N.Instance.GetText(I18n,Message.LeftRecursion, recs),
+                        ErrorCodes.PARSER_LEFT_RECURSIVE));
                     return result;
 
                 }
                 configuration.StartingRule = rootRule;
                 var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                 var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
-                parser = new Parser<IN, OUT>(syntaxParser, visitor);
+                parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
                 var lexerResult = BuildLexer(extensionBuilder);
                 parser.Lexer = lexerResult.Result;
                 if (lexerResult.IsError)
@@ -68,7 +87,7 @@ namespace sly.parser.generator
             }
             else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
             {
-                var builder = new EBNFParserBuilder<IN, OUT>();
+                var builder = new EBNFParserBuilder<IN, OUT>(I18n);
                 result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,
                     extensionBuilder);
             }
@@ -103,7 +122,7 @@ namespace sly.parser.generator
             {
                 case ParserType.LL_RECURSIVE_DESCENT:
                 {
-                    parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule);
+                    parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule,I18n);
                     break;
                 }
                 default:
@@ -118,6 +137,7 @@ namespace sly.parser.generator
 
         #endregion
 
+        
 
         #region CONFIGURATION
 
@@ -143,7 +163,7 @@ namespace sly.parser.generator
 
         protected virtual BuildResult<ILexer<IN>> BuildLexer(BuildExtension<IN> extensionBuilder =  null)
         {
-            var lexer = LexerBuilder.BuildLexer(new BuildResult<ILexer<IN>>(), extensionBuilder);
+            var lexer = LexerBuilder.BuildLexer(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n);
             return lexer;
         }
 
@@ -262,7 +282,7 @@ namespace sly.parser.generator
             return result;
         }
 
-        private static BuildResult<Parser<IN, OUT>> CheckUnreachable(BuildResult<Parser<IN, OUT>> result,
+        private BuildResult<Parser<IN, OUT>> CheckUnreachable(BuildResult<Parser<IN, OUT>> result,
             NonTerminal<IN> nonTerminal)
         {
             var conf = result.Result.Configuration;
@@ -278,7 +298,8 @@ namespace sly.parser.generator
 
                 if (!found)
                     result.AddError(new ParserInitializationError(ErrorLevel.WARN,
-                        $"non terminal [{nonTerminal.Name}] is never used.",ErrorCodes.NOT_AN_ERROR));
+                        I18N.Instance.GetText(I18n,Message.NonTerminalNeverUsed, nonTerminal.Name),
+                        ErrorCodes.NOT_AN_ERROR));
             }
 
             return result;
@@ -340,7 +361,7 @@ namespace sly.parser.generator
         }
 
 
-        private static BuildResult<Parser<IN, OUT>> CheckNotFound(BuildResult<Parser<IN, OUT>> result,
+        private BuildResult<Parser<IN, OUT>> CheckNotFound(BuildResult<Parser<IN, OUT>> result,
             NonTerminal<IN> nonTerminal)
         {
             var conf = result.Result.Configuration;
@@ -349,11 +370,12 @@ namespace sly.parser.generator
                 if (clause is NonTerminalClause<IN> ntClause)
                     if (!conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
                         result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                            $"{ntClause.NonTerminalName} references from {rule.RuleString} does not exist.",ErrorCodes.PARSER_REFERENCE_NOT_FOUND));
+                            I18N.Instance.GetText(I18n,Message.ReferenceNotFound,ntClause.NonTerminalName,rule.RuleString),
+                            ErrorCodes.PARSER_REFERENCE_NOT_FOUND));
             return result;
         }
         
-        private static BuildResult<Parser<IN, OUT>> CheckAlternates(BuildResult<Parser<IN, OUT>> result,
+        private BuildResult<Parser<IN, OUT>> CheckAlternates(BuildResult<Parser<IN, OUT>> result,
             NonTerminal<IN> nonTerminal)
         {
             var conf = result.Result.Configuration;
@@ -367,12 +389,14 @@ namespace sly.parser.generator
                         if (!choice.IsTerminalChoice && !choice.IsNonTerminalChoice)
                         {
                             result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                $"{rule.RuleString} contains {choice.ToString()} with mixed terminal and nonterminal.",ErrorCodes.PARSER_MIXED_CHOICES));
+                                I18N.Instance.GetText(I18n,Message.MixedChoices,rule.RuleString,choice.ToString()),
+                                ErrorCodes.PARSER_MIXED_CHOICES));
                         }
                         else if (choice.IsDiscarded && choice.IsNonTerminalChoice)
                         {
                             result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                $"{rule.RuleString} : {choice.ToString()} can not be marked as discarded as it is a non terminal choice.",ErrorCodes.PARSER_NON_TERMINAL_CHOICE_CANNOT_BE_DISCARDED));
+                                I18N.Instance.GetText(I18n,Message.NonTerminalChoiceCannotBeDiscarded,rule.RuleString,choice.ToString()),
+                                ErrorCodes.PARSER_NON_TERMINAL_CHOICE_CANNOT_BE_DISCARDED));
                         }
                     }
                 }
@@ -381,7 +405,7 @@ namespace sly.parser.generator
             return result;
         }
 
-        private static BuildResult<Parser<IN, OUT>> CheckVisitorsSignature(BuildResult<Parser<IN, OUT>> result,
+        private  BuildResult<Parser<IN, OUT>> CheckVisitorsSignature(BuildResult<Parser<IN, OUT>> result,
             NonTerminal<IN> nonTerminal)
         {
             foreach (var rule in nonTerminal.Rules)
@@ -396,7 +420,7 @@ namespace sly.parser.generator
         }
 
         
-        private static BuildResult<Parser<IN, OUT>> CheckVisitorSignature(BuildResult<Parser<IN, OUT>> result,
+        private BuildResult<Parser<IN, OUT>> CheckVisitorSignature(BuildResult<Parser<IN, OUT>> result,
             Rule<IN> rule) 
         {
             if (!rule.IsExpressionRule)
@@ -412,7 +436,7 @@ namespace sly.parser.generator
                 if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
                 {
                     result.AddError(new InitializationError(ErrorLevel.FATAL,
-                        $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expected {typeof(OUT)}, found {returnInfo.ParameterType.Name}",
+                        I18N.Instance.GetText(I18n,Message.IncorrectVisitorReturnType,visitor.Name,rule.RuleString,typeof(OUT).FullName,returnInfo.ParameterType.Name),
                         ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
                 }
 
@@ -421,7 +445,7 @@ namespace sly.parser.generator
                 if (visitor.GetParameters().Length != realClauses.Count && visitor.GetParameters().Length != realClauses.Count +1)
                 {
                     result.AddError(new InitializationError(ErrorLevel.FATAL,
-                        $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : expected {realClauses.Count} or {realClauses.Count+1}, found {visitor.GetParameters().Length}",
+                        I18N.Instance.GetText(I18n,Message.IncorrectVisitorParameterNumber,visitor.Name,rule.RuleString,realClauses.Count.ToString(),(realClauses.Count+1).ToString(),visitor.GetParameters().Length.ToString()),
                         ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
                     // do not go further : it will cause an out of bound error.
                     return result;
@@ -571,7 +595,9 @@ namespace sly.parser.generator
                     var foundReturn = returnInfo?.ParameterType;
                     if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
                     {
-                        result.AddError(new InitializationError(ErrorLevel.FATAL,$"visitor {visitor.Name} for rule {rule.RuleString} has incorrect return type : expected {typeof(OUT)}, found {returnInfo.ParameterType.Name}",ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
+                        result.AddError(new InitializationError(ErrorLevel.FATAL,
+                            I18N.Instance.GetText(I18n,Message.IncorrectVisitorReturnType,visitor.Name,rule.RuleString,typeof(OUT).FullName,returnInfo.ParameterType.Name),
+                            ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
                     }
                     
                     if (operation.IsUnary)
@@ -624,13 +650,14 @@ namespace sly.parser.generator
             return result;
         }
 
-        private static BuildResult<Parser<IN, OUT>> CheckArgType(BuildResult<Parser<IN, OUT>> result, Rule<IN> rule, Type expected, MethodInfo visitor,
+        private  BuildResult<Parser<IN, OUT>> CheckArgType(BuildResult<Parser<IN, OUT>> result, Rule<IN> rule, Type expected, MethodInfo visitor,
             ParameterInfo arg) 
         {
             if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
             {
                 result.AddError(new InitializationError(ErrorLevel.FATAL,
-                    $"visitor {visitor.Name} for rule {rule.RuleString} ; parameter {arg.Name} has incorrect type : expected {expected}, found {arg.ParameterType}",ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
+                    I18N.Instance.GetText(I18n,Message.IncorrectVisitorParameterType,visitor.Name,rule.RuleString,arg.Name,expected.FullName,arg.ParameterType.FullName),
+                    ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
             }
 
             return result;

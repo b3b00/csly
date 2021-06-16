@@ -56,39 +56,133 @@ namespace csly.whileLang.parser
 
         #region operators 30 -> 49
 
-        [Lexeme(GenericToken.SugarToken, ">")] GREATER = 30,
+        [Sugar( ">")] GREATER = 30,
 
-        [Lexeme(GenericToken.SugarToken, "<")] LESSER = 31,
+        [Sugar( "<")] LESSER = 31,
 
-        [Lexeme(GenericToken.SugarToken, "==")]
+        [Sugar( "==")]
         EQUALS = 32,
 
-        [Lexeme(GenericToken.SugarToken, "!=")]
+        [Sugar( "!=")]
         DIFFERENT = 33,
 
-        [Lexeme(GenericToken.SugarToken, ".")] CONCAT = 34,
+        [Sugar( ".")] CONCAT = 34,
 
-        [Lexeme(GenericToken.SugarToken, ":=")]
+        [Sugar( ":=")]
         ASSIGN = 35,
 
-        [Lexeme(GenericToken.SugarToken, "+")] PLUS = 36,
+        [Sugar( "+")] PLUS = 36,
 
-        [Lexeme(GenericToken.SugarToken, "-")] MINUS = 37,
+        [Sugar( "-")] MINUS = 37,
 
 
-        [Lexeme(GenericToken.SugarToken, "*")] TIMES = 38,
+        [Sugar( "*")] TIMES = 38,
 
-        [Lexeme(GenericToken.SugarToken, "/")] DIVIDE = 39,
+        [Sugar( "/")] DIVIDE = 39,
 
         #endregion
 
         #region sugar 50 ->
 
-        [Lexeme(GenericToken.SugarToken, "(")] LPAREN = 50,
+        [Sugar( "(")] LPAREN = 50,
 
-        [Lexeme(GenericToken.SugarToken, ")")] RPAREN = 51,
+        [Sugar( ")")] RPAREN = 51,
 
-        [Lexeme(GenericToken.SugarToken, ";")] SEMICOLON = 52,
+        [Sugar( ";")] SEMICOLON = 52,
+
+
+        EOF = 0
+
+        #endregion
+    }
+    
+    public enum ShortWhileTokenGeneric
+    {
+        #region keywords 0 -> 19
+
+        [Keyword("IF")] [Keyword("if")]
+        IF = 1,
+
+        [Keyword("THEN")] [Keyword("then")]
+        THEN = 2,
+
+        [Keyword("ELSE")] [Keyword("else")]
+        ELSE = 3,
+
+        [Keyword("WHILE")] [Keyword("while")]
+        WHILE = 4,
+
+        [Sugar("DO")] [Sugar("do")]
+        DO = 5,
+
+        [Keyword("SKIP")] [Keyword( "skip")]
+        SKIP = 6,
+
+        [Keyword( "TRUE")] [Keyword("true")]
+        TRUE = 7,
+
+        [Keyword( "FALSE")] [Keyword( "false")]
+        FALSE = 8,
+
+        [Keyword( "NOT")] [Keyword("not")]
+        NOT = 9,
+
+        [Keyword( "AND")] [Keyword("and")]
+        AND = 10,
+
+        [Keyword( "OR")] [Keyword("or")]
+        OR = 11,
+
+        [Keyword( "PRINT")] [Keyword("print")]
+        PRINT = 12,
+
+        #endregion
+
+        #region literals 20 -> 29
+
+        [AlphaId] IDENTIFIER = 20,
+
+        [String] STRING = 21,
+
+        [Int] INT = 22,
+
+        #endregion
+
+        #region operators 30 -> 49
+
+        [Sugar( ">")] GREATER = 30,
+
+        [Sugar( "<")] LESSER = 31,
+
+        [Sugar( "==")]
+        EQUALS = 32,
+
+        [Sugar( "!=")]
+        DIFFERENT = 33,
+
+        [Sugar( ".")] CONCAT = 34,
+
+        [Sugar( ":=")]
+        ASSIGN = 35,
+
+        [Sugar( "+")] PLUS = 36,
+
+        [Sugar( "-")] MINUS = 37,
+
+
+        [Sugar( "*")] TIMES = 38,
+
+        [Sugar( "/")] DIVIDE = 39,
+
+        #endregion
+
+        #region sugar 50 ->
+
+        [Sugar( "(")] LPAREN = 50,
+
+        [Sugar( ")")] RPAREN = 51,
+
+        [Sugar( ";")] SEMICOLON = 52,
 
 
         EOF = 0

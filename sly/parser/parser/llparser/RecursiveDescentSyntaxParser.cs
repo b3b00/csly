@@ -9,8 +9,9 @@ namespace sly.parser.llparser
 {
     public class RecursiveDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> where IN : struct
     {
-        public RecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal)
+        public RecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal, string i18n)
         {
+            I18n = i18n;
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
             ComputeSubRules(configuration);
@@ -19,6 +20,8 @@ namespace sly.parser.llparser
 
         public ParserConfiguration<IN, OUT> Configuration { get; set; }
         public string StartingNonTerminal { get; set; }
+        
+        public string I18n { get; set; }
 
         public ParserConfiguration<IN, OUT> ComputeSubRules(ParserConfiguration<IN, OUT> configuration)
         {
@@ -169,11 +172,11 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var nt = NonTerminals[start];
 
-            var rules = nt.Rules.Where(r => r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList();
+            var rules = nt.Rules.Where(r => !tokens[0].IsEOS && r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList();
 
             if (!rules.Any())
             {
-                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], nt.PossibleLeadingTokens.ToArray()));
+                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], I18n,nt.PossibleLeadingTokens.ToArray()));
             }
             
             var rs = new List<SyntaxParseResult<IN>>();
@@ -240,7 +243,7 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
             var children = new List<ISyntaxNode<IN>>();
-            if (rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
+            if (!tokens[position].IsEOS && rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
                     children = new List<ISyntaxNode<IN>>();
@@ -257,7 +260,7 @@ namespace sly.parser.llparser
                             else
                             {
                                 var tok = tokens[currentPosition];
-                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,
+                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,I18n,
                                     ((TerminalClause<IN>) clause).ExpectedToken));
                             }
 
@@ -355,7 +358,7 @@ namespace sly.parser.llparser
         public SyntaxParseResult<IN> ParseTerminal(IList<Token<IN>> tokens, TerminalClause<IN> terminal, int position)
         {
             var result = new SyntaxParseResult<IN>();
-            result.IsError = !terminal.Check(tokens[position].TokenID);
+            result.IsError = !terminal.Check(tokens[position]);
             result.EndingPosition = !result.IsError ? position + 1 : position;
             var token = tokens[position];
             token.Discarded = terminal.Discarded;
@@ -373,20 +376,18 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
 
             var i = 0;
-
-            var allAcceptableTokens = new List<IN>();
-            nt.Rules.ForEach(r =>
-            {
-                if (r != null && r.PossibleLeadingTokens != null) allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
-            });
-            allAcceptableTokens = allAcceptableTokens.Distinct().ToList();
-
             var rules = nt.Rules
-                .Where(r => startPosition < tokens.Count && r.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || r.MayBeEmpty)
+                .Where(r => startPosition < tokens.Count && !tokens[startPosition].IsEOS && r.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || r.MayBeEmpty)
                 .ToList();
 
             if (rules.Count == 0 )
             {
+                var allAcceptableTokens = new List<IN>();
+                nt.Rules.ForEach(r =>
+                {
+                    if (r != null && r.PossibleLeadingTokens != null) allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
+                });
+                allAcceptableTokens = allAcceptableTokens.Distinct().ToList();
                 return NoMatchingRuleError(tokens, currentPosition, allAcceptableTokens);
             }
 
@@ -452,18 +453,18 @@ namespace sly.parser.llparser
             return result;
         }
 
-        private static SyntaxParseResult<IN> NoMatchingRuleError(IList<Token<IN>> tokens, int currentPosition, List<IN> allAcceptableTokens)
+        private SyntaxParseResult<IN> NoMatchingRuleError(IList<Token<IN>> tokens, int currentPosition, List<IN> allAcceptableTokens)
         {
             var noRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 
             if (currentPosition < tokens.Count)
             {
-                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],
+                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],I18n,
                     allAcceptableTokens.ToArray<IN>()));
             }
             else
             {
-                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(new Token<IN>() {IsEOS = true},
+                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(new Token<IN>() {IsEOS = true},I18n,
                     allAcceptableTokens.ToArray<IN>()));
             }
 

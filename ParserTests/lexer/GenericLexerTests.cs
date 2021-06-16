@@ -2,14 +2,54 @@
 using System.Linq;
 using System.Text;
 using GenericLexerWithCallbacks;
+using indented;
 using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fsm;
+using sly.parser;
 using sly.parser.generator;
 using Xunit;
 
 namespace ParserTests.lexer
 {
+    
+    public enum GenericShortAttributes
+    {
+        [Double] DOUBLE = 1,
+
+        // integer        
+        [Int] INT = 3,
+
+        [AlphaId] IDENTIFIER = 4,
+
+        // the + operator
+        [Sugar("+")] PLUS = 5,
+
+        // the ++ operator
+        [Sugar("++")]
+        INCREMENT = 6,
+
+        // the - operator
+        [Sugar("-")] MINUS = 7,
+
+        // the * operator
+        [Sugar("*")] TIMES = 8,
+
+        //  the  / operator
+        [Sugar("/")] DIVIDE = 9,
+
+        // a left paranthesis (
+        [Sugar("(")] LPAREN = 10,
+
+        // a right paranthesis )
+        [Sugar(")")] RPAREN = 11,
+        
+        [String("'","\\")]
+        STRING = 12,
+        
+        [Keyword("hello")]
+        HELLO = 13
+    }
     
     public enum Issue210Token
     {
@@ -85,6 +125,13 @@ namespace ParserTests.lexer
 
         [Lexeme(GenericToken.Double)] DOUBLE
     }
+    
+    public enum ShortExtensions
+    {
+        [Extension] DATE,
+
+        [Double] DOUBLE
+    }
 
 
     public class ParserUsingLexerExtensions
@@ -139,6 +186,27 @@ namespace ParserTests.lexer
         public static void AddExtension(Extensions token, LexemeAttribute lexem, GenericLexer<Extensions> lexer)
         {
             if (token == Extensions.DATE)
+            {
+                NodeCallback<GenericToken> callback = match =>
+                {
+                    match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
+                    return match;
+                };
+
+                var fsmBuilder = lexer.FSMBuilder;
+
+                fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
+                    .Transition('.', CheckDate)
+                    .Mark("start_date")
+                    .RepetitionTransition(4, "[0-9]")
+                    .End(GenericToken.Extension)
+                    .CallBack(callback);
+            }
+        }
+        
+        public static void AddShortExtension(ShortExtensions token, LexemeAttribute lexem, GenericLexer<ShortExtensions> lexer)
+        {
+            if (token == ShortExtensions.DATE)
             {
                 NodeCallback<GenericToken> callback = match =>
                 {
@@ -250,7 +318,8 @@ namespace ParserTests.lexer
     {
         EOS,
 
-        [Lexeme(GenericToken.Identifier, IdentifierType.Custom, "A-Za-z", "-_0-9A-Za-z")]
+        [CustomId("A-Za-z", "-_0-9A-Za-z")]
+        // [Lexeme(GenericToken.Identifier, IdentifierType.Custom, "A-Za-z", "-_0-9A-Za-z")]
         ID,
 
         [Lexeme(GenericToken.SugarToken, "-", "_")]
@@ -735,6 +804,26 @@ namespace ParserTests.lexer
             Assert.Equal("3.14", r.Tokens[1].Value);
 
         }
+        
+        [Fact]
+        public void TestShortExtensions()
+        {
+            var lexerRes =
+                LexerBuilder.BuildLexer(new BuildResult<ILexer<ShortExtensions>>(), ExtendedGenericLexer.AddShortExtension);
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result as GenericLexer<ShortExtensions>;
+            Assert.NotNull(lexer);
+
+            var r = lexer.Tokenize("20.02.2018 3.14");
+            Assert.True(r.IsOk);
+
+            Assert.Equal(3, r.Tokens.Count);
+            Assert.Equal(ShortExtensions.DATE, r.Tokens[0].TokenID);
+            Assert.Equal("20.02.2018", r.Tokens[0].Value);
+            Assert.Equal(ShortExtensions.DOUBLE, r.Tokens[1].TokenID);
+            Assert.Equal("3.14", r.Tokens[1].Value);
+
+        }
 
         [Fact]
         public void TestExtensionsPreconditionFailure()
@@ -763,7 +852,7 @@ namespace ParserTests.lexer
             Assert.Equal(0, error.Line);
             Assert.Equal(13, error.Column);
             Assert.Equal('2', error.UnexpectedChar);
-            Assert.Contains("Unrecognized symbol", error.ToString());
+            Assert.Equal(ErrorType.UnexpectedChar,error.ErrorType);
         }
 
         [Fact]
@@ -964,8 +1053,8 @@ namespace ParserTests.lexer
 
             var result = lexer.Tokenize(".");
             Assert.True(result.IsError);
-            Assert.Equal("Lexical Error : Unrecognized symbol '.' at  (line 0, column 0).", result.Error.ErrorMessage);
-
+            Assert.Equal(ErrorType.UnexpectedChar,result.Error.ErrorType);
+            
             result = lexer.Tokenize("--");
             Assert.True(result.IsOk);
             Assert.Equal("BB0", ToTokens(result));
@@ -1046,6 +1135,81 @@ namespace ParserTests.lexer
             Assert.True(r.IsOk);
             l = ToTokens2(r);
             Assert.Equal("SPECIAL[]EOF[]",l);
+        }
+
+        [Fact]
+        public void TestIndented()
+        {
+            var source =@"if truc == 1
+    un = 1
+    deux = 2
+else
+    trois = 3
+    quatre = 4
+
+";
+            
+            var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer>();
+            Assert.True(lexRes.IsOk);
+            var lexer = lexRes.Result;
+            Assert.NotNull(lexer);
+            var tokResult = lexer.Tokenize(source);
+            Assert.True(tokResult.IsOk);
+            var tokens = tokResult.Tokens;
+            Assert.NotNull(tokens);
+            Assert.Equal(22,tokens.Count);
+            var indents = tokens.Count(x => x.IsIndent);
+            var unindents = tokens.Count(x => x.IsUnIndent);
+            Assert.Equal(2,indents);
+            Assert.Equal(2,unindents);
+        }
+        
+        [Fact]
+        public void TestIndented2()
+        {
+            var source =@"if truc == 1
+    un = 1
+    deux = 2
+else
+    trois = 3
+    quatre = 4
+
+";
+            
+            var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer2>();
+            Assert.True(lexRes.IsOk);
+            var lexer = lexRes.Result;
+            Assert.NotNull(lexer);
+            var tokResult = lexer.Tokenize(source);
+            Assert.True(tokResult.IsOk);
+            var tokens = tokResult.Tokens;
+            Assert.NotNull(tokens);
+            Assert.Equal(29,tokens.Count);
+            var indents = tokens.Count(x => x.IsIndent);
+            var unindents = tokens.Count(x => x.IsUnIndent);
+            Assert.Equal(2,indents);
+            Assert.Equal(2,unindents);
+        }
+
+        [Fact]
+        public void TestGenericShortCode()
+        {
+            var build = LexerBuilder.BuildLexer<GenericShortAttributes>();
+            Assert.True(build.IsOk);
+            Assert.NotNull(build.Result);
+            var lexer = build.Result;
+            var lexResult = lexer.Tokenize(@"1 + 2 + a + b * 8.3 hello / 'b\'jour'");
+            
+            Assert.True(lexResult.IsOk);
+            var tokens = lexResult.Tokens;
+            Assert.Equal(13,tokens.Count);
+            Assert.Equal(GenericShortAttributes.INT,tokens[0].TokenID);
+            Assert.Equal(GenericShortAttributes.PLUS,tokens[3].TokenID);
+            Assert.Equal(GenericShortAttributes.IDENTIFIER,tokens[4].TokenID);
+            Assert.Equal(GenericShortAttributes.DOUBLE,tokens[8].TokenID);
+            Assert.Equal(GenericShortAttributes.HELLO,tokens[9].TokenID);
+            Assert.Equal(GenericShortAttributes.STRING,tokens[11].TokenID);
+
         }
 
         private static string ToTokens<T>(LexerResult<T> result) where T : struct

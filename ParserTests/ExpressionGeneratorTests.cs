@@ -2,6 +2,7 @@
 using expressionparser;
 using simpleExpressionParser;
 using sly.buildresult;
+using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
@@ -9,6 +10,18 @@ using Xunit;
 namespace ParserTests
 {
 
+    public class ExpressionGeneratorError
+    {
+
+        
+        [Operation((int)ExpressionToken.PLUS, Affix.InFix, Associativity.Right, 10)]
+        [Operation("MINUSCULE", Affix.InFix, Associativity.Left, 10)]
+        public double BinaryTermExpression(double left, Token<ExpressionToken> operation, double right)
+        {
+            return 0;
+        }
+
+    }
     
     
     public class ExpressionGeneratorTests
@@ -225,6 +238,16 @@ namespace ParserTests
             c2 = issue184parser2.Result.Parse(" 2 - 2 * 2");
             Assert.True(c2.IsOk);
             Assert.Equal(2 - 2 * 2 ,c2.Result);
+        }
+
+        [Fact]
+        public void TestBadOperatorString()
+        {
+            var parserInstance = new ExpressionGeneratorError();
+            var builder = new ParserBuilder<ExpressionToken, double>();
+            var exception = Assert.Throws<ParserConfigurationException>(() =>
+                builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule));
+            Assert.Contains("bad enum name MINUSCULE",exception.Message);
         }
     }
 }

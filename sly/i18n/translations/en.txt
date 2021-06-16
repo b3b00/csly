@@ -1,0 +1,51 @@
+#
+#   Unexpected tokens
+#
+UnexpectedTokenExpecting=unexpected "{0}" ({1}). Expecting {2}.
+UnexpectedEosExpecting=unexpected end of stream. Expecting {0}.
+UnexpectedToken=unexpected "{0}" ({1}).
+UnexpectedEos=unexpected end of stream.
+
+#
+# lexer errors
+#
+UnexpectedChar =Lexical Error, line {1}, column {2} : Unrecognized symbol '{0}';
+
+
+##########################################
+#
+# lexer initialization
+#
+
+CannotMixGenericAndRegex=cannot mix Regex lexemes and Generic lexemes in same lexer
+DuplicateStringCharDelimiters=char or string lexeme delimiter {0} is used {1} times. This will results in lexing conflicts
+TooManyComment=too many comment lexem
+TooManyMultilineComment=too many multi-line comment lexem
+TooManySingleLineComment=too many single-line comment lexem
+CannotMixCommentAndSingleOrMulti=comment lexem can't be used together with single-line or multi-line comment lexems
+SameValueUsedManyTime=int value {0} is used {1} times in lexer enum   {2}
+StringDelimiterMustBe1Char=bad lexem {0} :  StringToken lexeme delimiter char <{1}> must be 1 character length.
+StringDelimiterCannotBeLetterOrDigit=bad lexem {0} :  StringToken lexeme delimiter char <{1}> can not start with a letter.
+StringEscapeCharMustBe1Char=bad lexem {0} :  StringToken lexeme escape char  <{1}> must be 1 character length.
+StringEscapeCharCannotBeLetterOrDigit=bad lexem {0} :  StringToken lexeme escape char lexeme <{1}> can not start with a letter.
+CharDelimiterMustBe1Char=bad lexem {0} :  CharToken lexeme delimiter char <{1}> must be 1 character length.
+CharDelimiterCannotBeLetter=bad lexem {0} :  CharToken lexeme delimiter char <{1}> can not start with a letter or digit.
+CharEscapeCharMustBe1Char=bad lexem {0} :  CharToken lexeme escape char  <{1}> must be 1 character length.
+CharEscapeCharCannotBeLetterOrDigit=bad lexem {0} :  CharToken lexeme escape char lexeme <{1}> can not start with a letter or digit.
+SugarTokenCannotStartWithLetter=bad lexem {0} :  SugarToken lexeme <{1}>  can not start with a letter.
+
+##############################################
+#
+#   Parser initialization
+#
+
+
+MissingOperand =missing [operand] attribute;
+ReferenceNotFound ={0} references from {1} does not exist.
+MixedChoices ={0} contains {1} with mixed terminal and nonterminal.
+NonTerminalChoiceCannotBeDiscarded ={0} : {1} can not be marked as discarded as it is a non terminal choice.
+IncorrectVisitorReturnType =visitor {0} for rule {1} has incorrect return type : expected {2}, found {3}
+IncorrectVisitorParameterType =visitor {0} for rule {1} ; parameter {2} has incorrect type : expected {3}, found {4}.
+IncorrectVisitorParameterNumber =visitor {0} for rule {1} has incorrect argument number : expected {2} or {3}, found {4}
+LeftRecursion =left recursion detected : {0}
+NonTerminalNeverUsed=non terminal [{0}] is never used.

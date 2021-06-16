@@ -2,7 +2,7 @@
 
 
 ![Test status](http://teststatusbadge.azurewebsites.net/api/status/mmaitre314/securestringcodegen)
-[![coveralls](https://coveralls.io/repos/github/b3b00/csly/badge.svg?branch=dev)](https://coveralls.io/github/b3b00/csly?branch=dev)
+[![Coverage Status](https://coveralls.io/repos/github/b3b00/csly/badge.svg?branch=dev&service=github)](https://coveralls.io/github/b3b00/csly?branch=dev)
 ![.NET Core](https://github.com/b3b00/csly/workflows/.NET%20Core/badge.svg)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fb3b00%2Fcsly.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fb3b00%2Fcsly?ref=badge_shield)
 
@@ -66,6 +66,13 @@ Many language needs parsing expressions (boolean or numeric).
 
 see [expression parsing](https://github.com/b3b00/csly/wiki/expression-parsing)
 
+
+### indented languages support ###
+
+Some languages use indentation to deonte blocks (think of Python or Yaml ).
+CSLY provides a way to manage this. Head to [Indented Languages](https://github.com/b3b00/csly/wiki/indented-languages)
+
+>### Easily use indentation to make your language structure more readable.
 
 ### generic lexer ### 
 
