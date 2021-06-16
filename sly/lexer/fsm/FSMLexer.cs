@@ -59,9 +59,10 @@ namespace sly.lexer.fsm
         public string ToGraphViz()
         {
             var dump = new StringBuilder();
-            foreach (var transitions in Transitions.Values)
-                foreach (var transition in transitions)
-                    dump.AppendLine(transition.ToGraphViz(Nodes));
+            
+            foreach (var transition in Transitions.Values.SelectMany(x => x) )
+                dump.AppendLine(transition.ToGraphViz(Nodes));
+            
             return dump.ToString();
         }
 
