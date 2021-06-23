@@ -26,10 +26,11 @@ namespace sly.parser.generator
         ///     token as an int as attribute can not be generics.
         /// </summary>
         /// <param name="intToken">token enum as int value</param>
-        /// <param name="arity">operator arity</param>
+        /// <param name="affix">operator affix (<see cref="Affix" />)</param>
         /// <param name="assoc">operator aosociativity (<see cref="Associativity" />) </param>
         /// <param name="precedence">precedence level: the greater, the higher</param>
-        public OperationAttribute(int intToken, Affix affix, Associativity assoc, int precedence)
+        /// <param name="name">operation name</param>
+        public OperationAttribute(int intToken, Affix affix, Associativity assoc, int precedence, string name = "Default")
         {
             IntToken = intToken;
             IsIntToken = true;
@@ -37,9 +38,10 @@ namespace sly.parser.generator
             Affix = affix;
             Assoc = assoc;
             Precedence = precedence;
+            Name = name;
         }
-        
-        public OperationAttribute(string stringToken, Affix affix, Associativity assoc, int precedence)
+
+        public OperationAttribute(string stringToken, Affix affix, Associativity assoc, int precedence, string name = "Default")
         {
             StringToken = stringToken;
             IsStringToken = true;
@@ -47,15 +49,16 @@ namespace sly.parser.generator
             Affix = affix;
             Assoc = assoc;
             Precedence = precedence;
+            Name = name;
         }
 
         public bool IsIntToken { get; set; }
-        
+
         public bool IsStringToken { get; set; }
-        
-        
+
+
         public int IntToken { get; set; }
-        
+
         public string StringToken { get; set; }
 
         public Affix Affix { get; set; }
@@ -63,5 +66,7 @@ namespace sly.parser.generator
         public Associativity Assoc { get; set; }
 
         public int Precedence { get; set; }
+
+        public string Name { get; set; }
     }
 }

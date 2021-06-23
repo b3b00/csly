@@ -12,13 +12,14 @@ namespace sly.parser.generator
 {
     public class OperationMetaData<T> where T : struct
     {
-        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, T oper)
+        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, T oper, string name)
         {
             Precedence = precedence;
             Associativity = assoc;
             VisitorMethod = method;
             OperatorToken = oper;
             Affix = affix;
+            Name = name;
         }
 
         public int Precedence { get; set; }
@@ -31,6 +32,8 @@ namespace sly.parser.generator
 
         public Affix Affix { get; set; }
 
+        public string Name { get; set; }
+
         public bool IsBinary => Affix == Affix.InFix;
 
         public bool IsUnary => Affix != Affix.InFix;
@@ -42,10 +45,10 @@ namespace sly.parser.generator
         }
     }
 
-    public class ExpressionRulesGenerator<IN,OUT> where IN : struct
+    public class ExpressionRulesGenerator<IN, OUT> where IN : struct
     {
         public string I18n { get; set; }
-        
+
         public ExpressionRulesGenerator(string i18n = null)
         {
             if (string.IsNullOrEmpty(i18n))
@@ -54,7 +57,7 @@ namespace sly.parser.generator
             }
             I18n = i18n;
         }
-        
+
         public BuildResult<ParserConfiguration<IN, OUT>> BuildExpressionRules<IN, OUT>(
             ParserConfiguration<IN, OUT> configuration, Type parserClass,
             BuildResult<ParserConfiguration<IN, OUT>> result) where IN : struct
@@ -67,7 +70,7 @@ namespace sly.parser.generator
                 return attr != null;
             }).ToList();
 
-            var operationsByPrecedence = new Dictionary<int, List<OperationMetaData<IN>>>();
+            var operationsByNameAndPrecedence = new Dictionary<string, Dictionary<int, List<OperationMetaData<IN>>>>();
 
             methods.ForEach(m =>
             {
@@ -85,46 +88,62 @@ namespace sly.parser.generator
                     {
                         oper = EnumConverter.ConvertStringToEnum<IN>(attr.StringToken);
                     }
-                    var operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper);
+                    var operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper, attr.Name);
                     var operations = new List<OperationMetaData<IN>>();
-                    if (operationsByPrecedence.ContainsKey(operation.Precedence))
-                        operations = operationsByPrecedence[operation.Precedence];
+
+                    if (operationsByNameAndPrecedence.ContainsKey(operation.Name))
+                        if (operationsByNameAndPrecedence[operation.Name].ContainsKey(operation.Precedence))
+                            operations = operationsByNameAndPrecedence[operation.Name][operation.Precedence];
+
                     operations.Add(operation);
-                    operationsByPrecedence[operation.Precedence] = operations;
+
+                    if (!operationsByNameAndPrecedence.ContainsKey(operation.Name))
+                        operationsByNameAndPrecedence.Add(operation.Name, new Dictionary<int, List<OperationMetaData<IN>>>
+                    {
+                        {operation.Precedence, operations}
+                    });
+                    else
+                        operationsByNameAndPrecedence[operation.Name][operation.Precedence] = operations;
                 }
             });
 
-            if (operationsByPrecedence.Count > 0)
+            if (operationsByNameAndPrecedence.Count > 0)
             {
-                var operandNonTerminal = GetOperandNonTerminal(parserClass,configuration, result);
+                var operandNonTerminal = GetOperandNonTerminal(parserClass, configuration, result);
 
+                var keys = operationsByNameAndPrecedence.Keys.ToList();
 
-                if (operandNonTerminal != null && operationsByPrecedence.Count > 0)
-                    GenerateExpressionParser(configuration, operandNonTerminal, operationsByPrecedence,
-                        parserClass.Name);
+                foreach (var key in keys)
+                {
+                    var operationsByPrecedence = operationsByNameAndPrecedence[key];
+
+                    if (operandNonTerminal != null)
+                        GenerateExpressionParser(configuration, operandNonTerminal, operationsByPrecedence,
+                            parserClass.Name, key);
+                }
             }
 
             result.Result = configuration;
             return result;
         }
 
-        private string GetOperandNonTerminal<IN, OUT>(Type parserClass, ParserConfiguration<IN,OUT> configuration,
+        private string GetOperandNonTerminal<IN, OUT>(Type parserClass, ParserConfiguration<IN, OUT> configuration,
             BuildResult<ParserConfiguration<IN, OUT>> result) where IN : struct
         {
             List<MethodInfo> methods;
             methods = parserClass.GetMethods().ToList();
-            
+
             var operandMethods = methods.Where(m =>
             {
                 var attributes = m.GetCustomAttributes().ToList();
                 var attr = attributes.Find(a => a.GetType() == typeof(OperandAttribute));
                 return attr != null;
             }).ToList();
-            
-            
+
+
             if (!operandMethods.Any())
             {
-                result.AddError(new ParserInitializationError(ErrorLevel.FATAL, I18N.Instance.GetText(I18n,Message.MissingOperand),ErrorCodes.PARSER_MISSING_OPERAND));
+                result.AddError(new ParserInitializationError(ErrorLevel.FATAL, I18N.Instance.GetText(I18n, Message.MissingOperand), ErrorCodes.PARSER_MISSING_OPERAND));
                 throw new Exception("missing [operand] attribute");
             }
 
@@ -140,8 +159,8 @@ namespace sly.parser.generator
                 operandNonTerminalName = $"{parserClass.Name}_operand";
                 var operandNonTerminals = operandMethods.Select(x => GetNonTerminalNameFromProductionMethod<IN, OUT>(x));
                 var operandNonTerminal = new NonTerminal<IN>(operandNonTerminalName);
-                
-                
+
+
                 foreach (var operand in operandNonTerminals)
                 {
                     if (!string.IsNullOrEmpty(operand))
@@ -150,7 +169,7 @@ namespace sly.parser.generator
                         {
                             IsByPassRule = true,
                             IsExpressionRule = true,
-                            Clauses = new List<IClause<IN>>() {new NonTerminalClause<IN>(operand)}
+                            Clauses = new List<IClause<IN>>() { new NonTerminalClause<IN>(operand) }
                         };
                         operandNonTerminal.Rules.Add(rule);
                     }
@@ -178,7 +197,7 @@ namespace sly.parser.generator
 
         private void GenerateExpressionParser<IN, OUT>(ParserConfiguration<IN, OUT> configuration,
             string operandNonTerminal, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence,
-            string parserClassName) where IN : struct
+            string parserClassName, string operationName) where IN : struct
         {
             var precedences = operationsByPrecedence.Keys.ToList();
             precedences.Sort();
@@ -197,7 +216,11 @@ namespace sly.parser.generator
             }
 
             // entry point non terminal
-            var entrypoint = new NonTerminal<IN>($"{parserClassName}_expressions", new List<Rule<IN>>());
+            var entrypointName = $"{parserClassName}_expressions" +
+                                 (!string.IsNullOrEmpty(operationName) && operationName != "Default"
+                                     ? $"_{operationName}"
+                                     : "");
+            var entrypoint = new NonTerminal<IN>(entrypointName, new List<Rule<IN>>());
             var prec = precedences[0];
             var lowestname = GetNonTerminalNameForPrecedence(prec, operationsByPrecedence, operandNonTerminal);
             var rule = new Rule<IN>();
@@ -301,7 +324,7 @@ namespace sly.parser.generator
                 .Select(oper => oper.ToString())
                 .ToList()
                 .Aggregate((s1, s2) => $"{s1}_{s2}");
-            
+
             return $"expr_{precedence}_{operatorsPart}";
         }
     }
