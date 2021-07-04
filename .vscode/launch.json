@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceRoot}/samples/ParserExample/bin/Debug/netcoreapp2.0/ParserExample.dll",
+            "program": "${workspaceRoot}/samples/ParserExample/bin/Debug/netcoreapp3.1/ParserExample.dll",
             "args": [],
             "cwd": "${workspaceRoot}/samples/ParserExample",
             // For more information about the 'console' field, see https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md#console-terminal-window
