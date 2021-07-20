@@ -41,7 +41,7 @@
                 "/p:CollectCoverage=true",
                 "/p:CoverletOutputFormat=lcov",
                 "/p:CoverletOutput=./lcov",
-                "/p:exclude=\"[while]*,[jsonparser]*,[expressionParser]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*\"",
+                "/p:exclude=\"[while]*,[jsonparser]*,[expressionParser]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indentedWhile]*,[indented]*\"",
                 "${workspaceFolder}/ParserTests/ParserTests.csproj"
             ],
             "problemMatcher": "$msCompile",            

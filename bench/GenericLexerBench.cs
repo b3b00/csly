@@ -52,7 +52,7 @@ namespace bench
         [Benchmark]
         
         public void TestJson() {
-            var ignored = BenchedLexer.Tokenize(content).ToList();
+            var ignored = BenchedLexer.Tokenize(content).Tokens;
         }
 
 
