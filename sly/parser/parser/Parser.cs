@@ -74,6 +74,10 @@ namespace sly.parser
             }
 
             var tokens = lexingResult.Tokens;
+            if (Lexer.LexerPostProcess != null)
+            {
+                tokens = Lexer.LexerPostProcess(tokens);
+            }
             var position = 0;
             var tokensWithoutComments = new List<Token<IN>>();
             for (var i = 0; i < tokens.Count; i++)
