@@ -20,6 +20,8 @@ namespace sly.lexer.fsm
     }
 
     public delegate void BuildExtension<IN>(IN token, LexemeAttribute lexem, GenericLexer<IN> lexer) where IN : struct;
+    
+    public delegate List<Token<IN>> LexerPostProcess<IN>(List<Token<IN>> tokens) where IN : struct;
 
     public class FSMLexer<N>
     {

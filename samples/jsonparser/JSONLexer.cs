@@ -8,7 +8,8 @@ namespace jsonparser
     public class JSONLexer : ILexer<JsonToken>
     {
         public string I18n { get; set; }
-        
+        public LexerPostProcess<JsonToken> LexerPostProcess { get; set; }
+
         public void AddDefinition(TokenDefinition<JsonToken> tokenDefinition)
         {
         }
