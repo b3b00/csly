@@ -53,7 +53,7 @@ namespace sly.parser.generator
         ///     <param name="rootRule">the name of the root non terminal of the grammar</param>
         ///     <returns></returns>
         public virtual BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType,
-            string rootRule, BuildExtension<IN> extensionBuilder = null)
+            string rootRule, BuildExtension<IN> extensionBuilder = null, LexerPostProcess<IN> lexerPostProcess = null)
         {
             Parser<IN, OUT> parser = null;
             var result = new BuildResult<Parser<IN, OUT>>();
@@ -74,7 +74,7 @@ namespace sly.parser.generator
                 var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                 var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
                 parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
-                var lexerResult = BuildLexer(extensionBuilder);
+                var lexerResult = BuildLexer(extensionBuilder, lexerPostProcess);
                 parser.Lexer = lexerResult.Result;
                 if (lexerResult.IsError)
                 {
@@ -161,9 +161,10 @@ namespace sly.parser.generator
         }
 
 
-        protected virtual BuildResult<ILexer<IN>> BuildLexer(BuildExtension<IN> extensionBuilder =  null)
+        protected virtual BuildResult<ILexer<IN>> BuildLexer(BuildExtension<IN> extensionBuilder = null,
+            LexerPostProcess<IN> lexerPostProcess = null)
         {
-            var lexer = LexerBuilder.BuildLexer(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n);
+            var lexer = LexerBuilder.BuildLexer(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n, lexerPostProcess);
             return lexer;
         }
 

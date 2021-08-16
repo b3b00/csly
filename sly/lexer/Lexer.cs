@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using sly.lexer.fsm;
 
 namespace sly.lexer
 {
@@ -10,7 +11,8 @@ namespace sly.lexer
     public class Lexer<T> : ILexer<T> where T : struct
     {
         public string I18n { get; set; }
-        
+        public LexerPostProcess<T> LexerPostProcess { get; set; }
+
         private readonly IList<TokenDefinition<T>> tokenDefinitions = new List<TokenDefinition<T>>();
 
         public void AddDefinition(TokenDefinition<T> tokenDefinition)

@@ -85,14 +85,15 @@ namespace sly.lexer
 
         public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result,
             BuildExtension<IN> extensionBuilder = null,
-            string lang = null) where IN : struct
+            string lang = null, LexerPostProcess<IN> lexerPostProcess = null) where IN : struct
         {
             var attributes = GetLexemes(result,lang);
             if (!result.IsError)
             {
                 result = Build(attributes, result, extensionBuilder,lang);
+                result.Result.LexerPostProcess = lexerPostProcess;
             }
-
+            
             return result;
         }
 

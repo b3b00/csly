@@ -22,7 +22,7 @@ namespace sly.parser.generator
         }
         
         public override BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType,
-            string rootRule, BuildExtension<IN> extensionBuilder = null)
+            string rootRule, BuildExtension<IN> extensionBuilder = null, LexerPostProcess<IN> lexerPostProcess = null)
         {
             var ruleparser = new RuleParser<IN>();
             var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>(I18n);
