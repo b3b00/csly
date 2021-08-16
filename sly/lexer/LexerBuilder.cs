@@ -91,8 +91,9 @@ namespace sly.lexer
             if (!result.IsError)
             {
                 result = Build(attributes, result, extensionBuilder,lang);
+                result.Result.LexerPostProcess = lexerPostProcess;
             }
-            result.Result.LexerPostProcess = lexerPostProcess;
+            
             return result;
         }
 
