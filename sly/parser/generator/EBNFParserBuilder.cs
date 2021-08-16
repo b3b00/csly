@@ -66,7 +66,7 @@ namespace sly.parser.generator
                 visitor = new EBNFSyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
             var parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
             parser.Configuration = configuration;
-            var lexerResult = BuildLexer(extensionBuilder);
+            var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess);
             if (lexerResult.IsError)
             {
                 foreach (var lexerResultError in lexerResult.Errors)

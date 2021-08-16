@@ -33,6 +33,10 @@
     <ProjectReference Include="..\SimpleExpressionParser\SimpleExpressionParser.csproj" />
     <ProjectReference Include="..\while\while.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="expressionModel" />
+  </ItemGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
      <NoWarn>1701;1702;1705;1591</NoWarn>
