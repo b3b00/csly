@@ -95,7 +95,7 @@ You should therefore not use it to define strong-typed languages like  C# or Jav
 
 #### Csly is #### 
 
-Csly is perfect for small [Domain-Specific Languages](https://en.wikipedia.org/wiki/Domain-specific_language) that are bundled in C# applications. 
+Csly is perfect for small [domain-specific languages (DSLs)](https://en.wikipedia.org/wiki/Domain-specific_language) that can be bundled in C# applications for end-users to interact with your application using natural language, for example. 
 
 ## Installation ##
 
