@@ -40,15 +40,13 @@ Csly has been designed to avoid extra build steps. Parser generators often need 
 ### Compact lexer/parser definition ### 
 
 The csly lexer/parser is defined with only 2 types: 
-    - a C# ```enum``` for the lexer
-    - a C# ```class``` for the parser
+ - a C# ```enum``` for the lexer,
+ - a C# ```class``` for the parser.
 
-Lexeme and parser production rules are defined using C# ```custom attributes``` making your code compact and readable.
- Although these features already exist with parser combinators (like [Sprache](https://github.com/sprache/Sprache) 
- or [Eto.Parse](https://github.com/picoe/Eto.Parse)), 
- csly can use productions rules defined using either [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  
- [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser)  notation, which I think is more natural and easier to understand, assuring maintainability.
-
+Lexeme and parser production rules are defined using C# custom attributes making your code compact and readable.
+Although these features already exist with parser combinators (like [Sprache](https://github.com/sprache/Sprache) 
+or [Eto.Parse](https://github.com/picoe/Eto.Parse)), 
+csly can use productions rules defined using either [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser)  notation, which I think is more natural and easier to understand, assuring maintainability.
 
 >###  Define languages in a very compact and dependency-free way
 
@@ -64,9 +62,7 @@ See [Lexer](https://github.com/b3b00/csly/wiki/Lexer) for lexers definition and 
 ### Expression parsing ### 
 
 Many domain-specific languages need parsing expressions (boolean or numeric).
- A recursive-descent parser is hard to maintain when parsing expressions have multiple precedence levels. For that reason, csly offers a way to generate expression-parsing rules using only operator tokens and
- a simple-to-understand precedence scheme.
- Csly will then generate production rules to parse expressions, managing precedence and either left-or-right associativity.
+A recursive-descent parser is hard to maintain when parsing expressions have multiple precedence levels. For that reason, csly offers a way to generate expression-parsing rules using only operator tokens and a simple-to-understand precedence scheme. Csly will then generate production rules to parse expressions, managing precedence and either left-or-right associativity.
 
 >### Avoid burdensome home-made expression parser implementations.
 
