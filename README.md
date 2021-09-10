@@ -17,7 +17,7 @@ to simplify generating lexer/parsers in C#.
 ## Getting started ##
 
 If you'd like to get coding right away, read 
-the  [quick getting-started guide](https://github.com/b3b00/csly/wiki/getting-started) hich will guide you through the implementation of a basic parser.parser.
+the  [quick getting-started guide](https://github.com/b3b00/csly/wiki/getting-started), which will guide you through the implementation of a basic parser.
 
 ## Documentation and examples ## 
 
