@@ -50,7 +50,7 @@ Lexeme and parser production rules are defined using C# ```custom attributes``` 
  [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser)  notation, which I think is more natural and easier to understand, assuring maintainability.
 
 
->###  Define languages in a very compact and dependency-free way. 
+>###  Define languages in a very compact and dependency-free way
 
 See [Lexer](https://github.com/b3b00/csly/wiki/Lexer) for lexers definition and [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser) for parser definitions.
 
