@@ -33,7 +33,7 @@ Csly is packed with special features that make it simpler to use, maintainable, 
 
 Csly has been designed to avoid extra build steps. Parser generators often need a build-time step 
  to generate target language source code. That is not the case with csly.
- A simple Nuget command will configure csly with for use in a 100% .NET implementation.
+ A simple Nuget command will configure csly for use in a 100% .NET implementation.
 
 >### Csly does not need a build-time step, simplifying the build/CI process
 
@@ -44,9 +44,9 @@ The csly lexer/parser is defined with only 2 types:
     - a C# ```class``` for the parser
 
 Lexeme and parser production rules are defined using C# ```custom attributes``` making your code compact and readable.
- Although these features already exists with parser combinators (like [Sprache](https://github.com/sprache/Sprache) 
+ Although these features already exist with parser combinators (like [Sprache](https://github.com/sprache/Sprache) 
  or [Eto.Parse](https://github.com/picoe/Eto.Parse)), 
- csly can use productions rules are defined using either [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  
+ csly can use productions rules defined using either [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  
  [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser)  notation, which I think is more natural and easier to understand, assuring maintainability.
 
 
@@ -59,16 +59,16 @@ See [Lexer](https://github.com/b3b00/csly/wiki/Lexer) for lexers definition and 
  Csly is strictly typed, so every parser you define renders according to its input and output types. 
  For additional details on parser typing, head to the [typing section](typing).
 
->### Be more confident in parser inputs and outputs validity.
+>### Be more confident that your parser will generate valid inputs and outputs.
 
 ### Expression parsing ### 
 
 Many domain-specific languages need parsing expressions (boolean or numeric).
- A recursive-descent parser is hard to maintain when parsing expressions with multiple precedence levels. For that reason, csly offers a way to express expression-parsing using only operator tokens and
+ A recursive-descent parser is hard to maintain when parsing expressions have multiple precedence levels. For that reason, csly offers a way to generate expression-parsing rules using only operator tokens and
  a simple-to-understand precedence scheme.
  Csly will then generate production rules to parse expressions, managing precedence and either left-or-right associativity.
 
->### Avoid burdensome expression parser home-made implementations.
+>### Avoid burdensome home-made expression parser implementations.
 
 see [expression parsing](https://github.com/b3b00/csly/wiki/expression-parsing)
 
@@ -83,9 +83,9 @@ Csly provides native support for indentation. Head to [Indented Languages](https
 ### Generic lexer ### 
 
 Lexemes are often similar from one language to another. Csly introduces a generic lexer that defines common lexemes and which can be reused across languages. 
-The generic lexer has better performance than a regex-based lexer.
+The built-in generic lexer has better performance than a regex-based lexer.
 
->### Reuse common token definition and take avantage of a better lexer performance.
+>### Reuse common token definition and take avantage of better lexer performance.
 
 See [Generic lexer](https://github.com/b3b00/csly/wiki/GenericLexer) for the generic lexer implementation and [Lexer](https://github.com/b3b00/wiki/Lexer) for a general presentation on rolling your own.
 
@@ -95,7 +95,7 @@ See [Generic lexer](https://github.com/b3b00/csly/wiki/GenericLexer) for the gen
 #### Csly is not #### 
 
 Csly is not a fully-featured parser generator like [ANTLR](http://www.antlr.org/).
-You should therefore not use it to define strongly-typed languages like  C# or Java.
+You should therefore not use it to define strong-typed languages like  C# or Java.
 
 #### Csly is #### 
 
