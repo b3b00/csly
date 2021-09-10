@@ -1,4 +1,4 @@
-# C# Lex Yacc #
+# C# lex and yacc #
 
 
 ![Test status](http://teststatusbadge.azurewebsites.net/api/status/mmaitre314/securestringcodegen)
@@ -11,89 +11,95 @@
 [![NuGet](https://img.shields.io/nuget/v/sly.svg)](https://www.nuget.org/packages/sly)
 
 
-CSLY is highly inspired by the python lex yacc library ([PLY](http://www.dabeaz.com/ply/)) and aims at easen the writing of lexer and parser with C#.
+Csly is inspired by the Python lex yacc library ([PLY](http://www.dabeaz.com/ply/)) and aims
+to simplify generating lexer/parsers in C#.
 
 ## Getting started ##
 
-If you're too impatient to further read this readme here is 
-a [quick getting started](https://github.com/b3b00/csly/wiki/getting-started) that will guide you through the implementation of a dumb parser.
+If you'd like to get coding right away, read 
+the  [quick getting-started guide](https://github.com/b3b00/csly/wiki/getting-started) hich will guide you through the implementation of a basic parser.parser.
 
-## full documentation ## 
+## Documentation and examples ## 
 
-Complete documentation can be found in the [wiki](https://github.com/b3b00/csly/wiki)
-
-
-## CSLY special features ##
-
-CSLY provide some special features that make it easier or safer to use.
-
-### fully embedded ###
-
-CSLY has been thought to avoid any extra build step. Parser generators often need a build time step to generate target language source code that do the parse job.
-Juste include a nuget and configure your lexer/parser in pure C# code.
-
->### CSLY does not need a build time step and easen your build / CI process
-
-### compact lexer/parser definition ### 
-
-A lexer/parser is defined with only 2 files : 
-    * a C# ```enum``` for the lexer
-    * a C# ```class``` for the parser
-
-Lexeme and parser production rules are defined with c# ```attributes``` making notation even more compact.
-this features already exists with parser combinators (like [sprache](https://github.com/sprache/Sprache) or [Eto.Parse](https://github.com/picoe/Eto.Parse)), but productions rules are defined using either [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser)  notation which I think is more natural and easier to understand for maintenance.
+Complete documentation can be found in the [wiki](https://github.com/b3b00/csly/wiki). For a list of more advanced 
+samples check out the samples folder in the repo.
 
 
->###  Define languages in a very compact and isolated way. 
+## Csly special features ##
 
-See [Lexer](https://github.com/b3b00/csly/wiki/Lexer) for lexers definition.
-And [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser) for parser definitions.
+Csly is packed with special features that make it simpler to use, maintainable, and type-safe.
+
+### Fully embeddable ###
+
+Csly has been designed to avoid extra build steps. Parser generators often need a build-time step 
+ to generate target language source code. That is not the case with csly.
+ A simple Nuget command will configure csly with for use in a 100% .NET implementation.
+
+>### Csly does not need a build-time step, simplifying the build/CI process
+
+### Compact lexer/parser definition ### 
+
+The csly lexer/parser is defined with only 2 types: 
+    - a C# ```enum``` for the lexer
+    - a C# ```class``` for the parser
+
+Lexeme and parser production rules are defined using C# ```custom attributes``` making your code compact and readable.
+ Although these features already exists with parser combinators (like [Sprache](https://github.com/sprache/Sprache) 
+ or [Eto.Parse](https://github.com/picoe/Eto.Parse)), 
+ csly can use productions rules are defined using either [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  
+ [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser)  notation, which I think is more natural and easier to understand, assuring maintainability.
+
+
+>###  Define languages in a very compact and dependency-free way. 
+
+See [Lexer](https://github.com/b3b00/csly/wiki/Lexer) for lexers definition and [BNF](https://github.com/b3b00/csly/wiki/BNF-Parser) or  [EBNF](https://github.com/b3b00/csly/wiki/EBNF-Parser) for parser definitions.
 
 ### Fully and Strictly typed ### 
 
- CSLY is strictly typed, every parser is defines according to its input and output types. For further reading about parser typing, head to [typing section](typing) to correctly type your parser.
+ Csly is strictly typed, so every parser you define renders according to its input and output types. 
+ For additional details on parser typing, head to the [typing section](typing).
 
 >### Be more confident in parser inputs and outputs validity.
 
-### expression parsing ### 
+### Expression parsing ### 
 
-Many language needs parsing expressions (boolean or numeric).
- A recursive descent parser is hard to maintain when parsing expressions with multiple precedence levels.
- So CSLY offers a way to express expression parsing using only operator tokens and precedence level.
- CSLY will then generates production rules to parse expressions. It also manages precedence and left or right associativity.
+Many domain-specific languages need parsing expressions (boolean or numeric).
+ A recursive-descent parser is hard to maintain when parsing expressions with multiple precedence levels. For that reason, csly offers a way to express expression-parsing using only operator tokens and
+ a simple-to-understand precedence scheme.
+ Csly will then generate production rules to parse expressions, managing precedence and either left-or-right associativity.
 
->### Get rid of the burden of writing an expression parser.
+>### Avoid burdensome expression parser home-made implementations.
 
 see [expression parsing](https://github.com/b3b00/csly/wiki/expression-parsing)
 
 
-### indented languages support ###
+### Indentable languages support ###
 
-Some languages use indentation to deonte blocks (think of Python or Yaml ).
-CSLY provides a way to manage this. Head to [Indented Languages](https://github.com/b3b00/csly/wiki/indented-languages)
+Some languages use indentation to denote functional blocks, like Python or Yaml.
+Csly provides native support for indentation. Head to [Indented Languages](https://github.com/b3b00/csly/wiki/Indented-languages)
 
->### Easily use indentation to make your language structure more readable.
+>### Easily use indentation to make your language more readable.
 
-### generic lexer ### 
+### Generic lexer ### 
 
-Lexemes are often similar from one language to another. So CSLY introduces a Generic Lexer that defines common lexemes that can be reused across languages. furthermore the generic has better performance than a regex based lexer.
+Lexemes are often similar from one language to another. Csly introduces a generic lexer that defines common lexemes and which can be reused across languages. 
+The generic lexer has better performance than a regex-based lexer.
 
 >### Reuse common token definition and take avantage of a better lexer performance.
 
+See [Generic lexer](https://github.com/b3b00/csly/wiki/GenericLexer) for the generic lexer implementation and [Lexer](https://github.com/b3b00/wiki/Lexer) for a general presentation on rolling your own.
 
-See [Generic lexer](https://github.com/b3b00/csly/wiki/GenericLexer) for generic lexer and [Lexer](https://github.com/b3b00/wiki/Lexer) for general presentation.
 
+### What Csly is and isn't ###
 
-### What is and what is not CSLY ###
+#### Csly is not #### 
 
-#### CSLY is not #### 
+Csly is not a fully-featured parser generator like [ANTLR](http://www.antlr.org/).
+You should therefore not use it to define strongly-typed languages like  C# or Java.
 
-CSLY is not a full featured parser generator like [ANTLR](http://www.antlr.org/).
-Hence you should not use it to define a full featured language (say C# or Java).
+#### Csly is #### 
 
-#### CSLY is #### 
-
-CSLY is dedicated to small [Domain-Specific Languages](https://en.wikipedia.org/wiki/Domain-specific_language) that can easily be embedded in a C# code base. 
+Csly is perfect for small [Domain-Specific Languages](https://en.wikipedia.org/wiki/Domain-specific_language) that are bundled in C# applications. 
 
 ## Installation ##
 
