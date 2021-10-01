@@ -82,7 +82,7 @@ namespace sly.parser.syntax.grammar
             return b.ToString();
         }
         
-        public string Dump()
+        public new string Dump()
         {
             return ExpectedToken.ToString();
         }
