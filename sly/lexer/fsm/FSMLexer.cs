@@ -195,7 +195,7 @@ namespace sly.lexer.fsm
                     return ind;
                 }
             }
-            // TODO here : indented language  
+            
             // if line start :
             
             // consume tabs and count them
@@ -296,7 +296,7 @@ namespace sly.lexer.fsm
                         int j = 0;
                         if (indentPosition + current.Length > indents.Count)
                         {
-                            // TODO : erreur d'indentation
+                            // erreur d'indentation
                             var ko = new FSMMatch<N>(false, default(N), " ", lexerPosition, -1, lexerPosition, false)
                             {
                                 IsIndentationError = true
@@ -347,10 +347,7 @@ namespace sly.lexer.fsm
 
                     if (i < currentIndentations.Count)
                     {
-                        // TODO : UINDENT : combien ?
                         uIndentCount = currentIndentations.Count - i;
-
-                        // 
                         currentIndentations.Reverse();
                         var unindented = currentIndentations.Take(i).ToList();
                         var spaces = unindented.Select(x => x.Length).Sum();
