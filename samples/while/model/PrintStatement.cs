@@ -35,10 +35,12 @@ namespace csly.whileLang.model
 
         public Emit<Func<int>> EmitByteCode(CompilerContext context, Emit<Func<int>> emiter)
         {
-            var mi = typeof(Console).GetMethod("WriteLine", new[] {typeof(string)});
-
-            emiter = Value.EmitByteCode(context, emiter);
-            emiter.Call(mi);
+            if (!context.IsQuiet)
+            {
+                var mi = typeof(Console).GetMethod("WriteLine", new[] { typeof(string) });
+                emiter = Value.EmitByteCode(context, emiter);
+                emiter.Call(mi);
+            }
 
             return emiter;
         }

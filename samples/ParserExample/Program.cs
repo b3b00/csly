@@ -139,7 +139,7 @@ namespace ParserExample
 
                     var compiler = new WhileCompiler();
                     var code = compiler.TranspileToCSharp(program);
-                    var f = compiler.CompileToFunction(program);
+                    var f = compiler.CompileToFunction(program,false);
                     int r = f();
                     if (r != 3628800)
                     {
@@ -206,7 +206,7 @@ return r";
 
                     var compiler = new IndentedWhileCompiler();
                     var code = compiler.TranspileToCSharp(program);
-                    var f = compiler.CompileToFunction(program);
+                    var f = compiler.CompileToFunction(program,false);
                     Console.WriteLine("***********************************");
                     Console.WriteLine("***********************************");
                     Console.WriteLine("***********************************");
