@@ -31,12 +31,13 @@ jobs:
     - name: Build with dotnet 
       run: dotnet build --configuration Release     
     - name: Test with dotnet
-      uses: b3b00/coverlet-action@1.1.0
+      uses: b3b00/coverlet-action@1.1.6
       id: 'coverlet'
       if: env.RUN_TESTS
       with:
         testProject: ${{env.TESTS_PROJECT}}
         output: 'lcov.info'
+        threshold: 80
         outputFormat: 'lcov'
         excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*'
     - name: coveralls      
