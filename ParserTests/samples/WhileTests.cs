@@ -140,7 +140,7 @@ namespace ParserTests.samples
 return r
 )";
             var compiler = new WhileCompiler();
-            var func = compiler.CompileToFunction(program);
+            var func = compiler.CompileToFunction(program,true);
             Assert.NotNull(func);
             var f = func();
             Assert.Equal(3628800, f);

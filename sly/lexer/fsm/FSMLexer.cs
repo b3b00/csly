@@ -292,7 +292,6 @@ namespace sly.lexer.fsm
                     while (i < currentIndentations.Count && indentPosition < indents.Count)
                     {
                         var current = currentIndentations[currentIndentations.Count-i-1];
-                        bool ok = true;
                         int j = 0;
                         if (indentPosition + current.Length > indents.Count)
                         {

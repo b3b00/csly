@@ -175,7 +175,6 @@ namespace ParserTests
                 n++;
                 count++;
             }
-            Console.WriteLine(dump);
             Assert.Equal(1, count);
             var eoss = tokens.Where(x => x.IsEOS);
             Assert.Single(eoss);

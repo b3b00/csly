@@ -10,6 +10,7 @@ namespace csly.whileLang.compiler
             CurrentScope = RootScope;
         }
 
+        public bool IsQuiet { get; set; }
 
         public Scope RootScope { get; protected set; }
 

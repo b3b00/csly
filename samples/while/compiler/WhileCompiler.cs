@@ -78,7 +78,7 @@ namespace csly.whileLang.compiler
         }
 
 
-        public Func<int> CompileToFunction(string whileCode)
+        public Func<int> CompileToFunction(string whileCode, bool isQuiet)
         {
             Func<int> function = null;
 
@@ -91,7 +91,7 @@ namespace csly.whileLang.compiler
 
                     var checker = new SemanticChecker();
 
-                    var context = checker.SemanticCheck(ast);
+                    var context = checker.SemanticCheck(ast, isQuiet);
 
                     var emiter = Emit<Func<int>>.NewDynamicMethod("Method" + Guid.NewGuid());
 
@@ -99,7 +99,6 @@ namespace csly.whileLang.compiler
                     //emiter.LoadConstant(42);                    
                     //emiter.Return();
                     function = emiter.CreateDelegate();
-                    object res = function.Invoke();
                 }
             }
             catch

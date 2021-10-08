@@ -371,7 +371,6 @@ namespace sly.parser.llparser
             int currentPosition)
         {
             var startPosition = currentPosition;
-            var endingPosition = 0;
             var nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
 

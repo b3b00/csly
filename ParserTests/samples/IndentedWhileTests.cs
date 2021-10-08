@@ -152,7 +152,7 @@ while i < 11 do
     i := i + 1
 return r";
             var compiler = new IndentedWhileCompiler();
-            var func = compiler.CompileToFunction(program);
+            var func = compiler.CompileToFunction(program,true);
             Assert.NotNull(func);
             var f = func();
             Assert.Equal(3628800, f);
