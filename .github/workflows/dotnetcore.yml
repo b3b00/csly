@@ -36,7 +36,7 @@ jobs:
       if: env.RUN_TESTS
       with:
         testProject: ${{env.TESTS_PROJECT}}
-        threshold: 90
+        threshold: 80
         output: 'lcov.info'
         outputFormat: 'lcov'
         excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*'
