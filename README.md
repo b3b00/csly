@@ -55,8 +55,8 @@ See [Lexer](https://github.com/b3b00/csly/wiki/Lexer) for lexers definition and 
 ### Fully and Strictly typed ### 
 
  Csly is strictly typed, so every parser you define renders according to its input and output types. 
- For additional details on parser typing, head to the [parser definition section](defining-your-parser).
-
+ For additional details on parser typing, head to the [parser definition section](https://github.com/b3b00/csly/wiki/defining-your-parser).
+7
 >### Be more confident that your parser will generate valid inputs and outputs.
 
 ### Expression parsing ### 
