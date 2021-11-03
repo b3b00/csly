@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ParserTests.Issue251;
+using sly.buildresult;
 using sly.lexer;
 using sly.parser.generator;
 using Xunit;
@@ -205,6 +207,17 @@ namespace ParserTests
             Assert.NotNull(parser);
             var exception = Assert.Throws<Exception219>(() => parser.Parse("a = 1"));
             Assert.Equal("visitor error",exception.Message);                
+        }
+        
+        [Fact]
+        public static void Issue251LeftrecForBNF() {
+            ParserBuilder<Issue251Parser.Issue251Tokens,Issue251Parser.ExprClosure> builder = new ParserBuilder<Issue251Parser.Issue251Tokens, Issue251Parser.ExprClosure>();
+            Issue251Parser instance = new Issue251Parser();
+            var bres = builder.BuildParser(instance,ParserType.LL_RECURSIVE_DESCENT, "expr");
+            Assert.False(bres.IsOk);
+            Assert.Equal(1,bres.Errors.Count);
+            var error = bres.Errors.First();
+            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE, error.Code);
         }
     }
 }
