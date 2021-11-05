@@ -364,6 +364,7 @@ namespace sly.parser.llparser
 
             var innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 
+            bool hasByPasNodes = false;
             while (stillOk)
             {
                 SyntaxParseResult<IN> innerResult = null;
@@ -371,10 +372,12 @@ namespace sly.parser.llparser
                 {
                     manyNode.IsManyTokens = true;
                     innerResult = ParseTerminal(tokens, term, currentPosition);
+                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
                 }
                 else if (innerClause is NonTerminalClause<IN> nonTerm)
                 {
                     innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
+                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
                     if (nonTerm.IsGroup)
                         manyNode.IsManyGroups = true;
                     else
@@ -384,12 +387,14 @@ namespace sly.parser.llparser
                 {
                     manyNode.IsManyGroups = true;
                     innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
+                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
                 }
                 else if (innerClause is ChoiceClause<IN> choice)
                 {
                     manyNode.IsManyTokens = choice.IsTerminalChoice;
                     manyNode.IsManyValues = choice.IsNonTerminalChoice;
                     innerResult = ParseChoice(tokens, choice, currentPosition);
+                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
                 }
                 else
                 {
@@ -401,6 +406,7 @@ namespace sly.parser.llparser
                     manyNode.Add(innerResult.Root);
                     currentPosition = innerResult.EndingPosition;
                     lastInnerResult = innerResult;
+                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
                 }
                 else
                 {
@@ -419,6 +425,7 @@ namespace sly.parser.llparser
             result.Errors = innerErrors;
             result.Root = manyNode;
             result.IsEnded = lastInnerResult != null && lastInnerResult.IsEnded;
+            result.HasByPassNodes = hasByPasNodes;
             return result;
         }
 
@@ -432,22 +439,26 @@ namespace sly.parser.llparser
 
             SyntaxParseResult<IN> lastInnerResult = null;
 
+            bool hasByPasNodes = false;
             SyntaxParseResult<IN> firstInnerResult = null;
             if (innerClause is TerminalClause<IN>)
             {
                 manyNode.IsManyTokens = true;
                 firstInnerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
+                hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
             }
             else if (innerClause is NonTerminalClause<IN>)
             {
                 manyNode.IsManyValues = true;
                 firstInnerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
+                hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
             }
             else if (innerClause is ChoiceClause<IN> choice)
             {
                 manyNode.IsManyTokens = choice.IsTerminalChoice;
                 manyNode.IsManyValues = choice.IsNonTerminalChoice;
                 firstInnerResult = ParseChoice(tokens, choice, currentPosition);
+                hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
             }
             else
             {
@@ -480,6 +491,7 @@ namespace sly.parser.llparser
             result.IsError = isError;
             result.Root = manyNode;
             result.IsEnded = lastInnerResult != null && lastInnerResult.IsEnded;
+            result.HasByPassNodes = hasByPasNodes;
             return result;
         }
 
@@ -492,6 +504,7 @@ namespace sly.parser.llparser
 
             SyntaxParseResult<IN> innerResult = null;
 
+            bool hasByPassNode = false;
 
             if (innerClause is TerminalClause<IN> term)
                 innerResult = ParseTerminal(tokens, term, currentPosition);
@@ -540,11 +553,12 @@ namespace sly.parser.llparser
             else
             {
                 var node = innerResult.Root;
-
+                
                 var children = new List<ISyntaxNode<IN>> {innerResult.Root};
                 result.Root =
                     new OptionSyntaxNode<IN>( rule.NonTerminalName,children, rule.GetVisitor());
                 result.EndingPosition = innerResult.EndingPosition;
+                result.HasByPassNodes = innerResult.HasByPassNodes;
             }
 
             return result;
