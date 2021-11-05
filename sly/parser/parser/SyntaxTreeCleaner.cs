@@ -10,7 +10,12 @@ namespace sly.parser.parser
             var tree = result.Root;
             if (tree != null)
             {
-                tree = RemoveByPassNodes(tree);
+                if (result.HasByPassNodes)
+                {
+                    tree = RemoveByPassNodes(tree);
+                }
+                    
+                
                 if (NeedAssociativityProcessing(tree)) tree = SetAssociativity(tree);
                 result.Root = tree;
             }

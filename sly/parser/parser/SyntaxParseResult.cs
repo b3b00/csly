@@ -27,6 +27,8 @@ namespace sly.parser
             }
             Expecting.AddRange(expected);
         }
-        
+
+        public bool HasByPassNodes { get; set; } = false;
+
     }
 }

@@ -320,6 +320,7 @@ namespace sly.parser.llparser
             if (rule.IsExpressionRule && rule.IsByPassRule)
             {
                 node.IsByPassNode = true;
+                node.HasByPassNodes = true;
             }
             else if (rule.IsExpressionRule && !rule.IsByPassRule)
             {
@@ -363,6 +364,7 @@ namespace sly.parser.llparser
             var token = tokens[position];
             token.Discarded = terminal.Discarded;
             result.Root = new SyntaxLeaf<IN>(token,terminal.Discarded);
+            result.HasByPassNodes = false;
             return result;
         }
 
@@ -440,6 +442,7 @@ namespace sly.parser.llparser
             result.EndingPosition = max.EndingPosition;
             result.IsError = max.IsError;
             result.IsEnded = max.IsEnded;
+            result.HasByPassNodes = max.HasByPassNodes;
             
             if (rulesResults.Any())
             {
