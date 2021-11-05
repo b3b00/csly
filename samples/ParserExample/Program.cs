@@ -928,7 +928,8 @@ final = 9999
             // TestI18N();
             // Console.ReadLine(); 
             // TestShortGeneric();
-            TestIssue239();
+            //TestIssue239();
+            TestShortOperations();
         }
 
 
@@ -965,6 +966,19 @@ final = 9999
                 }
             }
             ;
+        }
+
+        private static void TestShortOperations()
+        {
+            var startingRule = $"{typeof(ShortOperationAttributesParser).Name}_expressions";
+            var parserInstance = new ShortOperationAttributesParser();
+            var builder = new ParserBuilder<ExpressionToken, double>();
+            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Assert.True(buildResult.IsOk);
+            var parser = buildResult.Result;
+            Assert.NotNull(parser);
+            var result = parser.Parse("-1 +2 * (5 + 6) - 4 ");
+            Assert.Equal(-1+2*(5+6)-4, result.Result);
         }
 
         private static void TestIssue239()
