@@ -10,10 +10,6 @@ namespace sly.parser.parser
             var tree = result.Root;
             if (tree != null)
             {
-                if (tree.GetType().AssemblyQualifiedName.ToLower().Contains("json"))
-                {
-                    ;
-                }
                 if (result.HasByPassNodes)
                 {
                     tree = RemoveByPassNodes(tree);
