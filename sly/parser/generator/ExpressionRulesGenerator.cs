@@ -59,16 +59,16 @@ namespace sly.parser.generator
             ParserConfiguration<IN, OUT> configuration, Type parserClass,
             BuildResult<ParserConfiguration<IN, OUT>> result) 
         {
+            
             var methods = parserClass.GetMethods().ToList();
             methods = methods.Where(m =>
             {
-                var attributes = m.GetCustomAttributes().ToList();
-                var attr = attributes.Find(a => a.GetType() == typeof(OperationAttribute));
-                return attr != null;
+                var attributes = m.GetCustomAttributes(typeof(OperationAttribute),true).ToList();
+                
+                return attributes.Any();
             }).ToList();
 
             var operationsByPrecedence = new Dictionary<int, List<OperationMetaData<IN>>>();
-
             methods.ForEach(m =>
             {
                 var attributes =

@@ -22,7 +22,93 @@ namespace ParserTests
         }
 
     }
-    
+
+
+    public class ShortOperationAttributesParser
+    {
+        [Infix((int) ExpressionToken.PLUS, Associativity.Right, 10)]
+        [Infix("MINUS", Associativity.Left, 10)]
+        public double BinaryTermExpression(double left, Token<ExpressionToken> operation, double right)
+        {
+            double result = 0;
+            switch (operation.TokenID)
+            {
+                case ExpressionToken.PLUS:
+                {
+                    result = left + right;
+                    break;
+                }
+                case ExpressionToken.MINUS:
+                {
+                    result = left - right;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+
+        [Infix((int) ExpressionToken.TIMES, Associativity.Right, 50)]
+        [Infix("DIVIDE", Associativity.Left, 50)]
+        public double BinaryFactorExpression(double left, Token<ExpressionToken> operation, double right)
+        {
+            double result = 0;
+            switch (operation.TokenID)
+            {
+                case ExpressionToken.TIMES:
+                {
+                    result = left * right;
+                    break;
+                }
+                case ExpressionToken.DIVIDE:
+                {
+                    result = left / right;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+
+        [Prefix((int) ExpressionToken.MINUS,  Associativity.Right, 100)]
+        public double PreFixExpression(Token<ExpressionToken> operation, double value)
+        {
+            return -value;
+        }
+
+        [Postfix((int) ExpressionToken.FACTORIAL,  Associativity.Right, 100)]
+        public double PostFixExpression(double value, Token<ExpressionToken> operation)
+        {
+            var factorial = 1;
+            for (var i = 1; i <= value; i++) factorial = factorial * i;
+            return factorial;
+        }
+
+        
+
+        [Operand]
+        [Production("double_value : DOUBLE")]
+        public double OperandDouble(Token<ExpressionToken> value)
+        {
+            return value.DoubleValue;
+        }
+        
+        [Operand]
+        [Production("int_value : INT")]
+        public double OperandInt(Token<ExpressionToken> value)
+        {
+            return value.DoubleValue;
+        }
+
+        [Operand]
+        [Production("group : LPAREN ShortOperationAttributesParser_expressions RPAREN")]
+        public double OperandGroup(Token<ExpressionToken> lparen, double value, Token<ExpressionToken> rparen)
+        {
+            return value;
+        }
+    }
     
     public class ExpressionGeneratorTests
     {
@@ -248,6 +334,22 @@ namespace ParserTests
             var exception = Assert.Throws<ParserConfigurationException>(() =>
                 builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule));
             Assert.Contains("bad enum name MINUSCULE",exception.Message);
+        }
+
+        [Fact]
+        public void TestShortOperationAttributes()
+        {
+            StartingRule = $"{typeof(ShortOperationAttributesParser).Name}_expressions";
+            var parserInstance = new ShortOperationAttributesParser();
+            var builder = new ParserBuilder<ExpressionToken, double>();
+            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            Assert.True(buildResult.IsOk);
+            var parser = buildResult.Result;
+            Assert.NotNull(parser);
+            var result = parser.Parse("-1 +2 * (5 + 6) - 4 ");
+            Assert.True(result.IsOk);
+            Assert.Equal(-1+2*(5+6)-4, result.Result);
+
         }
     }
 }
