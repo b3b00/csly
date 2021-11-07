@@ -3,13 +3,14 @@ using sly.lexer;
 
 namespace BravoLights.Common.Ast
 {
-
     enum NumericOperator
     {
         Plus,
         Minus,
         Times,
-        Divide
+        Divide,
+        BinaryAnd,
+        BinaryOr
     }
 
     /// <summary>
@@ -46,6 +47,8 @@ namespace BravoLights.Common.Ast
                 "-" => new MinusExpression(lhs, rhs),
                 "*" => new TimesExpression(lhs, rhs),
                 "/" => new DivideExpression(lhs, rhs),
+                "&" => new BitwiseAndExpression(lhs, rhs),
+                "|" => new BitwiseOrExpression(lhs, rhs),
                 _ => throw new Exception($"Unexpected operator: {op.Value}"),
             };
         }
@@ -104,6 +107,34 @@ namespace BravoLights.Common.Ast
         protected override double ComputeNumericValue(double lhs, double rhs)
         {
             return lhs / rhs;
+        }
+    }
+
+    class BitwiseOrExpression : BinaryNumericExpression
+    {
+        public BitwiseOrExpression(IAstNode lhs, IAstNode rhs) : base(lhs, rhs)
+        {
+        }
+
+        protected override string OperatorText => "|";
+
+        protected override double ComputeNumericValue(double lhs, double rhs)
+        {
+            return Convert.ToDouble(Convert.ToInt32(lhs) | Convert.ToInt32(rhs));
+        }
+    }
+
+    class BitwiseAndExpression : BinaryNumericExpression
+    {
+        public BitwiseAndExpression(IAstNode lhs, IAstNode rhs) : base(lhs, rhs)
+        {
+        }
+
+        protected override string OperatorText => "&";
+
+        protected override double ComputeNumericValue(double lhs, double rhs)
+        {
+            return Convert.ToDouble(Convert.ToInt32(lhs) & Convert.ToInt32(rhs));
         }
     }
 }

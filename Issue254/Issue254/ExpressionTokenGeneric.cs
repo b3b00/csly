@@ -2,9 +2,9 @@
 
 namespace BravoLights.Common.Ast
 {
-    public enum ExpressionToken
+    public enum ExpressionTokenGeneric
     {
-        [Lexeme("L:[A-Za-z0-9_]+")]
+        [CustomId("L:","A-Za-z0-9_")]
         LVAR = 50,
 
         [Lexeme("A:[:A-Za-z0-9 ]+,\\s*([A-Za-z0-9 ]+)")]
@@ -14,7 +14,7 @@ namespace BravoLights.Common.Ast
         [Lexeme("\\[[A-Za-z_0-9 ]+:[A-Za-z_0-9 ]+\\]")]
         DCS_VAR = 53,
 
-        [Lexeme("OFF")]
+        [Sugar("OFF")]
         OFF = 0,
 
         [Lexeme("ON")]
@@ -39,19 +39,13 @@ namespace BravoLights.Common.Ast
         [Lexeme("/")]
         DIVIDE = 7,
 
-        [Lexeme("\\|")]
-        BITWISE_OR = 8,
-
-        [Lexeme("&")]
-        BITWISE_AND = 9,
-
         [Lexeme("[ \\t]+", isSkippable: true)]
         WHITESPACE = 20,
 
-        [Lexeme("OR")]
-        LOGICAL_OR = 10,
-        [Lexeme("AND")]
-        LOGICAL_AND = 11,
+        [Lexeme("(\\|\\|)|(OR)")]
+        OR = 10,
+        [Lexeme("(&&)|(AND)")]
+        AND = 11,
 
         [Lexeme("NOT")]
         NOT = 12,
@@ -64,6 +58,6 @@ namespace BravoLights.Common.Ast
 
         [Lexeme("\\)")]
         RPAREN = 31,
-
     }
+
 }
