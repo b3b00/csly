@@ -51,7 +51,7 @@ jobs:
       with:
         reports: ${{steps.coverlet.outputs.coverageFile}} 
         targetdir: 'coveragereport' 
-        reporttypes: 'HtmlInline;lcov' 
+        reporttypes: 'HtmlInline;Cobertura;MarkdownSummary;lcov' 
         verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
         tag: '${{ github.run_number }}_${{ github.run_id }}' 
     - name: Publish coverage summary
