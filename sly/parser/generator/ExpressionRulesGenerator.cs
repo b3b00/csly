@@ -94,6 +94,7 @@ namespace sly.parser.generator
                 }
             });
 
+            
             if (operationsByPrecedence.Count > 0)
             {
                 var operandNonTerminal = GetOperandNonTerminal(parserClass,configuration, result);
@@ -104,6 +105,7 @@ namespace sly.parser.generator
                         parserClass.Name);
             }
 
+            configuration.UsesOperations = operationsByPrecedence.Any(); 
             result.Result = configuration;
             return result;
         }

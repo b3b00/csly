@@ -102,6 +102,7 @@ namespace sly.parser
 
             var cleaner = new SyntaxTreeCleaner<IN>();
             var syntaxResult = SyntaxParser.Parse(tokens, startingNonTerminal);
+            syntaxResult.UsesOperations = Configuration.UsesOperations;
             syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {

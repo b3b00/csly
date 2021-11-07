@@ -16,28 +16,11 @@ namespace sly.parser.parser
                 }
                     
                 
-                if (NeedAssociativityProcessing(tree)) tree = SetAssociativity(tree);
+                if (result.UsesOperations) tree = SetAssociativity(tree);
                 result.Root = tree;
             }
 
             return result;
-        }
-
-        private bool NeedAssociativityProcessing(ISyntaxNode<IN> tree)
-        {
-            var need = false;
-            if (tree is ManySyntaxNode<IN> many)
-                foreach (var child in many.Children)
-                {
-                    need = need || NeedAssociativityProcessing(child);
-                    if (need) break;
-                }
-            else if (tree is SyntaxLeaf<IN> leaf)
-                need = false;
-            else if (tree is SyntaxNode<IN> node) need = true;
-                
-
-            return need;
         }
 
         private ISyntaxNode<IN> RemoveByPassNodes(ISyntaxNode<IN> tree)

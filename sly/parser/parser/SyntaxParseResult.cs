@@ -29,6 +29,6 @@ namespace sly.parser
         }
 
         public bool HasByPassNodes { get; set; } = false;
-
+        public bool UsesOperations { get; set; }
     }
 }
