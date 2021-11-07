@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "indented", "samples\indente
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "indentedWhile", "samples\IndentedWhile\indentedWhile.csproj", "{B1FAADF0-208D-4A0A-A24D-D7BF4E33DCB4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Issue254", "Issue254\Issue254.csproj", "{7E179836-0AD5-4A44-8972-584E67A00441}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -102,6 +104,10 @@ Global
 		{B1FAADF0-208D-4A0A-A24D-D7BF4E33DCB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B1FAADF0-208D-4A0A-A24D-D7BF4E33DCB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B1FAADF0-208D-4A0A-A24D-D7BF4E33DCB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E179836-0AD5-4A44-8972-584E67A00441}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E179836-0AD5-4A44-8972-584E67A00441}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E179836-0AD5-4A44-8972-584E67A00441}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E179836-0AD5-4A44-8972-584E67A00441}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
