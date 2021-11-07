@@ -47,11 +47,11 @@ jobs:
         github-token: ${{secrets.GITHUB_TOKEN }} 
         path-to-lcov: ${{steps.coverlet.outputs.coverageFile}} 
     - name: ReportGenerator
-      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.4
+      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
       with:
         reports: ${{steps.coverlet.outputs.coverageFile}} 
         targetdir: 'coveragereport' 
-        reporttypes: 'HtmlInline;Cobertura;MarkdownSummary' 
+        reporttypes: 'HtmlInline;MarkdownSummary' 
         verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
         tag: '${{ github.run_number }}_${{ github.run_id }}' 
     - name: Publish coverage summary
