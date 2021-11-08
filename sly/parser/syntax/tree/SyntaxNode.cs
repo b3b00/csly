@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using sly.parser.generator;
 
 namespace sly.parser.syntax.tree
@@ -29,6 +30,18 @@ namespace sly.parser.syntax.tree
         public string Name { get; set; }
 
         public bool HasByPassNodes { get; set; } = false;
+        
+        public string Dump(string tab)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine($"{tab}+ {Name} {(IsByPassNode ? "===":"")}");
+            foreach (var child in Children)
+            {
+                builder.AppendLine($"{child.Dump(tab + "\t")}");
+            }
+
+            return builder.ToString();
+        }
 
         #region expression syntax nodes
 
@@ -79,6 +92,10 @@ namespace sly.parser.syntax.tree
             }
         }
 
+        
+        
+        
+        
         #endregion
     }
 }

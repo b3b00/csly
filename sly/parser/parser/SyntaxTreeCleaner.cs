@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using sly.parser.generator.visitor;
 using sly.parser.syntax.tree;
 
 namespace sly.parser.parser
@@ -7,9 +9,19 @@ namespace sly.parser.parser
     {
         public SyntaxParseResult<IN> CleanSyntaxTree(SyntaxParseResult<IN> result)
         {
+            if (result.GetType().FullName.ToLower().Contains("expr"))
+            {
+                ;
+            }
+            
             var tree = result.Root;
             if (tree != null)
             {
+                // var graphviz = new GraphVizEBNFSyntaxTreeVisitor<IN>();
+                // var root = graphviz.VisitTree(tree);
+                // string graph = graphviz.Graph.Compile();
+                // File.Delete("c:\\temp\\complete-tree.dot");
+                // File.AppendAllText("c:\\temp\\complete-tree.dot", graph);
                 if (result.HasByPassNodes)
                 {
                     tree = RemoveByPassNodes(tree);

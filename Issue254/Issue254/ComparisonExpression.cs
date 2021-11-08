@@ -42,6 +42,20 @@ namespace BravoLights.Common.Ast
                 _ => throw new Exception($"Unexpected operator {token.Value}"),
             };
         }
+        
+        public static ComparisonExpression Create(IAstNode lhs, Token<OldExpressionToken> token, IAstNode rhs)
+        {
+            return token.Value switch
+            {
+                "<" => new LtComparison(lhs, rhs),
+                "<=" => new LeqComparison(lhs, rhs),
+                "==" => new EqComparison(lhs, rhs),
+                "!=" or "<>" => new NeqComparison(lhs, rhs),
+                ">=" => new GeqComparison(lhs, rhs),
+                ">" => new GtComparison(lhs, rhs),
+                _ => throw new Exception($"Unexpected operator {token.Value}"),
+            };
+        }
     }
 
     class LtComparison : ComparisonExpression

@@ -20,6 +20,16 @@ namespace BravoLights.Common.Ast
                 _ => throw new Exception($"Unexpected operator {token.Value}"),
             };
         }
+        
+        public static BooleanLogicalExpression Create(IAstNode lhs, Token<OldExpressionToken> token, IAstNode rhs)
+        {
+            return token.TokenID switch
+            {
+                 OldExpressionToken.AND => new AndExpression(lhs, rhs),
+                OldExpressionToken.OR => new OrExpression(lhs, rhs),
+                _ => throw new Exception($"Unexpected operator {token.Value}"),
+            };
+        }
     }
 
     class AndExpression : BooleanLogicalExpression

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
 using sly.parser.generator;
@@ -314,13 +315,17 @@ namespace sly.parser.llparser
             return result;
         }
 
+        public static int Count = 0;
+
         protected SyntaxNode<IN> ManageExpressionRules(Rule<IN> rule, SyntaxNode<IN> node)
         {
             var operatorIndex = -1;
             if (rule.IsExpressionRule && rule.IsByPassRule)
             {
+                Count++;
                 node.IsByPassNode = true;
                 node.HasByPassNodes = true;
+                // Console.WriteLine($"============ {Count}");
             }
             else if (rule.IsExpressionRule && !rule.IsByPassRule)
             {

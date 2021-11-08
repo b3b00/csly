@@ -52,6 +52,20 @@ namespace BravoLights.Common.Ast
                 _ => throw new Exception($"Unexpected operator: {op.Value}"),
             };
         }
+        
+        public static BinaryNumericExpression Create(IAstNode lhs, Token<OldExpressionToken> op, IAstNode rhs)
+        {
+            return op.Value switch
+            {
+                "+" => new PlusExpression(lhs, rhs),
+                "-" => new MinusExpression(lhs, rhs),
+                "*" => new TimesExpression(lhs, rhs),
+                "/" => new DivideExpression(lhs, rhs),
+                "&" => new BitwiseAndExpression(lhs, rhs),
+                "|" => new BitwiseOrExpression(lhs, rhs),
+                _ => throw new Exception($"Unexpected operator: {op.Value}"),
+            };
+        }
     }
 
     class PlusExpression : BinaryNumericExpression

@@ -37,39 +37,39 @@ namespace BravoLights.Common
             return new LiteralNumericNode(value);
         }
 
-        [Infix((int)ExpressionToken.PLUS, Associativity.Left, 14)]
-        [Infix((int)ExpressionToken.MINUS, Associativity.Left, 14)]
-        [Infix((int)ExpressionToken.TIMES, Associativity.Left, 15)]
-        [Infix((int)ExpressionToken.DIVIDE, Associativity.Left, 15)]
-        [Infix((int)ExpressionToken.BITWISE_AND, Associativity.Left, 10)]
-        [Infix((int)ExpressionToken.BITWISE_OR, Associativity.Left, 8)]
+        [Operation((int)ExpressionToken.PLUS,Affix.InFix, Associativity.Left, 14)]
+        [Operation((int)ExpressionToken.MINUS, Affix.InFix,Associativity.Left, 14)]
+        [Operation((int)ExpressionToken.TIMES, Affix.InFix, Associativity.Left, 15)]
+        [Operation((int)ExpressionToken.DIVIDE, Affix.InFix, Associativity.Left, 15)]
+        [Operation((int)ExpressionToken.BITWISE_AND, Affix.InFix, Associativity.Left, 10)]
+        [Operation((int)ExpressionToken.BITWISE_OR, Affix.InFix, Associativity.Left, 8)]
         public IAstNode NumberExpression(IAstNode lhs, Token<ExpressionToken> token, IAstNode rhs)
         {
             return BinaryNumericExpression.Create(lhs, token, rhs);
         }
 
-        [Infix((int)ExpressionToken.LOGICAL_AND, Associativity.Left, 7)]
-        [Infix((int)ExpressionToken.LOGICAL_OR, Associativity.Left, 6)]
+        [Operation((int)ExpressionToken.LOGICAL_AND, Affix.InFix, Associativity.Left, 7)]
+        [Operation((int)ExpressionToken.LOGICAL_OR, Affix.InFix, Associativity.Left, 6)]
         public IAstNode LogicalExpression(IAstNode lhs, Token<ExpressionToken> token, IAstNode rhs)
         {
             return BooleanLogicalExpression.Create(lhs, token, rhs);
         }
 
-        [Prefix((int)ExpressionToken.MINUS, Associativity.Right, 17)]
+        [Operation((int)ExpressionToken.MINUS, Affix.PreFix, Associativity.Right, 17)]
         public IAstNode NumericExpression(Token<ExpressionToken> _, IAstNode child)
         {
             return new UnaryMinusExpression(child);
         }
 
         // We want NOT to to bind tighter than AND/OR but looser than numeric comparison operations
-        [Prefix((int)ExpressionToken.NOT, Associativity.Right, 11)]
+        [Operation((int)ExpressionToken.NOT, Affix.PreFix,  Associativity.Right, 11)]
         public IAstNode LogicalExpression(Token<ExpressionToken> _, IAstNode child)
         {
             return new NotExpression(child);
         }
 
 
-        [Infix((int)ExpressionToken.COMPARISON, Associativity.Left, 12)]
+        [Operation((int)ExpressionToken.COMPARISON,  Affix.InFix,Associativity.Left, 12)]
         public IAstNode Comparison(IAstNode lhs, Token<ExpressionToken> token, IAstNode rhs)
         {
             return ComparisonExpression.Create(lhs, token, rhs);

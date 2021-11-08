@@ -106,6 +106,11 @@ namespace sly.parser.generator.visitor
                 label = node.Operation.OperatorToken.ToString();
             }
 
+            if (node.IsByPassNode)
+            {
+                label += " ##";
+            }
+
             return label;
         }
 
@@ -123,11 +128,14 @@ namespace sly.parser.generator.visitor
                 children.Add(v);
             }
 
-            if (node.IsByPassNode)
-            {
-                result = children[0];
-            }
-            else
+
+
+            // if (node.IsByPassNode)
+            // {
+            //     
+            //     // result = children[0];
+            // }
+            // else
             {
 
                 result = Node(GetNodeLabel(node));
