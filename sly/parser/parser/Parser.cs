@@ -1,5 +1,4 @@
 ﻿
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.buildresult;
@@ -108,19 +107,6 @@ namespace sly.parser
             if (syntaxResult.IsOk)
             {
                 var dump = syntaxResult.Root.Dump("");
-
-
-                if (SyntaxParser.StartingNonTerminal != null &&
-                    SyntaxParser.StartingNonTerminal.ToLower().Contains("msfs"))
-                {
-                    Console.WriteLine(dump);
-                }
-
-                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<IN>();
-                var root = graphviz.VisitTree(syntaxResult.Root);
-                string graph = graphviz.Graph.Compile();
-                System.IO.File.Delete("c:\\temp\\complete-tree.dot");
-                System.IO.File.AppendAllText("c:\\temp\\complete-tree.dot", graph);
             }
 
             syntaxResult.UsesOperations = Configuration.UsesOperations;

@@ -141,6 +141,7 @@ namespace sly.parser.generator
             {
                 operandNonTerminalName = $"{parserClass.Name}_operand";
                 var operandNonTerminals = operandMethods.Select(GetNonTerminalNameFromProductionMethod);
+                operandNonTerminals = operandNonTerminals.Distinct();
                 var operandNonTerminal = new NonTerminal<IN>(operandNonTerminalName);
                 
                 
