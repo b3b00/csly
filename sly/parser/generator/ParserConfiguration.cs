@@ -9,6 +9,7 @@ namespace sly.parser.generator
         public string StartingRule { get; set; }
         public Dictionary<string, NonTerminal<IN>> NonTerminals { get; set; }
 
+        public bool UsesOperations { get; set; }
 
         public void AddNonTerminalIfNotExists(NonTerminal<IN> nonTerminal)
         {
