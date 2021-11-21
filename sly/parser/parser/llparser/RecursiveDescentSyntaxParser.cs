@@ -4,6 +4,7 @@ using sly.lexer;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
+using  System.Linq;
 
 namespace sly.parser.llparser
 {
@@ -57,20 +58,30 @@ namespace sly.parser.llparser
 
                 if (result == null)
                 {
-                    var endingPositions = rs.Select(r => r.EndingPosition).ToList();
-                    var lastposition = endingPositions.Max();
-                    var furtherResults = rs.Where(r => r.EndingPosition == lastposition).ToList();
-
-                    
-                    
-                    furtherResults.ForEach(r =>
+                    int lastPosition = -1;
+                    List<SyntaxParseResult<IN>> furtherResults = new List<SyntaxParseResult<IN>>();
+                    //List<UnexpectedTokenSyntaxError<IN>> furtherErrors = new List<UnexpectedTokenSyntaxError<IN>>();
+                    foreach (var r in rs)
                     {
-                        if (r.Errors != null) errors.AddRange(r.Errors);
-                    });
-                    if (!errors.Any())
-                    {
-                        errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastposition], null));
+                        if (r.EndingPosition > lastPosition)
+                        {
+                            lastPosition = r.EndingPosition;
+                            furtherResults.Clear();
+                            errors.Clear();
+                        }
+                        if (r.EndingPosition == lastPosition)
+                        {
+                            furtherResults.Add(r);
+                            errors.AddRange(r.Errors);
+                        }
                     }
+                    
+                    
+                    if (errors.Count == 0)
+                    {
+                        errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastPosition], null));
+                    }
+
                 }
             }
 
@@ -136,7 +147,7 @@ namespace sly.parser.llparser
                             {
                                 children.Add(nonTerminalResult.Root);
                                 currentPosition = nonTerminalResult.EndingPosition;
-                                if (nonTerminalResult.Errors != null && nonTerminalResult.Errors.Any())
+                                if (nonTerminalResult.Errors != null && nonTerminalResult.Errors.Count > 0)
                                     errors.AddRange(nonTerminalResult.Errors);
                             }
                             else
@@ -260,7 +271,7 @@ namespace sly.parser.llparser
 
                     var other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
                     if (innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null &&
-                        !innerRuleRes.Errors.Any() || other)
+                        innerRuleRes.Errors.Count == 0 || other)
                     {
                         greaterIndex = innerRuleRes.EndingPosition;
                         //innerRuleErrors.Clear();
@@ -273,28 +284,56 @@ namespace sly.parser.llparser
                 i++;
             }
 
-            if (rulesResults.Count() == 0)
+            if (rulesResults.Count == 0)
             {
                 var allAcceptableTokens = new List<IN>();
                 nt.Rules.ForEach(r =>
                 {
                     if (r != null && r.PossibleLeadingTokens != null) allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
                 });
-                allAcceptableTokens = allAcceptableTokens.Distinct().ToList();
+                // allAcceptableTokens = allAcceptableTokens.ToList();
                 return NoMatchingRuleError(tokens, currentPosition, allAcceptableTokens);
             }
 
             errors.AddRange(innerRuleErrors);
             SyntaxParseResult<IN> max = null;
-            if (rulesResults.Any())
+            int okEndingPosition = -1;
+            int koEndingPosition = -1;
+            bool hasOk = false;
+            bool hasKo = false;
+            SyntaxParseResult<IN> maxOk = null;
+            SyntaxParseResult<IN> maxKo = null;
+            if (rulesResults.Count > 0)
             {
-                if (rulesResults.Any(x => x.IsOk))
+                foreach (var rulesResult in rulesResults)
                 {
-                    max = rulesResults.Where(x => x.IsOk).OrderBy(x => x.EndingPosition).Last();
+                    if (rulesResult.IsOk)
+                    {
+                        hasOk = true;
+                        if (rulesResult.EndingPosition > okEndingPosition)
+                        {
+                            okEndingPosition = rulesResult.EndingPosition;
+                            maxOk = rulesResult;
+                        }
+                    }
+                    if (rulesResult.IsError)
+                    {
+                        hasKo = true;
+                        if (rulesResult.EndingPosition > koEndingPosition)
+                        {
+                            koEndingPosition = rulesResult.EndingPosition;
+                            maxKo = rulesResult;
+                        }
+                    }
+                }
+
+                if (hasOk)
+                {
+                    max = maxOk;
                 }
                 else
                 {
-                    max = rulesResults.Where(x => !x.IsOk).OrderBy(x => x.EndingPosition).Last();
+                    max = maxKo;
                 }
             }
             else
@@ -314,12 +353,17 @@ namespace sly.parser.llparser
             result.IsEnded = max.IsEnded;
             result.HasByPassNodes = max.HasByPassNodes;
             
-            if (rulesResults.Any())
+            if (rulesResults.Count > 0)
             {
-                var terr = rulesResults.SelectMany(x => x.Errors).ToList();
-                var unexpected = terr.Cast<UnexpectedTokenSyntaxError<IN>>().ToList();
-                var expecting = unexpected.SelectMany(x => x.ExpectedTokens).ToList();
-                result.AddExpectings(expecting);
+                List<UnexpectedTokenSyntaxError<IN>> terr = new List<UnexpectedTokenSyntaxError<IN>>();
+                foreach (var ruleResult in rulesResults)
+                {
+                    terr.AddRange(ruleResult.Errors);
+                    foreach (var err in ruleResult.Errors)
+                    {
+                        result.AddExpectings(err.ExpectedTokens);
+                    }
+                }
             }
             
             return result;
@@ -332,12 +376,12 @@ namespace sly.parser.llparser
             if (currentPosition < tokens.Count)
             {
                 noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],I18n,
-                    allAcceptableTokens.ToArray<IN>()));
+                    allAcceptableTokens));
             }
             else
             {
                 noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(new Token<IN>() {IsEOS = true},I18n,
-                    allAcceptableTokens.ToArray<IN>()));
+                    allAcceptableTokens));
             }
 
             var error = new SyntaxParseResult<IN>();
