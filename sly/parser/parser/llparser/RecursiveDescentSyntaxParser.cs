@@ -172,8 +172,6 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var nt = NonTerminals[start];
 
-            //return ParseNonTerminal(tokens, nt.Name, 0);
-            
             var rules = nt.Rules.Where(r => !tokens[0].IsEOS && r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList();
 
             if (!rules.Any())
