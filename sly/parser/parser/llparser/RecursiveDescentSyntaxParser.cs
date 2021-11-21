@@ -172,20 +172,26 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var nt = NonTerminals[start];
 
-            var rules = nt.Rules.Where(r => !tokens[0].IsEOS && r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList();
+            
+            var rs = new List<SyntaxParseResult<IN>>();
 
-            if (!rules.Any())
+            var matchingRuleCount = 0;
+            
+            foreach (var rule in nt.Rules)
+            {
+                if (!tokens[0].IsEOS && rule.PossibleLeadingTokens.Contains(tokens[0].TokenID))
+                {
+                    matchingRuleCount++;
+                    var r = Parse(tokens, rule, 0, start);
+                    rs.Add(r);
+                }
+            }
+
+            if (matchingRuleCount == 0)
             {
                 errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], I18n,nt.PossibleLeadingTokens.ToArray()));
             }
             
-            var rs = new List<SyntaxParseResult<IN>>();
-            foreach (var rule in rules)
-            {
-                var r = Parse(tokens, rule, 0, start);
-                rs.Add(r);
-            }
-
             SyntaxParseResult<IN> result = null;
 
 
@@ -383,11 +389,35 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
 
             var i = 0;
-            var rules = nt.Rules
-                .Where(r => startPosition < tokens.Count && !tokens[startPosition].IsEOS && r.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || r.MayBeEmpty)
-                .ToList();
+            var rules = nt.Rules;
 
-            if (rules.Count == 0 )
+            var innerRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
+            var greaterIndex = 0;
+            var rulesResults = new List<SyntaxParseResult<IN>>();
+            while (i < rules.Count)
+            {
+                var innerrule = rules[i];
+                if (startPosition < tokens.Count && !tokens[startPosition].IsEOS && innerrule.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || innerrule.MayBeEmpty)
+                {
+                    var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTerminalName);
+                    rulesResults.Add(innerRuleRes);
+
+                    var other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
+                    if (innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null &&
+                        !innerRuleRes.Errors.Any() || other)
+                    {
+                        greaterIndex = innerRuleRes.EndingPosition;
+                        //innerRuleErrors.Clear();
+                        innerRuleErrors.AddRange(innerRuleRes.Errors);
+                    }
+
+                    innerRuleErrors.AddRange(innerRuleRes.Errors);
+                }
+
+                i++;
+            }
+
+            if (rulesResults.Count() == 0)
             {
                 var allAcceptableTokens = new List<IN>();
                 nt.Rules.ForEach(r =>
@@ -396,28 +426,6 @@ namespace sly.parser.llparser
                 });
                 allAcceptableTokens = allAcceptableTokens.Distinct().ToList();
                 return NoMatchingRuleError(tokens, currentPosition, allAcceptableTokens);
-            }
-
-            var innerRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
-            var greaterIndex = 0;
-            var rulesResults = new List<SyntaxParseResult<IN>>();
-            while (i < rules.Count)
-            {
-                var innerrule = rules[i];
-                var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTerminalName);
-                rulesResults.Add(innerRuleRes);
-
-                var other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
-                if (innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null &&
-                    !innerRuleRes.Errors.Any() || other)
-                {
-                    greaterIndex = innerRuleRes.EndingPosition;
-                    //innerRuleErrors.Clear();
-                    innerRuleErrors.AddRange(innerRuleRes.Errors);
-                }
-               
-                innerRuleErrors.AddRange(innerRuleRes.Errors);
-                i++;
             }
 
             errors.AddRange(innerRuleErrors);
