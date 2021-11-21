@@ -869,7 +869,7 @@ namespace ParserTests
             var optionParser = buildResult.Result;
 
             var result = optionParser.Parse("a b c", "root");
-            Assert.Equal("R(a,B(b),c)", result.Result);
+            Assert.Equal("R(a,b,c)", result.Result);
         }
 
 

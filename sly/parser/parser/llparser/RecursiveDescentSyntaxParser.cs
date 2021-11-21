@@ -172,6 +172,8 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var nt = NonTerminals[start];
 
+            //return ParseNonTerminal(tokens, nt.Name, 0);
+            
             var rules = nt.Rules.Where(r => !tokens[0].IsEOS && r.PossibleLeadingTokens.Contains(tokens[0].TokenID)).ToList();
 
             if (!rules.Any())
@@ -372,8 +374,14 @@ namespace sly.parser.llparser
         public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, NonTerminalClause<IN> nonTermClause,
             int currentPosition)
         {
+            return ParseNonTerminal(tokens, nonTermClause.NonTerminalName, currentPosition);
+        }
+
+        public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, string nonTerminalName,
+            int currentPosition)
+        {
             var startPosition = currentPosition;
-            var nt = Configuration.NonTerminals[nonTermClause.NonTerminalName];
+            var nt = Configuration.NonTerminals[nonTerminalName];
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
 
             var i = 0;
@@ -398,7 +406,7 @@ namespace sly.parser.llparser
             while (i < rules.Count)
             {
                 var innerrule = rules[i];
-                var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTermClause.NonTerminalName);
+                var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTerminalName);
                 rulesResults.Add(innerRuleRes);
 
                 var other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
