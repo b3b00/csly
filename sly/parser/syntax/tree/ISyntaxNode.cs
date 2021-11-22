@@ -7,5 +7,7 @@
         string Name { get; }
         
         bool HasByPassNodes { get; set; }
+        
+        string Dump(string tab);
     }
 }

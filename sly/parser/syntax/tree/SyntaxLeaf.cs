@@ -17,5 +17,10 @@ namespace sly.parser.syntax.tree
         public string Name => Token.TokenID.ToString();
         
         public bool HasByPassNodes { get; set; } = false;
+        
+        public string Dump(string tab)
+        {
+            return $"{tab}+ {Token.TokenID} : {Token.Value}";
+        }
     }
 }

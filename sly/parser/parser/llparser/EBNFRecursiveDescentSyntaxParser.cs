@@ -21,6 +21,11 @@ namespace sly.parser.llparser
         public override SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position,
             string nonTerminalName)
         {
+            if (rule.IsInfixExpressionRule && rule.IsExpressionRule)
+            {
+                return ParseExpressionRule(tokens, rule, position, nonTerminalName);
+            }
+            
             var currentPosition = position;
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
@@ -142,6 +147,145 @@ namespace sly.parser.llparser
             return result;
         }
 
+        
+        public virtual SyntaxParseResult<IN> ParseExpressionRule(IList<Token<IN>> tokens, Rule<IN> rule, int position,
+            string nonTerminalName)
+        {
+            var currentPosition = position;
+            var errors = new List<UnexpectedTokenSyntaxError<IN>>();
+            var isError = false;
+            var children = new List<ISyntaxNode<IN>>();
+            if (!tokens[position].IsEOS && rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
+                if (rule.Clauses != null && rule.Clauses.Count > 0)
+                {
+                    if (MatchExpressionRuleScheme(rule)) 
+                    {
+                        var first = rule.Clauses[0];
+                        SyntaxParseResult<IN> firstResult = null;
+                        if (first is NonTerminalClause<IN> firstNonTerminal)
+                        {
+                            firstResult = ParseNonTerminal(tokens, firstNonTerminal, currentPosition);
+
+                            if (firstResult.IsError)
+                            {
+                                return firstResult;
+                            }
+                        }
+
+                        currentPosition = firstResult.EndingPosition;
+                        var second = rule.Clauses[1];
+                        SyntaxParseResult<IN> secondResult = null;
+                        if (second is ChoiceClause<IN> secondChoice)
+                        {
+                            secondResult = ParseChoice(tokens, secondChoice, currentPosition);
+
+                            if (secondResult.IsError)
+                            {
+                                if (firstResult.Root is SyntaxNode<IN> node)
+                                {
+                                    node.IsByPassNode = true;
+                                    node.HasByPassNodes = true;
+                                    firstResult.AddExpectings(secondResult.Expecting);
+                                    return firstResult;
+                                }
+                            }
+                        }
+                        if (second is TerminalClause<IN> secondTerminal)
+                        {
+                            secondResult = ParseTerminal(tokens, secondTerminal, currentPosition);
+
+                            if (secondResult.IsError)
+                            {
+                                if (firstResult.Root is SyntaxNode<IN> node)
+                                {
+                                    node.IsByPassNode = true;
+                                    node.HasByPassNodes = true;
+                                    firstResult.AddExpectings(secondResult.Expecting);
+                                    return firstResult;
+                                }
+                            }
+                        }
+                        
+                        
+                        currentPosition = secondResult.EndingPosition;
+                        var third = rule.Clauses[2];
+                        SyntaxParseResult<IN> thirdResult;
+                        if (second is NonTerminalClause<IN> thirdNonTerminal)
+                        {
+                            thirdResult = ParseNonTerminal(tokens, thirdNonTerminal, currentPosition);
+
+                            if (thirdResult.IsError)
+                            {
+                                if (firstResult.Root is SyntaxNode<IN> node)
+                                {
+                                    node.IsByPassNode = true;
+                                    node.HasByPassNodes = true;
+                                    firstResult.AddExpectings(thirdResult.Expecting);
+                                    return firstResult;
+                                }
+                            }
+                            else
+                            {
+                                children = new List<ISyntaxNode<IN>>();
+                                children.Add(firstResult.Root);
+                                children.Add(secondResult.Root);
+                                children.Add(thirdResult.Root);
+                                
+                                var finalNode = new SyntaxNode<IN>( nonTerminalName,  children);
+                                finalNode.ExpressionAffix = rule.ExpressionAffix;
+                                finalNode = ManageExpressionRules(rule, finalNode);
+                                var finalResult = new SyntaxParseResult<IN>();
+                                finalResult.Root = finalNode;
+                                finalResult.IsEnded = currentPosition >= tokens.Count - 1
+                                                      || currentPosition == tokens.Count - 2 &&
+                                                      tokens[tokens.Count - 1].IsEOS;
+                                return finalResult;
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        throw new ParserConfigurationException(
+                            $@"expression rule {rule.RuleString} is incorrect : must have ""nonterminal terminal nonterminal"" scheme");
+                    }
+                    
+                    
+                }
+
+            var result = new SyntaxParseResult<IN>();
+            result.IsError = isError;
+            result.Errors = errors;
+            result.EndingPosition = currentPosition;
+            if (!isError)
+            {
+                SyntaxNode<IN> node = null;
+                if (rule.IsSubRule)
+                    node = new GroupSyntaxNode<IN>(nonTerminalName, children);
+                else
+                    node = new SyntaxNode<IN>( nonTerminalName, children);
+                node = ManageExpressionRules(rule, node);
+                if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
+                    result.Root = children[0];
+                result.Root = node;
+                result.IsEnded = result.EndingPosition >= tokens.Count - 1
+                                 || result.EndingPosition == tokens.Count - 2 &&
+                                 tokens[tokens.Count - 1].IsEOS;
+                
+            }
+
+
+            return result;
+        }
+
+        private static bool MatchExpressionRuleScheme(Rule<IN> rule)
+        {
+            return rule.Clauses.Count == 3
+                   && rule.Clauses[0] is NonTerminalClause<IN>
+                   && (rule.Clauses[1] is ChoiceClause<IN> ||
+                       rule.Clauses[1] is TerminalClause<IN>)
+                   && rule.Clauses[2] is NonTerminalClause<IN>;
+        }
 
         public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position)
         {
