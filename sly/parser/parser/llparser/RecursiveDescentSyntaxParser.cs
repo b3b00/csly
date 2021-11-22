@@ -43,13 +43,6 @@ namespace sly.parser.llparser
                     matchingRuleCount++;
                     var r = Parse(tokens, rule, 0, start);
                     rs.Add(r);
-                    if (typeof(IN).FullName.Contains("ExpressionToken") && Debug.DEBUG_EXPRESSION_OPTIMIZATION)
-                    {
-                        var tree = r.Root;
-                        var dump = tree.Dump("");
-                        Console.WriteLine(dump);
-                        ;
-                    }
                 }
             }
 

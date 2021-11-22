@@ -194,8 +194,12 @@ namespace sly.parser.llparser
                             {
                                 if (firstResult.Root is SyntaxNode<IN> node)
                                 {
-                                    node.IsByPassNode = true;
-                                    node.HasByPassNodes = true;
+                                    if (node.Name == "expr_17_MINUS")
+                                    {
+                                        ;
+                                    }
+                                    // node.IsByPassNode = true;
+                                    // node.HasByPassNodes = true;
                                     firstResult.AddExpectings(secondResult.Expecting);
                                     return firstResult;
                                 }
@@ -216,8 +220,6 @@ namespace sly.parser.llparser
                             {
                                 if (firstResult.Root is SyntaxNode<IN> node)
                                 {
-                                    node.IsByPassNode = true;
-                                    node.HasByPassNodes = true;
                                     firstResult.AddExpectings(secondResult.Expecting);
                                     return firstResult;
                                 }
@@ -236,8 +238,6 @@ namespace sly.parser.llparser
                             {
                                 if (firstResult.Root is SyntaxNode<IN> node)
                                 {
-                                    node.IsByPassNode = true;
-                                    node.HasByPassNodes = true;
                                     firstResult.AddExpectings(thirdResult.Expecting);
                                     return firstResult;
                                 }
