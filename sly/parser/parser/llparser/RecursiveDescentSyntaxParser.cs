@@ -43,7 +43,7 @@ namespace sly.parser.llparser
                     matchingRuleCount++;
                     var r = Parse(tokens, rule, 0, start);
                     rs.Add(r);
-                    if (typeof(IN).FullName.Contains("ExpressionToken"))
+                    if (typeof(IN).FullName.Contains("ExpressionToken") && Debug.DEBUG_EXPRESSION_OPTIMIZATION)
                     {
                         var tree = r.Root;
                         var dump = tree.Dump("");
@@ -276,6 +276,7 @@ namespace sly.parser.llparser
                 if (startPosition < tokens.Count && !tokens[startPosition].IsEOS &&
                     innerrule.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || innerrule.MayBeEmpty)
                 {
+                    Console.WriteLine($"{innerrule.Key} @ {startPosition}");
                     var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTerminalName);
                     rulesResults.Add(innerRuleRes);
 
@@ -354,7 +355,7 @@ namespace sly.parser.llparser
                 max.IsError = true;
                 max.Root = null;
                 max.IsEnded = false;
-                max.EndingPosition = currentPosition;
+                //max.EndingPosition = currentPosition;
             }
 
             var result = new SyntaxParseResult<IN>();

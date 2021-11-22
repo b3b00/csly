@@ -125,7 +125,7 @@ namespace sly.parser.generator.visitor
 
             if (node.IsByPassNode)
             {
-                result = children[0];
+                //result = children[0];
             }
             else
             {

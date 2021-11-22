@@ -21,7 +21,12 @@ namespace sly.parser.llparser
         public override SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position,
             string nonTerminalName)
         {
-            if (rule.IsInfixExpressionRule && rule.IsExpressionRule)
+            if (rule.RuleString == "primary: DECIMAL_NUMBER")
+            {
+                ;
+            }
+            
+            if (rule.IsInfixExpressionRule && rule.IsExpressionRule && Debug.DEBUG_EXPRESSION_OPTIMIZATION)
             {
                 return ParseExpressionRule(tokens, rule, position, nonTerminalName);
             }
@@ -151,6 +156,12 @@ namespace sly.parser.llparser
         public virtual SyntaxParseResult<IN> ParseExpressionRule(IList<Token<IN>> tokens, Rule<IN> rule, int position,
             string nonTerminalName)
         {
+
+            if (nonTerminalName == "expr_14_PLUS_MINUS")
+            {
+                ;
+            }
+            
             var currentPosition = position;
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
@@ -189,7 +200,14 @@ namespace sly.parser.llparser
                                     return firstResult;
                                 }
                             }
+                            else
+                            {
+                                currentPosition = secondResult.EndingPosition;
+                            }
                         }
+
+                        
+                        
                         if (second is TerminalClause<IN> secondTerminal)
                         {
                             secondResult = ParseTerminal(tokens, secondTerminal, currentPosition);
@@ -210,7 +228,7 @@ namespace sly.parser.llparser
                         currentPosition = secondResult.EndingPosition;
                         var third = rule.Clauses[2];
                         SyntaxParseResult<IN> thirdResult;
-                        if (second is NonTerminalClause<IN> thirdNonTerminal)
+                        if (third is NonTerminalClause<IN> thirdNonTerminal)
                         {
                             thirdResult = ParseNonTerminal(tokens, thirdNonTerminal, currentPosition);
 
@@ -230,7 +248,7 @@ namespace sly.parser.llparser
                                 children.Add(firstResult.Root);
                                 children.Add(secondResult.Root);
                                 children.Add(thirdResult.Root);
-                                
+                                currentPosition = thirdResult.EndingPosition;
                                 var finalNode = new SyntaxNode<IN>( nonTerminalName,  children);
                                 finalNode.ExpressionAffix = rule.ExpressionAffix;
                                 finalNode = ManageExpressionRules(rule, finalNode);
@@ -239,6 +257,7 @@ namespace sly.parser.llparser
                                 finalResult.IsEnded = currentPosition >= tokens.Count - 1
                                                       || currentPosition == tokens.Count - 2 &&
                                                       tokens[tokens.Count - 1].IsEOS;
+                                finalResult.EndingPosition = currentPosition;
                                 return finalResult;
                             }
                         }

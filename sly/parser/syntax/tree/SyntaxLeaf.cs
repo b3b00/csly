@@ -20,7 +20,7 @@ namespace sly.parser.syntax.tree
         
         public string Dump(string tab)
         {
-            return $"{tab}+ {Token.TokenID} : {Token.Value}";
+            return $"{tab}+ {Token.TokenID} : {Token.Value} @{Token.PositionInTokenFlow}";
         }
     }
 }
