@@ -269,7 +269,6 @@ namespace sly.parser.llparser
                 if (startPosition < tokens.Count && !tokens[startPosition].IsEOS &&
                     innerrule.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || innerrule.MayBeEmpty)
                 {
-                    Console.WriteLine($"{innerrule.Key} @ {startPosition}");
                     var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTerminalName);
                     rulesResults.Add(innerRuleRes);
 
