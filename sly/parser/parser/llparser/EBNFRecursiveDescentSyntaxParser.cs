@@ -200,6 +200,7 @@ namespace sly.parser.llparser
                                     }
                                     // node.IsByPassNode = true;
                                     // node.HasByPassNodes = true;
+                                    firstResult.Errors.AddRange(secondResult.Errors);
                                     firstResult.AddExpectings(secondResult.Expecting);
                                     return firstResult;
                                 }
@@ -220,6 +221,7 @@ namespace sly.parser.llparser
                             {
                                 if (firstResult.Root is SyntaxNode<IN> node)
                                 {
+                                    firstResult.Errors.AddRange(secondResult.Errors);
                                     firstResult.AddExpectings(secondResult.Expecting);
                                     return firstResult;
                                 }
