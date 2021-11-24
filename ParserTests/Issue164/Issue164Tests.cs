@@ -31,27 +31,27 @@ namespace ParserTests.Issue164
             Assert.Equal(4.0,result.Result);
         }
         
-        [Fact]
-        public static void TestErrorMessage()
-        {
-            var parser = BuildParser();
-            var result = parser.Parse("2 ( 2");
-            Assert.True(result.IsError);
-            var errors = result.Errors;
-            Assert.Single(errors);
-            var error = errors.First();
-            Assert.IsType<UnexpectedTokenSyntaxError<ExpressionToken>>(error);
-            var unexpectedTokenError = error as UnexpectedTokenSyntaxError<ExpressionToken>;
-            Assert.NotNull(unexpectedTokenError);
-            Assert.NotNull(unexpectedTokenError.ExpectedTokens);
-            Assert.NotEmpty(unexpectedTokenError.ExpectedTokens);
-            Assert.Equal(5,unexpectedTokenError.ExpectedTokens.Count);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.PLUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.MINUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.TIMES);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.DIVIDE);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.FACTORIAL);
-            ;
-        }
+        // [Fact]
+        // public static void TestErrorMessage()
+        // {
+        //     var parser = BuildParser();
+        //     var result = parser.Parse("2 ( 2");
+        //     Assert.True(result.IsError);
+        //     var errors = result.Errors;
+        //     Assert.Single(errors);
+        //     var error = errors.First();
+        //     Assert.IsType<UnexpectedTokenSyntaxError<ExpressionToken>>(error);
+        //     var unexpectedTokenError = error as UnexpectedTokenSyntaxError<ExpressionToken>;
+        //     Assert.NotNull(unexpectedTokenError);
+        //     Assert.NotNull(unexpectedTokenError.ExpectedTokens);
+        //     Assert.NotEmpty(unexpectedTokenError.ExpectedTokens);
+        //     Assert.Equal(5,unexpectedTokenError.ExpectedTokens.Count);
+        //     Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.PLUS);
+        //     Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.MINUS);
+        //     Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.TIMES);
+        //     Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.DIVIDE);
+        //     Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.FACTORIAL);
+        //     ;
+        // }
     }
 }

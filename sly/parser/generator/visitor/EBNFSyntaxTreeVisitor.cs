@@ -124,7 +124,7 @@ namespace sly.parser.generator.visitor
 
                 if (node.IsByPassNode)
                 {
-                    result = SyntaxVisitorResult<IN, OUT>.NewValue((OUT) args[0]);
+                    result = SyntaxVisitorResult<IN, OUT>.NewValue((OUT)args[0]);
                 }
                 else
                 {
