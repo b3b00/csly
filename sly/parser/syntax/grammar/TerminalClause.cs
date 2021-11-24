@@ -39,7 +39,7 @@ namespace sly.parser.syntax.grammar
             return b.ToString();
         }
         
-        public string Dump()
+        public virtual string Dump()
         {
             return ExpectedToken.ToString();
         }
@@ -77,14 +77,14 @@ namespace sly.parser.syntax.grammar
         public override string ToString()
         {
             var b = new StringBuilder();
-            b.Append(ExpectedToken);
+            b.Append(ExpectedIndentation == IndentationType.Indent ? "TAB" : "UNTAB" );
             if (Discarded) b.Append("[d]");
             return b.ToString();
         }
         
-        public new string Dump()
+        public override string Dump()
         {
-            return ExpectedToken.ToString();
+            return ToString();
         }
     }
 }
