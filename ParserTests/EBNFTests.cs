@@ -132,7 +132,7 @@ namespace ParserTests
             return r.ToString();
         }
 
-        [Production("root : a B c? ")]
+        [Production("root3 : a B c? ")]
         public string root(Token<OptionTestToken> a, string b, Token<OptionTestToken> c)
         {
             var r = $"R({a.StringWithoutQuotes},{b}";
@@ -712,7 +712,7 @@ namespace ParserTests
             Assert.False(buildResult.IsError);
             var optionParser = buildResult.Result;
 
-            var result = optionParser.Parse("a b", "root");
+            var result = optionParser.Parse("a b", "root3");
             Assert.Equal("R(a,B(b),<none>)", result.Result);
         }
 
@@ -869,7 +869,7 @@ namespace ParserTests
             var optionParser = buildResult.Result;
 
             var result = optionParser.Parse("a b c", "root");
-            Assert.Equal("R(a,B(b),c)", result.Result);
+            Assert.Equal("R(a,b,c)", result.Result);
         }
 
 

@@ -307,17 +307,14 @@ namespace BravoLights.Connections
         public event EventHandler<AircraftEventArgs> OnAircraftLoaded;
         public void ClearSubscriptions()
         {
-            throw new NotImplementedException();
         }
 
         public void Subscribe(short id)
         {
-            throw new NotImplementedException();
         }
 
         public void Unsubscribe(short id)
         {
-            throw new NotImplementedException();
         }
 
         public SimState SimState

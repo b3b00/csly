@@ -24,6 +24,8 @@ namespace sly.parser.syntax.grammar
         private MethodInfo Visitor { get; set; }
 
         public bool IsExpressionRule { get; set; }
+        
+        public bool IsInfixExpressionRule { get; set; }
 
         public Affix ExpressionAffix { get; set; }
 
