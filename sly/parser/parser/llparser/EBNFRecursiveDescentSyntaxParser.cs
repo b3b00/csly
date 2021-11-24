@@ -21,14 +21,10 @@ namespace sly.parser.llparser
         public override SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position,
             string nonTerminalName)
         {
-            if (rule.RuleString == "primary: DECIMAL_NUMBER")
-            {
-                ;
-            }
             
-            if (rule.IsInfixExpressionRule && rule.IsExpressionRule && Debug.DEBUG_EXPRESSION_OPTIMIZATION)
+            if (rule.IsInfixExpressionRule && rule.IsExpressionRule)
             {
-                return ParseExpressionRule(tokens, rule, position, nonTerminalName);
+                return ParseInfixExpressionRule(tokens, rule, position, nonTerminalName);
             }
             
             var currentPosition = position;
@@ -153,15 +149,9 @@ namespace sly.parser.llparser
         }
 
         
-        public virtual SyntaxParseResult<IN> ParseExpressionRule(IList<Token<IN>> tokens, Rule<IN> rule, int position,
+        public virtual SyntaxParseResult<IN> ParseInfixExpressionRule(IList<Token<IN>> tokens, Rule<IN> rule, int position,
             string nonTerminalName)
         {
-
-            if (nonTerminalName == "expr_14_PLUS_MINUS")
-            {
-                ;
-            }
-            
             var currentPosition = position;
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;

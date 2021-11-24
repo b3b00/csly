@@ -277,7 +277,7 @@ namespace sly.parser.generator
                 nonTerminal.Rules.Add(rule);
             }
 
-            if (InFixOps.Count == 0 || !Debug.DEBUG_EXPRESSION_OPTIMIZATION )
+            if (InFixOps.Count == 0)
             {
                 var rule0 = new Rule<IN>();
                 rule0.Clauses.Add(new NonTerminalClause<IN>(nextName));
