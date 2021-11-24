@@ -22,8 +22,6 @@ namespace Issue254.Issue254
         {
             var text = offsetToken.Value;
             var num = text[2..];
-
-            // TODO: error handling
             var value = int.Parse(num, NumberStyles.HexNumber);
             return new LiteralNumericNode(value);
         }
@@ -33,7 +31,7 @@ namespace Issue254.Issue254
         {
             var text = offsetToken.Value;
 
-            // TODO: error handling
+            
             var value = double.Parse(text, CultureInfo.InvariantCulture);
             return new LiteralNumericNode(value);
         }

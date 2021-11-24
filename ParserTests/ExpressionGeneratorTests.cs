@@ -182,12 +182,12 @@ namespace ParserTests
             Assert.Equal(3, nt.Rules.Count);
             Assert.Contains("primary_value", nt.Name);
             nt = nonterminals[2];
-            Assert.Equal(2, nt.Rules.Count);
+            Assert.Equal(1, nt.Rules.Count);
             Assert.Contains("10", nt.Name);
             Assert.Contains("PLUS", nt.Name);
             Assert.Contains("MINUS", nt.Name);
             nt = nonterminals[3];
-            Assert.Equal(2, nt.Rules.Count);
+            Assert.Equal(1, nt.Rules.Count);
             Assert.Contains("50", nt.Name);
             Assert.Contains("TIMES", nt.Name);
             Assert.Contains("DIVIDE", nt.Name);

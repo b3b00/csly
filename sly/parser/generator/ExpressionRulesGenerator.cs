@@ -234,6 +234,8 @@ namespace sly.parser.generator
                 {
                     rule.SetVisitor(x);
                     rule.IsExpressionRule = true;
+                    rule.IsInfixExpressionRule = true;
+
                 });
                 nonTerminal.Rules.Add(rule);
             }
@@ -275,12 +277,15 @@ namespace sly.parser.generator
                 nonTerminal.Rules.Add(rule);
             }
 
-            var rule0 = new Rule<IN>();
-            rule0.Clauses.Add(new NonTerminalClause<IN>(nextName));
-            rule0.IsExpressionRule = true;
-            rule0.ExpressionAffix = Affix.NotOperator;
-            rule0.IsByPassRule = true;
-            nonTerminal.Rules.Add(rule0);
+            if (InFixOps.Count == 0 || !Debug.DEBUG_EXPRESSION_OPTIMIZATION )
+            {
+                var rule0 = new Rule<IN>();
+                rule0.Clauses.Add(new NonTerminalClause<IN>(nextName));
+                rule0.IsExpressionRule = true;
+                rule0.ExpressionAffix = Affix.NotOperator;
+                rule0.IsByPassRule = true;
+                nonTerminal.Rules.Add(rule0);
+            }
 
             return nonTerminal;
         }

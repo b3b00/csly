@@ -8,227 +8,29 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.llparser
 {
-    public class EBNFRecursiveDescentSyntaxParser<IN, OUT> : RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
+    public partial  class EBNFRecursiveDescentSyntaxParser<IN, OUT> : RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
     {
         public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal, string i18n)
             : base(configuration, startingNonTerminal, i18n)
         {
         }
 
-        #region STARTING_TOKENS
-
-        protected override void InitStartingTokensForRuleExtensions(IClause<IN> first, Rule<IN> rule,
-            Dictionary<string, NonTerminal<IN>> nonTerminals)
-        {
-            
-            if (first is TerminalClause<IN>)
-            {
-                var term = first as TerminalClause<IN>;
-
-                InitStartingTokensWithTerminal(rule, term);
-            }
-            else if (first is NonTerminalClause<IN>)
-            {
-                var nonterm = first as NonTerminalClause<IN>;
-                InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
-            }
-            else if (first is ZeroOrMoreClause<IN> zeroOrMore)
-            {
-                InitStartingTokensWithZeroOrMore(rule, zeroOrMore, nonTerminals);
-                int i = 1;
-                bool optional = true;
-                while (i < rule.Clauses.Count && optional)
-                {
-                    IClause<IN> clause = rule.Clauses[i];
-
-                    switch (clause)
-                    {
-                        case TerminalClause<IN> terminalClause:
-                        {
-                            rule.PossibleLeadingTokens.Add(terminalClause.ExpectedToken);
-                            break;
-                        }
-                        case NonTerminalClause<IN> terminalClause:
-                        {
-                            InitStartingTokensForNonTerminal(nonTerminals, terminalClause.NonTerminalName);
-                            NonTerminal<IN> nonTerminal = nonTerminals[terminalClause.NonTerminalName];
-                            {
-                                rule.PossibleLeadingTokens.AddRange(nonTerminal.PossibleLeadingTokens);
-                            }
-                            break;
-                        }
-                        case ChoiceClause<IN> choice:
-                        {
-                            InitStartingTokensWithChoice(rule, choice, nonTerminals);
-                            break;
-                        }
-                        case OptionClause<IN> option:
-                        {
-                            InitStartingTokensWithOption(rule, option, nonTerminals);
-                            break;
-                        }
-                    }
-
-                    // add startig tokens of clause in rule.startingtokens
-                    optional = clause is ZeroOrMoreClause<IN> || clause is OptionClause<IN>;
-                    i++;
-                }
-            }
-            else if (first is OneOrMoreClause<IN>)
-            {
-                var many = first as OneOrMoreClause<IN>;
-                InitStartingTokensWithOneOrMore(rule, many, nonTerminals);
-            }
-            else if (first is ChoiceClause<IN> choice)
-            {
-                InitStartingTokensWithChoice(rule, choice, nonTerminals);
-            }
-            else if (first is OptionClause<IN> option)
-            {
-               InitStartingTokensWithOption(rule,option,nonTerminals);
-               int i = 1;
-               bool optional = true;
-               while (i < rule.Clauses.Count && optional)
-               {
-                   IClause<IN> clause = rule.Clauses[i];
-
-                   switch (clause)
-                   {
-                       case TerminalClause<IN> terminalClause:
-                       {
-                           rule.PossibleLeadingTokens.Add(terminalClause.ExpectedToken);
-                           break;
-                       }
-                       case NonTerminalClause<IN> terminalClause:
-                       {
-                           InitStartingTokensForNonTerminal(nonTerminals, terminalClause.NonTerminalName);
-                           NonTerminal<IN> nonTerminal = nonTerminals[terminalClause.NonTerminalName];
-                           {
-                               rule.PossibleLeadingTokens.AddRange(nonTerminal.PossibleLeadingTokens);
-                           }
-                           break;
-                       }
-                       case ChoiceClause<IN> choiceClause:
-                       {
-                           InitStartingTokensWithChoice(rule, choiceClause, nonTerminals);
-                           break;
-                       }
-                       case OptionClause<IN> optionClause:
-                       {
-                           InitStartingTokensWithOption(rule, optionClause, nonTerminals);
-                           break;
-                       }
-                       case ZeroOrMoreClause<IN> zeroOrMoreClause:
-                       {
-                           InitStartingTokensWithZeroOrMore(rule,zeroOrMoreClause,nonTerminals);
-                           break;
-                       }
-                       case OneOrMoreClause<IN> oneOrMoreClause:
-                       {
-                           InitStartingTokensWithOneOrMore(rule, oneOrMoreClause, nonTerminals);
-                           break;
-                       }
-                    }
-
-                   // add startig tokens of clause in rule.startingtokens
-                   optional = clause is ZeroOrMoreClause<IN> || clause is OptionClause<IN>;
-                   i++;
-               }
-            }
-        }
-
-        private void InitStartingTokensWithOption(Rule<IN> rule, OptionClause<IN> option,
-            Dictionary<string, NonTerminal<IN>> nonTerminals)
-        {
-            if (option.Clause is TerminalClause<IN> term)
-            {
-                InitStartingTokensWithTerminal(rule,term);
-            }
-            else if (option.Clause is NonTerminalClause<IN> nonTerminal)
-            {
-                InitStartingTokensWithNonTerminal(rule,nonTerminal,nonTerminals);
-            }
-            else if (option.Clause is ChoiceClause<IN> choice)
-            {
-                InitStartingTokensWithChoice(rule,choice,nonTerminals);
-            }
-        }
-
-        private void InitStartingTokensWithChoice(Rule<IN> rule, ChoiceClause<IN> choice,Dictionary<string, NonTerminal<IN>> nonTerminals)
-        {
-            foreach (var alternate in choice.Choices)
-            {
-                if (alternate is TerminalClause<IN> term)
-                {
-                    InitStartingTokensWithTerminal(rule,term);
-                }
-                else if (alternate is NonTerminalClause<IN> nonTerminal)
-                {
-                    InitStartingTokensWithNonTerminal(rule,nonTerminal,nonTerminals);
-                }
-            }
-        }
-
-
-        private void InitStartingTokensWithTerminal(Rule<IN> rule, TerminalClause<IN> term)
-        {
-            rule.PossibleLeadingTokens.Add(term.ExpectedToken);
-            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
-        }
-
-        private void InitStartingTokensWithNonTerminal(Rule<IN> rule, NonTerminalClause<IN> nonterm,
-            Dictionary<string, NonTerminal<IN>> nonTerminals)
-        {
-            InitStartingTokensForNonTerminal(nonTerminals, nonterm.NonTerminalName);
-            if (nonTerminals.ContainsKey(nonterm.NonTerminalName))
-            {
-                var firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
-                firstNonTerminal.Rules.ForEach(r => { rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens); });
-                rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
-            }
-        }
-
-        private void InitStartingTokensWithZeroOrMore(Rule<IN> rule, ZeroOrMoreClause<IN> manyClause,
-            Dictionary<string, NonTerminal<IN>> nonTerminals)
-        {
-            if (manyClause.Clause is TerminalClause<IN> term)
-            {
-                InitStartingTokensWithTerminal(rule, term);
-            }
-            else if (manyClause.Clause is NonTerminalClause<IN> nonTerm)
-            {
-                InitStartingTokensWithNonTerminal(rule, nonTerm, nonTerminals);
-            }
-            else if (manyClause.Clause is ChoiceClause<IN> choice)
-            {
-                InitStartingTokensWithChoice(rule,choice,nonTerminals);
-            }
-        }
-
-        private void InitStartingTokensWithOneOrMore(Rule<IN> rule, OneOrMoreClause<IN> manyClause,
-            Dictionary<string, NonTerminal<IN>> nonTerminals)
-        {
-            if (manyClause.Clause is TerminalClause<IN> term)
-            {
-                InitStartingTokensWithTerminal(rule, term);
-            }
-            else if (manyClause.Clause is NonTerminalClause<IN> nonterm)
-            {
-                InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
-            }
-            else if (manyClause.Clause is ChoiceClause<IN> choice)
-            {
-                InitStartingTokensWithChoice(rule, choice, nonTerminals);
-            }
-        }
-
-        #endregion
 
         #region parsing
 
         public override SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position,
             string nonTerminalName)
         {
+            if (rule.RuleString == "primary: DECIMAL_NUMBER")
+            {
+                ;
+            }
+            
+            if (rule.IsInfixExpressionRule && rule.IsExpressionRule && Debug.DEBUG_EXPRESSION_OPTIMIZATION)
+            {
+                return ParseExpressionRule(tokens, rule, position, nonTerminalName);
+            }
+            
             var currentPosition = position;
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
@@ -350,6 +152,161 @@ namespace sly.parser.llparser
             return result;
         }
 
+        
+        public virtual SyntaxParseResult<IN> ParseExpressionRule(IList<Token<IN>> tokens, Rule<IN> rule, int position,
+            string nonTerminalName)
+        {
+
+            if (nonTerminalName == "expr_14_PLUS_MINUS")
+            {
+                ;
+            }
+            
+            var currentPosition = position;
+            var errors = new List<UnexpectedTokenSyntaxError<IN>>();
+            var isError = false;
+            var children = new List<ISyntaxNode<IN>>();
+            if (!tokens[position].IsEOS && rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
+                if (rule.Clauses != null && rule.Clauses.Count > 0)
+                {
+                    if (MatchExpressionRuleScheme(rule)) 
+                    {
+                        var first = rule.Clauses[0];
+                        SyntaxParseResult<IN> firstResult = null;
+                        if (first is NonTerminalClause<IN> firstNonTerminal)
+                        {
+                            firstResult = ParseNonTerminal(tokens, firstNonTerminal, currentPosition);
+
+                            if (firstResult.IsError)
+                            {
+                                return firstResult;
+                            }
+                        }
+
+                        currentPosition = firstResult.EndingPosition;
+                        var second = rule.Clauses[1];
+                        SyntaxParseResult<IN> secondResult = null;
+                        if (second is ChoiceClause<IN> secondChoice)
+                        {
+                            secondResult = ParseChoice(tokens, secondChoice, currentPosition);
+
+                            if (secondResult.IsError)
+                            {
+                                if (firstResult.Root is SyntaxNode<IN> node)
+                                {
+                                    if (node.Name == "expr_17_MINUS")
+                                    {
+                                        ;
+                                    }
+                                    // node.IsByPassNode = true;
+                                    // node.HasByPassNodes = true;
+                                    firstResult.Errors.AddRange(secondResult.Errors);
+                                    firstResult.AddExpectings(secondResult.Expecting);
+                                    return firstResult;
+                                }
+                            }
+                            else
+                            {
+                                currentPosition = secondResult.EndingPosition;
+                            }
+                        }
+
+                        
+                        
+                        if (second is TerminalClause<IN> secondTerminal)
+                        {
+                            secondResult = ParseTerminal(tokens, secondTerminal, currentPosition);
+
+                            if (secondResult.IsError)
+                            {
+                                if (firstResult.Root is SyntaxNode<IN> node)
+                                {
+                                    firstResult.Errors.AddRange(secondResult.Errors);
+                                    firstResult.AddExpectings(secondResult.Expecting);
+                                    return firstResult;
+                                }
+                            }
+                        }
+                        
+                        
+                        currentPosition = secondResult.EndingPosition;
+                        var third = rule.Clauses[2];
+                        SyntaxParseResult<IN> thirdResult;
+                        if (third is NonTerminalClause<IN> thirdNonTerminal)
+                        {
+                            thirdResult = ParseNonTerminal(tokens, thirdNonTerminal, currentPosition);
+
+                            if (thirdResult.IsError)
+                            {
+                                if (firstResult.Root is SyntaxNode<IN> node)
+                                {
+                                    firstResult.AddExpectings(thirdResult.Expecting);
+                                    return firstResult;
+                                }
+                            }
+                            else
+                            {
+                                children = new List<ISyntaxNode<IN>>();
+                                children.Add(firstResult.Root);
+                                children.Add(secondResult.Root);
+                                children.Add(thirdResult.Root);
+                                currentPosition = thirdResult.EndingPosition;
+                                var finalNode = new SyntaxNode<IN>( nonTerminalName,  children);
+                                finalNode.ExpressionAffix = rule.ExpressionAffix;
+                                finalNode = ManageExpressionRules(rule, finalNode);
+                                var finalResult = new SyntaxParseResult<IN>();
+                                finalResult.Root = finalNode;
+                                finalResult.IsEnded = currentPosition >= tokens.Count - 1
+                                                      || currentPosition == tokens.Count - 2 &&
+                                                      tokens[tokens.Count - 1].IsEOS;
+                                finalResult.EndingPosition = currentPosition;
+                                return finalResult;
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        throw new ParserConfigurationException(
+                            $@"expression rule {rule.RuleString} is incorrect : must have ""nonterminal terminal nonterminal"" scheme");
+                    }
+                    
+                    
+                }
+
+            var result = new SyntaxParseResult<IN>();
+            result.IsError = isError;
+            result.Errors = errors;
+            result.EndingPosition = currentPosition;
+            if (!isError)
+            {
+                SyntaxNode<IN> node = null;
+                if (rule.IsSubRule)
+                    node = new GroupSyntaxNode<IN>(nonTerminalName, children);
+                else
+                    node = new SyntaxNode<IN>( nonTerminalName, children);
+                node = ManageExpressionRules(rule, node);
+                if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
+                    result.Root = children[0];
+                result.Root = node;
+                result.IsEnded = result.EndingPosition >= tokens.Count - 1
+                                 || result.EndingPosition == tokens.Count - 2 &&
+                                 tokens[tokens.Count - 1].IsEOS;
+                
+            }
+
+
+            return result;
+        }
+
+        private static bool MatchExpressionRuleScheme(Rule<IN> rule)
+        {
+            return rule.Clauses.Count == 3
+                   && rule.Clauses[0] is NonTerminalClause<IN>
+                   && (rule.Clauses[1] is ChoiceClause<IN> ||
+                       rule.Clauses[1] is TerminalClause<IN>)
+                   && rule.Clauses[2] is NonTerminalClause<IN>;
+        }
 
         public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position)
         {

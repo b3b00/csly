@@ -19,6 +19,15 @@ namespace sly.parser
         
         public List<IN> Expecting {get; set;}
 
+        public void AddExpecting(IN expected)
+        {
+            if (Expecting == null)
+            {
+                Expecting = new List<IN>();
+            }
+            Expecting.Add(expected);
+        }
+        
         public void AddExpectings(IEnumerable<IN> expected)
         {
             if (Expecting == null)
