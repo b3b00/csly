@@ -84,10 +84,6 @@ namespace CslyNullIssue
                 {
                     throw new Exception($"Could not create parser. BNF is not valid. {parser.Errors[0]}");
                 }
-
-                var dump = parser.Result.Configuration.Dump();
-                Console.WriteLine(dump);
-                
                 cachedParser = parser.Result;
             }
 
