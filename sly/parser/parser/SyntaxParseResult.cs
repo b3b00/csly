@@ -30,6 +30,10 @@ namespace sly.parser
         
         public void AddExpectings(IEnumerable<IN> expected)
         {
+            if (expected == null)
+            {
+                return;
+            }
             if (Expecting == null)
             {
                 Expecting = new List<IN>();
