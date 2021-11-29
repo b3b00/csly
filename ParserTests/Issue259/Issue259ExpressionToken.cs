@@ -2,7 +2,7 @@
 
 namespace CslyNullIssue
 {
-    public enum ExpressionToken
+    public enum Issue259ExpressionToken
     {
         [Lexeme("L:[A-Za-z0-9_]+")]
         LVAR = 50,

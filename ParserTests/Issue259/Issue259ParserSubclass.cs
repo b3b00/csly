@@ -3,19 +3,19 @@ using sly.parser.generator;
 
 namespace CslyNullIssue
 {
-    public class ParserSubclass : ExpressionParser
+    public class Issue259ParserSubclass : Issue259ExpressionParser
     {
 
         [Operand]
         [Production("numeric_literal: LVAR")]
-        public string Lvar(Token<ExpressionToken> token)
+        public string Lvar(Token<Issue259ExpressionToken> token)
         {
             return token.Value;
         }
 
         [Operand]
         [Production("numeric_literal: SIMVAR")]
-        public string SimVarExpression(Token<ExpressionToken> simvarToken)
+        public string SimVarExpression(Token<Issue259ExpressionToken> simvarToken)
         {
             var text = simvarToken.Value[2..];
             var bits = text.Split(",");
@@ -25,8 +25,8 @@ namespace CslyNullIssue
         }
 
         [Operand]
-        [Production("group : LPAREN ParserSubclass_expressions RPAREN")]
-        public string Group(Token<ExpressionToken> _1, string child, Token<ExpressionToken> _2)
+        [Production("group : LPAREN Issue259ParserSubclass_expressions RPAREN")]
+        public string Group(Token<Issue259ExpressionToken> _1, string child, Token<Issue259ExpressionToken> _2)
         {
             return child;
         }
