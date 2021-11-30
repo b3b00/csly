@@ -397,6 +397,7 @@ namespace sly.parser.llparser
             error.IsEnded = false;
             error.Errors = noRuleErrors;
             error.EndingPosition = currentPosition;
+            error.Expecting = allAcceptableTokens;
 
             return error;
         }

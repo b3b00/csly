@@ -1,13 +1,10 @@
-﻿using sly.lexer;
-using sly.parser;
+﻿using System.Globalization;
+using sly.lexer;
 using sly.parser.generator;
-using System;
-using System.Globalization;
-using System.Linq;
 
 namespace CslyNullIssue
 {
-    public abstract class Issue259ExpressionParser
+    public class Issue259Parser 
     {
         [Operand]
         [Production("logical_literal: OFF")]
@@ -69,43 +66,32 @@ namespace CslyNullIssue
         {
             return $"({lhs} {token.Value} {rhs})";
         }
+        
 
-        private static Parser<Issue259ExpressionToken, string> cachedParser;
-
-        public static string Parse<T>(string expression) where T : Issue259ExpressionParser, new()
+        [Operand]
+        [Production("numeric_literal: LVAR")]
+        public string Lvar(Token<Issue259ExpressionToken> token)
         {
-            if (cachedParser == null)
-            {
-                var startingRule = $"{typeof(T).Name}_expressions";
-                var parserInstance = new T();
-                var builder = new ParserBuilder<Issue259ExpressionToken, string>();
-                var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
-                if (parser.IsError)
-                {
-                    throw new Exception($"Could not create parser. BNF is not valid. {parser.Errors[0]}");
-                }
-                cachedParser = parser.Result;
-            }
-
-            // To simplify an ambiguous lexer which would result from having both && and & as well as || and |, we'll
-            // simplify the incoming expression by turning && into AND and || into OR:
-            expression = expression.Replace("&&", " AND ");
-            expression = expression.Replace("||", " OR ");
-
-            var parseResult = cachedParser.Parse(expression);
-            if (parseResult.IsError)
-            {
-                if (parseResult.Errors.Any())
-                {
-                    throw new Exception(parseResult.Errors[0].ErrorMessage);
-                }
-                else
-                {
-                    throw new Exception("unknwon error ");
-                }
-            }
-
-            return parseResult.Result;
+            return token.Value;
         }
+
+        [Operand]
+        [Production("numeric_literal: SIMVAR")]
+        public string SimVarExpression(Token<Issue259ExpressionToken> simvarToken)
+        {
+            var text = simvarToken.Value[2..];
+            var bits = text.Split(",");
+            var varName = bits[0];
+            var type = bits[1].Trim();
+            return $"A:{varName}, {type}";
+        }
+
+        [Operand]
+        [Production("group : LPAREN Issue259Parser_expressions RPAREN")]
+        public string Group(Token<Issue259ExpressionToken> _1, string child, Token<Issue259ExpressionToken> _2)
+        {
+            return child;
+        }
+
     }
 }

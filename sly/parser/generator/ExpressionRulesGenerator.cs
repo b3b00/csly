@@ -223,7 +223,8 @@ namespace sly.parser.generator
                 var rule = new Rule<IN>()
                 {
                     ExpressionAffix = Affix.InFix,
-                    IsExpressionRule = true
+                    IsExpressionRule = true,
+                    NonTerminalName = name
                 };
 
                 rule.Clauses.Add(new NonTerminalClause<IN>(nextName));
