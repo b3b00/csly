@@ -348,7 +348,6 @@ namespace sly.parser.llparser
                 max.IsError = true;
                 max.Root = null;
                 max.IsEnded = false;
-                //max.EndingPosition = currentPosition;
             }
 
             var result = new SyntaxParseResult<IN>();

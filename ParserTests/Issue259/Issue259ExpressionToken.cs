@@ -1,6 +1,6 @@
 ﻿using sly.lexer;
 
-namespace CslyNullIssue
+namespace ParserTests.Issue259
 {
     public enum Issue259ExpressionToken
     {

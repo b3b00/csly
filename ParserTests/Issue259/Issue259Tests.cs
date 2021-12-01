@@ -3,7 +3,7 @@ using sly.parser;
 using sly.parser.generator;
 using Xunit;
 
-namespace CslyNullIssue
+namespace ParserTests.Issue259
 {
     public class Issue259Tests
     {
@@ -19,8 +19,6 @@ namespace CslyNullIssue
             var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
             Assert.True(parser.IsOk);
             Assert.NotNull(parser.Result);
-            
-            Console.WriteLine(parser.Result.Configuration.Dump());
             
             var parseResult = parser.Result.Parse(expression);
             

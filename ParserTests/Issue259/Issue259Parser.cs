@@ -2,7 +2,7 @@
 using sly.lexer;
 using sly.parser.generator;
 
-namespace CslyNullIssue
+namespace ParserTests.Issue259
 {
     public class Issue259Parser 
     {
