@@ -239,6 +239,7 @@ namespace sly.parser.llparser
             token.Discarded = terminal.Discarded;
             result.Root = new SyntaxLeaf<IN>(token, terminal.Discarded);
             result.HasByPassNodes = false;
+            result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(token,I18n,terminal.ExpectedToken));
             result.AddExpecting(terminal.ExpectedToken);
             return result;
         }
@@ -347,7 +348,6 @@ namespace sly.parser.llparser
                 max.IsError = true;
                 max.Root = null;
                 max.IsEnded = false;
-                //max.EndingPosition = currentPosition;
             }
 
             var result = new SyntaxParseResult<IN>();
@@ -396,6 +396,7 @@ namespace sly.parser.llparser
             error.IsEnded = false;
             error.Errors = noRuleErrors;
             error.EndingPosition = currentPosition;
+            error.Expecting = allAcceptableTokens;
 
             return error;
         }

@@ -184,12 +184,6 @@ namespace sly.parser.llparser
                             {
                                 if (firstResult.Root is SyntaxNode<IN> node)
                                 {
-                                    if (node.Name == "expr_17_MINUS")
-                                    {
-                                        ;
-                                    }
-                                    // node.IsByPassNode = true;
-                                    // node.HasByPassNodes = true;
                                     firstResult.Errors.AddRange(secondResult.Errors);
                                     firstResult.AddExpectings(secondResult.Expecting);
                                     return firstResult;
@@ -225,14 +219,9 @@ namespace sly.parser.llparser
                         if (third is NonTerminalClause<IN> thirdNonTerminal)
                         {
                             thirdResult = ParseNonTerminal(tokens, thirdNonTerminal, currentPosition);
-
                             if (thirdResult.IsError)
                             {
-                                if (firstResult.Root is SyntaxNode<IN> node)
-                                {
-                                    firstResult.AddExpectings(thirdResult.Expecting);
-                                    return firstResult;
-                                }
+                                return thirdResult;
                             }
                             else
                             {

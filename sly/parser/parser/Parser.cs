@@ -119,9 +119,14 @@ namespace sly.parser
                 var errors = new List<ParseError>();  
                 foreach (var expecting in byEnding)
                 {
-                    var expectingTokens = expecting.SelectMany(x => x.ExpectedTokens).Distinct(); 
-                    var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, I18n,expectingTokens.ToArray());
-                    errors.Add(expected);
+                    var expectingTokens = expecting.SelectMany(x => (x.ExpectedTokens ?? new List<IN>())).Distinct();
+                    var expectedTokens =  (expectingTokens != null && expectingTokens.Any()) ? expectingTokens?.ToArray() : null;
+                    if (expectedTokens != null)
+                    {
+                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, I18n,
+                            expectedTokens);
+                        errors.Add(expected);
+                    }
                 }
                 
                 result.Errors.AddRange(errors);
