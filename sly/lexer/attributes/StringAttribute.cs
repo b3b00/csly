@@ -2,9 +2,8 @@ namespace sly.lexer
 {
     public class StringAttribute : LexemeAttribute
     {
-        public StringAttribute(string delimiter = null, string escape = null) : base(GenericToken.String, delimiter, escape)
-        {
-            
+        public StringAttribute(string delimiter = "\"", string escape = "\\") : base(GenericToken.String, delimiter, escape)
+        {   
         } 
     }
 }
