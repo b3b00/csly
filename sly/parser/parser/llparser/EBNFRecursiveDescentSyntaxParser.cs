@@ -377,6 +377,8 @@ namespace sly.parser.llparser
 
             bool hasByPasNodes = false;
             SyntaxParseResult<IN> firstInnerResult = null;
+            var innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
+
             if (innerClause is TerminalClause<IN>)
             {
                 manyNode.IsManyTokens = true;
@@ -414,17 +416,25 @@ namespace sly.parser.llparser
                     var moreChildren = (ManySyntaxNode<IN>) nextResult.Root;
                     manyNode.Children.AddRange(moreChildren.Children);
                 }
+                if (nextResult != null)
+                {
+                    innerErrors.AddRange(nextResult.Errors);
+                }
 
                 isError = false;
             }
-
             else
             {
+                if (firstInnerResult != null)
+                {
+                    innerErrors.AddRange(firstInnerResult.Errors);
+                }
                 isError = true;
             }
 
             result.EndingPosition = currentPosition;
             result.IsError = isError;
+            result.Errors = innerErrors;
             result.Root = manyNode;
             result.IsEnded = lastInnerResult != null && lastInnerResult.IsEnded;
             result.HasByPassNodes = hasByPasNodes;
