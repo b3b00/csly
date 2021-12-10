@@ -9,6 +9,8 @@ on:
   pull_request:
     branches: 
       - dev
+permissions:
+  pull-requests: write
 jobs:  
   build:
     env:
