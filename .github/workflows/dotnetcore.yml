@@ -54,10 +54,10 @@ jobs:
         reporttypes: 'HtmlInline;MarkdownSummary' 
         verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
         tag: '${{ github.run_number }}_${{ github.run_id }}' 
-    - name: Publish coverage summary
-      uses: marocchino/sticky-pull-request-comment@v2
-      with:
-           path: coveragereport/Summary.md
+#    - name: Publish coverage summary
+#      uses: marocchino/sticky-pull-request-comment@v2
+#      with:
+#           path: coveragereport/Summary.md
     - name: publish nuget
       if: matrix.os == 'windows-latest' && env.PUBLISH_NUGET
       id: publish_nuget
