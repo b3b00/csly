@@ -29,9 +29,9 @@ namespace ParserTests.Issue263
         }
 
         [Theory]
-        [InlineData("([")]
-        [InlineData("()()(]")]
-        public void OperationCannotBeParsedAndReturnsError(string source)
+        [InlineData("([", Issue263Token.LBRAC,Issue263Token.RPARA)]
+        [InlineData("()()(]", Issue263Token.RBRAC,Issue263Token.RPARA)]
+        public void OperationCannotBeParsedAndReturnsError(string source, Issue263Token unexpectedToken, params Issue263Token[] expectedTokens)
         {
             var commandParser = new Issue263Parser();
             var parserBuilder = new ParserBuilder<Issue263Token, object>();
@@ -46,6 +46,15 @@ namespace ParserTests.Issue263
             Assert.Single(parseResult.Errors);
             var error = parseResult.Errors[0];
             Assert.Equal(ErrorType.UnexpectedToken, error.ErrorType);
+            Assert.IsType<UnexpectedTokenSyntaxError<Issue263Token>>(error);
+            var unexpected = error as UnexpectedTokenSyntaxError<Issue263Token>;
+            Assert.NotNull(unexpected);
+            Assert.Equal(unexpectedToken,unexpected.UnexpectedToken.TokenID);
+            Assert.Equal(expectedTokens.Length,unexpected.ExpectedTokens.Count);
+            for (int i = 0; i < expectedTokens.Length; i++)
+            {
+                Assert.Contains(expectedTokens[i], unexpected.ExpectedTokens);
+            }
         }
     }
 }
