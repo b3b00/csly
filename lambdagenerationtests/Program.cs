@@ -66,11 +66,9 @@ namespace lambdagenerationtests
             
             
             var l = Expression.Lambda<Func<object,object[],OUT>>(body, $"call_{method.Name}", lambdaParameters);
-            var str = l.ToString();
+            
             var callIt = l.Compile();
-            var str2 = callIt.ToString();
-
-            var result = callIt(instance, new object[]{2, new Token<ExpressionToken>() { TokenID = ExpressionToken.PLUS }, 2, new Dictionary<string,int>()});
+            
         }
 
         static List<ParameterExpression> BuildParameters(Type instanceType, ParameterInfo[] parameters)

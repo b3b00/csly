@@ -929,7 +929,8 @@ final = 9999
             // Console.ReadLine(); 
             // TestShortGeneric();
             //TestIssue239();
-            TestShortOperations();
+            //TestShortOperations();
+            testGenericLexerJson();
         }
 
 
