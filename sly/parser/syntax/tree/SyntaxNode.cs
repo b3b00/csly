@@ -3,21 +3,25 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using sly.parser.generator;
+using sly.parser.syntax.grammar;
 
 namespace sly.parser.syntax.tree
 {
     public class SyntaxNode<IN> : ISyntaxNode<IN> where IN : struct
     {
-        public SyntaxNode(string name, List<ISyntaxNode<IN>> children = null, MethodInfo visitor = null)
+        public SyntaxNode(string name, List<ISyntaxNode<IN>> children = null, MethodInfo visitor = null, CallVisitor visitorCaller = null )
         {
             Name = name;
             Children = children ?? new List<ISyntaxNode<IN>>();
             Visitor = visitor;
+            VisitorCaller = visitorCaller;
         }
 
         public List<ISyntaxNode<IN>> Children { get; }
 
         public MethodInfo Visitor { get; set; }
+        public CallVisitor VisitorCaller { get; set; }
+        
 
         public bool IsByPassNode { get; set; } = false;
 

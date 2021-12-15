@@ -6,17 +6,20 @@ using System.Linq;
 using System.Reflection;
 using sly.buildresult;
 using sly.i18n;
+using sly.parser.parser;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {
     public class OperationMetaData<T> where T : struct
     {
-        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, T oper)
+        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, T oper,
+            object parserInstance)
         {
             Precedence = precedence;
             Associativity = assoc;
             VisitorMethod = method;
+            VisitorCaller = VisitorCallerBuilder.BuildLambda(parserInstance, method);
             OperatorToken = oper;
             Affix = affix;
         }
@@ -26,6 +29,8 @@ namespace sly.parser.generator
         public Associativity Associativity { get; set; }
 
         public MethodInfo VisitorMethod { get; set; }
+
+        private CallVisitor VisitorCaller { get; set; }
 
         public T OperatorToken { get; set; }
 
@@ -85,7 +90,7 @@ namespace sly.parser.generator
                     {
                         oper = EnumConverter.ConvertStringToEnum<IN>(attr.StringToken);
                     }
-                    var operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper);
+                    var operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper, configuration.ParserInstance);
                     var operations = new List<OperationMetaData<IN>>();
                     if (operationsByPrecedence.ContainsKey(operation.Precedence))
                         operations = operationsByPrecedence[operation.Precedence];

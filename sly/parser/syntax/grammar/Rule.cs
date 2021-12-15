@@ -1,10 +1,15 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 using sly.parser.generator;
+using sly.parser.parser;
 
 namespace sly.parser.syntax.grammar
 {
+
+    public delegate OUT CallVisitor<OUT>(object instance, object[] parameters);
+    
     public class Rule<IN> : GrammarNode<IN> where IN : struct
     {
         public Rule()
@@ -22,6 +27,10 @@ namespace sly.parser.syntax.grammar
 
         // visitor for classical rules
         private MethodInfo Visitor { get; set; }
+        
+        private CallVisitor VisitorCaller { get; set; }
+        
+         
 
         public bool IsExpressionRule { get; set; }
         
@@ -113,9 +122,10 @@ namespace sly.parser.syntax.grammar
             return visitor;
         }
 
-        public void SetVisitor(MethodInfo visitor)
+        public void SetVisitor(MethodInfo visitor, object parserInstance)
         {
             Visitor = visitor;
+            VisitorCallerBuilder.BuildLambda(parserInstance, visitor); // TODO : set instance !
         }
 
         public void SetVisitor(OperationMetaData<IN> operation)

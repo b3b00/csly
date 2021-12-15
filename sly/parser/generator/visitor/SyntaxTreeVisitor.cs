@@ -26,6 +26,49 @@ namespace sly.parser.generator.visitor
 
         public OUT ValueResult;
 
+        public object GetRawValue()
+        {
+            if (IsNone)
+            {
+                return null;
+            }
+            if (IsToken)
+            {
+                return TokenResult;
+            }
+
+            if (IsValue)
+            {
+                return ValueResult;
+            }
+
+            if (IsGroup)
+            {
+                return GroupResult;
+            }
+
+            if (IsOption)
+            {
+                return OptionResult;
+            }
+
+            if (IsTokenList)
+            {
+                return TokenListResult;
+            }
+
+            if (IsValueList)
+            {
+                return ValueListResult;
+            }
+
+            if (IsGroupList)
+            {
+                return GroupListResult;
+            }
+            return null;
+        }
+
         public bool IsOption => OptionResult != null;
         public bool IsOptionGroup => OptionGroupResult != null;
 

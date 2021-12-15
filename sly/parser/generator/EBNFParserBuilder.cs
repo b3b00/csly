@@ -37,6 +37,7 @@ namespace sly.parser.generator
             try
             {
                 configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
+                configuration.ParserInstance = parserInstance;
                 LeftRecursionChecker<IN,OUT> recursionChecker = new LeftRecursionChecker<IN,OUT>();
                 var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
                 if (foundRecursion)
@@ -139,7 +140,7 @@ namespace sly.parser.generator
                     {
                         var rule = (Rule<IN>) parseResult.Result;
                         rule.RuleString = ruleString;
-                        rule.SetVisitor(m);
+                        rule.SetVisitor(m,conf.ParserInstance);
                         NonTerminal<IN> nonT = null;
                         if (!nonTerminals.ContainsKey(rule.NonTerminalName))
                             nonT = new NonTerminal<IN>(rule.NonTerminalName, new List<Rule<IN>>());

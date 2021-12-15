@@ -59,7 +59,7 @@ namespace sly.parser.generator
             var result = new BuildResult<Parser<IN, OUT>>();
             if (parserType == ParserType.LL_RECURSIVE_DESCENT)
             {
-                var configuration = ExtractParserConfiguration(parserInstance.GetType());
+                var configuration = ExtractParserConfiguration(parserInstance);
                 var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
                 if (foundRecursion)
                 {
@@ -168,9 +168,11 @@ namespace sly.parser.generator
         }
 
 
-        protected virtual ParserConfiguration<IN, OUT> ExtractParserConfiguration(Type parserClass)
+        protected virtual ParserConfiguration<IN, OUT> ExtractParserConfiguration( object parserInstance)
         {
+            Type parserClass = parserInstance.GetType();
             var conf = new ParserConfiguration<IN, OUT>();
+            conf.ParserInstance = parserInstance;
             var functions = new Dictionary<string, MethodInfo>();
             var nonTerminals = new Dictionary<string, NonTerminal<IN>>();
             var methods = parserClass.GetMethods().ToList();
@@ -192,7 +194,7 @@ namespace sly.parser.generator
 
 
                     var r = BuildNonTerminal(ntAndRule);
-                    r.SetVisitor(m);
+                    r.SetVisitor(m,conf.ParserInstance);
                     r.NonTerminalName = ntAndRule.Item1;
                     var key = ntAndRule.Item1 + "__" + r.Key;
                     functions[key] = m;
