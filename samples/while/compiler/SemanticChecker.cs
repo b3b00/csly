@@ -80,11 +80,11 @@ namespace csly.whileLang.compiler
             ast.CompilerScope = context.CurrentScope;
 
             context.OpenNewScope();
-            SemanticCheck(ast.ThenStmt);
+            SemanticCheck(ast.ThenStmt,context);
             context.CloseScope();
 
             context.OpenNewScope();
-            SemanticCheck(ast.ElseStmt);
+            SemanticCheck(ast.ElseStmt,context);
             context.CloseScope();
         }
 

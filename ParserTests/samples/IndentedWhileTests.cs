@@ -204,6 +204,32 @@ else
         }
 
         [Fact]
+        public void TestNestedIfThenElse()
+        {
+            var program = @"
+# TestIfThenElse
+a := -111
+if true then
+    if true then
+        a := 1
+    else
+        a := 2
+else
+    a := 3
+    b := ""world""
+return a
+";
+            var compiler = new IndentedWhileCompiler();
+            var func = compiler.CompileToFunction(program,true);
+            Assert.NotNull(func);
+            var f = func();
+            Assert.Equal(1, f);
+
+            
+        }
+
+
+        [Fact]
         public void TestInfiniteWhile()
         {
             var buildResult = buildParser();
