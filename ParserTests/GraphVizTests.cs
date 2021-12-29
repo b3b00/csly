@@ -73,7 +73,7 @@ namespace ParserTests
             var result = Parser.Result.Parse("1+1");
 
             var tree = result.SyntaxTree;
-            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken,double>();
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile();
 

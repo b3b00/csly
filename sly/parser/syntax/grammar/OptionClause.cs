@@ -2,16 +2,16 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
-    public class OptionClause<T> : IClause<T>
+    public class OptionClause<T,OUT> : IClause<T,OUT>
     {
-        public OptionClause(IClause<T> clause)
+        public OptionClause(IClause<T,OUT> clause)
         {
             Clause = clause;
         }
 
-        public IClause<T> Clause { get; set; }
+        public IClause<T,OUT> Clause { get; set; }
 
-        public bool IsGroupOption => Clause is NonTerminalClause<T> && (Clause as NonTerminalClause<T>).IsGroup;
+        public bool IsGroupOption => Clause is NonTerminalClause<T,OUT> && (Clause as NonTerminalClause<T,OUT>).IsGroup;
 
         public bool MayBeEmpty()
         {

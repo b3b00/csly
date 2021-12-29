@@ -33,7 +33,7 @@ namespace ParserTests.Issue223_EarlyEos
 
             var queryExpression = parser.Parse(query.Trim());
             
-            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<EarlyEosToken>();
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<EarlyEosToken, Expression>();
             var root = graphviz.VisitTree(queryExpression.SyntaxTree);
             string graph = graphviz.Graph.Compile();
             ;

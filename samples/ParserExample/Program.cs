@@ -301,43 +301,45 @@ return r";
 
         private static void testGenericLexerJson()
         {
+            
+            var instanceregex = new EbnfJsonParser();
+            var wbuilder = new ParserBuilder<JsonToken, JSon>();
+            var buildResult = wbuilder.BuildParser(instanceregex, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var jsonregexparser = buildResult.Result;
+            
+            var instancegeneric = new EbnfJsonGenericParser();
+            var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
+            var result = builder.BuildParser(instancegeneric, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var jsongenericparser = result.Result;
+            
+            var source = File.ReadAllText("test.json");
+            
             var sw = new Stopwatch();
 
-            var source = File.ReadAllText("test.json");
-
-            var wp = new EbnfJsonParser();
-            sw.Reset();
+            DebugVisitor.UseCaller = false;
+            
+            // sw.Start();
+            // var  x = jsonregexparser.Parse(source);
+            // sw.Stop();
+            // Console.WriteLine($"invoke regex : {sw.ElapsedMilliseconds}");
+            
             sw.Start();
-            var wbuilder = new ParserBuilder<JsonToken, JSon>();
-            var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            var parser = buildResult.Result;
-            var r = parser.Parse(source);
+            var y = jsongenericparser.Parse(source);
             sw.Stop();
-            Console.WriteLine($"json regex parser : {sw.ElapsedMilliseconds} ms");
-            if (r.IsError) r.Errors.ForEach(e => Console.WriteLine(e.ToString()));
-
-
-            sw.Reset();
-            sw.Start();
-            wbuilder = new ParserBuilder<JsonToken, JSon>();
-            buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            parser = buildResult.Result;
-            parser.Lexer = new JSONLexer();
-            r = parser.Parse(source);
-            Console.WriteLine($"json hard coded lexer : {sw.ElapsedMilliseconds} ms");
-            sw.Stop();
-
-
-            sw.Reset();
-            sw.Start();
-            var wpg = new EbnfJsonGenericParser();
-            var wbuilderGen = new ParserBuilder<JsonTokenGeneric, JSon>();
-            var buildResultgen = wbuilderGen.BuildParser(wpg, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            var parserGen = buildResultgen.Result;
-            var rGen = parserGen.Parse(source);
-            sw.Stop();
-            Console.WriteLine($"json generic parser : {sw.ElapsedMilliseconds} ms");
-            if (rGen.IsError) rGen.Errors.ForEach(e => Console.WriteLine(e.ToString()));
+            Console.WriteLine($"invoke generic : {sw.ElapsedMilliseconds}");
+            
+            // DebugVisitor.UseCaller = false;
+            //
+            // sw.Start();
+            // x = jsonregexparser.Parse(source);
+            // sw.Stop();
+            // Console.WriteLine($"lambda regex : {sw.ElapsedMilliseconds}");
+            //
+            // sw.Start();
+            // y = jsongenericparser.Parse(source);
+            // sw.Stop();
+            // Console.WriteLine($"lambda generic : {sw.ElapsedMilliseconds}");
+            
         }
 
         private static void testJSONLexer()
@@ -397,8 +399,8 @@ return r";
         private static void TestRuleParser()
         {
             Console.WriteLine("hum hum...");
-            var parserInstance = new RuleParser<EbnfToken>();
-            var builder = new ParserBuilder<EbnfToken, IClause<EbnfToken>>();
+            var parserInstance = new RuleParser<EbnfToken,string>();
+            var builder = new ParserBuilder<EbnfToken, IClause<EbnfToken,string>>();
             var r = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "rule");
 
             var parser = r.Result;
@@ -506,7 +508,7 @@ return r";
             var parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
             var result = parser.Result.Parse("2 + 2 * 3");
             var tree = result.SyntaxTree;
-            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken,int>();
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile();
             File.Delete("c:\\temp\\tree.dot");
@@ -555,8 +557,8 @@ return r";
         private static void TestGrammarParser()
         {
             string productionRule = "clauses : clause (COMMA [D] clause)*";
-            var ruleparser = new RuleParser<TestGrammarToken>();
-            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<TestGrammarToken>>();
+            var ruleparser = new RuleParser<TestGrammarToken,string>();
+            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<TestGrammarToken,string>>();
             var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
             var result = grammarParser.Parse(productionRule);
             //(grammarParser.Lexer as GenericLexer<TestGrammarToken>).ResetLexer();
@@ -630,7 +632,7 @@ return r";
                 string ko2 = "|B|plotshape(data, style=shapexcross)|E|";
                 
                 var r = parser.Parse(ko1);
-                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
+                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken,object>();
                 var root = graphviz.VisitTree(r.SyntaxTree);
                 var graph = graphviz.Graph.Compile();
                 r = parser.Parse(ko2);

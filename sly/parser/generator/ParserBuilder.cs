@@ -15,7 +15,7 @@ using sly.parser.syntax.grammar;
 namespace sly.parser.generator
 {
     public delegate BuildResult<Parser<IN, OUT>> ParserChecker<IN, OUT>(BuildResult<Parser<IN, OUT>> result,
-        NonTerminal<IN> nonterminal) where IN : struct;
+        NonTerminal<IN,OUT> nonterminal) where IN : struct;
 
     /// <summary>
     ///     this class provides API to build parser
@@ -174,7 +174,7 @@ namespace sly.parser.generator
             var conf = new ParserConfiguration<IN, OUT>();
             conf.ParserInstance = parserInstance;
             var functions = new Dictionary<string, MethodInfo>();
-            var nonTerminals = new Dictionary<string, NonTerminal<IN>>();
+            var nonTerminals = new Dictionary<string, NonTerminal<IN,OUT>>();
             var methods = parserClass.GetMethods().ToList();
             methods = methods.Where(m =>
             {
@@ -198,9 +198,9 @@ namespace sly.parser.generator
                     r.NonTerminalName = ntAndRule.Item1;
                     var key = ntAndRule.Item1 + "__" + r.Key;
                     functions[key] = m;
-                    NonTerminal<IN> nonT = null;
+                    NonTerminal<IN,OUT> nonT = null;
                     if (!nonTerminals.ContainsKey(ntAndRule.Item1))
-                        nonT = new NonTerminal<IN>(ntAndRule.Item1, new List<Rule<IN>>());
+                        nonT = new NonTerminal<IN,OUT>(ntAndRule.Item1, new List<Rule<IN,OUT>>());
                     else
                         nonT = nonTerminals[ntAndRule.Item1];
                     nonT.Rules.Add(r);
@@ -213,16 +213,16 @@ namespace sly.parser.generator
             return conf;
         }
 
-        private Rule<IN> BuildNonTerminal(Tuple<string, string> ntAndRule)
+        private Rule<IN,OUT> BuildNonTerminal(Tuple<string, string> ntAndRule)
         {
-            var rule = new Rule<IN>();
+            var rule = new Rule<IN,OUT>();
             rule.RuleString = $"{ntAndRule.Item1} : {ntAndRule.Item2}";
-            var clauses = new List<IClause<IN>>();
+            var clauses = new List<IClause<IN,OUT>>();
             var ruleString = ntAndRule.Item2;
             var clausesString = ruleString.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
             foreach (var item in clausesString)
             {
-                IClause<IN> clause = null;
+                IClause<IN,OUT> clause = null;
                 var isTerminal = false;
                 var token = default(IN);
                 try
@@ -244,15 +244,15 @@ namespace sly.parser.generator
 
                 if (isTerminal)
                 {
-                    clause = new TerminalClause<IN>(token);
+                    clause = new TerminalClause<IN,OUT>(token);
                 }
                 else if (item == "[d]")
                 {
-                    if (clauses.Last() is TerminalClause<IN> discardedTerminal) discardedTerminal.Discarded = true;
+                    if (clauses.Last() is TerminalClause<IN,OUT> discardedTerminal) discardedTerminal.Discarded = true;
                 }
                 else
                 {
-                    clause = new NonTerminalClause<IN>(item);
+                    clause = new NonTerminalClause<IN,OUT>(item);
                 }
 
                 if (clause != null) clauses.Add(clause);
@@ -285,7 +285,7 @@ namespace sly.parser.generator
         }
 
         private BuildResult<Parser<IN, OUT>> CheckUnreachable(BuildResult<Parser<IN, OUT>> result,
-            NonTerminal<IN> nonTerminal)
+            NonTerminal<IN,OUT> nonTerminal)
         {
             var conf = result.Result.Configuration;
             var found = false;
@@ -308,7 +308,7 @@ namespace sly.parser.generator
         }
 
 
-        private static bool NonTerminalReferences(NonTerminal<IN> nonTerminal, string referenceName)
+        private static bool NonTerminalReferences(NonTerminal<IN,OUT> nonTerminal, string referenceName)
         {
             var found = false;
             var iRule = 0;
@@ -319,34 +319,34 @@ namespace sly.parser.generator
                 while (iClause < rule.Clauses.Count && !found)
                 {
                     var clause = rule.Clauses[iClause];
-                    if (clause is NonTerminalClause<IN> ntClause)
+                    if (clause is NonTerminalClause<IN,OUT> ntClause)
                     {
                         found = ntClause.NonTerminalName == referenceName;
                     }
-                    else if (clause is OptionClause<IN> option)
+                    else if (clause is OptionClause<IN,OUT> option)
                     {
-                        if (option.Clause is NonTerminalClause<IN> inner)
+                        if (option.Clause is NonTerminalClause<IN,OUT> inner)
                             found = inner.NonTerminalName == referenceName;
                     }
-                    else if (clause is ZeroOrMoreClause<IN> zeroOrMore)
+                    else if (clause is ZeroOrMoreClause<IN,OUT> zeroOrMore)
                     {
-                        if (zeroOrMore.Clause is NonTerminalClause<IN> inner)
+                        if (zeroOrMore.Clause is NonTerminalClause<IN,OUT> inner)
                             found = inner.NonTerminalName == referenceName;
                     }
-                    else if (clause is OneOrMoreClause<IN> oneOrMore)
+                    else if (clause is OneOrMoreClause<IN,OUT> oneOrMore)
                     {
-                        if (oneOrMore.Clause is NonTerminalClause<IN> innerNonTerminal)
+                        if (oneOrMore.Clause is NonTerminalClause<IN,OUT> innerNonTerminal)
                             found = innerNonTerminal.NonTerminalName == referenceName;
-                        if (oneOrMore.Clause is ChoiceClause<IN> innerChoice && innerChoice.IsNonTerminalChoice)
-                            found = innerChoice.Choices.Where(c => (c as NonTerminalClause<IN>).NonTerminalName == referenceName).Any();
+                        if (oneOrMore.Clause is ChoiceClause<IN,OUT> innerChoice && innerChoice.IsNonTerminalChoice)
+                            found = innerChoice.Choices.Where(c => (c as NonTerminalClause<IN,OUT>).NonTerminalName == referenceName).Any();
                     }
-                    else if (clause is ChoiceClause<IN> choice)
+                    else if (clause is ChoiceClause<IN,OUT> choice)
                     {
 
                         int i = 0;
                         while (i < choice.Choices.Count && !found)
                         {
-                            if (choice.Choices[i] is NonTerminalClause<IN> nonTerm)
+                            if (choice.Choices[i] is NonTerminalClause<IN,OUT> nonTerm)
                             {
                                 found = nonTerm.NonTerminalName == referenceName;
                             }
@@ -364,12 +364,12 @@ namespace sly.parser.generator
 
 
         private BuildResult<Parser<IN, OUT>> CheckNotFound(BuildResult<Parser<IN, OUT>> result,
-            NonTerminal<IN> nonTerminal)
+            NonTerminal<IN,OUT> nonTerminal)
         {
             var conf = result.Result.Configuration;
             foreach (var rule in nonTerminal.Rules)
             foreach (var clause in rule.Clauses)
-                if (clause is NonTerminalClause<IN> ntClause)
+                if (clause is NonTerminalClause<IN,OUT> ntClause)
                     if (!conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
                         result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
                             I18N.Instance.GetText(I18n,Message.ReferenceNotFound,ntClause.NonTerminalName,rule.RuleString),
@@ -378,7 +378,7 @@ namespace sly.parser.generator
         }
         
         private BuildResult<Parser<IN, OUT>> CheckAlternates(BuildResult<Parser<IN, OUT>> result,
-            NonTerminal<IN> nonTerminal)
+            NonTerminal<IN,OUT> nonTerminal)
         {
             var conf = result.Result.Configuration;
 
@@ -386,7 +386,7 @@ namespace sly.parser.generator
             {
                 foreach (var clause in rule.Clauses)
                 {
-                    if (clause is ChoiceClause<IN> choice)
+                    if (clause is ChoiceClause<IN,OUT> choice)
                     {
                         if (!choice.IsTerminalChoice && !choice.IsNonTerminalChoice)
                         {
@@ -408,7 +408,7 @@ namespace sly.parser.generator
         }
 
         private  BuildResult<Parser<IN, OUT>> CheckVisitorsSignature(BuildResult<Parser<IN, OUT>> result,
-            NonTerminal<IN> nonTerminal)
+            NonTerminal<IN,OUT> nonTerminal)
         {
             foreach (var rule in nonTerminal.Rules)
             {
@@ -423,7 +423,7 @@ namespace sly.parser.generator
 
         
         private BuildResult<Parser<IN, OUT>> CheckVisitorSignature(BuildResult<Parser<IN, OUT>> result,
-            Rule<IN> rule) 
+            Rule<IN,OUT> rule) 
         {
             if (!rule.IsExpressionRule)
             {
@@ -442,7 +442,7 @@ namespace sly.parser.generator
                         ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
                 }
 
-                var realClauses = rule.Clauses.Where(x => !(x is TerminalClause<IN> || x is ChoiceClause<IN>) || (x is TerminalClause<IN> t && !t.Discarded) || (x is ChoiceClause<IN> c && !c.IsDiscarded) ).ToList();
+                var realClauses = rule.Clauses.Where(x => !(x is TerminalClause<IN,OUT> || x is ChoiceClause<IN,OUT>) || (x is TerminalClause<IN,OUT> t && !t.Discarded) || (x is ChoiceClause<IN,OUT> c && !c.IsDiscarded) ).ToList();
 
                 if (visitor.GetParameters().Length != realClauses.Count && visitor.GetParameters().Length != realClauses.Count +1)
                 {
@@ -460,14 +460,14 @@ namespace sly.parser.generator
 
                     switch (clause)
                     {
-                        case TerminalClause<IN> terminal:
+                        case TerminalClause<IN,OUT> terminal:
                         {
                             var expected = typeof(Token<IN>);
                             var found = arg.ParameterType;
                             result = CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
-                        case NonTerminalClause<IN> nonTerminal:
+                        case NonTerminalClause<IN,OUT> nonTerminal:
                         {
                             Type expected = null;
                             var found = arg.ParameterType;
@@ -482,19 +482,19 @@ namespace sly.parser.generator
                             CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
-                        case ManyClause<IN> many:
+                        case ManyClause<IN,OUT> many:
                         {
                             Type expected = null;
                             Type found =  arg.ParameterType;
                             var innerClause = many.Clause;
                             switch (innerClause)
                             {
-                                case TerminalClause<IN> term:
+                                case TerminalClause<IN,OUT> term:
                                 {
                                     expected = typeof(List<Token<IN>>);
                                     break;
                                 }
-                                case NonTerminalClause<IN> nonTerm:
+                                case NonTerminalClause<IN,OUT> nonTerm:
                                 {
                                     if (nonTerm.IsGroup)
                                     {
@@ -507,12 +507,12 @@ namespace sly.parser.generator
 
                                     break;
                                 }
-                                case GroupClause<IN> group:
+                                case GroupClause<IN,OUT> group:
                                 {
                                     expected = typeof(Group<IN, OUT>);
                                     break;
                                 }
-                                case ChoiceClause<IN> choice:
+                                case ChoiceClause<IN,OUT> choice:
                                 {
                                     if (choice.IsTerminalChoice)
                                     {
@@ -528,26 +528,26 @@ namespace sly.parser.generator
                             result = CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
-                        case GroupClause<IN> group:
+                        case GroupClause<IN,OUT> group:
                         {
                             Type expected = typeof(Group<IN,OUT>);
                             Type found =  arg.ParameterType;
                             result = CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
-                        case OptionClause<IN> option:
+                        case OptionClause<IN,OUT> option:
                         {
                             Type expected = null;
                             Type found =  arg.ParameterType;
                             var innerClause = option.Clause;
                             switch (innerClause)
                             {
-                                case TerminalClause<IN> term:
+                                case TerminalClause<IN,OUT> term:
                                 {
                                     expected = typeof(Token<IN>);
                                     break;
                                 }
-                                case NonTerminalClause<IN> nonTerm:
+                                case NonTerminalClause<IN,OUT> nonTerm:
                                 {
                                     if (nonTerm.IsGroup)
                                     {
@@ -560,12 +560,12 @@ namespace sly.parser.generator
 
                                     break;
                                 }
-                                case GroupClause<IN> group:
+                                case GroupClause<IN,OUT> group:
                                 {
                                     expected = typeof(ValueOption<Group<IN, OUT>>);
                                     break;
                                 }
-                                case ChoiceClause<IN> choice:
+                                case ChoiceClause<IN,OUT> choice:
                                 {
                                     if (choice.IsTerminalChoice)
                                     {
@@ -652,7 +652,7 @@ namespace sly.parser.generator
             return result;
         }
 
-        private  BuildResult<Parser<IN, OUT>> CheckArgType(BuildResult<Parser<IN, OUT>> result, Rule<IN> rule, Type expected, MethodInfo visitor,
+        private  BuildResult<Parser<IN, OUT>> CheckArgType(BuildResult<Parser<IN, OUT>> result, Rule<IN,OUT> rule, Type expected, MethodInfo visitor,
             ParameterInfo arg) 
         {
             if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)

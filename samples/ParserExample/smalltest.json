@@ -1,0 +1,11 @@
+﻿[
+  {
+    "int": 1,
+    "double": 3.14,
+    "string": "string",
+    "bool": true,
+    "null": null,
+    "object": {"id": 1,"value": 2.18},
+    "array":[1,2,3,4,5,6,7,8,9]
+  }
+]

@@ -11,7 +11,7 @@ namespace sly.lexer
         No
     }
 
-    public class Token<T>
+    public class Token<IN>
     {
         public char StringDelimiter = '"';
         
@@ -19,13 +19,13 @@ namespace sly.lexer
         public bool Notignored;
 
 
-        public Token(T token, string value, LexerPosition position, bool isCommentStart = false,
+        public Token(IN token, string value, LexerPosition position, bool isCommentStart = false,
             CommentType commentType = CommentType.Single) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType )
         {
             
         }
         
-        public Token(T token, ReadOnlyMemory<char> value, LexerPosition position, bool isCommentStart = false,
+        public Token(IN token, ReadOnlyMemory<char> value, LexerPosition position, bool isCommentStart = false,
             CommentType commentType = CommentType.Single)
         {
             IsEOS = false;
@@ -49,7 +49,7 @@ namespace sly.lexer
         public LexerPosition Position { get; set; }
 
         public int PositionInTokenFlow { get; set; }
-        public T TokenID { get; set; }
+        public IN TokenID { get; set; }
         public bool IsComment { get; set; }
 
         public bool Discarded { get; set; } = false;
@@ -72,7 +72,7 @@ namespace sly.lexer
 
         public string Value => SpanValue.ToString();
 
-        public static T DefaultToken
+        public static IN DefaultToken
         {
             get => DefTok;
             set => DefTok = value;
@@ -139,12 +139,12 @@ namespace sly.lexer
 
 
         public bool End { get; set; }
-        public static T DefTok { get; set; }
+        public static IN DefTok { get; set; }
         public bool IsLineEnding { get; set; }
 
-        public static Token<T> Empty()
+        public static Token<IN> Empty()
         {
-            var empty = new Token<T>();
+            var empty = new Token<IN>();
             empty.IsEmpty = true;
             return empty;
         }

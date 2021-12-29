@@ -5,19 +5,19 @@ using System.Linq;
 
 namespace sly.parser.syntax.grammar
 {
-    public class GroupClause<T> : IClause<T>
+    public class GroupClause<T,OUT> : IClause<T,OUT>
     {
-        public GroupClause(IClause<T> clause)
+        public GroupClause(IClause<T,OUT> clause)
         {
-            Clauses = new List<IClause<T>> {clause};
+            Clauses = new List<IClause<T,OUT>> {clause};
         }
      
-        public GroupClause(ChoiceClause<T> choices)
+        public GroupClause(ChoiceClause<T,OUT> choices)
         {
-            Clauses = new List<IClause<T>>() {choices};
+            Clauses = new List<IClause<T,OUT>>() {choices};
         }
 
-        public List<IClause<T>> Clauses { get; set; }
+        public List<IClause<T,OUT>> Clauses { get; set; }
 
         [ExcludeFromCodeCoverage]
         public bool MayBeEmpty()
@@ -25,7 +25,7 @@ namespace sly.parser.syntax.grammar
             return true;
         }
 
-        public void AddRange(GroupClause<T> clauses)
+        public void AddRange(GroupClause<T,OUT> clauses)
         {
             Clauses.AddRange(clauses.Clauses);
         }

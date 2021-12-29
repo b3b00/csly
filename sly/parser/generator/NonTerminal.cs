@@ -6,21 +6,21 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {
-    public class NonTerminal<IN> where IN : struct
+    public class NonTerminal<IN,OUT> where IN : struct
     {
-        public NonTerminal(string name, List<Rule<IN>> rules)
+        public NonTerminal(string name, List<Rule<IN,OUT>> rules)
         {
             Name = name;
             Rules = rules;
         }
 
-        public NonTerminal(string name) : this(name, new List<Rule<IN>>())
+        public NonTerminal(string name) : this(name, new List<Rule<IN,OUT>>())
         {
         }
 
         public string Name { get; set; }
 
-        public List<Rule<IN>> Rules { get; set; }
+        public List<Rule<IN,OUT>> Rules { get; set; }
 
         public bool IsSubRule { get; set; }
 
@@ -35,7 +35,7 @@ namespace sly.parser.generator
             {
                 
                 dump.Append(Name).Append(rule.IsInfixExpressionRule ? " (*) ":"").Append(" : ");
-                foreach (IClause<IN> clause in rule.Clauses)
+                foreach (IClause<IN,OUT> clause in rule.Clauses)
                 {
                     dump.Append(clause.Dump()).Append(" ");
                 }

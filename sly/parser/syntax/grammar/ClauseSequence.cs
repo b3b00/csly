@@ -4,15 +4,15 @@ using System.Linq;
 
 namespace sly.parser.syntax.grammar
 {
-    public class ClauseSequence<T> : IClause<T>
+    public class ClauseSequence<T,OUT> : IClause<T,OUT>
     {
-        public ClauseSequence(IClause<T> item)
+        public ClauseSequence(IClause<T,OUT> item)
         {
-            Clauses = new List<IClause<T>>();
+            Clauses = new List<IClause<T,OUT>>();
             Clauses.Add(item);
         }
 
-        public List<IClause<T>> Clauses { get; set; }
+        public List<IClause<T,OUT>> Clauses { get; set; }
 
         public bool MayBeEmpty()
         {
@@ -20,12 +20,12 @@ namespace sly.parser.syntax.grammar
         }
 
 
-        public void AddRange(List<IClause<T>> clauses)
+        public void AddRange(List<IClause<T,OUT>> clauses)
         {
             Clauses.AddRange(clauses);
         }
 
-        public void AddRange(ClauseSequence<T> seq)
+        public void AddRange(ClauseSequence<T,OUT> seq)
         {
             AddRange(seq.Clauses);
         }

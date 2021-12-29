@@ -4,9 +4,9 @@ namespace sly.parser.parser
 {
     public static class ValueOptionConstructors
     {
-        public static ValueOption<T> None<T>()
+        public static ValueOption<IN> None<IN>()
         {
-            return new ValueOption<T>();
+            return new ValueOption<IN>();
         }
 
         public static ValueOption<Group<IN, OUT>> NoneGroup<IN, OUT>()
@@ -15,13 +15,13 @@ namespace sly.parser.parser
             return noneGroup;
         }
 
-        public static ValueOption<T> Some<T>(T value)
+        public static ValueOption<OUT> Some<OUT>(OUT value)
         {
-            return  new ValueOption<T>(value);
+            return  new ValueOption<OUT>(value);
         }
     }
 
-    public class ValueOption<T>
+    public class ValueOption<OUT>
     {
         public ValueOption()
         {
@@ -33,18 +33,18 @@ namespace sly.parser.parser
             IsNone = none;
         }
 
-        public ValueOption(T value)
+        public ValueOption(OUT value)
         {
             IsNone = false;
             Value = value;
         }
 
-        private T Value { get; }
+        private OUT Value { get; }
 
         public bool IsNone { get; }
         public bool IsSome => !IsNone;
 
-        public T Match(Func<T, T> some, Func<T> none)
+        public OUT Match(Func<OUT, OUT> some, Func<OUT> none)
         {
             if (IsSome)
                 return some(Value);

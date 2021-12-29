@@ -7,7 +7,7 @@ namespace sly.parser
     {
         public OUT Result { get; set; }
         
-        public ISyntaxNode<IN> SyntaxTree { get; set; }
+        public ISyntaxNode<IN, OUT> SyntaxTree { get; set; }
 
         public bool IsError { get; set; }
 

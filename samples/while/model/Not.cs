@@ -46,5 +46,10 @@ namespace csly.whileLang.model
             emiter.Negate();
             return emiter;
         }
+        
+        public override string ToString()
+        {
+            return Dump("");
+        }
     }
 }

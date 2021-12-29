@@ -7,13 +7,13 @@ namespace sly.parser.generator
     public class ParserConfiguration<IN, OUT> where IN : struct
     {
         public string StartingRule { get; set; }
-        public Dictionary<string, NonTerminal<IN>> NonTerminals { get; set; }
+        public Dictionary<string, NonTerminal<IN,OUT>> NonTerminals { get; set; }
 
         public bool UsesOperations { get; set; }
         
         public object ParserInstance { get; set; }
 
-        public void AddNonTerminalIfNotExists(NonTerminal<IN> nonTerminal)
+        public void AddNonTerminalIfNotExists(NonTerminal<IN,OUT> nonTerminal)
         {
             if (!NonTerminals.ContainsKey(nonTerminal.Name)) NonTerminals[nonTerminal.Name] = nonTerminal;
         }
@@ -22,7 +22,7 @@ namespace sly.parser.generator
         public string Dump()
         {
             StringBuilder dump = new StringBuilder();
-            foreach (NonTerminal<IN> nonTerminal in NonTerminals.Values)
+            foreach (NonTerminal<IN,OUT> nonTerminal in NonTerminals.Values)
             {
                 dump.AppendLine(nonTerminal.Dump());
             }

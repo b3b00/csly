@@ -4,7 +4,7 @@ namespace sly.parser.syntax.grammar
     ///     a clause within a grammar rule
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IClause<T> : GrammarNode<T>
+    public interface IClause<T,OUT> : GrammarNode<T,OUT>
     {
         bool MayBeEmpty();
         string Dump();

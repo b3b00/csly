@@ -142,7 +142,7 @@ namespace jsonparser
         }
 
         [Production("additionalProperty : COMMA property")]
-        public JObject property(Token<JsonToken> comma, JObject property)
+        public JObject additionalProperty(Token<JsonToken> comma, JObject property)
         {
             return property;
         }
@@ -154,22 +154,7 @@ namespace jsonparser
         }
 
 
-        //[Production("members : property COMMA members")]
-        //public  object ManyMembers(KeyValuePair<string, object> pair, object comma, Dictionary<string, object> tail)
-        //{
-        //    Dictionary<string, object> members = new Dictionary<string, object>();
-        //    members[pair.Key] = pair.Value;
-        //    members.Merge(tail);
-        //    return members;
-        //}
-
-        //[Production("members : property")]
-        //public  object SingleMember(KeyValuePair<string, object> pair)
-        //{
-        //    Dictionary<string, object> members = new Dictionary<string, object>();
-        //    members.Add(pair.Key, pair.Value);
-        //    return members;
-        //}
+       
 
         #endregion
     }

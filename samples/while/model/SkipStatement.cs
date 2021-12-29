@@ -26,5 +26,10 @@ namespace csly.whileLang.model
         {
             return ";";
         }
+        
+        public override string ToString()
+        {
+            return Dump("");
+        }
     }
 }

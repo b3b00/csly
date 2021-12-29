@@ -4,19 +4,19 @@ using sly.lexer;
 
 namespace sly.parser.syntax.grammar
 {
-    public class TerminalClause<T> : IClause<T>
+    public class TerminalClause<IN,OUT> : IClause<IN,OUT>
     {
-        public TerminalClause(T token)
+        public TerminalClause(IN token)
         {
             ExpectedToken = token;
         }
 
-        public TerminalClause(T token, bool discard) : this(token)
+        public TerminalClause(IN token, bool discard) : this(token)
         {
             Discarded = discard;
         }
 
-        public T ExpectedToken { get; set; }
+        public IN ExpectedToken { get; set; }
 
         public bool Discarded { get; set; }
 
@@ -25,7 +25,7 @@ namespace sly.parser.syntax.grammar
             return false;
         }
 
-        public virtual bool Check(Token<T> nextToken)
+        public virtual bool Check(Token<IN> nextToken)
         {
             return nextToken.TokenID.Equals(ExpectedToken);
         }
@@ -52,11 +52,11 @@ namespace sly.parser.syntax.grammar
         UnIndent
     }
     
-    public class IndentTerminalClause<T> : TerminalClause<T>
+    public class IndentTerminalClause<IN,OUT> : TerminalClause<IN,OUT>
     {
         private IndentationType ExpectedIndentation;
         
-        public IndentTerminalClause(IndentationType expectedIndentation, bool discard) : base(default(T))
+        public IndentTerminalClause(IndentationType expectedIndentation, bool discard) : base(default(IN))
         {
             ExpectedIndentation = expectedIndentation;
             Discarded = discard;
@@ -67,7 +67,7 @@ namespace sly.parser.syntax.grammar
             return false;
         }
     
-        public override bool Check(Token<T> nextToken)
+        public override bool Check(Token<IN> nextToken)
         {
             return (nextToken.IsIndent && ExpectedIndentation == IndentationType.Indent) ||
                    (nextToken.IsUnIndent && ExpectedIndentation == IndentationType.UnIndent);

@@ -6,34 +6,33 @@ namespace sly.lexer
     /// <summary>
     ///     T is the token type
     /// </summary>
-    /// <typeparam name="T">T is the enum Token type</typeparam>
-    public class Lexer<T> : ILexer<T> where T : struct
+    /// <typeparam name="IN">T is the enum Token type</typeparam>
+    public class Lexer<IN> : ILexer<IN> where IN : struct
     {
         public string I18n { get; set; }
         
-        private readonly IList<TokenDefinition<T>> tokenDefinitions = new List<TokenDefinition<T>>();
+        private readonly IList<TokenDefinition<IN>> tokenDefinitions = new List<TokenDefinition<IN>>();
 
-        public void AddDefinition(TokenDefinition<T> tokenDefinition)
+        public void AddDefinition(TokenDefinition<IN> tokenDefinition)
         {
             tokenDefinitions.Add(tokenDefinition);
         }
 
 
-        public LexerResult<T> Tokenize(string source)
+        public LexerResult<IN> Tokenize(string source)
         {
-            List<Token<T>> tokens = new List<Token<T>>();
+            List<Token<IN>> tokens = new List<Token<IN>>();
             
             var currentIndex = 0;
-            //List<Token<T>> tokens = new List<Token<T>>();
             var currentLine = 1;
             var currentColumn = 0;
             var currentLineStartIndex = 0;
-            Token<T> previousToken = null;
+            Token<IN> previousToken = null;
 
             while (currentIndex < source.Length)
             {
                 currentColumn = currentIndex - currentLineStartIndex + 1;
-                TokenDefinition<T> matchedDefinition = null;
+                TokenDefinition<IN> matchedDefinition = null;
                 var matchLength = 0;
 
                 foreach (var rule in tokenDefinitions)
@@ -50,7 +49,7 @@ namespace sly.lexer
 
                 if (matchedDefinition == null)
                 {
-                    return new LexerResult<T>(new LexicalError(currentLine, currentColumn, source[currentIndex],I18n));
+                    return new LexerResult<IN>(new LexicalError(currentLine, currentColumn, source[currentIndex],I18n));
                 }
 
                 var value = source.Substring(currentIndex, matchLength);
@@ -63,7 +62,7 @@ namespace sly.lexer
 
                 if (!matchedDefinition.IsIgnored)
                 {
-                    previousToken = new Token<T>(matchedDefinition.TokenID, value,
+                    previousToken = new Token<IN>(matchedDefinition.TokenID, value,
                         new LexerPosition(currentIndex, currentLine, currentColumn));
                     tokens.Add(previousToken);
                 }
@@ -71,7 +70,7 @@ namespace sly.lexer
                 currentIndex += matchLength;
             }
 
-            var eos = new Token<T>();
+            var eos = new Token<IN>();
             if (previousToken != null)
             {
                 eos.Position = new LexerPosition(previousToken.Position.Index + 1, previousToken.Position.Line,
@@ -84,12 +83,12 @@ namespace sly.lexer
 
 
             tokens.Add(eos);
-            return new LexerResult<T>(tokens);
+            return new LexerResult<IN>(tokens);
         }
 
-        public LexerResult<T> Tokenize(ReadOnlyMemory<char> source)
+        public LexerResult<IN> Tokenize(ReadOnlyMemory<char> source)
         {
-            return new LexerResult<T>(new LexicalError(0, 0, '.',I18n));
+            return new LexerResult<IN>(new LexicalError(0, 0, '.',I18n));
         }
     }
 }

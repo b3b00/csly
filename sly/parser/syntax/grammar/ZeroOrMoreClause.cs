@@ -2,10 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
-    public class ZeroOrMoreClause<T> : ManyClause<T>
+    public class ZeroOrMoreClause<T,OUT> : ManyClause<T,OUT>
     {
         
-        public ZeroOrMoreClause(IClause<T> clause)
+        public ZeroOrMoreClause(IClause<T,OUT> clause)
         {
             Clause = clause;
         }

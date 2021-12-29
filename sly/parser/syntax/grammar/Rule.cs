@@ -10,12 +10,12 @@ namespace sly.parser.syntax.grammar
 
     public delegate OUT CallVisitor<OUT>(object instance, object[] parameters);
     
-    public class Rule<IN> : GrammarNode<IN> where IN : struct
+    public class Rule<IN,OUT> : GrammarNode<IN,OUT> where IN : struct
     {
         public Rule()
         {
-            Clauses = new List<IClause<IN>>();
-            VisitorMethodsForOperation = new Dictionary<IN, OperationMetaData<IN>>();
+            Clauses = new List<IClause<IN,OUT>>();
+            VisitorMethodsForOperation = new Dictionary<IN, OperationMetaData<IN,OUT>>();
             Visitor = null;
             IsSubRule = false;
         }
@@ -23,12 +23,12 @@ namespace sly.parser.syntax.grammar
         public bool IsByPassRule { get; set; } = false;
 
         // visitors for operation rules
-        private Dictionary<IN, OperationMetaData<IN>> VisitorMethodsForOperation { get; }
+        private Dictionary<IN, OperationMetaData<IN,OUT>> VisitorMethodsForOperation { get; }
 
         // visitor for classical rules
         private MethodInfo Visitor { get; set; }
         
-        private CallVisitor VisitorCaller { get; set; }
+        private CallVisitor<OUT> VisitorCaller { get; set; }
         
          
 
@@ -53,7 +53,7 @@ namespace sly.parser.syntax.grammar
             }
         }
 
-        public List<IClause<IN>> Clauses { get; set; }
+        public List<IClause<IN,OUT>> Clauses { get; set; }
         public List<IN> PossibleLeadingTokens { get; set; }
 
         public string NonTerminalName { get; set; }
@@ -65,9 +65,9 @@ namespace sly.parser.syntax.grammar
                 if (Clauses != null && Clauses.Any())
                     foreach (var clause in Clauses)
                     {
-                        if (clause is GroupClause<IN>) return true;
-                        if (clause is ManyClause<IN> many) return many.Clause is GroupClause<IN>;
-                        if (clause is OptionClause<IN> option) return option.Clause is GroupClause<IN>;
+                        if (clause is GroupClause<IN,OUT>) return true;
+                        if (clause is ManyClause<IN,OUT> many) return many.Clause is GroupClause<IN,OUT>;
+                        if (clause is OptionClause<IN,OUT> option) return option.Clause is GroupClause<IN,OUT>;
                     }
 
                 return false;
@@ -81,7 +81,7 @@ namespace sly.parser.syntax.grammar
                                   || Clauses.Count == 1 && Clauses[0].MayBeEmpty();
 
 
-        public OperationMetaData<IN> GetOperation(IN token = default(IN))
+        public OperationMetaData<IN,OUT> GetOperation(IN token = default(IN))
         {
             if (IsExpressionRule)
             {
@@ -94,7 +94,7 @@ namespace sly.parser.syntax.grammar
             return null;
         }
         
-        public List<OperationMetaData<IN>> GetOperations()
+        public List<OperationMetaData<IN,OUT>> GetOperations()
         {
             if (IsExpressionRule)
             {
@@ -121,14 +121,33 @@ namespace sly.parser.syntax.grammar
 
             return visitor;
         }
+        
+        public CallVisitor<OUT> GetVisitorCaller(IN token = default(IN))
+        {
+            CallVisitor<OUT> caller = null;
+            if (IsExpressionRule)
+            {
+                var operation = VisitorMethodsForOperation.ContainsKey(token)
+                    ? VisitorMethodsForOperation[token]
+                    : null;
+                caller = operation?.VisitorCaller;
+            }
+            else
+            {
+                caller = VisitorCaller;
+            }
+
+            return caller;
+        }
 
         public void SetVisitor(MethodInfo visitor, object parserInstance)
         {
             Visitor = visitor;
-            VisitorCallerBuilder.BuildLambda(parserInstance, visitor); // TODO : set instance !
+            VisitorCaller = VisitorCallerBuilder.BuildLambda<OUT>(parserInstance, visitor); // TODO : set instance !
+            ;
         }
 
-        public void SetVisitor(OperationMetaData<IN> operation)
+        public void SetVisitor(OperationMetaData<IN,OUT> operation)
         {
             VisitorMethodsForOperation[operation.OperatorToken] = operation;
         }

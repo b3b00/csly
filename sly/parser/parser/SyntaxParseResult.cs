@@ -3,9 +3,9 @@ using sly.parser.syntax.tree;
 
 namespace sly.parser
 {
-    public class SyntaxParseResult<IN> where IN : struct
+    public class SyntaxParseResult<IN, OUT> where IN : struct
     {
-        public ISyntaxNode<IN> Root { get; set; }
+        public ISyntaxNode<IN, OUT> Root { get; set; }
 
         public bool IsError { get; set; }
 

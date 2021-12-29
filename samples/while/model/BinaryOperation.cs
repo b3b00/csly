@@ -161,5 +161,10 @@ namespace csly.whileLang.model
             emiter.Call(mi);
             return emiter;
         }
+        
+        public override string ToString()
+        {
+            return Dump("");
+        }
     }
 }

@@ -173,7 +173,7 @@ namespace ParserTests
             BuildParser();
             Assert.False(Parser.IsError);
             Assert.Equal(6, Parser.Result.Configuration.NonTerminals.Count);
-            var nonterminals = new List<NonTerminal<ExpressionToken>>();
+            var nonterminals = new List<NonTerminal<ExpressionToken,double>>();
             foreach (var pair in Parser.Result.Configuration.NonTerminals) nonterminals.Add(pair.Value);
             var nt = nonterminals[0]; // operan
             Assert.Single(nt.Rules);

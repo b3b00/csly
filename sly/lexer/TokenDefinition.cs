@@ -8,8 +8,8 @@ namespace sly.lexer
     ///     - and a regular expression capturing the token
     ///     a token may be skipped and / or match an end of line
     /// </summary>
-    /// <typeparam name="T">T is the enum Token type</typeparam>
-    public class TokenDefinition<T>
+    /// <typeparam name="IN">T is the enum Token type</typeparam>
+    public class TokenDefinition<IN>
     {
         /// <summary>
         /// </summary>
@@ -20,7 +20,7 @@ namespace sly.lexer
         ///     instance)
         /// </param>
         /// <param name="isEndOfLine">true if the token matches an end of line (for line counting)</param>
-        public TokenDefinition(T token, string regex, bool isIgnored = false, bool isEndOfLine = false)
+        public TokenDefinition(IN token, string regex, bool isIgnored = false, bool isEndOfLine = false)
         {
             TokenID = token;
             Regex = new Regex(regex, RegexOptions.Compiled);
@@ -33,6 +33,6 @@ namespace sly.lexer
         public bool IsEndOfLine { get; }
 
         public Regex Regex { get; }
-        public T TokenID { get; }
+        public IN TokenID { get; }
     }
 }

@@ -3,9 +3,9 @@ using sly.parser.syntax.tree;
 
 namespace sly.parser.parser
 {
-    public class SyntaxTreeCleaner<IN> where IN : struct
+    public class SyntaxTreeCleaner<IN, OUT> where IN : struct
     {
-        public SyntaxParseResult<IN> CleanSyntaxTree(SyntaxParseResult<IN> result)
+        public SyntaxParseResult<IN, OUT> CleanSyntaxTree(SyntaxParseResult<IN, OUT> result)
         {
             var tree = result.Root;
             if (tree != null)
@@ -23,30 +23,30 @@ namespace sly.parser.parser
             return result;
         }
 
-        private ISyntaxNode<IN> RemoveByPassNodes(ISyntaxNode<IN> tree)
+        private ISyntaxNode<IN, OUT> RemoveByPassNodes(ISyntaxNode<IN, OUT> tree)
         {
-            ISyntaxNode<IN> result = null;
+            ISyntaxNode<IN, OUT> result = null;
 
 
-            if (tree is SyntaxNode<IN> node && node.IsByPassNode)
+            if (tree is SyntaxNode<IN, OUT> node && node.IsByPassNode)
             {
                 result = RemoveByPassNodes(node.Children[0]);
             }
             else
             {
-                if (tree is SyntaxLeaf<IN> leaf) result = leaf;
-                if (tree is SyntaxNode<IN> innernode)
+                if (tree is SyntaxLeaf<IN, OUT> leaf) result = leaf;
+                if (tree is SyntaxNode<IN, OUT> innernode)
                 {
-                    var newChildren = new List<ISyntaxNode<IN>>();
+                    var newChildren = new List<ISyntaxNode<IN, OUT>>();
                     foreach (var child in innernode.Children) newChildren.Add(RemoveByPassNodes(child));
                     innernode.Children.Clear();
                     innernode.Children.AddRange(newChildren);
                     result = innernode;
                 }
 
-                if (tree is ManySyntaxNode<IN> many)
+                if (tree is ManySyntaxNode<IN,OUT> many)
                 {
-                    var newChildren = new List<ISyntaxNode<IN>>();
+                    var newChildren = new List<ISyntaxNode<IN, OUT>>();
                     foreach (var child in many.Children) newChildren.Add(RemoveByPassNodes(child));
                     many.Children.Clear();
                     many.Children.AddRange(newChildren);
@@ -58,27 +58,27 @@ namespace sly.parser.parser
         }
 
 
-        private ISyntaxNode<IN> SetAssociativity(ISyntaxNode<IN> tree)
+        private ISyntaxNode<IN, OUT> SetAssociativity(ISyntaxNode<IN, OUT> tree)
         {
-            ISyntaxNode<IN> result = null;
+            ISyntaxNode<IN, OUT> result = null;
 
 
-            if (tree is ManySyntaxNode<IN> many)
+            if (tree is ManySyntaxNode<IN,OUT> many)
             {
-                var newChildren = new List<ISyntaxNode<IN>>();
+                var newChildren = new List<ISyntaxNode<IN, OUT>>();
                 foreach (var child in many.Children) newChildren.Add(SetAssociativity(child));
                 many.Children.Clear();
                 many.Children.AddRange(newChildren);
                 result = many;
             }
-            else if (tree is SyntaxLeaf<IN> leaf)
+            else if (tree is SyntaxLeaf<IN, OUT> leaf)
             {
                 result = leaf;
             }
-            else if (tree is SyntaxNode<IN> node)
+            else if (tree is SyntaxNode<IN, OUT> node)
             {
                 if (NeedLeftAssociativity(node)) node = ProcessLeftAssociativity(node);
-                var newChildren = new List<ISyntaxNode<IN>>();
+                var newChildren = new List<ISyntaxNode<IN, OUT>>();
                 foreach (var child in node.Children) newChildren.Add(SetAssociativity(child));
                 node.Children.Clear();
                 node.Children.AddRange(newChildren);
@@ -89,20 +89,20 @@ namespace sly.parser.parser
         }
 
 
-        private bool NeedLeftAssociativity(SyntaxNode<IN> node)
+        private bool NeedLeftAssociativity(SyntaxNode<IN, OUT> node)
         {
             return node.IsBinaryOperationNode && node.IsLeftAssociative
-                                              && node.Right is SyntaxNode<IN> right && right.IsExpressionNode
+                                              && node.Right is SyntaxNode<IN, OUT> right && right.IsExpressionNode
                                               && right.Precedence == node.Precedence;
         }
 
-        private SyntaxNode<IN> ProcessLeftAssociativity(SyntaxNode<IN> node)
+        private SyntaxNode<IN, OUT> ProcessLeftAssociativity(SyntaxNode<IN, OUT> node)
         {
             var result = node;
             while (NeedLeftAssociativity(result))
             {
                 var newLeft = result;
-                var newTop = (SyntaxNode<IN>) result.Right;
+                var newTop = (SyntaxNode<IN, OUT>) result.Right;
                 newLeft.Children[2] = newTop.Left;
                 newTop.Children[0] = newLeft;
                 result = newTop;

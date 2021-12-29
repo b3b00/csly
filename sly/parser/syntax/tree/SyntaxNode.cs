@@ -7,20 +7,20 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.syntax.tree
 {
-    public class SyntaxNode<IN> : ISyntaxNode<IN> where IN : struct
+    public class SyntaxNode<IN,OUT> : ISyntaxNode<IN,OUT> where IN : struct
     {
-        public SyntaxNode(string name, List<ISyntaxNode<IN>> children = null, MethodInfo visitor = null, CallVisitor visitorCaller = null )
+        public SyntaxNode(string name, List<ISyntaxNode<IN, OUT>> children = null, MethodInfo visitor = null, CallVisitor<OUT> visitorCaller = null )
         {
             Name = name;
-            Children = children ?? new List<ISyntaxNode<IN>>();
+            Children = children ?? new List<ISyntaxNode<IN, OUT>>();
             Visitor = visitor;
             VisitorCaller = visitorCaller;
         }
 
-        public List<ISyntaxNode<IN>> Children { get; }
+        public List<ISyntaxNode<IN, OUT>> Children { get; }
 
         public MethodInfo Visitor { get; set; }
-        public CallVisitor VisitorCaller { get; set; }
+        public CallVisitor<OUT> VisitorCaller { get; set; }
         
 
         public bool IsByPassNode { get; set; } = false;
@@ -37,7 +37,7 @@ namespace sly.parser.syntax.tree
 
         #region expression syntax nodes
 
-        public OperationMetaData<IN> Operation { get; set; } = null;
+        public OperationMetaData<IN, OUT> Operation { get; set; } = null;
 
         public bool IsExpressionNode => Operation != null;
 
@@ -50,11 +50,11 @@ namespace sly.parser.syntax.tree
 
         public bool IsLeftAssociative => Associativity == Associativity.Left;
 
-        public ISyntaxNode<IN> Left
+        public ISyntaxNode<IN, OUT> Left
         {
             get
             {
-                ISyntaxNode<IN> l = null;
+                ISyntaxNode<IN, OUT> l = null;
                 if (IsExpressionNode)
                 {
                     var leftindex = -1;
@@ -66,11 +66,11 @@ namespace sly.parser.syntax.tree
             }
         }
 
-        public ISyntaxNode<IN> Right
+        public ISyntaxNode<IN, OUT> Right
         {
             get
             {
-                ISyntaxNode<IN> r = null;
+                ISyntaxNode<IN, OUT> r = null;
                 if (IsExpressionNode)
                 {
                     var rightIndex = -1;

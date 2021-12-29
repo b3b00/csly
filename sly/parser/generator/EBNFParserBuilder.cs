@@ -24,8 +24,8 @@ namespace sly.parser.generator
         public override BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType,
             string rootRule, BuildExtension<IN> extensionBuilder = null)
         {
-            var ruleparser = new RuleParser<IN>();
-            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>(I18n);
+            var ruleparser = new RuleParser<IN,OUT>();
+            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN,OUT>>(I18n);
 
             var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
 
@@ -36,7 +36,7 @@ namespace sly.parser.generator
 
             try
             {
-                configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
+                configuration = ExtractEbnfParserConfiguration(parserInstance, grammarParser);
                 configuration.ParserInstance = parserInstance;
                 LeftRecursionChecker<IN,OUT> recursionChecker = new LeftRecursionChecker<IN,OUT>();
                 var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
@@ -114,11 +114,13 @@ namespace sly.parser.generator
 
         #region configuration
 
-        protected virtual ParserConfiguration<IN, OUT> ExtractEbnfParserConfiguration(Type parserClass,
-            Parser<EbnfTokenGeneric, GrammarNode<IN>> grammarParser)
+        protected virtual ParserConfiguration<IN, OUT> ExtractEbnfParserConfiguration(object parserInstance,
+            Parser<EbnfTokenGeneric, GrammarNode<IN,OUT>> grammarParser)
         {
+            var parserClass = parserInstance.GetType();
             var conf = new ParserConfiguration<IN, OUT>();
-            var nonTerminals = new Dictionary<string, NonTerminal<IN>>();
+            conf.ParserInstance = parserInstance;
+            var nonTerminals = new Dictionary<string, NonTerminal<IN,OUT>>();
             var methods = parserClass.GetMethods().ToList();
             methods = methods.Where(m =>
             {
@@ -138,12 +140,12 @@ namespace sly.parser.generator
                     var parseResult = grammarParser.Parse(ruleString);
                     if (!parseResult.IsError)
                     {
-                        var rule = (Rule<IN>) parseResult.Result;
+                        var rule = (Rule<IN,OUT>) parseResult.Result;
                         rule.RuleString = ruleString;
                         rule.SetVisitor(m,conf.ParserInstance);
-                        NonTerminal<IN> nonT = null;
+                        NonTerminal<IN,OUT> nonT = null;
                         if (!nonTerminals.ContainsKey(rule.NonTerminalName))
-                            nonT = new NonTerminal<IN>(rule.NonTerminalName, new List<Rule<IN>>());
+                            nonT = new NonTerminal<IN,OUT>(rule.NonTerminalName, new List<Rule<IN,OUT>>());
                         else
                             nonT = nonTerminals[rule.NonTerminalName];
                         nonT.Rules.Add(rule);

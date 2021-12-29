@@ -7,7 +7,7 @@ using sly.parser.syntax.tree;
 namespace sly.parser.generator.visitor
 {
     [ExcludeFromCodeCoverage]
-    public class GraphVizEBNFSyntaxTreeVisitor<IN> where IN : struct
+    public class GraphVizEBNFSyntaxTreeVisitor<IN,OUT> where IN : struct
     {
         public DotGraph Graph { get; private set; }
 
@@ -19,7 +19,7 @@ namespace sly.parser.generator.visitor
         private int NodeCounter = 0;
 
 
-        private DotNode Leaf(SyntaxLeaf<IN> leaf)
+        private DotNode Leaf(SyntaxLeaf<IN,OUT> leaf)
         {
             return Leaf(leaf.Token.TokenID, leaf.Token.Value);
         }
@@ -44,7 +44,7 @@ namespace sly.parser.generator.visitor
             return node;
         }
 
-        public DotNode VisitTree(ISyntaxNode<IN> root)
+        public DotNode VisitTree(ISyntaxNode<IN,OUT> root)
         {
             Graph = new DotGraph("syntaxtree", true);
             return Visit(root);
@@ -66,28 +66,28 @@ namespace sly.parser.generator.visitor
             return node;
         }
 
-        protected DotNode Visit(ISyntaxNode<IN> n)
+        protected DotNode Visit(ISyntaxNode<IN,OUT> n)
         {
-            if (n is SyntaxLeaf<IN>)
-                return Visit(n as SyntaxLeaf<IN>);
-            if (n is GroupSyntaxNode<IN>)
-                return Visit(n as GroupSyntaxNode<IN>);
-            if (n is ManySyntaxNode<IN>)
-                return Visit(n as ManySyntaxNode<IN>);
-            if (n is OptionSyntaxNode<IN>)
-                return Visit(n as OptionSyntaxNode<IN>);
-            if (n is SyntaxNode<IN>)
-                return Visit(n as SyntaxNode<IN>);
+            if (n is SyntaxLeaf<IN,OUT>)
+                return Visit(n as SyntaxLeaf<IN,OUT>);
+            if (n is GroupSyntaxNode<IN,OUT>)
+                return Visit(n as GroupSyntaxNode<IN,OUT>);
+            if (n is ManySyntaxNode<IN,OUT>)
+                return Visit(n as ManySyntaxNode<IN,OUT>);
+            if (n is OptionSyntaxNode<IN,OUT>)
+                return Visit(n as OptionSyntaxNode<IN,OUT>);
+            if (n is SyntaxNode<IN,OUT>)
+                return Visit(n as SyntaxNode<IN,OUT>);
 
             return null;
         }
 
-        private DotNode Visit(GroupSyntaxNode<IN> node)
+        private DotNode Visit(GroupSyntaxNode<IN,OUT> node)
         {
-            return Visit(node as SyntaxNode<IN>);
+            return Visit(node as SyntaxNode<IN,OUT>);
         }
 
-        private DotNode Visit(OptionSyntaxNode<IN> node)
+        private DotNode Visit(OptionSyntaxNode<IN,OUT> node)
         {
             var child = node.Children != null && node.Children.Any() ? node.Children[0] : null;
             if (child == null || node.IsEmpty)
@@ -98,7 +98,7 @@ namespace sly.parser.generator.visitor
             return Visit(child);
         }
 
-        private string GetNodeLabel(SyntaxNode<IN> node)
+        private string GetNodeLabel(SyntaxNode<IN,OUT> node)
         {
             string label = node.Name;
             if (node.IsExpressionNode)
@@ -109,7 +109,7 @@ namespace sly.parser.generator.visitor
             return label;
         }
 
-        private DotNode Visit(SyntaxNode<IN> node)
+        private DotNode Visit(SyntaxNode<IN,OUT> node)
         {
             DotNode result = null;
 
@@ -151,13 +151,13 @@ namespace sly.parser.generator.visitor
             return result;
         }
 
-        private DotNode Visit(ManySyntaxNode<IN> node)
+        private DotNode Visit(ManySyntaxNode<IN,OUT> node)
         {
-            return Visit(node as SyntaxNode<IN>);
+            return Visit(node as SyntaxNode<IN,OUT>);
         }
 
 
-        private DotNode Visit(SyntaxLeaf<IN> leaf)
+        private DotNode Visit(SyntaxLeaf<IN,OUT> leaf)
         {
             return Leaf(leaf.Token.TokenID, leaf.Token.Value);
         }

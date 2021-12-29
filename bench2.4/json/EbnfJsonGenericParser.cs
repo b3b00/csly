@@ -140,7 +140,7 @@ namespace bench.json
         }
 
         [Production("additionalProperty : COMMA property")]
-        public object property(Token<JsonTokenGeneric> comma, JObject property)
+        public object additionalProperty(Token<JsonTokenGeneric> comma, JObject property)
         {
             return property;
         }

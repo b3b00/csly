@@ -16,23 +16,23 @@ namespace sly.parser.generator.visitor
         }
 
 
-        protected override SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN> n, object context = null)
+        protected override SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN,OUT> n, object context = null)
         {
-            if (n is SyntaxLeaf<IN>)
-                return Visit(n as SyntaxLeaf<IN>);
-            if (n is GroupSyntaxNode<IN>)
-                return Visit(n as GroupSyntaxNode<IN>, context);
-            if (n is ManySyntaxNode<IN>)
-                return Visit(n as ManySyntaxNode<IN>, context);
-            if (n is OptionSyntaxNode<IN>)
-                return Visit(n as OptionSyntaxNode<IN>, context);
-            if (n is SyntaxNode<IN>)
-                return Visit(n as SyntaxNode<IN>, context);
+            if (n is SyntaxLeaf<IN,OUT>)
+                return Visit(n as SyntaxLeaf<IN,OUT>);
+            if (n is GroupSyntaxNode<IN,OUT>)
+                return Visit(n as GroupSyntaxNode<IN,OUT>, context);
+            if (n is ManySyntaxNode<IN,OUT>)
+                return Visit(n as ManySyntaxNode<IN,OUT>, context);
+            if (n is OptionSyntaxNode<IN,OUT>)
+                return Visit(n as OptionSyntaxNode<IN,OUT>, context);
+            if (n is SyntaxNode<IN,OUT>)
+                return Visit(n as SyntaxNode<IN,OUT>, context);
 
             return null;
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(GroupSyntaxNode<IN> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> Visit(GroupSyntaxNode<IN,OUT> node, object context = null)
         {
             var group = new Group<IN, OUT>();
             var values = new List<SyntaxVisitorResult<IN, OUT>>();
@@ -51,7 +51,7 @@ namespace sly.parser.generator.visitor
             return res;
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(OptionSyntaxNode<IN> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> Visit(OptionSyntaxNode<IN,OUT> node, object context = null)
         {
             var child = node.Children != null && node.Children.Any() ? node.Children[0] : null;
             if (child == null || node.IsEmpty)
@@ -67,15 +67,15 @@ namespace sly.parser.generator.visitor
             }
 
             var innerResult = Visit(child, context);
-            if (child is SyntaxLeaf<IN> leaf)
+            if (child is SyntaxLeaf<IN,OUT> leaf)
                 return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
-            if (child is GroupSyntaxNode<IN> group)
+            if (child is GroupSyntaxNode<IN,OUT> group)
                 return SyntaxVisitorResult<IN, OUT>.NewOptionGroupSome(innerResult.GroupResult);
             return SyntaxVisitorResult<IN, OUT>.NewOptionSome(innerResult.ValueResult);
         }
 
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN,OUT> node, object context = null)
         {
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
             if (node.Visitor != null || node.IsByPassNode)
@@ -137,7 +137,11 @@ namespace sly.parser.generator.visitor
                         }
 
                         if (method == null) method = node.Visitor;
-                        var t = method.Invoke(ParserVsisitorInstance, args.ToArray());
+                        object t = null;
+                        if (!DebugVisitor.UseCaller)
+                            t = method?.Invoke(ParserVsisitorInstance, args.ToArray());
+                        else
+                            t = node.VisitorCaller(ParserVsisitorInstance, args.ToArray());
                         var res = (OUT) t;
                         result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
                     }
@@ -158,7 +162,7 @@ namespace sly.parser.generator.visitor
             return result;
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(ManySyntaxNode<IN> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> Visit(ManySyntaxNode<IN,OUT> node, object context = null)
         {
             SyntaxVisitorResult<IN, OUT> result = null;
 
@@ -193,7 +197,7 @@ namespace sly.parser.generator.visitor
         }
 
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN> leaf)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN,OUT> leaf)
         {
             return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
         }

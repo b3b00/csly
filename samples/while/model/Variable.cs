@@ -34,5 +34,10 @@ namespace csly.whileLang.model
             emiter.LoadLocal(emiter.Locals[Name]);
             return emiter;
         }
+        
+        public override string ToString()
+        {
+            return Dump("");
+        }
     }
 }

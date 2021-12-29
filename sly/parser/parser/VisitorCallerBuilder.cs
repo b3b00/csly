@@ -9,7 +9,7 @@ namespace sly.parser.parser
 {
     public class VisitorCallerBuilder
     {
-         public static CallVisitor BuildLambda(object instance, MethodInfo method)
+         public static CallVisitor<OUT> BuildLambda<OUT>(object instance, MethodInfo method)
         {
             var parameters = BuildParameters(instance.GetType(),method.GetParameters());
 
@@ -26,7 +26,7 @@ namespace sly.parser.parser
             
             
             
-            var l = Expression.Lambda<CallVisitor>(body, $"call_{method.Name}", lambdaParameters);
+            var l = Expression.Lambda<CallVisitor<OUT>>(body, $"call_{method.Name}", lambdaParameters);
             
             var lambda = l.Compile();
 

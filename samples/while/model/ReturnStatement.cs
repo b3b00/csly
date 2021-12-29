@@ -39,5 +39,10 @@ namespace csly.whileLang.model
             emiter.Return();
             return emiter;
         }
+        
+        public override string ToString()
+        {
+            return Dump("");
+        }
     }
 }

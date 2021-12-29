@@ -3,12 +3,12 @@ using System;
 
 namespace sly.lexer
 {
-    public interface ILexer<T> where T : struct
+    public interface ILexer<IN> where IN : struct
     {
-        void AddDefinition(TokenDefinition<T> tokenDefinition);
-        LexerResult<T> Tokenize(string source);
+        void AddDefinition(TokenDefinition<IN> tokenDefinition);
+        LexerResult<IN> Tokenize(string source);
         
-        LexerResult<T> Tokenize(ReadOnlyMemory<char> source);
+        LexerResult<IN> Tokenize(ReadOnlyMemory<char> source);
         
         string I18n { get; set; }
     }

@@ -8,6 +8,11 @@ using static sly.parser.parser.ValueOptionConstructors;
 
 namespace sly.parser.generator.visitor
 {
+    public static class DebugVisitor
+    {
+        public static bool UseCaller = false;
+    }
+    
     public class SyntaxVisitorResult<IN, OUT> where IN : struct
     {
         public List<Group<IN, OUT>> GroupListResult;
@@ -185,22 +190,22 @@ namespace sly.parser.generator.visitor
 
         public ParserConfiguration<IN, OUT> Configuration { get; set; }
 
-        public OUT VisitSyntaxTree(ISyntaxNode<IN> root, object context = null)
+        public OUT VisitSyntaxTree(ISyntaxNode<IN, OUT> root, object context = null)
         {
             var result = Visit(root, context);
             return result.ValueResult;
         }
 
-        protected virtual SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN> n, object context = null)
+        protected virtual SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN, OUT> n, object context = null)
         {
-            if (n is SyntaxLeaf<IN>)
-                return Visit(n as SyntaxLeaf<IN>);
-            if (n is SyntaxNode<IN>)
-                return Visit(n as SyntaxNode<IN>, context);
+            if (n is SyntaxLeaf<IN, OUT>)
+                return Visit(n as SyntaxLeaf<IN, OUT>);
+            if (n is SyntaxNode<IN, OUT>)
+                return Visit(n as SyntaxNode<IN, OUT>, context);
             return null;
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN, OUT> node, object context = null)
         {
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
             if (node.Visitor != null || node.IsByPassNode)
@@ -239,7 +244,11 @@ namespace sly.parser.generator.visitor
                         }
 
                         method = node.Visitor;
-                        var t = method?.Invoke(ParserVsisitorInstance, args.ToArray());
+                        object t = null;
+                        if (!DebugVisitor.UseCaller)
+                            t = method?.Invoke(ParserVsisitorInstance, args.ToArray());
+                        else
+                            t = node.VisitorCaller(ParserVsisitorInstance, args.ToArray());
                         var res = (OUT) t;
                         result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
                     }
@@ -260,7 +269,7 @@ namespace sly.parser.generator.visitor
             return result;
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN> leaf)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN, OUT> leaf)
         {
             return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
         }

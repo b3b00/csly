@@ -11,6 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="smalltest.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="test.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

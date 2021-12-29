@@ -7,11 +7,11 @@ using sly.lexer;
 
 namespace sly.parser
 {
-    public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable
+    public class UnexpectedTokenSyntaxError<IN> : ParseError, IComparable where IN : struct
     {
         private string I18n;
         
-        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, string i18n=null, params T[] expectedTokens )
+        public UnexpectedTokenSyntaxError(Token<IN> unexpectedToken, string i18n=null, params IN[] expectedTokens )
         {
             I18n = i18n;
             ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
@@ -19,7 +19,7 @@ namespace sly.parser
             UnexpectedToken = unexpectedToken;
             if (expectedTokens != null)
             {
-                ExpectedTokens = new List<T>();
+                ExpectedTokens = new List<IN>();
                 ExpectedTokens.AddRange(expectedTokens);
             }
             else
@@ -29,7 +29,7 @@ namespace sly.parser
 
         }
 
-        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, string i18n = null, List<T> expectedTokens = null) 
+        public UnexpectedTokenSyntaxError(Token<IN> unexpectedToken, string i18n = null, List<IN> expectedTokens = null) 
         {
             I18n = i18n;
             ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
@@ -37,7 +37,7 @@ namespace sly.parser
             UnexpectedToken = unexpectedToken;
             if (expectedTokens != null)
             {
-                ExpectedTokens = new List<T>();
+                ExpectedTokens = new List<IN>();
                 ExpectedTokens.AddRange(expectedTokens);
             }
             else
@@ -47,9 +47,9 @@ namespace sly.parser
         }
 
 
-        public Token<T> UnexpectedToken { get; set; }
+        public Token<IN> UnexpectedToken { get; set; }
 
-        public List<T> ExpectedTokens { get; set; }
+        public List<IN> ExpectedTokens { get; set; }
 
         public override int Line
         {

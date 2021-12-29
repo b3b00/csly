@@ -140,7 +140,7 @@ namespace jsonparser
         }
 
         [Production("additionalProperty : COMMA property")]
-        public JSon property(Token<JsonTokenGeneric> comma, JObject property)
+        public JSon additionalProperty(Token<JsonTokenGeneric> comma, JObject property)
         {
             return property;
         }

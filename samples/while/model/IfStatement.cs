@@ -80,5 +80,9 @@ namespace csly.whileLang.model
             emiter.MarkLabel(endLabel);
             return emiter;
         }
+        public override string ToString()
+        {
+            return Dump("");
+        }
     }
 }

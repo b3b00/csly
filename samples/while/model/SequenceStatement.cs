@@ -73,5 +73,10 @@ namespace csly.whileLang.model
         {
             Statements.AddRange(stmts);
         }
+        
+        public override string ToString()
+        {
+            return Dump("");
+        }
     }
 }
