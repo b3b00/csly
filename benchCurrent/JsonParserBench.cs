@@ -8,6 +8,7 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Toolchains.CsProj;
 using sly.parser;
 using sly.parser.generator;
+using sly.parser.generator.visitor;
 
 namespace benchCurrent
 {
@@ -45,7 +46,8 @@ namespace benchCurrent
             if (result.IsError)
             {
                 Console.WriteLine("ERROR");
-                result.Errors.ForEach(Console.WriteLine);
+                result.Errors.ForEach(x => Console.WriteLine(x.Message));
+                Environment.Exit(666);
             }
             else
             {
@@ -57,6 +59,20 @@ namespace benchCurrent
         }
 
         [Benchmark]
+
+        public void TestInvoke()
+        {
+            DebugVisitor.UseCaller = false;
+            TestJson();
+        }
+        
+        [Benchmark]
+
+        public void TestLambda()
+        {
+            DebugVisitor.UseCaller = true;
+            TestJson();
+        }
         
         public void TestJson()
         {

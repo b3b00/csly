@@ -29,13 +29,13 @@ namespace benchCurrent.json
         }
 
         [Production("value : INT")]
-        public object IntValue(Token<JsonToken> intToken)
+        public JSon IntValue(Token<JsonToken> intToken)
         {
             return new JValue(intToken.IntValue);
         }
 
         [Production("value : DOUBLE")]
-        public object DoubleValue(Token<JsonToken> doubleToken)
+        public JSon DoubleValue(Token<JsonToken> doubleToken)
         {
             var dbl = double.MinValue;
             try
@@ -58,13 +58,13 @@ namespace benchCurrent.json
         }
 
         [Production("value : BOOLEAN")]
-        public object BooleanValue(Token<JsonToken> boolToken)
+        public JSon BooleanValue(Token<JsonToken> boolToken)
         {
             return new JValue(bool.Parse(boolToken.Value));
         }
 
         [Production("value : NULL")]
-        public object NullValue(object forget)
+        public JSon NullValue(Token<JsonToken> forget)
         {
             return new JNull();
         }
@@ -86,13 +86,13 @@ namespace benchCurrent.json
         #region OBJECT
 
         [Production("object: ACCG ACCD")]
-        public JSon EmptyObjectValue(object accg, object accd)
+        public JSon EmptyObjectValue(Token<JsonToken> accg, Token<JsonToken> accd)
         {
             return new JObject();
         }
 
         [Production("object: ACCG members ACCD")]
-        public JSon AttributesObjectValue(object accg, JObject members, object accd)
+        public JSon AttributesObjectValue(Token<JsonToken> accg, JObject members, Token<JsonToken> accd)
         {
             return members;
         }
@@ -102,13 +102,13 @@ namespace benchCurrent.json
         #region LIST
 
         [Production("list: CROG CROD")]
-        public JSon EmptyList(object crog, object crod)
+        public JSon EmptyList(Token<JsonToken> crog, Token<JsonToken> crod)
         {
             return new JList();
         }
 
         [Production("list: CROG listElements CROD")]
-        public JSon List(object crog, JList elements, object crod)
+        public JSon List(Token<JsonToken> crog, JList elements, Token<JsonToken> crod)
         {
             return elements;
         }
@@ -133,7 +133,7 @@ namespace benchCurrent.json
         #region PROPERTIES
 
         [Production("members: property additionalProperty*")]
-        public object Members(JObject head, List<JSon> tail)
+        public JSon Members(JObject head, List<JSon> tail)
         {
             var value = new JObject();
             value.Merge(head);
@@ -142,13 +142,13 @@ namespace benchCurrent.json
         }
 
         [Production("additionalProperty : COMMA property")]
-        public object property(Token<JsonToken> comma, JObject property)
+        public JSon property(Token<JsonToken> comma, JObject property)
         {
             return property;
         }
 
         [Production("property: STRING COLON value")]
-        public object property(Token<JsonToken> key, object colon, JSon value)
+        public JSon property(Token<JsonToken> key, Token<JsonToken> colon, JSon value)
         {
             return new JObject(key.StringWithoutQuotes, value);
         }
