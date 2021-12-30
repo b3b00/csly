@@ -65,11 +65,14 @@ using sly.parser.generator;
          * expr ::= PARENTHESIS_L expr PARENTHESIS_R
          */
         [Production("int: DIGITS")]
-        public int exprIntL(Token<Issue251Tokens> expr) => expr.IntValue;
+        public ExprClosure exprIntL(Token<Issue251Tokens> expr) => new ExprClosure() {valueInt = expr.IntValue, ResultType = ExprClosure.Types.INT};
 
         [Production("string: LITERAL_STRING")]
-        public string exprStringL(Token<Issue251Tokens> expr) => 
-            expr.StringWithoutQuotes.Replace("\\\"", "\""); // default string delimiter works. 
+        public ExprClosure exprStringL(Token<Issue251Tokens> expr) => new ExprClosure()
+        {
+            valueString = expr.StringWithoutQuotes.Replace("\\\"", "\""), // default string delimiter works.
+            ResultType = ExprClosure.Types.STRING
+        };
 
         [Production("expr: int")]
         public ExprClosure exprInt(int what) =>

@@ -194,7 +194,7 @@ namespace sly.parser.generator
 
 
                     var r = BuildNonTerminal(ntAndRule);
-                    r.SetVisitor(m,conf.ParserInstance);
+                    r.Visitor = m;
                     r.NonTerminalName = ntAndRule.Item1;
                     var key = ntAndRule.Item1 + "__" + r.Key;
                     functions[key] = m;
@@ -270,17 +270,18 @@ namespace sly.parser.generator
 
         private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result)
         {
-            var checkers = new List<ParserChecker<IN, OUT>>();
-            checkers.Add(CheckUnreachable);
-            checkers.Add(CheckNotFound);
-            checkers.Add(CheckAlternates);
-            checkers.Add(CheckVisitorsSignature);
+            var checkers = new List<(bool applyIfError, ParserChecker<IN, OUT> checker)>();
+            checkers.Add((true,CheckUnreachable));
+            checkers.Add((true,CheckNotFound));
+            checkers.Add((true,CheckAlternates));
+            checkers.Add((true,CheckVisitorsSignature));
+            checkers.Add((false,SetVisitorCallers));
 
             if (result.Result != null && !result.IsError)
                 foreach (var checker in checkers)
-                    if (checker != null)
+                    if (checker.checker != null  && checker.applyIfError)
                         result.Result.Configuration.NonTerminals.Values.ToList()
-                            .ForEach(nt => result = checker(result, nt));
+                            .ForEach(nt => result = checker.checker(result, nt));
             return result;
         }
 
@@ -665,6 +666,17 @@ namespace sly.parser.generator
             return result;
         }
 
+       
+        private  BuildResult<Parser<IN, OUT>> SetVisitorCallers(BuildResult<Parser<IN, OUT>> result,
+            NonTerminal<IN,OUT> nonTerminal)
+        {
+            foreach (var rule in nonTerminal.Rules)
+            {
+                rule.SetVisitorCaller(rule.RuleString, rule.Visitor, result.Result.Configuration);
+            }
+            
+            return result;
+        }
        
 
         #endregion

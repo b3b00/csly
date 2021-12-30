@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using sly.buildresult;
+using sly.i18n;
+using sly.parser.generator;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.parser
 {
     public class VisitorCallerBuilder
     {
-         public static CallVisitor<OUT> BuildLambda<OUT>(object instance, MethodInfo method)
+         public static CallVisitor<OUT> BuildLambda<OUT>(string ruleString, object instance, MethodInfo method)
         {
             var parameters = BuildParameters(instance.GetType(),method.GetParameters());
 
@@ -23,9 +26,7 @@ namespace sly.parser.parser
             var body = BuildBody(method.Name, instance, method.GetParameters(), lambdaParameters);
             var bodyString = body.ToString();
 
-            
-            
-            
+
             var l = Expression.Lambda<CallVisitor<OUT>>(body, $"call_{method.Name}", lambdaParameters);
             
             var lambda = l.Compile();

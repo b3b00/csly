@@ -19,7 +19,6 @@ namespace sly.parser.generator
             Precedence = precedence;
             Associativity = assoc;
             VisitorMethod = method;
-            VisitorCaller = VisitorCallerBuilder.BuildLambda<OUT>(parserInstance, method);
             OperatorToken = oper;
             Affix = affix;
         }

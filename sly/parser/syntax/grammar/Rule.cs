@@ -26,8 +26,8 @@ namespace sly.parser.syntax.grammar
         private Dictionary<IN, OperationMetaData<IN,OUT>> VisitorMethodsForOperation { get; }
 
         // visitor for classical rules
-        private MethodInfo Visitor { get; set; }
-        
+        public MethodInfo Visitor { get; set; }
+
         private CallVisitor<OUT> VisitorCaller { get; set; }
         
          
@@ -140,10 +140,10 @@ namespace sly.parser.syntax.grammar
             return caller;
         }
 
-        public void SetVisitor(MethodInfo visitor, object parserInstance)
+        public void SetVisitorCaller(string ruleString, MethodInfo visitor, object parserInstance)
         {
             Visitor = visitor;
-            VisitorCaller = VisitorCallerBuilder.BuildLambda<OUT>(parserInstance, visitor); // TODO : set instance !
+            VisitorCaller = VisitorCallerBuilder.BuildLambda<OUT>(ruleString, parserInstance, visitor); // TODO : set instance !
             ;
         }
 
