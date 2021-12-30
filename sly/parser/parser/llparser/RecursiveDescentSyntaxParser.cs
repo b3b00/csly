@@ -174,7 +174,7 @@ namespace sly.parser.llparser
                 if (rule.IsSubRule)
                     node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, children);
                 else
-                    node = new SyntaxNode<IN, OUT>(nonTerminalName, children,rule.GetVisitor(),rule.GetVisitorCaller());
+                    node = new SyntaxNode<IN, OUT>(nonTerminalName, children,rule.GetVisitor(),rule.GetVisitorCaller(Configuration.ParserInstance));
                 node = ManageExpressionRules(rule, node);
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                     result.Root = children[0];
@@ -215,7 +215,7 @@ namespace sly.parser.llparser
                         if (operatorNode != null)
                         {
                             var visitor = rule.GetVisitor(operatorNode.Token.TokenID);
-                            var caller = rule.GetVisitorCaller(operatorNode.Token.TokenID);
+                            var caller = rule.GetVisitorCaller(Configuration.ParserInstance, operatorNode.Token.TokenID);
                             if (visitor != null)
                             {
                                 node.Visitor = visitor;

@@ -10,7 +10,7 @@ namespace sly.parser.generator.visitor
 {
     public static class DebugVisitor
     {
-        public static bool UseCaller = false;
+        public static bool UseCaller = true;
     }
     
     public class SyntaxVisitorResult<IN, OUT> where IN : struct

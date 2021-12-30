@@ -135,7 +135,7 @@ namespace sly.parser.llparser
                 }
                 else
                 {
-                    node = new SyntaxNode<IN,OUT>( nonTerminalName,  children, rule.GetVisitor(),rule.GetVisitorCaller());
+                    node = new SyntaxNode<IN,OUT>( nonTerminalName,  children, rule.GetVisitor(),rule.GetVisitorCaller(Configuration.ParserInstance));
                     node.ExpressionAffix = rule.ExpressionAffix;
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
@@ -230,7 +230,7 @@ namespace sly.parser.llparser
                                 children.Add(secondResult.Root);
                                 children.Add(thirdResult.Root);
                                 currentPosition = thirdResult.EndingPosition;
-                                var finalNode = new SyntaxNode<IN,OUT>( nonTerminalName,  children, rule.GetVisitor(), rule.GetVisitorCaller());
+                                var finalNode = new SyntaxNode<IN,OUT>( nonTerminalName,  children, rule.GetVisitor(), rule.GetVisitorCaller(Configuration.ParserInstance));
                                 finalNode.ExpressionAffix = rule.ExpressionAffix;
                                 finalNode = ManageExpressionRules(rule, finalNode);
                                 var finalResult = new SyntaxParseResult<IN,OUT>();
@@ -263,7 +263,7 @@ namespace sly.parser.llparser
                 if (rule.IsSubRule)
                     node = new GroupSyntaxNode<IN,OUT>(nonTerminalName, children);
                 else
-                    node = new SyntaxNode<IN,OUT>( nonTerminalName, children,rule.GetVisitor(),rule.GetVisitorCaller());
+                    node = new SyntaxNode<IN,OUT>( nonTerminalName, children,rule.GetVisitor(),rule.GetVisitorCaller(Configuration.ParserInstance));
                 node = ManageExpressionRules(rule, node);
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                     result.Root = children[0];

@@ -122,7 +122,7 @@ namespace sly.parser.syntax.grammar
             return visitor;
         }
         
-        public CallVisitor<OUT> GetVisitorCaller(IN token = default(IN))
+        public CallVisitor<OUT> GetVisitorCaller(object parserInstance, IN token = default(IN))
         {
             CallVisitor<OUT> caller = null;
             if (IsExpressionRule)
@@ -131,6 +131,12 @@ namespace sly.parser.syntax.grammar
                     ? VisitorMethodsForOperation[token]
                     : null;
                 caller = operation?.VisitorCaller;
+                if (caller == null && !(token.Equals(default(IN))))
+                {
+                    ;
+                    caller = VisitorCallerBuilder.BuildLambda<OUT>(token.ToString(),parserInstance, operation.VisitorMethod);
+                    operation.VisitorCaller = caller;
+                }
             }
             else
             {

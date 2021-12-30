@@ -279,7 +279,7 @@ namespace sly.parser.generator
 
             if (result.Result != null && !result.IsError)
                 foreach (var checker in checkers)
-                    if (checker.checker != null  && checker.applyIfError)
+                    if (checker.checker != null  && ((checker.applyIfError) || (!checker.applyIfError && result.IsOk)))
                         result.Result.Configuration.NonTerminals.Values.ToList()
                             .ForEach(nt => result = checker.checker(result, nt));
             return result;
@@ -672,7 +672,11 @@ namespace sly.parser.generator
         {
             foreach (var rule in nonTerminal.Rules)
             {
-                rule.SetVisitorCaller(rule.RuleString, rule.Visitor, result.Result.Configuration);
+                if (!rule.IsSubRule && ! rule.IsExpressionRule)
+                {
+                    
+                    rule.SetVisitorCaller(rule.RuleString, rule.Visitor, result.Result.Configuration.ParserInstance);
+                }
             }
             
             return result;
