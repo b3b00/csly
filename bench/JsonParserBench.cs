@@ -32,11 +32,9 @@ namespace bench
             public Config()
             {
                 var baseJob = Job.MediumRun.With(CsProjCoreToolchain.Current.Value);
-                Add(baseJob.WithNuGet("sly", "2.2.5.1").WithId("2.2.5.1"));
-                Add(baseJob.WithNuGet("sly", "2.2.5.2").WithId("2.2.5.2"));
                 Add(EnvironmentAnalyser.Default);
-                Add(baseJob.WithNuGet("sly", "2.2.5.3").WithId("2.2.5.3"));
-                Add(baseJob.WithNuGet("sly", "2.3.0.1").WithId("2.3.0.1"));
+                Add(baseJob.WithNuGet("sly", "2.8.0.3").WithId("2.8.0.3"));
+                
             }
         }
 
@@ -48,7 +46,6 @@ namespace bench
         public void Setup()
         {
             Console.WriteLine(("SETUP"));
-            Console.ReadLine();
             content = File.ReadAllText("test.json");
             Console.WriteLine("json read.");
             var jsonParser = new EbnfJsonGenericParser();
@@ -59,7 +56,8 @@ namespace bench
             if (result.IsError)
             {
                 Console.WriteLine("ERROR");
-                result.Errors.ForEach(e => Console.WriteLine(e));
+                result.Errors.ForEach(e => Console.WriteLine(e.Message));
+                Environment.Exit(666);
             }
             else
             {

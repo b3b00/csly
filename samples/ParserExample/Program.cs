@@ -470,29 +470,29 @@ return r";
                 var instance = new EbnfJsonGenericParser();
             var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
             var buildResult = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            // if (buildResult.IsOk)
-            // {
-            //     Console.WriteLine("parser built.");
-            //     var parser = buildResult.Result;
-            //     var content = File.ReadAllText("test.json");
-            //     Console.WriteLine("test.json read.");
-            //     var jsonResult = parser.Parse(content);
-            //     Console.WriteLine("json parse done.");
-            //     if (jsonResult.IsOk)
-            //     {
-            //         Console.WriteLine("YES !");
-            //     }
-            //     else
-            //     {
-            //         Console.WriteLine("Ooh no !");
-            //     }
-            //     Console.WriteLine("Done.");
-            //
-            // }
-            // else
-            // {
-            //     buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
-            // }
+            if (buildResult.IsOk)
+            {
+                Console.WriteLine("parser built.");
+                var parser = buildResult.Result;
+                var content = File.ReadAllText("test.json");
+                Console.WriteLine("test.json read.");
+                var jsonResult = parser.Parse(content);
+                Console.WriteLine("json parse done.");
+                if (jsonResult.IsOk)
+                {
+                    Console.WriteLine("YES !");
+                }
+                else
+                {
+                    Console.WriteLine("Ooh no !");
+                }
+                Console.WriteLine("Done.");
+            
+            }
+            else
+            {
+                buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
+            }
             }
             catch(Exception e) {
                 Console.WriteLine($"ERROR {e.Message} : \n {e.StackTrace}");
@@ -909,7 +909,7 @@ final = 9999
             //TestContextualParser();
             //TestTokenCallBacks();
             //test104();
-            // testJSON();
+            testJSON();
             //TestGrammarParser();
             // TestGraphViz();
             // TestGraphViz();
@@ -932,7 +932,7 @@ final = 9999
             // TestShortGeneric();
             //TestIssue239();
             //TestShortOperations();
-            testGenericLexerJson();
+            //testGenericLexerJson();
         }
 
 

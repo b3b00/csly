@@ -27,13 +27,13 @@ namespace bench.json
         }
 
         [Production("value : INT")]
-        public object IntValue(Token<JsonTokenGeneric> intToken)
+        public JSon IntValue(Token<JsonTokenGeneric> intToken)
         {
             return new JValue(intToken.IntValue);
         }
 
         [Production("value : DOUBLE")]
-        public object DoubleValue(Token<JsonTokenGeneric> doubleToken)
+        public JSon DoubleValue(Token<JsonTokenGeneric> doubleToken)
         {
             double dbl;
             try
@@ -56,13 +56,13 @@ namespace bench.json
         }
 
         [Production("value : BOOLEAN")]
-        public object BooleanValue(Token<JsonTokenGeneric> boolToken)
+        public JSon BooleanValue(Token<JsonTokenGeneric> boolToken)
         {
             return new JValue(bool.Parse(boolToken.Value));
         }
 
         [Production("value : NULL")]
-        public object NullValue(object forget)
+        public JSon NullValue(Token<JsonTokenGeneric> forget)
         {
             return new JNull();
         }
@@ -84,13 +84,13 @@ namespace bench.json
         #region OBJECT
 
         [Production("object: ACCG ACCD")]
-        public JSon EmptyObjectValue(object accg, object accd)
+        public JSon EmptyObjectValue(Token<JsonTokenGeneric> accg, Token<JsonTokenGeneric> accd)
         {
             return new JObject();
         }
 
         [Production("object: ACCG members ACCD")]
-        public JSon AttributesObjectValue(object accg, JObject members, object accd)
+        public JSon AttributesObjectValue(Token<JsonTokenGeneric> accg, JObject members, Token<JsonTokenGeneric> accd)
         {
             return members;
         }
@@ -100,13 +100,13 @@ namespace bench.json
         #region LIST
 
         [Production("list: CROG CROD")]
-        public JSon EmptyList(object crog, object crod)
+        public JSon EmptyList(Token<JsonTokenGeneric> crog, Token<JsonTokenGeneric> crod)
         {
             return new JList();
         }
 
         [Production("list: CROG listElements CROD")]
-        public JSon List(object crog, JList elements, object crod)
+        public JSon List(Token<JsonTokenGeneric> crog, JList elements, Token<JsonTokenGeneric> crod)
         {
             return elements;
         }
@@ -131,7 +131,7 @@ namespace bench.json
         #region PROPERTIES
 
         [Production("members: property additionalProperty*")]
-        public object Members(JObject head, List<JSon> tail)
+        public JSon Members(JObject head, List<JSon> tail)
         {
             var value = new JObject();
             value.Merge(head);
@@ -140,13 +140,13 @@ namespace bench.json
         }
 
         [Production("additionalProperty : COMMA property")]
-        public object property(Token<JsonTokenGeneric> comma, JObject property)
+        public JSon property(Token<JsonTokenGeneric> comma, JObject property)
         {
             return property;
         }
 
         [Production("property: STRING COLON value")]
-        public object property(Token<JsonTokenGeneric> key, object colon, JSon value)
+        public JSon property(Token<JsonTokenGeneric> key, Token<JsonTokenGeneric> colon, JSon value)
         {
             return new JObject(key.StringWithoutQuotes, value);
         }
