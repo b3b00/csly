@@ -25,6 +25,7 @@
     <ProjectReference Include="..\samples\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj" />
     <ProjectReference Include="..\samples\IndentedWhile\indentedWhile.csproj" />
     <ProjectReference Include="..\samples\indented\indented.csproj" />
+    <ProjectReference Include="..\samples\postProcessedLexerParser\postProcessedLexerParser.csproj" />
     <ProjectReference Include="..\samples\SimpleExpressionParser\SimpleExpressionParser.csproj" />
     <ProjectReference Include="..\samples\while\while.csproj" />
     <ProjectReference Include="..\sly\sly.csproj" />

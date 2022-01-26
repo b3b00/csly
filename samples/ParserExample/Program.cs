@@ -18,6 +18,7 @@ using jsonparser.JsonModel;
 using ParserTests;
 using ParserTests.Issue239;
 using ParserTests.lexer;
+using postProcessedLexerParser.expressionModel;
 using simpleExpressionParser;
 using sly.lexer;
 using sly.lexer.fsm;
@@ -29,6 +30,8 @@ using sly.i18n;
 using sly.parser.generator.visitor;
 using sly.parser.parser;
 using Xunit;
+using Expression = postProcessedLexerParser.expressionModel.Expression;
+using ExpressionContext = postProcessedLexerParser.expressionModel.ExpressionContext;
 
 namespace ParserExample
 {
@@ -928,8 +931,12 @@ final = 9999
             // TestI18N();
             // Console.ReadLine(); 
             // TestShortGeneric();
+
             //TestIssue239();
-            TestShortOperations();
+            TestLexerPostProcess();
+            TestLexerPostProcessEBNF();
+            //TestIssue239();
+            // TestShortOperations();
         }
 
 
@@ -985,6 +992,169 @@ final = 9999
         {
             Issue239Tests.TestOk();
             ;
+        }
+
+        private static List<Token<ExpressionToken>> postProcess(List<Token<ExpressionToken>> tokens)
+        {
+            var mayLeft = new List<ExpressionToken>()
+            {
+                ExpressionToken.INT, ExpressionToken.DOUBLE,  ExpressionToken.IDENTIFIER
+            };
+            
+            var mayRight = new List<ExpressionToken>()
+            {
+                ExpressionToken.INT, ExpressionToken.DOUBLE, ExpressionToken.LPAREN, ExpressionToken.IDENTIFIER
+            };
+            
+            Func<ExpressionToken,bool> mayOmmitLeft = (ExpressionToken tokenid) =>  mayLeft.Contains(tokenid);
+            
+            Func<ExpressionToken,bool> mayOmmitRight = (ExpressionToken tokenid) =>  mayRight.Contains(tokenid);
+                
+            
+            List<Token<ExpressionToken>> newTokens = new List<Token<ExpressionToken>>();
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                if ( i >= 1 &&
+                    mayOmmitRight(tokens[i].TokenID) && mayOmmitLeft(tokens[i-1].TokenID))
+                {
+                    newTokens.Add(new Token<ExpressionToken>()
+                    {
+                        TokenID = ExpressionToken.TIMES
+                    });
+                }
+                newTokens.Add(tokens[i]);
+            }
+
+            return newTokens;
+        }
+
+        
+        
+        private static void TestLexerPostProcess()
+        {
+            var Parser = postProcessedLexerParser.PostProcessedLexerParserBuilder.buildPostProcessedLexerParser();
+            
+            var r = Parser.Parse("2 * x");
+            if (r.IsError)
+            {
+                foreach (var error in r.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+
+                return;
+            }
+            var res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
+                { { "x", 2 } }));
+            Console.WriteLine("2 * x = "+(res.HasValue ? res.Value.ToString() : "?"));
+            
+            
+            r = Parser.Parse("2  x");
+            if (r.IsError)
+            {
+                foreach (var error in r.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+
+                return;
+            }
+            res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
+                { { "x", 2 } }));
+            Console.WriteLine("2 x = "+(res.HasValue ? res.Value.ToString() : "?"));
+            
+            r = Parser.Parse("2 ( x ) ");
+            if (r.IsError)
+            {
+                foreach (var error in r.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+
+                return;
+            }
+            res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
+                { { "x", 2 } }));
+            Console.WriteLine("2 (x) = "+(res.HasValue ? res.Value.ToString() : "?"));
+            
+            r = Parser.Parse("x x ");
+            if (r.IsError)
+            {
+                foreach (var error in r.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+
+                return;
+            }
+            res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
+                { { "x", 2 } }));
+            Console.WriteLine("x x = "+(res.HasValue ? res.Value.ToString() : "?"));
+            
+        }
+        
+          private static void TestLexerPostProcessEBNF()
+        {
+            var Parser = postProcessedLexerParser.PostProcessedLexerParserBuilder.buildPostProcessedLexerParser();
+            
+            var r = Parser.Parse("2 * x");
+            if (r.IsError)
+            {
+                foreach (var error in r.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+
+                return;
+            }
+            var res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
+                { { "x", 2 } }));
+            Console.WriteLine("2 * x = "+(res.HasValue ? res.Value.ToString() : "?"));
+            
+            
+            r = Parser.Parse("2  x");
+            if (r.IsError)
+            {
+                foreach (var error in r.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+
+                return;
+            }
+            res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
+                { { "x", 2 } }));
+            Console.WriteLine("2 x = "+(res.HasValue ? res.Value.ToString() : "?"));
+            
+            r = Parser.Parse("2 ( x ) ");
+            if (r.IsError)
+            {
+                foreach (var error in r.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+
+                return;
+            }
+            res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
+                { { "x", 2 } }));
+            Console.WriteLine("2 (x) = "+(res.HasValue ? res.Value.ToString() : "?"));
+            
+            r = Parser.Parse("x x ");
+            if (r.IsError)
+            {
+                foreach (var error in r.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+
+                return;
+            }
+            res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
+                { { "x", 2 } }));
+            
+            Console.WriteLine("x x = "+(res.HasValue ? res.Value.ToString() : "?"));
+            
         }
     }
 

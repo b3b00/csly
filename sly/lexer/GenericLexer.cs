@@ -79,6 +79,8 @@ namespace sly.lexer
             public IEqualityComparer<string> KeyWordComparer => KeyWordIgnoreCase ? StringComparer.OrdinalIgnoreCase : null;
         }
         
+        public LexerPostProcess<IN> LexerPostProcess { get; set; }
+        
         public string I18n { get; set; }
 
         public const string in_string = "in_string";

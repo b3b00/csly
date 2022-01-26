@@ -1,5 +1,6 @@
 ﻿
 using System;
+using sly.lexer.fsm;
 
 namespace sly.lexer
 {
@@ -11,5 +12,7 @@ namespace sly.lexer
         LexerResult<T> Tokenize(ReadOnlyMemory<char> source);
         
         string I18n { get; set; }
+        
+        LexerPostProcess<T> LexerPostProcess { get; set; }
     }
 }
