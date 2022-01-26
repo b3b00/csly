@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ParserTests.Issue251;
+using ParserTests.Issue260;
+using sly.buildresult;
 using sly.lexer;
 using sly.parser.generator;
 using Xunit;
@@ -175,7 +178,6 @@ namespace ParserTests
                 n++;
                 count++;
             }
-            Console.WriteLine(dump);
             Assert.Equal(1, count);
             var eoss = tokens.Where(x => x.IsEOS);
             Assert.Single(eoss);
@@ -206,6 +208,34 @@ namespace ParserTests
             Assert.NotNull(parser);
             var exception = Assert.Throws<Exception219>(() => parser.Parse("a = 1"));
             Assert.Equal("visitor error",exception.Message);                
+        }
+        
+        [Fact]
+        public static void Issue251LeftrecForBNF() {
+            ParserBuilder<Issue251Parser.Issue251Tokens,Issue251Parser.ExprClosure> builder = new ParserBuilder<Issue251Parser.Issue251Tokens, Issue251Parser.ExprClosure>();
+            Issue251Parser instance = new Issue251Parser();
+            var bres = builder.BuildParser(instance,ParserType.LL_RECURSIVE_DESCENT, "expr");
+            Assert.False(bres.IsOk);
+            Assert.Equal(1,bres.Errors.Count);
+            var error = bres.Errors.First();
+            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE, error.Code);
+        }
+
+        [Fact]
+        public static void Issue261Test()
+        {
+            var buildResult = LexerBuilder.BuildLexer<Issue261Lexer>();
+            Assert.True(buildResult.IsOk);
+            Assert.NotNull(buildResult.Result);
+            var lexer = buildResult.Result;
+            var lex = lexer.Tokenize(@"""test""");
+            Assert.True(lex.IsOk);
+            var tokens = lex.Tokens;
+            Assert.NotNull(tokens);
+            Assert.Equal(2,tokens.Count);
+            Assert.Equal("test",tokens[0].StringWithoutQuotes);
+
+
         }
     }
 }

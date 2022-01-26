@@ -1,6 +1,5 @@
-﻿using expressionparser.model;
-
-namespace ParserExample.expressionModel
+﻿
+namespace postProcessedLexerParser.expressionModel
 {
     public interface Expression
     {

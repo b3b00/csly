@@ -1,4 +1,5 @@
 .localhistory/*
+.VSCodeCounter
 # User-specific files
 *.suo
 *.user

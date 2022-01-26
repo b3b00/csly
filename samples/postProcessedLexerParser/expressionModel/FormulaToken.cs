@@ -1,6 +1,6 @@
 using sly.lexer;
 
-namespace ParserExample.expressionModel
+namespace postProcessedLexerParser.expressionModel
 {
     public enum FormulaToken
     {

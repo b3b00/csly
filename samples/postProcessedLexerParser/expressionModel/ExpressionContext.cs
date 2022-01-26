@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ParserExample.expressionModel
+namespace postProcessedLexerParser.expressionModel
 {
     public class ExpressionContext
     {

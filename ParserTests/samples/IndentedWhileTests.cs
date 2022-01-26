@@ -152,7 +152,7 @@ while i < 11 do
     i := i + 1
 return r";
             var compiler = new IndentedWhileCompiler();
-            var func = compiler.CompileToFunction(program);
+            var func = compiler.CompileToFunction(program,true);
             Assert.NotNull(func);
             var f = func();
             Assert.Equal(3628800, f);
@@ -202,6 +202,32 @@ else
             Assert.IsType<StringConstant>(elseAssign.Value);
             Assert.Equal("world", (elseAssign.Value as StringConstant).Value);
         }
+
+        [Fact]
+        public void TestNestedIfThenElse()
+        {
+            var program = @"
+# TestIfThenElse
+a := -111
+if true then
+    if true then
+        a := 1
+    else
+        a := 2
+else
+    a := 3
+    b := ""world""
+return a
+";
+            var compiler = new IndentedWhileCompiler();
+            var func = compiler.CompileToFunction(program,true);
+            Assert.NotNull(func);
+            var f = func();
+            Assert.Equal(1, f);
+
+            
+        }
+
 
         [Fact]
         public void TestInfiniteWhile()

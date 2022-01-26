@@ -29,6 +29,23 @@ namespace sly.parser
 
         }
 
+        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, string i18n = null, List<T> expectedTokens = null) 
+        {
+            I18n = i18n;
+            ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
+            
+            UnexpectedToken = unexpectedToken;
+            if (expectedTokens != null)
+            {
+                ExpectedTokens = new List<T>();
+                ExpectedTokens.AddRange(expectedTokens);
+            }
+            else
+            {
+                ExpectedTokens = null;
+            }
+        }
+
 
         public Token<T> UnexpectedToken { get; set; }
 

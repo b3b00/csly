@@ -1,17 +1,17 @@
-﻿namespace ParserExample.expressionModel
+﻿namespace postProcessedLexerParser.expressionModel
 {
-    public class UnaryOperation : ParserExample.expressionModel.Expression
+    public class UnaryOperation : Expression
     {
         private readonly FormulaToken Operator;
-        private readonly ParserExample.expressionModel.Expression RightExpression;
+        private readonly Expression RightExpression;
 
-        public UnaryOperation(FormulaToken op, ParserExample.expressionModel.Expression right)
+        public UnaryOperation(FormulaToken op, Expression right)
         {
             Operator = op;
             RightExpression = right;
         }
 
-        public double? Evaluate(ParserExample.expressionModel.ExpressionContext context)
+        public double? Evaluate(ExpressionContext context)
         {
             var right = RightExpression.Evaluate(context);
 

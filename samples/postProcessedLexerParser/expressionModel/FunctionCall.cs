@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ParserExample.expressionModel
+namespace postProcessedLexerParser.expressionModel
 {
     public class FunctionCall : Expression
     {
@@ -57,7 +57,7 @@ namespace ParserExample.expressionModel
         {
             if (parameters.Count() == 1 && parameters.First().HasValue)
             {
-                return Math.Log2(parameters.First().Value);
+                return Math.Log(parameters.First().Value);
             }
             return 0.0;
         }

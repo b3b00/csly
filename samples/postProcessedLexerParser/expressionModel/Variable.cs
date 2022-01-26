@@ -1,6 +1,6 @@
-﻿namespace ParserExample.expressionModel
+﻿namespace postProcessedLexerParser.expressionModel
 {
-    public sealed class Variable : ParserExample.expressionModel.Expression
+    public sealed class Variable : Expression
     {
         private readonly string VariableName;
 
@@ -10,7 +10,7 @@
         }
 
 
-        public double? Evaluate(ParserExample.expressionModel.ExpressionContext context)
+        public double? Evaluate(ExpressionContext context)
         {
             return context.GetValue(VariableName);
         }

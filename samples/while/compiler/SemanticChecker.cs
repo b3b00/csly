@@ -6,10 +6,12 @@ namespace csly.whileLang.compiler
     {
         private ExpressionTyper expressionTyper;
 
-        public CompilerContext SemanticCheck(WhileAST ast)
+        public CompilerContext SemanticCheck(WhileAST ast, bool isQuiet = false)
         {
             expressionTyper = new ExpressionTyper();
-            return SemanticCheck(ast, new CompilerContext());
+            var context = new CompilerContext();
+            context.IsQuiet = isQuiet;
+            return SemanticCheck(ast, context);
         }
 
         private CompilerContext SemanticCheck(WhileAST ast, CompilerContext context)
@@ -78,11 +80,11 @@ namespace csly.whileLang.compiler
             ast.CompilerScope = context.CurrentScope;
 
             context.OpenNewScope();
-            SemanticCheck(ast.ThenStmt);
+            SemanticCheck(ast.ThenStmt,context);
             context.CloseScope();
 
             context.OpenNewScope();
-            SemanticCheck(ast.ElseStmt);
+            SemanticCheck(ast.ElseStmt,context);
             context.CloseScope();
         }
 

@@ -8,7 +8,6 @@ namespace ParserTests.Issue164
         [Production("root: INT [PLUS|MINUS|TIMES|DIVIDE] INT")]
         public int root(Token<TestOption164Lexer> left, Token<TestOption164Lexer> op, Token<TestOption164Lexer> right)
         {
-            int res = 0;
             int l = left.IntValue;
             int r = right.IntValue;
             switch (op.TokenID)

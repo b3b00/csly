@@ -9,6 +9,8 @@ on:
   pull_request:
     branches: 
       - dev
+permissions:
+  pull-requests: write
 jobs:  
   build:
     env:
@@ -31,12 +33,13 @@ jobs:
     - name: Build with dotnet 
       run: dotnet build --configuration Release     
     - name: Test with dotnet
-      uses: b3b00/coverlet-action@1.1.0
+      uses: b3b00/coverlet-action@1.1.1
       id: 'coverlet'
       if: env.RUN_TESTS
       with:
         testProject: ${{env.TESTS_PROJECT}}
         output: 'lcov.info'
+        threshold: 80
         outputFormat: 'lcov'
         excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*'
     - name: coveralls      
@@ -46,13 +49,17 @@ jobs:
         github-token: ${{secrets.GITHUB_TOKEN }} 
         path-to-lcov: ${{steps.coverlet.outputs.coverageFile}} 
     - name: ReportGenerator
-      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.4
+      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
       with:
         reports: ${{steps.coverlet.outputs.coverageFile}} 
         targetdir: 'coveragereport' 
-        reporttypes: 'HtmlInline;lcov' 
+        reporttypes: 'HtmlInline;MarkdownSummary' 
         verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
         tag: '${{ github.run_number }}_${{ github.run_id }}' 
+#    - name: Publish coverage summary
+#      uses: marocchino/sticky-pull-request-comment@v2
+#      with:
+#           path: coveragereport/Summary.md
     - name: publish nuget
       if: matrix.os == 'windows-latest' && env.PUBLISH_NUGET
       id: publish_nuget
@@ -88,4 +95,9 @@ jobs:
       uses: fjogeleit/http-request-action@master
       with:
         url: https://camo.githubusercontent.com/12c4fcb3b21fbb2a725fc61449fb1b91e972c4c8a2baaf5904936d8e334bdbe8/68747470733a2f2f636f766572616c6c732e696f2f7265706f732f6769746875622f62336230302f63736c792f62616467652e7376673f6272616e63683d64657626736572766963653d676974687562
+        method: PURGE
+    - name: refresh nuget badge
+      uses: fjogeleit/http-request-action@master
+      with:
+        url: https://camo.githubusercontent.com/b0c8ccfcb3256380ae37c312e789e6282143295fa495361ea5c2dbe2169bff8c/68747470733a2f2f696d672e736869656c64732e696f2f6e756765742f762f736c792e737667
         method: PURGE

@@ -1,7 +1,6 @@
 ﻿using System;
-using expressionparser.model;
 
-namespace ParserExample.expressionModel
+namespace postProcessedLexerParser.expressionModel
 {
     public class BinaryOperation : Expression
     {
