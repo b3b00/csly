@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
+using GenericLexerWithCallbacks;
+using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
 
@@ -23,6 +24,8 @@ namespace ParserTests.Issue267
             var buildResult = parserBuilder.BuildParser(commandParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
 
             Assert.True(buildResult.IsOk);
+            var lexer = buildResult.Result.Lexer as GenericLexer<Issue267Token>;
+            CallBacksBuilder.BuildCallbacks(lexer);
 
             var parser = buildResult.Result;
             var parseResult = parser.Parse(program);
