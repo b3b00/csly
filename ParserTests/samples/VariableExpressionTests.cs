@@ -25,7 +25,7 @@ namespace ParserTests.samples
             var r = Parser.Parse("42/2");
             Assert.False(r.IsError);
             Assert.NotNull(r.Result);
-            Assert.Equal(20, r.Result.Evaluate(new ExpressionContext()));
+            Assert.Equal(21, r.Result.Evaluate(new ExpressionContext()));
         }
 
         [Fact]
