@@ -450,8 +450,6 @@ namespace sly.parser.llparser
 
             SyntaxParseResult<IN> innerResult = null;
 
-            bool hasByPassNode = false;
-
             if (innerClause is TerminalClause<IN> term)
                 innerResult = ParseTerminal(tokens, term, currentPosition);
             else if (innerClause is NonTerminalClause<IN> nonTerm)

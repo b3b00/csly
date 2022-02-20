@@ -148,10 +148,6 @@ namespace sly.parser.generator.visitor
                             throw tie.InnerException;
                         }
                     }
-                    catch (Exception e)
-                    {
-                        throw e;
-                    }
                 }
             }
 
