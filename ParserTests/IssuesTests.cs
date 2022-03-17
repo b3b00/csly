@@ -216,7 +216,7 @@ namespace ParserTests
             Issue251Parser instance = new Issue251Parser();
             var bres = builder.BuildParser(instance,ParserType.LL_RECURSIVE_DESCENT, "expr");
             Assert.False(bres.IsOk);
-            Assert.Equal(1,bres.Errors.Count);
+            Assert.Single(bres.Errors);
             var error = bres.Errors.First();
             Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE, error.Code);
         }

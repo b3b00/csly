@@ -305,7 +305,6 @@ namespace sly.parser.llparser
             int okEndingPosition = -1;
             int koEndingPosition = -1;
             bool hasOk = false;
-            bool hasKo = false;
             SyntaxParseResult<IN> maxOk = null;
             SyntaxParseResult<IN> maxKo = null;
             if (rulesResults.Count > 0)
@@ -324,7 +323,6 @@ namespace sly.parser.llparser
 
                     if (rulesResult.IsError)
                     {
-                        hasKo = true;
                         if (rulesResult.EndingPosition > koEndingPosition)
                         {
                             koEndingPosition = rulesResult.EndingPosition;
