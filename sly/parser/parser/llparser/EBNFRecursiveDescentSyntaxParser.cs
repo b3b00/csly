@@ -385,11 +385,14 @@ namespace sly.parser.llparser
                 firstInnerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
                 hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
             }
-            else if (innerClause is NonTerminalClause<IN>)
+            else if (innerClause is NonTerminalClause<IN> nonTerm)
             {
-                manyNode.IsManyValues = true;
                 firstInnerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
                 hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
+                if (nonTerm.IsGroup)
+                    manyNode.IsManyGroups = true;
+                else
+                    manyNode.IsManyValues = true;
             }
             else if (innerClause is ChoiceClause<IN> choice)
             {

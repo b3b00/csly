@@ -5,7 +5,9 @@ using ParserTests.Issue251;
 using ParserTests.Issue260;
 using sly.buildresult;
 using sly.lexer;
+using sly.parser;
 using sly.parser.generator;
+using sly.parser.parser;
 using Xunit;
 
 namespace ParserTests
@@ -158,6 +160,31 @@ namespace ParserTests
             throw new Exception219("visitor error");
         }
     }
+    
+    public enum Issue277Tokens
+    {
+        [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumericDash)]
+        IDENTIFIER,
+
+        [Lexeme(GenericToken.KeyWord, "or")]
+        OR,
+    }
+    
+    public class Issue277Parser
+    {
+        [Production("widget: IDENTIFIER")]
+        public string Widget(Token<Issue277Tokens> widget)
+        {
+            return widget.Value;
+        }
+
+        [Production("expression: widget (OR [d] widget)+")]
+        public string Expression(string widget, List<Group<Issue277Tokens, string>> ors)
+        {
+            return ors.Aggregate($"{widget}", (acc, a) => $"{acc} | {a.Value(0)}");
+        }
+    }
+    
     public class IssuesTests
     {
 
@@ -237,5 +264,30 @@ namespace ParserTests
 
 
         }
+
+        [Fact]
+        public static void Issue277Test()
+        {
+            var parserInstance = new Issue277Parser();
+            var builder = new ParserBuilder<Issue277Tokens, string>();
+
+            var result = builder
+                .BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression");
+            
+            Assert.True(result.IsOk);
+            
+            Assert.NotNull(result.Result);
+            Assert.IsType<Parser<Issue277Tokens, string>>(result.Result);
+            var parser = result.Result as Parser<Issue277Tokens, string>;
+            
+            var expression = "foo or bar or baz";
+            
+            var res = parser.Parse(expression);
+            Assert.True(res.IsOk);
+            Assert.NotNull(res.Result);
+            Assert.IsType<string>(res.Result);
+            var resAsString = res.Result as string;
+            Assert.Equal("foo | bar | baz", resAsString);
+        } 
     }
 }
