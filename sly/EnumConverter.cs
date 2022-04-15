@@ -3,7 +3,7 @@ using sly.parser.generator;
 
 namespace sly
 {
-    public class EnumConverter
+    public static class EnumConverter
     {
         public static IN ConvertIntToEnum<IN>(int intValue)
         {
@@ -25,7 +25,7 @@ namespace sly
         public static IN ConvertStringToEnum<IN>(string name)  where IN : struct
         {
             IN token = default(IN);
-            if (!Enum.TryParse(name, out token))
+            if (!Enum.TryParse<IN>(name, out token))
             {
                 throw new ParserConfigurationException($"bad enum name {name} on Operation definition.");
             }

@@ -79,8 +79,8 @@ namespace sly.parser.llparser
 
         public NonTerminal<IN> CreateSubRule(GroupClause<IN> group)
         {
-            var subRuleNonTerminalName = "GROUP-" + group.Clauses.Select(c => c.ToString())
-                                             .Aggregate((c1, c2) => $"{c1.ToString()}-{c2.ToString()}");
+            var subRuleNonTerminalName = "GROUP-" + group.Clauses.Select<IClause<IN>, string>(c => c.ToString())
+                                             .Aggregate<string>((c1, c2) => $"{c1.ToString()}-{c2.ToString()}");
             var nonTerminal = new NonTerminal<IN>(subRuleNonTerminalName);
             var subRule = new Rule<IN>();
             subRule.Clauses = group.Clauses;
@@ -132,7 +132,7 @@ namespace sly.parser.llparser
                     {
                         case TerminalClause<IN> term:
                             rule.PossibleLeadingTokens.Add(term.ExpectedToken);
-                            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
+                            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<IN>().ToList<IN>();
                             break;
                         case NonTerminalClause<IN> nonterm:
                         {
@@ -144,7 +144,7 @@ namespace sly.parser.llparser
                                 {
                                     rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
                                 });
-                                rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
+                                rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<IN>().ToList<IN>();
                             }
 
                             break;

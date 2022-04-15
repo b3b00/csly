@@ -33,7 +33,7 @@ namespace sly.parser.syntax.grammar
         [ExcludeFromCodeCoverage]
         public string Dump()
         {
-            return Clauses.Select(c => c.Dump()).Aggregate((d1, d2) => d1 + " " + d2);
+            return Clauses.Select<IClause<T>, string>(c => c.Dump()).Aggregate<string>((d1, d2) => d1 + " " + d2);
         }
     }
 }

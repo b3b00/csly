@@ -60,13 +60,13 @@ namespace sly.parser.generator
             BuildResult<ParserConfiguration<IN, OUT>> result) 
         {
             
-            var methods = parserClass.GetMethods().ToList();
-            methods = methods.Where(m =>
+            var methods = parserClass.GetMethods().ToList<MethodInfo>();
+            methods = methods.Where<MethodInfo>(m =>
             {
-                var attributes = m.GetCustomAttributes(typeof(OperationAttribute),true).ToList();
+                var attributes = m.GetCustomAttributes(typeof(OperationAttribute),true).ToList<object>();
                 
-                return attributes.Any();
-            }).ToList();
+                return attributes.Any<object>();
+            }).ToList<MethodInfo>();
 
             var operationsByPrecedence = new Dictionary<int, List<OperationMetaData<IN>>>();
             methods.ForEach(m =>
@@ -105,7 +105,7 @@ namespace sly.parser.generator
                         parserClass.Name);
             }
 
-            configuration.UsesOperations = operationsByPrecedence.Any(); 
+            configuration.UsesOperations = operationsByPrecedence.Any<KeyValuePair<int, List<OperationMetaData<IN>>>>(); 
             result.Result = configuration;
             return result;
         }
@@ -114,17 +114,17 @@ namespace sly.parser.generator
             BuildResult<ParserConfiguration<IN, OUT>> result) 
         {
             List<MethodInfo> methods;
-            methods = parserClass.GetMethods().ToList();
+            methods = parserClass.GetMethods().ToList<MethodInfo>();
             
-            var operandMethods = methods.Where(m =>
+            var operandMethods = methods.Where<MethodInfo>(m =>
             {
-                var attributes = m.GetCustomAttributes().ToList();
+                var attributes = m.GetCustomAttributes().ToList<Attribute>();
                 var attr = attributes.Find(a => a.GetType() == typeof(OperandAttribute));
                 return attr != null;
-            }).ToList();
+            }).ToList<MethodInfo>();
             
             
-            if (!operandMethods.Any())
+            if (!operandMethods.Any<MethodInfo>())
             {
                 result.AddError(new ParserInitializationError(ErrorLevel.FATAL, I18N.Instance.GetText(I18n,Message.MissingOperand),ErrorCodes.PARSER_MISSING_OPERAND));
                 throw new Exception("missing [operand] attribute");
@@ -134,13 +134,13 @@ namespace sly.parser.generator
 
             if (operandMethods.Count == 1)
             {
-                var operandMethod = operandMethods.Single();
+                var operandMethod = operandMethods.Single<MethodInfo>();
                 operandNonTerminalName = GetNonTerminalNameFromProductionMethod(operandMethod);
             }
             else
             {
                 operandNonTerminalName = $"{parserClass.Name}_operand";
-                var operandNonTerminals = operandMethods.Select(GetNonTerminalNameFromProductionMethod);
+                var operandNonTerminals = operandMethods.Select<MethodInfo, string>(GetNonTerminalNameFromProductionMethod);
                 var operandNonTerminal = new NonTerminal<IN>(operandNonTerminalName);
                 
                 
@@ -167,7 +167,7 @@ namespace sly.parser.generator
         private string GetNonTerminalNameFromProductionMethod(MethodInfo operandMethod)
         {
             string operandNonTerminal = null;
-            if (operandMethod.GetCustomAttributes().ToList()
+            if (operandMethod.GetCustomAttributes().ToList<Attribute>()
                 .Find(attr => attr.GetType() == typeof(ProductionAttribute)) is ProductionAttribute production)
             {
                 var ruleItems = production.RuleString.Split(':');
@@ -182,7 +182,7 @@ namespace sly.parser.generator
             string operandNonTerminal, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence,
             string parserClassName) 
         {
-            var precedences = operationsByPrecedence.Keys.ToList();
+            var precedences = operationsByPrecedence.Keys.ToList<int>();
             precedences.Sort();
 
             for (var i = 0; i < precedences.Count; i++)
@@ -215,10 +215,10 @@ namespace sly.parser.generator
         {
             var nonTerminal = new NonTerminal<IN>(name, new List<Rule<IN>>());
 
-            var InFixOps = operations.Where(x => x.Affix == Affix.InFix).ToList();
+            var InFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.InFix).ToList<OperationMetaData<IN>>();
             if (InFixOps.Count > 0)
             {
-                var InFixClauses = InFixOps.Select(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
+                var InFixClauses = InFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
 
                 var rule = new Rule<IN>
                 {
@@ -242,10 +242,10 @@ namespace sly.parser.generator
             }
 
 
-            var PreFixOps = operations.Where(x => x.Affix == Affix.PreFix).ToList();
+            var PreFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.PreFix).ToList<OperationMetaData<IN>>();
             if (PreFixOps.Count > 0)
             {
-                var PreFixClauses = PreFixOps.Select(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
+                var PreFixClauses = PreFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
 
                 var rule = new Rule<IN>
                 {
@@ -260,10 +260,10 @@ namespace sly.parser.generator
                 nonTerminal.Rules.Add(rule);
             }
 
-            var PostFixOps = operations.Where(x => x.Affix == Affix.PostFix).ToList();
+            var PostFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.PostFix).ToList<OperationMetaData<IN>>();
             if (PostFixOps.Count > 0)
             {
-                var PostFixClauses = PostFixOps.Select(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
+                var PostFixClauses = PostFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
 
                 var rule = new Rule<IN>
                 {
@@ -296,7 +296,7 @@ namespace sly.parser.generator
         {
             if (precedence > 0)
             {
-                var tokens = operationsByPrecedence[precedence].Select(o => o.OperatorToken).ToList();
+                var tokens = operationsByPrecedence[precedence].Select<OperationMetaData<IN>, IN>(o => o.OperatorToken).ToList<IN>();
                 return GetNonTerminalNameForPrecedence(precedence, tokens);
             }
 
@@ -306,9 +306,9 @@ namespace sly.parser.generator
         private string GetNonTerminalNameForPrecedence(int precedence, List<IN> operators) 
         {
             var operatorsPart = operators
-                .Select(oper => oper.ToString())
-                .ToList()
-                .Aggregate((s1, s2) => $"{s1}_{s2}");
+                .Select<IN, string>(oper => oper.ToString())
+                .ToList<string>()
+                .Aggregate<string>((s1, s2) => $"{s1}_{s2}");
             
             return $"expr_{precedence}_{operatorsPart}";
         }

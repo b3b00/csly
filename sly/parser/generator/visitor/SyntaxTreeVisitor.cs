@@ -86,14 +86,14 @@ namespace sly.parser.generator.visitor
         public static SyntaxVisitorResult<IN, OUT> NewOptionSome(OUT value)
         {
             var res = new SyntaxVisitorResult<IN, OUT>();
-            res.OptionResult = Some(value);
+            res.OptionResult = Some<OUT>(value);
             return res;
         }
 
         public static SyntaxVisitorResult<IN, OUT> NewOptionGroupSome(Group<IN, OUT> group)
         {
             var res = new SyntaxVisitorResult<IN, OUT>();
-            res.OptionGroupResult = Some(group);
+            res.OptionGroupResult = Some<Group<IN, OUT>>(group);
             return res;
         }
         

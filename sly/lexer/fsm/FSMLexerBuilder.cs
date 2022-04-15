@@ -242,7 +242,7 @@ namespace sly.lexer.fsm
             
             if (count > 0 && !string.IsNullOrEmpty(pattern))
             {
-                if (parsedPattern.ranges != null && parsedPattern.ranges.Any())
+                if (parsedPattern.ranges != null && parsedPattern.ranges.Any<(char start, char end)>())
                 {
                     for (int i = 0; i < count; i++)
                     {
@@ -369,7 +369,7 @@ namespace sly.lexer.fsm
             
             if (count > 0 && !string.IsNullOrEmpty(pattern))
             {
-                if (parsedPattern.ranges != null && parsedPattern.ranges.Any())
+                if (parsedPattern.ranges != null && parsedPattern.ranges.Any<(char start, char end)>())
                 {
                     for (int i = 0; i < count-1; i++)
                     {

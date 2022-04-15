@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace sly.lexer.fsm
 {
-    public class EOLManager
+    public static class EOLManager
     {
         public static ReadOnlyMemory<char> GetToEndOfLine(ReadOnlyMemory<char> value, int position)
         {
@@ -23,13 +23,13 @@ namespace sly.lexer.fsm
         public static EOLType IsEndOfLine(ReadOnlyMemory<char> value, int position)
         {
             var end = EOLType.No;
-            var n = value.At(position);
+            var n = value.At<char>(position);
             switch (n)
             {
                 case '\n':
                     end = EOLType.Nix;
                     break;
-                case '\r' when value.At(position + 1) == '\n':
+                case '\r' when value.At<char>(position + 1) == '\n':
                     end = EOLType.Windows;
                     break;
                 case '\r':

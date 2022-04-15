@@ -35,7 +35,7 @@ namespace sly.parser.syntax.grammar
         {
             get
             {
-                var key = string.Join("_", Clauses.Select(c => c.ToString()));
+                var key = string.Join("_", Clauses.Select<IClause<IN>, string>(c => c.ToString()));
                 
                 if (Clauses.Count == 1) 
                     key += "_";
@@ -53,7 +53,7 @@ namespace sly.parser.syntax.grammar
         {
             get
             {
-                if (Clauses != null && Clauses.Any())
+                if (Clauses != null && Clauses.Any<IClause<IN>>())
                     foreach (var clause in Clauses)
                     {
                         switch (clause)
@@ -95,7 +95,7 @@ namespace sly.parser.syntax.grammar
         {
             if (IsExpressionRule)
             {
-                return VisitorMethodsForOperation.Values.ToList();
+                return VisitorMethodsForOperation.Values.ToList<OperationMetaData<IN>>();
             }
 
             return null;

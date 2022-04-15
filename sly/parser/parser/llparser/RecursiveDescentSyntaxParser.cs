@@ -92,9 +92,9 @@ namespace sly.parser.llparser
 
                 if (errors.Count > 0)
                 {
-                    var lastErrorPosition = errors.Select(e => e.UnexpectedToken.PositionInTokenFlow).ToList().Max();
-                    var lastErrors = errors.Where(e => e.UnexpectedToken.PositionInTokenFlow == lastErrorPosition)
-                        .ToList();
+                    var lastErrorPosition = errors.Select<UnexpectedTokenSyntaxError<IN>, int>(e => e.UnexpectedToken.PositionInTokenFlow).ToList<int>().Max();
+                    var lastErrors = errors.Where<UnexpectedTokenSyntaxError<IN>>(e => e.UnexpectedToken.PositionInTokenFlow == lastErrorPosition)
+                        .ToList<UnexpectedTokenSyntaxError<IN>>();
                     result.Errors = lastErrors;
                 }
                 else

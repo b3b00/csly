@@ -77,7 +77,7 @@ namespace sly.parser
                 if (UnexpectedToken.IsEOS)
                 {
                     message = Message.UnexpectedEos;
-                    if (ExpectedTokens != null && ExpectedTokens.Any())
+                    if (ExpectedTokens != null && ExpectedTokens.Any<T>())
                     {
                         message = Message.UnexpectedEosExpecting;
                     }
@@ -85,7 +85,7 @@ namespace sly.parser
                 else
                 {
                     message = Message.UnexpectedToken;
-                    if (ExpectedTokens != null && ExpectedTokens.Any())
+                    if (ExpectedTokens != null && ExpectedTokens.Any<T>())
                     {
                         message = Message.UnexpectedTokenExpecting;
                     }
@@ -94,7 +94,7 @@ namespace sly.parser
                 
                 var expecting = new StringBuilder();
                 
-                if (ExpectedTokens != null && ExpectedTokens.Any())
+                if (ExpectedTokens != null && ExpectedTokens.Any<T>())
                 {
                     
 

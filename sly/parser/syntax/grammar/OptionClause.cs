@@ -11,7 +11,7 @@ namespace sly.parser.syntax.grammar
 
         public IClause<T> Clause { get; set; }
 
-        public bool IsGroupOption => Clause is NonTerminalClause<T> && (Clause as NonTerminalClause<T>).IsGroup;
+        public bool IsGroupOption => Clause is NonTerminalClause<T> clause && clause.IsGroup;
 
         public bool MayBeEmpty()
         {

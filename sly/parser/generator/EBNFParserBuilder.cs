@@ -41,7 +41,7 @@ namespace sly.parser.generator
                 var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
                 if (foundRecursion)
                 {
-                    var recs = string.Join("\n", recursions.Select(x => string.Join(" > ",x)));
+                    var recs = string.Join("\n", recursions.Select<List<string>, string>(x => string.Join(" > ",x)));
                     result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
                         I18N.Instance.GetText(I18n,Message.LeftRecursion,recs),
                         ErrorCodes.PARSER_LEFT_RECURSIVE));
@@ -123,13 +123,13 @@ namespace sly.parser.generator
         {
             var conf = new ParserConfiguration<IN, OUT>();
             var nonTerminals = new Dictionary<string, NonTerminal<IN>>();
-            var methods = parserClass.GetMethods().ToList();
-            methods = methods.Where(m =>
+            var methods = parserClass.GetMethods().ToList<MethodInfo>();
+            methods = methods.Where<MethodInfo>(m =>
             {
-                var attributes = m.GetCustomAttributes().ToList();
+                var attributes = m.GetCustomAttributes().ToList<Attribute>();
                 var attr = attributes.Find(a => a.GetType() == typeof(ProductionAttribute));
                 return attr != null;
-            }).ToList();
+            }).ToList<MethodInfo>();
 
             methods.ForEach(m =>
             {
@@ -157,8 +157,8 @@ namespace sly.parser.generator
                     {
                         var message = parseResult
                             .Errors
-                            .Select(e => e.ErrorMessage)
-                            .Aggregate((e1, e2) => e1 + "\n" + e2);
+                            .Select<ParseError, string>(e => e.ErrorMessage)
+                            .Aggregate<string>((e1, e2) => e1 + "\n" + e2);
                         message = $"rule error [{ruleString}] : {message}";
                         throw new ParserConfigurationException(message);
                     }

@@ -21,7 +21,7 @@ namespace sly.parser.generator
 
         public static List<string> Lst(params string[] args)
         {
-            return args.ToList();
+            return args.ToList<string>();
         }
 
         public static List<string> GetLeftClausesName(IClause<IN> clause)
@@ -35,9 +35,9 @@ namespace sly.parser.generator
                 case OptionClause<IN> option:
                     return GetLeftClausesName(option.Clause);
                 case ChoiceClause<IN> choice when choice.IsNonTerminalChoice:
-                    return choice.Choices.SelectMany(x => GetLeftClausesName(x)).ToList();
+                    return choice.Choices.SelectMany<IClause<IN>, string>(x => GetLeftClausesName(x)).ToList<string>();
                 case GroupClause<IN> group:
-                    return GetLeftClausesName(group.Clauses.First());
+                    return GetLeftClausesName(group.Clauses.First<IClause<IN>>());
                 default:
                     return new List<string>();
             }
@@ -51,13 +51,13 @@ namespace sly.parser.generator
             IClause<IN> current = rule.Clauses[0] as IClause<IN>;
             var currentLefts = GetLeftClausesName(current);
             bool stopped = false;
-            while (i < rule.Clauses.Count && ! stopped && currentLefts != null && currentLefts.Any())
+            while (i < rule.Clauses.Count && ! stopped && currentLefts != null && currentLefts.Any<string>())
             {
                 stopped = !current.MayBeEmpty();
                 lefts.AddRange(currentLefts);
                 stopped = !current.MayBeEmpty();
                 i++;
-                if (i < rule.Clauses.Count())
+                if (i < rule.Clauses.Count<IClause<IN>>())
                 {
                     current = rule.Clauses[i];
                     currentLefts = GetLeftClausesName(current);
@@ -105,7 +105,7 @@ namespace sly.parser.generator
                 return (true,new List<List<string>> {currentPath});
             }
             
-            var leftClauses = nonTerminal.Rules.SelectMany(x => GetLeftClausesName(x, configuration)).ToList();
+            var leftClauses = nonTerminal.Rules.SelectMany<Rule<IN>, string>(x => GetLeftClausesName(x, configuration)).ToList<string>();
             
             foreach (var leftClause in leftClauses)
             {

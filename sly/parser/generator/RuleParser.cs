@@ -197,7 +197,7 @@ namespace sly.parser.generator
             var token = default(IN);
             IClause<IN> clause;
             var isTerminal = false;
-            var b = Enum.TryParse(name, out token);
+            var b = Enum.TryParse<IN>(name, out token);
             if (b)
             {
                 isTerminal = true;

@@ -41,12 +41,12 @@ namespace sly.parser.parser
 
         public static implicit operator OUT(GroupItem<IN, OUT> item)
         {
-            return item.Match((name, token) => default(OUT), (name, value) => item.Value);
+            return item.Match<OUT>((name, token) => default(OUT), (name, value) => item.Value);
         }
 
         public static implicit operator Token<IN>(GroupItem<IN, OUT> item)
         {
-            return item.Match((name, token) => item.Token, (name, value) => default(Token<IN>));
+            return item.Match<Token<IN>>((name, token) => item.Token, (name, value) => default(Token<IN>));
         }
 
         [ExcludeFromCodeCoverage]

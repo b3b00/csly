@@ -20,7 +20,7 @@ namespace sly.buildresult
 
         public bool IsError
         {
-            get { return Errors.Any(e => e.Level != ErrorLevel.WARN); }
+            get { return Errors.Any<InitializationError>(e => e.Level != ErrorLevel.WARN); }
         }
 
         public bool IsOk => !IsError;

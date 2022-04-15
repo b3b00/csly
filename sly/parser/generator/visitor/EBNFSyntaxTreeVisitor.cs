@@ -55,7 +55,7 @@ namespace sly.parser.generator.visitor
 
         private SyntaxVisitorResult<IN, OUT> Visit(OptionSyntaxNode<IN> node, object context = null)
         {
-            var child = node.Children != null && node.Children.Any() ? node.Children[0] : null;
+            var child = node.Children != null && node.Children.Any<ISyntaxNode<IN>>() ? node.Children[0] : null;
             if (child == null || node.IsEmpty)
             {
                 if (node.IsGroupOption)

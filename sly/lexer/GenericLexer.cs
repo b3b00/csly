@@ -236,7 +236,7 @@ namespace sly.lexer
             }
 
             var eos = new Token<IN>();
-            var prev = tokens.LastOrDefault();
+            var prev = tokens.LastOrDefault<Token<IN>>();
             if (prev == null)
             {
                 eos.Position = new LexerPosition(1, 0, 0);
@@ -258,8 +258,8 @@ namespace sly.lexer
 
                 if (r.IsLineEnding) // only compute if token is eol
                 {
-                    var eols = tokens.Where(t => t.IsLineEnding).ToList();
-                    int line = eols.Any() ? eols.Count : 0;
+                    var eols = tokens.Where<Token<IN>>(t => t.IsLineEnding).ToList<Token<IN>>();
+                    int line = eols.Any<Token<IN>>() ? eols.Count : 0;
                     int column = 0;
                     int index = newPosition.Index;
                     // r.Result.Position.Line = line+1;
@@ -287,20 +287,20 @@ namespace sly.lexer
             // start machine definition
             FSMBuilder.Mark(start);
 
-            if (staticTokens.Contains(GenericToken.Identifier) || staticTokens.Contains(GenericToken.KeyWord))
+            if (staticTokens.Contains<GenericToken>(GenericToken.Identifier) || staticTokens.Contains<GenericToken>(GenericToken.KeyWord))
             {
                 InitializeIdentifier(config);
             }
 
             // numeric
-            if (staticTokens.Contains(GenericToken.Int) || staticTokens.Contains(GenericToken.Double))
+            if (staticTokens.Contains<GenericToken>(GenericToken.Int) || staticTokens.Contains<GenericToken>(GenericToken.Double))
             {
                 FSMBuilder = FSMBuilder.GoTo(start)
                     .RangeTransition('0', '9')
                     .Mark(in_int)
                     .RangeTransitionTo('0', '9', in_int)
                     .End(GenericToken.Int);
-                if (staticTokens.Contains(GenericToken.Double))
+                if (staticTokens.Contains<GenericToken>(GenericToken.Double))
                     FSMBuilder.Transition('.')
                         .Mark(start_double)
                         .RangeTransition('0', '9')
@@ -523,7 +523,7 @@ namespace sly.lexer
             var r = string.Empty;
             while (i < value.Length - 1)
             {
-                var current = value.At(i);
+                var current = value.At<char>(i);
                 if (current == escapeStringDelimiterChar && i < value.Length - 2)
                 {
                     escaping = true;
@@ -552,7 +552,7 @@ namespace sly.lexer
             }
             if (substitutionHappened)
             {
-                r += value.At(value.Length - 1);
+                r += value.At<char>(value.Length - 1);
                 value = r.AsMemory();
             }
 
@@ -568,7 +568,7 @@ namespace sly.lexer
             string r = string.Empty;
             while (i < value.Length - 1)
             {
-                char current = value.At(i);
+                char current = value.At<char>(i);
                 if (current == escapeStringDelimiterChar && !escaping && i < value.Length - 2)
                 {
                     escaping = true;
@@ -594,7 +594,7 @@ namespace sly.lexer
             }
             if (substitutionHappened)
             {
-                r += value.At(value.Length - 1);
+                r += value.At<char>(value.Length - 1);
                 value = r.AsMemory();
             }
 
@@ -805,7 +805,7 @@ namespace sly.lexer
             {
                 var position = lexerPosition.Index;
 
-                var end = source.Span.Slice(position).IndexOf(MultiLineCommentEnd.AsSpan());
+                var end = source.Span.Slice(position).IndexOf<char>(MultiLineCommentEnd.AsSpan());
                 if (end < 0)
                     position = source.Length;
                 else
@@ -818,7 +818,7 @@ namespace sly.lexer
                 var newLine = lexerPosition.Line + lines.Count - 1;
                 int newColumn;
                 if (lines.Count > 1)
-                    newColumn = lines.Last() + MultiLineCommentEnd.Length;
+                    newColumn = lines.Last<int>() + MultiLineCommentEnd.Length;
                 else
                     newColumn = lexerPosition.Column + lines[0] + MultiLineCommentEnd.Length;
 

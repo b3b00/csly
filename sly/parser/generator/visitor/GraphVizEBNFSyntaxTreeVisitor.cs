@@ -92,7 +92,7 @@ namespace sly.parser.generator.visitor
 
         private DotNode Visit(OptionSyntaxNode<IN> node)
         {
-            var child = node.Children != null && node.Children.Any() ? node.Children[0] : null;
+            var child = node.Children != null && node.Children.Any<ISyntaxNode<IN>>() ? node.Children[0] : null;
             if (child == null || node.IsEmpty)
             {
                 return null;

@@ -65,7 +65,7 @@ namespace sly.parser.generator
                     var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
                     if (foundRecursion)
                     {
-                        var recs = string.Join("\n", recursions.Select(x => string.Join(" > ",x)));
+                        var recs = string.Join("\n", recursions.Select<List<string>, string>(x => string.Join(" > ",x)));
                         result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
                             I18N.Instance.GetText(I18n,Message.LeftRecursion, recs),
                             ErrorCodes.PARSER_LEFT_RECURSIVE));
@@ -169,7 +169,7 @@ namespace sly.parser.generator
         protected virtual BuildResult<ILexer<IN>> BuildLexer(BuildExtension<IN> extensionBuilder = null,
             LexerPostProcess<IN> lexerPostProcess = null)
         {
-            var lexer = LexerBuilder.BuildLexer(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n, lexerPostProcess);
+            var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n, lexerPostProcess);
             return lexer;
         }
 
@@ -179,13 +179,13 @@ namespace sly.parser.generator
             var conf = new ParserConfiguration<IN, OUT>();
             var functions = new Dictionary<string, MethodInfo>();
             var nonTerminals = new Dictionary<string, NonTerminal<IN>>();
-            var methods = parserClass.GetMethods().ToList();
-            methods = methods.Where(m =>
+            var methods = parserClass.GetMethods().ToList<MethodInfo>();
+            methods = methods.Where<MethodInfo>(m =>
             {
-                var attributes = m.GetCustomAttributes().ToList();
+                var attributes = m.GetCustomAttributes().ToList<Attribute>();
                 var attr = attributes.Find(a => a.GetType() == typeof(ProductionAttribute));
                 return attr != null;
-            }).ToList();
+            }).ToList<MethodInfo>();
 
             parserClass.GetMethods();
             methods.ForEach(m =>
@@ -232,7 +232,7 @@ namespace sly.parser.generator
                 try
                 {
                     var tIn = typeof(IN);
-                    var b = Enum.TryParse(item, out token);
+                    var b = Enum.TryParse<IN>(item, out token);
                     if (b)
                     {
                         isTerminal = true;
@@ -252,7 +252,7 @@ namespace sly.parser.generator
                 }
                 else if (item == "[d]")
                 {
-                    if (clauses.Last() is TerminalClause<IN> discardedTerminal) discardedTerminal.Discarded = true;
+                    if (clauses.Last<IClause<IN>>() is TerminalClause<IN> discardedTerminal) discardedTerminal.Discarded = true;
                 }
                 else
                 {
@@ -283,7 +283,7 @@ namespace sly.parser.generator
             if (result.Result != null && !result.IsError)
                 foreach (var checker in checkers)
                     if (checker != null)
-                        result.Result.Configuration.NonTerminals.Values.ToList()
+                        result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>()
                             .ForEach(nt => result = checker(result, nt));
             return result;
         }
@@ -295,7 +295,7 @@ namespace sly.parser.generator
             var found = false;
             if (nonTerminal.Name != conf.StartingRule)
             {
-                foreach (var nt in result.Result.Configuration.NonTerminals.Values.ToList())
+                foreach (var nt in result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>())
                     if (nt.Name != nonTerminal.Name)
                     {
                         found = NonTerminalReferences(nt, nonTerminal.Name);
@@ -348,7 +348,7 @@ namespace sly.parser.generator
                                     found = innerNonTerminal.NonTerminalName == referenceName;
                                     break;
                                 case ChoiceClause<IN> innerChoice when innerChoice.IsNonTerminalChoice:
-                                    found = innerChoice.Choices.Where(c => (c as NonTerminalClause<IN>).NonTerminalName == referenceName).Any();
+                                    found = innerChoice.Choices.Where<IClause<IN>>(c => (c as NonTerminalClause<IN>).NonTerminalName == referenceName).Any<IClause<IN>>();
                                     break;
                             }
 
@@ -458,7 +458,7 @@ namespace sly.parser.generator
                         ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
                 }
 
-                var realClauses = rule.Clauses.Where(x => !(x is TerminalClause<IN> || x is ChoiceClause<IN>) || (x is TerminalClause<IN> t && !t.Discarded) || (x is ChoiceClause<IN> c && !c.IsDiscarded) ).ToList();
+                var realClauses = rule.Clauses.Where<IClause<IN>>(x => !(x is TerminalClause<IN> || x is ChoiceClause<IN>) || (x is TerminalClause<IN> t && !t.Discarded) || (x is ChoiceClause<IN> c && !c.IsDiscarded) ).ToList<IClause<IN>>();
 
                 if (visitor.GetParameters().Length != realClauses.Count && visitor.GetParameters().Length != realClauses.Count +1)
                 {

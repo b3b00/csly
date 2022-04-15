@@ -24,13 +24,13 @@ namespace sly.lexer.fsm.transitioncheck
         {
             var t = "";
             if (Precondition != null) t = "[|] ";
-             t += "["+string.Join(",",TransitionToken.Select(x => x.ToEscaped()))+"]";
+             t += "["+string.Join(",",TransitionToken.Select<char, string>(x => x.ToEscaped()))+"]";
             return $@"[ label=""{t}"" ]";
         }
 
         public override bool Match(char input)
         {
-            return TransitionToken.Contains(input);
+            return TransitionToken.Contains<char>(input);
         }
     }
 }

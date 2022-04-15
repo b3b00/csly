@@ -26,7 +26,7 @@ namespace sly.lexer.fsm.transitioncheck
         {
            var label = "";
             if (Precondition != null) label = "[|] ";
-            label += $"^({string.Join(", ",TokenExceptions.Select(c => c.ToEscaped()))})";
+            label += $"^({string.Join(", ",TokenExceptions.Select<char, string>(c => c.ToEscaped()))})";
             return $@"[ label=""{label}"" ]";
         }
 

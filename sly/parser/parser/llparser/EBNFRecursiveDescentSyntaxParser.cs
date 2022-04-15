@@ -115,7 +115,7 @@ namespace sly.parser.llparser
                             {
                                 var choiceResult = ParseChoice(tokens, choice, currentPosition);
                                 currentPosition = choiceResult.EndingPosition;
-                                if (choiceResult.IsError && choiceResult.Errors != null && choiceResult.Errors.Any())
+                                if (choiceResult.IsError && choiceResult.Errors != null && choiceResult.Errors.Any<UnexpectedTokenSyntaxError<IN>>())
                                 {
                                     errors.AddRange(choiceResult.Errors);
                                 }
@@ -578,7 +578,7 @@ namespace sly.parser.llparser
             if (result.IsError && choice.IsTerminalChoice)
             {
                 var terminalAlternates = choice.Choices.Cast<TerminalClause<IN>>();
-                var expected = terminalAlternates.Select(x => x.ExpectedToken).ToList();
+                var expected = terminalAlternates.Select<TerminalClause<IN>, IN>(x => x.ExpectedToken).ToList<IN>();
                 result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],I18n,expected.ToArray()));
             }
             

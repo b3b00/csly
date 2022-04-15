@@ -118,16 +118,16 @@ namespace sly.parser
             else
             {
                 result.Errors = new List<ParseError>();
-                var unexpectedTokens = syntaxResult.Errors.ToList();
-                var byEnding = unexpectedTokens.GroupBy(x => x.UnexpectedToken.Position).OrderBy(x => x.Key);
+                var unexpectedTokens = syntaxResult.Errors.ToList<UnexpectedTokenSyntaxError<IN>>();
+                var byEnding = unexpectedTokens.GroupBy<UnexpectedTokenSyntaxError<IN>, LexerPosition>(x => x.UnexpectedToken.Position).OrderBy<IGrouping<LexerPosition, UnexpectedTokenSyntaxError<IN>>, LexerPosition>(x => x.Key);
                 var errors = new List<ParseError>();  
                 foreach (var expecting in byEnding)
                 {
-                    var expectingTokens = expecting.SelectMany(x => x.ExpectedTokens ?? new List<IN>()).Distinct();
-                    var expectedTokens =  expectingTokens != null && expectingTokens.Any() ? expectingTokens?.ToArray() : null;
+                    var expectingTokens = expecting.SelectMany<UnexpectedTokenSyntaxError<IN>, IN>(x => x.ExpectedTokens ?? new List<IN>()).Distinct<IN>();
+                    var expectedTokens =  expectingTokens != null && expectingTokens.Any<IN>() ? expectingTokens?.ToArray<IN>() : null;
                     if (expectedTokens != null)
                     {
-                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, I18n,
+                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First<UnexpectedTokenSyntaxError<IN>>().UnexpectedToken, I18n,
                             expectedTokens);
                         errors.Add(expected);
                     }
