@@ -18,7 +18,6 @@ using jsonparser.JsonModel;
 using ParserTests;
 using ParserTests.Issue239;
 using ParserTests.lexer;
-using postProcessedLexerParser.expressionModel;
 using simpleExpressionParser;
 using sly.lexer;
 using sly.lexer.fsm;
@@ -30,7 +29,6 @@ using sly.i18n;
 using sly.parser.generator.visitor;
 using sly.parser.parser;
 using Xunit;
-using Expression = postProcessedLexerParser.expressionModel.Expression;
 using ExpressionContext = postProcessedLexerParser.expressionModel.ExpressionContext;
 
 namespace ParserExample
@@ -66,7 +64,7 @@ namespace ParserExample
     public enum CharTokens {
         [Lexeme(GenericToken.Char,"'","\\")]
 //        [Lexeme(GenericToken.Char,"|","\\")]
-        MyChar,
+        MyChar
 
 //        [Lexeme(GenericToken.Char,"|","\\")]
 //        OtherChar,
@@ -413,7 +411,7 @@ return r";
         {
 
 
-            var StartingRule = $"{typeof(SimpleExpressionParserWithContext).Name}_expressions";
+            var StartingRule = $"{nameof(SimpleExpressionParserWithContext)}_expressions";
             var parserInstance = new SimpleExpressionParserWithContext();
             var builder = new ParserBuilder<ExpressionToken, int>();
             var Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
@@ -503,7 +501,7 @@ return r";
 
         private static void TestGraphViz()
         {
-            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, int>();
             var parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
@@ -674,7 +672,7 @@ return r";
 
         private static BuildResult<Parser<ExpressionToken, double>> BuildParserExpression()
         {   
-            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
             return builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
@@ -683,7 +681,7 @@ return r";
         
         public static void TestAssociativityFactorExpressionParser()
         {
-            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var Parser = BuildParserExpression();
             var r = Parser.Result.Parse("1 / 2 / 3", StartingRule);
             Console.WriteLine($"{r.IsOk} : {r.Result}");
@@ -977,7 +975,7 @@ final = 9999
 
         private static void TestShortOperations()
         {
-            var startingRule = $"{typeof(ShortOperationAttributesParser).Name}_expressions";
+            var startingRule = $"{nameof(ShortOperationAttributesParser)}_expressions";
             var parserInstance = new ShortOperationAttributesParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
             var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);

@@ -5,6 +5,6 @@ namespace ParserTests.Issue225_IndexOutOfRangeException
         NONE,
         NOT,
         PLUS = NONE,
-        MINUS = NOT,
+        MINUS = NOT
     }
 }

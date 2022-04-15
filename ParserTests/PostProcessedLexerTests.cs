@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using Xunit;
-using postProcessedLexerParser;
 using postProcessedLexerParser.expressionModel;
 
 namespace ParserTests

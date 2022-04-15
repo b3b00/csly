@@ -32,8 +32,8 @@ namespace ParserTests
         [Lexeme(GenericToken.SugarToken, "(")] LPAREN = 10,
 
         // a right paranthesis )
-        [Lexeme(GenericToken.SugarToken, ")")] RPAREN = 11,
-        
+        [Lexeme(GenericToken.SugarToken, ")")] RPAREN = 11
+
         // a variable
         
     }

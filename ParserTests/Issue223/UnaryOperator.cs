@@ -5,6 +5,6 @@ namespace ParserTests.Issue223_EarlyEos
         NONE,
         NOT,
         PLUS = NONE,
-        MINUS = NOT,
+        MINUS = NOT
     }
 }

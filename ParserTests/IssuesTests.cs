@@ -167,7 +167,7 @@ namespace ParserTests
         IDENTIFIER,
 
         [Lexeme(GenericToken.KeyWord, "or")]
-        OR,
+        OR
     }
     
     public class Issue277Parser

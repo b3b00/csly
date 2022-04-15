@@ -1,10 +1,8 @@
 ﻿using System.Linq;
 using csly.indentedWhileLang.compiler;
 using csly.indentedWhileLang.parser;
-using csly.whileLang.compiler;
 using csly.whileLang.interpreter;
 using csly.whileLang.model;
-using csly.whileLang.parser;
 using sly.buildresult;
 using sly.parser;
 using sly.parser.generator;

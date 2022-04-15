@@ -3,7 +3,6 @@ using System.Linq;
 using csly.whileLang.model;
 using sly.lexer;
 using sly.parser.generator;
-using sly.parser.parser;
 
 namespace csly.indentedWhileLang.parser
 {

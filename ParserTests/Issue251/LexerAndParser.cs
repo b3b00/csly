@@ -25,7 +25,7 @@ using sly.parser.generator;
             [Lexeme(")")] PARENTHESIS_R,
 
             [Lexeme("[ \\t][ \\t]*", isSkippable: true)]
-            IGNORED, // simply discarded in lexer
+            IGNORED // simply discarded in lexer
         }
 
         public class ExprClosure

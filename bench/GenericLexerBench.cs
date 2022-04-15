@@ -5,7 +5,6 @@ using BenchmarkDotNet.Toolchains.CsProj;
 using sly.lexer;
 using sly.buildresult;
 using System.IO;
-using System.Linq;
 using bench.json;
 using BenchmarkDotNet.Analysers;
 

@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using expressionparser;
-using simpleExpressionParser;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;

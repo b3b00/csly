@@ -81,6 +81,6 @@ namespace ParserTests.Issue225_IndexOutOfRangeException
         INT,
         
         [Lexeme(GenericToken.Identifier, IdentifierType.Custom, "_A-Za-z0-9.@#&\\=*~", "_A-Za-z0-9.@#+&/\\=*~+")]
-        VALUE,
+        VALUE
     }
 }

@@ -3,7 +3,6 @@ using System.Text;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.compiler;
 using csly.whileLang.model;
-using csly.whileLang.parser;
 using sly.parser;
 using sly.parser.generator;
 using Sigil;

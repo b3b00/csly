@@ -16,7 +16,7 @@ namespace indented
 
         [Lexeme(GenericToken.SugarToken, "=")] SET = 5,
 
-        [Lexeme(GenericToken.Int)] INT = 6,
-        
+        [Lexeme(GenericToken.Int)] INT = 6
+
     }
 }

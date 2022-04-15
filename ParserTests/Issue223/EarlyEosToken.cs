@@ -42,6 +42,6 @@ namespace ParserTests.Issue223_EarlyEos
         SPACE,
 
         [Lexeme(@"[\w\-\._@#+&/\=*~]+")]
-        VALUE,
+        VALUE
     }
 }

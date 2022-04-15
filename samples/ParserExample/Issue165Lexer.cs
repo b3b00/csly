@@ -42,9 +42,9 @@ namespace ParserExample
 
         [Lexeme(GenericToken.String)] STRING = 21,
 
-        [Lexeme(GenericToken.Int)] INT = 22,
-        
-        
-        
+        [Lexeme(GenericToken.Int)] INT = 22
+
+
+
     }
 }

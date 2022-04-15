@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using expressionparser;
 using sly.buildresult;
@@ -22,7 +21,7 @@ namespace ParserTests
     {
         [Lexeme("a")] A = 1,
         [Lexeme("b")] B = 2,
-        [Lexeme("c")] C = 3,
+        [Lexeme("c")] C = 3
     }
 
 
@@ -143,7 +142,7 @@ namespace ParserTests
         A = 2,
         
         [Lexeme(GenericToken.KeyWord,"b")]
-        B = 3,
+        B = 3
     }
     
     public class BnfRecursiveGrammar

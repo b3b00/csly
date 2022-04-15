@@ -63,6 +63,6 @@ namespace ParserTests.Issue259
         LPAREN = 30,
 
         [Lexeme("\\)")]
-        RPAREN = 31,
+        RPAREN = 31
     }
 }

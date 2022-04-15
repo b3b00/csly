@@ -4,7 +4,6 @@ using System.Linq;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
-using sly.parser.parser;
 
 namespace ParserExample
 {

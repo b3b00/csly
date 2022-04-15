@@ -966,7 +966,7 @@ namespace ParserTests
 
         private BuildResult<Parser<ExpressionToken, int>> buildSimpleExpressionParserWithContext(ParserType parserType = ParserType.EBNF_LL_RECURSIVE_DESCENT)
         {
-            var startingRule = $"{typeof(SimpleExpressionParserWithContext).Name}_expressions";
+            var startingRule = $"{nameof(SimpleExpressionParserWithContext)}_expressions";
             var parserInstance = new SimpleExpressionParserWithContext();
             var builder = new ParserBuilder<ExpressionToken, int>();
             var parser = builder.BuildParser(parserInstance, parserType, startingRule);

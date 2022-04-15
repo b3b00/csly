@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-using sly.lexer;
+﻿using sly.lexer;
 
 namespace ParserTests.Issue263
 {
@@ -21,6 +17,6 @@ namespace ParserTests.Issue263
         LBRAC,
 
         [Lexeme("\\]")]
-        RBRAC,
+        RBRAC
     }
 }

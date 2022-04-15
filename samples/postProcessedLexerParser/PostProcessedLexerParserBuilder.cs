@@ -48,7 +48,7 @@ namespace postProcessedLexerParser
         {
             var parserInstance = new FormulaParser();
             var builder = new ParserBuilder<FormulaToken, Expression>();
-            var build = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, $"{typeof(FormulaParser).Name}_expressions",
+            var build = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, $"{nameof(FormulaParser)}_expressions",
                 lexerPostProcess: postProcessFormula);
             if (build.IsError)
             {

@@ -21,7 +21,7 @@ namespace indented
         [Lexeme(GenericToken.SugarToken, "\n",IsLineEnding = true)]
         [Lexeme(GenericToken.SugarToken, "\r\n",IsLineEnding = true)]
         [Lexeme(GenericToken.SugarToken, "\r",IsLineEnding = true)]
-        EOL = 7,
-        
+        EOL = 7
+
     }
 }

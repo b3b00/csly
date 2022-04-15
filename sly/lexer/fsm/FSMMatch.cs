@@ -52,7 +52,7 @@ namespace sly.lexer.fsm
                 IsIndent = true,
                 IsSuccess = true,
                 IndentationLevel = level,
-                Result = new Token<N>(){IsIndent = true, IsEOS = false},
+                Result = new Token<N>(){IsIndent = true, IsEOS = false}
             };
         }
         

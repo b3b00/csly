@@ -1,5 +1,4 @@
-﻿using expressionparser;
-using sly.lexer;
+﻿using sly.lexer;
 using sly.parser.generator;
 
 namespace ParserTests

@@ -66,7 +66,7 @@ namespace ParserTests
         [Fact]
         public void SyntaxTreeGraphVizTest()
         {
-            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
             var  Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);

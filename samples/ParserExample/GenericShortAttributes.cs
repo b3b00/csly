@@ -1,4 +1,3 @@
-using ParserTests.lexer;
 using sly.lexer;
 
 namespace ParserExample

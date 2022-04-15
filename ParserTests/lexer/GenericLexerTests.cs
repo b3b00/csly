@@ -57,7 +57,7 @@ namespace ParserTests.lexer
 
         [Lexeme(GenericToken.Extension)] SPECIAL,
         [Lexeme(GenericToken.KeyWord, "x")] X,
-        [Lexeme(GenericToken.SugarToken, "?")] QMARK,
+        [Lexeme(GenericToken.SugarToken, "?")] QMARK
     }
     public static class Issue210Extensions
     {
@@ -116,7 +116,7 @@ namespace ParserTests.lexer
         keyword1 = 2,
 
         [Lexeme(GenericToken.KeyWord,"Keyword2")]
-        keyword2 = 2,
+        keyword2 = 2
     }
 
     public enum Extensions
@@ -399,7 +399,7 @@ namespace ParserTests.lexer
         [Lexeme(GenericToken.SugarToken, "-+")]
         C,
         [Lexeme(GenericToken.SugarToken, "---")]
-        E,
+        E
     }
 
     // Test that the FSMLexer properly terminates, without skipping tokens.
@@ -410,7 +410,7 @@ namespace ParserTests.lexer
         [Lexeme(GenericToken.SugarToken, "-")]
         B,
         [Lexeme(GenericToken.SugarToken, "---")]
-        C,
+        C
     }
 
     [Lexer(IgnoreEOL=false)]

@@ -56,9 +56,15 @@ namespace sly.parser.syntax.grammar
                 if (Clauses != null && Clauses.Any())
                     foreach (var clause in Clauses)
                     {
-                        if (clause is GroupClause<IN>) return true;
-                        if (clause is ManyClause<IN> many) return many.Clause is GroupClause<IN>;
-                        if (clause is OptionClause<IN> option) return option.Clause is GroupClause<IN>;
+                        switch (clause)
+                        {
+                            case GroupClause<IN> _:
+                                return true;
+                            case ManyClause<IN> many:
+                                return many.Clause is GroupClause<IN>;
+                            case OptionClause<IN> option:
+                                return option.Clause is GroupClause<IN>;
+                        }
                     }
 
                 return false;

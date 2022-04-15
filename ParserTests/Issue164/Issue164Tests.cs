@@ -11,7 +11,7 @@ namespace ParserTests.Issue164
     {
         private static Parser<ExpressionToken, double> BuildParser()
         {   
-            var StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            var StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
             var pBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);

@@ -119,7 +119,7 @@ namespace ParserTests
 
         private void BuildParser()
         {
-            StartingRule = $"{typeof(SimpleExpressionParser).Name}_expressions";
+            StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
             Parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
@@ -298,7 +298,7 @@ namespace ParserTests
         [Fact]
         public void TestIssue184()
         {
-            StartingRule = $"{typeof(Issue184ParserOne).Name}_expressions";
+            StartingRule = $"{nameof(Issue184ParserOne)}_expressions";
             var parserInstance = new Issue184ParserOne();
             var builder = new ParserBuilder<Issue184Token, double>();
             var issue184parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
@@ -308,7 +308,7 @@ namespace ParserTests
             Assert.Equal(4.0,c.Result);
             
             
-            StartingRule = $"{typeof(Issue184Parser).Name}_expressions";
+            StartingRule = $"{nameof(Issue184Parser)}_expressions";
             var parserInstance2 = new Issue184Parser();
             var builder2 = new ParserBuilder<Issue184Token, double>();
             var issue184parser2 = builder.BuildParser(parserInstance2, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
@@ -339,7 +339,7 @@ namespace ParserTests
         [Fact]
         public void TestShortOperationAttributes()
         {
-            StartingRule = $"{typeof(ShortOperationAttributesParser).Name}_expressions";
+            StartingRule = $"{nameof(ShortOperationAttributesParser)}_expressions";
             var parserInstance = new ShortOperationAttributesParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
             var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);

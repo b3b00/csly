@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using expressionparser;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
 using Xunit;
