@@ -37,80 +37,94 @@ namespace sly.parser.llparser
                     children = new List<ISyntaxNode<IN>>();
                     foreach (var clause in rule.Clauses)
                     {
-                        if (clause is TerminalClause<IN> termClause)
+                        switch (clause)
                         {
-                            var termRes =
-                                ParseTerminal(tokens, termClause, currentPosition);
-                            if (!termRes.IsError)
+                            case TerminalClause<IN> termClause:
                             {
-                                children.Add(termRes.Root);
-                                currentPosition = termRes.EndingPosition;
-                            }
-                            else
-                            {
-                                var tok = tokens[currentPosition];
-                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,I18n,
-                                    ((TerminalClause<IN>) clause).ExpectedToken));
-                            }
+                                var termRes =
+                                    ParseTerminal(tokens, termClause, currentPosition);
+                                if (!termRes.IsError)
+                                {
+                                    children.Add(termRes.Root);
+                                    currentPosition = termRes.EndingPosition;
+                                }
+                                else
+                                {
+                                    var tok = tokens[currentPosition];
+                                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,I18n,
+                                        termClause.ExpectedToken));
+                                }
 
-                            isError = isError || termRes.IsError;
-                        }
-                        else if (clause is NonTerminalClause<IN>)
-                        {
-                            var nonTerminalResult =
-                                ParseNonTerminal(tokens, clause as NonTerminalClause<IN>, currentPosition);
-                            if (!nonTerminalResult.IsError)
-                            {
-                                errors.AddRange(nonTerminalResult.Errors);
-                                children.Add(nonTerminalResult.Root);
-                                currentPosition = nonTerminalResult.EndingPosition;
+                                isError = isError || termRes.IsError;
+                                break;
                             }
-                            else
+                            case NonTerminalClause<IN> terminalClause:
                             {
-                                errors.AddRange(nonTerminalResult.Errors);
-                            }
+                                var nonTerminalResult =
+                                    ParseNonTerminal(tokens, terminalClause, currentPosition);
+                                if (!nonTerminalResult.IsError)
+                                {
+                                    errors.AddRange(nonTerminalResult.Errors);
+                                    children.Add(nonTerminalResult.Root);
+                                    currentPosition = nonTerminalResult.EndingPosition;
+                                }
+                                else
+                                {
+                                    errors.AddRange(nonTerminalResult.Errors);
+                                }
 
-                            isError = isError || nonTerminalResult.IsError;
-                        }
-                        else if (clause is OneOrMoreClause<IN> || clause is ZeroOrMoreClause<IN>)
-                        {
-                            SyntaxParseResult<IN> manyResult = null;
-                            if (clause is OneOrMoreClause<IN> oneOrMore)
-                                manyResult = ParseOneOrMore(tokens, oneOrMore, currentPosition);
-                            else if (clause is ZeroOrMoreClause<IN> zeroOrMore)
-                                manyResult = ParseZeroOrMore(tokens, zeroOrMore, currentPosition);
-                            if (!manyResult.IsError)
-                            {
-                                errors.AddRange(manyResult.Errors);
-                                children.Add(manyResult.Root);
-                                currentPosition = manyResult.EndingPosition;
+                                isError = isError || nonTerminalResult.IsError;
+                                break;
                             }
-                            else
+                            case OneOrMoreClause<IN> _:
+                            case ZeroOrMoreClause<IN> _:
                             {
-                                if (manyResult.Errors != null && manyResult.Errors.Count > 0)
+                                SyntaxParseResult<IN> manyResult = null;
+                                switch (clause)
+                                {
+                                    case OneOrMoreClause<IN> oneOrMore:
+                                        manyResult = ParseOneOrMore(tokens, oneOrMore, currentPosition);
+                                        break;
+                                    case ZeroOrMoreClause<IN> zeroOrMore:
+                                        manyResult = ParseZeroOrMore(tokens, zeroOrMore, currentPosition);
+                                        break;
+                                }
+                                if (!manyResult.IsError)
+                                {
                                     errors.AddRange(manyResult.Errors);
-                            }
+                                    children.Add(manyResult.Root);
+                                    currentPosition = manyResult.EndingPosition;
+                                }
+                                else
+                                {
+                                    if (manyResult.Errors != null && manyResult.Errors.Count > 0)
+                                        errors.AddRange(manyResult.Errors);
+                                }
 
-                            isError = manyResult.IsError;
-                        }
-                        else if (clause is OptionClause<IN> option)
-                        {
-                            var optionResult = ParseOption(tokens, option, rule, currentPosition);
-                            currentPosition = optionResult.EndingPosition;
-                            children.Add(optionResult.Root);
-                        }
-                        else if (clause is ChoiceClause<IN> choice)
-                        {
-                            var choiceResult = ParseChoice(tokens, choice, currentPosition);
-                            currentPosition = choiceResult.EndingPosition;
-                            if (choiceResult.IsError && choiceResult.Errors != null && choiceResult.Errors.Any())
+                                isError = manyResult.IsError;
+                                break;
+                            }
+                            case OptionClause<IN> option:
                             {
-                                errors.AddRange(choiceResult.Errors);
+                                var optionResult = ParseOption(tokens, option, rule, currentPosition);
+                                currentPosition = optionResult.EndingPosition;
+                                children.Add(optionResult.Root);
+                                break;
                             }
+                            case ChoiceClause<IN> choice:
+                            {
+                                var choiceResult = ParseChoice(tokens, choice, currentPosition);
+                                currentPosition = choiceResult.EndingPosition;
+                                if (choiceResult.IsError && choiceResult.Errors != null && choiceResult.Errors.Any())
+                                {
+                                    errors.AddRange(choiceResult.Errors);
+                                }
 
-                            isError = choiceResult.IsError;
+                                isError = choiceResult.IsError;
 
-                            children.Add(choiceResult.Root);
+                                children.Add(choiceResult.Root);
+                                break;
+                            }
                         }
 
                         if (isError) break;
@@ -176,43 +190,47 @@ namespace sly.parser.llparser
                         currentPosition = firstResult.EndingPosition;
                         var second = rule.Clauses[1];
                         SyntaxParseResult<IN> secondResult = null;
-                        if (second is ChoiceClause<IN> secondChoice)
+                        switch (second)
                         {
-                            secondResult = ParseChoice(tokens, secondChoice, currentPosition);
+                            case ChoiceClause<IN> secondChoice:
+                            {
+                                secondResult = ParseChoice(tokens, secondChoice, currentPosition);
 
-                            if (secondResult.IsError)
-                            {
-                                if (firstResult.Root is SyntaxNode<IN> node)
+                                if (secondResult.IsError)
                                 {
-                                    firstResult.Errors.AddRange(secondResult.Errors);
-                                    firstResult.AddExpectings(secondResult.Expecting);
-                                    return firstResult;
+                                    if (firstResult.Root is SyntaxNode<IN> node)
+                                    {
+                                        firstResult.Errors.AddRange(secondResult.Errors);
+                                        firstResult.AddExpectings(secondResult.Expecting);
+                                        return firstResult;
+                                    }
                                 }
+                                else
+                                {
+                                    currentPosition = secondResult.EndingPosition;
+                                }
+
+                                break;
                             }
-                            else
+                            case TerminalClause<IN> secondTerminal:
                             {
-                                currentPosition = secondResult.EndingPosition;
+                                secondResult = ParseTerminal(tokens, secondTerminal, currentPosition);
+
+                                if (secondResult.IsError)
+                                {
+                                    if (firstResult.Root is SyntaxNode<IN> node)
+                                    {
+                                        firstResult.Errors.AddRange(secondResult.Errors);
+                                        firstResult.AddExpectings(secondResult.Expecting);
+                                        return firstResult;
+                                    }
+                                }
+
+                                break;
                             }
                         }
 
-                        
-                        
-                        if (second is TerminalClause<IN> secondTerminal)
-                        {
-                            secondResult = ParseTerminal(tokens, secondTerminal, currentPosition);
 
-                            if (secondResult.IsError)
-                            {
-                                if (firstResult.Root is SyntaxNode<IN> node)
-                                {
-                                    firstResult.Errors.AddRange(secondResult.Errors);
-                                    firstResult.AddExpectings(secondResult.Expecting);
-                                    return firstResult;
-                                }
-                            }
-                        }
-                        
-                        
                         currentPosition = secondResult.EndingPosition;
                         var third = rule.Clauses[2];
                         SyntaxParseResult<IN> thirdResult;
@@ -304,37 +322,36 @@ namespace sly.parser.llparser
             while (stillOk)
             {
                 SyntaxParseResult<IN> innerResult = null;
-                if (innerClause is TerminalClause<IN> term)
+                switch (innerClause)
                 {
-                    manyNode.IsManyTokens = true;
-                    innerResult = ParseTerminal(tokens, term, currentPosition);
-                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
-                }
-                else if (innerClause is NonTerminalClause<IN> nonTerm)
-                {
-                    innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
-                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
-                    if (nonTerm.IsGroup)
+                    case TerminalClause<IN> term:
+                        manyNode.IsManyTokens = true;
+                        innerResult = ParseTerminal(tokens, term, currentPosition);
+                        hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
+                        break;
+                    case NonTerminalClause<IN> nonTerm:
+                    {
+                        innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
+                        hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
+                        if (nonTerm.IsGroup)
+                            manyNode.IsManyGroups = true;
+                        else
+                            manyNode.IsManyValues = true;
+                        break;
+                    }
+                    case GroupClause<IN> _:
                         manyNode.IsManyGroups = true;
-                    else
-                        manyNode.IsManyValues = true;
-                }
-                else if (innerClause is GroupClause<IN>)
-                {
-                    manyNode.IsManyGroups = true;
-                    innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
-                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
-                }
-                else if (innerClause is ChoiceClause<IN> choice)
-                {
-                    manyNode.IsManyTokens = choice.IsTerminalChoice;
-                    manyNode.IsManyValues = choice.IsNonTerminalChoice;
-                    innerResult = ParseChoice(tokens, choice, currentPosition);
-                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
-                }
-                else
-                {
-                    throw new InvalidOperationException("unable to apply repeater to " + innerClause.GetType().Name);
+                        innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
+                        hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
+                        break;
+                    case ChoiceClause<IN> choice:
+                        manyNode.IsManyTokens = choice.IsTerminalChoice;
+                        manyNode.IsManyValues = choice.IsNonTerminalChoice;
+                        innerResult = ParseChoice(tokens, choice, currentPosition);
+                        hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
+                        break;
+                    default:
+                        throw new InvalidOperationException("unable to apply repeater to " + innerClause.GetType().Name);
                 }
 
                 if (innerResult != null && !innerResult.IsError)
@@ -379,31 +396,31 @@ namespace sly.parser.llparser
             SyntaxParseResult<IN> firstInnerResult = null;
             var innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 
-            if (innerClause is TerminalClause<IN>)
+            switch (innerClause)
             {
-                manyNode.IsManyTokens = true;
-                firstInnerResult = ParseTerminal(tokens, innerClause as TerminalClause<IN>, currentPosition);
-                hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
-            }
-            else if (innerClause is NonTerminalClause<IN> nonTerm)
-            {
-                firstInnerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
-                hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
-                if (nonTerm.IsGroup)
-                    manyNode.IsManyGroups = true;
-                else
-                    manyNode.IsManyValues = true;
-            }
-            else if (innerClause is ChoiceClause<IN> choice)
-            {
-                manyNode.IsManyTokens = choice.IsTerminalChoice;
-                manyNode.IsManyValues = choice.IsNonTerminalChoice;
-                firstInnerResult = ParseChoice(tokens, choice, currentPosition);
-                hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
-            }
-            else
-            {
-                throw new InvalidOperationException("unable to apply repeater to " + innerClause.GetType().Name);
+                case TerminalClause<IN> terminalClause:
+                    manyNode.IsManyTokens = true;
+                    firstInnerResult = ParseTerminal(tokens, terminalClause, currentPosition);
+                    hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
+                    break;
+                case NonTerminalClause<IN> nonTerm:
+                {
+                    firstInnerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
+                    hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
+                    if (nonTerm.IsGroup)
+                        manyNode.IsManyGroups = true;
+                    else
+                        manyNode.IsManyValues = true;
+                    break;
+                }
+                case ChoiceClause<IN> choice:
+                    manyNode.IsManyTokens = choice.IsTerminalChoice;
+                    manyNode.IsManyValues = choice.IsNonTerminalChoice;
+                    firstInnerResult = ParseChoice(tokens, choice, currentPosition);
+                    hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
+                    break;
+                default:
+                    throw new InvalidOperationException("unable to apply repeater to " + innerClause.GetType().Name);
             }
 
             if (firstInnerResult != null && !firstInnerResult.IsError)
@@ -453,48 +470,56 @@ namespace sly.parser.llparser
 
             SyntaxParseResult<IN> innerResult = null;
 
-            if (innerClause is TerminalClause<IN> term)
-                innerResult = ParseTerminal(tokens, term, currentPosition);
-            else if (innerClause is NonTerminalClause<IN> nonTerm)
-                innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
-            else if (innerClause is ChoiceClause<IN> choice)
+            switch (innerClause)
             {
-                innerResult = ParseChoice(tokens, choice, currentPosition);
+                case TerminalClause<IN> term:
+                    innerResult = ParseTerminal(tokens, term, currentPosition);
+                    break;
+                case NonTerminalClause<IN> nonTerm:
+                    innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
+                    break;
+                case ChoiceClause<IN> choice:
+                    innerResult = ParseChoice(tokens, choice, currentPosition);
+                    break;
+                default:
+                    throw new InvalidOperationException("unable to apply repeater to " + innerClause.GetType().Name);
             }
-                
-            else
-                throw new InvalidOperationException("unable to apply repeater to " + innerClause.GetType().Name);
 
 
             if (innerResult.IsError)
             {
-                if (innerClause is TerminalClause<IN>)
+                switch (innerClause)
                 {
-                    result = new SyntaxParseResult<IN>();
-                    result.IsError = true;
-                    result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(),false);
-                    result.EndingPosition = position;
-                }
-                else if (innerClause is ChoiceClause<IN> choiceClause)
-                {
-                    if (choiceClause.IsTerminalChoice)
-                    {
+                    case TerminalClause<IN> _:
                         result = new SyntaxParseResult<IN>();
-                        result.IsError = false;
+                        result.IsError = true;
                         result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(),false);
                         result.EndingPosition = position;
+                        break;
+                    case ChoiceClause<IN> choiceClause:
+                    {
+                        if (choiceClause.IsTerminalChoice)
+                        {
+                            result = new SyntaxParseResult<IN>();
+                            result.IsError = false;
+                            result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(),false);
+                            result.EndingPosition = position;
+                        }
+
+                        break;
                     }
-                }
-                else
-                {
-                    result = new SyntaxParseResult<IN>();
-                    result.IsError = true;
-                    var children = new List<ISyntaxNode<IN>> {innerResult.Root};
-                    if (innerResult.IsError) children.Clear();
-                    result.Root = new OptionSyntaxNode<IN>( rule.NonTerminalName, children,
-                        rule.GetVisitor());
-                    (result.Root as OptionSyntaxNode<IN>).IsGroupOption = clause.IsGroupOption;
-                    result.EndingPosition = position;
+                    default:
+                    {
+                        result = new SyntaxParseResult<IN>();
+                        result.IsError = true;
+                        var children = new List<ISyntaxNode<IN>> {innerResult.Root};
+                        if (innerResult.IsError) children.Clear();
+                        result.Root = new OptionSyntaxNode<IN>( rule.NonTerminalName, children,
+                            rule.GetVisitor());
+                        (result.Root as OptionSyntaxNode<IN>).IsGroupOption = clause.IsGroupOption;
+                        result.EndingPosition = position;
+                        break;
+                    }
                 }
             }
             else
@@ -516,7 +541,7 @@ namespace sly.parser.llparser
         {
             var currentPosition = position;
 
-            SyntaxParseResult<IN> result = new SyntaxParseResult<IN>()
+            SyntaxParseResult<IN> result = new SyntaxParseResult<IN>
             {
                 IsError = true,
                 IsEnded = false,
@@ -526,14 +551,18 @@ namespace sly.parser.llparser
 
             foreach (var alternate in choice.Choices)
             {
-                if (alternate is TerminalClause<IN> terminalAlternate)
+                switch (alternate)
                 {
-                    result = ParseTerminal(tokens, terminalAlternate, currentPosition);
+                    case TerminalClause<IN> terminalAlternate:
+                        result = ParseTerminal(tokens, terminalAlternate, currentPosition);
+                        break;
+                    case NonTerminalClause<IN> nonTerminalAlternate:
+                        result = ParseNonTerminal(tokens, nonTerminalAlternate, currentPosition);
+                        break;
+                    default:
+                        throw new InvalidOperationException("unable to apply repeater inside  " + choice.GetType().Name);
                 }
-                else if (alternate is NonTerminalClause<IN> nonTerminalAlternate)
-                    result = ParseNonTerminal(tokens, nonTerminalAlternate, currentPosition);
-                else
-                    throw new InvalidOperationException("unable to apply repeater inside  " + choice.GetType().Name);
+
                 if (result.IsOk)
                 {
                     if (choice.IsTerminalChoice && choice.IsDiscarded && result.Root is SyntaxLeaf<IN> leaf)
@@ -543,7 +572,7 @@ namespace sly.parser.llparser
                     }
 
                     return result;
-                }               
+                }
             }
 
             if (result.IsError && choice.IsTerminalChoice)

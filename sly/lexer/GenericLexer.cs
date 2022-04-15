@@ -167,20 +167,21 @@ namespace sly.lexer
 
             var r = LexerFsm.Run(memorySource, new LexerPosition());
             
-            if (!r.IsSuccess && !r.IsEOS)
+            switch (r.IsSuccess)
             {
-                var result = r.Result;
-                var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue, I18n);
-                return new LexerResult<IN>(error);
-            }
-            if (r.IsSuccess && r.Result.IsComment)
-            {
-                position = r.NewPosition;
-                position = ConsumeComment(r.Result, memorySource, position);
-            }
-            else if (r.IsSuccess && !r.Result.IsComment)
-            {
-                position = r.NewPosition;
+                case false when !r.IsEOS:
+                {
+                    var result = r.Result;
+                    var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue, I18n);
+                    return new LexerResult<IN>(error);
+                }
+                case true when r.Result.IsComment:
+                    position = r.NewPosition;
+                    position = ConsumeComment(r.Result, memorySource, position);
+                    break;
+                case true when !r.Result.IsComment:
+                    position = r.NewPosition;
+                    break;
             }
 
             while (r.IsSuccess)
@@ -207,30 +208,30 @@ namespace sly.lexer
                 }
                 tokens.Add(transcoded);
                 r = LexerFsm.Run(memorySource,position);
-                if (!r.IsSuccess && !r.IsEOS)
+                switch (r.IsSuccess)
                 {
-                    if (r.IsIndentationError)
+                    case false when !r.IsEOS:
                     {
-                        var result = r.Result;
-                        var error = new IndentationError(result.Position.Line, result.Position.Column,I18n);
-                        return new LexerResult<IN>(error);
+                        if (r.IsIndentationError)
+                        {
+                            var result = r.Result;
+                            var error = new IndentationError(result.Position.Line, result.Position.Column,I18n);
+                            return new LexerResult<IN>(error);
+                        }
+                        else
+                        {
+                            var result = r.Result;
+                            var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue,I18n);
+                            return new LexerResult<IN>(error);
+                        }
                     }
-                    else
-                    {
-                        var result = r.Result;
-                        var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue,I18n);
-                        return new LexerResult<IN>(error);
-                    }
-                }
-
-                if (r.IsSuccess && r.Result.IsComment)
-                {
-                    position = r.NewPosition;
-                    position = ConsumeComment(r.Result, memorySource, position);
-                }
-                else if (r.IsSuccess && !r.Result.IsComment)
-                {
-                    position = r.NewPosition;
+                    case true when r.Result.IsComment:
+                        position = r.NewPosition;
+                        position = ConsumeComment(r.Result, memorySource, position);
+                        break;
+                    case true when !r.Result.IsComment:
+                        position = r.NewPosition;
+                        break;
                 }
             }
 

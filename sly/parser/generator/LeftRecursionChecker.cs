@@ -26,31 +26,21 @@ namespace sly.parser.generator
 
         public static List<string> GetLeftClausesName(IClause<IN> clause)
         {
-            if (clause is NonTerminalClause<IN> nonTerminal)
+            switch (clause)
             {
-                return Lst(nonTerminal.NonTerminalName);
+                case NonTerminalClause<IN> nonTerminal:
+                    return Lst(nonTerminal.NonTerminalName);
+                case ManyClause<IN> many:
+                    return GetLeftClausesName(many.Clause);
+                case OptionClause<IN> option:
+                    return GetLeftClausesName(option.Clause);
+                case ChoiceClause<IN> choice when choice.IsNonTerminalChoice:
+                    return choice.Choices.SelectMany(x => GetLeftClausesName(x)).ToList();
+                case GroupClause<IN> group:
+                    return GetLeftClausesName(group.Clauses.First());
+                default:
+                    return new List<string>();
             }
-
-            if (clause is ManyClause<IN> many)
-            {
-                return GetLeftClausesName(many.Clause);
-            }
-
-            if (clause is OptionClause<IN> option)
-            {
-                return GetLeftClausesName(option.Clause);
-            }
-
-            if (clause is ChoiceClause<IN> choice && choice.IsNonTerminalChoice)
-            {
-                return choice.Choices.SelectMany(x => GetLeftClausesName(x)).ToList();
-            }
-
-            if (clause is GroupClause<IN> group)
-            {
-                return GetLeftClausesName(group.Clauses.First());
-            }
-            return new List<string>();
         }
 
         public static List<string> GetLeftClausesName(Rule<IN> rule, ParserConfiguration<IN, OUT> configuration)
@@ -90,7 +80,7 @@ namespace sly.parser.generator
             bool foundRecursion = false;
             foreach (var nonTerminal in configuration.NonTerminals)
             {
-                var (found,recursion) = CheckLeftRecursion(configuration,nonTerminal.Value, new List<string>(){nonTerminal.Key});
+                var (found,recursion) = CheckLeftRecursion(configuration,nonTerminal.Value, new List<string> {nonTerminal.Key});
                 if (found)
                 {
                     foundRecursion = true;
@@ -112,7 +102,7 @@ namespace sly.parser.generator
             var (found,path) = FindRecursion(currentPath);
             if (found)
             {
-                return (true,new List<List<string>>() {currentPath});
+                return (true,new List<List<string>> {currentPath});
             }
             
             var leftClauses = nonTerminal.Rules.SelectMany(x => GetLeftClausesName(x, configuration)).ToList();

@@ -24,16 +24,17 @@ namespace sly.lexer.fsm
         {
             var end = EOLType.No;
             var n = value.At(position);
-            if (n == '\n')
+            switch (n)
             {
-                end = EOLType.Nix;
-            }
-            else if (n == '\r')
-            {
-                if (value.At(position + 1) == '\n')
+                case '\n':
+                    end = EOLType.Nix;
+                    break;
+                case '\r' when value.At(position + 1) == '\n':
                     end = EOLType.Windows;
-                else
+                    break;
+                case '\r':
                     end = EOLType.Mac;
+                    break;
             }
 
             return end;

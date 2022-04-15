@@ -68,18 +68,21 @@ namespace sly.parser.generator.visitor
 
         protected DotNode Visit(ISyntaxNode<IN> n)
         {
-            if (n is SyntaxLeaf<IN>)
-                return Visit(n as SyntaxLeaf<IN>);
-            if (n is GroupSyntaxNode<IN>)
-                return Visit(n as GroupSyntaxNode<IN>);
-            if (n is ManySyntaxNode<IN>)
-                return Visit(n as ManySyntaxNode<IN>);
-            if (n is OptionSyntaxNode<IN>)
-                return Visit(n as OptionSyntaxNode<IN>);
-            if (n is SyntaxNode<IN>)
-                return Visit(n as SyntaxNode<IN>);
-
-            return null;
+            switch (n)
+            {
+                case SyntaxLeaf<IN> leaf:
+                    return Visit(leaf);
+                case GroupSyntaxNode<IN> node:
+                    return Visit(node);
+                case ManySyntaxNode<IN> node:
+                    return Visit(node);
+                case OptionSyntaxNode<IN> node:
+                    return Visit(node);
+                case SyntaxNode<IN> node:
+                    return Visit(node);
+                default:
+                    return null;
+            }
         }
 
         private DotNode Visit(GroupSyntaxNode<IN> node)

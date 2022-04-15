@@ -26,8 +26,7 @@
         public int CompareTo(object obj)
         {
             var comparison = 0;
-            var unexpectedError = obj as ParseError;
-            if (unexpectedError != null)
+            if (obj is ParseError unexpectedError)
             {
                 var lineComparison = Line.CompareTo(unexpectedError != null ? unexpectedError.Line : 0);
                 var columnComparison = Column.CompareTo(unexpectedError != null ? unexpectedError.Column : 0);

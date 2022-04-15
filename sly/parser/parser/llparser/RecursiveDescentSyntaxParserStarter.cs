@@ -24,41 +24,48 @@ namespace sly.parser.llparser
                 if (rule.ContainsSubRule)
                 {
                     foreach (var clause in rule.Clauses)
-                        if (clause is GroupClause<IN> group)
+                        switch (clause)
                         {
-                            var newNonTerm = CreateSubRule(group);
-                            newNonTerms.Add(newNonTerm);
-                            var newClause = new NonTerminalClause<IN>(newNonTerm.Name);
-                            newClause.IsGroup = true;
-                            newclauses.Add(newClause);
-                        }
-                        else if (clause is ManyClause<IN> many)
-                        {
-                            if (many.Clause is GroupClause<IN> manyGroup)
+                            case GroupClause<IN> group:
                             {
-                                var newNonTerm = CreateSubRule(manyGroup);
+                                var newNonTerm = CreateSubRule(group);
                                 newNonTerms.Add(newNonTerm);
-                                var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
-                                newInnerNonTermClause.IsGroup = true;
-                                many.Clause = newInnerNonTermClause;
-                                newclauses.Add(many);
+                                var newClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                newClause.IsGroup = true;
+                                newclauses.Add(newClause);
+                                break;
                             }
-                        }
-                        else if (clause is OptionClause<IN> option)
-                        {
-                            if (option.Clause is GroupClause<IN> optionGroup)
+                            case ManyClause<IN> many:
                             {
-                                var newNonTerm = CreateSubRule(optionGroup);
-                                newNonTerms.Add(newNonTerm);
-                                var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
-                                newInnerNonTermClause.IsGroup = true;
-                                option.Clause = newInnerNonTermClause;
-                                newclauses.Add(option);
+                                if (many.Clause is GroupClause<IN> manyGroup)
+                                {
+                                    var newNonTerm = CreateSubRule(manyGroup);
+                                    newNonTerms.Add(newNonTerm);
+                                    var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                    newInnerNonTermClause.IsGroup = true;
+                                    many.Clause = newInnerNonTermClause;
+                                    newclauses.Add(many);
+                                }
+
+                                break;
                             }
-                        }
-                        else
-                        {
-                            newclauses.Add(clause);
+                            case OptionClause<IN> option:
+                            {
+                                if (option.Clause is GroupClause<IN> optionGroup)
+                                {
+                                    var newNonTerm = CreateSubRule(optionGroup);
+                                    newNonTerms.Add(newNonTerm);
+                                    var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                    newInnerNonTermClause.IsGroup = true;
+                                    option.Clause = newInnerNonTermClause;
+                                    newclauses.Add(option);
+                                }
+
+                                break;
+                            }
+                            default:
+                                newclauses.Add(clause);
+                                break;
                         }
 
                     rule.Clauses.Clear();
@@ -121,27 +128,30 @@ namespace sly.parser.llparser
                 if (rule.Clauses.Count > 0)
                 {
                     var first = rule.Clauses[0];
-                    if (first is TerminalClause<IN> term)
+                    switch (first)
                     {
-                        rule.PossibleLeadingTokens.Add(term.ExpectedToken);
-                        rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
-                    }
-                    else if (first  is NonTerminalClause<IN> nonterm)
-                    {
-                        InitStartingTokensForNonTerminal(nonTerminals, nonterm.NonTerminalName);
-                        if (nonTerminals.ContainsKey(nonterm.NonTerminalName))
-                        {
-                            var firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
-                            firstNonTerminal.Rules.ForEach(r =>
-                            {
-                                rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
-                            });
+                        case TerminalClause<IN> term:
+                            rule.PossibleLeadingTokens.Add(term.ExpectedToken);
                             rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
+                            break;
+                        case NonTerminalClause<IN> nonterm:
+                        {
+                            InitStartingTokensForNonTerminal(nonTerminals, nonterm.NonTerminalName);
+                            if (nonTerminals.ContainsKey(nonterm.NonTerminalName))
+                            {
+                                var firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
+                                firstNonTerminal.Rules.ForEach(r =>
+                                {
+                                    rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
+                                });
+                                rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
+                            }
+
+                            break;
                         }
-                    }
-                    else
-                    {
-                        InitStartingTokensForRuleExtensions(first,rule,nonTerminals);
+                        default:
+                            InitStartingTokensForRuleExtensions(first,rule,nonTerminals);
+                            break;
                     }
                 }
             }

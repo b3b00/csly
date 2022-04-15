@@ -14,7 +14,7 @@ namespace sly.parser.syntax.grammar
      
         public GroupClause(ChoiceClause<T> choices)
         {
-            Clauses = new List<IClause<T>>() {choices};
+            Clauses = new List<IClause<T>> {choices};
         }
 
         public List<IClause<T>> Clauses { get; set; }

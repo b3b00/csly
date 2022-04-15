@@ -17,18 +17,21 @@ namespace sly.parser.generator.visitor
 
         protected override SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN> n, object context = null)
         {
-            if (n is SyntaxLeaf<IN>)
-                return Visit(n as SyntaxLeaf<IN>);
-            if (n is GroupSyntaxNode<IN>)
-                return Visit(n as GroupSyntaxNode<IN>, context);
-            if (n is ManySyntaxNode<IN>)
-                return Visit(n as ManySyntaxNode<IN>, context);
-            if (n is OptionSyntaxNode<IN>)
-                return Visit(n as OptionSyntaxNode<IN>, context);
-            if (n is SyntaxNode<IN>)
-                return Visit(n as SyntaxNode<IN>, context);
-
-            return null;
+            switch (n)
+            {
+                case SyntaxLeaf<IN> leaf:
+                    return Visit(leaf);
+                case GroupSyntaxNode<IN> node:
+                    return Visit(node, context);
+                case ManySyntaxNode<IN> node:
+                    return Visit(node, context);
+                case OptionSyntaxNode<IN> node:
+                    return Visit(node, context);
+                case SyntaxNode<IN> node:
+                    return Visit(node, context);
+                default:
+                    return null;
+            }
         }
 
         private SyntaxVisitorResult<IN, OUT> Visit(GroupSyntaxNode<IN> node, object context = null)
@@ -66,11 +69,15 @@ namespace sly.parser.generator.visitor
             }
 
             var innerResult = Visit(child, context);
-            if (child is SyntaxLeaf<IN> leaf)
-                return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
-            if (child is GroupSyntaxNode<IN> group)
-                return SyntaxVisitorResult<IN, OUT>.NewOptionGroupSome(innerResult.GroupResult);
-            return SyntaxVisitorResult<IN, OUT>.NewOptionSome(innerResult.ValueResult);
+            switch (child)
+            {
+                case SyntaxLeaf<IN> leaf:
+                    return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
+                case GroupSyntaxNode<IN> group:
+                    return SyntaxVisitorResult<IN, OUT>.NewOptionGroupSome(innerResult.GroupResult);
+                default:
+                    return SyntaxVisitorResult<IN, OUT>.NewOptionSome(innerResult.ValueResult);
+            }
         }
 
 

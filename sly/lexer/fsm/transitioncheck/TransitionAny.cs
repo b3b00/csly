@@ -16,7 +16,7 @@ namespace sly.lexer.fsm.transitioncheck
         [ExcludeFromCodeCoverage]
         public override string ToGraphViz()
         {
-            var label = (Precondition != null) ? "[|]*" : "*";
+            var label = Precondition != null ? "[|]*" : "*";
             return  $@"[ label=""{label}"" ]";
         }
 

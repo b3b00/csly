@@ -57,39 +57,44 @@ namespace sly.parser.generator
         {
             Parser<IN, OUT> parser = null;
             var result = new BuildResult<Parser<IN, OUT>>();
-            if (parserType == ParserType.LL_RECURSIVE_DESCENT)
+            switch (parserType)
             {
-                var configuration = ExtractParserConfiguration(parserInstance.GetType());
-                var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
-                if (foundRecursion)
+                case ParserType.LL_RECURSIVE_DESCENT:
                 {
-                    var recs = string.Join("\n", recursions.Select(x => string.Join(" > ",x)));
-                    result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
-                        I18N.Instance.GetText(I18n,Message.LeftRecursion, recs),
-                        ErrorCodes.PARSER_LEFT_RECURSIVE));
-                    return result;
+                    var configuration = ExtractParserConfiguration(parserInstance.GetType());
+                    var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
+                    if (foundRecursion)
+                    {
+                        var recs = string.Join("\n", recursions.Select(x => string.Join(" > ",x)));
+                        result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
+                            I18N.Instance.GetText(I18n,Message.LeftRecursion, recs),
+                            ErrorCodes.PARSER_LEFT_RECURSIVE));
+                        return result;
 
+                    }
+                    configuration.StartingRule = rootRule;
+                    var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
+                    var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
+                    parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
+                    var lexerResult = BuildLexer(extensionBuilder, lexerPostProcess);
+                    parser.Lexer = lexerResult.Result;
+                    if (lexerResult.IsError)
+                    {
+                        result.Errors.AddRange(lexerResult.Errors);
+                        return result;
+                    }
+                    parser.Instance = parserInstance;
+                    parser.Configuration = configuration;
+                    result.Result = parser;
+                    break;
                 }
-                configuration.StartingRule = rootRule;
-                var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
-                var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
-                parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
-                var lexerResult = BuildLexer(extensionBuilder, lexerPostProcess);
-                parser.Lexer = lexerResult.Result;
-                if (lexerResult.IsError)
+                case ParserType.EBNF_LL_RECURSIVE_DESCENT:
                 {
-                    result.Errors.AddRange(lexerResult.Errors);
-                    return result;
+                    var builder = new EBNFParserBuilder<IN, OUT>(I18n);
+                    result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,
+                        extensionBuilder,lexerPostProcess);
+                    break;
                 }
-                parser.Instance = parserInstance;
-                parser.Configuration = configuration;
-                result.Result = parser;
-            }
-            else if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
-            {
-                var builder = new EBNFParserBuilder<IN, OUT>(I18n);
-                result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,
-                    extensionBuilder,lexerPostProcess);
             }
 
             parser = result.Result;
@@ -318,38 +323,50 @@ namespace sly.parser.generator
                 while (iClause < rule.Clauses.Count && !found)
                 {
                     var clause = rule.Clauses[iClause];
-                    if (clause is NonTerminalClause<IN> ntClause)
+                    switch (clause)
                     {
-                        found = ntClause.NonTerminalName == referenceName;
-                    }
-                    else if (clause is OptionClause<IN> option)
-                    {
-                        if (option.Clause is NonTerminalClause<IN> inner)
-                            found = inner.NonTerminalName == referenceName;
-                    }
-                    else if (clause is ZeroOrMoreClause<IN> zeroOrMore)
-                    {
-                        if (zeroOrMore.Clause is NonTerminalClause<IN> inner)
-                            found = inner.NonTerminalName == referenceName;
-                    }
-                    else if (clause is OneOrMoreClause<IN> oneOrMore)
-                    {
-                        if (oneOrMore.Clause is NonTerminalClause<IN> innerNonTerminal)
-                            found = innerNonTerminal.NonTerminalName == referenceName;
-                        if (oneOrMore.Clause is ChoiceClause<IN> innerChoice && innerChoice.IsNonTerminalChoice)
-                            found = innerChoice.Choices.Where(c => (c as NonTerminalClause<IN>).NonTerminalName == referenceName).Any();
-                    }
-                    else if (clause is ChoiceClause<IN> choice)
-                    {
-
-                        int i = 0;
-                        while (i < choice.Choices.Count && !found)
+                        case NonTerminalClause<IN> ntClause:
+                            found = ntClause.NonTerminalName == referenceName;
+                            break;
+                        case OptionClause<IN> option:
                         {
-                            if (choice.Choices[i] is NonTerminalClause<IN> nonTerm)
+                            if (option.Clause is NonTerminalClause<IN> inner)
+                                found = inner.NonTerminalName == referenceName;
+                            break;
+                        }
+                        case ZeroOrMoreClause<IN> zeroOrMore:
+                        {
+                            if (zeroOrMore.Clause is NonTerminalClause<IN> inner)
+                                found = inner.NonTerminalName == referenceName;
+                            break;
+                        }
+                        case OneOrMoreClause<IN> oneOrMore:
+                        {
+                            switch (oneOrMore.Clause)
                             {
-                                found = nonTerm.NonTerminalName == referenceName;
+                                case NonTerminalClause<IN> innerNonTerminal:
+                                    found = innerNonTerminal.NonTerminalName == referenceName;
+                                    break;
+                                case ChoiceClause<IN> innerChoice when innerChoice.IsNonTerminalChoice:
+                                    found = innerChoice.Choices.Where(c => (c as NonTerminalClause<IN>).NonTerminalName == referenceName).Any();
+                                    break;
                             }
-                            i++;
+
+                            break;
+                        }
+                        case ChoiceClause<IN> choice:
+                        {
+                            int i = 0;
+                            while (i < choice.Choices.Count && !found)
+                            {
+                                if (choice.Choices[i] is NonTerminalClause<IN> nonTerm)
+                                {
+                                    found = nonTerm.NonTerminalName == referenceName;
+                                }
+                                i++;
+                            }
+
+                            break;
                         }
                     }
 

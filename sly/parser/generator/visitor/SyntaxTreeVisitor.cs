@@ -150,11 +150,15 @@ namespace sly.parser.generator.visitor
 
         protected virtual SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN> n, object context = null)
         {
-            if (n is SyntaxLeaf<IN>)
-                return Visit(n as SyntaxLeaf<IN>);
-            if (n is SyntaxNode<IN>)
-                return Visit(n as SyntaxNode<IN>, context);
-            return null;
+            switch (n)
+            {
+                case SyntaxLeaf<IN> leaf:
+                    return Visit(leaf);
+                case SyntaxNode<IN> node:
+                    return Visit(node, context);
+                default:
+                    return null;
+            }
         }
 
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node, object context = null)

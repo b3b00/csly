@@ -207,17 +207,17 @@ namespace sly.parser.generator
                 clause = new TerminalClause<IN>(token, discard);
             else
             {
-                if (name == "INDENT")
+                switch (name)
                 {
-                    clause = new IndentTerminalClause<IN>(IndentationType.Indent,discard);
-                }
-                else if (name == "UINDENT")
-                {
-                    clause = new IndentTerminalClause<IN>(IndentationType.UnIndent,discard);
-                }
-                else
-                {
-                    clause = new NonTerminalClause<IN>(name);
+                    case "INDENT":
+                        clause = new IndentTerminalClause<IN>(IndentationType.Indent,discard);
+                        break;
+                    case "UINDENT":
+                        clause = new IndentTerminalClause<IN>(IndentationType.UnIndent,discard);
+                        break;
+                    default:
+                        clause = new NonTerminalClause<IN>(name);
+                        break;
                 }
             }
 

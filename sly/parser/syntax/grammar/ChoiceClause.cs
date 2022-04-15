@@ -14,7 +14,7 @@ namespace sly.parser.syntax.grammar
         public  List<IClause<T>> Choices { get; set; }
         public ChoiceClause(IClause<T> clause)
         {
-            Choices = new List<IClause<T>>() {clause};
+            Choices = new List<IClause<T>> {clause};
         }
         
         public ChoiceClause(List<IClause<T>> choices)

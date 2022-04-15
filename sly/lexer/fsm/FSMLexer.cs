@@ -330,7 +330,7 @@ namespace sly.lexer.fsm
                             var t = indents.Skip(indentCharCount).ToArray();
                             var newTab = new string(t);
                             var indent = FSMMatch<N>.Indent(lexerPosition.Indentations.Count()+1);
-                            indent.Result = new Token<N>()
+                            indent.Result = new Token<N>
                             {
                                 IsIndent = true,
                                 Position = lexerPosition.Clone()
@@ -354,7 +354,7 @@ namespace sly.lexer.fsm
                         var spaces = unindented.Select(x => x.Length).Sum();
                         
                         var uIndent = FSMMatch<N>.UIndent(uIndentCount,uIndentCount);
-                        uIndent.Result = new Token<N>()
+                        uIndent.Result = new Token<N>
                         {
                             IsIndent = true,
                             Position = lexerPosition.Clone()
@@ -384,7 +384,7 @@ namespace sly.lexer.fsm
                     if (indents.Any())
                     {
                         var indent = FSMMatch<N>.Indent(1);
-                        indent.Result = new Token<N>()
+                        indent.Result = new Token<N>
                         {
                             IsIndent = true,
                             Position = lexerPosition.Clone()

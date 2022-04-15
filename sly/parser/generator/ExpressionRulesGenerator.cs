@@ -148,11 +148,11 @@ namespace sly.parser.generator
                 {
                     if (!string.IsNullOrEmpty(operand))
                     {
-                        var rule = new Rule<IN>()
+                        var rule = new Rule<IN>
                         {
                             IsByPassRule = true,
                             IsExpressionRule = true,
-                            Clauses = new List<IClause<IN>>() {new NonTerminalClause<IN>(operand)}
+                            Clauses = new List<IClause<IN>> {new NonTerminalClause<IN>(operand)}
                         };
                         operandNonTerminal.Rules.Add(rule);
                     }
@@ -220,7 +220,7 @@ namespace sly.parser.generator
             {
                 var InFixClauses = InFixOps.Select(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
 
-                var rule = new Rule<IN>()
+                var rule = new Rule<IN>
                 {
                     ExpressionAffix = Affix.InFix,
                     IsExpressionRule = true,
@@ -247,7 +247,7 @@ namespace sly.parser.generator
             {
                 var PreFixClauses = PreFixOps.Select(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
 
-                var rule = new Rule<IN>()
+                var rule = new Rule<IN>
                 {
                     ExpressionAffix = Affix.PreFix,
                     IsExpressionRule = true
@@ -265,7 +265,7 @@ namespace sly.parser.generator
             {
                 var PostFixClauses = PostFixOps.Select(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
 
-                var rule = new Rule<IN>()
+                var rule = new Rule<IN>
                 {
                     ExpressionAffix = Affix.PostFix,
                     IsExpressionRule = true

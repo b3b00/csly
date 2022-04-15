@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace sly.parser.llparser
 {
-    public partial class RecursiveDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> where IN : struct
+    public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
     {
         public RecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal,
             string i18n)
@@ -122,40 +122,45 @@ namespace sly.parser.llparser
                     children = new List<ISyntaxNode<IN>>();
                     foreach (var clause in rule.Clauses)
                     {
-                        if (clause is TerminalClause<IN>)
+                        switch (clause)
                         {
-                            var termRes = ParseTerminal(tokens, clause as TerminalClause<IN>, currentPosition);
-                            if (!termRes.IsError)
+                            case TerminalClause<IN> terminalClause:
                             {
-                                children.Add(termRes.Root);
-                                currentPosition = termRes.EndingPosition;
-                            }
-                            else
-                            {
-                                var tok = tokens[currentPosition];
-                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok, I18n,
-                                    ((TerminalClause<IN>)clause).ExpectedToken));
-                            }
+                                var termRes = ParseTerminal(tokens, terminalClause, currentPosition);
+                                if (!termRes.IsError)
+                                {
+                                    children.Add(termRes.Root);
+                                    currentPosition = termRes.EndingPosition;
+                                }
+                                else
+                                {
+                                    var tok = tokens[currentPosition];
+                                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tok, I18n,
+                                        terminalClause.ExpectedToken));
+                                }
 
-                            isError = isError || termRes.IsError;
-                        }
-                        else if (clause is NonTerminalClause<IN>)
-                        {
-                            var nonTerminalResult =
-                                ParseNonTerminal(tokens, clause as NonTerminalClause<IN>, currentPosition);
-                            if (!nonTerminalResult.IsError)
+                                isError = isError || termRes.IsError;
+                                break;
+                            }
+                            case NonTerminalClause<IN> terminalClause:
                             {
-                                children.Add(nonTerminalResult.Root);
-                                currentPosition = nonTerminalResult.EndingPosition;
-                                if (nonTerminalResult.Errors != null && nonTerminalResult.Errors.Count > 0)
+                                var nonTerminalResult =
+                                    ParseNonTerminal(tokens, terminalClause, currentPosition);
+                                if (!nonTerminalResult.IsError)
+                                {
+                                    children.Add(nonTerminalResult.Root);
+                                    currentPosition = nonTerminalResult.EndingPosition;
+                                    if (nonTerminalResult.Errors != null && nonTerminalResult.Errors.Count > 0)
+                                        errors.AddRange(nonTerminalResult.Errors);
+                                }
+                                else
+                                {
                                     errors.AddRange(nonTerminalResult.Errors);
-                            }
-                            else
-                            {
-                                errors.AddRange(nonTerminalResult.Errors);
-                            }
+                                }
 
-                            isError = isError || nonTerminalResult.IsError;
+                                isError = isError || nonTerminalResult.IsError;
+                                break;
+                            }
                         }
 
                         if (isError) break;
@@ -189,40 +194,47 @@ namespace sly.parser.llparser
         protected SyntaxNode<IN> ManageExpressionRules(Rule<IN> rule, SyntaxNode<IN> node)
         {
             var operatorIndex = -1;
-            if (rule.IsExpressionRule && rule.IsByPassRule)
+            switch (rule.IsExpressionRule)
             {
-                node.IsByPassNode = true;
-                node.HasByPassNodes = true;
-            }
-            else if (rule.IsExpressionRule && !rule.IsByPassRule)
-            {
-                node.ExpressionAffix = rule.ExpressionAffix;
-                if (node.Children.Count == 3)
+                case true when rule.IsByPassRule:
+                    node.IsByPassNode = true;
+                    node.HasByPassNodes = true;
+                    break;
+                case true when !rule.IsByPassRule:
                 {
-                    operatorIndex = 1;
-                }
-                else if (node.Children.Count == 2)
-                {
-                    if (node.ExpressionAffix == Affix.PreFix)
-                        operatorIndex = 0;
-                    else if (node.ExpressionAffix == Affix.PostFix) operatorIndex = 1;
-                }
-
-                if (operatorIndex >= 0)
-                    if (node.Children[operatorIndex] is SyntaxLeaf<IN> operatorNode)
-                        if (operatorNode != null)
+                    node.ExpressionAffix = rule.ExpressionAffix;
+                    switch (node.Children.Count)
+                    {
+                        case 3:
+                            operatorIndex = 1;
+                            break;
+                        case 2 when node.ExpressionAffix == Affix.PreFix:
+                            operatorIndex = 0;
+                            break;
+                        case 2:
                         {
-                            var visitor = rule.GetVisitor(operatorNode.Token.TokenID);
-                            if (visitor != null)
-                            {
-                                node.Visitor = visitor;
-                                node.Operation = rule.GetOperation(operatorNode.Token.TokenID);
-                            }
+                            if (node.ExpressionAffix == Affix.PostFix) operatorIndex = 1;
+                            break;
                         }
-            }
-            else if (!rule.IsExpressionRule)
-            {
-                node.Visitor = rule.GetVisitor();
+                    }
+
+                    if (operatorIndex >= 0)
+                        if (node.Children[operatorIndex] is SyntaxLeaf<IN> operatorNode)
+                            if (operatorNode != null)
+                            {
+                                var visitor = rule.GetVisitor(operatorNode.Token.TokenID);
+                                if (visitor != null)
+                                {
+                                    node.Visitor = visitor;
+                                    node.Operation = rule.GetOperation(operatorNode.Token.TokenID);
+                                }
+                            }
+
+                    break;
+                }
+                case false:
+                    node.Visitor = rule.GetVisitor();
+                    break;
             }
 
             return node;
@@ -382,7 +394,7 @@ namespace sly.parser.llparser
             }
             else
             {
-                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(new Token<IN>() { IsEOS = true }, I18n,
+                noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(new Token<IN> { IsEOS = true }, I18n,
                     allAcceptableTokens));
             }
 
