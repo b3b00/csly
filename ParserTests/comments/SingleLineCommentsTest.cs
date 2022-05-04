@@ -13,7 +13,7 @@ namespace ParserTests.comments
 
         [Lexeme(GenericToken.Identifier)] ID,
 
-        [SingleLineComment("//")] COMMENT
+        [SingleLineComment("//",channel:0)] COMMENT
     }
     
     public class SingleLineCommentsTest

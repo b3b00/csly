@@ -9,9 +9,14 @@ namespace sly.lexer
         
         public LexicalError Error { get; }
         
-        public List<Token<IN>> Tokens { get; set; }
+        public TokenChannels<IN> Tokens { get; set; }
         
         public LexerResult(List<Token<IN>> tokens)
+        {
+            Tokens = new TokenChannels<IN>(tokens);
+        }
+        
+        public LexerResult(TokenChannels<IN> tokens)
         {
             IsError = false;
             Tokens = tokens;
@@ -22,6 +27,7 @@ namespace sly.lexer
             IsError = true;
             Error = error;
         }
+
         
     }
 }

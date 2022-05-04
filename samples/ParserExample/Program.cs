@@ -791,6 +791,7 @@ return r";
         }
 
 
+
         public static void TestIndentedLang()
         {
             string source = @"if truc == 1
@@ -864,7 +865,47 @@ final = 9999
                 parserRes.Errors.ForEach(x => Console.WriteLine(x.Message));
             }
         }
-        
+
+
+        public static void TestChannels()
+        {
+            var lexerResult = LexerBuilder.BuildLexer<ChannelLexer>();
+            if (lexerResult.IsOk)
+            {
+                var lexer = lexerResult.Result;
+                var source = @"toto 
+// commentaire
+1
+id
+""string""";
+                var tokens = lexer.Tokenize(source);
+
+                var width = tokens.Tokens.GetChannels().Select(x => x.Tokens.Count).Max();
+                
+                List<string> headers = new List<string>();
+                
+                
+                
+                if (tokens.IsOk)
+                {
+                    foreach (var channel in tokens.Tokens.GetChannels())
+                    {
+                        Console.Write($"#{channel.ChannelId};");
+                        foreach (var token in channel.Tokens)
+                        {
+                            Console.Write(token == null ? "" : token.ToString());
+                            Console.Write(";");
+                        }
+                        Console.WriteLine();
+                    }
+                }
+
+                
+                ;
+            }
+            
+        }
+
         private static void IndentedTest2(string source)
         {
             var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer2>();
@@ -918,9 +959,15 @@ final = 9999
             // TestIndentedFactorial();
             //TestThreadsafeGeneric();
             // TestManyString();
+
             //  TestDoubleExponent();
             //Test192();
             //TestRecursion();
+            //  TestDoubleExponent();
+            //Test192();
+            //TestRecursion();
+            //  TestDoubleExponent();
+            //Test192();
             // TestFactorial();
             // TestThreadsafeGeneric();
             //Test177();
@@ -931,10 +978,11 @@ final = 9999
             // TestShortGeneric();
 
             //TestIssue239();
-            TestLexerPostProcess();
-            TestLexerPostProcessEBNF();
+            // TestLexerPostProcess();
+            // TestLexerPostProcessEBNF();
             //TestIssue239();
             // TestShortOperations();
+            TestChannels();
         }
 
 
@@ -955,7 +1003,7 @@ final = 9999
                     var lexResult = lexer.Tokenize(@"1 + 2 + a + b * 8.3 hello / 'b\'jour'");
                     if (lexResult.IsOk)
                     {
-                        lexResult.Tokens.ForEach(x => Console.WriteLine(x));
+                        lexResult.Tokens.Tokens.ForEach(x => Console.WriteLine(x));
                     }
                     else
                     {

@@ -73,7 +73,7 @@ namespace sly.parser
                 return result;
             }
 
-            var tokens = lexingResult.Tokens;
+            var tokens = lexingResult.Tokens.Tokens;
             if (Lexer.LexerPostProcess != null)
             {
                 tokens = Lexer.LexerPostProcess(tokens);
@@ -85,7 +85,7 @@ namespace sly.parser
                 var token = tokens[i];
                 if (!token.IsComment || token.Notignored)
                 {
-                    token.PositionInTokenFlow = position;
+                    token.PositionInTokenVisibleFlow = position;
                     tokensWithoutComments.Add(token);
                     position++;
                 }

@@ -164,8 +164,19 @@ namespace sly.lexer
             LexerPosition position = new LexerPosition();
             
             var tokens = new List<Token<IN>>();
-
+            string src = memorySource.ToString();
+            if (src.Contains("commented"))
+            {
+                ;
+            }
+            
             var r = LexerFsm.Run(memorySource, new LexerPosition());
+            
+            var ignored = r.IgnoredTokens.Select(x =>
+                new Token<IN>(default(IN), x.SpanValue, x.Position, x.IsComment,
+                    x.CommentType, x.Channel)).ToList();
+            tokens.AddRange(ignored);
+            
             
             switch (r.IsSuccess)
             {
@@ -789,6 +800,11 @@ namespace sly.lexer
 
         public LexerPosition ConsumeComment(Token<GenericToken> comment, ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
+            
+            if (comment.Channel == Channels.Comments)
+            {
+                ;
+            }
 
             ReadOnlyMemory<char> commentValue;
 
@@ -847,6 +863,7 @@ namespace sly.lexer
             tok.IsUnIndent = match.IsUnIndent;
             tok.IndentationLevel = match.IndentationLevel;
             tok.Notignored = match.Result.Notignored;
+            tok.Channel = match.Result.Channel;
             return tok;
         }
 

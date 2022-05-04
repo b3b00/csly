@@ -21,9 +21,26 @@ namespace ParserTests
 {
     
     [Lexer(IgnoreWS = true, IgnoreEOL = true)]
+    public enum DoNotIgnoreCommentsTokenWithChannels
+    {
+        [MultiLineComment("/*","*/")]
+        MULTILINECOMMENT = 1,
+        
+        [SingleLineComment("//")]
+        SINGLELINECOMMENT = 2,
+
+        [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumeric)]
+        ID = 3,
+        
+        [Lexeme(GenericToken.Double, channel:101)]
+        DOUBLE = 4
+    }
+
+    
+    [Lexer(IgnoreWS = true, IgnoreEOL = true)]
     public enum DoNotIgnoreCommentsToken
     {
-        [MultiLineComment("/*","*/",true)]
+        [MultiLineComment("/*","*/",true,channel:0)]
         COMMENT = 1,
 
         [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumeric)]
@@ -84,6 +101,30 @@ namespace ParserTests
         {
             return new DoNotIgnoreCommentIdentifier(token.Value, comment.Value);
         } 
+    }
+    
+    public class DoNotIgnoreCommentsWithChannelsParser
+    {
+        [Production("main : id *")]
+        public DoNotIgnore Main(List<DoNotIgnore> ids)
+        {
+            return new IdentifierList(ids);
+        }
+
+        [Production("id : ID")]
+        public DoNotIgnore SimpleId(Token<DoNotIgnoreCommentsTokenWithChannels> token)
+        {
+            // get previous token in channel 2 (COMMENT)
+            var previous = token.Previous(Channels.Comments);
+            string comment = null;
+            // previous token may not be a comment so we have to check if not null
+            if (previous != null && (previous.TokenID == DoNotIgnoreCommentsTokenWithChannels.SINGLELINECOMMENT || previous.TokenID == DoNotIgnoreCommentsTokenWithChannels.MULTILINECOMMENT))
+            {
+                comment = previous?.Value;
+            }
+            return new DoNotIgnoreCommentIdentifier(token.Value, comment);
+        }
+
     }
     
     public static class ListExtensions
@@ -1276,6 +1317,7 @@ namespace ParserTests
 
         }
 
+
         [Fact]
         public void TestIndentedParser()
         {
@@ -1387,6 +1429,48 @@ else
             Assert.Equal(2,ifthenelse.Then.Statements.Count);
             Assert.NotNull(ifthenelse.Else);
             Assert.Equal(2,ifthenelse.Else.Statements.Count);
+        }
+        
+        [Fact]
+        public void TestIssue213WithChannels()
+        {
+            var parserInstance = new DoNotIgnoreCommentsWithChannelsParser();
+            var builder = new ParserBuilder<DoNotIgnoreCommentsTokenWithChannels, DoNotIgnore>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
+            
+            Assert.True(builtParser.IsOk);
+            Assert.NotNull(builtParser.Result);
+            var parser = builtParser.Result;
+
+            var test = parser.Parse("a /*commented b*/b");
+
+            Assert.True(test.IsOk);
+            Assert.NotNull(test.Result);
+            Assert.IsType<IdentifierList>(test.Result);
+            var list = test.Result as IdentifierList;
+            Assert.Equal(2, list.Ids.Count);
+            Assert.False(list.Ids[0].IsCommented);
+            Assert.Equal("a",list.Ids[0].Name);
+            Assert.True(list.Ids[1].IsCommented);
+            Assert.Equal("b",list.Ids[1].Name);
+            Assert.Equal("commented b",list.Ids[1].Comment.Trim());    
+            
+            test = parser.Parse(@"a 
+// commented b
+b");
+
+            Assert.True(test.IsOk);
+            Assert.NotNull(test.Result);
+            Assert.IsType<IdentifierList>(test.Result);
+            list = test.Result as IdentifierList;
+            Assert.Equal(2, list.Ids.Count);
+            Assert.False(list.Ids[0].IsCommented);
+            Assert.Equal("a",list.Ids[0].Name);
+            Assert.True(list.Ids[1].IsCommented);
+            Assert.Equal("b",list.Ids[1].Name);
+            Assert.Equal("commented b",list.Ids[1].Comment.Trim());    
+            ;
+
         }
     }
 }

@@ -205,7 +205,7 @@ namespace sly.lexer.fsm
             // if count = previousCount -1 => add an unindent token
             // else ....
             
-            ConsumeIgnored(source,lexerPosition);
+            var ignoredTokens = ConsumeIgnored(source,lexerPosition);
 
             if (IndentationAware) // could start of line
             {
@@ -260,6 +260,7 @@ namespace sly.lexer.fsm
                     result = Callbacks[result.NodeId](result);
                 }
 
+                result.IgnoredTokens = ignoredTokens;
                 return result;
             }
 
@@ -427,10 +428,11 @@ namespace sly.lexer.fsm
             return Move(node, token, "".AsMemory());
         }
 
-        private void ConsumeIgnored(ReadOnlyMemory<char> source, LexerPosition position)
+        private List<Token<N>> ConsumeIgnored(ReadOnlyMemory<char> source, LexerPosition position)
         {
 
             bool eolReached = false;
+            List<Token<N>> ignoredTokens = new List<Token<N>>();
             while (position.Index < source.Length && !(eolReached && IndentationAware))
             {
                 if (IgnoreWhiteSpace)
@@ -438,6 +440,10 @@ namespace sly.lexer.fsm
                     var currentCharacter = source.At<char>(position.Index);
                     if (WhiteSpaces.Contains(currentCharacter))
                     {
+                        var whiteToken = new Token<N>(default(N),source.Slice(position.Index, 1), position, false, CommentType.No,
+                            Channels.WhiteSpaces);
+                        ignoredTokens.Add(whiteToken);
+                        whiteToken.IsWhiteSpace = true;
                         position.Index++;
                         position.Column++;
                         continue;
@@ -463,6 +469,7 @@ namespace sly.lexer.fsm
 
                 break;
             }
+            return ignoredTokens;
         }
 
         #endregion
