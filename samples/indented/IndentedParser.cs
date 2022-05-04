@@ -44,9 +44,18 @@ namespace indented
             return new Block(statements);
         }
         
-        [Production("ifthenelse: IF[d] cond block (ELSE[d] block)?")]
-        public Ast ifthenelse(Cond cond, Block thenblk, ValueOption<Group<IndentedLangLexer,Ast>> elseblk)
+        [Production("ifthenelse: IF cond block (ELSE[d] block)?")]
+        public Ast ifthenelse(Token<IndentedLangLexer> si, Cond cond, Block thenblk, ValueOption<Group<IndentedLangLexer,Ast>> elseblk)
         {
+            
+            var previous = si.Previous(Channels.Comments);
+            string comment = null;
+            // previous token may not be a comment so we have to check if not null
+            if (previous != null && (previous.TokenID == IndentedLangLexer.SINGLE_COMMENT || previous.TokenID == IndentedLangLexer.MULTI_COMMENT))
+            {
+                comment = previous?.Value;
+            }
+            
             var eGrp = elseblk.Match(
                 x => {
                 return x;
@@ -55,7 +64,7 @@ namespace indented
                 return null;
             });
             var eBlk = eGrp?.Value(0) as Block;
-            return new IfThenElse(cond, thenblk, eBlk);
+            return new IfThenElse(cond, thenblk, eBlk, comment);
         }
 
         [Production("block : INDENT[d] statement* UINDENT[d]")]

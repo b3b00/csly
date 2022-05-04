@@ -6,6 +6,8 @@ namespace indented
     public class Block : Statement
     {
         public List<Ast> Statements { get; set; } = new List<Ast>();
+        
+        public string Comment { get; set; }
 
         public Block(List<Ast> stats)
         {

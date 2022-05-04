@@ -79,7 +79,7 @@ namespace sly.lexer
             if (TokenChannels.TryGet(channelId, out channel))
             {
                 int position = PositionInTokenFlow - 1;
-                if (position >= 0) 
+                if (position >= 0 && position <= channel.Count - 1) 
                 {
                     return channel[position];
                 }

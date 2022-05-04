@@ -16,7 +16,11 @@ namespace indented
 
         [Lexeme(GenericToken.SugarToken, "=")] SET = 5,
 
-        [Lexeme(GenericToken.Int)] INT = 6
+        [Lexeme(GenericToken.Int)] INT = 6,
+         
+        [SingleLineComment("//")] SINGLE_COMMENT = 8,
+        
+        [MultiLineComment("/*","*/")] MULTI_COMMENT = 9,
 
     }
 }

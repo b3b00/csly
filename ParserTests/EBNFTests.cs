@@ -1354,7 +1354,10 @@ else
         [Fact]
         public void TestIndentedParserNestedBlocks()
         {
-            var source =@"if truc == 1
+
+            var source =@"
+// this is a informative comment
+if truc == 1
   un = 1
   deux = 2
 else  
@@ -1379,6 +1382,8 @@ final = 9999
             Assert.Equal(2,root.Statements.Count);
             Assert.IsAssignableFrom<IfThenElse>(root.Statements.First());
             IfThenElse ifthenelse = root.Statements.First() as IfThenElse;
+            Assert.NotNull(ifthenelse.Comment);
+            Assert.Equal("this is a informative comment",ifthenelse.Comment.Trim());
             Assert.NotNull(ifthenelse.Cond);
             Assert.NotNull(ifthenelse.Then);
             Assert.Equal(2,ifthenelse.Then.Statements.Count);

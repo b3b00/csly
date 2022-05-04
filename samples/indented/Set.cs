@@ -5,6 +5,8 @@ namespace indented
         public Identifier Id { get; set; }
         
         public Integer Value { get; set; }
+        
+        public string Comment { get; set; }
 
         public Set(Identifier id, Integer integer)
         {

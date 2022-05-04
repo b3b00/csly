@@ -800,13 +800,7 @@ namespace sly.lexer
 
         public LexerPosition ConsumeComment(Token<GenericToken> comment, ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
-            
-            if (comment.Channel == Channels.Comments)
-            {
-                ;
-            }
-
-            ReadOnlyMemory<char> commentValue;
+           ReadOnlyMemory<char> commentValue;
 
             if (comment.IsSingleLineComment)
             {
