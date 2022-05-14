@@ -75,6 +75,16 @@ Csly provides native support for indentation. Head to [Indented Languages](https
 
 >### Easily use indentation to make your language more readable.
 
+
+### Preserve comments 
+
+Comments or whitespace are almost every time discardable. But sometimes it makes sens to preserve them : 
+
+- use comments to generate auto doc (think javadoc, c#'s xmldoc or python's docstring )
+- introduce meta data without clutering your grammar
+    
+
+
 ### Generic lexer ### 
 
 Lexemes are often similar from one language to another. Csly introduces a generic lexer that defines common lexemes and which can be reused across languages. 
