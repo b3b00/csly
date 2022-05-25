@@ -505,6 +505,13 @@ namespace sly.parser.llparser
                             result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(),false);
                             result.EndingPosition = position;
                         }
+                        else if (choiceClause.IsNonTerminalChoice)
+                        {
+                            result = new SyntaxParseResult<IN>();
+                            result.IsError = false;
+                            result.Root = new SyntaxEpsilon<IN>();
+                            result.EndingPosition = position;
+                        }
 
                         break;
                     }
@@ -580,6 +587,17 @@ namespace sly.parser.llparser
                 var terminalAlternates = choice.Choices.Cast<TerminalClause<IN>>();
                 var expected = terminalAlternates.Select<TerminalClause<IN>, IN>(x => x.ExpectedToken).ToList<IN>();
                 result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],I18n,expected.ToArray()));
+            }
+
+            if (result.IsError && choice.IsNonTerminalChoice)
+            {
+                result = new SyntaxParseResult<IN>
+                {
+                    IsError = false,
+                    IsEnded = false,
+                    EndingPosition = currentPosition,
+                    Root = new SyntaxEpsilon<IN>()
+                };
             }
             
             return result;

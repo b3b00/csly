@@ -88,6 +88,10 @@ namespace sly.parser.generator.visitor
                     return Visit(node);
                 case SyntaxNode<IN> node:
                     return Visit(node);
+                case SyntaxEpsilon<IN> epsilon:
+                {
+                    return Leaf(default(IN), "Epsilon");
+                }
                 default:
                     return Leaf(default(IN),"NULL");
             }
@@ -103,10 +107,10 @@ namespace sly.parser.generator.visitor
             var child = node.Children != null && node.Children.Any<ISyntaxNode<IN>>() ? node.Children[0] : null;
             if (child == null || node.IsEmpty)
             {
-                return null;
+                return Leaf(default(IN),"<NONE>");
             }
-
-            return Visit(child);
+            var r = Visit(child);
+            return r;
         }
 
         private string GetNodeLabel(SyntaxNode<IN> node)
