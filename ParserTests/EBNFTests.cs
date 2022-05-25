@@ -1423,14 +1423,6 @@ else
             Assert.True(parserRes.IsOk);
             var parser = parserRes.Result;
             Assert.NotNull(parser);
-            parser.SyntaxParseCallback = node =>
-            {
-                GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer2> grapher =
-                    new GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer2>();
-                var root = grapher.VisitTree(node);
-                var graph = grapher.Graph.Compile();
-                File.WriteAllText(@"c:\tmp\graph2.dot", graph);
-            };
             var parseResult = parser.Parse(source);
             Assert.True(parseResult.IsOk);
             var ast = parseResult.Result;
@@ -1467,14 +1459,6 @@ else
             Assert.True(parserRes.IsOk);
             var parser = parserRes.Result;
             Assert.NotNull(parser);
-            parser.SyntaxParseCallback = node =>
-            {
-                GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer2> grapher =
-                    new GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer2>();
-                        var root = grapher.VisitTree(node);
-                var graph = grapher.Graph.Compile();
-                File.WriteAllText(@"c:\tmp\graph.dot", graph);
-            };
             var parseResult = parser.Parse(source);
             Assert.True(parseResult.IsOk);
             var ast = parseResult.Result;
