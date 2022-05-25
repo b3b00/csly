@@ -944,6 +944,46 @@ id
             }
         }
 
+        
+        public static void TestIndentedParserNeverEnding()
+        {
+            var source =@"if truc == 1
+    un = 1
+    deux = 2
+    cinq = 5
+else
+    trois = 3
+    quatre = 4
+
+";
+            ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
+            var instance = new IndentedParser();
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Assert.True(parserRes.IsOk);
+            var parser = parserRes.Result;
+            Assert.NotNull(parser);
+            parser.SyntaxParseCallback = node =>
+            {
+                GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer> grapher =
+                    new GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer>();
+                var root = grapher.VisitTree(node);
+                var graph = grapher.Graph.Compile();
+                File.WriteAllText(@"c:\tmp\graph.dot", graph);
+            };
+            var parseResult = parser.Parse(source);
+            Assert.True(parseResult.IsOk);
+            var ast = parseResult.Result;
+            indented.Block root = ast as indented.Block;
+            Assert.Single(root.Statements);
+            Assert.IsAssignableFrom<indented.IfThenElse>(root.Statements.First());
+            IfThenElse ifthenelse = root.Statements.First() as indented.IfThenElse;
+            Assert.NotNull(ifthenelse.Cond);
+            Assert.NotNull(ifthenelse.Then);
+            Assert.Equal(3,ifthenelse.Then.Statements.Count);
+            Assert.NotNull(ifthenelse.Else);
+            Assert.Equal(2,ifthenelse.Else.Statements.Count);
+        }
+        
         private static void Main(string[] args)
         {
             //TestContextualParser();
@@ -982,7 +1022,8 @@ id
             // TestLexerPostProcessEBNF();
             //TestIssue239();
             // TestShortOperations();
-            TestChannels();
+            // TestChannels();
+            TestIndentedParserNeverEnding();
         }
 
 

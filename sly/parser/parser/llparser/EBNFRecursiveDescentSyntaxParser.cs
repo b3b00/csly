@@ -588,17 +588,6 @@ namespace sly.parser.llparser
                 var expected = terminalAlternates.Select<TerminalClause<IN>, IN>(x => x.ExpectedToken).ToList<IN>();
                 result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],I18n,expected.ToArray()));
             }
-
-            if (result.IsError && choice.IsNonTerminalChoice)
-            {
-                result = new SyntaxParseResult<IN>
-                {
-                    IsError = false,
-                    IsEnded = false,
-                    EndingPosition = currentPosition,
-                    Root = new SyntaxEpsilon<IN>()
-                };
-            }
             
             return result;
         }
