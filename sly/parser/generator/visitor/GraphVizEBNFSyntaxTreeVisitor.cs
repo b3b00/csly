@@ -21,6 +21,14 @@ namespace sly.parser.generator.visitor
 
         private DotNode Leaf(SyntaxLeaf<IN> leaf)
         {
+            if (leaf.Token.IsIndent)
+            {
+                return Leaf(leaf.Token.TokenID, "INDENT>>");
+            }
+            else if (leaf.Token.IsUnIndent)
+            {
+                return Leaf(leaf.Token.TokenID, "<<UNINDENT");
+            }
             return Leaf(leaf.Token.TokenID, leaf.Token.Value);
         }
 
@@ -81,7 +89,7 @@ namespace sly.parser.generator.visitor
                 case SyntaxNode<IN> node:
                     return Visit(node);
                 default:
-                    return null;
+                    return Leaf(default(IN),"NULL");
             }
         }
 
@@ -162,6 +170,14 @@ namespace sly.parser.generator.visitor
 
         private DotNode Visit(SyntaxLeaf<IN> leaf)
         {
+            if (leaf.Token.IsIndent)
+            {
+                return Leaf(leaf.Token.TokenID, "INDENT>>");
+            }
+            else if (leaf.Token.IsUnIndent)
+            {
+                return Leaf(leaf.Token.TokenID, "<<UNINDENT");
+            }
             return Leaf(leaf.Token.TokenID, leaf.Token.Value);
         }
     }

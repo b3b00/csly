@@ -11,6 +11,7 @@ namespace indented
         public Block Else { get; set; }
         
         public string Comment { get; set; }
+        public bool IsCommented => !string.IsNullOrWhiteSpace(Comment);
 
         public IfThenElse(Cond cond, Block thenBlock, Block elseBlock, string comment = null)
         {
