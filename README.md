@@ -82,6 +82,16 @@ Comments or whitespace are almost every time discardable. But sometimes it makes
 
 - use comments to generate auto doc (think javadoc, c#'s xmldoc or python's docstring )
 - introduce meta data without clutering your grammar
+
+So CSLY borrowed the (antlr channel concept)[https://datacadamia.com/antlr/channel]. 
+Every lexeme can be redirected to a specific channel. By default comments go to channel 2.
+
+This feature is already available on branch dev but not deployed in any nuget package.
+Documentation is also a work in progress event though you can have it a glance looking at (EBNF unit tests)[https://github.com/b3b00/csly/blob/dev/ParserTests/EBNFTests.cs] :
+  - [TestIndentedParserNestedBlocks](https://github.com/b3b00/csly/blob/dev/ParserTests/EBNFTests.cs#L1357)
+  - [TestIndentedParserWithEolAwareness](https://github.com/b3b00/csly/blob/dev/ParserTests/EBNFTests.cs#L1409)
+  - [TestIndentedParserWithEolAwareness2](https://github.com/b3b00/csly/blob/dev/ParserTests/EBNFTests.cs#L1445)
+  - [TestIssue213WithChannels](https://github.com/b3b00/csly/blob/dev/ParserTests/EBNFTests.cs#L1481)
     
 
 
