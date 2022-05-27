@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.buildresult;
@@ -6,11 +7,14 @@ using sly.lexer;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
 using sly.parser.parser;
+using sly.parser.syntax.tree;
 
 namespace sly.parser
 {
     public class Parser<IN, OUT> where IN : struct
-    {
+    {   
+        public Action<ISyntaxNode<IN>> SyntaxParseCallback { get; set; }
+
         public Parser(string i18n, ISyntaxParser<IN, OUT> syntaxParser, SyntaxTreeVisitor<IN, OUT> visitor)
         {
             I18n = i18n;
@@ -73,7 +77,7 @@ namespace sly.parser
                 return result;
             }
 
-            var tokens = lexingResult.Tokens;
+            var tokens = lexingResult.Tokens.Tokens;
             if (Lexer.LexerPostProcess != null)
             {
                 tokens = Lexer.LexerPostProcess(tokens);
@@ -85,7 +89,7 @@ namespace sly.parser
                 var token = tokens[i];
                 if (!token.IsComment || token.Notignored)
                 {
-                    token.PositionInTokenFlow = position;
+                    token.PositionInTokenVisibleFlow = position;
                     tokensWithoutComments.Add(token);
                     position++;
                 }
@@ -110,6 +114,10 @@ namespace sly.parser
             syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
+                if (SyntaxParseCallback != null)
+                {
+                    SyntaxParseCallback(syntaxResult.Root);
+                }
                 var r = Visitor.VisitSyntaxTree(syntaxResult.Root,parsingContext);
                 result.Result = r;
                 result.SyntaxTree = syntaxResult.Root;

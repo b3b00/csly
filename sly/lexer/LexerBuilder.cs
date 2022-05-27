@@ -149,7 +149,9 @@ namespace sly.lexer
                     {
                         foreach (var lexeme in lexemes)
                         {
-                            lexer.AddDefinition(new TokenDefinition<IN>(tokenID, lexeme.Pattern, lexeme.IsSkippable,
+                            // TODO ??? 
+                            var channel = lexeme.Channel.HasValue ? lexeme.Channel.Value : 0;
+                            lexer.AddDefinition(new TokenDefinition<IN>(tokenID, lexeme.Pattern, channel,lexeme.IsSkippable,
                                 lexeme.IsLineEnding));
                         }
                     }
@@ -227,7 +229,7 @@ namespace sly.lexer
             }
         }
 
-        private static NodeCallback<GenericToken> GetCallbackSingle<IN>(IN token, bool doNotIgnore) where IN : struct
+        private static NodeCallback<GenericToken> GetCallbackSingle<IN>(IN token, bool doNotIgnore, int channel) where IN : struct
         {
             NodeCallback<GenericToken> callback = match =>
             {
@@ -235,12 +237,13 @@ namespace sly.lexer
                 match.Result.IsComment = true;
                 match.Result.CommentType = CommentType.Single;
                 match.Result.Notignored = doNotIgnore;
+                match.Result.Channel = channel;
                 return match;
             };
             return callback;
         }
 
-        private static NodeCallback<GenericToken> GetCallbackMulti<IN>(IN token, bool doNotIgnore) where IN : struct
+        private static NodeCallback<GenericToken> GetCallbackMulti<IN>(IN token, bool doNotIgnore, int channel) where IN : struct
         {
             NodeCallback<GenericToken> callbackMulti = match =>
             {
@@ -248,6 +251,7 @@ namespace sly.lexer
                 match.Result.IsComment = true;
                 match.Result.Notignored = doNotIgnore;
                 match.Result.CommentType = CommentType.Multi;
+                match.Result.Channel = channel;
                 return match;
             };
             return callbackMulti;
@@ -340,7 +344,7 @@ namespace sly.lexer
                             fsmBuilder.ConstantTransition(commentAttr.SingleLineCommentStart);
                             fsmBuilder.Mark(GenericLexer<IN>.single_line_comment_start);
                             fsmBuilder.End(GenericToken.Comment);
-                            fsmBuilder.CallBack(GetCallbackSingle<IN>(comment.Key,commentAttr.DoNotIgnore));
+                            fsmBuilder.CallBack(GetCallbackSingle<IN>(comment.Key,commentAttr.DoNotIgnore, commentAttr.Channel));
                         }
 
                         var hasMultiLine = !string.IsNullOrWhiteSpace(commentAttr.MultiLineCommentStart);
@@ -353,7 +357,7 @@ namespace sly.lexer
                             fsmBuilder.ConstantTransition(commentAttr.MultiLineCommentStart);
                             fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
                             fsmBuilder.End(GenericToken.Comment);
-                            fsmBuilder.CallBack(GetCallbackMulti<IN>(comment.Key,commentAttr.DoNotIgnore));
+                            fsmBuilder.CallBack(GetCallbackMulti<IN>(comment.Key,commentAttr.DoNotIgnore, commentAttr.Channel));
                         }
                     }
                 }

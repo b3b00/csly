@@ -54,10 +54,17 @@ namespace indented
             return new Block(statements);
         }
         
-        [Production("ifthenelse: IF[d] cond EOL[d] block ELSE[d] EOL[d] block ")]
-        public Ast ifthenelse(Cond cond, Block thenblk, Block elseblk)
+        [Production("ifthenelse: IF cond EOL[d] block ELSE[d] EOL[d] block ")]
+        public Ast ifthenelse(Token<IndentedLangLexer2> si, Cond cond, Block thenblk, Block elseblk)
         {
-            return new IfThenElse(cond, thenblk, elseblk);
+            var previous = si.Previous(Channels.Comments);
+            string comment = null;
+            // previous token may not be a comment so we have to check if not null
+            if (previous != null && (previous.TokenID == IndentedLangLexer2.SINGLE_COMMENT || previous.TokenID == IndentedLangLexer2.MULTI_COMMENT))
+            {
+                comment = previous?.Value;
+            }
+            return new IfThenElse(cond, thenblk, elseblk,comment);
         }
 
         [Production("block : INDENT[d] statement* UINDENT[d]")]

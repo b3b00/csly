@@ -9,12 +9,16 @@ namespace indented
         public Block Then { get; set; }
 
         public Block Else { get; set; }
+        
+        public string Comment { get; set; }
+        public bool IsCommented => !string.IsNullOrWhiteSpace(Comment);
 
-        public IfThenElse(Cond cond, Block thenBlock, Block elseBlock)
+        public IfThenElse(Cond cond, Block thenBlock, Block elseBlock, string comment = null)
         {
             Cond = cond;
             Then = thenBlock;
             Else = elseBlock;
+            Comment = comment;
         }
 
         public string Dump(string tab)

@@ -67,6 +67,7 @@ namespace sly.lexer
                 {
                     previousToken = new Token<T>(matchedDefinition.TokenID, value,
                         new LexerPosition(currentIndex, currentLine, currentColumn));
+                    previousToken.Channel = matchedDefinition.Channel;
                     tokens.Add(previousToken);
                 }
 
@@ -74,6 +75,7 @@ namespace sly.lexer
             }
 
             var eos = new Token<T>();
+            eos.Channel = Channels.Main;
             if (previousToken != null)
             {
                 eos.Position = new LexerPosition(previousToken.Position.Index + 1, previousToken.Position.Line,
@@ -84,8 +86,8 @@ namespace sly.lexer
                 eos.Position = new LexerPosition(0,0,0);
             }
 
-
             tokens.Add(eos);
+            
             return new LexerResult<T>(tokens);
         }
 

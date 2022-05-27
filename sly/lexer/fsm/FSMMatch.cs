@@ -33,9 +33,12 @@ namespace sly.lexer.fsm
 
         public bool IsIndentationError { get; set; }
         
+        public List<Token<N>> IgnoredTokens { get; set; }
+        
         
         public FSMMatch(bool success)
         {
+            IgnoredTokens = new List<Token<N>>();
             IsSuccess = success;
             IsEOS = !success;
         }
@@ -43,6 +46,7 @@ namespace sly.lexer.fsm
         protected FSMMatch()
         {
             Properties = new Dictionary<string, object>();
+            IgnoredTokens = new List<Token<N>>();
         }
 
         public static FSMMatch<N> Indent(int level)
@@ -83,6 +87,7 @@ namespace sly.lexer.fsm
             Result = new Token<N>(result, value, position);
             NewPosition = newPosition;
             IsLineEnding = isLineEnding;
+            IgnoredTokens = new List<Token<N>>();
         }
         
         

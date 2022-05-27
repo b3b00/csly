@@ -40,6 +40,8 @@ namespace sly.parser.generator.visitor
         public bool IsTokenList { get; private set; }
 
         public bool IsGroup { get; private set; }
+        
+        public bool IsEpsilon { get; private set; }
 
         public bool IsNone => !IsToken && !IsValue && !IsTokenList && !IsValueList && !IsGroup && !IsGroupList;
 
@@ -123,6 +125,13 @@ namespace sly.parser.generator.visitor
         public static SyntaxVisitorResult<IN, OUT> NoneResult()
         {
             var res = new SyntaxVisitorResult<IN, OUT>();
+            return res;
+        }
+
+        public static SyntaxVisitorResult<IN, OUT> Epsilon()
+        {
+            var res = new SyntaxVisitorResult<IN, OUT>();
+            res.IsEpsilon = true;
             return res;
         }
     }

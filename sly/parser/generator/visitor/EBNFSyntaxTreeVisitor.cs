@@ -29,6 +29,8 @@ namespace sly.parser.generator.visitor
                     return Visit(node, context);
                 case SyntaxNode<IN> node:
                     return Visit(node, context);
+                case SyntaxEpsilon<IN> epsilon:
+                    return SyntaxVisitorResult<IN, OUT>.Epsilon();
                 default:
                     return null;
             }
@@ -71,6 +73,8 @@ namespace sly.parser.generator.visitor
             var innerResult = Visit(child, context);
             switch (child)
             {
+                case SyntaxEpsilon<IN> epsilon: 
+                    return SyntaxVisitorResult<IN, OUT>.NewOptionNone();
                 case SyntaxLeaf<IN> leaf:
                     return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
                 case GroupSyntaxNode<IN> group:
@@ -125,6 +129,10 @@ namespace sly.parser.generator.visitor
                     else if (v.IsGroupList)
                     {
                         args.Add(v.GroupListResult);
+                    }
+                    else if (v.IsEpsilon)
+                    {
+                        args.Add(default(OUT));
                     }
                 }
 

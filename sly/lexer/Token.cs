@@ -13,6 +13,8 @@ namespace sly.lexer
 
     public class Token<T>
     {
+        
+        
         public char StringDelimiter = '"';
         
         public char CharDelimiter ='\'';
@@ -20,19 +22,31 @@ namespace sly.lexer
 
 
         public Token(T token, string value, LexerPosition position, bool isCommentStart = false,
-            CommentType commentType = CommentType.Single) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType )
+            CommentType commentType = CommentType.Single, int? channel = null) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType,channel )
         {
-            
         }
         
         public Token(T token, ReadOnlyMemory<char> value, LexerPosition position, bool isCommentStart = false,
-            CommentType commentType = CommentType.Single)
+            CommentType commentType = CommentType.Single, int? channel = null)
         {
             IsEOS = false;
             TokenID = token;
             SpanValue = value;
             Position = position;
             CommentType = commentType;
+            if (CommentType != CommentType.No)
+            {
+                if (channel == null)
+                {
+                    channel = Channels.Main;
+                }
+            }
+            else
+            {
+                channel = channel ?? Channels.Main;
+            }
+
+            Channel = channel.Value;
         }
 
 
@@ -43,12 +57,46 @@ namespace sly.lexer
             Position = new LexerPosition(0, 0, 0);
         }
 
+        public Token<T> Next(int channelId)
+        {
+            TokenChannel<T> channel = null;
+             
+            if (TokenChannels.TryGet(channelId, out channel))
+            {
+                int position = PositionInTokenFlow + 1;
+                if (position < channel.Count)
+                {
+                    return channel[position];
+                }
+            }
+            return null;
+        }
+
+        public Token<T> Previous(int channelId)
+        {
+            TokenChannel<T> channel = null;
+             
+            if (TokenChannels.TryGet(channelId, out channel))
+            {
+                int position = PositionInTokenFlow - 1;
+                if (position >= 0 && position <= channel.Count - 1) 
+                {
+                    return channel[position];
+                }
+            }
+            return null;
+        }
+
+        public int Channel {get; set;} = 0;
 
         public  ReadOnlyMemory<char> SpanValue { get; set; }
         
         public LexerPosition Position { get; set; }
 
+        public int PositionInTokenVisibleFlow { get; set; }
+        
         public int PositionInTokenFlow { get; set; }
+
         public T TokenID { get; set; }
         public bool IsComment { get; set; }
 
@@ -61,6 +109,10 @@ namespace sly.lexer
         public bool IsUnIndent { get; set; }
         
         public int IndentationLevel { get; set; }
+        
+        public bool IsWhiteSpace { get; set; }
+        
+        public bool IsEOL { get; set; }
 
         public CommentType CommentType { get; set; } = CommentType.No;
 
@@ -141,6 +193,8 @@ namespace sly.lexer
         public bool End { get; set; }
         public static T DefTok { get; set; }
         public bool IsLineEnding { get; set; }
+        
+        public TokenChannels<T> TokenChannels { get; set; }         
 
         public static Token<T> Empty()
         {
@@ -154,20 +208,23 @@ namespace sly.lexer
         {
             if (IsEOS)
             {
-                return "<<EOS>>";    
+                return "<<EOS>>";
             }
 
+            string value = $"{TokenID} [{Value.Replace("\r","").Replace("\n","")}]";
+                
             if (IsIndent)
             {
-                return $"<<INDENT({IndentationLevel})>> @{Position}";
+                value = $"<<INDENT({IndentationLevel})>>";
             }
 
             if (IsUnIndent)
             {
-                return $"<<UINDENT({IndentationLevel})>> @{Position}";
+                value = $"<<UINDENT({IndentationLevel})>>";
             }
-            return $"{TokenID} [{Value}] @{Position}";
+            return $"{value} @{Position} on channel {Channel}";
             
+
         }
     }
 }

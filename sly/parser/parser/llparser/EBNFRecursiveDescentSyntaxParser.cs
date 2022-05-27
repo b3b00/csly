@@ -505,6 +505,13 @@ namespace sly.parser.llparser
                             result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(),false);
                             result.EndingPosition = position;
                         }
+                        else if (choiceClause.IsNonTerminalChoice)
+                        {
+                            result = new SyntaxParseResult<IN>();
+                            result.IsError = false;
+                            result.Root = new SyntaxEpsilon<IN>();
+                            result.EndingPosition = position;
+                        }
 
                         break;
                     }

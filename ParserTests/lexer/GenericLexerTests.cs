@@ -121,9 +121,9 @@ namespace ParserTests.lexer
 
     public enum Extensions
     {
-        [Lexeme(GenericToken.Extension)] DATE,
+        [Lexeme(GenericToken.Extension,channel:0)] DATE,
 
-        [Lexeme(GenericToken.Double)] DOUBLE
+        [Lexeme(GenericToken.Double,channel:0)] DOUBLE
     }
     
     public enum ShortExtensions
@@ -190,6 +190,7 @@ namespace ParserTests.lexer
                 NodeCallback<GenericToken> callback = match =>
                 {
                     match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
+                    match.Result.Channel = 0;
                     return match;
                 };
 
@@ -951,6 +952,7 @@ namespace ParserTests.lexer
             Assert.NotNull(lexer);
             var res1 = lexer.Tokenize("'c'");
             Assert.False(res1.IsError);
+            Console.WriteLine(res1.Tokens.ToString());
             Assert.Equal(2, res1.Tokens.Count);
             Token<CharTokens> token = res1.Tokens[0];
             Assert.Equal('c', token.CharValue);
