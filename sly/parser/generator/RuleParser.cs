@@ -88,10 +88,24 @@ namespace sly.parser.generator
             return new ChoiceClause<IN>(choice);
         }
         
+        [Production("choices : STRING")]
+        public IClause<IN> ChoicesString(Token<EbnfTokenGeneric> head)
+        {
+            var choice = BuildTerminalOrNonTerimal(head.StringWithoutQuotes, discard: false,implicitToken:true);
+            return new ChoiceClause<IN>(choice);
+        }
+        
         [Production("choices : IDENTIFIER OR choices ")]
         public IClause<IN> ChoicesMany(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> discardOr, ChoiceClause<IN> tail)
         {
             var headClause = BuildTerminalOrNonTerimal(head.Value); 
+            return new ChoiceClause<IN>(headClause,tail.Choices);
+        }
+        
+        [Production("choices : STRING OR choices ")]
+        public IClause<IN> ChoicesManyImplicit(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> discardOr, ChoiceClause<IN> tail)
+        {
+            var headClause = BuildTerminalOrNonTerimal(head.StringWithoutQuotes,discard:false,implicitToken:true); 
             return new ChoiceClause<IN>(headClause,tail.Choices);
         }
         
@@ -103,9 +117,15 @@ namespace sly.parser.generator
             return clause;
         }
 
-        [Production("clause : STRING DISCARD?")]
-        public IClause<IN> ImplicitTokenClause(Token<EbnfTokenGeneric> implicitToken, Token<EbnfTokenGeneric> discard) {
-            var clause = BuildTerminalOrNonTerimal(implicitToken.StringWithoutQuotes,discard:!discard.IsEmpty, implicitToken :true);
+        [Production("clause : STRING")]
+        public IClause<IN> ImplicitTokenClause(Token<EbnfTokenGeneric> implicitToken) {
+            var clause = BuildTerminalOrNonTerimal(implicitToken.StringWithoutQuotes,discard:false, implicitToken :true);
+            return clause;
+        }
+        
+        [Production("clause : STRING DISCARD")]
+        public IClause<IN> ImplicitTokenClauseDiscarded(Token<EbnfTokenGeneric> implicitToken, Token<EbnfTokenGeneric> discard) {
+            var clause = BuildTerminalOrNonTerimal(implicitToken.StringWithoutQuotes,discard:true, implicitToken :true);
             return clause;
         }
 

@@ -54,7 +54,7 @@ namespace sly.parser.generator
         [Lexeme(GenericToken.SugarToken,"]")]
         RCROG = 12,
 
-        [Lexeme(GenericToken.String, "'","")]  
+        [Lexeme(GenericToken.String, "'","\\")]  
         STRING = 13,
 
     }
