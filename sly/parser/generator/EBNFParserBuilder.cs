@@ -38,6 +38,8 @@ namespace sly.parser.generator
             {
                 configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
                 LeftRecursionChecker<IN,OUT> recursionChecker = new LeftRecursionChecker<IN,OUT>();
+                
+                // check left recursion.
                 var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
                 if (foundRecursion)
                 {
@@ -46,7 +48,6 @@ namespace sly.parser.generator
                         I18N.Instance.GetText(I18n,Message.LeftRecursion,recs),
                         ErrorCodes.PARSER_LEFT_RECURSIVE));
                     return result;
-
                 }
                 
                 configuration.StartingRule = rootRule;
@@ -71,7 +72,7 @@ namespace sly.parser.generator
             }
             var parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
             parser.Configuration = configuration;
-            var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess);
+            var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, configuration);
             if (lexerResult.IsError)
             {
                 foreach (var lexerResultError in lexerResult.Errors)
@@ -81,10 +82,12 @@ namespace sly.parser.generator
                 return result;
             }
             else
+            {
                 parser.Lexer = lexerResult.Result;
-            parser.Instance = parserInstance;
-            result.Result = parser;
-            return result;
+                parser.Instance = parserInstance;
+                result.Result = parser;
+                return result;
+            }
         }
 
 

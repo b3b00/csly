@@ -15,9 +15,19 @@ namespace sly.parser.syntax.grammar
         {
             Discarded = discard;
         }
+        
+        public TerminalClause(string implicitToken, bool discard) : this(default(T))
+        {
+            ImplicitToken = implicitToken;
+            Discarded = discard;
+        }
 
         public T ExpectedToken { get; set; }
 
+        public string ImplicitToken { get; set; }
+
+        public bool IsImplicitToken => !string.IsNullOrEmpty(ImplicitToken);
+        
         public bool Discarded { get; set; }
 
         public virtual bool MayBeEmpty()

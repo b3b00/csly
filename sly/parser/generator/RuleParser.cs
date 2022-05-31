@@ -91,7 +91,7 @@ namespace sly.parser.generator
         [Production("choices : STRING")]
         public IClause<IN> ChoicesString(Token<EbnfTokenGeneric> head)
         {
-            var choice = BuildTerminalOrNonTerimal(head.StringWithoutQuotes, discard: false,implicitToken:true);
+            var choice = BuildTerminalOrNonTerimal(head.Value, discard: false,implicitToken:true);
             return new ChoiceClause<IN>(choice);
         }
         
@@ -105,7 +105,7 @@ namespace sly.parser.generator
         [Production("choices : STRING OR choices ")]
         public IClause<IN> ChoicesManyImplicit(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> discardOr, ChoiceClause<IN> tail)
         {
-            var headClause = BuildTerminalOrNonTerimal(head.StringWithoutQuotes,discard:false,implicitToken:true); 
+            var headClause = BuildTerminalOrNonTerimal(head.Value,discard:false,implicitToken:true); 
             return new ChoiceClause<IN>(headClause,tail.Choices);
         }
         
@@ -119,13 +119,13 @@ namespace sly.parser.generator
 
         [Production("clause : STRING")]
         public IClause<IN> ImplicitTokenClause(Token<EbnfTokenGeneric> implicitToken) {
-            var clause = BuildTerminalOrNonTerimal(implicitToken.StringWithoutQuotes,discard:false, implicitToken :true);
+            var clause = BuildTerminalOrNonTerimal(implicitToken.Value,discard:false, implicitToken :true);
             return clause;
         }
         
         [Production("clause : STRING DISCARD")]
         public IClause<IN> ImplicitTokenClauseDiscarded(Token<EbnfTokenGeneric> implicitToken, Token<EbnfTokenGeneric> discard) {
-            var clause = BuildTerminalOrNonTerimal(implicitToken.StringWithoutQuotes,discard:true, implicitToken :true);
+            var clause = BuildTerminalOrNonTerimal(implicitToken.Value,discard:true, implicitToken :true);
             return clause;
         }
 
@@ -220,6 +220,7 @@ namespace sly.parser.generator
 
         private IClause<IN> BuildTerminalOrNonTerimal(string name, bool discard = false, bool implicitToken = false)
         {
+            
             var token = default(IN);
             IClause<IN> clause;
             var isTerminal = false;
@@ -229,21 +230,30 @@ namespace sly.parser.generator
                 isTerminal = true;
             }
 
+            
+            
             if (isTerminal)
                 clause = new TerminalClause<IN>(token, discard);
             else
             {
-                switch (name)
+                if (name.StartsWith("'"))
                 {
-                    case "INDENT":
-                        clause = new IndentTerminalClause<IN>(IndentationType.Indent,discard);
-                        break;
-                    case "UINDENT":
-                        clause = new IndentTerminalClause<IN>(IndentationType.UnIndent,discard);
-                        break;
-                    default:
-                        clause = new NonTerminalClause<IN>(name);
-                        break;
+                    clause = new TerminalClause<IN>(name.Substring(1,name.Length-2), discard);
+                }
+                else
+                {
+                    switch (name)
+                    {
+                        case "INDENT":
+                            clause = new IndentTerminalClause<IN>(IndentationType.Indent, discard);
+                            break;
+                        case "UINDENT":
+                            clause = new IndentTerminalClause<IN>(IndentationType.UnIndent, discard);
+                            break;
+                        default:
+                            clause = new NonTerminalClause<IN>(name);
+                            break;
+                    }
                 }
             }
 

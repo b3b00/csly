@@ -167,9 +167,21 @@ namespace sly.parser.generator
 
 
         protected virtual BuildResult<ILexer<IN>> BuildLexer(BuildExtension<IN> extensionBuilder = null,
-            LexerPostProcess<IN> lexerPostProcess = null)
+            LexerPostProcess<IN> lexerPostProcess = null, ParserConfiguration<IN, OUT> parserConfiguration = null)
         {
             var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n, lexerPostProcess);
+            if (parserConfiguration != null)
+            {
+                var implicitTokenClauses = parserConfiguration.GetAllImplicitTokenClauses();
+                if (implicitTokenClauses.Any())
+                {
+                    Console.WriteLine($"found {implicitTokenClauses.Count} implicit tokens");
+                    var implicits = implicitTokenClauses.Select(x => x.ImplicitToken).Distinct();
+                    Console.WriteLine(string.Join(", ", implicits));
+                    ; // TODO
+                }
+            }
+
             return lexer;
         }
 
@@ -200,7 +212,7 @@ namespace sly.parser.generator
                     var r = BuildNonTerminal(ntAndRule);
                     r.SetVisitor(m);
                     r.NonTerminalName = ntAndRule.Item1;
-                    var key = ntAndRule.Item1 + "__" + r.Key;
+                    var key = $"{ntAndRule.Item1}__{r.Key}";
                     functions[key] = m;
                     NonTerminal<IN> nonT = null;
                     if (!nonTerminals.ContainsKey(ntAndRule.Item1))
