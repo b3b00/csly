@@ -35,7 +35,11 @@ namespace ParserTests
         ID = 3,
         
         [Lexeme(GenericToken.Double, channel:101)]
-        DOUBLE = 4
+        DOUBLE = 4,
+        
+        [Keyword("Test")] 
+        TEST = 5
+       
     }
 
     public class ImplicitTokensParser
@@ -117,6 +121,18 @@ namespace ParserTests
         {
             return -factorValue;
         }
+
+        [Production("primary : 'bozzo'[d]")]
+        public double Bozzo()
+        {
+            return 42.0;
+        }
+
+        [Production("primary : TEST[d]")]
+        public double Test()
+        {
+            return 0.0;
+        } 
     }
 
 
@@ -138,6 +154,9 @@ namespace ParserTests
             var parser = BuildParser();
             Assert.True(parser.IsOk);
             Assert.NotNull(parser.Result);
+            var r = parser.Result.Parse("1.0 + 2.0 + bozzo");
+            Assert.True(r.IsOk);
+            Assert.Equal(45.0,r.Result);
         }
     }
     

@@ -178,6 +178,33 @@ namespace sly.parser.generator
                     Console.WriteLine($"found {implicitTokenClauses.Count} implicit tokens");
                     var implicits = implicitTokenClauses.Select(x => x.ImplicitToken).Distinct();
                     Console.WriteLine(string.Join(", ", implicits));
+                    if (lexer.IsOk && lexer.Result is GenericLexer<IN> genericLexer)
+                    {
+                        Console.WriteLine("something really magic will happen here !");
+                        foreach (var @implicit in implicits)
+                        {
+                            var x = genericLexer.FSMBuilder.Fsm.Run(@implicit, new LexerPosition());
+                            if (x.IsSuccess)
+                            {
+                                // todo : if x.NodeId == "in_identifier" 
+                                var t = genericLexer.FSMBuilder.Marks;
+                                var y = genericLexer.FSMBuilder.Marks.FirstOrDefault(k => k.Value == x.NodeId);
+                                if (y.Key == GenericLexer<IN>.in_identifier) // implicit keyword
+                                {
+                                    var result = new BuildResult<ILexer<IN>>();
+                                    genericLexer.AddKeyWord(default(IN),@implicit,result);
+                                    ;
+                                }
+                                Console.WriteLine("hey ! Rodriguez !");
+                            }
+                            else
+                            {
+                                var result = new BuildResult<ILexer<IN>>();
+                                genericLexer.AddSugarLexem(default(IN),result,@implicit);
+                            }
+                        }
+                        ;
+                    }
                     ; // TODO
                 }
             }
