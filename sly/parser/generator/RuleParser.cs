@@ -103,6 +103,12 @@ namespace sly.parser.generator
             return clause;
         }
 
+        [Production("clause : STRING DISCARD?")]
+        public IClause<IN> ImplicitTokenClause(Token<EbnfTokenGeneric> implicitToken, Token<EbnfTokenGeneric> discard) {
+            var clause = BuildTerminalOrNonTerimal(implicitToken.StringWithoutQuotes,discard:!discard.IsEmpty, implicitToken :true);
+            return clause;
+        }
+
 
         #region  groups
 
@@ -192,7 +198,7 @@ namespace sly.parser.generator
         #endregion
 
 
-        private IClause<IN> BuildTerminalOrNonTerimal(string name, bool discard = false)
+        private IClause<IN> BuildTerminalOrNonTerimal(string name, bool discard = false, bool implicitToken = false)
         {
             var token = default(IN);
             IClause<IN> clause;
