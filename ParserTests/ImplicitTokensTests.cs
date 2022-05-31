@@ -49,9 +49,22 @@ namespace ParserTests
         {
             return doubleToken.DoubleValue;
         }
+        
+        [Production("primary : 'bozzo'[d]")]
+        public double Bozzo()
+        {
+            return 42.0;
+        }
+
+        [Production("primary : TEST[d]")]
+        public double Test()
+        {
+            return 0.0;
+        } 
 
 
-        [Production("expression : term ['+' | '-'] expression")]
+        [Production("expression : primary ['+' | '-'] expression")]
+        
         
         public double Expression(double left, Token<ImplicitTokensTokens> operatorToken, double right)
         {
@@ -75,64 +88,16 @@ namespace ParserTests
             return result;
         }
 
-        [Production("expression : term")]
-        public double Expression_Term(double termValue)
+
+        [Production("expression : primary ")]
+        public double Simple(double value)
         {
-            return termValue;
+            return value;
         }
 
-        [Production("term : factor ['*' | '/'] term")]
-        public double Term(double left, Token<ImplicitTokensTokens> operatorToken, double right)
-        {
-            var result = 0d;
 
 
-            switch (operatorToken.StringWithoutQuotes)
-            {
-                case "*":
-                {
-                    result = left * right;
-                    break;
-                }
-                case "/":
-                {
-                    result = left / right;
-                    break;
-                }
-            }
 
-            return result;
-        }
-
-        [Production("term : factor")]
-        public double Term_Factor(double factorValue)
-        {
-            return factorValue;
-        }
-
-        [Production("factor : primary")]
-        public double primaryFactor(double primValue)
-        {
-            return primValue;
-        }
-
-        [Production("factor : '-'[d] factor")]
-        public double Factor(double factorValue)
-        {
-            return -factorValue;
-        }
-
-        [Production("primary : 'bozzo'[d]")]
-        public double Bozzo()
-        {
-            return 42.0;
-        }
-
-        [Production("primary : TEST[d]")]
-        public double Test()
-        {
-            return 0.0;
-        } 
     }
 
 
