@@ -119,9 +119,11 @@ namespace ParserTests
             var parser = BuildParser();
             Assert.True(parser.IsOk);
             Assert.NotNull(parser.Result);
-            var r = parser.Result.Parse("1.0 + 2.0 + bozzo");
+            var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
             Assert.True(r.IsOk);
-            Assert.Equal(45.0,r.Result);
+            // grammar is left associative so expression really is 
+            // (2.0 - (2.0 + (bozzo  + Test))) = 2 - ( 2 + (42 + 0)) = 2 - (2 + 42) = 2 - 44 = -42
+            Assert.Equal(-42.0,r.Result);
         }
     }
     

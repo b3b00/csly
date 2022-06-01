@@ -6,7 +6,6 @@ on:
       - dev
       - tech/actions 
       - master
-      - feature/implicit-tokens
   pull_request:
     branches: 
       - dev
