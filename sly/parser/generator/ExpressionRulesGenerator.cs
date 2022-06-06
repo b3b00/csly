@@ -20,6 +20,15 @@ namespace sly.parser.generator
             OperatorToken = oper;
             Affix = affix;
         }
+        
+        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, string oper)
+        {
+            Precedence = precedence;
+            Associativity = assoc;
+            VisitorMethod = method;
+            ImplicitOperatorToken = oper;
+            Affix = affix;
+        }
 
         public int Precedence { get; set; }
 
@@ -34,6 +43,10 @@ namespace sly.parser.generator
         public bool IsBinary => Affix == Affix.InFix;
 
         public bool IsUnary => Affix != Affix.InFix;
+
+        public bool IsImplicitOperatorToken => !string.IsNullOrEmpty(ImplicitOperatorToken);
+
+        public string ImplicitOperatorToken { get; set; }
 
         [ExcludeFromCodeCoverage]
         public override string ToString()
@@ -77,15 +90,33 @@ namespace sly.parser.generator
                 foreach (var attr in attributes)
                 {
                     IN oper = default;
+                    string implicitToken = null;
                     if (attr.IsIntToken)
                     {
                         oper = EnumConverter.ConvertIntToEnum<IN>(attr.IntToken);
                     }
                     else if (attr.IsStringToken)
                     {
-                        oper = EnumConverter.ConvertStringToEnum<IN>(attr.StringToken);
+                        if (EnumConverter.IsEnumValue<IN>(attr.StringToken))
+                        {
+                            oper = EnumConverter.ConvertStringToEnum<IN>(attr.StringToken);
+                        }
+                        else
+                        {
+                            implicitToken = attr.StringToken;
+                        }
                     }
-                    var operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper);
+
+                    OperationMetaData<IN> operation = null;
+                    if (string.IsNullOrEmpty(implicitToken))
+                    {
+                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper);
+                    }
+                    else
+                    {
+                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, implicitToken);
+                    }
+
                     var operations = new List<OperationMetaData<IN>>();
                     if (operationsByPrecedence.ContainsKey(operation.Precedence))
                         operations = operationsByPrecedence[operation.Precedence];
