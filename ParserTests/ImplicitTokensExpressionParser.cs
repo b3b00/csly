@@ -1,3 +1,4 @@
+using System;
 using expressionparser;
 using sly.lexer;
 using sly.parser.generator;
@@ -28,26 +29,32 @@ namespace ParserTests
         }
 
 
-        [Operation("+", Affix.InFix, Associativity.Right, 10)]
+        [Operation("+", Affix.InFix, Associativity.Left, 10)]
         [Operation("-", Affix.InFix, Associativity.Left, 10)]
         public double BinaryTermExpression(double left, Token<ImplicitTokensTokens> operation, double right)
         {
+            switch (operation.Value)
+            {
+                case "+" : return left + right;
+                case "-" : return left - right;
+                default : throw new InvalidOperationException($"that is not possible ! {operation.Value} is not a valid operation");
+            }
             return 0;
         }
             
-        [Operation((int) ImplicitTokensTokens.TIMES, Affix.InFix, Associativity.Right, 50)]
+        [Operation((int) ImplicitTokensTokens.TIMES, Affix.InFix, Associativity.Left, 50)]
         [Operation("DIVIDE", Affix.InFix, Associativity.Left, 50)]
-        public double BinaryFactorExpression(double left, Token<ExpressionToken> operation, double right)
+        public double BinaryFactorExpression(double left, Token<ImplicitTokensTokens> operation, double right)
         {
             double result = 0;
             switch (operation.TokenID)
             {
-                case ExpressionToken.TIMES:
+                case ImplicitTokensTokens.TIMES:
                 {
                     result = left * right;
                     break;
                 }
-                case ExpressionToken.DIVIDE:
+                case ImplicitTokensTokens.DIVIDE:
                 {
                     result = left / right;
                     break;
@@ -59,7 +66,7 @@ namespace ParserTests
 
 
         [Operation("-", Affix.PreFix, Associativity.Right, 100)]
-        public double PreFixExpression(Token<ExpressionToken> operation, double value)
+        public double PreFixExpression(Token<ImplicitTokensTokens> operation, double value)
         {
             return -value;
         }

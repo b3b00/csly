@@ -43,7 +43,13 @@ namespace sly.parser.generator
                                     clauses.Add(terminal);
                                 }
                             }
-                        } 
+                        }
+
+                        if (clause is OptionClause<IN> option)
+                        {
+                            if (option.Clause is TerminalClause<IN> terminal && terminal.IsImplicitToken)
+                            clauses.Add(terminal);
+                        }
                     }
                 }
             }

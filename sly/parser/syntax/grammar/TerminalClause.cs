@@ -21,6 +21,10 @@ namespace sly.parser.syntax.grammar
             ImplicitToken = implicitToken;
             Discarded = discard;
         }
+        
+        public TerminalClause(string implicitToken) : this(implicitToken,false)
+        {
+        }
 
         public T ExpectedToken { get; set; }
 

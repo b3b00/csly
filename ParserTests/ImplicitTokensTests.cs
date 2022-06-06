@@ -35,7 +35,7 @@ namespace ParserTests
         {
             var parserInstance = new ImplicitTokensExpressionParser();
             var builder = new ParserBuilder<ImplicitTokensTokens, double>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(ImplicitTokensExpressionParser)+"_expression");
+            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(ImplicitTokensExpressionParser)+"_expressions");
             return result;
         }
 

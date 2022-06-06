@@ -249,7 +249,17 @@ namespace sly.parser.generator
             var InFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.InFix).ToList<OperationMetaData<IN>>();
             if (InFixOps.Count > 0)
             {
-                var InFixClauses = InFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
+                var InFixClauses = InFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
+                {
+                    if (x.IsImplicitOperatorToken)
+                    {
+                        return new TerminalClause<IN>(x.ImplicitOperatorToken);
+                    }
+                    else
+                    {
+                        return new TerminalClause<IN>(x.OperatorToken);
+                    }
+                }).ToList<IClause<IN>>();
 
                 var rule = new Rule<IN>
                 {

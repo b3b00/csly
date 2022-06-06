@@ -102,8 +102,30 @@ namespace sly.parser.generator
             {
                 var expressionResult = parser.BuildExpressionParser(result, rootRule);
                 if (expressionResult.IsError) result.AddErrors(expressionResult.Errors);
+                
+                
+                
                 result.Result.Configuration = expressionResult.Result;
-
+                
+                // TODO : how to avoid this double lexer initialization ?
+                var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, result.Result.Configuration);
+                if (lexerResult.IsError)
+                {
+                    foreach (var lexerResultError in lexerResult.Errors)
+                    {
+                        result.AddError(lexerResultError);
+                    }
+                    return result;
+                }
+                else
+                {
+                    parser.Lexer = lexerResult.Result;
+                    parser.Instance = parserInstance;
+                    result.Result = parser;
+                    return result;
+                }
+                
+// todo : ???
                 result = CheckParser(result);
                 if (result.IsError)
                 {
