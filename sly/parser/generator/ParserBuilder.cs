@@ -115,22 +115,21 @@ namespace sly.parser.generator
                     {
                         result.AddError(lexerResultError);
                     }
-                    return result;
                 }
                 else
                 {
                     parser.Lexer = lexerResult.Result;
                     parser.Instance = parserInstance;
                     result.Result = parser;
-                    return result;
+                    
                 }
                 
-// todo : ???
                 result = CheckParser(result);
                 if (result.IsError)
                 {
                     result.Result = null;
                 }
+                return result;
             }
             else
             {

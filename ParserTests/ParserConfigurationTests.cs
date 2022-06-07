@@ -392,8 +392,6 @@ namespace ParserTests
             var instance = new BadManyArgParser();
             ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badmanyarg");
-            var d = result.Result.SyntaxParser.Dump();
-            Debug.WriteLine(d);
             
             Assert.True(result.IsError);
             Assert.Equal(4,result.Errors.Count);
