@@ -41,6 +41,10 @@ namespace sly.parser.syntax.grammar
 
         public virtual bool Check(Token<T> nextToken)
         {
+            if (IsImplicitToken)
+            {
+                return nextToken.Value.Equals(ImplicitToken);
+            }
             return nextToken.TokenID.Equals(ExpectedToken);
         }
 

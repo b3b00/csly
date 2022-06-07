@@ -224,6 +224,11 @@ namespace sly.lexer
             {
                 value = $"<<UINDENT({IndentationLevel})>>";
             }
+
+            if (IsImplicit)
+            {
+                value = $"[{Value.Replace("\r", "").Replace("\n", "")}]";
+            }
             return $"{value} @{Position} on channel {Channel}";
             
 
