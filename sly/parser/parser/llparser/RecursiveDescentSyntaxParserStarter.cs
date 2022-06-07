@@ -165,5 +165,10 @@ namespace sly.parser.llparser
         #endregion
 
 
+        public string Dump()
+        {
+            return this.Configuration.Dump();
+        }
+        
     }
 }

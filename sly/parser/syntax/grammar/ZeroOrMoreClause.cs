@@ -24,7 +24,8 @@ namespace sly.parser.syntax.grammar
         [ExcludeFromCodeCoverage]
         public override string Dump()
         {
-            return Clause.Dump()+"*";
+            var t = Clause.Dump() + "*";
+            return t;
         }
     }
 }

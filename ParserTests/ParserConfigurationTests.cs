@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using expressionparser;
 using sly.buildresult;
@@ -391,14 +392,17 @@ namespace ParserTests
             var instance = new BadManyArgParser();
             ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badmanyarg");
+            var d = result.Result.SyntaxParser.Dump();
+            Debug.WriteLine(d);
+            
             Assert.True(result.IsError);
             Assert.Equal(4,result.Errors.Count);
             
             //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter aArg has incorrect type")));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter bArg has incorrect type")));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter cArg has incorrect type")));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter dArg has incorrect type")));
+            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter aArg has incorrect type") && x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
+            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter bArg has incorrect type") && x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
+            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter cArg has incorrect type") && x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
+            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter dArg has incorrect type") && x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
            
         }
         

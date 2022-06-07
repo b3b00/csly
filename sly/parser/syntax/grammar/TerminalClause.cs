@@ -52,14 +52,28 @@ namespace sly.parser.syntax.grammar
         public override string ToString()
         {
             var b = new StringBuilder();
-            b.Append(ExpectedToken);
+            if (IsImplicitToken)
+            {
+                b.Append($"'{ImplicitToken}'");
+            }
+            else
+            {
+                b.Append(ExpectedToken);
+            }
+
             if (Discarded) b.Append("[d]");
+            b.Append("(T)");
             return b.ToString();
         }
         
         public virtual string Dump()
         {
-            return ExpectedToken.ToString();
+
+            if (IsImplicitToken)
+            {
+                return $"'{ImplicitToken}'(T)";
+            }
+            return $"{ExpectedToken}(T)";
         }
     }
 

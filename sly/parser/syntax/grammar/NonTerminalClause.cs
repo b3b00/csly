@@ -28,7 +28,7 @@ namespace sly.parser.syntax.grammar
         [ExcludeFromCodeCoverage]
         public string Dump()
         {
-            return NonTerminalName;
+            return $"{NonTerminalName}(NT)";
         }
     }
 }
