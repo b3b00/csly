@@ -62,7 +62,7 @@ namespace sly.parser.generator
                     }
 
                     OperationMetaData<IN> operation = null;
-                    if (string.IsNullOrEmpty(implicitToken))
+                    if (string.IsNullOrEmpty(implicitToken)) // TODO ?? uniquement si contient '...' ??
                     {
                         operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper);
                     }

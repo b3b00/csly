@@ -207,7 +207,6 @@ namespace sly.parser.generator
                             var x = genericLexer.FSMBuilder.Fsm.Run(@implicit, new LexerPosition());
                             if (x.IsSuccess)
                             {
-                                // todo : if x.NodeId == "in_identifier" 
                                 var t = genericLexer.FSMBuilder.Marks;
                                 var y = genericLexer.FSMBuilder.Marks.FirstOrDefault(k => k.Value == x.NodeId);
                                 if (y.Key == GenericLexer<IN>.in_identifier) // implicit keyword
@@ -224,9 +223,7 @@ namespace sly.parser.generator
                                 genericLexer.AddSugarLexem(default(IN),result,@implicit);
                             }
                         }
-                        ;
                     }
-                    ; // TODO
                 }
             }
 
