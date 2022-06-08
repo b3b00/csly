@@ -61,14 +61,21 @@ namespace sly.parser.generator
                         }
                     }
 
+
+                    bool isEnumValue = EnumConverter.IsEnumValue<IN>(attr.StringToken) ||
+                                       EnumConverter.IsEnumValue<IN>(attr.IntToken);
                     OperationMetaData<IN> operation = null;
-                    if (string.IsNullOrEmpty(implicitToken)) // TODO ?? uniquement si contient '...' ??
+                    if (!isEnumValue && !string.IsNullOrEmpty(implicitToken) && implicitToken.StartsWith("'") && implicitToken.EndsWith("'")) // TODO ?? uniquement si contient '...' ??
+                    {
+                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, implicitToken);
+                    }
+                    else if (isEnumValue)
                     {
                         operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper);
                     }
                     else
                     {
-                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, implicitToken);
+                        throw new ParserConfigurationException($"bad enum name {attr.StringToken} on Operation definition.");   
                     }
 
                     var operations = new List<OperationMetaData<IN>>();
@@ -207,7 +214,7 @@ namespace sly.parser.generator
                 {
                     if (x.IsImplicitOperatorToken)
                     {
-                        return new TerminalClause<IN>(x.ImplicitOperatorToken);
+                        return new TerminalClause<IN>(x.ImplicitOperatorToken.Substring(1,x.ImplicitOperatorToken.Length-2));
                     }
                     else
                     {

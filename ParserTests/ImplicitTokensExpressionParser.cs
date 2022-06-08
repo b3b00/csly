@@ -29,8 +29,8 @@ namespace ParserTests
         }
 
 
-        [Operation("+", Affix.InFix, Associativity.Left, 10)]
-        [Operation("-", Affix.InFix, Associativity.Left, 10)]
+        [Operation("'+'", Affix.InFix, Associativity.Left, 10)]
+        [Operation("'-'", Affix.InFix, Associativity.Left, 10)]
         public double BinaryTermExpression(double left, Token<ImplicitTokensTokens> operation, double right)
         {
             switch (operation.Value)
@@ -65,7 +65,7 @@ namespace ParserTests
         }
 
 
-        [Operation("-", Affix.PreFix, Associativity.Right, 100)]
+        [Operation("'-'", Affix.PreFix, Associativity.Right, 100)]
         public double PreFixExpression(Token<ImplicitTokensTokens> operation, double value)
         {
             return -value;
