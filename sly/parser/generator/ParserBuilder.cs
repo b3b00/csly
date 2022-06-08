@@ -76,13 +76,7 @@ namespace sly.parser.generator
                     var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                     var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
                     parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
-                    var lexerResult = BuildLexer(extensionBuilder, lexerPostProcess);
-                    parser.Lexer = lexerResult.Result;
-                    if (lexerResult.IsError)
-                    {
-                        result.Errors.AddRange(lexerResult.Errors);
-                        return result;
-                    }
+                    
                     parser.Instance = parserInstance;
                     parser.Configuration = configuration;
                     result.Result = parser;
@@ -107,8 +101,7 @@ namespace sly.parser.generator
                 
                 result.Result.Configuration = expressionResult.Result;
                 
-                // TODO : how to avoid this double lexer initialization ?
-                var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, result.Result.Configuration);
+                var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, result.Result.Configuration.GetAllImplicitTokenClauses().Select(x => x.ImplicitToken).Distinct().ToList());
                 if (lexerResult.IsError)
                 {
                     foreach (var lexerResultError in lexerResult.Errors)
@@ -188,44 +181,11 @@ namespace sly.parser.generator
 
 
         protected virtual BuildResult<ILexer<IN>> BuildLexer(BuildExtension<IN> extensionBuilder = null,
-            LexerPostProcess<IN> lexerPostProcess = null, ParserConfiguration<IN, OUT> parserConfiguration = null)
+            LexerPostProcess<IN> lexerPostProcess = null, IList<string> implicitTokens = null)
         {
-            var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n, lexerPostProcess);
-            if (parserConfiguration != null)
-            {
-                var implicitTokenClauses = parserConfiguration.GetAllImplicitTokenClauses();
-                if (implicitTokenClauses.Any())
-                {
-                    Console.WriteLine($"found {implicitTokenClauses.Count} implicit tokens");
-                    var implicits = implicitTokenClauses.Select(x => x.ImplicitToken).Distinct();
-                    Console.WriteLine(string.Join(", ", implicits));
-                    if (lexer.IsOk && lexer.Result is GenericLexer<IN> genericLexer)
-                    {
-                        Console.WriteLine("something really magic will happen here !");
-                        foreach (var @implicit in implicits)
-                        {
-                            var x = genericLexer.FSMBuilder.Fsm.Run(@implicit, new LexerPosition());
-                            if (x.IsSuccess)
-                            {
-                                var t = genericLexer.FSMBuilder.Marks;
-                                var y = genericLexer.FSMBuilder.Marks.FirstOrDefault(k => k.Value == x.NodeId);
-                                if (y.Key == GenericLexer<IN>.in_identifier) // implicit keyword
-                                {
-                                    var result = new BuildResult<ILexer<IN>>();
-                                    genericLexer.AddKeyWord(default(IN),@implicit,result);
-                                    ;
-                                }
-                                Console.WriteLine("hey ! Rodriguez !");
-                            }
-                            else
-                            {
-                                var result = new BuildResult<ILexer<IN>>();
-                                genericLexer.AddSugarLexem(default(IN),result,@implicit);
-                            }
-                        }
-                    }
-                }
-            }
+            
+            
+            var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n, lexerPostProcess, implicitTokens);
 
             return lexer;
         }

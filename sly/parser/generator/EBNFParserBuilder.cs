@@ -72,7 +72,7 @@ namespace sly.parser.generator
             }
             var parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
             parser.Configuration = configuration;
-            var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, configuration);
+            var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, configuration.GetAllImplicitTokenClauses().Select(x => x.ImplicitToken).Distinct().ToList());
             if (lexerResult.IsError)
             {
                 foreach (var lexerResultError in lexerResult.Errors)

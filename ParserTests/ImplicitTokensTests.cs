@@ -47,6 +47,22 @@ namespace ParserTests
             Assert.True(parser.IsOk);
             Assert.NotNull(parser.Result);
             var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
+            var tree = r.SyntaxTree;
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ImplicitTokensTokens>();
+            var dump = tree.Dump("\t");
+            // File.Delete(@"c:\temp\tree.txt");
+            // File.WriteAllText(@"c:\temp\tree.txt",dump);
+            //
+            var json = $@"{{
+{tree.ToJson()}
+}}";
+            // File.Delete(@"c:\temp\tree.json");
+            // File.WriteAllText(@"c:\temp\tree.json",json);
+            //
+            var root = graphviz.VisitTree(tree);
+            string graph = graphviz.Graph.Compile();
+            // File.Delete("c:\\temp\\tree.dot");
+            // File.AppendAllText("c:\\temp\\tree.dot", graph);
             Assert.True(r.IsOk);
              
             

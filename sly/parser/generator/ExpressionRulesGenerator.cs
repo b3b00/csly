@@ -65,7 +65,7 @@ namespace sly.parser.generator
                     bool isEnumValue = EnumConverter.IsEnumValue<IN>(attr.StringToken) ||
                                        EnumConverter.IsEnumValue<IN>(attr.IntToken);
                     OperationMetaData<IN> operation = null;
-                    if (!isEnumValue && !string.IsNullOrEmpty(implicitToken) && implicitToken.StartsWith("'") && implicitToken.EndsWith("'")) // TODO ?? uniquement si contient '...' ??
+                    if (!isEnumValue && !string.IsNullOrEmpty(implicitToken) && implicitToken.StartsWith("'") && implicitToken.EndsWith("'")) 
                     {
                         operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, implicitToken);
                     }

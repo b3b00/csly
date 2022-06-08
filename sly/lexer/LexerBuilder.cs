@@ -85,12 +85,12 @@ namespace sly.lexer
 
         public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result,
             BuildExtension<IN> extensionBuilder = null,
-            string lang = null, LexerPostProcess<IN> lexerPostProcess = null) where IN : struct
+            string lang = null, LexerPostProcess<IN> lexerPostProcess = null, IList<string> implicitTokens = null) where IN : struct
         {
             var attributes = GetLexemes<IN>(result,lang);
             if (!result.IsError)
             {
-                result = Build<IN>(attributes, result, extensionBuilder,lang);
+                result = Build<IN>(attributes, result, extensionBuilder,lang, implicitTokens);
                 result.Result.LexerPostProcess = lexerPostProcess;
             }
             
@@ -99,7 +99,8 @@ namespace sly.lexer
 
 
         private static BuildResult<ILexer<IN>> Build<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
-            BuildResult<ILexer<IN>> result, BuildExtension<IN> extensionBuilder = null, string lang = null) where IN : struct
+            BuildResult<ILexer<IN>> result, BuildExtension<IN> extensionBuilder = null, string lang = null,
+            IList<string> implicitTokens = null) where IN : struct
         {
             var hasRegexLexemes = IsRegexLexer<IN>(attributes);
             var hasGenericLexemes = IsGenericLexer<IN>(attributes);
@@ -114,7 +115,7 @@ namespace sly.lexer
             {
                 if (hasRegexLexemes)
                     result = BuildRegexLexer<IN>(attributes, result,lang);
-                else if (hasGenericLexemes) result = BuildGenericLexer<IN>(attributes, extensionBuilder, result, lang);
+                else if (hasGenericLexemes) result = BuildGenericLexer<IN>(attributes, extensionBuilder, result, lang, implicitTokens);
             }
 
             return result;
@@ -257,7 +258,8 @@ namespace sly.lexer
         }
         
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
-            BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result, string lang) where IN : struct
+            BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result, string lang,
+            IList<string> implicitTokens = null) where IN : struct
         {
             result = CheckStringAndCharTokens<IN>(attributes, result, lang);
             var (config, tokens) = GetConfigAndGenericTokens<IN>(attributes);
@@ -321,6 +323,7 @@ namespace sly.lexer
             AddExtensions<IN>(Extensions, extensionBuilder, lexer);
 
             var comments = GetCommentsAttribute<IN>(result,lang);
+            
             if (!result.IsError)
             {
                 foreach (var comment in comments)
@@ -360,6 +363,34 @@ namespace sly.lexer
                         }
                     }
                 }
+
+                if (implicitTokens != null)
+                {
+                    foreach (var implicitToken in implicitTokens)
+                    {
+                        var fsmBuilder = lexer.FSMBuilder;
+                        var x = fsmBuilder.Fsm.Run(implicitToken, new LexerPosition());
+                        if (x.IsSuccess)
+                        {
+                            var t = fsmBuilder.Marks;
+                            var y = fsmBuilder.Marks.FirstOrDefault(k => k.Value == x.NodeId);
+                            if (y.Key == GenericLexer<IN>.in_identifier) // implicit keyword
+                            {
+                                var resultx = new BuildResult<ILexer<IN>>();
+                                result.Errors.AddRange(resultx.Errors);
+                                lexer.AddKeyWord(default(IN), implicitToken, resultx);
+                                ;
+                            }
+                        }
+                        else
+                        {
+                            var resulty = new BuildResult<ILexer<IN>>();
+                            result.Errors.AddRange(resulty.Errors);
+                            lexer.AddSugarLexem(default(IN), resulty, implicitToken);
+                        }
+                    }
+                }
+
             }
             
             result.Result = lexer;
