@@ -468,11 +468,9 @@ namespace ParserTests.lexer
 
     public class GenericLexerTests
     {
-        private readonly ITestOutputHelper _testOutputHelper;
-
-        public GenericLexerTests(ITestOutputHelper testOutputHelper)
+   
+        public GenericLexerTests()
         {
-            _testOutputHelper = testOutputHelper;
         }
 
         [Fact]
@@ -960,7 +958,7 @@ namespace ParserTests.lexer
             Assert.NotNull(lexer);
             var res1 = lexer.Tokenize("'c'");
             Assert.False(res1.IsError);
-            _testOutputHelper.WriteLine(res1.Tokens.ToString());
+            Console.WriteLine(res1.Tokens.ToString());
             Assert.Equal(2, res1.Tokens.Count);
             Token<CharTokens> token = res1.Tokens[0];
             Assert.Equal('c', token.CharValue);
