@@ -9,11 +9,13 @@ namespace sly.parser.syntax.tree
 
         public bool HasByPassNodes { get; set; } = false;
 
+        [ExcludeFromCodeCoverage]
         public string Dump(string tab)
         {
             return $"Epsilon";
         }
 
+        [ExcludeFromCodeCoverage]
         public string ToJson(int index = 0)
         {
             return $@"""{index}.Epsilon"":""e""";
