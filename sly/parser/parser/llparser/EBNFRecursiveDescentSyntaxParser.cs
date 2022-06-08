@@ -260,15 +260,7 @@ namespace sly.parser.llparser
                                 return finalResult;
                             }
                         }
-
                     }
-                    else
-                    {
-                        throw new ParserConfigurationException(
-                            $@"expression rule {rule.RuleString} is incorrect : must have ""nonterminal terminal nonterminal"" scheme");
-                    }
-                    
-                    
                 }
 
             var result = new SyntaxParseResult<IN>();

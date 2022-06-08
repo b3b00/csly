@@ -142,20 +142,20 @@ namespace sly.parser.generator.visitor
 
            
 
-                result = Node(GetNodeLabel(node));
-                Graph.Add(result);
-                children.ForEach(c =>
+            result = Node(GetNodeLabel(node));
+            Graph.Add(result);
+            children.ForEach(c =>
+            {
+                if (c != null) // Prevent arrows with null destinations
                 {
-                    if (c != null) // Prevent arrows with null destinations
+                    var edge = new DotArrow(result, c)
                     {
-                        var edge = new DotArrow(result, c)
-                        {
-                            // Set all available properties
-                            ArrowHeadShape = "none"
-                        };
-                        Graph.Add(edge);
-                    }
-                });
+                        // Set all available properties
+                        ArrowHeadShape = "none"
+                    };
+                    Graph.Add(edge);
+                }
+            });
             return result;
         }
 

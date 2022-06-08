@@ -9,6 +9,7 @@ using sly.lexer.fsm;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace ParserTests.lexer
 {
@@ -467,6 +468,13 @@ namespace ParserTests.lexer
 
     public class GenericLexerTests
     {
+        private readonly ITestOutputHelper _testOutputHelper;
+
+        public GenericLexerTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
+
         [Fact]
         public void TestEmptyInput()
         {
@@ -952,7 +960,7 @@ namespace ParserTests.lexer
             Assert.NotNull(lexer);
             var res1 = lexer.Tokenize("'c'");
             Assert.False(res1.IsError);
-            Console.WriteLine(res1.Tokens.ToString());
+            _testOutputHelper.WriteLine(res1.Tokens.ToString());
             Assert.Equal(2, res1.Tokens.Count);
             Token<CharTokens> token = res1.Tokens[0];
             Assert.Equal('c', token.CharValue);

@@ -48,7 +48,7 @@ namespace sly.parser.generator
                         if (clause is OptionClause<IN> option)
                         {
                             if (option.Clause is TerminalClause<IN> terminal && terminal.IsImplicitToken)
-                            clauses.Add(terminal);
+                                clauses.Add(terminal);
                         }
                     }
                 }

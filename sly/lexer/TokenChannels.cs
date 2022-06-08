@@ -23,7 +23,6 @@ namespace sly.lexer
         public List<Token<IN>> Tokens => GetChannel(Channels.Main).Tokens.Where(x => x != null).ToList();
          
         
-        public readonly int ChannelId;
 
         public TokenChannels()
         {
@@ -53,11 +52,6 @@ namespace sly.lexer
         public TokenChannel<IN> GetChannel(int i)
         {
             return _tokenChannels[i];
-        }
-        
-        public void SetChannel(int i, TokenChannel<IN> token)
-        {
-            _tokenChannels[i] = token;
         }
 
         public Token<IN> this[int index]
@@ -112,48 +106,6 @@ namespace sly.lexer
             
         }
 
-        public bool ContainsChannel(int channel) => _tokenChannels.ContainsKey(channel);
-
-        
-        
-        public Token<IN> TokenAt(int index)
-        {
-            foreach (var channel in _tokenChannels)
-            {
-                var token = TokenInChannelAt(channel.Value, index);
-                if (token != null)
-                {
-                    return null;
-                }
-            }
-            return null;
-        }
-
-        public Token<IN> TokenInChannelAt(TokenChannel<IN> channel, int index)
-        {
-            
-            if (channel != null)
-            {
-                if (index >= 0 && index < channel.Count)
-                {
-                    return channel[index];
-                }
-            }
-            return null;
-        }
-        
-        public Token<IN> TokenInChannelAt(int channelId, int index)
-        {
-            TokenChannel<IN> channel = null;
-            if (TryGet(index, out channel))
-            {
-                if (index >= 0 && index < channel.Count)
-                {
-                    return channel[index];
-                }
-            }
-            return null;
-        }
 
         public bool TryGet(int index, out TokenChannel<IN> channel) => _tokenChannels.TryGetValue(index, out channel);
 
@@ -169,7 +121,6 @@ namespace sly.lexer
 
         public override string ToString()
         {
-            var channels = _tokenChannels.Values.OrderBy(x => x.ChannelId);
             return string.Join("\n", _tokenChannels.Values.Select(x => x.ToString()).ToArray());
         }
     }
