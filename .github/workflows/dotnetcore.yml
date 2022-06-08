@@ -48,7 +48,7 @@ jobs:
       with:
         github-token: ${{secrets.GITHUB_TOKEN }} 
         path-to-lcov: ${{steps.coverlet.outputs.coverageFile}}
-        base-path: ${GITHUB_WORKSPACE}
+        base-path: ${{GITHUB_WORKSPACE}}
     - name: ReportGenerator
       uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
       with:
