@@ -1,21 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using indented;
-using jsonparser;
-using jsonparser.JsonModel;
-using simpleExpressionParser;
+﻿using System.IO;
 using sly.buildresult;
 using sly.parser;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
-using sly.parser.llparser;
-using sly.parser.parser;
-using sly.parser.syntax.grammar;
 using Xunit;
-using String = System.String;
 
 namespace ParserTests
 {
