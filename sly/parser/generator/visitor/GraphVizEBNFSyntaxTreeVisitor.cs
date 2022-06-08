@@ -116,11 +116,6 @@ namespace sly.parser.generator.visitor
         private string GetNodeLabel(SyntaxNode<IN> node)
         {
             string label = node.Name;
-            if (node.IsExpressionNode)
-            {
-                label = node.Operation.OperatorToken.ToString();
-            }
-
             return label;
         }
 
@@ -138,12 +133,7 @@ namespace sly.parser.generator.visitor
                 children.Add(v);
             }
 
-            if (node.IsByPassNode)
-            {
-                //result = children[0];
-            }
-            else
-            {
+           
 
                 result = Node(GetNodeLabel(node));
                 Graph.Add(result);
@@ -159,10 +149,6 @@ namespace sly.parser.generator.visitor
                         Graph.Add(edge);
                     }
                 });
-
-            }
-
-
             return result;
         }
 
