@@ -20,7 +20,14 @@ namespace sly.parser.syntax.tree
         
         public string Dump(string tab)
         {
-            return $"{tab}+ {Token.TokenID} : {Token.Value} @{Token.PositionInTokenFlow}";
+            return $"{tab}+ {Token.TokenID.ToString()} : {Token.Value} @{Token.PositionInTokenFlow}";
         }
+
+        public string ToJson(int index = 0)
+        {
+            return $@"""{index}.{Token.TokenID.ToString()}"" : ""{Token.Value}""";
+        }
+        
+        
     }
 }

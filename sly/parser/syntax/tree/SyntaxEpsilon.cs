@@ -19,5 +19,10 @@ namespace sly.parser.syntax.tree
         {
             return $"Epsilon";
         }
+
+        public string ToJson(int index = 0)
+        {
+            return $@"""{index}.Epsilon"":""e""";
+        }
     }
 }

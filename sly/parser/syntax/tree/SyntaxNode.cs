@@ -83,11 +83,57 @@ namespace sly.parser.syntax.tree
         public string Dump(string tab)
         {
             StringBuilder builder = new StringBuilder();
+            string expressionSuffix = "";
+            if (Operation != null && (Operation.IsBinary || Operation.IsBinary))
+            {
+                if (Operation.IsImplicitOperatorToken)
+                {
+                    expressionSuffix = Operation.ImplicitOperatorToken;
+                }
+                else
+                {
+                    expressionSuffix = Operation.OperatorToken.ToString();
+                }
+
+                expressionSuffix = $">{expressionSuffix}<";
+            }
+            
             builder.AppendLine($"{tab}+ {Name} {(IsByPassNode ? "===":"")}");
+            
             foreach (var child in Children)
             {
                 builder.AppendLine($"{child.Dump(tab + "\t")}");
             }
+
+            return builder.ToString();
+        }
+        
+        public string ToJson(int index = 0)
+        {
+            StringBuilder builder = new StringBuilder();
+
+
+            builder.Append($@"""{index}.{Name}");
+            if (IsByPassNode)
+            {
+                builder.Append("--");
+            }
+
+            builder.AppendLine(@""" : {");
+
+            for (int i = 0; i < Children.Count; i++)
+            {
+                var child = Children[i];
+                builder.Append(child.ToJson(i));
+                if (i < Children.Count - 1)
+                {
+                    builder.Append(",");
+                }
+
+                builder.AppendLine();
+            }
+
+            builder.Append("}");
 
             return builder.ToString();
         }
