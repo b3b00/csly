@@ -35,7 +35,14 @@ namespace sly.parser.generator.visitor
         private DotNode Leaf(IN type, string value)
         {
             string label = type.ToString();
-            label += "\n";
+            if (label == "0")
+            {
+                label = "";
+            }
+            else
+            {
+                label += "\n";
+            }
             var esc = value.Replace("\"", "\\\"");
             label += "\\\"" + esc + "\\\"";
             var node = new DotNode(NodeCounter.ToString())
