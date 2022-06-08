@@ -47,7 +47,8 @@ jobs:
       if: matrix.os == 'windows-latest' && env.RUN_TESTS
       with:
         github-token: ${{secrets.GITHUB_TOKEN }} 
-        path-to-lcov: ${{steps.coverlet.outputs.coverageFile}} 
+        path-to-lcov: ${{steps.coverlet.outputs.coverageFile}}
+        base-path: ${GITHUB_WORKSPACE}
     - name: ReportGenerator
       uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
       with:
