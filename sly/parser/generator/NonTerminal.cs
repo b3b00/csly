@@ -33,8 +33,7 @@ namespace sly.parser.generator
             
             foreach (var rule in Rules)
             {
-                
-                dump.Append(Name).Append(rule.IsInfixExpressionRule ? " (*) ":"").Append(" : ");
+                dump.Append(Name).Append(rule.IsExpressionRule ? " (R) ":"").Append(" : ");
                 foreach (IClause<IN> clause in rule.Clauses)
                 {
                     dump.Append(clause.Dump()).Append(" ");

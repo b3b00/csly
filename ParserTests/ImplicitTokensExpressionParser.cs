@@ -29,8 +29,8 @@ namespace ParserTests
         }
 
 
-        [Operation("'+'", Affix.InFix, Associativity.Left, 10)]
-        [Operation("'-'", Affix.InFix, Associativity.Left, 10)]
+        [Infix("'+'",Associativity.Left, 10)]
+        [Infix("'-'", Associativity.Left, 10)]
         public double BinaryTermExpression(double left, Token<ImplicitTokensTokens> operation, double right)
         {
             switch (operation.Value)
@@ -65,41 +65,25 @@ namespace ParserTests
         }
 
 
-        [Operation("'-'", Affix.PreFix, Associativity.Right, 100)]
+        [Prefix("'-'", Associativity.Right, 100)]
         public double PreFixExpression(Token<ImplicitTokensTokens> operation, double value)
         {
             return -value;
         }
-            
-            
-        public double Expression(double left, Token<ImplicitTokensTokens> operatorToken, double right)
+        
+        [Postfix("'!'", Associativity.Left, 110)]
+        public double PostFixExpression(double value, Token<ImplicitTokensTokens> operation)
         {
-            double result = 0.0;
-    
-    
-            switch (operatorToken.StringWithoutQuotes)
+            double factorial = 1;
+            for (int i = 0; i < value; i++)
             {
-                case "+":
-                {
-                    result = left + right;
-                    break;
-                }
-                case "-":
-                {
-                    result = left - right;
-                    break;
-                }
+                factorial *= i;
             }
-    
-            return result;
+        
+            return factorial;
         }
     
-    
-        [Production("expression : primary ")]
-        public double Simple(double value)
-        {
-            return value;
-        }
+      
     
     
     

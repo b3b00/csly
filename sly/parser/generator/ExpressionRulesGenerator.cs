@@ -247,7 +247,20 @@ namespace sly.parser.generator
             var PreFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.PreFix).ToList<OperationMetaData<IN>>();
             if (PreFixOps.Count > 0)
             {
-                var PreFixClauses = PreFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
+                var PreFixClauses = PreFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
+                {
+                    if (x.IsImplicitOperatorToken)
+                    {
+                        return new TerminalClause<IN>(
+                            x.ImplicitOperatorToken.Substring(1, x.ImplicitOperatorToken.Length - 2));
+                    }
+                    else
+                    {
+                        return new TerminalClause<IN>(x.OperatorToken);
+                    }
+                }).ToList<IClause<IN>>();
+                
+                    
 
                 var rule = new Rule<IN>
                 {
@@ -265,7 +278,18 @@ namespace sly.parser.generator
             var PostFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.PostFix).ToList<OperationMetaData<IN>>();
             if (PostFixOps.Count > 0)
             {
-                var PostFixClauses = PostFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
+                var PostFixClauses = PostFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
+                {
+                    if (x.IsImplicitOperatorToken)
+                    {
+                        return new TerminalClause<IN>(
+                            x.ImplicitOperatorToken.Substring(1, x.ImplicitOperatorToken.Length - 2));
+                    }
+                    else
+                    {
+                        return new TerminalClause<IN>(x.OperatorToken);
+                    }
+                }).ToList<IClause<IN>>();
 
                 var rule = new Rule<IN>
                 {
