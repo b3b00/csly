@@ -16,12 +16,6 @@ namespace sly.lexer
             Tokens = new TokenChannels<IN>(tokens);
         }
         
-        public LexerResult(TokenChannels<IN> tokens)
-        {
-            IsError = false;
-            Tokens = tokens;
-        }
-
         public LexerResult(LexicalError error)
         {
             IsError = true;

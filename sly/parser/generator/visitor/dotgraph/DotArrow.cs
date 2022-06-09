@@ -23,11 +23,6 @@ namespace sly.parser.generator.visitor.dotgraph
             return "";
         }
 
-        public string Attribute(string name, double value)
-        {
-            return Attribute(name, string.Format("{0:0.00}", value).Replace(",","."));
-        }
-
         public string ArrowHeadShape { get; set; }
         public string ToGraph()
         {
@@ -40,9 +35,5 @@ namespace sly.parser.generator.visitor.dotgraph
             return builder.ToString();
         }
 
-        public string ToString()
-        {
-            return ToGraph();
-        }
     }
 }

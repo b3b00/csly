@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using sly.lexer.fsm;
 
 namespace sly.lexer
@@ -91,6 +92,7 @@ namespace sly.lexer
             return new LexerResult<T>(tokens);
         }
 
+        [ExcludeFromCodeCoverage]
         public LexerResult<T> Tokenize(ReadOnlyMemory<char> source)
         {
             return new LexerResult<T>(new LexicalError(0, 0, '.',I18n));

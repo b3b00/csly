@@ -61,15 +61,7 @@ namespace sly.parser.generator
             var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
 
             SyntaxTreeVisitor<IN, OUT> visitor = null;
-            switch (parserType)
-            {
-                case ParserType.LL_RECURSIVE_DESCENT:
-                    new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
-                    break;
-                case ParserType.EBNF_LL_RECURSIVE_DESCENT:
-                    visitor = new EBNFSyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
-                    break;
-            }
+            visitor = new EBNFSyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
             var parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
             parser.Configuration = configuration;
             var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, configuration.GetAllImplicitTokenClauses().Select(x => x.ImplicitToken).Distinct().ToList());

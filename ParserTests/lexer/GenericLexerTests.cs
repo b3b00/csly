@@ -5,7 +5,6 @@ using GenericLexerWithCallbacks;
 using indented;
 using sly.buildresult;
 using sly.lexer;
-using sly.lexer.fsm;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
@@ -13,263 +12,6 @@ using Xunit.Abstractions;
 
 namespace ParserTests.lexer
 {
-    
-    public enum GenericShortAttributes
-    {
-        [Double] DOUBLE = 1,
-
-        // integer        
-        [Int] INT = 3,
-
-        [AlphaId] IDENTIFIER = 4,
-
-        // the + operator
-        [Sugar("+")] PLUS = 5,
-
-        // the ++ operator
-        [Sugar("++")]
-        INCREMENT = 6,
-
-        // the - operator
-        [Sugar("-")] MINUS = 7,
-
-        // the * operator
-        [Sugar("*")] TIMES = 8,
-
-        //  the  / operator
-        [Sugar("/")] DIVIDE = 9,
-
-        // a left paranthesis (
-        [Sugar("(")] LPAREN = 10,
-
-        // a right paranthesis )
-        [Sugar(")")] RPAREN = 11,
-        
-        [String("'","\\")]
-        STRING = 12,
-        
-        [Keyword("hello")]
-        HELLO = 13
-    }
-    
-    public enum Issue210Token
-    {
-        EOF = 0,
-
-        [Lexeme(GenericToken.Extension)] SPECIAL,
-        [Lexeme(GenericToken.KeyWord, "x")] X,
-        [Lexeme(GenericToken.SugarToken, "?")] QMARK
-    }
-    public static class Issue210Extensions
-    {
-        
-        
-        public static void AddExtensions(Issue210Token token, LexemeAttribute lexem, GenericLexer<Issue210Token> lexer)
-        {
-            if (token == Issue210Token.SPECIAL || token == Issue210Token.QMARK)
-            {
-                FSMMatch<GenericToken> Callback(FSMMatch<GenericToken> match)
-                {
-                    var result = match.Result.Value;
-                    if (result.Length >= 2)
-                    {
-                        if (match.Result.Value[0] == '?' && match.Result.Value.Last() == '?')
-                        {
-                            var section = result.Substring(1, result.Length - 2);
-
-                            match.Result.SpanValue = section.AsMemory();
-                            match.Properties[GenericLexer<Issue210Token>.DerivedToken] = Issue210Token.SPECIAL;
-                            return match;
-                        }
-                        Console.WriteLine($"bad lexing {match.Result.Value}");
-                        match.Result.SpanValue = null;
-                        match.Properties[GenericLexer<Issue210Token>.DerivedToken] = default(Issue210Token);
-                        return match;
-                    }
-
-                    return match;
-                }
-
-
-
-
-                lexer.FSMBuilder.GoTo(GenericLexer<Issue210Token>.start)
-                    .Transition('?')
-                    .Mark("qmark")
-                    .ExceptTransition(new[] {'?'}) // moving to first char of a special
-                    .Mark("in_qmark") // now we are really in a potential SPECIAL
-                    .ExceptTransitionTo(new[] {'?'}, "in_qmark")
-                    .Transition('?') // ending ? of a SPECIAL
-                    .End(GenericToken.Extension) // we re done with a SPECIAL
-                    .Mark("end_qmark")
-                    .CallBack(Callback)
-                    .GoTo("qmark")
-                    .TransitionTo('?', "end_qmark");
-            }
-        }
-    }
-    
-    public enum SameIntValuesError
-    {
-        [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)] ID = 1,
-        
-        [Lexeme(GenericToken.KeyWord,"Keyword1")]
-        keyword1 = 2,
-
-        [Lexeme(GenericToken.KeyWord,"Keyword2")]
-        keyword2 = 2
-    }
-
-    public enum Extensions
-    {
-        [Lexeme(GenericToken.Extension,channel:0)] DATE,
-
-        [Lexeme(GenericToken.Double,channel:0)] DOUBLE
-    }
-    
-    public enum ShortExtensions
-    {
-        [Extension] DATE,
-
-        [Double] DOUBLE
-    }
-
-
-    public class ParserUsingLexerExtensions
-    {
-        [Production("root : value")]
-        public object root(object value)
-        {
-            return value;
-        }
-
-        [Production("value : DATE")]
-        public object dateValue(Token<Extensions> token)
-        {
-            string[] elements = token.Value.Split(new char[] {'.'});
-            int day = 0;
-            int month = 0;
-            int year = 0;
-            bool ok = int.TryParse(elements[0], out day) && int.TryParse(elements[1], out month) &&
-                      int.TryParse(elements[2], out year);
-            if (ok)
-            {
-                return new DateTime(year, month, day);
-            }
-            return new DateTime(1789,7,14);
-        }
-
-        [Production("value : DOUBLE")]
-        public object doubleValue(Token<Extensions> token)
-        {
-            return token.DoubleValue;
-        }
-    }
-
-    public static class ExtendedGenericLexer
-    {
-        public static bool CheckDate(ReadOnlyMemory<char> value)
-        {
-            var ok = false;
-            if (value.Length == 6)
-            {
-                ok = char.IsDigit(value.At(0));
-                ok = ok && char.IsDigit(value.At(1));
-                ok = ok && value.At(2) == '.';
-                ok = ok && char.IsDigit(value.At(3));
-                ok = ok && char.IsDigit(value.At(4));
-                ok = ok && value.At(5) == '.';
-            }
-
-            return ok;
-        }
-
-        public static void AddExtension(Extensions token, LexemeAttribute lexem, GenericLexer<Extensions> lexer)
-        {
-            if (token == Extensions.DATE)
-            {
-                NodeCallback<GenericToken> callback = match =>
-                {
-                    match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
-                    match.Result.Channel = 0;
-                    return match;
-                };
-
-                var fsmBuilder = lexer.FSMBuilder;
-
-                fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
-                    .Transition('.', CheckDate)
-                    .Mark("start_date")
-                    .RepetitionTransition(4, "[0-9]")
-                    .End(GenericToken.Extension)
-                    .CallBack(callback);
-            }
-        }
-        
-        public static void AddShortExtension(ShortExtensions token, LexemeAttribute lexem, GenericLexer<ShortExtensions> lexer)
-        {
-            if (token == ShortExtensions.DATE)
-            {
-                NodeCallback<GenericToken> callback = match =>
-                {
-                    match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
-                    return match;
-                };
-
-                var fsmBuilder = lexer.FSMBuilder;
-
-                fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
-                    .Transition('.', CheckDate)
-                    .Mark("start_date")
-                    .RepetitionTransition(4, "[0-9]")
-                    .End(GenericToken.Extension)
-                    .CallBack(callback);
-            }
-        }
-    }
-
-    public enum CharTokens {
-        [Lexeme(GenericToken.Char,"'","\\")]
-        MyChar
-    }
-
-    public enum CharTokensConflicts{
-        [Lexeme(GenericToken.Char,"'","\\")]
-        [Lexeme(GenericToken.Char,"|","\\")]
-        MyChar,
-
-        [Lexeme(GenericToken.Char,"|","\\")]
-        OtherChar,
-
-        [Lexeme(GenericToken.String,"'","\\")]
-        MyString
-    }
-
-
-    public enum StringDelimiters {
-        [Lexeme(GenericToken.String,"'","'")]
-        MyString
-    }
-    public enum BadLetterStringDelimiter
-    {
-        [Lexeme(GenericToken.String, "a")] Letter
-    }
-
-    public enum BadEscapeStringDelimiterTooLong
-    {
-        [Lexeme(GenericToken.String, "'", ";:")] toolong
-    }
-
-    public enum BadEscapeStringDelimiterLetter
-    {
-        [Lexeme(GenericToken.String, "'", "a")] toolong
-    }
-
-    public enum BadEmptyStringDelimiter
-    {
-        [Lexeme(GenericToken.String, "")] Empty
-    }
-
     public enum DoubleQuotedString
     {
         [Lexeme(GenericToken.String, "\"")] DoubleString
@@ -322,6 +64,17 @@ namespace ParserTests.lexer
 
         [CustomId("A-Za-z", "-_0-9A-Za-z")]
         // [Lexeme(GenericToken.Identifier, IdentifierType.Custom, "A-Za-z", "-_0-9A-Za-z")]
+        ID,
+
+        [Lexeme(GenericToken.SugarToken, "-", "_")]
+        OTHER
+    }
+    
+    public enum CustomIdReverseRange
+    {
+        EOS,
+
+        [CustomId("Z-Az-a", "-_9-0A-Za-z")]
         ID,
 
         [Lexeme(GenericToken.SugarToken, "-", "_")]
@@ -572,6 +325,23 @@ namespace ParserTests.lexer
             Assert.Equal("a_-Bc",     tok1.Value);
             var tok2 = r.Tokens[1];
             Assert.Equal(CustomId.ID, tok2.TokenID);
+            Assert.Equal("ZyX-_",     tok2.Value);
+        }
+        
+        [Fact]
+        public void TestCustomIdReverseRange()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<CustomIdReverseRange>>());
+            Assert.False(lexerRes.IsError);
+            var lexer = lexerRes.Result;
+            var r = lexer.Tokenize("a_-Bc ZyX-_");
+            Assert.True(r.IsOk);
+            Assert.Equal(3, r.Tokens.Count);
+            var tok1 = r.Tokens[0];
+            Assert.Equal(CustomIdReverseRange.ID, tok1.TokenID);
+            Assert.Equal("a_-Bc",     tok1.Value);
+            var tok2 = r.Tokens[1];
+            Assert.Equal(CustomIdReverseRange.ID, tok2.TokenID);
             Assert.Equal("ZyX-_",     tok2.Value);
         }
 
