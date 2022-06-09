@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using sly.buildresult;
 using sly.parser;
 using sly.parser.generator;
@@ -68,6 +69,17 @@ namespace ParserTests
              
             
             Assert.Equal(2 - 2 + 42 + 0,r.Result);
+        }
+
+        [Fact]
+        public void TestErrorWhenUsingImplicitTokensAndRegexLexer()
+        {
+            var parserInstance = new RegexLexAndImplicitTokensParser();
+            var builder = new ParserBuilder<RegexLexAndImplicitTokensLexer, double>();
+            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(ImplicitTokensExpressionParser)+"_expressions");
+            Assert.True(result.IsError);
+            Assert.Single(result.Errors);
+            Assert.Equal(ErrorCodes.LEXER_CANNOT_USE_IMPLICIT_TOKENS_WITH_REGEX_LEXER,result.Errors.First().Code);
         }
     }
     

@@ -46,7 +46,7 @@ namespace sly.lexer
                     int intValue = Convert.ToInt32(enumValue); // x is the integer value of enum
                     
                     result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
-                        I18N.Instance.GetText(lang,Message.SameValueUsedManyTime,intValue.ToString(),group.Count<IN>().ToString(),typeof(IN).FullName),
+                        I18N.Instance.GetText(lang,I18NMessage.SameValueUsedManyTime,intValue.ToString(),group.Count<IN>().ToString(),typeof(IN).FullName),
                         ErrorCodes.LEXER_SAME_VALUE_USED_MANY_TIME));
                     
                 }
@@ -111,14 +111,28 @@ namespace sly.lexer
             if (hasGenericLexemes && hasRegexLexemes)
             {
                 result.AddError(new LexerInitializationError(ErrorLevel.ERROR,
-                    I18N.Instance.GetText(lang,Message.CannotMixGenericAndRegex),
+                    I18N.Instance.GetText(lang,I18NMessage.CannotMixGenericAndRegex),
                     ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX));
             }
             else
             {
                 if (hasRegexLexemes)
-                    result = BuildRegexLexer<IN>(attributes, result,lang);
-                else if (hasGenericLexemes) result = BuildGenericLexer<IN>(attributes, extensionBuilder, result, lang, implicitTokens);
+                {
+                    if (implicitTokens != null && implicitTokens.Any())
+                    {
+                        result.AddError(new LexerInitializationError(ErrorLevel.ERROR,
+                            I18N.Instance.GetText(lang,I18NMessage.CannotUseImplicitTokensWithRegexLexer),
+                            ErrorCodes.LEXER_CANNOT_USE_IMPLICIT_TOKENS_WITH_REGEX_LEXER));
+                    }
+                    else
+                    {
+                        result = BuildRegexLexer<IN>(attributes, result, lang);
+                    }
+                }
+                else if (hasGenericLexemes)
+                {
+                    result = BuildGenericLexer<IN>(attributes, extensionBuilder, result, lang, implicitTokens);
+                }
             }
 
             return result;
@@ -431,7 +445,7 @@ namespace sly.lexer
             foreach (var duplicate in duplicates)
             {
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
-                    I18N.Instance.GetText(lang,Message.DuplicateStringCharDelimiters,duplicate.Element,duplicate.Counter.ToString()),
+                    I18N.Instance.GetText(lang,I18NMessage.DuplicateStringCharDelimiters,duplicate.Element,duplicate.Counter.ToString()),
                     ErrorCodes.LEXER_DUPLICATE_STRING_CHAR_DELIMITERS));
             }
 
@@ -458,27 +472,27 @@ namespace sly.lexer
             if (commentCount > 1)
             {
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
-                    I18N.Instance.GetText(lang,Message.TooManyComment),
+                    I18N.Instance.GetText(lang,I18NMessage.TooManyComment),
                     ErrorCodes.LEXER_TOO_MANY_COMMNENT));
             }
 
             if (multiLineCommentCount > 1)
             {
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
-                    I18N.Instance.GetText(lang,Message.TooManyMultilineComment),
+                    I18N.Instance.GetText(lang,I18NMessage.TooManyMultilineComment),
                     ErrorCodes.LEXER_TOO_MANY_MULTILINE_COMMNENT));
             }
 
             if (singleLineCommentCount > 1)
             {
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL, 
-                    I18N.Instance.GetText(lang,Message.TooManySingleLineComment),ErrorCodes.LEXER_TOO_MANY_SINGLELINE_COMMNENT));
+                    I18N.Instance.GetText(lang,I18NMessage.TooManySingleLineComment),ErrorCodes.LEXER_TOO_MANY_SINGLELINE_COMMNENT));
             }
 
             if (commentCount > 0 && (multiLineCommentCount > 0 || singleLineCommentCount > 0))
             {
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL, 
-                    I18N.Instance.GetText(lang,Message.CannotMixCommentAndSingleOrMulti),
+                    I18N.Instance.GetText(lang,I18NMessage.CannotMixCommentAndSingleOrMulti),
                     ErrorCodes.LEXER_CANNOT_MIX_COMMENT_AND_SINGLE_OR_MULTI));
             }
 
