@@ -45,7 +45,7 @@ namespace sly.parser.generator
                 {
                     var recs = string.Join("\n", recursions.Select<List<string>, string>(x => string.Join(" > ",x)));
                     result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
-                        I18N.Instance.GetText(I18n,Message.LeftRecursion,recs),
+                        I18N.Instance.GetText(I18n,I18NMessage.LeftRecursion,recs),
                         ErrorCodes.PARSER_LEFT_RECURSIVE));
                     return result;
                 }

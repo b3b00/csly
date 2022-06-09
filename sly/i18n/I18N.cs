@@ -5,47 +5,9 @@ using System.Reflection;
 
 namespace sly.i18n
 {
-
-    public enum Message
-    {
-        UnexpectedTokenExpecting,
-        UnexpectedEosExpecting,
-        UnexpectedToken,
-        UnexpectedEos,
-        UnexpectedChar,
-        
-        CannotMixGenericAndRegex,
-        DuplicateStringCharDelimiters,
-        TooManyComment,
-        TooManyMultilineComment,
-        TooManySingleLineComment,
-        CannotMixCommentAndSingleOrMulti,
-        SameValueUsedManyTime,
-        StringDelimiterMustBe1Char,
-        StringDelimiterCannotBeLetterOrDigit,
-        StringEscapeCharMustBe1Char,
-        StringEscapeCharCannotBeLetterOrDigit,
-        CharDelimiterMustBe1Char,
-        CharDelimiterCannotBeLetter,
-        CharEscapeCharMustBe1Char,
-        CharEscapeCharCannotBeLetterOrDigit,
-        SugarTokenCannotStartWithLetter,
-        
-        
-        MissingOperand,
-        ReferenceNotFound,
-        MixedChoices,
-        NonTerminalChoiceCannotBeDiscarded,
-        IncorrectVisitorReturnType,
-        IncorrectVisitorParameterType,
-        IncorrectVisitorParameterNumber,
-        LeftRecursion,
-        NonTerminalNeverUsed
-    }
-    
     public class I18N
     {
-        public static IDictionary<string, IDictionary<Message, string>> Translations;
+        public static IDictionary<string, IDictionary<I18NMessage, string>> Translations;
 
         private static I18N _instance;
 
@@ -64,13 +26,13 @@ namespace sly.i18n
 
         protected I18N()
         {
-            Translations = new Dictionary<string, IDictionary<Message, string>>();
+            Translations = new Dictionary<string, IDictionary<I18NMessage, string>>();
         }
         
-        public string GetText(string lang, Message key, params string[] args)
+        public string GetText(string lang, I18NMessage key, params string[] args)
         {
             lang = lang ?? CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
-            IDictionary<Message, string> translation = new Dictionary<Message, string>();
+            IDictionary<I18NMessage, string> translation = new Dictionary<I18NMessage, string>();
             if (!Translations.TryGetValue(lang, out translation))
             {
                 translation = Load(lang);
@@ -86,9 +48,9 @@ namespace sly.i18n
         }
 
 
-        private IDictionary<Message,string> Load(string lang)
+        private IDictionary<I18NMessage,string> Load(string lang)
         {
-            var translation = new Dictionary<Message, string>();
+            var translation = new Dictionary<I18NMessage, string>();
             Assembly assembly = GetType().Assembly;
             var res = assembly.GetManifestResourceNames();
             using (var stream = assembly.GetManifestResourceStream($"sly.i18n.translations.{lang}.txt"))
@@ -105,7 +67,7 @@ namespace sly.i18n
                                 var items = line.Split(new[] {'='});
                                 if (items.Length == 2)
                                 {
-                                    var key = EnumConverter.ConvertStringToEnum<Message>(items[0]);
+                                    var key = EnumConverter.ConvertStringToEnum<I18NMessage>(items[0]);
                                     translation[key] = items[1];
                                 }
                             }

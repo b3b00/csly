@@ -67,7 +67,7 @@ namespace sly.parser.generator
                     {
                         var recs = string.Join("\n", recursions.Select<List<string>, string>(x => string.Join(" > ",x)));
                         result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
-                            I18N.Instance.GetText(I18n,Message.LeftRecursion, recs),
+                            I18N.Instance.GetText(I18n,I18NMessage.LeftRecursion, recs),
                             ErrorCodes.PARSER_LEFT_RECURSIVE));
                         return result;
 
@@ -321,7 +321,7 @@ namespace sly.parser.generator
 
                 if (!found)
                     result.AddError(new ParserInitializationError(ErrorLevel.WARN,
-                        I18N.Instance.GetText(I18n,Message.NonTerminalNeverUsed, nonTerminal.Name),
+                        I18N.Instance.GetText(I18n,I18NMessage.NonTerminalNeverUsed, nonTerminal.Name),
                         ErrorCodes.NOT_AN_ERROR));
             }
 
@@ -405,7 +405,7 @@ namespace sly.parser.generator
                 if (clause is NonTerminalClause<IN> ntClause)
                     if (!conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
                         result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                            I18N.Instance.GetText(I18n,Message.ReferenceNotFound,ntClause.NonTerminalName,rule.RuleString),
+                            I18N.Instance.GetText(I18n,I18NMessage.ReferenceNotFound,ntClause.NonTerminalName,rule.RuleString),
                             ErrorCodes.PARSER_REFERENCE_NOT_FOUND));
             return result;
         }
@@ -424,13 +424,13 @@ namespace sly.parser.generator
                         if (!choice.IsTerminalChoice && !choice.IsNonTerminalChoice)
                         {
                             result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                I18N.Instance.GetText(I18n,Message.MixedChoices,rule.RuleString,choice.ToString()),
+                                I18N.Instance.GetText(I18n,I18NMessage.MixedChoices,rule.RuleString,choice.ToString()),
                                 ErrorCodes.PARSER_MIXED_CHOICES));
                         }
                         else if (choice.IsDiscarded && choice.IsNonTerminalChoice)
                         {
                             result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                I18N.Instance.GetText(I18n,Message.NonTerminalChoiceCannotBeDiscarded,rule.RuleString,choice.ToString()),
+                                I18N.Instance.GetText(I18n,I18NMessage.NonTerminalChoiceCannotBeDiscarded,rule.RuleString,choice.ToString()),
                                 ErrorCodes.PARSER_NON_TERMINAL_CHOICE_CANNOT_BE_DISCARDED));
                         }
                     }
@@ -471,7 +471,7 @@ namespace sly.parser.generator
                 if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
                 {
                     result.AddError(new InitializationError(ErrorLevel.FATAL,
-                        I18N.Instance.GetText(I18n,Message.IncorrectVisitorReturnType,visitor.Name,rule.RuleString,typeof(OUT).FullName,returnInfo.ParameterType.Name),
+                        I18N.Instance.GetText(I18n,I18NMessage.IncorrectVisitorReturnType,visitor.Name,rule.RuleString,typeof(OUT).FullName,returnInfo.ParameterType.Name),
                         ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
                 }
 
@@ -480,7 +480,7 @@ namespace sly.parser.generator
                 if (visitor.GetParameters().Length != realClauses.Count && visitor.GetParameters().Length != realClauses.Count +1)
                 {
                     result.AddError(new InitializationError(ErrorLevel.FATAL,
-                        I18N.Instance.GetText(I18n,Message.IncorrectVisitorParameterNumber,visitor.Name,rule.RuleString,realClauses.Count.ToString(),(realClauses.Count+1).ToString(),visitor.GetParameters().Length.ToString()),
+                        I18N.Instance.GetText(I18n,I18NMessage.IncorrectVisitorParameterNumber,visitor.Name,rule.RuleString,realClauses.Count.ToString(),(realClauses.Count+1).ToString(),visitor.GetParameters().Length.ToString()),
                         ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
                     // do not go further : it will cause an out of bound error.
                     return result;
@@ -631,7 +631,7 @@ namespace sly.parser.generator
                     if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
                     {
                         result.AddError(new InitializationError(ErrorLevel.FATAL,
-                            I18N.Instance.GetText(I18n,Message.IncorrectVisitorReturnType,visitor.Name,rule.RuleString,typeof(OUT).FullName,returnInfo.ParameterType.Name),
+                            I18N.Instance.GetText(I18n,I18NMessage.IncorrectVisitorReturnType,visitor.Name,rule.RuleString,typeof(OUT).FullName,returnInfo.ParameterType.Name),
                             ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
                     }
                     
@@ -691,7 +691,7 @@ namespace sly.parser.generator
             if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
             {
                 result.AddError(new InitializationError(ErrorLevel.FATAL,
-                    I18N.Instance.GetText(I18n,Message.IncorrectVisitorParameterType,visitor.Name,rule.RuleString,arg.Name,expected.FullName,arg.ParameterType.FullName),
+                    I18N.Instance.GetText(I18n,I18NMessage.IncorrectVisitorParameterType,visitor.Name,rule.RuleString,arg.Name,expected.FullName,arg.ParameterType.FullName),
                     ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
             }
 

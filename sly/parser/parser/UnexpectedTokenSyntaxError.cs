@@ -73,21 +73,21 @@ namespace sly.parser
         {
             get
             {
-                Message message = Message.UnexpectedToken;
+                I18NMessage i18NMessage = I18NMessage.UnexpectedToken;
                 if (UnexpectedToken.IsEOS)
                 {
-                    message = Message.UnexpectedEos;
+                    i18NMessage = I18NMessage.UnexpectedEos;
                     if (ExpectedTokens != null && ExpectedTokens.Any<T>())
                     {
-                        message = Message.UnexpectedEosExpecting;
+                        i18NMessage = I18NMessage.UnexpectedEosExpecting;
                     }
                 }
                 else
                 {
-                    message = Message.UnexpectedToken;
+                    i18NMessage = I18NMessage.UnexpectedToken;
                     if (ExpectedTokens != null && ExpectedTokens.Any<T>())
                     {
-                        message = Message.UnexpectedTokenExpecting;
+                        i18NMessage = I18NMessage.UnexpectedTokenExpecting;
                     }
                 }
                 
@@ -107,7 +107,7 @@ namespace sly.parser
 
                 string value = UnexpectedToken.ToString();
                 
-                return I18N.Instance.GetText(I18n,message, value, UnexpectedToken.TokenID.ToString(), expecting.ToString());
+                return I18N.Instance.GetText(I18n,i18NMessage, value, UnexpectedToken.TokenID.ToString(), expecting.ToString());
             }
         }
 
