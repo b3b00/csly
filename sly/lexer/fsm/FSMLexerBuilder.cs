@@ -249,13 +249,6 @@ namespace sly.lexer.fsm
                         MultiRangeTransition(precondition, parsedPattern.ranges.ToArray());
                     }
                 }
-//                if (pattern.StartsWith("[") && pattern.EndsWith("]") && pattern.Contains("-") && pattern.Length == 5)
-//                {
-//                    var start = pattern[1];
-//                    var end = pattern[3];
-//                    RangeTransition(start, end, precondition);
-//                    for (var i = 1; i < count; i++) RangeTransition(start, end);
-//                }
                 else
                 {
                     ConstantTransition(pattern, precondition);
