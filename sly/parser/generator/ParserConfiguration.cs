@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
+using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {
@@ -14,6 +16,45 @@ namespace sly.parser.generator
         public void AddNonTerminalIfNotExists(NonTerminal<IN> nonTerminal)
         {
             if (!NonTerminals.ContainsKey(nonTerminal.Name)) NonTerminals[nonTerminal.Name] = nonTerminal;
+        }
+
+        public bool HasImplicitTokens() => GetAllImplicitTokenClauses().Any();
+
+        public List<TerminalClause<IN>> GetAllImplicitTokenClauses()
+        {
+            List<TerminalClause<IN>> clauses = new List<TerminalClause<IN>>();
+            foreach (var nonTerminal in NonTerminals.Values)
+            {
+                foreach (var rule in nonTerminal.Rules)
+                {
+                    foreach (var clause in rule.Clauses)
+                    {
+                        if (clause is TerminalClause<IN> terminalClause && terminalClause.IsImplicitToken)
+                        {
+                            clauses.Add(terminalClause);
+                        }
+
+                        if (clause is ChoiceClause<IN> choices)
+                        {
+                            foreach (var choice in choices.Choices)
+                            {
+                                if (choice is TerminalClause<IN> terminal && terminal.IsImplicitToken)
+                                {
+                                    clauses.Add(terminal);
+                                }
+                            }
+                        }
+
+                        if (clause is OptionClause<IN> option)
+                        {
+                            if (option.Clause is TerminalClause<IN> terminal && terminal.IsImplicitToken)
+                                clauses.Add(terminal);
+                        }
+                    }
+                }
+            }
+
+            return clauses;
         }
 
         [ExcludeFromCodeCoverage]

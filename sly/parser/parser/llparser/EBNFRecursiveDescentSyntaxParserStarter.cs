@@ -15,19 +15,6 @@ namespace sly.parser.llparser
         {
             switch (first)
             {
-                case TerminalClause<IN> clause:
-                {
-                    var term = clause;
-
-                    InitStartingTokensWithTerminal(rule, term);
-                    break;
-                }
-                case NonTerminalClause<IN> clause:
-                {
-                    var nonterm = clause;
-                    InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
-                    break;
-                }
                 case ZeroOrMoreClause<IN> zeroOrMore:
                 {
                     InitStartingTokensWithZeroOrMore(rule, zeroOrMore, nonTerminals);
@@ -44,10 +31,10 @@ namespace sly.parser.llparser
                                 rule.PossibleLeadingTokens.Add(terminalClause.ExpectedToken);
                                 break;
                             }
-                            case NonTerminalClause<IN> terminalClause:
+                            case NonTerminalClause<IN> nonTerminalClause:
                             {
-                                InitStartingTokensForNonTerminal(nonTerminals, terminalClause.NonTerminalName);
-                                NonTerminal<IN> nonTerminal = nonTerminals[terminalClause.NonTerminalName];
+                                InitStartingTokensForNonTerminal(nonTerminals, nonTerminalClause.NonTerminalName);
+                                NonTerminal<IN> nonTerminal = nonTerminals[nonTerminalClause.NonTerminalName];
                                 {
                                     rule.PossibleLeadingTokens.AddRange(nonTerminal.PossibleLeadingTokens);
                                 }

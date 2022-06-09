@@ -67,14 +67,6 @@ namespace sly.i18n
             Translations = new Dictionary<string, IDictionary<Message, string>>();
         }
         
-        
-        
-        public string GetText(Message key, params string[] args)
-        {
-            var lang = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
-            return GetText(lang,key,args);
-        }
-        
         public string GetText(string lang, Message key, params string[] args)
         {
             lang = lang ?? CultureInfo.CurrentCulture.TwoLetterISOLanguageName;

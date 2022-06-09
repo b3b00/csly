@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -661,11 +662,11 @@ return r";
             Console.WriteLine("***");
             Console.WriteLine("***          LOCAL ");
             Console.WriteLine("***");
-            e = I18N.Instance.GetText( Message.UnexpectedEos);
+            e = I18N.Instance.GetText( CultureInfo.CurrentCulture.TwoLetterISOLanguageName, Message.UnexpectedEos);
             Console.WriteLine(e);
-            ee = I18N.Instance.GetText( Message.UnexpectedToken,"xxx","SOME_TOKEN");
+            ee = I18N.Instance.GetText( CultureInfo.CurrentCulture.TwoLetterISOLanguageName, Message.UnexpectedToken,"xxx","SOME_TOKEN");
             Console.WriteLine(ee);
-            eee = I18N.Instance.GetText( Message.UnexpectedTokenExpecting,"xxx","SOME_TOKEN","OTHER_TOKEN1, OTHER_TOKEN2, OTHER_TOKEN_3");
+            eee = I18N.Instance.GetText( CultureInfo.CurrentCulture.TwoLetterISOLanguageName, Message.UnexpectedTokenExpecting,"xxx","SOME_TOKEN","OTHER_TOKEN1, OTHER_TOKEN2, OTHER_TOKEN_3");
             Console.WriteLine(eee);
             ;
         }
@@ -986,6 +987,7 @@ else
         
         private static void Main(string[] args)
         {
+            testErrors();
             //TestContextualParser();
             //TestTokenCallBacks();
             //test104();

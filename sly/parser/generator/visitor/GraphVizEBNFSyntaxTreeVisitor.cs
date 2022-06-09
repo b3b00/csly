@@ -35,7 +35,14 @@ namespace sly.parser.generator.visitor
         private DotNode Leaf(IN type, string value)
         {
             string label = type.ToString();
-            label += "\n";
+            if (label == "0")
+            {
+                label = "";
+            }
+            else
+            {
+                label += "\n";
+            }
             var esc = value.Replace("\"", "\\\"");
             label += "\\\"" + esc + "\\\"";
             var node = new DotNode(NodeCounter.ToString())
@@ -116,11 +123,6 @@ namespace sly.parser.generator.visitor
         private string GetNodeLabel(SyntaxNode<IN> node)
         {
             string label = node.Name;
-            if (node.IsExpressionNode)
-            {
-                label = node.Operation.OperatorToken.ToString();
-            }
-
             return label;
         }
 
@@ -138,31 +140,22 @@ namespace sly.parser.generator.visitor
                 children.Add(v);
             }
 
-            if (node.IsByPassNode)
-            {
-                //result = children[0];
-            }
-            else
-            {
+           
 
-                result = Node(GetNodeLabel(node));
-                Graph.Add(result);
-                children.ForEach(c =>
+            result = Node(GetNodeLabel(node));
+            Graph.Add(result);
+            children.ForEach(c =>
+            {
+                if (c != null) // Prevent arrows with null destinations
                 {
-                    if (c != null) // Prevent arrows with null destinations
+                    var edge = new DotArrow(result, c)
                     {
-                        var edge = new DotArrow(result, c)
-                        {
-                            // Set all available properties
-                            ArrowHeadShape = "none"
-                        };
-                        Graph.Add(edge);
-                    }
-                });
-
-            }
-
-
+                        // Set all available properties
+                        ArrowHeadShape = "none"
+                    };
+                    Graph.Add(edge);
+                }
+            });
             return result;
         }
 

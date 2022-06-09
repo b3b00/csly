@@ -76,13 +76,7 @@ namespace sly.parser.generator
                     var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                     var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
                     parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
-                    var lexerResult = BuildLexer(extensionBuilder, lexerPostProcess);
-                    parser.Lexer = lexerResult.Result;
-                    if (lexerResult.IsError)
-                    {
-                        result.Errors.AddRange(lexerResult.Errors);
-                        return result;
-                    }
+                    
                     parser.Instance = parserInstance;
                     parser.Configuration = configuration;
                     result.Result = parser;
@@ -102,13 +96,33 @@ namespace sly.parser.generator
             {
                 var expressionResult = parser.BuildExpressionParser(result, rootRule);
                 if (expressionResult.IsError) result.AddErrors(expressionResult.Errors);
+                
+                
+                
                 result.Result.Configuration = expressionResult.Result;
-
+                
+                var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, result.Result.Configuration.GetAllImplicitTokenClauses().Select(x => x.ImplicitToken).Distinct().ToList());
+                if (lexerResult.IsError)
+                {
+                    foreach (var lexerResultError in lexerResult.Errors)
+                    {
+                        result.AddError(lexerResultError);
+                    }
+                }
+                else
+                {
+                    parser.Lexer = lexerResult.Result;
+                    parser.Instance = parserInstance;
+                    result.Result = parser;
+                    
+                }
+                
                 result = CheckParser(result);
                 if (result.IsError)
                 {
                     result.Result = null;
                 }
+                return result;
             }
             else
             {
@@ -167,9 +181,12 @@ namespace sly.parser.generator
 
 
         protected virtual BuildResult<ILexer<IN>> BuildLexer(BuildExtension<IN> extensionBuilder = null,
-            LexerPostProcess<IN> lexerPostProcess = null)
+            LexerPostProcess<IN> lexerPostProcess = null, IList<string> implicitTokens = null)
         {
-            var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n, lexerPostProcess);
+            
+            
+            var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n, lexerPostProcess, implicitTokens);
+
             return lexer;
         }
 
@@ -200,7 +217,7 @@ namespace sly.parser.generator
                     var r = BuildNonTerminal(ntAndRule);
                     r.SetVisitor(m);
                     r.NonTerminalName = ntAndRule.Item1;
-                    var key = ntAndRule.Item1 + "__" + r.Key;
+                    var key = $"{ntAndRule.Item1}__{r.Key}";
                     functions[key] = m;
                     NonTerminal<IN> nonT = null;
                     if (!nonTerminals.ContainsKey(ntAndRule.Item1))

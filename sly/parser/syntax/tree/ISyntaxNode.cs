@@ -9,5 +9,8 @@
         bool HasByPassNodes { get; set; }
         
         string Dump(string tab);
+
+        string ToJson(int index = 0);
+        
     }
 }

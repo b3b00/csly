@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -10,38 +9,6 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {
-    public class OperationMetaData<T> where T : struct
-    {
-        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, T oper)
-        {
-            Precedence = precedence;
-            Associativity = assoc;
-            VisitorMethod = method;
-            OperatorToken = oper;
-            Affix = affix;
-        }
-
-        public int Precedence { get; set; }
-
-        public Associativity Associativity { get; set; }
-
-        public MethodInfo VisitorMethod { get; set; }
-
-        public T OperatorToken { get; set; }
-
-        public Affix Affix { get; set; }
-
-        public bool IsBinary => Affix == Affix.InFix;
-
-        public bool IsUnary => Affix != Affix.InFix;
-
-        [ExcludeFromCodeCoverage]
-        public override string ToString()
-        {
-            return $"{OperatorToken} / {Affix} : {Precedence} / {Associativity}";
-        }
-    }
-
     public class ExpressionRulesGenerator<IN,OUT> where IN : struct
     {
         public string I18n { get; set; }
@@ -77,15 +44,40 @@ namespace sly.parser.generator
                 foreach (var attr in attributes)
                 {
                     IN oper = default;
+                    string implicitToken = null;
                     if (attr.IsIntToken)
                     {
                         oper = EnumConverter.ConvertIntToEnum<IN>(attr.IntToken);
                     }
                     else if (attr.IsStringToken)
                     {
-                        oper = EnumConverter.ConvertStringToEnum<IN>(attr.StringToken);
+                        if (EnumConverter.IsEnumValue<IN>(attr.StringToken))
+                        {
+                            oper = EnumConverter.ConvertStringToEnum<IN>(attr.StringToken);
+                        }
+                        else
+                        {
+                            implicitToken = attr.StringToken;
+                        }
                     }
-                    var operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper);
+
+
+                    bool isEnumValue = EnumConverter.IsEnumValue<IN>(attr.StringToken) ||
+                                       EnumConverter.IsEnumValue<IN>(attr.IntToken);
+                    OperationMetaData<IN> operation = null;
+                    if (!isEnumValue && !string.IsNullOrEmpty(implicitToken) && implicitToken.StartsWith("'") && implicitToken.EndsWith("'")) 
+                    {
+                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, implicitToken);
+                    }
+                    else if (isEnumValue)
+                    {
+                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper);
+                    }
+                    else
+                    {
+                        throw new ParserConfigurationException($"bad enum name {attr.StringToken} on Operation definition.");   
+                    }
+
                     var operations = new List<OperationMetaData<IN>>();
                     if (operationsByPrecedence.ContainsKey(operation.Precedence))
                         operations = operationsByPrecedence[operation.Precedence];
@@ -218,7 +210,17 @@ namespace sly.parser.generator
             var InFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.InFix).ToList<OperationMetaData<IN>>();
             if (InFixOps.Count > 0)
             {
-                var InFixClauses = InFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
+                var InFixClauses = InFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
+                {
+                    if (x.IsImplicitOperatorToken)
+                    {
+                        return new TerminalClause<IN>(x.ImplicitOperatorToken.Substring(1,x.ImplicitOperatorToken.Length-2));
+                    }
+                    else
+                    {
+                        return new TerminalClause<IN>(x.OperatorToken);
+                    }
+                }).ToList<IClause<IN>>();
 
                 var rule = new Rule<IN>
                 {
@@ -245,7 +247,20 @@ namespace sly.parser.generator
             var PreFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.PreFix).ToList<OperationMetaData<IN>>();
             if (PreFixOps.Count > 0)
             {
-                var PreFixClauses = PreFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
+                var PreFixClauses = PreFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
+                {
+                    if (x.IsImplicitOperatorToken)
+                    {
+                        return new TerminalClause<IN>(
+                            x.ImplicitOperatorToken.Substring(1, x.ImplicitOperatorToken.Length - 2));
+                    }
+                    else
+                    {
+                        return new TerminalClause<IN>(x.OperatorToken);
+                    }
+                }).ToList<IClause<IN>>();
+                
+                    
 
                 var rule = new Rule<IN>
                 {
@@ -263,7 +278,18 @@ namespace sly.parser.generator
             var PostFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.PostFix).ToList<OperationMetaData<IN>>();
             if (PostFixOps.Count > 0)
             {
-                var PostFixClauses = PostFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x => new TerminalClause<IN>(x.OperatorToken)).ToList<IClause<IN>>();
+                var PostFixClauses = PostFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
+                {
+                    if (x.IsImplicitOperatorToken)
+                    {
+                        return new TerminalClause<IN>(
+                            x.ImplicitOperatorToken.Substring(1, x.ImplicitOperatorToken.Length - 2));
+                    }
+                    else
+                    {
+                        return new TerminalClause<IN>(x.OperatorToken);
+                    }
+                }).ToList<IClause<IN>>();
 
                 var rule = new Rule<IN>
                 {

@@ -165,10 +165,6 @@ namespace sly.lexer
             
             var tokens = new List<Token<IN>>();
             string src = memorySource.ToString();
-            if (src.Contains("commented"))
-            {
-                ;
-            }
             
             var r = LexerFsm.Run(memorySource, new LexerPosition());
             

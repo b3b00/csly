@@ -31,7 +31,8 @@ namespace sly.parser.syntax.grammar
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            return string.Join(" | ", Choices.Select<IClause<T>, string>(c => c.ToString()));
+            var choices = string.Join(" | ", Choices.Select<IClause<T>, string>(c => c.Dump()));
+            return $"[ {choices} ]";
         }
 
         public bool MayBeEmpty()

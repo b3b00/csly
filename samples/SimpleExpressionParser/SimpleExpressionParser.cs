@@ -52,13 +52,13 @@ namespace simpleExpressionParser
         }
 
 
-        [Operation((int) ExpressionToken.MINUS, Affix.PreFix, Associativity.Right, 100)]
+        [Prefix((int) ExpressionToken.MINUS,  Associativity.Right, 100)]
         public double PreFixExpression(Token<ExpressionToken> operation, double value)
         {
             return -value;
         }
 
-        [Operation((int) ExpressionToken.FACTORIAL, Affix.PostFix, Associativity.Right, 100)]
+        [Postfix((int) ExpressionToken.FACTORIAL, Associativity.Right, 100)]
         public double PostFixExpression(double value, Token<ExpressionToken> operation)
         {
             var factorial = 1;

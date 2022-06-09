@@ -15,9 +15,23 @@ namespace sly.parser.syntax.grammar
         {
             Discarded = discard;
         }
+        
+        public TerminalClause(string implicitToken, bool discard) : this(default(T))
+        {
+            ImplicitToken = implicitToken;
+            Discarded = discard;
+        }
+        
+        public TerminalClause(string implicitToken) : this(implicitToken,false)
+        {
+        }
 
         public T ExpectedToken { get; set; }
 
+        public string ImplicitToken { get; set; }
+
+        public bool IsImplicitToken => !string.IsNullOrEmpty(ImplicitToken);
+        
         public bool Discarded { get; set; }
 
         public virtual bool MayBeEmpty()
@@ -27,6 +41,10 @@ namespace sly.parser.syntax.grammar
 
         public virtual bool Check(Token<T> nextToken)
         {
+            if (IsImplicitToken)
+            {
+                return nextToken.Value.Equals(ImplicitToken);
+            }
             return nextToken.TokenID.Equals(ExpectedToken);
         }
 
@@ -34,14 +52,28 @@ namespace sly.parser.syntax.grammar
         public override string ToString()
         {
             var b = new StringBuilder();
-            b.Append(ExpectedToken);
+            if (IsImplicitToken)
+            {
+                b.Append($"'{ImplicitToken}'");
+            }
+            else
+            {
+                b.Append(ExpectedToken);
+            }
+
             if (Discarded) b.Append("[d]");
+            b.Append("(T)");
             return b.ToString();
         }
         
         public virtual string Dump()
         {
-            return ExpectedToken.ToString();
+
+            if (IsImplicitToken)
+            {
+                return $"'{ImplicitToken}'(T)";
+            }
+            return $"{ExpectedToken}(T)";
         }
     }
 

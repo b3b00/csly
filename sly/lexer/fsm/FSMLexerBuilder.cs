@@ -13,7 +13,7 @@ namespace sly.lexer.fsm
     {
         private int CurrentState;
 
-        private readonly Dictionary<string, int> Marks;
+        internal readonly Dictionary<string, int> Marks;
 
 
         public FSMLexerBuilder()

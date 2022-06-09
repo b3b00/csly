@@ -249,8 +249,11 @@ namespace sly.parser.llparser
             token.Discarded = terminal.Discarded;
             result.Root = new SyntaxLeaf<IN>(token, terminal.Discarded);
             result.HasByPassNodes = false;
-            result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(token,I18n,terminal.ExpectedToken));
-            result.AddExpecting(terminal.ExpectedToken);
+            if (result.IsError)
+            {
+                result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(token, I18n, terminal.ExpectedToken));
+                result.AddExpecting(terminal.ExpectedToken);
+            }
             return result;
         }
 
@@ -414,6 +417,8 @@ namespace sly.parser.llparser
             if (root != null) StartingNonTerminal = root;
             InitializeStartingTokens(configuration, StartingNonTerminal);
         }
+
+        
 
         #endregion
     }

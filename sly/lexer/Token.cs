@@ -113,6 +113,8 @@ namespace sly.lexer
         public bool IsWhiteSpace { get; set; }
         
         public bool IsEOL { get; set; }
+        
+        public bool IsImplicit { get; set; }
 
         public CommentType CommentType { get; set; } = CommentType.No;
 
@@ -221,6 +223,11 @@ namespace sly.lexer
             if (IsUnIndent)
             {
                 value = $"<<UINDENT({IndentationLevel})>>";
+            }
+
+            if (IsImplicit)
+            {
+                value = $"[{Value.Replace("\r", "").Replace("\n", "")}]";
             }
             return $"{value} @{Position} on channel {Channel}";
             

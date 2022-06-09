@@ -38,6 +38,8 @@ namespace sly.parser.generator
             {
                 configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
                 LeftRecursionChecker<IN,OUT> recursionChecker = new LeftRecursionChecker<IN,OUT>();
+                
+                // check left recursion.
                 var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
                 if (foundRecursion)
                 {
@@ -46,7 +48,6 @@ namespace sly.parser.generator
                         I18N.Instance.GetText(I18n,Message.LeftRecursion,recs),
                         ErrorCodes.PARSER_LEFT_RECURSIVE));
                     return result;
-
                 }
                 
                 configuration.StartingRule = rootRule;
@@ -60,18 +61,10 @@ namespace sly.parser.generator
             var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
 
             SyntaxTreeVisitor<IN, OUT> visitor = null;
-            switch (parserType)
-            {
-                case ParserType.LL_RECURSIVE_DESCENT:
-                    new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
-                    break;
-                case ParserType.EBNF_LL_RECURSIVE_DESCENT:
-                    visitor = new EBNFSyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
-                    break;
-            }
+            visitor = new EBNFSyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
             var parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
             parser.Configuration = configuration;
-            var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess);
+            var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, configuration.GetAllImplicitTokenClauses().Select(x => x.ImplicitToken).Distinct().ToList());
             if (lexerResult.IsError)
             {
                 foreach (var lexerResultError in lexerResult.Errors)
@@ -81,10 +74,12 @@ namespace sly.parser.generator
                 return result;
             }
             else
+            {
                 parser.Lexer = lexerResult.Result;
-            parser.Instance = parserInstance;
-            result.Result = parser;
-            return result;
+                parser.Instance = parserInstance;
+                result.Result = parser;
+                return result;
+            }
         }
 
 

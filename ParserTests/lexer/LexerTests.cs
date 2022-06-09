@@ -3,6 +3,7 @@ using System.Linq;
 using expressionparser;
 using jsonparser;
 using jsonparser.JsonModel;
+using sly.buildresult;
 using sly.lexer;
 using sly.parser.generator;
 using Xunit;
@@ -164,6 +165,16 @@ namespace ParserTests.lexer
 
             var columnPositions = tokens.Take(9).Select(tok => tok.Position.Column).ToList();
             Assert.Equal(expectedColumnPositions, columnPositions);
+        }
+
+        [Fact]
+        public void TestMixedGenericRegexLexer()
+        {
+            var result = LexerBuilder.BuildLexer<MixedGenericRegexLexer>();
+            Assert.True(result.IsError);
+            var errors = result.Errors;
+            Assert.Single(errors);
+            Assert.Equal(ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX,errors[0].Code);
         }
     }
 }

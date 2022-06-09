@@ -6,7 +6,6 @@ on:
       - dev
       - tech/actions 
       - master
-      - feature/implicit-tokens
   pull_request:
     branches: 
       - dev
@@ -42,15 +41,13 @@ jobs:
         output: 'lcov.info'
         threshold: 80
         outputFormat: 'lcov'
-        excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*,[postProcessedLexerParser]*'
-
+        excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*'
     - name: coveralls      
       uses: coverallsapp/github-action@v1.1.1
       if: matrix.os == 'windows-latest' && env.RUN_TESTS
       with:
         github-token: ${{secrets.GITHUB_TOKEN }} 
-        path-to-lcov: ${{steps.coverlet.outputs.coverageFile}}
-        #base-path: ${{github.workspace}}
+        path-to-lcov: ${{steps.coverlet.outputs.coverageFile}} 
     - name: ReportGenerator
       uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
       with:

@@ -69,15 +69,16 @@ namespace ParserTests
             var StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
-            var  Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+            var  Parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            var grammar = Parser.Result.Configuration.Dump();
             var result = Parser.Result.Parse("1+1");
-
+            Assert.False(result.IsError);
+            Assert.NotNull(result.SyntaxTree);
             var tree = result.SyntaxTree;
             var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile();
-
-
+            var dump = graphviz.Graph.Dump();
         }
         
     }
