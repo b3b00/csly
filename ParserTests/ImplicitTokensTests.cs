@@ -75,12 +75,26 @@ namespace ParserTests
         public void TestErrorWhenUsingImplicitTokensAndRegexLexer()
         {
             var parserInstance = new RegexLexAndImplicitTokensParser();
-            var builder = new ParserBuilder<RegexLexAndImplicitTokensLexer, double>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(ImplicitTokensExpressionParser)+"_expressions");
+            var builder = new ParserBuilder<RegexLexAndImplicitTokensLexer, string>();
+            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(RegexLexAndImplicitTokensParser)+"_expressions");
             Assert.True(result.IsError);
             Assert.Single(result.Errors);
             Assert.Equal(ErrorCodes.LEXER_CANNOT_USE_IMPLICIT_TOKENS_WITH_REGEX_LEXER,result.Errors.First().Code);
         }
+        
+        [Fact]
+        public void TestNoIdentifierPatternSuppliedWithImplicitTokens()
+        {
+            var parserInstance = new NoIdentifierParser();
+            var builder = new ParserBuilder<NoIdentifierLexer, string>();
+            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
+            Assert.False(result.IsError);
+            Assert.NotNull(result.Result);
+            var r = result.Result.Parse("test 1 test 2 test 3");
+            Assert.False(r.IsError);
+            Assert.Equal("test:1,test:2,test:3",r.Result);
+        }
+        
     }
     
 }

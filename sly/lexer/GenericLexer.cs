@@ -320,7 +320,7 @@ namespace sly.lexer
         }
 
 
-        private void InitializeIdentifier(Config config)
+        public void InitializeIdentifier(Config config)
         {
             // identifier
             if (config.IdType == IdentifierType.Custom)

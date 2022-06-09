@@ -386,9 +386,19 @@ namespace sly.lexer
                     foreach (var implicitToken in implicitTokens)
                     {
                         var fsmBuilder = lexer.FSMBuilder;
+
+                        if (!fsmBuilder.Marks.Any(mark => mark.Key == GenericLexer<IN>.in_identifier))
+                        {
+                            // no identifier pattern has been defined. Creating a default one to allow implicit keyword tokens
+                            (lexer as GenericLexer<IN>).InitializeIdentifier(new GenericLexer<IN>.Config()  { IdType = IdentifierType.Alpha});
+                        }
+                        
                         var x = fsmBuilder.Fsm.Run(implicitToken, new LexerPosition());
                         if (x.IsSuccess)
                         {
+                            
+                            
+                            
                             var t = fsmBuilder.Marks;
                             var y = fsmBuilder.Marks.FirstOrDefault(k => k.Value == x.NodeId);
                             if (y.Key == GenericLexer<IN>.in_identifier) // implicit keyword
