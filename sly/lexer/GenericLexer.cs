@@ -21,7 +21,8 @@ namespace sly.lexer
 
         Extension,
 
-        Comment
+        Comment,
+        AllExcept
     }
 
     public enum IdentifierType
@@ -77,6 +78,7 @@ namespace sly.lexer
             public BuildExtension<IN> ExtensionBuilder { get; set; }
 
             public IEqualityComparer<string> KeyWordComparer => KeyWordIgnoreCase ? StringComparer.OrdinalIgnoreCase : null;
+            public IList<string> Modes { get; set; }
         }
         
         public LexerPostProcess<IN> LexerPostProcess { get; set; }
@@ -791,6 +793,24 @@ namespace sly.lexer
             FSMBuilder.GoTo(start);
             for (var i = 0; i < specialValue.Length; i++) FSMBuilder.SafeTransition(specialValue[i]);
             FSMBuilder.End(GenericToken.SugarToken, isLineEnding)
+                .CallBack(callback);
+        }
+        
+        public void AddAllExcept(IN token, BuildResult<ILexer<IN>> buildResult, string[] exceptions, bool isLineEnding = false)
+        {
+            
+                
+            NodeCallback<GenericToken> callback = match =>
+            {
+                match.Properties[DerivedToken] = token;
+                return match;
+            };
+
+            FSMBuilder.GoTo(start);
+
+            FSMBuilder.ExceptTransition(exceptions.First().ToCharArray())
+                .Mark("in_allexcept")
+                .End(GenericToken.AllExcept)
                 .CallBack(callback);
         }
 

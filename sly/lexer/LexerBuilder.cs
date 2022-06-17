@@ -8,6 +8,33 @@ using sly.lexer.fsm;
 
 namespace sly.lexer
 {
+
+    public static class DicExt
+    {
+        public static void AddToKey<K, V>(this IDictionary<K, IList<V>> dic, K key, V value)
+        {
+            IList<V> values ;
+            if (!dic.TryGetValue(key, out values))
+            {
+                values = new List<V>();
+            }
+            values.Add(value);
+            dic[key] = values;
+        }
+        
+        public static void AddToKey<K, K2, V>(this IDictionary<K, IDictionary<K2,V>> dic, K key, K2 k2, V value)
+        {
+            IDictionary<K2,V> values ;
+            if (!dic.TryGetValue(key, out values))
+            {
+                values = new Dictionary<K2, V>();
+            }
+            values[k2] = value;
+            dic[key] = values;
+        }
+        
+    }
+    
     public static class EnumHelper
     {
         /// <summary>
@@ -189,9 +216,41 @@ namespace sly.lexer
             return result;
         }
 
+        private static Dictionary<string, IDictionary<IN, List<LexemeAttribute>>> GetSubLexers<IN>(IDictionary<IN, List<LexemeAttribute>> attributes) where IN : struct
+        {
+            Dictionary<string, IDictionary<IN, List<LexemeAttribute>>> subLexers = new Dictionary<string, IDictionary<IN, List<LexemeAttribute>>>();
+            foreach (var attribute in attributes)
+            {
+                if (attribute.Key is Enum enumValue)
+                {
+                    var modes = enumValue.GetAttributesOfType<ModeAttribute>();
+
+                    if (modes != null && modes.Any())
+                    {
+                        foreach (var mode in modes.Select(x => x.Mode))
+                        {
+                            subLexers.AddToKey(mode,attribute.Key,attribute.Value);
+                        }
+                    }
+                    else
+                    {
+                        subLexers.AddToKey(ModeAttribute.DefaultLexerMode,attribute.Key,attribute.Value);
+                    }
+                    
+                    var push = enumValue.GetAttributesOfType<PushAttribute>();
+                    var pop = enumValue.GetAttributesOfType<PopAttribute>();
+                }
+            }
+
+            return subLexers;
+        }
+
         private static (GenericLexer<IN>.Config, GenericToken[]) GetConfigAndGenericTokens<IN>(IDictionary<IN, List<LexemeAttribute>> attributes)
             where IN : struct
         {
+
+            GetSubLexers(attributes);
+            
             var config = new GenericLexer<IN>.Config();
             var lexerAttribute = typeof(IN).GetCustomAttribute<LexerAttribute>();
             if (lexerAttribute != null)
@@ -202,6 +261,11 @@ namespace sly.lexer
                 config.KeyWordIgnoreCase = lexerAttribute.KeyWordIgnoreCase;
                 config.Indentation = lexerAttribute.Indentation;
                 config.IndentationAware = lexerAttribute.IndentationAWare;
+            }
+            var modesAttribute = typeof(IN).GetCustomAttribute<ModesAttribute>();
+            if (modesAttribute != null)
+            {
+                config.Modes = modesAttribute.Modes;
             }
 
             var statics = new List<GenericToken>();
@@ -311,6 +375,11 @@ namespace sly.lexer
                             {
                                 lexer.AddSugarLexem(tokenID,result, param, lexeme.IsLineEnding);
                             }
+                        }
+
+                        if (lexeme.IsAllExcept)
+                        {
+                            lexer.AddAllExcept(tokenID,result,lexeme.GenericTokenParameters);
                         }
 
                         if (lexeme.IsString)
