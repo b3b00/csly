@@ -25,6 +25,9 @@ namespace sly.lexer.fsm
 
     public class FSMLexer<N>
     {
+        
+        public string Mode { get; set; }
+        
         private readonly Dictionary<int, FSMNode<N>> Nodes;
 
         public char StringDelimiter = '"';
@@ -61,10 +64,12 @@ namespace sly.lexer.fsm
         public string ToGraphViz()
         {
             var dump = new StringBuilder();
+            dump.AppendLine($"digraph {Mode} {{");
             
             foreach (var transition in Transitions.Values.SelectMany<List<FSMTransition>, FSMTransition>(x => x) )
                 dump.AppendLine(transition.ToGraphViz<N>(Nodes));
-            
+
+            dump.AppendLine("}");
             return dump.ToString();
         }
 
@@ -241,7 +246,7 @@ namespace sly.lexer.fsm
                 if (currentNode.IsEnd)
                 {
                     // Remember the possible match
-                    result = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id,lexerPosition, currentNode.IsLineEnding);
+                    result = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id,lexerPosition, currentNode.IsLineEnding, currentNode.IsPopModeNode, currentNode.IsPushModeNode, currentNode.PushToMode);
                 }
 
                 lexerPosition.Index++;

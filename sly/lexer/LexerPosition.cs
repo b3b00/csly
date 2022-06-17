@@ -14,27 +14,21 @@ namespace sly.lexer
         {
         }
         
-        public LexerPosition(int index, int line, int column)
+        public LexerPosition(int index, int line, int column, string mode = ModeAttribute.DefaultLexerMode)
         {
             Index = index;
             Line = line;
             Column = column;
             Indentations = ImmutableStack<string>.Empty;
+            Mode = mode;
         }
         
-        public LexerPosition(int index, int line, int column, int currentIndentation) : this(index, line, column)
-        {
-            CurrentIndentation = currentIndentation;
-            ;
-           
-        }
-        
-        public LexerPosition(int index, int line, int column, ImmutableStack<string> indentations) : this(index, line, column)
+        public LexerPosition(int index, int line, int column, ImmutableStack<string> indentations, string mode = ModeAttribute.DefaultLexerMode) : this(index, line, column, mode)
         {
             Indentations = indentations;
         }
         
-        public LexerPosition(int index, int line, int column, ImmutableStack<string> indentations, int currentIndentation) : this(index, line, column, indentations)
+        public LexerPosition(int index, int line, int column, ImmutableStack<string> indentations, int currentIndentation, string mode = ModeAttribute.DefaultLexerMode) : this(index, line, column, indentations, mode)
         {
             CurrentIndentation = currentIndentation;
         }
@@ -48,6 +42,8 @@ namespace sly.lexer
         public int Column { get; set; }
         public int Index { get; set; }
         public int Line { get; set; }
+        
+        public string Mode { get; set; }
 
         public override string ToString()
         {
@@ -76,7 +72,10 @@ namespace sly.lexer
 
         public LexerPosition Clone()
         {
-            return new LexerPosition(Index,Line,Column,Indentations, CurrentIndentation);
+            return new LexerPosition(Index, Line, Column, Indentations, CurrentIndentation)
+            {
+                Mode = Mode
+            };
         }
     }
     

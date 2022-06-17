@@ -5,6 +5,15 @@ namespace sly.lexer
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
     public class LexemeAttribute : Attribute
     {
+        
+        internal bool IsPop { get; set; }
+        
+        internal bool IsPush { get; set; }
+        
+        internal string Pushtarget { get; set; }
+        
+        internal string Mode { get; set; }
+        
         public LexemeAttribute(string pattern, bool isSkippable = false, bool isLineEnding = false)
         {
             Pattern = pattern;

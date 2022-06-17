@@ -16,5 +16,13 @@
         internal bool IsStart { get; set; } = false;
         public string Mark { get; internal set; }
         public bool IsLineEnding { get; set; }
+        
+        public bool IsPushModeNode { get; set; }
+        
+        public string PushToMode { get; set; }
+
+        public bool IsPopModeNode { get; set; }
+        
+        
     }
 }

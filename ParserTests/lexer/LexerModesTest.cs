@@ -10,14 +10,27 @@ namespace ParserTests.lexer
     [Modes("one","two")]
     public enum MinimalXmlLexer
     {
+        #region sea
         [Sugar("<")]
         [Mode()]
         [Push("tag")]
         OPEN,
         
+        [AllExcept("<")]
+        [Mode()]
+        CONTENT,
+        
+        #endregion
+        
+        #region in tag
+        
         [AlphaId]
         [Mode("tag")]
         ID,
+        
+        [Sugar("/")]
+        [Mode("tag")]
+        SLASH,
         
         [Sugar("=")]
         [Mode("tag")]
@@ -32,8 +45,8 @@ namespace ParserTests.lexer
         [Pop]
         CLOSE,
         
-        [AllExcept(">")]
-        CONTENT
+        #endregion
+        
         
         
     }

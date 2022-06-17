@@ -1027,7 +1027,27 @@ else
             //TestIssue239();
             // TestShortOperations();
             // TestChannels();
-            TestIndentedParserNeverEnding();
+            //TestIndentedParserNeverEnding();
+            TestLexerModes();
+        }
+
+        private static void TestLexerModes()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MinimalXmlLexer>>());
+            Assert.False(lexerRes.IsError);
+            var tokens = lexerRes.Result.Tokenize(@"hello<tag attr=""value"">inner text</tag>");
+            if (tokens.IsOk)
+            {
+                foreach (var token in tokens.Tokens)
+                {
+                    Console.WriteLine(token.ToString());
+                }
+            }
+            else
+            {
+                Console.WriteLine(tokens.Error);
+            }
+            Console.WriteLine("stop");
         }
 
 

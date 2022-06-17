@@ -158,7 +158,7 @@ namespace sly.lexer
                 }
                 else if (hasGenericLexemes)
                 {
-                    result = BuildGenericLexer<IN>(attributes, extensionBuilder, result, lang, implicitTokens);
+                    result = BuildGenericSubLexers<IN>(attributes, extensionBuilder, result, lang, implicitTokens);
                 }
             }
 
@@ -216,7 +216,8 @@ namespace sly.lexer
             return result;
         }
 
-        private static Dictionary<string, IDictionary<IN, List<LexemeAttribute>>> GetSubLexers<IN>(IDictionary<IN, List<LexemeAttribute>> attributes) where IN : struct
+        private static Dictionary<string, IDictionary<IN, List<LexemeAttribute>>> GetSubLexers<IN>(
+            IDictionary<IN, List<LexemeAttribute>> attributes) where IN : struct
         {
             Dictionary<string, IDictionary<IN, List<LexemeAttribute>>> subLexers = new Dictionary<string, IDictionary<IN, List<LexemeAttribute>>>();
             foreach (var attribute in attributes)
@@ -238,8 +239,37 @@ namespace sly.lexer
                     }
                     
                     var push = enumValue.GetAttributesOfType<PushAttribute>();
+                    if (push != null && push.Length == 1)
+                    {
+                        attribute.Value.ForEach(x =>
+                        {
+                            x.IsPush = true;
+                            x.Pushtarget = push.First().TargetMode;
+                        }); 
+                    }
+                    else if (push.Length > 1)
+                    {
+                        // TODO : error can not push many mode 
+                    }
                     var pop = enumValue.GetAttributesOfType<PopAttribute>();
+                    if (pop != null && pop.Length == 1)
+                    {
+                        attribute.Value.ForEach(x =>
+                        {
+                            x.IsPop = true;
+                        }); 
+                    }
+                    else if (pop.Length > 1)
+                    {
+                        // TODO : error only pop once
+                    }
                 }
+            }
+
+            if (!subLexers.Any())
+            {
+                subLexers = new Dictionary<string, IDictionary<IN, List<LexemeAttribute>>>();
+                subLexers[ModeAttribute.DefaultLexerMode] = attributes;
             }
 
             return subLexers;
@@ -249,7 +279,7 @@ namespace sly.lexer
             where IN : struct
         {
 
-            GetSubLexers(attributes);
+            
             
             var config = new GenericLexer<IN>.Config();
             var lexerAttribute = typeof(IN).GetCustomAttribute<LexerAttribute>();
@@ -282,7 +312,7 @@ namespace sly.lexer
                     }
                 }
             }
-
+            
             return (config, statics.Distinct<GenericToken>().ToArray<GenericToken>());
         }
         
@@ -338,12 +368,45 @@ namespace sly.lexer
             return callbackMulti;
         }
         
-        private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
+        
+        
+        private static BuildResult<ILexer<IN>> BuildGenericSubLexers<IN>(Dictionary<IN, List<LexemeAttribute>> attributes,
             BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result, string lang,
             IList<string> implicitTokens = null) where IN : struct
         {
+            GenericLexer<IN> genLexer = null;
+            var subLexers = GetSubLexers(attributes);
+            foreach (var subLexer in subLexers)
+            {
+                var x = BuildGenericLexer(subLexer.Value, extensionBuilder, result, lang, implicitTokens);
+                var currentGenericLexer = x.Result as GenericLexer<IN>;
+                if (genLexer == null)
+                {
+                    genLexer = currentGenericLexer;
+                }
+
+                currentGenericLexer.FSMBuilder.Fsm.Mode = subLexer.Key;
+                
+                genLexer.SubLexersFsm[subLexer.Key] = currentGenericLexer.FSMBuilder.Fsm;
+
+            }
+
+            result.Result = genLexer;
+            
+            return result;
+        }
+
+
+        private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(IDictionary<IN, List<LexemeAttribute>> attributes,
+            BuildExtension<IN> extensionBuilder, BuildResult<ILexer<IN>> result, string lang,
+            IList<string> implicitTokens = null) where IN : struct
+        {
+            
             result = CheckStringAndCharTokens<IN>(attributes, result, lang);
             var (config, tokens) = GetConfigAndGenericTokens<IN>(attributes);
+
+            
+            
             config.ExtensionBuilder = extensionBuilder;
             var lexer = new GenericLexer<IN>(config, tokens);
             var Extensions = new Dictionary<IN, LexemeAttribute>();
@@ -398,6 +461,16 @@ namespace sly.lexer
                         {
                             Extensions[tokenID] = lexeme;
                         }
+
+                        if (lexeme.IsPush)
+                        {
+                            lexer.FSMBuilder.Push(lexeme.Pushtarget);
+                        }
+
+                        if (lexeme.IsPop)
+                        {
+                            lexer.FSMBuilder.Pop();
+                        }
                     }
                     catch (Exception e)
                     {
@@ -405,6 +478,8 @@ namespace sly.lexer
                     }
                 }
             }
+            
+            
 
             AddExtensions<IN>(Extensions, extensionBuilder, lexer);
 
@@ -492,6 +567,8 @@ namespace sly.lexer
             result.Result = lexer;
             return result;
         }
+        
+        
 
         private static (string delimiter, string escape) GetDelimiters(LexemeAttribute lexeme, string delimiter, string escape)
         {
@@ -508,7 +585,7 @@ namespace sly.lexer
         }
 
         private static BuildResult<ILexer<IN>> CheckStringAndCharTokens<IN>(
-            Dictionary<IN, List<LexemeAttribute>> attributes, BuildResult<ILexer<IN>> result, string lang) where IN : struct
+            IDictionary<IN, List<LexemeAttribute>> attributes, BuildResult<ILexer<IN>> result, string lang) where IN : struct
         {
             var allLexemes = attributes.Values.SelectMany<List<LexemeAttribute>, LexemeAttribute>(a => a);
 

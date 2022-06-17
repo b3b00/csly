@@ -20,10 +20,17 @@ namespace sly.lexer.fsm
         public AbstractTransitionCheck Check { get; set; }
 
 
+        private string GraphVizNodeLabel<N>(FSMNode<N> node)
+        {
+            var push = node.IsPushModeNode ? "Push(" + node.PushToMode + ")" : "";
+            var pop = node.IsPopModeNode ? "Pop()" : "";
+            return (node.Mark ?? "")+ push+ " "+pop+" #"+node.Id;
+        }
+        
         public string ToGraphViz<N>(Dictionary<int, FSMNode<N>> nodes)
         {
-            string f = "\""+(nodes[FromNode].Mark ?? "")+ " #"+FromNode+"\"";
-            string t = "\""+(nodes[ToNode].Mark ?? "")+ " #"+ToNode+"\"";
+            string f = "\""+GraphVizNodeLabel(nodes[FromNode])+"\"";
+            string t = "\""+GraphVizNodeLabel(nodes[ToNode])+"\"";
             return $"{f} -> {t} {Check.ToGraphViz()}";
         }
 
