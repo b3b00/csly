@@ -34,6 +34,14 @@ using ExpressionContext = postProcessedLexerParser.expressionModel.ExpressionCon
 
 namespace ParserExample
 {
+
+    public enum ManySugar
+    {
+    [Sugar("<")]
+    OPEN,
+    [Sugar("<?")]
+    PI
+    }
     
     public enum ManyString
     {
@@ -1031,11 +1039,23 @@ else
             TestLexerModes();
         }
 
+        private static void testManySugar()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManySugar>>());
+            Assert.False(lexerRes.IsError);
+            var res = lexerRes.Result.Tokenize("< <? <");
+            Console.WriteLine(".");
+        }
+
         private static void TestLexerModes()
         {
+            // testManySugar();
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MinimalXmlLexer>>());
             Assert.False(lexerRes.IsError);
-            var tokens = lexerRes.Result.Tokenize(@"hello<tag attr=""value"">inner text</tag>");
+            var tokens = lexerRes.Result.Tokenize(@"hello
+<tag attr=""value"">inner text</tag>
+<!-- this is a comment -->
+<? PI PIattr=""PIValue""?>");
             if (tokens.IsOk)
             {
                 foreach (var token in tokens.Tokens)

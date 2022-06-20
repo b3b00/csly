@@ -13,43 +13,42 @@ namespace ParserTests.lexer
     [Modes("one","two")]
     public enum MinimalXmlLexer
     {
+        NOT_A_TOKEN = 0,
+        
+        
         #region sea
         [Sugar("<")]
         [Mode()]
         [Push("tag")]
         OPEN,
         
-        [Sugar("<!--")]
-        [Mode()]
-        [Push("comment")]
-        OPEN_COMMENT,
-        
         [AllExcept("<")]
-        [Mode()]
         CONTENT,
         
-        
+        [Sugar("<?")]
+        [Mode]
+        [Push("pi")]
+        OPEN_PI,
 
 
         #endregion
         
-        #region in comment
         
-        [AllExcept("-->")]
-        [Mode("comment")]
-        COMMENT_CONTENT,
+        [MultiLineComment("<!--","-->",channel:Channels.Main)]
+        [Mode]
+        COMMENT,
         
-        [Sugar("-->")]
-        [Mode("comment")]
-        [Pop]
-        CLOSE_COMMENT,
+        
+        #region pi
         
         #endregion
+        
         
         #region in tag
         
         [AlphaId]
         [Mode("tag")]
+        [Mode("pi")]
         ID,
         
         [Sugar("/")]
@@ -58,11 +57,20 @@ namespace ParserTests.lexer
         
         [Sugar("=")]
         [Mode("tag")]
+        [Mode("pi")]
         EQUALS,
         
         [String]
         [Mode("tag")]
+        [Mode("pi")]
         VALUE,
+        
+        [Sugar("?>")]
+        [Mode("pi")]
+        [Pop]
+        CLOSE_PI,
+        
+        
         
         [Sugar(">")]
         [Mode("tag")]
@@ -85,7 +93,8 @@ namespace ParserTests.lexer
             Assert.False(lexerRes.IsError);
             var result = lexerRes.Result.Tokenize(@"hello
 <tag attr=""value"">inner text</tag>
-<!-- this is a comment -->");
+<!-- this is a comment -->
+<? PI attr=""test""?>");
             Assert.True(result.IsOk);
             var expectedTokens = new List<MinimalXmlLexer>()
             {
@@ -101,9 +110,13 @@ namespace ParserTests.lexer
                 MinimalXmlLexer.SLASH,
                 MinimalXmlLexer.ID,
                 MinimalXmlLexer.CLOSE,
-                MinimalXmlLexer.OPEN_COMMENT,
-                MinimalXmlLexer.COMMENT_CONTENT,
-                MinimalXmlLexer.CLOSE_COMMENT
+                MinimalXmlLexer.COMMENT,
+                MinimalXmlLexer.OPEN_PI,
+                MinimalXmlLexer.ID,
+                MinimalXmlLexer.ID,
+                MinimalXmlLexer.EQUALS,
+                MinimalXmlLexer.VALUE,
+                MinimalXmlLexer.CLOSE_PI
             };
             var tokens = result.Tokens.Tokens;
             Assert.Equal(expectedTokens.Count,tokens.Count-1);

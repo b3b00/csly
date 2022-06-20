@@ -254,6 +254,7 @@ namespace sly.lexer.fsm
                 if (currentNode.IsEnd)
                 {
                     // Remember the possible match
+                    lexerPosition.Mode = this.Mode;
                     result = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id,lexerPosition, currentNode.IsLineEnding, currentNode.IsPopModeNode, currentNode.IsPushModeNode, currentNode.PushToMode);
                 }
 
