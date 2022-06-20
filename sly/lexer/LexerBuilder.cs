@@ -11,17 +11,6 @@ namespace sly.lexer
 
     public static class DicExt
     {
-        public static void AddToKey<K, V>(this IDictionary<K, IList<V>> dic, K key, V value)
-        {
-            IList<V> values ;
-            if (!dic.TryGetValue(key, out values))
-            {
-                values = new List<V>();
-            }
-            values.Add(value);
-            dic[key] = values;
-        }
-        
         public static void AddToKey<K, K2, V>(this IDictionary<K, IDictionary<K2,V>> dic, K key, K2 k2, V value)
         {
             IDictionary<K2,V> values ;

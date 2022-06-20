@@ -181,7 +181,7 @@ namespace ParserTests
         [Production("expression: widget (OR [d] widget)+")]
         public string Expression(string widget, List<Group<Issue277Tokens, string>> ors)
         {
-            return ors.Aggregate($"{widget}", (acc, a) => $"{acc} | {a.Value(0)}");
+            return ors.Aggregate($"{widget}", (acc, a) => $"{acc} | {a.Value("widget")}");
         }
     }
     

@@ -284,7 +284,7 @@ namespace ParserTests
             option.Match(
                 group =>
                 {
-                    var aToken = group.Token(0).Value;
+                    var aToken = group.Token("A").Value;
                     builder.Append($";{aToken}");
                     return null;
                 },
