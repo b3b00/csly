@@ -29,6 +29,7 @@ using sly.buildresult;
 using sly.i18n;
 using sly.parser.generator.visitor;
 using sly.parser.parser;
+using XML;
 using Xunit;
 using ExpressionContext = postProcessedLexerParser.expressionModel.ExpressionContext;
 
@@ -1036,7 +1037,8 @@ else
             // TestShortOperations();
             // TestChannels();
             //TestIndentedParserNeverEnding();
-            TestLexerModes();
+            //TestLexerModes();
+            TestXmlParser();
         }
 
         private static void testManySugar()
@@ -1047,6 +1049,42 @@ else
             Console.WriteLine(".");
         }
 
+        private static void TestXmlParser()
+        {
+            ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
+            var parser = new MinimalXmlParser();
+            var r = builder.BuildParser(parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+            if (r.IsError)
+            {
+                r.Errors.ForEach(x => Console.WriteLine(x.Message));
+                return;
+            }
+            Console.WriteLine(r.Result.SyntaxParser.Dump());
+            var pr = r.Result.Parse(@"
+<?xml version=""1.0""?>
+<!-- starting doc -->
+<root name=""root"">
+    <autoInner name=""autoinner1""/>
+    <inner name=""inner"">
+         <?PI name=""pi""?> 
+        <innerinner name=""innerinner"">
+            inner inner content
+        </innerinner>
+    </inner>                      
+</root>
+");
+            if (pr.IsError)
+            {
+                pr.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+            }
+            else
+            {
+                Console.WriteLine("WAHOU !");
+                Console.WriteLine();
+                Console.WriteLine(pr.Result);
+            }
+        }
+        
         private static void TestLexerModes()
         {
             // testManySugar();

@@ -5,89 +5,19 @@ using System.Collections.Generic;
 using System.Linq;
 using sly.buildresult;
 using sly.lexer;
+using sly.parser.generator;
+using XML;
 using Xunit;
 
 namespace ParserTests.lexer
 {
-    [Lexer()]
-    [Modes("one","two")]
-    public enum MinimalXmlLexer
-    {
-        NOT_A_TOKEN = 0,
-        
-        
-        #region sea
-        [Sugar("<")]
-        [Mode()]
-        [Push("tag")]
-        OPEN,
-        
-        [AllExcept("<")]
-        CONTENT,
-        
-        [Sugar("<?")]
-        [Mode]
-        [Push("pi")]
-        OPEN_PI,
-
-
-        #endregion
-        
-        
-        [MultiLineComment("<!--","-->",channel:Channels.Main)]
-        [Mode]
-        COMMENT,
-        
-        
-        #region pi
-        
-        #endregion
-        
-        
-        #region in tag
-        
-        [AlphaId]
-        [Mode("tag")]
-        [Mode("pi")]
-        ID,
-        
-        [Sugar("/")]
-        [Mode("tag")]
-        SLASH,
-        
-        [Sugar("=")]
-        [Mode("tag")]
-        [Mode("pi")]
-        EQUALS,
-        
-        [String]
-        [Mode("tag")]
-        [Mode("pi")]
-        VALUE,
-        
-        [Sugar("?>")]
-        [Mode("pi")]
-        [Pop]
-        CLOSE_PI,
-        
-        
-        
-        [Sugar(">")]
-        [Mode("tag")]
-        [Pop]
-        CLOSE,
-        
-        #endregion
-        
-        
-        
-    }
+   
     
     
     public class LexerModesTest
     {
         [Fact]
-        public static void Test()
+        public static void TestLexerModes()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MinimalXmlLexer>>());
             Assert.False(lexerRes.IsError);
@@ -124,6 +54,32 @@ namespace ParserTests.lexer
             {
                 Assert.Equal(expectedTokens[i],tokens[i].TokenID);
             }
+        }
+
+        [Fact]
+        public void TestXmlParserWithLexerModes()
+        {
+            ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
+            var parser = new MinimalXmlParser();
+            var r = builder.BuildParser(parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+            Assert.False(r.IsError);
+            var pr = r.Result.Parse(@"
+<?xml version=""1.0""?>
+<!-- starting doc -->
+<root name=""root"">
+    <autoInner name=""autoinner1""/>
+    <inner name=""inner"">
+         <?PI name=""pi""?> 
+        <innerinner name=""innerinner"">
+            inner inner content
+        </innerinner>
+    </inner>                      
+</root>
+");
+            Assert.True(pr.IsOk);
+            Assert.NotNull(pr.Result);
+            Assert.NotEmpty(pr.Result);
+            
         }
     }
 }

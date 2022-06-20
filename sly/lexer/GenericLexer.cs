@@ -283,7 +283,6 @@ namespace sly.lexer
                 {
                     lexersStack.Pop();
                     LexerFsm = lexersStack.Peek();
-                    Console.WriteLine($"poping mode -> {LexerFsm.Mode}");
                     r.NewPosition.Mode = LexerFsm.Mode;
                     return LexerFsm;
                 }
@@ -291,7 +290,6 @@ namespace sly.lexer
                 if (r.IsPush)
                 {
                     LexerFsm = SubLexersFsm[r.NewPosition.Mode];
-                    Console.WriteLine($"pushing mode {r.NewPosition.Mode}");
                     lexersStack.Push(LexerFsm);
                 }
                 else
