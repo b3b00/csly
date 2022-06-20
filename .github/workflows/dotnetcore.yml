@@ -42,7 +42,7 @@ jobs:
         output: 'lcov.info'
         threshold: 80
         outputFormat: 'lcov'
-        excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*,[postProcessedLexerParser]*'
+        excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*,[postProcessedLexerParser]*,[XML]*'
 
     - name: coveralls      
       uses: coverallsapp/github-action@v1.1.1
