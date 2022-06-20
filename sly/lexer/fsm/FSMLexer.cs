@@ -65,6 +65,14 @@ namespace sly.lexer.fsm
         {
             var dump = new StringBuilder();
             dump.AppendLine($"digraph {Mode} {{");
+
+            foreach (var fsmNode in Nodes)
+            {
+                dump.Append(fsmNode.Value.Id);
+                var shape = fsmNode.Value.IsEnd ? "doublecircle" : "circle";
+                dump.AppendLine($@"[shape={shape} label=""{fsmNode.Value.GraphVizNodeLabel<N>()}""] ");
+
+            }
             
             foreach (var transition in Transitions.Values.SelectMany<List<FSMTransition>, FSMTransition>(x => x) )
                 dump.AppendLine(transition.ToGraphViz<N>(Nodes));
