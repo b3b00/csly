@@ -8,11 +8,16 @@ namespace sly.lexer
      
         public const string DefaultLexerMode = "default";
         
-        public string Mode { get; }
+        public string[] Modes { get; }
 
-        public ModeAttribute(string mode = DefaultLexerMode)
+        public ModeAttribute()
         {
-            Mode = mode;
+            Modes = new[] { DefaultLexerMode };
+        }
+        
+        public ModeAttribute(params string[] modes)
+        {
+            Modes = modes;
         }
     }
 }

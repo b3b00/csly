@@ -213,13 +213,19 @@ namespace sly.lexer
             {
                 if (attribute.Key is Enum enumValue)
                 {
-                    var modes = enumValue.GetAttributesOfType<ModeAttribute>();
+                    var modeAtributes = enumValue.GetAttributesOfType<ModeAttribute>();
 
-                    if (modes != null && modes.Any())
+                    if (modeAtributes != null && modeAtributes.Any())
                     {
-                        foreach (var mode in modes.Select(x => x.Mode))
+                        foreach (var modes in modeAtributes.Select(x => x.Modes))
                         {
-                            subLexers.AddToKey(mode,attribute.Key,attribute.Value);
+                            if (modes != null && modes.Any())
+                            {
+                                foreach (var mode in modes)
+                                {
+                                    subLexers.AddToKey(mode,attribute.Key,attribute.Value);        
+                                }
+                            }
                         }
                     }
                     else

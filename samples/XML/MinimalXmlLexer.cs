@@ -50,12 +50,11 @@ namespace XML
         SLASH,
         
         [Sugar("=")]
-        [Mode("tag")]
-        [Mode("pi")]
+        [Mode("tag","pi")]
         EQUALS,
         
         [String]
-        [Mode("tag")]
+        [Mode("tag","pi")]
         [Mode("pi")]
         VALUE,
         
