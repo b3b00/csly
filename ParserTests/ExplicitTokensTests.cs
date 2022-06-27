@@ -152,7 +152,6 @@ else
 c = 3.0
 ");
             Assert.False(r.IsError);
-            Assert.Equal("test:1,test:2,test:3",r.Result);
         }
         
     }
