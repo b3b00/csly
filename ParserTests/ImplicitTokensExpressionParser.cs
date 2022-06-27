@@ -39,7 +39,6 @@ namespace ParserTests
                 case "-" : return left - right;
                 default : throw new InvalidOperationException($"that is not possible ! {operation.Value} is not a valid operation");
             }
-            return 0;
         }
             
         [Operation((int) ImplicitTokensTokens.TIMES, Affix.InFix, Associativity.Left, 50)]

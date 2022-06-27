@@ -70,7 +70,7 @@ namespace sly.lexer.fsm
             {
                 dump.Append(fsmNode.Value.Id);
                 var shape = fsmNode.Value.IsEnd ? "doublecircle" : "circle";
-                dump.AppendLine($@"[shape={shape} label=""{fsmNode.Value.GraphVizNodeLabel<N>()}""] ");
+                dump.AppendLine($@"[shape={shape} label=""{fsmNode.Value.GraphVizNodeLabel()}""] ");
 
             }
             

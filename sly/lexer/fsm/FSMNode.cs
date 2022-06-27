@@ -23,7 +23,7 @@
 
         public bool IsPopModeNode { get; set; }
         
-        public string GraphVizNodeLabel<N>()
+        public string GraphVizNodeLabel()
         {
             var push = IsPushModeNode ? "Push(" + PushToMode + ")" : "";
             var pop = IsPopModeNode ? "Pop()" : "";
