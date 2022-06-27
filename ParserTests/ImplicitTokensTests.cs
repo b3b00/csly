@@ -10,8 +10,6 @@ namespace ParserTests
 {
     public class ImplicitTokensTests
     {
-        private Parser<ImplicitTokensTokens, double> Parser;
-
         private BuildResult<Parser<ImplicitTokensTokens, double>> BuildParser()
         {
             var parserInstance = new ImplicitTokensParser();
