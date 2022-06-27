@@ -41,11 +41,12 @@ namespace sly.parser.syntax.grammar
 
         public virtual bool Check(Token<T> nextToken)
         {
+            return ExpectedToken.Match(nextToken);
             if (IsExplicitToken)
             {
                 return nextToken.Value.Equals(ExplicitToken);
             }
-            return nextToken.TokenID.Equals(ExpectedToken);
+            return nextToken.TokenID.Equals(ExpectedToken.TokenId);
         }
 
         [ExcludeFromCodeCoverage]

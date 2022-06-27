@@ -97,11 +97,9 @@ namespace sly.parser
                 
                 if (ExpectedTokens != null && ExpectedTokens.Any())
                 {
-                    
-
                     foreach (var t in ExpectedTokens)
                     {
-                        expecting.Append(t);
+                        expecting.Append(t.ToString());
                         expecting.Append(", ");
                     }
                 }
