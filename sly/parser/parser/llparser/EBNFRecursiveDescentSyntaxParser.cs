@@ -31,7 +31,7 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
             var children = new List<ISyntaxNode<IN>>();
-            if (rule.PossibleLeadingTokens.Contains(tokens[position].TokenID) || rule.MayBeEmpty)
+            if (rule.PossibleLeadingTokens.Any(x => x.Match(tokens[position])) || rule.MayBeEmpty)
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
                     children = new List<ISyntaxNode<IN>>();
@@ -170,7 +170,7 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
             var children = new List<ISyntaxNode<IN>>();
-            if (!tokens[position].IsEOS && rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
+            if (!tokens[position].IsEOS && rule.PossibleLeadingTokens.Any(x => x.Match(tokens[position])))
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
                     if (MatchExpressionRuleScheme(rule)) 
@@ -577,7 +577,7 @@ namespace sly.parser.llparser
             if (result.IsError && choice.IsTerminalChoice)
             {
                 var terminalAlternates = choice.Choices.Cast<TerminalClause<IN>>();
-                var expected = terminalAlternates.Select<TerminalClause<IN>, IN>(x => x.ExpectedToken).ToList<IN>();
+                var expected = terminalAlternates.Select(x => x.ExpectedToken).ToList();
                 result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],I18n,expected.ToArray()));
             }
             

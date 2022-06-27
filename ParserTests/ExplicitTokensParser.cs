@@ -3,10 +3,10 @@ using sly.parser.generator;
 
 namespace ParserTests
 {
-    public class ImplicitTokensParser
+    public class ExplicitTokensParser
     {
         [Production("primary: DOUBLE")]
-        public double Primary(Token<ImplicitTokensTokens> doubleToken)
+        public double Primary(Token<ExplicitTokensTokens> doubleToken)
         {
             return doubleToken.DoubleValue;
         }
@@ -27,7 +27,7 @@ namespace ParserTests
         [Production("expression : primary ['+' | '-'] expression")]
         
         
-        public double Expression(double left, Token<ImplicitTokensTokens> operatorToken, double right)
+        public double Expression(double left, Token<ExplicitTokensTokens> operatorToken, double right)
         {
             double result = 0.0;
 

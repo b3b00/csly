@@ -7,6 +7,7 @@ using sly.lexer;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
 using sly.parser.parser;
+using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 
 namespace sly.parser
@@ -131,8 +132,8 @@ namespace sly.parser
                 var errors = new List<ParseError>();  
                 foreach (var expecting in byEnding)
                 {
-                    var expectingTokens = expecting.SelectMany<UnexpectedTokenSyntaxError<IN>, IN>(x => x.ExpectedTokens ?? new List<IN>()).Distinct<IN>();
-                    var expectedTokens =  expectingTokens != null && expectingTokens.Any<IN>() ? expectingTokens?.ToArray<IN>() : null;
+                    var expectingTokens = expecting.SelectMany<UnexpectedTokenSyntaxError<IN>, LeadingToken<IN>>(x => x.ExpectedTokens ?? new List<LeadingToken<IN>>()).Distinct();
+                    var expectedTokens =  expectingTokens != null && expectingTokens.Any() ? expectingTokens?.ToArray() : null;
                     if (expectedTokens != null)
                     {
                         var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First<UnexpectedTokenSyntaxError<IN>>().UnexpectedToken, I18n,

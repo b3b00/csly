@@ -1,6 +1,9 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using csly.whileLang.model;
 using sly.buildresult;
+using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
@@ -8,21 +11,61 @@ using Xunit;
 
 namespace ParserTests
 {
-    public class ImplicitTokensTests
+
+    public enum Lex
     {
-        private BuildResult<Parser<ImplicitTokensTokens, double>> BuildParser()
+        Nop = 0,
+        [AlphaId]
+        Id = 1,
+        
+        [Double]
+        Dbl = 2
+    }
+
+    public class Parse
+    {
+        [Production("program : statement*")]
+        public string Program(List<string> statements)
         {
-            var parserInstance = new ImplicitTokensParser();
-            var builder = new ParserBuilder<ImplicitTokensTokens, double>();
+            return string.Join("\n", statements);
+        }
+
+        [Production("statement : Id '='[d] Dbl ")]
+        public string Assignment(Token<Lex> id, Token<Lex> dbl)
+        {
+            return $"{id.Value} = {dbl.DoubleValue}";
+        }
+        
+        [Production("condition : Id '=='[d] Dbl ")]
+        public string Condition(Token<Lex> id, Token<Lex> dbl)
+        {
+            return $"{id.Value} == {dbl.DoubleValue}";
+        }
+
+        [Production("statement : 'if'[d] condition 'then'[d] statement 'else'[d] statement")]
+        public string IfThenElse(string condition, string thenStatement, string elseStatement)
+        {
+            return $@"{condition} :
+    - {thenStatement}
+    - {elseStatement}";
+        }
+    }
+    
+    public class ExplicitTokensTests
+    {
+        private BuildResult<Parser<ExplicitTokensTokens, double>> BuildParser()
+        {
+            var parserInstance = new ExplicitTokensParser();
+            var builder = new ParserBuilder<ExplicitTokensTokens, double>();
             var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression");
             return result;
         }
         
-        private BuildResult<Parser<ImplicitTokensTokens, double>> BuildExpressionParser()
+        private BuildResult<Parser<ExplicitTokensTokens, double>> BuildExpressionParser()
         {
-            var parserInstance = new ImplicitTokensExpressionParser();
-            var builder = new ParserBuilder<ImplicitTokensTokens, double>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(ImplicitTokensExpressionParser)+"_expressions");
+            var parserInstance = new ExplicitTokensExpressionParser();
+            var builder = new ParserBuilder<ExplicitTokensTokens, double>();
+            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(ExplicitTokensExpressionParser)+"_expressions");
             var dump = result.Result.Configuration.Dump();
             return result;
         }
@@ -48,7 +91,7 @@ namespace ParserTests
             Assert.NotNull(parser.Result);
             var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
             var tree = r.SyntaxTree;
-            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ImplicitTokensTokens>();
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExplicitTokensTokens>();
             var dump = tree.Dump("\t");
             // File.Delete(@"c:\temp\tree.txt");
             // File.WriteAllText(@"c:\temp\tree.txt",dump);
@@ -72,9 +115,9 @@ namespace ParserTests
         [Fact]
         public void TestErrorWhenUsingImplicitTokensAndRegexLexer()
         {
-            var parserInstance = new RegexLexAndImplicitTokensParser();
-            var builder = new ParserBuilder<RegexLexAndImplicitTokensLexer, string>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(RegexLexAndImplicitTokensParser)+"_expressions");
+            var parserInstance = new RegexLexAndExplicitTokensParser();
+            var builder = new ParserBuilder<RegexLexAndExplicitTokensLexer, string>();
+            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(RegexLexAndExplicitTokensParser)+"_expressions");
             Assert.True(result.IsError);
             Assert.Single(result.Errors);
             Assert.Equal(ErrorCodes.LEXER_CANNOT_USE_IMPLICIT_TOKENS_WITH_REGEX_LEXER,result.Errors.First().Code);
@@ -89,6 +132,25 @@ namespace ParserTests
             Assert.False(result.IsError);
             Assert.NotNull(result.Result);
             var r = result.Result.Parse("test 1 test 2 test 3");
+            Assert.False(r.IsError);
+            Assert.Equal("test:1,test:2,test:3",r.Result);
+        }
+        
+        [Fact]
+        public void Test()
+        {
+            var parserInstance = new Parse();
+            var builder = new ParserBuilder<Lex, string>();
+            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+            Assert.False(result.IsError);
+            Assert.NotNull(result.Result);
+            var r = result.Result.Parse(@"
+if a == 1.0 then
+    b = 1.0
+else 
+    b = 2.0
+c = 3.0
+");
             Assert.False(r.IsError);
             Assert.Equal("test:1,test:2,test:3",r.Result);
         }

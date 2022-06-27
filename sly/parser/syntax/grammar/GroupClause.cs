@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace sly.parser.syntax.grammar
 {
-    public class GroupClause<T> : IClause<T>
+    public class GroupClause<T> : IClause<T> where T : struct
     {
         public GroupClause(IClause<T> clause)
         {

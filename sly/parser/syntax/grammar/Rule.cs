@@ -45,7 +45,7 @@ namespace sly.parser.syntax.grammar
         }
 
         public List<IClause<IN>> Clauses { get; set; }
-        public List<IN> PossibleLeadingTokens { get; set; }
+        public List<LeadingToken<IN>> PossibleLeadingTokens { get; set; }
 
         public string NonTerminalName { get; set; }
 

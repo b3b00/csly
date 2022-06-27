@@ -46,11 +46,11 @@ namespace ParserTests.Issue164
             Assert.NotNull(unexpectedTokenError.ExpectedTokens);
             Assert.NotEmpty(unexpectedTokenError.ExpectedTokens);
             Assert.Equal(5,unexpectedTokenError.ExpectedTokens.Count);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.PLUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.MINUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.TIMES);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.DIVIDE);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == ExpressionToken.FACTORIAL);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == ExpressionToken.PLUS);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == ExpressionToken.MINUS);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == ExpressionToken.TIMES);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == ExpressionToken.DIVIDE);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == ExpressionToken.FACTORIAL);
             ;
         }
     }

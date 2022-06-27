@@ -19,7 +19,7 @@ namespace sly.parser.generator
             Precedence = precedence;
             Associativity = assoc;
             VisitorMethod = method;
-            ImplicitOperatorToken = oper;
+            ExplicitOperatorToken = oper;
             Affix = affix;
         }
 
@@ -37,9 +37,9 @@ namespace sly.parser.generator
 
         public bool IsUnary => Affix != Affix.InFix;
 
-        public bool IsImplicitOperatorToken => !string.IsNullOrEmpty(ImplicitOperatorToken);
+        public bool IsExplicitOperatorToken => !string.IsNullOrEmpty(ExplicitOperatorToken);
 
-        public string ImplicitOperatorToken { get; set; }
+        public string ExplicitOperatorToken { get; set; }
 
         [ExcludeFromCodeCoverage]
         public override string ToString()

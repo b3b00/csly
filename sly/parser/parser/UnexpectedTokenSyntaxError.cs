@@ -4,14 +4,15 @@ using System.Linq;
 using System.Text;
 using sly.i18n;
 using sly.lexer;
+using sly.parser.syntax.grammar;
 
 namespace sly.parser
 {
-    public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable
+    public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable where T : struct
     {
         private string I18n;
         
-        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, string i18n=null, params T[] expectedTokens )
+        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, string i18n=null, params LeadingToken<T>[] expectedTokens )
         {
             I18n = i18n;
             ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
@@ -19,7 +20,7 @@ namespace sly.parser
             UnexpectedToken = unexpectedToken;
             if (expectedTokens != null)
             {
-                ExpectedTokens = new List<T>();
+                ExpectedTokens = new List<LeadingToken<T>>();
                 ExpectedTokens.AddRange(expectedTokens);
             }
             else
@@ -29,7 +30,7 @@ namespace sly.parser
 
         }
 
-        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, string i18n = null, List<T> expectedTokens = null) 
+        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, string i18n = null, List<LeadingToken<T>> expectedTokens = null) 
         {
             I18n = i18n;
             ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
@@ -37,7 +38,7 @@ namespace sly.parser
             UnexpectedToken = unexpectedToken;
             if (expectedTokens != null)
             {
-                ExpectedTokens = new List<T>();
+                ExpectedTokens = new List<LeadingToken<T>>();
                 ExpectedTokens.AddRange(expectedTokens);
             }
             else
@@ -49,7 +50,7 @@ namespace sly.parser
 
         public Token<T> UnexpectedToken { get; set; }
 
-        public List<T> ExpectedTokens { get; set; }
+        public List<LeadingToken<T>> ExpectedTokens { get; set; }
 
         public override int Line
         {
@@ -77,7 +78,7 @@ namespace sly.parser
                 if (UnexpectedToken.IsEOS)
                 {
                     i18NMessage = I18NMessage.UnexpectedEos;
-                    if (ExpectedTokens != null && ExpectedTokens.Any<T>())
+                    if (ExpectedTokens != null && ExpectedTokens.Any())
                     {
                         i18NMessage = I18NMessage.UnexpectedEosExpecting;
                     }
@@ -85,7 +86,7 @@ namespace sly.parser
                 else
                 {
                     i18NMessage = I18NMessage.UnexpectedToken;
-                    if (ExpectedTokens != null && ExpectedTokens.Any<T>())
+                    if (ExpectedTokens != null && ExpectedTokens.Any())
                     {
                         i18NMessage = I18NMessage.UnexpectedTokenExpecting;
                     }
@@ -94,7 +95,7 @@ namespace sly.parser
                 
                 var expecting = new StringBuilder();
                 
-                if (ExpectedTokens != null && ExpectedTokens.Any<T>())
+                if (ExpectedTokens != null && ExpectedTokens.Any())
                 {
                     
 

@@ -1,4 +1,5 @@
-﻿using sly.parser;
+﻿using System.Linq;
+using sly.parser;
 using sly.parser.generator;
 
 using Xunit;
@@ -49,7 +50,8 @@ namespace ParserTests.Issue263
             Assert.Equal(expectedTokens.Length,unexpected.ExpectedTokens.Count);
             for (int i = 0; i < expectedTokens.Length; i++)
             {
-                Assert.Contains(expectedTokens[i], unexpected.ExpectedTokens);
+                Assert.True(unexpected.ExpectedTokens.Any(x => x.TokenId == expectedTokens[i]));
+                //Assert.Contains(expectedTokens[i], unexpected.ExpectedTokens);
             }
         }
     }

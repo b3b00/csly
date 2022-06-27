@@ -4,33 +4,33 @@ using sly.lexer;
 
 namespace sly.parser.syntax.grammar
 {
-    public class TerminalClause<T> : IClause<T>
+    public class TerminalClause<T> : IClause<T> where T : struct
     {
-        public TerminalClause(T token)
+        public TerminalClause(LeadingToken<T> token)
         {
             ExpectedToken = token;
         }
 
-        public TerminalClause(T token, bool discard) : this(token)
+        public TerminalClause(LeadingToken<T> token, bool discard) : this(token)
         {
             Discarded = discard;
         }
         
-        public TerminalClause(string implicitToken, bool discard) : this(default(T))
+        public TerminalClause(string explicitToken, bool discard) : this(new LeadingToken<T>(default(T),explicitToken))
         {
-            ImplicitToken = implicitToken;
+            ExplicitToken = explicitToken;
             Discarded = discard;
         }
         
-        public TerminalClause(string implicitToken) : this(implicitToken,false)
+        public TerminalClause(string explicitToken) : this(explicitToken,false)
         {
         }
 
-        public T ExpectedToken { get; set; }
+        public LeadingToken<T> ExpectedToken { get; set; }
 
-        public string ImplicitToken { get; set; }
+        public string ExplicitToken { get; set; }
 
-        public bool IsImplicitToken => !string.IsNullOrEmpty(ImplicitToken);
+        public bool IsExplicitToken => !string.IsNullOrEmpty(ExplicitToken);
         
         public bool Discarded { get; set; }
 
@@ -41,9 +41,9 @@ namespace sly.parser.syntax.grammar
 
         public virtual bool Check(Token<T> nextToken)
         {
-            if (IsImplicitToken)
+            if (IsExplicitToken)
             {
-                return nextToken.Value.Equals(ImplicitToken);
+                return nextToken.Value.Equals(ExplicitToken);
             }
             return nextToken.TokenID.Equals(ExpectedToken);
         }
@@ -52,9 +52,9 @@ namespace sly.parser.syntax.grammar
         public override string ToString()
         {
             var b = new StringBuilder();
-            if (IsImplicitToken)
+            if (IsExplicitToken)
             {
-                b.Append($"'{ImplicitToken}'");
+                b.Append($"'{ExplicitToken}'");
             }
             else
             {
@@ -69,9 +69,9 @@ namespace sly.parser.syntax.grammar
         public virtual string Dump()
         {
 
-            if (IsImplicitToken)
+            if (IsExplicitToken)
             {
-                return $"'{ImplicitToken}'(T)";
+                return $"'{ExplicitToken}'(T)";
             }
             return $"{ExpectedToken}(T)";
         }
@@ -84,11 +84,11 @@ namespace sly.parser.syntax.grammar
         UnIndent
     }
     
-    public class IndentTerminalClause<T> : TerminalClause<T>
+    public class IndentTerminalClause<T> : TerminalClause<T> where T : struct
     {
         private IndentationType ExpectedIndentation;
         
-        public IndentTerminalClause(IndentationType expectedIndentation, bool discard) : base(default(T))
+        public IndentTerminalClause(IndentationType expectedIndentation, bool discard) : base(default(LeadingToken<T>))
         {
             ExpectedIndentation = expectedIndentation;
             Discarded = discard;
