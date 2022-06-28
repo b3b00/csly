@@ -91,7 +91,7 @@ namespace sly.parser.generator
         [Production("choices : STRING")]
         public IClause<IN> ChoicesString(Token<EbnfTokenGeneric> head)
         {
-            var choice = BuildTerminalOrNonTerimal(head.Value, discard: false,implicitToken:true);
+            var choice = BuildTerminalOrNonTerimal(head.Value, discard: false,explicitToken:true);
             return new ChoiceClause<IN>(choice);
         }
         
@@ -105,7 +105,7 @@ namespace sly.parser.generator
         [Production("choices : STRING OR choices ")]
         public IClause<IN> ChoicesManyImplicit(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> discardOr, ChoiceClause<IN> tail)
         {
-            var headClause = BuildTerminalOrNonTerimal(head.Value,discard:false,implicitToken:true); 
+            var headClause = BuildTerminalOrNonTerimal(head.Value,discard:false,explicitToken:true); 
             return new ChoiceClause<IN>(headClause,tail.Choices);
         }
         
@@ -118,14 +118,14 @@ namespace sly.parser.generator
         }
 
         [Production("clause : STRING")]
-        public IClause<IN> ImplicitTokenClause(Token<EbnfTokenGeneric> implicitToken) {
-            var clause = BuildTerminalOrNonTerimal(implicitToken.Value,discard:false, implicitToken :true);
+        public IClause<IN> ExplicitTokenClause(Token<EbnfTokenGeneric> explicitToken) {
+            var clause = BuildTerminalOrNonTerimal(explicitToken.Value,discard:false, explicitToken :true);
             return clause;
         }
         
         [Production("clause : STRING DISCARD")]
-        public IClause<IN> ImplicitTokenClauseDiscarded(Token<EbnfTokenGeneric> implicitToken, Token<EbnfTokenGeneric> discard) {
-            var clause = BuildTerminalOrNonTerimal(implicitToken.Value,discard:true, implicitToken :true);
+        public IClause<IN> ExplicitTokenClauseDiscarded(Token<EbnfTokenGeneric> explicitToken, Token<EbnfTokenGeneric> discard) {
+            var clause = BuildTerminalOrNonTerimal(explicitToken.Value,discard:true, explicitToken :true);
             return clause;
         }
 
@@ -218,7 +218,7 @@ namespace sly.parser.generator
         #endregion
 
 
-        private IClause<IN> BuildTerminalOrNonTerimal(string name, bool discard = false, bool implicitToken = false)
+        private IClause<IN> BuildTerminalOrNonTerimal(string name, bool discard = false, bool explicitToken = false)
         {
             
             var token = default(IN);
@@ -233,7 +233,7 @@ namespace sly.parser.generator
             
             
             if (isTerminal)
-                clause = new TerminalClause<IN>(token, discard);
+                clause = new TerminalClause<IN>(new LeadingToken<IN>(token), discard);
             else
             {
                 if (name.StartsWith("'"))

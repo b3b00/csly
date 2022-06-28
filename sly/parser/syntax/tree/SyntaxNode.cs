@@ -86,9 +86,9 @@ namespace sly.parser.syntax.tree
             string expressionSuffix = "";
             if (Operation != null && (Operation.IsBinary || Operation.IsBinary))
             {
-                if (Operation.IsImplicitOperatorToken)
+                if (Operation.IsExplicitOperatorToken)
                 {
-                    expressionSuffix = Operation.ImplicitOperatorToken;
+                    expressionSuffix = Operation.ExplicitOperatorToken;
                 }
                 else
                 {

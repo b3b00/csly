@@ -30,14 +30,14 @@ namespace ParserTests.Issue259
             Assert.NotNull(unexpectedTokenError);
             Assert.Equal(Issue259ExpressionToken.COMPARISON, unexpectedTokenError.UnexpectedToken.TokenID);
             Assert.Equal(">",unexpectedTokenError.UnexpectedToken.Value);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Issue259ExpressionToken.ON);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Issue259ExpressionToken.OFF);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Issue259ExpressionToken.MINUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Issue259ExpressionToken.HEX_NUMBER);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Issue259ExpressionToken.DECIMAL_NUMBER);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Issue259ExpressionToken.LVAR);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Issue259ExpressionToken.SIMVAR);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == Issue259ExpressionToken.LPAREN);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.ON);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.OFF);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.MINUS);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.HEX_NUMBER);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.DECIMAL_NUMBER);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.LVAR);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.SIMVAR);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.LPAREN);
             
         }
     }

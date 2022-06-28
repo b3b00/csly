@@ -101,7 +101,7 @@ namespace sly.parser.generator
                 
                 result.Result.Configuration = expressionResult.Result;
                 
-                var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, result.Result.Configuration.GetAllImplicitTokenClauses().Select(x => x.ImplicitToken).Distinct().ToList());
+                var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, result.Result.Configuration.GetAllExplicitTokenClauses().Select(x => x.ExplicitToken).Distinct().ToList());
                 if (lexerResult.IsError)
                 {
                     foreach (var lexerResultError in lexerResult.Errors)
@@ -181,11 +181,11 @@ namespace sly.parser.generator
 
 
         protected virtual BuildResult<ILexer<IN>> BuildLexer(BuildExtension<IN> extensionBuilder = null,
-            LexerPostProcess<IN> lexerPostProcess = null, IList<string> implicitTokens = null)
+            LexerPostProcess<IN> lexerPostProcess = null, IList<string> explicitTokens = null)
         {
             
             
-            var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n, lexerPostProcess, implicitTokens);
+            var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n, lexerPostProcess, explicitTokens);
 
             return lexer;
         }
@@ -265,7 +265,7 @@ namespace sly.parser.generator
 
                 if (isTerminal)
                 {
-                    clause = new TerminalClause<IN>(token);
+                    clause = new TerminalClause<IN>(new LeadingToken<IN>(token));
                 }
                 else if (item == "[d]")
                 {

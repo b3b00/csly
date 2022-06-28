@@ -18,9 +18,9 @@ namespace sly.parser.generator
             if (!NonTerminals.ContainsKey(nonTerminal.Name)) NonTerminals[nonTerminal.Name] = nonTerminal;
         }
 
-        public bool HasImplicitTokens() => GetAllImplicitTokenClauses().Any();
+        public bool HasExplicitTokens() => GetAllExplicitTokenClauses().Any();
 
-        public List<TerminalClause<IN>> GetAllImplicitTokenClauses()
+        public List<TerminalClause<IN>> GetAllExplicitTokenClauses()
         {
             List<TerminalClause<IN>> clauses = new List<TerminalClause<IN>>();
             foreach (var nonTerminal in NonTerminals.Values)
@@ -29,7 +29,7 @@ namespace sly.parser.generator
                 {
                     foreach (var clause in rule.Clauses)
                     {
-                        if (clause is TerminalClause<IN> terminalClause && terminalClause.IsImplicitToken)
+                        if (clause is TerminalClause<IN> terminalClause && terminalClause.IsExplicitToken)
                         {
                             clauses.Add(terminalClause);
                         }
@@ -38,7 +38,7 @@ namespace sly.parser.generator
                         {
                             foreach (var choice in choices.Choices)
                             {
-                                if (choice is TerminalClause<IN> terminal && terminal.IsImplicitToken)
+                                if (choice is TerminalClause<IN> terminal && terminal.IsExplicitToken)
                                 {
                                     clauses.Add(terminal);
                                 }
@@ -47,7 +47,7 @@ namespace sly.parser.generator
 
                         if (clause is OptionClause<IN> option)
                         {
-                            if (option.Clause is TerminalClause<IN> terminal && terminal.IsImplicitToken)
+                            if (option.Clause is TerminalClause<IN> terminal && terminal.IsExplicitToken)
                                 clauses.Add(terminal);
                         }
                     }
