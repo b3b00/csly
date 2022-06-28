@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using csly.whileLang.model;
 using sly.buildresult;
 using sly.lexer;
@@ -27,7 +28,13 @@ namespace ParserTests
         [Production("program : statement*")]
         public string Program(List<string> statements)
         {
-            return string.Join("\n", statements);
+            StringBuilder builder = new StringBuilder();
+            foreach (var statement in statements)
+            {
+                builder.AppendLine(statement);
+            }
+
+            return builder.ToString();
         }
 
         [Production("statement : Id '='[d] Dbl ")]
@@ -45,9 +52,11 @@ namespace ParserTests
         [Production("statement : 'if'[d] condition 'then'[d] statement 'else'[d] statement")]
         public string IfThenElse(string condition, string thenStatement, string elseStatement)
         {
-            return $@"{condition} :
-    - {thenStatement}
-    - {elseStatement}";
+            StringBuilder builder = new StringBuilder();
+            builder.AppendLine($"{condition} :");
+            builder.AppendLine($"    - {thenStatement}");
+            builder.AppendLine($"    - {elseStatement}");
+            return builder.ToString();
         }
     }
     
@@ -151,7 +160,12 @@ else
     b = 2.0
 c = 3.0
 ");
-            Assert.False(r.IsError);
+            Assert.Equal(@"a == 1 :
+    - b = 1
+    - b = 2
+
+c = 3
+",r.Result);
         }
         
     }
