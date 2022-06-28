@@ -77,7 +77,7 @@ jobs:
       id: create_release
       uses: actions/create-release@latest
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
       with:
         tag_name: ${{ steps.publish_nuget.outputs.VERSION }}
         release_name: Release ${{ steps.publish_nuget.outputs.VERSION }}
@@ -88,7 +88,7 @@ jobs:
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ${{ steps.publish_nuget.outputs.PACKAGE_PATH }}
