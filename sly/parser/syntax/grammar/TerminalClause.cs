@@ -1,9 +1,11 @@
+using System.Diagnostics;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
 using sly.lexer;
 
 namespace sly.parser.syntax.grammar
 {
+    [DebuggerDisplay("Terminal {(ExpectedToken.ToString())}{Discarded ? \"[d]\" : \"\"}")]
     public class TerminalClause<T> : IClause<T> where T : struct
     {
         public TerminalClause(LeadingToken<T> token)
@@ -42,11 +44,6 @@ namespace sly.parser.syntax.grammar
         public virtual bool Check(Token<T> nextToken)
         {
             return ExpectedToken.Match(nextToken);
-            if (IsExplicitToken)
-            {
-                return nextToken.Value.Equals(ExplicitToken);
-            }
-            return nextToken.TokenID.Equals(ExpectedToken.TokenId);
         }
 
         [ExcludeFromCodeCoverage]
@@ -59,22 +56,19 @@ namespace sly.parser.syntax.grammar
             }
             else
             {
-                b.Append(ExpectedToken);
+                b.Append(ExpectedToken.ToString());
             }
 
             if (Discarded) b.Append("[d]");
             b.Append("(T)");
             return b.ToString();
         }
-        
-        public virtual string Dump()
-        {
 
-            if (IsExplicitToken)
-            {
-                return $"'{ExplicitToken}'(T)";
-            }
-            return $"{ExpectedToken}(T)";
+        
+        [ExcludeFromCodeCoverage]
+        public string Dump()
+        {
+            return ToString();
         }
     }
 
@@ -115,9 +109,5 @@ namespace sly.parser.syntax.grammar
             return b.ToString();
         }
         
-        public override string Dump()
-        {
-            return ToString();
-        }
     }
 }
