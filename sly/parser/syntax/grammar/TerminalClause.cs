@@ -83,7 +83,7 @@ namespace sly.parser.syntax.grammar
     {
         private IndentationType ExpectedIndentation;
         
-        public IndentTerminalClause(IndentationType expectedIndentation, bool discard) : base(default(LeadingToken<T>))
+        public IndentTerminalClause(IndentationType expectedIndentation, bool discard) : base(new LeadingToken<T>(default(T)))
         {
             ExpectedIndentation = expectedIndentation;
             Discarded = discard;
