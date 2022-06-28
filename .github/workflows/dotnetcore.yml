@@ -63,7 +63,7 @@ jobs:
 #      uses: marocchino/sticky-pull-request-comment@v2
 #      with:
 #           path: coveragereport/Summary.md    
-     - name: publish nuget
+    - name: publish nuget
       if:  ${{success() && matrix.os == 'windows-latest' && env.PUBLISH_NUGET}}
       id: publish_nuget
       uses: brandedoutcast/publish-nuget@v2.5.2
