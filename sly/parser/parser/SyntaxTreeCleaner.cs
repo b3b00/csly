@@ -10,59 +10,12 @@ namespace sly.parser.parser
             var tree = result.Root;
             if (tree != null)
             {
-                if (result.HasByPassNodes)
-                {
-                    tree = RemoveByPassNodes(tree);
-                }
-                    
-                
                 if (result.UsesOperations) tree = SetAssociativity(tree);
                 result.Root = tree;
             }
 
             return result;
         }
-
-        private ISyntaxNode<IN> RemoveByPassNodes(ISyntaxNode<IN> tree)
-        {
-            ISyntaxNode<IN> result = null;
-
-
-            if (tree is SyntaxNode<IN> node && node.IsByPassNode)
-            {
-                result = RemoveByPassNodes(node.Children[0]);
-            }
-            else
-            {
-                switch (tree)
-                {
-                    case SyntaxLeaf<IN> leaf:
-                        result = leaf;
-                        break;
-                    case SyntaxNode<IN> innernode:
-                    {
-                        var newChildren = new List<ISyntaxNode<IN>>();
-                        foreach (var child in innernode.Children) newChildren.Add(RemoveByPassNodes(child));
-                        innernode.Children.Clear();
-                        innernode.Children.AddRange(newChildren);
-                        result = innernode;
-                        break;
-                    }
-                }
-
-                if (tree is ManySyntaxNode<IN> many)
-                {
-                    var newChildren = new List<ISyntaxNode<IN>>();
-                    foreach (var child in many.Children) newChildren.Add(RemoveByPassNodes(child));
-                    many.Children.Clear();
-                    many.Children.AddRange(newChildren);
-                    result = many;
-                }
-            }
-
-            return result;
-        }
-
 
         private ISyntaxNode<IN> SetAssociativity(ISyntaxNode<IN> tree)
         {

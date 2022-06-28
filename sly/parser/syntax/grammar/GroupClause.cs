@@ -1,11 +1,13 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Linq;
 
 namespace sly.parser.syntax.grammar
 {
-    public class GroupClause<T> : IClause<T>
+    [DebuggerDisplay("{ToString()}")]
+    public class GroupClause<T> : IClause<T> where T : struct
     {
         public GroupClause(IClause<T> clause)
         {
@@ -37,6 +39,11 @@ namespace sly.parser.syntax.grammar
             dump.Append(Clauses.Select<IClause<T>, string>(c => c.Dump()).Aggregate<string>((d1, d2) => d1 + " " + d2));
             dump.Append(" )");
             return dump.ToString();
+        }
+
+        public string ToString()
+        {
+            return Dump();
         }
     }
 }

@@ -36,7 +36,7 @@ namespace sly.parser.llparser
 
             foreach (var rule in nt.Rules)
             {
-                if (!tokens[0].IsEOS && rule.PossibleLeadingTokens.Contains(tokens[0].TokenID))
+                if (!tokens[0].IsEOS && rule.PossibleLeadingTokens.Any(x => x.Match(tokens[0])))
                 {
                     matchingRuleCount++;
                     var r = Parse(tokens, rule, 0, start);
@@ -116,7 +116,7 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
             var children = new List<ISyntaxNode<IN>>();
-            if (!tokens[position].IsEOS && rule.PossibleLeadingTokens.Contains(tokens[position].TokenID))
+            if (!tokens[position].IsEOS && rule.PossibleLeadingTokens.Any(x => x.Match(tokens[position])))
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
                     children = new List<ISyntaxNode<IN>>();
@@ -281,7 +281,7 @@ namespace sly.parser.llparser
             {
                 var innerrule = rules[i];
                 if (startPosition < tokens.Count && !tokens[startPosition].IsEOS &&
-                    innerrule.PossibleLeadingTokens.Contains(tokens[startPosition].TokenID) || innerrule.MayBeEmpty)
+                    innerrule.PossibleLeadingTokens.Any(x => x.Match(tokens[startPosition])) || innerrule.MayBeEmpty)
                 {
                     var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTerminalName);
                     rulesResults.Add(innerRuleRes);
@@ -303,7 +303,7 @@ namespace sly.parser.llparser
 
             if (rulesResults.Count == 0)
             {
-                var allAcceptableTokens = new List<IN>();
+                var allAcceptableTokens = new List<LeadingToken<IN>>();
                 nt.Rules.ForEach(r =>
                 {
                     if (r != null && r.PossibleLeadingTokens != null)
@@ -386,7 +386,7 @@ namespace sly.parser.llparser
         }
 
         private SyntaxParseResult<IN> NoMatchingRuleError(IList<Token<IN>> tokens, int currentPosition,
-            List<IN> allAcceptableTokens)
+            List<LeadingToken<IN>> allAcceptableTokens)
         {
             var noRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 

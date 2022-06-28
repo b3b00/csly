@@ -127,6 +127,33 @@ namespace sly.lexer.fsm
 
             return this;
         }
+        
+        
+        public FSMLexerBuilder<N> Push(string toMode)
+        {
+            if (Fsm.HasState(CurrentState))
+            {
+                var node = Fsm.GetNode(CurrentState);
+
+                node.IsPushModeNode = true;
+                node.PushToMode = toMode;
+            }
+
+            return this;
+        }
+        
+        // TODO : later pop to a specific mode
+        public FSMLexerBuilder<N> Pop(string toMode = null)
+        {
+            if (Fsm.HasState(CurrentState))
+            {
+                var node = Fsm.GetNode(CurrentState);
+
+                node.IsPopModeNode = true;
+            }
+
+            return this;
+        }
 
         public FSMLexerBuilder<N> CallBack(NodeCallback<N> callback)
         {

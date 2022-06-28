@@ -79,8 +79,8 @@ namespace sly.parser.llparser
 
         public NonTerminal<IN> CreateSubRule(GroupClause<IN> group)
         {
-            var subRuleNonTerminalName = "GROUP-" + group.Clauses.Select<IClause<IN>, string>(c => c.ToString())
-                                             .Aggregate<string>((c1, c2) => $"{c1.ToString()}-{c2.ToString()}");
+            var clauses = string.Join("-",group.Clauses.Select(x => x.Dump())).Replace(" ","");
+            var subRuleNonTerminalName = $"GROUP-{clauses}";
             var nonTerminal = new NonTerminal<IN>(subRuleNonTerminalName);
             var subRule = new Rule<IN>();
             subRule.Clauses = group.Clauses;
@@ -124,7 +124,7 @@ namespace sly.parser.llparser
         {
             if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
             {
-                rule.PossibleLeadingTokens = new List<IN>();
+                rule.PossibleLeadingTokens = new List<LeadingToken<IN>>();
                 if (rule.Clauses.Count > 0)
                 {
                     var first = rule.Clauses[0];
@@ -132,7 +132,7 @@ namespace sly.parser.llparser
                     {
                         case TerminalClause<IN> term:
                             rule.PossibleLeadingTokens.Add(term.ExpectedToken);
-                            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<IN>().ToList<IN>();
+                            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
                             break;
                         case NonTerminalClause<IN> nonterm:
                         {
@@ -144,7 +144,7 @@ namespace sly.parser.llparser
                                 {
                                     rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
                                 });
-                                rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<IN>().ToList<IN>();
+                                rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.ToList();
                             }
 
                             break;

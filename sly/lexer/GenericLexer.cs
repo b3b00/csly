@@ -21,7 +21,8 @@ namespace sly.lexer
 
         Extension,
 
-        Comment
+        Comment,
+        AllExcept
     }
 
     public enum IdentifierType
@@ -77,6 +78,7 @@ namespace sly.lexer
             public BuildExtension<IN> ExtensionBuilder { get; set; }
 
             public IEqualityComparer<string> KeyWordComparer => KeyWordIgnoreCase ? StringComparer.OrdinalIgnoreCase : null;
+            public IList<string> Modes { get; set; }
         }
         
         public LexerPostProcess<IN> LexerPostProcess { get; set; }
@@ -100,6 +102,8 @@ namespace sly.lexer
         public const string defaultIdentifierKey = "identifier";
         public const string escape_string = "escape_string";
         public const string escape_char = "escape_char";
+        public const string in_all_except = "in_allexcept";
+        
 
         public const string single_line_comment_start = "single_line_comment_start";
 
@@ -114,9 +118,15 @@ namespace sly.lexer
         protected IN identifierDerivedToken;
         protected IN intDerivedToken;
 
-        protected FSMLexer<GenericToken> LexerFsm;
+        
+
+        protected FSMLexer<GenericToken> TempLexerFsm;
+        
+        internal IDictionary<string, FSMLexer<GenericToken>> SubLexersFsm { get; set; }
+
         protected int StringCounter;
         protected int CharCounter;
+        protected int allExceptCounter;
 
 
         protected Dictionary<IN, Func<Token<IN>, Token<IN>>> CallBacks = new Dictionary<IN, Func<Token<IN>, Token<IN>>>();
@@ -136,6 +146,7 @@ namespace sly.lexer
             derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
             ExtensionBuilder = config.ExtensionBuilder;
             KeyWordComparer = config.KeyWordComparer;
+            SubLexersFsm = new Dictionary<string, FSMLexer<GenericToken>>();
             InitializeStaticLexer(config, staticTokens);
         }
 
@@ -161,13 +172,18 @@ namespace sly.lexer
         
         public LexerResult<IN> Tokenize(ReadOnlyMemory<char> memorySource)
         {
+            Stack<FSMLexer<GenericToken>> lexersStack = new Stack<FSMLexer<GenericToken>>();
+
+            FSMLexer<GenericToken> LexerFsm = SubLexersFsm[ModeAttribute.DefaultLexerMode];
+            lexersStack.Push(LexerFsm);
             LexerPosition position = new LexerPosition();
             
             var tokens = new List<Token<IN>>();
             string src = memorySource.ToString();
             
             var r = LexerFsm.Run(memorySource, new LexerPosition());
-            
+            LexerFsm = SetLexerMode(r, lexersStack);
+
             var ignored = r.IgnoredTokens.Select(x =>
                 new Token<IN>(default(IN), x.SpanValue, x.Position, x.IsComment,
                     x.CommentType, x.Channel)).ToList();
@@ -193,7 +209,7 @@ namespace sly.lexer
 
             while (r.IsSuccess)
             {
-                ComputePositionWhenIgnoringEOL(r, tokens);
+                ComputePositionWhenIgnoringEOL(r, tokens, LexerFsm);
                 var transcoded = Transcode(r);
                 
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
@@ -203,7 +219,7 @@ namespace sly.lexer
                 
                 if (transcoded.IsLineEnding)
                 {
-                    ComputePositionWhenIgnoringEOL(r, tokens);
+                    ComputePositionWhenIgnoringEOL(r, tokens, LexerFsm);
                 }
 
                 if (r.IsUnIndent && r.UnIndentCount > 1)
@@ -215,6 +231,7 @@ namespace sly.lexer
                 }
                 tokens.Add(transcoded);
                 r = LexerFsm.Run(memorySource,position);
+                LexerFsm = SetLexerMode(r, lexersStack);
                 switch (r.IsSuccess)
                 {
                     case false when !r.IsEOS:
@@ -257,7 +274,34 @@ namespace sly.lexer
             return new LexerResult<IN>(tokens);
         }
 
-        private void ComputePositionWhenIgnoringEOL(FSMMatch<GenericToken> r, List<Token<IN>> tokens)
+        private FSMLexer<GenericToken> SetLexerMode(FSMMatch<GenericToken> r, Stack<FSMLexer<GenericToken>> lexersStack)
+        {
+            FSMLexer<GenericToken> LexerFsm = lexersStack.Peek();
+            if (!r.IsEOS)
+            {
+                if (r.IsPop)
+                {
+                    lexersStack.Pop();
+                    LexerFsm = lexersStack.Peek();
+                    r.NewPosition.Mode = LexerFsm.Mode;
+                    return LexerFsm;
+                }
+
+                if (r.IsPush)
+                {
+                    LexerFsm = SubLexersFsm[r.NewPosition.Mode];
+                    lexersStack.Push(LexerFsm);
+                }
+                else
+                {
+                    LexerFsm = SubLexersFsm[r.NewPosition.Mode];
+                }
+            }
+
+            return LexerFsm;
+        }
+
+        private void ComputePositionWhenIgnoringEOL(FSMMatch<GenericToken> r, List<Token<IN>> tokens,FSMLexer<GenericToken> LexerFsm)
         {
             if (!LexerFsm.IgnoreEOL)            
             {
@@ -316,7 +360,7 @@ namespace sly.lexer
                         .End(GenericToken.Double);
             }
 
-            LexerFsm = FSMBuilder.Fsm;
+            TempLexerFsm = FSMBuilder.Fsm;
         }
 
 
@@ -793,6 +837,26 @@ namespace sly.lexer
             FSMBuilder.End(GenericToken.SugarToken, isLineEnding)
                 .CallBack(callback);
         }
+        
+        public void AddAllExcept(IN token, BuildResult<ILexer<IN>> buildResult, string[] exceptions, bool isLineEnding = false)
+        {
+            
+                
+            NodeCallback<GenericToken> callback = match =>
+            {
+                match.Properties[DerivedToken] = token;
+                return match;
+            };
+
+            FSMBuilder.GoTo(start);
+
+            FSMBuilder.ExceptTransition(exceptions.First().ToCharArray())
+                .Mark(in_all_except+"_"+allExceptCounter)
+                .End(GenericToken.AllExcept)
+                .CallBack(callback);
+            FSMBuilder.ExceptTransitionTo(exceptions.First().ToCharArray(),in_all_except+"_"+allExceptCounter);
+            allExceptCounter++;
+        }
 
         public LexerPosition ConsumeComment(Token<GenericToken> comment, ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
@@ -860,12 +924,12 @@ namespace sly.lexer
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            return LexerFsm.ToString();
+            return TempLexerFsm.ToString();
         }
         
         public string ToGraphViz()
         {
-            return LexerFsm.ToGraphViz();
+            return TempLexerFsm.ToGraphViz();
         }
         
     }

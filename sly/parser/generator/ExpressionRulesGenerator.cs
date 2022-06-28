@@ -44,7 +44,7 @@ namespace sly.parser.generator
                 foreach (var attr in attributes)
                 {
                     IN oper = default;
-                    string implicitToken = null;
+                    string explicitToken = null;
                     if (attr.IsIntToken)
                     {
                         oper = EnumConverter.ConvertIntToEnum<IN>(attr.IntToken);
@@ -57,17 +57,17 @@ namespace sly.parser.generator
                         }
                         else
                         {
-                            implicitToken = attr.StringToken;
+                            explicitToken = attr.StringToken;
                         }
                     }
 
 
                     bool isEnumValue = EnumConverter.IsEnumValue<IN>(attr.StringToken) ||
-                                       EnumConverter.IsEnumValue<IN>(attr.IntToken);
+                                       attr.IntToken >= 0;
                     OperationMetaData<IN> operation = null;
-                    if (!isEnumValue && !string.IsNullOrEmpty(implicitToken) && implicitToken.StartsWith("'") && implicitToken.EndsWith("'")) 
+                    if (!isEnumValue && !string.IsNullOrEmpty(explicitToken) && explicitToken.StartsWith("'") && explicitToken.EndsWith("'")) 
                     {
-                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, implicitToken);
+                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, explicitToken);
                     }
                     else if (isEnumValue)
                     {
@@ -212,13 +212,13 @@ namespace sly.parser.generator
             {
                 var InFixClauses = InFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
                 {
-                    if (x.IsImplicitOperatorToken)
+                    if (x.IsExplicitOperatorToken)
                     {
-                        return new TerminalClause<IN>(x.ImplicitOperatorToken.Substring(1,x.ImplicitOperatorToken.Length-2));
+                        return new TerminalClause<IN>(x.ExplicitOperatorToken.Substring(1,x.ExplicitOperatorToken.Length-2));
                     }
                     else
                     {
-                        return new TerminalClause<IN>(x.OperatorToken);
+                        return new TerminalClause<IN>(new LeadingToken<IN>(x.OperatorToken));
                     }
                 }).ToList<IClause<IN>>();
 
@@ -249,14 +249,14 @@ namespace sly.parser.generator
             {
                 var PreFixClauses = PreFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
                 {
-                    if (x.IsImplicitOperatorToken)
+                    if (x.IsExplicitOperatorToken)
                     {
                         return new TerminalClause<IN>(
-                            x.ImplicitOperatorToken.Substring(1, x.ImplicitOperatorToken.Length - 2));
+                            x.ExplicitOperatorToken.Substring(1, x.ExplicitOperatorToken.Length - 2));
                     }
                     else
                     {
-                        return new TerminalClause<IN>(x.OperatorToken);
+                        return new TerminalClause<IN>(new LeadingToken<IN>(x.OperatorToken));
                     }
                 }).ToList<IClause<IN>>();
                 
@@ -280,14 +280,14 @@ namespace sly.parser.generator
             {
                 var PostFixClauses = PostFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
                 {
-                    if (x.IsImplicitOperatorToken)
+                    if (x.IsExplicitOperatorToken)
                     {
                         return new TerminalClause<IN>(
-                            x.ImplicitOperatorToken.Substring(1, x.ImplicitOperatorToken.Length - 2));
+                            x.ExplicitOperatorToken.Substring(1, x.ExplicitOperatorToken.Length - 2));
                     }
                     else
                     {
-                        return new TerminalClause<IN>(x.OperatorToken);
+                        return new TerminalClause<IN>(new LeadingToken<IN>(x.OperatorToken));
                     }
                 }).ToList<IClause<IN>>();
 
@@ -322,17 +322,17 @@ namespace sly.parser.generator
         {
             if (precedence > 0)
             {
-                var tokens = operationsByPrecedence[precedence].Select<OperationMetaData<IN>, IN>(o => o.OperatorToken).ToList<IN>();
+                var tokens = operationsByPrecedence[precedence].Select<OperationMetaData<IN>, string>(o => o.Operatorkey).ToList<string>();
                 return GetNonTerminalNameForPrecedence(precedence, tokens);
             }
 
             return operandName;
         }
 
-        private string GetNonTerminalNameForPrecedence(int precedence, List<IN> operators) 
+        private string GetNonTerminalNameForPrecedence(int precedence, List<string> operators) 
         {
             var operatorsPart = operators
-                .Select<IN, string>(oper => oper.ToString())
+                //.Select<IN, string>(oper => oper.ToString())
                 .ToList<string>()
                 .Aggregate<string>((s1, s2) => $"{s1}_{s2}");
             

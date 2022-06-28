@@ -20,11 +20,13 @@ namespace sly.lexer.fsm
         public AbstractTransitionCheck Check { get; set; }
 
 
+   
+        
         public string ToGraphViz<N>(Dictionary<int, FSMNode<N>> nodes)
         {
-            string f = "\""+(nodes[FromNode].Mark ?? "")+ " #"+FromNode+"\"";
-            string t = "\""+(nodes[ToNode].Mark ?? "")+ " #"+ToNode+"\"";
-            return $"{f} -> {t} {Check.ToGraphViz()}";
+            // string f = "\""+nodes[FromNode].GraphVizNodeLabel<N>()+"\"";
+            // string t = "\""+nodes[ToNode].GraphVizNodeLabel<N>()+"\"";
+            return $"{nodes[FromNode].Id} -> {nodes[ToNode].Id} {Check.ToGraphViz()}";
         }
 
 

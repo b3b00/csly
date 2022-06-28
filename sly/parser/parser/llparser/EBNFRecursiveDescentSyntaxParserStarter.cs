@@ -162,7 +162,7 @@ namespace sly.parser.llparser
         private void InitStartingTokensWithTerminal(Rule<IN> rule, TerminalClause<IN> term)
         {
             rule.PossibleLeadingTokens.Add(term.ExpectedToken);
-            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<IN>().ToList<IN>();
+            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
         }
 
         private void InitStartingTokensWithNonTerminal(Rule<IN> rule, NonTerminalClause<IN> nonterm,
@@ -173,7 +173,7 @@ namespace sly.parser.llparser
             {
                 var firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
                 firstNonTerminal.Rules.ForEach(r => { rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens); });
-                rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct<IN>().ToList<IN>();
+                rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
             }
         }
 

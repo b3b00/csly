@@ -29,6 +29,12 @@ namespace sly.lexer.fsm
 
         public LexerPosition NewPosition { get; set; }
         
+        public bool IsPush { get; set; }
+        
+        public bool IsPop { get; set; }
+        
+        
+        
         public bool IsLineEnding { get; set; }
 
         public bool IsIndentationError { get; set; }
@@ -73,12 +79,12 @@ namespace sly.lexer.fsm
         }
         
 
-        public FSMMatch(bool success, N result, string value, LexerPosition position, int nodeId, LexerPosition newPosition, bool isLineEnding)
-            : this(success, result, new ReadOnlyMemory<char>(value.ToCharArray()), position, nodeId,newPosition,isLineEnding)
+        public FSMMatch(bool success, N result, string value, LexerPosition position, int nodeId, LexerPosition newPosition, bool isLineEnding, bool isPop = false, bool isPush = false, string mode = null)
+            : this(success, result, new ReadOnlyMemory<char>(value.ToCharArray()), position, nodeId, newPosition, isLineEnding, isPop, isPush, mode)
         { }
 
         public FSMMatch(bool success, N result, ReadOnlyMemory<char> value, LexerPosition position, int nodeId,
-            LexerPosition newPosition, bool isLineEnding)
+            LexerPosition newPosition, bool isLineEnding, bool isPop = false, bool isPush = false, string mode = null)
         {
             Properties = new Dictionary<string, object>();
             IsSuccess = success;
@@ -86,7 +92,13 @@ namespace sly.lexer.fsm
             IsEOS = false;
             Result = new Token<N>(result, value, position);
             NewPosition = newPosition;
+            if (isPush)
+            {
+                NewPosition.Mode = mode;
+            }
             IsLineEnding = isLineEnding;
+            IsPop = isPop;
+            IsPush = isPush;
             IgnoredTokens = new List<Token<N>>();
         }
         

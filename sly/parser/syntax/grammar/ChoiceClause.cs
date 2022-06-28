@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace sly.parser.syntax.grammar
 {
-    public class ChoiceClause<T> : IClause<T>
+    public class ChoiceClause<T> : IClause<T> where T : struct
     {
 
         public bool IsDiscarded { get; set; } = false;

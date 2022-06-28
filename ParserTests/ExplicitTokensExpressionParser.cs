@@ -5,11 +5,11 @@ using sly.parser.generator;
 
 namespace ParserTests
 {
-    public class ImplicitTokensExpressionParser
+    public class ExplicitTokensExpressionParser
     {
         [Production("primary: DOUBLE")]
         [Operand]
-        public double Primary(Token<ImplicitTokensTokens> doubleToken)
+        public double Primary(Token<ExplicitTokensTokens> doubleToken)
         {
             return doubleToken.DoubleValue;
         }
@@ -31,7 +31,7 @@ namespace ParserTests
 
         [Infix("'+'",Associativity.Left, 10)]
         [Infix("'-'", Associativity.Left, 10)]
-        public double BinaryTermExpression(double left, Token<ImplicitTokensTokens> operation, double right)
+        public double BinaryTermExpression(double left, Token<ExplicitTokensTokens> operation, double right)
         {
             switch (operation.Value)
             {
@@ -39,22 +39,21 @@ namespace ParserTests
                 case "-" : return left - right;
                 default : throw new InvalidOperationException($"that is not possible ! {operation.Value} is not a valid operation");
             }
-            return 0;
         }
             
-        [Operation((int) ImplicitTokensTokens.TIMES, Affix.InFix, Associativity.Left, 50)]
+        [Operation((int) ExplicitTokensTokens.TIMES, Affix.InFix, Associativity.Left, 50)]
         [Operation("DIVIDE", Affix.InFix, Associativity.Left, 50)]
-        public double BinaryFactorExpression(double left, Token<ImplicitTokensTokens> operation, double right)
+        public double BinaryFactorExpression(double left, Token<ExplicitTokensTokens> operation, double right)
         {
             double result = 0;
             switch (operation.TokenID)
             {
-                case ImplicitTokensTokens.TIMES:
+                case ExplicitTokensTokens.TIMES:
                 {
                     result = left * right;
                     break;
                 }
-                case ImplicitTokensTokens.DIVIDE:
+                case ExplicitTokensTokens.DIVIDE:
                 {
                     result = left / right;
                     break;
@@ -66,13 +65,13 @@ namespace ParserTests
 
 
         [Prefix("'-'", Associativity.Right, 100)]
-        public double PreFixExpression(Token<ImplicitTokensTokens> operation, double value)
+        public double PreFixExpression(Token<ExplicitTokensTokens> operation, double value)
         {
             return -value;
         }
         
         [Postfix("'!'", Associativity.Left, 110)]
-        public double PostFixExpression(double value, Token<ImplicitTokensTokens> operation)
+        public double PostFixExpression(double value, Token<ExplicitTokensTokens> operation)
         {
             double factorial = 1;
             for (int i = 0; i < value; i++)

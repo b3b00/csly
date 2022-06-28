@@ -3,7 +3,7 @@ using sly.lexer;
 namespace ParserTests
 {
     [Lexer(IgnoreWS = true, IgnoreEOL = true)]
-    public enum ImplicitTokensTokens
+    public enum ExplicitTokensTokens
     {
         [MultiLineComment("/*","*/")]
         MULTILINECOMMENT = 1,

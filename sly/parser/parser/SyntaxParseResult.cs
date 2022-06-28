@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 
 namespace sly.parser
@@ -17,18 +18,18 @@ namespace sly.parser
 
         public bool IsEnded { get; set; }
         
-        public List<IN> Expecting {get; set;}
+        public List<LeadingToken<IN>> Expecting {get; set;}
 
-        public void AddExpecting(IN expected)
+        public void AddExpecting(LeadingToken<IN> expected)
         {
             if (Expecting == null)
             {
-                Expecting = new List<IN>();
+                Expecting = new List<LeadingToken<IN>>();
             }
             Expecting.Add(expected);
         }
         
-        public void AddExpectings(IEnumerable<IN> expected)
+        public void AddExpectings(IEnumerable<LeadingToken<IN>> expected)
         {
             if (expected == null)
             {
@@ -36,7 +37,7 @@ namespace sly.parser
             }
             if (Expecting == null)
             {
-                Expecting = new List<IN>();
+                Expecting = new List<LeadingToken<IN>>();
             }
             Expecting.AddRange(expected);
         }

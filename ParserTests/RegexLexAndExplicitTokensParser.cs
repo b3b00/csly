@@ -4,7 +4,7 @@ using sly.parser.generator;
 
 namespace ParserTests
 {
-    public class RegexLexAndImplicitTokensParser
+    public class RegexLexAndExplicitTokensParser
     {
         [Production("main : item*")]
         public string Main(List<string> items)
@@ -13,7 +13,7 @@ namespace ParserTests
         }
 
         [Production("item : 'test' INT")]
-        public string Item(Token<RegexLexAndImplicitTokensLexer> test, Token<RegexLexAndImplicitTokensLexer> integer)
+        public string Item(Token<RegexLexAndExplicitTokensLexer> test, Token<RegexLexAndExplicitTokensLexer> integer)
         {
             return $"{test.Value}:{integer.IntValue}";
         }

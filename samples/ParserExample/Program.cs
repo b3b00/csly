@@ -29,11 +29,20 @@ using sly.buildresult;
 using sly.i18n;
 using sly.parser.generator.visitor;
 using sly.parser.parser;
+using XML;
 using Xunit;
 using ExpressionContext = postProcessedLexerParser.expressionModel.ExpressionContext;
 
 namespace ParserExample
 {
+
+    public enum ManySugar
+    {
+    [Sugar("<")]
+    OPEN,
+    [Sugar("<?")]
+    PI
+    }
     
     public enum ManyString
     {
@@ -74,6 +83,8 @@ namespace ParserExample
 //        MyString
     }
 
+    
+    
     
     internal class Program
     {
@@ -1025,7 +1036,76 @@ else
             //TestIssue239();
             // TestShortOperations();
             // TestChannels();
-            TestIndentedParserNeverEnding();
+            //TestIndentedParserNeverEnding();
+            //TestLexerModes();
+            TestXmlParser();
+        }
+
+        private static void testManySugar()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManySugar>>());
+            Assert.False(lexerRes.IsError);
+            var res = lexerRes.Result.Tokenize("< <? <");
+            Console.WriteLine(".");
+        }
+
+        private static void TestXmlParser()
+        {
+            ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
+            var parser = new MinimalXmlParser();
+            var r = builder.BuildParser(parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+            if (r.IsError)
+            {
+                r.Errors.ForEach(x => Console.WriteLine(x.Message));
+                return;
+            }
+            Console.WriteLine(r.Result.SyntaxParser.Dump());
+            var pr = r.Result.Parse(@"
+<?xml version=""1.0""?>
+<!-- starting doc -->
+<root name=""root"">
+    <autoInner name=""autoinner1""/>
+    <inner name=""inner"">
+         <?PI name=""pi""?> 
+        <innerinner name=""innerinner"">
+            inner inner content
+        </innerinner>
+    </inner>                      
+</root>
+");
+            if (pr.IsError)
+            {
+                pr.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+            }
+            else
+            {
+                Console.WriteLine("WAHOU !");
+                Console.WriteLine();
+                Console.WriteLine(pr.Result);
+            }
+        }
+        
+        private static void TestLexerModes()
+        {
+            // testManySugar();
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MinimalXmlLexer>>());
+            Assert.False(lexerRes.IsError);
+            var tokens = lexerRes.Result.Tokenize(@"hello
+<tag attr=""value"">inner text</tag>
+<!-- this is a comment -->
+<? PI PIattr=""PIValue""?>");
+            if (tokens.IsOk)
+            {
+                foreach (var token in tokens.Tokens)
+                {
+                    Console.WriteLine(token.ToString());
+                }
+            }
+            else
+            {
+                Console.WriteLine(tokens.Error);
+            }
+            Console.WriteLine("stop");
         }
 
 

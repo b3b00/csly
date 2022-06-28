@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "indentedWhile", "samples\In
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "postProcessedLexerParser", "samples\postProcessedLexerParser\postProcessedLexerParser.csproj", "{8F703C3C-0D10-4F43-AC2E-14843D59E460}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XML", "samples\XML\XML.csproj", "{81E72CFA-A6D6-4DB4-B3B5-E167064E7858}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -108,6 +110,10 @@ Global
 		{8F703C3C-0D10-4F43-AC2E-14843D59E460}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F703C3C-0D10-4F43-AC2E-14843D59E460}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F703C3C-0D10-4F43-AC2E-14843D59E460}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81E72CFA-A6D6-4DB4-B3B5-E167064E7858}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81E72CFA-A6D6-4DB4-B3B5-E167064E7858}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81E72CFA-A6D6-4DB4-B3B5-E167064E7858}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81E72CFA-A6D6-4DB4-B3B5-E167064E7858}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -122,6 +128,7 @@ Global
 		{7C6C4A13-2AE5-4070-A2E1-05B6A83DC97C} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{B1FAADF0-208D-4A0A-A24D-D7BF4E33DCB4} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{8F703C3C-0D10-4F43-AC2E-14843D59E460} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
+		{81E72CFA-A6D6-4DB4-B3B5-E167064E7858} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43254130-CF3E-480E-952F-E50CA5D2E417}

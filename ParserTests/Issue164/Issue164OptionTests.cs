@@ -42,10 +42,10 @@ namespace ParserTests.Issue164
             Assert.NotNull(unexpectedTokenError.ExpectedTokens);
             Assert.NotEmpty(unexpectedTokenError.ExpectedTokens);
             Assert.Equal(4,unexpectedTokenError.ExpectedTokens.Count);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == TestOption164Lexer.PLUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == TestOption164Lexer.MINUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == TestOption164Lexer.TIMES);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x == TestOption164Lexer.DIVIDE);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == TestOption164Lexer.PLUS);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == TestOption164Lexer.MINUS);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == TestOption164Lexer.TIMES);
+            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == TestOption164Lexer.DIVIDE);
             ;
         }
     }
