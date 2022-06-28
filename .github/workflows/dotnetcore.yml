@@ -62,16 +62,7 @@ jobs:
 #    - name: Publish coverage summary
 #      uses: marocchino/sticky-pull-request-comment@v2
 #      with:
-#           path: coveragereport/Summary.md
-    - name: publish nuget
-      if: matrix.os == 'windows-latest' && env.PUBLISH_NUGET
-      id: publish_nuget
-      uses: brandedoutcast/publish-nuget@v2.5.2
-      with:
-          VERSION_REGEX: <version>(.*)<\/version>  
-          PROJECT_FILE_PATH: ${{env.MAIN_CSPROJ}}
-          NUGET_KEY: ${{secrets.NUGET_KEY}}
-          VERSION_FILE_PATH: ${{env.MAIN_CSPROJ}}
+#           path: coveragereport/Summary.md    
     - name: Create Release
       if: ${{ success() && matrix.os == 'windows-latest' && steps.publish_nuget.outputs.VERSION != ''  && steps.publish_nuget.outputs.VERSION != null }}
       id: create_release
@@ -83,6 +74,15 @@ jobs:
         release_name: Release ${{ steps.publish_nuget.outputs.VERSION }}
         draft: false
         prerelease: false
+    - name: publish nuget
+      if:  ${{success() && matrix.os == 'windows-latest' && env.PUBLISH_NUGET}}
+      id: publish_nuget
+      uses: brandedoutcast/publish-nuget@v2.5.2
+      with:
+          VERSION_REGEX: <version>(.*)<\/version>  
+          PROJECT_FILE_PATH: ${{env.MAIN_CSPROJ}}
+          NUGET_KEY: ${{secrets.NUGET_KEY}}
+          VERSION_FILE_PATH: ${{env.MAIN_CSPROJ}}
     - name: Upload Release Asset
       if: ${{ success() && matrix.os == 'windows-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
       id: upload-release-asset 
