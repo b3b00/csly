@@ -31,6 +31,8 @@ namespace sly.parser.generator
 
         public T OperatorToken { get; set; }
 
+        public string Operatorkey => IsExplicitOperatorToken ? ExplicitOperatorToken : OperatorToken.ToString();
+
         public Affix Affix { get; set; }
 
         public bool IsBinary => Affix == Affix.InFix;

@@ -37,16 +37,16 @@ namespace ParserTests
             return builder.ToString();
         }
 
-        [Production("statement : Id '='[d] Dbl ")]
-        public string Assignment(Token<Lex> id, Token<Lex> dbl)
+        [Production("statement : Id '='[d] Parse_expressions ")]
+        public string Assignment(Token<Lex> id, string expression)
         {
-            return $"{id.Value} = {dbl.DoubleValue}";
+            return $"{id.Value} = {expression}";
         }
         
-        [Production("condition : Id '=='[d] Dbl ")]
-        public string Condition(Token<Lex> id, Token<Lex> dbl)
+        [Production("condition : Id '=='[d] Parse_expressions ")]
+        public string Condition(Token<Lex> id, string expression)
         {
-            return $"{id.Value} == {dbl.DoubleValue}";
+            return $"{id.Value} == {expression}";
         }
 
         [Production("statement : 'if'[d] condition 'then'[d] statement 'else'[d] statement")]
@@ -58,6 +58,29 @@ namespace ParserTests
             builder.AppendLine($"    - {elseStatement}");
             return builder.ToString();
         }
+
+        [Operand]
+        [Production("operand : Id")]
+        [Production("operand : Dbl")]
+        public string Operand(Token<Lex> oper)
+        {
+            return oper.Value;
+        }
+
+        [Infix("'+'", Associativity.Left, 10)]
+        public string Plus(string left, Token<Lex> oper, string right)
+        {
+            return $"( {left} + {right} )";
+        }
+        
+        [Infix("'*'", Associativity.Left, 20)]
+        public string Times(string left, Token<Lex> oper, string right)
+        {
+            return $"( {left} * {right} )";
+        }
+        
+        
+        
     }
     
     public class ExplicitTokensTests
@@ -155,16 +178,17 @@ namespace ParserTests
             Assert.NotNull(result.Result);
             var r = result.Result.Parse(@"
 if a == 1.0 then
-    b = 1.0
+    b = 1.0 + 2.0 * 3.0
 else 
-    b = 2.0
+    b = 2.0 + a
 c = 3.0
 ");
-            Assert.Equal(@"a == 1 :
-    - b = 1
-    - b = 2
+            Assert.False(r.IsError);
+            Assert.Equal(@"a == 1.0 :
+    - b = ( 1.0 + ( 2.0 * 3.0 ) )
+    - b = ( 2.0 + a )
 
-c = 3
+c = 3.0
 ",r.Result);
         }
         

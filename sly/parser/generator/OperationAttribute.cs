@@ -52,9 +52,9 @@ namespace sly.parser.generator
         public bool IsIntToken { get; set; }
         
         public bool IsStringToken { get; set; }
-        
-        
-        public int IntToken { get; set; }
+
+
+        public int IntToken { get; set; } = -1;
         
         public string StringToken { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using sly.i18n;
@@ -70,6 +71,7 @@ namespace sly.parser
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public override string ErrorMessage
         {
             get
@@ -110,6 +112,7 @@ namespace sly.parser
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return ErrorMessage;

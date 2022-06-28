@@ -63,7 +63,7 @@ namespace sly.parser.generator
 
 
                     bool isEnumValue = EnumConverter.IsEnumValue<IN>(attr.StringToken) ||
-                                       EnumConverter.IsEnumValue<IN>(attr.IntToken);
+                                       attr.IntToken >= 0;
                     OperationMetaData<IN> operation = null;
                     if (!isEnumValue && !string.IsNullOrEmpty(explicitToken) && explicitToken.StartsWith("'") && explicitToken.EndsWith("'")) 
                     {
@@ -322,17 +322,17 @@ namespace sly.parser.generator
         {
             if (precedence > 0)
             {
-                var tokens = operationsByPrecedence[precedence].Select<OperationMetaData<IN>, IN>(o => o.OperatorToken).ToList<IN>();
+                var tokens = operationsByPrecedence[precedence].Select<OperationMetaData<IN>, string>(o => o.Operatorkey).ToList<string>();
                 return GetNonTerminalNameForPrecedence(precedence, tokens);
             }
 
             return operandName;
         }
 
-        private string GetNonTerminalNameForPrecedence(int precedence, List<IN> operators) 
+        private string GetNonTerminalNameForPrecedence(int precedence, List<string> operators) 
         {
             var operatorsPart = operators
-                .Select<IN, string>(oper => oper.ToString())
+                //.Select<IN, string>(oper => oper.ToString())
                 .ToList<string>()
                 .Aggregate<string>((s1, s2) => $"{s1}_{s2}");
             

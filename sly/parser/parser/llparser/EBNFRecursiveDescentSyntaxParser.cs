@@ -162,8 +162,9 @@ namespace sly.parser.llparser
             return result;
         }
 
-        
-        public virtual SyntaxParseResult<IN> ParseInfixExpressionRule(IList<Token<IN>> tokens, Rule<IN> rule, int position,
+
+        public virtual SyntaxParseResult<IN> ParseInfixExpressionRule(IList<Token<IN>> tokens, Rule<IN> rule,
+            int position,
             string nonTerminalName)
         {
             var currentPosition = position;
@@ -173,7 +174,7 @@ namespace sly.parser.llparser
             if (!tokens[position].IsEOS && rule.PossibleLeadingTokens.Any(x => x.Match(tokens[position])))
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
-                    if (MatchExpressionRuleScheme(rule)) 
+                    if (MatchExpressionRuleScheme(rule))
                     {
                         var first = rule.Clauses[0];
                         SyntaxParseResult<IN> firstResult = null;
