@@ -33,11 +33,9 @@ namespace sly.parser.syntax.grammar
             {
                 return TokenId.Equals(token.TokenID);
             }
-
-            return false;
         }
 
-        public string ToString()
+        public override string ToString()
         {
             if (IsExplicitToken)
             {

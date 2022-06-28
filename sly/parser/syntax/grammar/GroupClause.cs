@@ -41,7 +41,7 @@ namespace sly.parser.syntax.grammar
             return dump.ToString();
         }
 
-        public string ToString()
+        public override string ToString()
         {
             return Dump();
         }
