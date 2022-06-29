@@ -142,7 +142,7 @@ namespace sly.lexer.fsm
             return this;
         }
         
-        // TODO : later pop to a specific mode
+        // TODO : later pop to a specific mode ?
         public FSMLexerBuilder<N> Pop(string toMode = null)
         {
             if (Fsm.HasState(CurrentState))
@@ -177,6 +177,12 @@ namespace sly.lexer.fsm
             else
                 return TransitionTo(input, Fsm.NewNodeId);
             return this;
+        }
+
+        public FSMTransition GetTransition(char input)
+        {
+            var transition = Fsm.GetTransition(CurrentState, input);
+            return transition;
         }
 
         public FSMLexerBuilder<N> SafeTransition(char input, TransitionPrecondition precondition)
@@ -515,6 +521,22 @@ namespace sly.lexer.fsm
             var toNode = Marks[toNodeMark];
             return TransitionTo(inputs, toNode);
         }
+        
+        public FSMLexerBuilder<N> TransitionToAndMark(char[] inputs, string toNodeMark)
+        {
+            int toNode = -1;
+            if (Marks.TryGetValue(toNodeMark, out toNode))
+            {
+                TransitionTo(inputs, toNode);
+            }
+            else
+            {
+                Transition(inputs);
+                Mark(toNodeMark);
+            }
+
+            return this;
+        }
 
 
         public FSMLexerBuilder<N> TransitionTo(char input, string toNodeMark, TransitionPrecondition precondition)
@@ -547,7 +569,7 @@ namespace sly.lexer.fsm
             var toNode = Marks[toNodeMark];
             return ExceptTransitionTo(exceptions, toNode);
         }
-
+      
         public FSMLexerBuilder<N> ExceptTransitionTo(char[] exceptions, string toNodeMark,
             TransitionPrecondition precondition)
         {

@@ -20,6 +20,7 @@ using ParserTests;
 using ParserTests.Issue239;
 using ParserTests.lexer;
 using simpleExpressionParser;
+using SimpleTemplate;
 using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser;
@@ -995,10 +996,57 @@ else
             Assert.NotNull(ifthenelse.Else);
             Assert.Equal(2,ifthenelse.Else.Statements.Count);
         }
+
+        private static void TestTemplate()
+        {
+            var lexerResult = LexerBuilder.BuildLexer<TemplateLexer>();
+            Assert.False(lexerResult.IsError);
+            var genericLexer = lexerResult.Result as GenericLexer<TemplateLexer>;
+            var fsm = genericLexer.FSMBuilder.Fsm;
+            var fsmGraph = fsm.ToGraphViz();
+            Console.WriteLine(fsmGraph);
+
+            
+
+            var source = @"hello - {= world =} - billy - {% if (a == 1.0) %} - bob - {%else%} - boubou - {%endif%}";
+            
+            var tokens = genericLexer.Tokenize(source);
+            foreach (var token in tokens.Tokens.Tokens)
+            {
+                Console.WriteLine(token);
+            }
+
+            var builder = new ParserBuilder<TemplateLexer, string>();
+            var instance = new TemplateParser();
+            var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "template");
+            if (build.IsOk)
+            {
+                var context = new Dictionary<string, string>()
+                {
+                    { "world", "monde" },
+                    { "a", "1.0" }
+                };
+                var r = build.Result.ParseWithContext(source, context);
+                if (r.IsOk)
+                {
+                    Console.WriteLine(r.Result);
+                }
+                else
+                {
+                    r.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+                }
+            }
+            else
+            {
+                build.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
+
+        }
         
         private static void Main(string[] args)
         {
-            testErrors();
+            TestTemplate();
+            // testErrors();
             //TestContextualParser();
             //TestTokenCallBacks();
             //test104();
@@ -1038,7 +1086,7 @@ else
             // TestChannels();
             //TestIndentedParserNeverEnding();
             //TestLexerModes();
-            TestXmlParser();
+            // TestXmlParser();
         }
 
         private static void testManySugar()

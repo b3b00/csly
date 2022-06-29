@@ -14,6 +14,11 @@ namespace sly.lexer.fsm.transitioncheck
             TokenExceptions.AddRange(tokens);
         }
 
+        public void AddException(char exception)
+        {
+            TokenExceptions.Add(exception);
+        }
+
         public TransitionAnyExcept(TransitionPrecondition precondition, params char[] tokens)
         {
             TokenExceptions = new List<char>();
