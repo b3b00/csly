@@ -39,7 +39,7 @@ namespace ParserTests.lexer
 
 
                 lexer.FSMBuilder.GoTo(GenericLexer<Issue210Token>.start)
-                    .Transition('?')
+                    .SafeTransition('?')
                     .Mark("qmark")
                     .ExceptTransition(new[] {'?'}) // moving to first char of a special
                     .Mark("in_qmark") // now we are really in a potential SPECIAL

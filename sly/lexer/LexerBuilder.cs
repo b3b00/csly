@@ -234,7 +234,7 @@ namespace sly.lexer
                     }
                     
                     var push = enumValue.GetAttributesOfType<PushAttribute>();
-                    if (push != null && push.Length == 1)
+                    if (push != null && push.Length >= 1)
                     {
                         attribute.Value.ForEach(x =>
                         {
@@ -242,21 +242,13 @@ namespace sly.lexer
                             x.Pushtarget = push.First().TargetMode;
                         }); 
                     }
-                    else if (push.Length > 1)
-                    {
-                        // TODO : error can not push many mode 
-                    }
                     var pop = enumValue.GetAttributesOfType<PopAttribute>();
-                    if (pop != null && pop.Length == 1)
+                    if (pop != null && pop.Length >= 1)
                     {
                         attribute.Value.ForEach(x =>
                         {
                             x.IsPop = true;
                         }); 
-                    }
-                    else if (pop.Length > 1)
-                    {
-                        // TODO : error only pop once
                     }
                 }
             }

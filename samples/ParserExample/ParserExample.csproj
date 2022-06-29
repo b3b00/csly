@@ -32,6 +32,7 @@
     <ProjectReference Include="..\..\sly\sly.csproj" />
     <ProjectReference Include="..\postProcessedLexerParser\postProcessedLexerParser.csproj" />
     <ProjectReference Include="..\SimpleExpressionParser\SimpleExpressionParser.csproj" />
+    <ProjectReference Include="..\SimpleTemplate\SimpleTemplate.csproj" />
     <ProjectReference Include="..\while\while.csproj" />
     <ProjectReference Include="..\XML\XML.csproj" />
   </ItemGroup>

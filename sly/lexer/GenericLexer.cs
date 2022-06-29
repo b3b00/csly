@@ -5,6 +5,7 @@ using System.Linq;
 using sly.buildresult;
 using sly.i18n;
 using sly.lexer.fsm;
+using sly.lexer.fsm.transitioncheck;
 
 namespace sly.lexer
 {
@@ -832,8 +833,16 @@ namespace sly.lexer
                 return match;
             };
 
+            Func<int, TransitionPrecondition> precond = (int i) =>
+            {
+                return (ReadOnlyMemory<char> value) =>
+                {
+                    return value.Length == i+1;
+                };
+            };
+            
             FSMBuilder.GoTo(start);
-            for (var i = 0; i < specialValue.Length; i++) FSMBuilder.SafeTransition(specialValue[i]);
+            for (var i = 0; i < specialValue.Length; i++) FSMBuilder.SafeTransition(specialValue[i],precond(i));
             FSMBuilder.End(GenericToken.SugarToken, isLineEnding)
                 .CallBack(callback);
         }
@@ -850,11 +859,73 @@ namespace sly.lexer
 
             FSMBuilder.GoTo(start);
 
-            FSMBuilder.ExceptTransition(exceptions.First().ToCharArray())
-                .Mark(in_all_except+"_"+allExceptCounter)
+            var allExceptChars0 = exceptions.Select(x => x.First()).Distinct().ToArray();
+
+            Func<int, int, string> GetEndLabel = (int exception, int exceptionIndex) =>
+            {
+                if (exception < 0 || exceptionIndex < 0)
+                {
+                    return $"{in_all_except}_text_{allExceptCounter}";
+                }
+
+                return $"{in_all_except}_{exception}_{exceptionIndex}_{allExceptCounter}";
+            };
+            
+            var allExceptChars1 = exceptions.Where(x => x.Length >= 2).Select(x => x[1]).Distinct().ToArray();
+
+            FSMBuilder.ExceptTransition(allExceptChars0)
+                .Mark(GetEndLabel(-1,-1))
                 .End(GenericToken.AllExcept)
                 .CallBack(callback);
-            FSMBuilder.ExceptTransitionTo(exceptions.First().ToCharArray(),in_all_except+"_"+allExceptCounter);
+            FSMBuilder.ExceptTransitionTo(allExceptChars0,GetEndLabel(-1,-1));
+            for (int i = 0; i < exceptions.Length; i++)
+            {
+                string exception = exceptions[i];
+                for (int j = 0; j < exception.Length-1; j ++)
+                {
+                    char exceptionChar = exception[j];
+                    var end = GetEndLabel(i, j);
+                    var startNode = GetEndLabel(i, j - 1);
+                    if (j == 0)
+                    {
+                        FSMBuilder.GoTo(startNode);
+                        FSMBuilder.SafeTransition(exceptionChar);
+                        FSMBuilder.Mark(end);
+                        // FSMBuilder.End(GenericToken.AllExcept)
+                        //     .CallBack(callback);
+                            
+                        startNode = start;
+                    }
+
+                    
+                    FSMBuilder.GoTo(startNode);
+
+                    if (j < exception.Length - 1)
+                    {
+                        FSMBuilder.TransitionToAndMark(new[] { exceptionChar }, end);
+
+
+                        var transition = FSMBuilder.GetTransition(exception[j + 1]);
+                        if (transition != null)
+                        {
+                            if (transition.Check is TransitionAnyExcept except)
+                            {
+                                except.AddException(exception[j+1]);
+                            }
+                        }
+                        else
+                        {
+                            FSMBuilder.ExceptTransitionTo(new[] { exception[j + 1] }, GetEndLabel(-1, -1));
+                        }
+                        // TODO : si on a un except qui match le lien retour vers text
+                        // alors ajouter exception[j+1] dans la transition
+                    }
+
+                    //FSMBuilder.Mark(GetEndLabel(i, j));
+
+                }
+            }
+            
             allExceptCounter++;
         }
 

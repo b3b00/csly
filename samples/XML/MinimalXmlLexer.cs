@@ -4,7 +4,7 @@ using sly.lexer;
 namespace XML
 {
     [Lexer()]
-    [Modes("one","two")]
+    [Modes("tag","pi")]
     public enum MinimalXmlLexer
     {
         NOT_A_TOKEN = 0,
