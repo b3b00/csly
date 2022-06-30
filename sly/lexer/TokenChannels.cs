@@ -31,10 +31,6 @@ namespace sly.lexer
 
         public TokenChannels(List<Token<IN>> tokens) : this()
         {
-            if (nameof(IN) == "DoNotIgnoreCommentsTokenWithChannels")
-            {
-                ;
-            }
             int i = 0;
             foreach (var token in tokens)
             {

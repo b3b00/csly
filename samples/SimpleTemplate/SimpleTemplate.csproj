@@ -2,10 +2,15 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\sly\sly.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="model\expressions" />
     </ItemGroup>
 
 </Project>
