@@ -1,7 +1,5 @@
 # C# lex and yacc #      
 
-
-![Test status](http://teststatusbadge.azurewebsites.net/api/status/b3b00/csly)
  [![Coverage Status](https://coveralls.io/repos/github/b3b00/csly/badge.svg?branch=dev)](https://coveralls.io/github/b3b00/csly?branch=dev)
 ![.NET Core](https://github.com/b3b00/csly/workflows/.NET%20Core/badge.svg)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fb3b00%2Fcsly.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fb3b00%2Fcsly?ref=badge_shield)
