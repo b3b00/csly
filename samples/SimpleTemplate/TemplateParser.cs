@@ -24,7 +24,13 @@ namespace SimpleTemplate
         [Production("item : TEXT")]
         public ITemplate Text(Token<TemplateLexer> text)
         {
-            return new Text(text.Value);
+            var nxts = text.NextTokens(Channels.WhiteSpaces);
+            var prev = text.Previous(Channels.WhiteSpaces);
+            var val = prev != null ? prev.Value : "";
+            val += text.Value;
+            var next = text.Next(Channels.WhiteSpaces);
+            val += next != null ? next.Value : "";
+            return new Text(val);
         }
         
         [Production("item :OPEN_VALUE[d] ID CLOSE_VALUE[d]")]

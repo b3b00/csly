@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
@@ -11,6 +13,7 @@ namespace sly.lexer
         No
     }
 
+    [DebuggerDisplay("{TokenID} : {Value} - {IsImplicit}")]
     public class Token<T>
     {
         
@@ -27,8 +30,9 @@ namespace sly.lexer
         }
         
         public Token(T token, ReadOnlyMemory<char> value, LexerPosition position, bool isCommentStart = false,
-            CommentType commentType = CommentType.Single, int? channel = null)
+            CommentType commentType = CommentType.Single, int? channel = null, bool isWhiteSpace = false)
         {
+            IsWhiteSpace = isWhiteSpace;
             IsEOS = false;
             TokenID = token;
             SpanValue = value;
@@ -57,6 +61,48 @@ namespace sly.lexer
             Position = new LexerPosition(0, 0, 0);
         }
 
+
+        public List<Token<T>> NextTokens(int channelId)
+        {
+            TokenChannel<T> targetChannel = null;
+
+            List<Token<T>> list = new List<Token<T>>();
+            
+            if (TokenChannels.TryGet(channelId, out targetChannel))
+            {
+                TokenChannel<T> thisChannel = null;
+                if (TokenChannels.TryGet(this.Channel, out thisChannel))
+                {
+                    var x = thisChannel[PositionInTokenVisibleFlow+1];
+                    if (x != null)
+                    {
+                        int from = PositionInTokenFlow + 1;
+                        int to = x.PositionInTokenFlow - 1;
+                        for (int i = from; i <= to; i++)
+                        {
+                            if (i >= targetChannel.Count)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                if (targetChannel[i] != null)
+                                {
+                                    list.Add(targetChannel[i]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (list.Count >= 1)
+            {
+                ;
+            }
+            return list;
+        }
+        
         public Token<T> Next(int channelId)
         {
             TokenChannel<T> channel = null;
@@ -206,11 +252,54 @@ namespace sly.lexer
         }
 
         [ExcludeFromCodeCoverage]
+
+        public string GetDebug()
+        {
+            if (IsEOS)
+            {
+                return "<<EOS>>";
+            }
+
+            if (IsWhiteSpace)
+            {
+                return $"<<WS>>[{Value}]";
+            }
+
+            if (IsEOL)
+            {
+                return "<<EOL>>";
+            }
+
+            string value = $"{TokenID} [{Value.Replace("\r","").Replace("\n","")}]";
+                
+            if (IsIndent)
+            {
+                value = $"<<INDENT({IndentationLevel})>>";
+            }
+
+            if (IsUnIndent)
+            {
+                value = $"<<UINDENT({IndentationLevel})>>";
+            }
+
+            if (IsImplicit)
+            {
+                value = $"[{Value.Replace("\r", "").Replace("\n", "")}]";
+            }
+
+            return value;
+        }
+        
         public override string ToString()
         {
             if (IsEOS)
             {
                 return "<<EOS>>";
+            }
+
+            if (IsWhiteSpace)
+            {
+                return $"<<WS>>[{Value}]";
             }
 
             string value = $"{TokenID} [{Value.Replace("\r","").Replace("\n","")}]";
@@ -230,8 +319,6 @@ namespace sly.lexer
                 value = $"[{Value.Replace("\r", "").Replace("\n", "")}]";
             }
             return $"{value} @{Position} on channel {Channel}";
-            
-
         }
     }
 }

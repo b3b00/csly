@@ -3,7 +3,7 @@ using System;
 namespace sly.lexer
 {
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
-    public class ModeAttribute : Attribute
+ public class ModeAttribute : Attribute
     {
      
         public const string DefaultLexerMode = "default";

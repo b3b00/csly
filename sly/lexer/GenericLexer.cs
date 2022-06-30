@@ -233,6 +233,12 @@ namespace sly.lexer
                 tokens.Add(transcoded);
                 r = LexerFsm.Run(memorySource,position);
                 LexerFsm = SetLexerMode(r, lexersStack);
+                
+                 ignored = r.IgnoredTokens.Select(x =>
+                                new Token<IN>(default(IN), x.SpanValue, x.Position, x.IsComment,
+                                    x.CommentType, x.Channel, x.IsWhiteSpace)).ToList();
+                            tokens.AddRange(ignored);
+                
                 switch (r.IsSuccess)
                 {
                     case false when !r.IsEOS:
@@ -817,7 +823,7 @@ namespace sly.lexer
 
         }
 
-        public void AddSugarLexem(IN token, BuildResult<ILexer<IN>> buildResult, string specialValue, bool isLineEnding = false)
+        public void AddSugarLexem(IN token, BuildResult<ILexer<IN>> buildResult, string specialValue, bool isLineEnding = false, int? channel = null)
         {
             if (char.IsLetter(specialValue[0]))
             {
@@ -830,6 +836,7 @@ namespace sly.lexer
             NodeCallback<GenericToken> callback = match =>
             {
                 match.Properties[DerivedToken] = token;
+                match.Result.Channel = channel ?? Channels.Main;
                 return match;
             };
 
