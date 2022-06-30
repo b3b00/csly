@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using sly.lexer;
 
 namespace sly.parser.syntax.grammar
@@ -35,6 +36,7 @@ namespace sly.parser.syntax.grammar
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             if (IsExplicitToken)
