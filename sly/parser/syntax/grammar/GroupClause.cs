@@ -32,6 +32,7 @@ namespace sly.parser.syntax.grammar
             Clauses.AddRange(clauses.Clauses);
         }
         
+        [ExcludeFromCodeCoverage]
         public string Dump()
         {
             StringBuilder dump = new StringBuilder();
@@ -41,6 +42,8 @@ namespace sly.parser.syntax.grammar
             return dump.ToString();
         }
 
+        
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return Dump();
