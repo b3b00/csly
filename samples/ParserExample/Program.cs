@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using csly.indentedWhileLang.compiler;
 using csly.indentedWhileLang.parser;
@@ -1056,21 +1057,51 @@ else
 
             
 
-            var source = @"hello - {= world =} - billy - {% if (a == 1) %} - bob - {%else%} - boubou - {%endif%}
-{% for 1..10 as i%}
-{=i=}
+            var source = @"hello                  
 
+{= world =}
+
+billy
+
+{% if (a == 1) %}
+    bob
+{%else%}
+    boubou
+{%endif%}
+{% for 1..10 as i%}[
+    {=i=}
+]]
 {% end%}
--------------------------
-{% for items as item%}
-{=item=}
 
+====================
+
+{% for items as item%}**
+    {=item=}
+...
 {% end%}
 ";
             
             var tokens = genericLexer.Tokenize(source);
+            
+            var channels = tokens.Tokens.GetChannels();
+            StringBuilder b = new StringBuilder();
+            foreach (var channel in channels)
+            {
+                b.Append(channel.ChannelId).Append(";");
+                foreach (var token in channel.Tokens)
+                {
+                    b.Append(token?.GetDebug()).Append(";");
+                }
+
+                b.AppendLine();
+            }
+            
+            File.WriteAllText(@"c:\temp\tokens.txt",b.ToString());
+            
+            
             foreach (var token in tokens.Tokens.Tokens)
             {
+                
                 Console.WriteLine(token);
             }
 
@@ -1083,7 +1114,7 @@ else
                 {
                     { "world", "monde" },
                     { "a", 1 },
-                    { "items", new List<string>(){"one","two","three}"}}
+                    { "items", new List<string>(){"one","two","three"}}
                 };
                 var r = build.Result.Parse(source);
                 if (r.IsOk)
