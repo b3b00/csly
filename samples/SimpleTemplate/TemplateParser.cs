@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
+using System.Diagnostics;
+using System.Text;
+using SimpleTemplate.model;
+using SimpleTemplate.model.expressions;
 using sly.lexer;
 using sly.parser.generator;
 using sly.parser.parser;
@@ -9,79 +12,63 @@ namespace SimpleTemplate
 {
     public class TemplateParser
     {
+        
+        #region structure
 
         [Production("template: item*")]
-        public string Template(List<string> items, Dictionary<string,string> context) 
+        public ITemplate Template(List<ITemplate> items)
         {
-            return string.Join("",items);
+            return new Template(items);
         }
 
         [Production("item : TEXT")]
-        public string Text(Token<TemplateLexer> text, Dictionary<string,string> context)
+        public ITemplate Text(Token<TemplateLexer> text)
         {
-            return text.Value;
+            return new Text(text.Value);
         }
         
         [Production("item :OPEN_VALUE[d] ID CLOSE_VALUE[d]")]
-        public string Value(Token<TemplateLexer> value, Dictionary<string,string> context)
+        public ITemplate Value(Token<TemplateLexer> value)
         {
-            
-            if (context.TryGetValue(value.Value, out var val))
-            {
-                return val;
-            }
-
-            return "";
+            return new Value(value.Value);
         }
 
-        [Production("item : if item (else item)? endif ")]
-        public string Conditional(string cond, string thenBlock, ValueOption<Group<TemplateLexer, string>> elseBlock,
-            string endif, Dictionary<string,string> context)
+        [Production(@"item : OPEN_CODE[d] IF[d] OPEN_PAREN[d] TemplateParser_expressions CLOSE_PAREN[d] CLOSE_CODE[d]
+                                     item* 
+                                  elseBlock? 
+                                  OPEN_CODE[d] ENDIF[d] CLOSE_CODE[d] ")]
+        public ITemplate Conditional(Expression cond, List<ITemplate> thenBlock, ValueOption<ITemplate> elseBlock)
         {
-            if (cond == "1")
-            {
-                return thenBlock;
-            }
-            else
-            {
-                var gg = elseBlock.Match(
-                    (Group<TemplateLexer, string> group) =>
-                    {
-                        return group;
-                    },
-                    () =>
-                    {
-                        var g = new Group<TemplateLexer, string>();
-                        g.Add("item", "<none>");
-                        return g;
-                    });
-                return gg.Value("item");
-            }
+            var ifthenelse = new IfThenElse(cond, new Block(thenBlock), elseBlock.Match(x => x, () => new Block()) as Block);
+            return ifthenelse;
         }
 
         [Production("if : OPEN_CODE[d] IF[d] OPEN_PAREN[d] TemplateParser_expressions CLOSE_PAREN[d] CLOSE_CODE[d]")]
-        public string If(string condition, Dictionary<string,string> context)
+        public ITemplate If(ITemplate condition)
         {
             return condition;
         }
 
-        [Production("else :OPEN_CODE[d] ELSE[d] CLOSE_CODE[d]")]
-        public string Else(Dictionary<string,string> context)
+        [Production("elseBlock : OPEN_CODE[d] ELSE[d] CLOSE_CODE[d] item*")]
+        public ITemplate elseBlock(List<ITemplate> items)
         {
-            return "";
+            return new Block(items);
         }
         
-        [Production("endif :OPEN_CODE[d] ENDIF[d] CLOSE_CODE[d]")]
-        public string EndIf(Dictionary<string,string> context)
+
+        [Production("item : OPEN_CODE[d] FOR[d] INT RANGE[d] INT AS[d] ID CLOSE_CODE[d] item* OPEN_CODE[d] END[d] CLOSE_CODE[d]")]
+        public ITemplate fori(Token<TemplateLexer> start, Token<TemplateLexer> end, Token<TemplateLexer> iterator, List<ITemplate> items)
         {
-            return "";
+            return new ForI(start.IntValue, end.IntValue, iterator.Value, items);
         }
         
-        
-        
-        
-        
-        
+        [Production("item : OPEN_CODE[d] FOR[d] ID AS[d] ID CLOSE_CODE[d] item* OPEN_CODE[d] END[d] CLOSE_CODE[d]")]
+        public ITemplate _foreach(Token<TemplateLexer> listName, Token<TemplateLexer> iterator, List<ITemplate> items)
+        {
+            return new ForEach(listName.Value, iterator.Value, items);
+        }
+       
+        #endregion
         
         #region COMPARISON OPERATIONS
 
@@ -89,83 +76,69 @@ namespace SimpleTemplate
         [Infix("GREATER", Associativity.Right, 50)]
         [Infix("EQUALS", Associativity.Right, 50)]
         [Infix("DIFFERENT", Associativity.Right, 50)]
-        public string binaryComparisonExpression(string left, Token<TemplateLexer> operatorToken,
-            string right, Dictionary<string,string> context)
+        public Expression binaryComparisonExpression(Expression left, Token<TemplateLexer> operatorToken,
+            Expression right)
         {
-            int comparison = left.CompareTo(right);
+            
+            var oper = BinaryOperator.EQUALS;
 
-            switch (operatorToken.TokenID)
+            oper = operatorToken.TokenID switch
             {
-                case TemplateLexer.LESSER:
-                {
-                    return comparison < 0 ? "1" : "0";
-                    break;
-                }
-                case TemplateLexer.GREATER:
-                {
-                    return comparison > 0 ? "1" : "0";
-                }
-                case TemplateLexer.EQUALS:
-                {
-                    return comparison == 0 ? "1" : "0";
-                }
-                case TemplateLexer.DIFFERENT:
-                {
-                    return comparison != 0 ? "1" : "0";
-                }
-            }
+                TemplateLexer.LESSER => BinaryOperator.LESSER,
+                TemplateLexer.GREATER => BinaryOperator.GREATER,
+                TemplateLexer.EQUALS => BinaryOperator.EQUALS,
+                TemplateLexer.DIFFERENT => BinaryOperator.DIFFERENT
+            };
 
-            return "0";
+            return new BinaryOperation(left, oper, right);
         }
 
         #endregion
 
         #region STRING OPERATIONS
 
-        [Operation((int) TemplateLexer.CONCAT, Affix.InFix, Associativity.Right, 10)]
-        public string binaryStringExpression(string left, Token<TemplateLexer> operatorToken, string right, Dictionary<string,string> context)
-        {
-            return left + right;
-        }
+        // [Operation((int) TemplateLexer.CONCAT, Affix.InFix, Associativity.Right, 10)]
+        // public Expression binaryStringExpression(Expression left, Token<TemplateLexer> operatorToken, Expression right)
+        // {
+        //     return new BinaryOperation(left, BinaryOperator.CONCAT, right);
+        // }
 
         #endregion
         
           #region OPERANDS
 
           
-        [Production("primary: DOUBLE")]
-        public string PrimaryInt(Token<TemplateLexer> intToken, Dictionary<string,string> context)
+        [Production("primary: INT")]
+        public Expression PrimaryInt(Token<TemplateLexer> intToken)
         {
-            return intToken.Value;
+            return new IntegerConstant(intToken.IntValue, intToken.Position);
         }
 
         
         [Production("primary: TRUE")]
         [Production("primary: FALSE")]
-        public string PrimaryBool(Token<TemplateLexer> boolToken, Dictionary<string,string> context)
+        public ITemplate PrimaryBool(Token<TemplateLexer> boolToken)
         {
-            return bool.Parse(boolToken.StringWithoutQuotes) ? "1" : "0";
+            return new BoolConstant(bool.Parse(boolToken.StringWithoutQuotes) ? true : false);
         }
 
         
         [Production("primary: STRING")]
-        public string PrimaryString(Token<TemplateLexer> stringToken, Dictionary<string,string> context)
+        public ITemplate PrimaryString(Token<TemplateLexer> stringToken)
         {
-            return stringToken.StringWithoutQuotes;
+            return new StringConstant(stringToken.StringWithoutQuotes, stringToken.Position);
         }
 
         
         [Production("primary: ID")]
-        public string PrimaryId(Token<TemplateLexer> varToken, Dictionary<string,string> context)
+        public Expression PrimaryId(Token<TemplateLexer> varToken)
         {
-            string result = "";
-            context.TryGetValue(varToken.Value, out result);
-            return result;
+            return new Variable(varToken.Value);
         }
 
         [Operand]
         [Production("operand: primary")]
-        public string Operand(string prim, Dictionary<string,string> context)
+        public Expression Operand(Expression prim)
         {
             return prim;
         }
@@ -176,60 +149,40 @@ namespace SimpleTemplate
 
         [Operation((int) TemplateLexer.PLUS, Affix.InFix, Associativity.Right, 10)]
         [Operation((int) TemplateLexer.MINUS, Affix.InFix, Associativity.Right, 10)]
-        public string binaryTermNumericExpression(string left, Token<TemplateLexer> operatorToken,
-            string right, Dictionary<string,string> context)
+        public Expression binaryTermNumericExpression(Expression left, Token<TemplateLexer> operatorToken,
+            Expression right)
         {
-            double l = double.Parse(left);    
-            double r = double.Parse(right);            
+            var oper = BinaryOperator.ADD;
 
-            switch (operatorToken.TokenID)
+            oper = operatorToken.TokenID switch
             {
-                case TemplateLexer.PLUS:
-                {
-                    return (l + r).ToString();
-                }
-                case TemplateLexer.MINUS:
-                {
-                    return (l - r).ToString();
-                }
-            }
+                TemplateLexer.PLUS => BinaryOperator.ADD,
+                TemplateLexer.MINUS => BinaryOperator.SUB
+            };
 
-            
-            return "";
+            return new BinaryOperation(left, oper, right);
         }
 
         [Operation((int) TemplateLexer.TIMES, Affix.InFix, Associativity.Right, 50)]
         [Operation((int) TemplateLexer.DIVIDE, Affix.InFix, Associativity.Right, 50)]
-        public string binaryFactorNumericExpression(string left, Token<TemplateLexer> operatorToken,
-            string right, Dictionary<string,string> context)
+        public Expression binaryFactorNumericExpression(Expression left, Token<TemplateLexer> operatorToken,
+            Expression right)
         {
-            double l = double.Parse(left);    
-            double r = double.Parse(right);
+            var oper = BinaryOperator.ADD;
 
-            switch (operatorToken.TokenID)
+            oper = operatorToken.TokenID switch
             {
-                case TemplateLexer.TIMES:
-                {
-                    return (l * r).ToString();
-                }
-                case TemplateLexer.DIVIDE:
-                {
-                    return (l / r).ToString();
-                }
-            }
+                TemplateLexer.TIMES => BinaryOperator.MULTIPLY,
+                TemplateLexer.DIVIDE => BinaryOperator.DIVIDE
+            };
 
-            return "";
+            return new BinaryOperation(left, oper, right);
         }
 
         [Prefix((int) TemplateLexer.MINUS, Associativity.Right, 100)]
-        public string unaryNumericExpression(Token<TemplateLexer> operation, string value, Dictionary<string,string> context)
+        public Expression unaryNumericExpression(Token<TemplateLexer> operation, Expression value)
         {
-            if (double.TryParse(value, out double x))
-            {
-                return (-x).ToString();
-            }
-
-            return "0";
+            return new Neg(value, operation.Position);
         }
 
         #endregion
@@ -238,21 +191,21 @@ namespace SimpleTemplate
         #region BOOLEAN OPERATIONS
 
         [Operation((int) TemplateLexer.OR, Affix.InFix, Associativity.Right, 10)]
-        public string binaryOrExpression(string left, Token<TemplateLexer> operatorToken, string right, Dictionary<string,string> context)
+        public Expression binaryOrExpression(Expression left, Token<TemplateLexer> operatorToken, Expression right)
         {
-            return left == "1" || right == "1" ? "1" : "0";
+            return new BinaryOperation(left, BinaryOperator.OR, right);
         }
 
         [Operation((int) TemplateLexer.AND, Affix.InFix, Associativity.Right, 50)]
-        public string binaryAndExpression(string left, Token<TemplateLexer> operatorToken, string right, Dictionary<string,string> context)
+        public Expression binaryAndExpression(Expression left, Token<TemplateLexer> operatorToken, Expression right)
         {
-            return left == "1" && right == "1" ? "1" : "0";
+            return new BinaryOperation(left, BinaryOperator.AND, right);
         }
 
         [Operation((int) TemplateLexer.NOT, Affix.PreFix, Associativity.Right, 100)]
-        public string binaryOrExpression(Token<TemplateLexer> operatorToken, string value, Dictionary<string,string> context)
+        public Expression binaryOrExpression(Token<TemplateLexer> operatorToken, Expression value)
         {
-            return value == "1" ? "0" : "1";
+            return new Not(value,operatorToken.Position);
         }
 
         #endregion

@@ -21,6 +21,7 @@ using ParserTests.Issue239;
 using ParserTests.lexer;
 using simpleExpressionParser;
 using SimpleTemplate;
+using SimpleTemplate.model;
 using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser;
@@ -33,6 +34,7 @@ using sly.parser.parser;
 using XML;
 using Xunit;
 using ExpressionContext = postProcessedLexerParser.expressionModel.ExpressionContext;
+using IfThenElse = indented.IfThenElse;
 
 namespace ParserExample
 {
@@ -1008,7 +1010,7 @@ else
 
             
 
-            var source = @"hello - {= world =} - billy - {% if (a == 1.0) %} - bob - {%else%} - boubou - {%endif%}";
+            var source = @"hello - {= world =} - billy - {% if (a == 1) %} - bob - {%else%} - boubou - {%endif%}";
             
             var tokens = genericLexer.Tokenize(source);
             foreach (var token in tokens.Tokens.Tokens)
@@ -1021,10 +1023,10 @@ else
             var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "template");
             if (build.IsOk)
             {
-                var context = new Dictionary<string, string>()
+                var context = new Dictionary<string, object>()
                 {
                     { "world", "monde" },
-                    { "a", "1.0" }
+                    { "a", 1 }
                 };
                 var r = build.Result.ParseWithContext(source, context);
                 if (r.IsOk)
@@ -1043,9 +1045,67 @@ else
 
         }
         
+        private static void TestTemplateFor()
+        {
+            var lexerResult = LexerBuilder.BuildLexer<TemplateLexer>();
+            Assert.False(lexerResult.IsError);
+            var genericLexer = lexerResult.Result as GenericLexer<TemplateLexer>;
+            var fsm = genericLexer.FSMBuilder.Fsm;
+            var fsmGraph = fsm.ToGraphViz();
+            Console.WriteLine(fsmGraph);
+
+            
+
+            var source = @"hello - {= world =} - billy - {% if (a == 1) %} - bob - {%else%} - boubou - {%endif%}
+{% for 1..10 as i%}
+{=i=}
+
+{% end%}
+-------------------------
+{% for items as item%}
+{=item=}
+
+{% end%}
+";
+            
+            var tokens = genericLexer.Tokenize(source);
+            foreach (var token in tokens.Tokens.Tokens)
+            {
+                Console.WriteLine(token);
+            }
+
+            var builder = new ParserBuilder<TemplateLexer, ITemplate>();
+            var instance = new TemplateParser();
+            var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "template");
+            if (build.IsOk)
+            {
+                var context = new Dictionary<string, object>()
+                {
+                    { "world", "monde" },
+                    { "a", 1 },
+                    { "items", new List<string>(){"one","two","three}"}}
+                };
+                var r = build.Result.Parse(source);
+                if (r.IsOk)
+                {
+                    var templated = r.Result.GetValue(context);
+                    Console.WriteLine(templated);
+                }
+                else
+                {
+                    r.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+                }
+            }
+            else
+            {
+                build.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
+
+        }
+        
         private static void Main(string[] args)
         {
-            TestTemplate();
+            TestTemplateFor();
             // testErrors();
             //TestContextualParser();
             //TestTokenCallBacks();

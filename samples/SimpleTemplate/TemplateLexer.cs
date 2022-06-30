@@ -3,11 +3,28 @@ using sly.lexer;
 
 namespace SimpleTemplate
 {
+    // [Lexer(IgnoreWS = false)]
     public enum TemplateLexer
     {
 
         NOT_A_TOKEN = 0,
 
+        // [Sugar(" ",28)]
+        // [Mode]
+        // SP,
+        // [Sugar("\t", 28)]
+        // [Mode]
+        // TAB,
+        // [Sugar("\r\n",28,IsLineEnding = true)]
+        // [Mode]
+        // CRLF,
+        // [Sugar("\n",28,IsLineEnding = true)]
+        // [Mode]
+        // LF,
+        
+        
+        
+        
         #region TEXT
    
         [AllExcept("{%", "{=")]
@@ -57,6 +74,22 @@ namespace SimpleTemplate
     [Mode("code")]
     ELSE,
     
+    [Keyword("for")] 
+    [Mode("code")]
+    FOR,
+
+    [Keyword("as")] 
+    [Mode("code")]
+    AS,
+    
+    [Keyword("end")] 
+    [Mode("code")]
+    END,
+    
+    [Sugar("..")]
+    [Mode("code")]
+    RANGE,
+    
     #region literals
     
     [String()]
@@ -67,9 +100,9 @@ namespace SimpleTemplate
     // [Mode("code")]
     // INT,
     
-    [Double()]
+    [Int()]
     [Mode("code")]
-    DOUBLE,
+    INT,
     
     [Lexeme(GenericToken.KeyWord, "TRUE")]
     [Lexeme(GenericToken.KeyWord, "true")]
@@ -103,9 +136,9 @@ namespace SimpleTemplate
     [Mode("code")]
     DIFFERENT = 33,
 
-    [Sugar( ".")]
-    [Mode("code")]
-    CONCAT = 34,
+    // [Sugar( ".")]
+    // [Mode("code")]
+    // CONCAT = 34,
 
     [Sugar( ":=")]
     [Mode("code")]
