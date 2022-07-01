@@ -115,21 +115,40 @@ namespace ParserTests
         public DoNotIgnore SimpleId(Token<DoNotIgnoreCommentsTokenWithChannels> token)
         {
             // get previous tokens in channel 2 (COMMENT)
-            var previousTokens = token.PreviousTokens(Channels.Comments);
+            var commentTokens = token.PreviousTokens(Channels.Comments);
             
-            string comment = null;
+            string comment = "";
             // previous tokens may not be a comment so we have to check if not null
-            if (previousTokens.Any())
+            if (commentTokens.Any())
             {
-                var previousComments = previousTokens
+                var previousComments = commentTokens
+                    .Where(x => x.TokenID == DoNotIgnoreCommentsTokenWithChannels.MULTILINECOMMENT ||
+                                x.TokenID == DoNotIgnoreCommentsTokenWithChannels.SINGLELINECOMMENT)
+                    .Reverse()
+                    .Select(x => x.Value.Trim());
+                
+                if (previousComments.Any())
+                {
+                    comment += string.Join("\n", previousComments);
+                }
+            }
+            
+            commentTokens = token.NextTokens(Channels.Comments);
+           
+            
+            // previous tokens may not be a comment so we have to check if not null
+            if (commentTokens.Any())
+            {
+                var nextComments = commentTokens
                     .Where(x => x.TokenID == DoNotIgnoreCommentsTokenWithChannels.MULTILINECOMMENT ||
                                 x.TokenID == DoNotIgnoreCommentsTokenWithChannels.SINGLELINECOMMENT)
                     .Select(x => x.Value.Trim());
-                if (previousComments.Any())
+                if (nextComments.Any())
                 {
-                    comment = string.Join("\n", previousComments);
+                    comment += (string.IsNullOrEmpty(comment) ? "" : "\n")+ string.Join("\n", nextComments);
                 }
             }
+            
             return new DoNotIgnoreCommentIdentifier(token.Value, comment);
         }
 
@@ -1496,20 +1515,61 @@ else
 
             var test = parser.Parse(@"
 a
+
+b1
 // commented b [1] 
 /*commented b [2]*/
-b");
+b2
+
+c
+// comment c @1
+// commented c @2
+// commented c @3
+
+test
+
+// commented d before
+d
+// commented d after
+
+");
 
             Assert.True(test.IsOk);
             Assert.NotNull(test.Result);
             Assert.IsType<IdentifierList>(test.Result);
             var list = test.Result as IdentifierList;
-            Assert.Equal(2, list.Ids.Count);
-            Assert.False(list.Ids[0].IsCommented);
-            Assert.Equal("a",list.Ids[0].Name);
-            Assert.True(list.Ids[1].IsCommented);
-            Assert.Equal("b",list.Ids[1].Name);
-            Assert.Equal("commented b [2]\ncommented b [1]",list.Ids[1].Comment.Trim());    
+            Assert.Equal(6, list.Ids.Count);
+            
+            var id = list.Ids[0];
+            Assert.Equal("a",id.Name);
+            Assert.False(id.IsCommented);
+
+            id = list.Ids[1];
+            Assert.True(id.IsCommented);
+            Assert.Equal("b1",id.Name);
+            Assert.Equal("commented b [1]\ncommented b [2]",id.Comment.Trim());    
+            
+            id = list.Ids[2];
+            Assert.True(id.IsCommented);
+            Assert.Equal("b2",id.Name);
+            Assert.Equal("commented b [1]\ncommented b [2]",id.Comment.Trim());    
+            
+            id = list.Ids[3];
+            Assert.True(id.IsCommented);
+            Assert.Equal("c",id.Name);
+            var comments = id.Comment;
+            Assert.Equal("comment c @1\ncommented c @2\ncommented c @3",id.Comment.Trim());
+            
+            id = list.Ids[4];
+            Assert.Equal("test",id.Name);
+            Assert.True(id.IsCommented); // catches comment from c  and d
+            Assert.Equal("comment c @1\ncommented c @2\ncommented c @3\ncommented d before",id.Comment.Trim());
+            
+            id = list.Ids[5];
+            Assert.True(id.IsCommented);
+            Assert.Equal("d",id.Name);
+            comments = id.Comment;
+            Assert.Equal("commented d before\ncommented d after",id.Comment.Trim());
             
             test = parser.Parse(@"a 
 // commented b
