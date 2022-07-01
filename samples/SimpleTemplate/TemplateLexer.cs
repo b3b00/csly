@@ -117,9 +117,9 @@ namespace SimpleTemplate
     [Mode("code")]
     DIFFERENT = 33,
 
-    // [Sugar( ".")]
-    // [Mode("code")]
-    // CONCAT = 34,
+    [Sugar( "&")]
+    [Mode("code")]
+    CONCAT = 34,
 
     [Sugar( ":=")]
     [Mode("code")]
