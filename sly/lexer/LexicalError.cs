@@ -1,4 +1,5 @@
-﻿using sly.i18n;
+﻿using System.Diagnostics.CodeAnalysis;
+using sly.i18n;
 using sly.parser;
 
 namespace sly.lexer
@@ -20,6 +21,7 @@ namespace sly.lexer
 
         public override string ErrorMessage => I18N.Instance.GetText(I18n,I18NMessage.UnexpectedChar,UnexpectedChar.ToString(), Line.ToString(), Column.ToString());
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return ErrorMessage;
