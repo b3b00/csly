@@ -100,13 +100,3 @@ jobs:
       with:
         workflow: refresh readme badges
         token: ${{ secrets.RELEASE_PAT }}
-   # - name: refresh coverage badge
-   #   uses: fjogeleit/http-request-action@master
-#      with:
-#        url: https://camo.githubusercontent.com/9b503a172b04f61f76884f7c7d224da0a9c910cf3ea687ee153a2ea3497ed263/68747470733a2f2f636f766572616c6c732e696f2f7265706f732f6769746875622f62336230302f63736c792f62616467652e7376673f6272616e63683d646576266b696c6c5f63616368653d31
-#        method: PURGE
-#    - name: refresh nuget badge
-#      uses: fjogeleit/http-request-action@master
-#      with:
-#        url: https://camo.githubusercontent.com/bfc2c204084e1d7b4c2a38c9b6633bebf84493555eb5f890993d9e81d3ad9baa/68747470733a2f2f696d672e736869656c64732e696f2f6e756765742f762f736c792e7376673f6b696c6c5f63616368653d31
-#        method: PURGE
