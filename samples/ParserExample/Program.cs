@@ -1061,13 +1061,11 @@ else
 
 {= world =}
 
-billy
+billy      
+   
 
-{% if (a == 1) %}
-    bob
-{%else%}
-    boubou
-{%endif%}
+!
+{% if (a == 1) %}-bob{%else%}foobar{%endif%}
 {% for 1..10 as i%}[
     {=i=}
 ]]
