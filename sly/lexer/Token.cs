@@ -129,11 +129,7 @@ namespace sly.lexer
 
         public string Value => SpanValue.ToString();
 
-        public static T DefaultToken
-        {
-            get => DefTok;
-            set => DefTok = value;
-        }
+        
 
 
         public string StringWithoutQuotes
@@ -196,7 +192,7 @@ namespace sly.lexer
 
 
         public bool End { get; set; }
-        public static T DefTok { get; set; }
+        
         public bool IsLineEnding { get; set; }
         
         public TokenChannels<T> TokenChannels { get; set; }         
@@ -247,6 +243,8 @@ namespace sly.lexer
             return value;
         }
         
+        
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             if (IsEOS)
