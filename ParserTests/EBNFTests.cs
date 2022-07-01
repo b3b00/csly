@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using expressionparser;
@@ -12,7 +11,6 @@ using sly.buildresult;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
-using sly.parser.generator.visitor;
 using sly.parser.llparser;
 using sly.parser.parser;
 using sly.parser.syntax.grammar;
@@ -116,13 +114,21 @@ namespace ParserTests
         [Production("id : ID")]
         public DoNotIgnore SimpleId(Token<DoNotIgnoreCommentsTokenWithChannels> token)
         {
-            // get previous token in channel 2 (COMMENT)
-            var previous = token.Previous(Channels.Comments);
+            // get previous tokens in channel 2 (COMMENT)
+            var previousTokens = token.PreviousTokens(Channels.Comments);
+            
             string comment = null;
-            // previous token may not be a comment so we have to check if not null
-            if (previous != null && (previous.TokenID == DoNotIgnoreCommentsTokenWithChannels.SINGLELINECOMMENT || previous.TokenID == DoNotIgnoreCommentsTokenWithChannels.MULTILINECOMMENT))
+            // previous tokens may not be a comment so we have to check if not null
+            if (previousTokens.Any())
             {
-                comment = previous?.Value;
+                var previousComments = previousTokens
+                    .Where(x => x.TokenID == DoNotIgnoreCommentsTokenWithChannels.MULTILINECOMMENT ||
+                                x.TokenID == DoNotIgnoreCommentsTokenWithChannels.SINGLELINECOMMENT)
+                    .Select(x => x.Value.Trim());
+                if (previousComments.Any())
+                {
+                    comment = string.Join("\n", previousComments);
+                }
             }
             return new DoNotIgnoreCommentIdentifier(token.Value, comment);
         }
@@ -1488,7 +1494,11 @@ else
             Assert.NotNull(builtParser.Result);
             var parser = builtParser.Result;
 
-            var test = parser.Parse("a /*commented b*/b");
+            var test = parser.Parse(@"
+a
+// commented b [1] 
+/*commented b [2]*/
+b");
 
             Assert.True(test.IsOk);
             Assert.NotNull(test.Result);
@@ -1499,7 +1509,7 @@ else
             Assert.Equal("a",list.Ids[0].Name);
             Assert.True(list.Ids[1].IsCommented);
             Assert.Equal("b",list.Ids[1].Name);
-            Assert.Equal("commented b",list.Ids[1].Comment.Trim());    
+            Assert.Equal(@"commented b [2]\ncommented b [1]",list.Ids[1].Comment.Trim());    
             
             test = parser.Parse(@"a 
 // commented b
