@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -75,6 +76,35 @@ namespace sly.lexer
             return null;
         }
 
+        public List<Token<T>> PreviousTokens(int channelId)
+        {
+            TokenChannel<T> channel = null;
+            if (TokenChannels.TryGet(channelId, out channel))
+            {
+                var list = new List<Token<T>>();
+                int position = PositionInTokenFlow - 1;
+                if (position >= 0 && position <= channel.Count - 1);
+                {
+                    
+                    for (int i = position; position > 0; position--)
+                    {
+                        var token = channel[position];
+                        if (token != null)
+                        {
+                            list.Add(token);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                return list;
+            }
+            return new List<Token<T>>();
+        }
+        
         public Token<T> Previous(int channelId)
         {
             TokenChannel<T> channel = null;
