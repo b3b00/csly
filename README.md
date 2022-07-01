@@ -6,7 +6,7 @@
 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/b3b00/sly/blob/dev/LICENSE)
-[![NuGet](https://img.shields.io/nuget/v/sly.svg)](https://www.nuget.org/packages/sly)
+[![NuGet](https://img.shields.io/nuget/v/sly.svg&kill_cache=1)](https://www.nuget.org/packages/sly)
 
 
 Csly is inspired by the Python lex yacc library ([PLY](http://www.dabeaz.com/ply/)) and aims
