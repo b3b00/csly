@@ -924,12 +924,7 @@ namespace sly.lexer
                         {
                             FSMBuilder.ExceptTransitionTo(new[] { exception[j + 1] }, GetEndLabel(-1, -1));
                         }
-                        // TODO : si on a un except qui match le lien retour vers text
-                        // alors ajouter exception[j+1] dans la transition
                     }
-
-                    //FSMBuilder.Mark(GetEndLabel(i, j));
-
                 }
             }
             

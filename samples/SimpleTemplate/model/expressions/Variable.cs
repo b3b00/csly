@@ -25,7 +25,8 @@ namespace SimpleTemplate.model.expressions
             {
                 return value;
             }
-// TODO : raise variable not found
+
+            throw new SystemException($"variable {Name} not found @ {Position}");
             return "";
         }
     }

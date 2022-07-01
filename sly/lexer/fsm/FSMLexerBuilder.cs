@@ -142,8 +142,8 @@ namespace sly.lexer.fsm
             return this;
         }
         
-        // TODO : later pop to a specific mode ?
-        public FSMLexerBuilder<N> Pop(string toMode = null)
+        
+        public FSMLexerBuilder<N> Pop()
         {
             if (Fsm.HasState(CurrentState))
             {

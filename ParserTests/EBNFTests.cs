@@ -1069,14 +1069,12 @@ namespace ParserTests
             var nonTerm = conf.NonTerminals["testNonTerm"];
             Assert.NotNull(nonTerm);
             Assert.Equal(2, nonTerm.PossibleLeadingTokens.Count);
-           // TODO !!!!
-           // Assert.True(nonTerm.PossibleLeadingTokens.All(x => expected.Contains(y => x.TokenId == y)));
+            Assert.True(Enumerable.SequenceEqual(nonTerm.PossibleLeadingTokens.Select(x => x.TokenId),expected));
 
             var term = conf.NonTerminals["testTerm"];
             Assert.NotNull(term);
             Assert.Equal(2, nonTerm.PossibleLeadingTokens.Count);
-            // TODO !!!!
-            //Assert.True(term.PossibleLeadingTokens.ContainsAll(expected));
+            Assert.True(Enumerable.SequenceEqual(nonTerm.PossibleLeadingTokens.Select(x => x.TokenId),expected));
         }
 
         #endregion
