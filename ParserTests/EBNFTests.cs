@@ -1509,7 +1509,7 @@ b");
             Assert.Equal("a",list.Ids[0].Name);
             Assert.True(list.Ids[1].IsCommented);
             Assert.Equal("b",list.Ids[1].Name);
-            Assert.Equal(@"commented b [2]\ncommented b [1]",list.Ids[1].Comment.Trim());    
+            Assert.Equal("commented b [2]\ncommented b [1]",list.Ids[1].Comment.Trim());    
             
             test = parser.Parse(@"a 
 // commented b
