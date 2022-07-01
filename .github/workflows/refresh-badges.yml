@@ -17,7 +17,7 @@ jobs:
     steps:
     # Runs a single command using the runners shell
     - name: refresh
-      uses: b3b00/refreshBadgesAction@v1.0.2
+      uses: b3b00/refreshBadgesAction@v1.0.4
       with:
         repository : 'b3b00/csly'
         branch: dev
