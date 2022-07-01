@@ -60,48 +60,6 @@ namespace sly.lexer
             End = true;
             Position = new LexerPosition(0, 0, 0);
         }
-
-
-        public List<Token<T>> NextTokens(int channelId)
-        {
-            TokenChannel<T> targetChannel = null;
-
-            List<Token<T>> list = new List<Token<T>>();
-            
-            if (TokenChannels.TryGet(channelId, out targetChannel))
-            {
-                TokenChannel<T> thisChannel = null;
-                if (TokenChannels.TryGet(this.Channel, out thisChannel))
-                {
-                    var x = thisChannel[PositionInTokenVisibleFlow+1];
-                    if (x != null)
-                    {
-                        int from = PositionInTokenFlow + 1;
-                        int to = x.PositionInTokenFlow - 1;
-                        for (int i = from; i <= to; i++)
-                        {
-                            if (i >= targetChannel.Count)
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                if (targetChannel[i] != null)
-                                {
-                                    list.Add(targetChannel[i]);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (list.Count >= 1)
-            {
-                ;
-            }
-            return list;
-        }
         
         public Token<T> Next(int channelId)
         {
