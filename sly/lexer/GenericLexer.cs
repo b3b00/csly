@@ -103,7 +103,7 @@ namespace sly.lexer
         public const string defaultIdentifierKey = "identifier";
         public const string escape_string = "escape_string";
         public const string escape_char = "escape_char";
-        public const string in_all_except = "in_allexcept";
+        public const string in_up_to = "in_upto";
         
 
         public const string single_line_comment_start = "single_line_comment_start";
@@ -127,7 +127,7 @@ namespace sly.lexer
 
         protected int StringCounter;
         protected int CharCounter;
-        protected int allExceptCounter;
+        protected int upToCounter;
 
 
         protected Dictionary<IN, Func<Token<IN>, Token<IN>>> CallBacks = new Dictionary<IN, Func<Token<IN>, Token<IN>>>();
@@ -854,7 +854,7 @@ namespace sly.lexer
                 .CallBack(callback);
         }
         
-        public void AddAllExcept(IN token, BuildResult<ILexer<IN>> buildResult, string[] exceptions, bool isLineEnding = false)
+        public void AddUpTo(IN token, BuildResult<ILexer<IN>> buildResult, string[] exceptions, bool isLineEnding = false)
         {
             
                 
@@ -866,25 +866,23 @@ namespace sly.lexer
 
             FSMBuilder.GoTo(start);
 
-            var allExceptChars0 = exceptions.Select(x => x.First()).Distinct().ToArray();
+            var upToChars0 = exceptions.Select(x => x.First()).Distinct().ToArray();
 
             Func<int, int, string> GetEndLabel = (int exception, int exceptionIndex) =>
             {
                 if (exception < 0 || exceptionIndex < 0)
                 {
-                    return $"{in_all_except}_text_{allExceptCounter}";
+                    return $"{in_up_to}_text_{upToCounter}";
                 }
 
-                return $"{in_all_except}_{exception}_{exceptionIndex}_{allExceptCounter}";
+                return $"{in_up_to}_{exception}_{exceptionIndex}_{upToCounter}";
             };
             
-            var allExceptChars1 = exceptions.Where(x => x.Length >= 2).Select(x => x[1]).Distinct().ToArray();
-
-            FSMBuilder.ExceptTransition(allExceptChars0)
+            FSMBuilder.ExceptTransition(upToChars0)
                 .Mark(GetEndLabel(-1,-1))
                 .End(GenericToken.UpTo)
                 .CallBack(callback);
-            FSMBuilder.ExceptTransitionTo(allExceptChars0,GetEndLabel(-1,-1));
+            FSMBuilder.ExceptTransitionTo(upToChars0,GetEndLabel(-1,-1));
             for (int i = 0; i < exceptions.Length; i++)
             {
                 string exception = exceptions[i];
@@ -928,7 +926,7 @@ namespace sly.lexer
                 }
             }
             
-            allExceptCounter++;
+            upToCounter++;
         }
 
         public LexerPosition ConsumeComment(Token<GenericToken> comment, ReadOnlyMemory<char> source, LexerPosition lexerPosition)

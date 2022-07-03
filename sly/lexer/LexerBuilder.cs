@@ -427,9 +427,9 @@ namespace sly.lexer
                             }
                         }
 
-                        if (lexeme.IsAllExcept)
+                        if (lexeme.IsUpTo)
                         {
-                            lexer.AddAllExcept(tokenID,result,lexeme.GenericTokenParameters);
+                            lexer.AddUpTo(tokenID,result,lexeme.GenericTokenParameters);
                         }
 
                         if (lexeme.IsString)

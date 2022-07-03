@@ -82,6 +82,6 @@ namespace sly.lexer
         public bool IsIdentifier => GenericToken == GenericToken.Identifier;
 
         public bool IsExtension => GenericToken == GenericToken.Extension;
-        public bool IsAllExcept => GenericToken == GenericToken.UpTo;
+        public bool IsUpTo => GenericToken == GenericToken.UpTo;
     }
 }

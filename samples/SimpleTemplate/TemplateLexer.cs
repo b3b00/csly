@@ -26,7 +26,6 @@ namespace SimpleTemplate
         #region TEXT
    
         [UpTo("{%", "{=")]
-        // [AllExcept("{%")]
         TEXT,
         
         [Sugar("{%")] [Push("code")] OPEN_CODE,
