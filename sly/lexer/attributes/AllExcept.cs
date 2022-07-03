@@ -1,8 +1,8 @@
 namespace sly.lexer
 {
-    public class AllExceptAttribute : LexemeAttribute
+    public class UpToAttribute : LexemeAttribute
     {
-        public AllExceptAttribute(params string[] exceptions) : base(GenericToken.AllExcept, exceptions)
+        public UpToAttribute(params string[] exceptions) : base(GenericToken.UpTo, exceptions)
         {
         }
     }

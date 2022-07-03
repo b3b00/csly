@@ -23,7 +23,7 @@ namespace sly.lexer
         Extension,
 
         Comment,
-        AllExcept
+        UpTo
     }
 
     public enum IdentifierType
@@ -882,7 +882,7 @@ namespace sly.lexer
 
             FSMBuilder.ExceptTransition(allExceptChars0)
                 .Mark(GetEndLabel(-1,-1))
-                .End(GenericToken.AllExcept)
+                .End(GenericToken.UpTo)
                 .CallBack(callback);
             FSMBuilder.ExceptTransitionTo(allExceptChars0,GetEndLabel(-1,-1));
             for (int i = 0; i < exceptions.Length; i++)

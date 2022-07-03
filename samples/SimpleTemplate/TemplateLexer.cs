@@ -25,7 +25,7 @@ namespace SimpleTemplate
  
         #region TEXT
    
-        [AllExcept("{%", "{=")]
+        [UpTo("{%", "{=")]
         // [AllExcept("{%")]
         TEXT,
         

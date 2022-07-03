@@ -16,7 +16,7 @@ namespace XML
         [Push("tag")]
         OPEN,
         
-        [AllExcept("<")]
+        [UpTo("<")]
         CONTENT,
         
         [Sugar("<?")]

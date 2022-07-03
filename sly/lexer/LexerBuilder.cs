@@ -94,9 +94,9 @@ namespace sly.lexer
             return attributes;
         }
 
-        public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildExtension<IN> extensionBuilder = null) where IN : struct
+        public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildExtension<IN> extensionBuilder = null, LexerPostProcess<IN> lexerPostProcess = null) where IN : struct
         {
-            return BuildLexer<IN>(new BuildResult < ILexer < IN >>() , extensionBuilder);
+            return BuildLexer<IN>(new BuildResult < ILexer < IN >>() , extensionBuilder, lexerPostProcess:lexerPostProcess);
         }
 
         public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result,
