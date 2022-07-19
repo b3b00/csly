@@ -61,7 +61,7 @@ See [Lexer](https://github.com/b3b00/csly/wiki/Lexer) for lexers definition and 
 Many domain-specific languages need parsing expressions (boolean or numeric).
 A recursive-descent parser is hard to maintain when parsing expressions have multiple precedence levels. For that reason, csly offers a way to generate expression-parsing rules using only operator tokens and a simple-to-understand precedence scheme. Csly will then generate production rules to parse expressions, managing precedence and either left-or-right associativity.
 
->### Avoid burdensome home-made expression parser implementations.
+>### Avoid burdensburdensome hand-made expression parser implementations.
 
 see [expression parsing](https://github.com/b3b00/csly/wiki/expression-parsing)
 
