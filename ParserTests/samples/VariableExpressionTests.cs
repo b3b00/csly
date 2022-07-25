@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using expressionparser;
 using expressionparser.model;
+using NFluent;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
+
 
 namespace ParserTests.samples
 {
@@ -23,54 +25,54 @@ namespace ParserTests.samples
         public void TestFactorDivide()
         {
             var r = Parser.Parse("42/2");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.Equal(21, r.Result.Evaluate(new ExpressionContext()));
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsNotNull();
+            Check.That(r.Result.Evaluate(new ExpressionContext())).IsEqualTo(21);
         }
 
         [Fact]
         public void TestFactorTimes()
         {
             var r = Parser.Parse("2*2");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.Equal(4, r.Result.Evaluate(new ExpressionContext()));
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsNotNull();
+            Check.That(r.Result.Evaluate(new ExpressionContext())).IsEqualTo(4);
         }
 
         [Fact]
         public void TestGroup()
         {
             var r = Parser.Parse("(2 + 2)");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.Equal(4, r.Result.Evaluate(new ExpressionContext()));
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsNotNull();
+            Check.That(r.Result.Evaluate(new ExpressionContext())).IsEqualTo(4);
         }
 
         [Fact]
         public void TestGroup2()
         {
             var r = Parser.Parse("6 * (2 + 2)");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.Equal(24, r.Result.Evaluate(new ExpressionContext()));
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsNotNull();
+            Check.That(r.Result.Evaluate(new ExpressionContext())).IsEqualTo(24);
         }
 
         [Fact]
         public void TestPrecedence()
         {
             var r = Parser.Parse("6 * 2 + 2");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.Equal(14, r.Result.Evaluate(new ExpressionContext()));
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsNotNull();
+            Check.That(r.Result.Evaluate(new ExpressionContext())).IsEqualTo(14);
         }
 
         [Fact]
         public void TestSingleNegativeValue()
         {
             var r = Parser.Parse("-1");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.Equal(-1, r.Result.Evaluate(new ExpressionContext()));
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsNotNull();
+            Check.That(r.Result.Evaluate(new ExpressionContext())).IsEqualTo(-1);
         }
 
 
@@ -78,28 +80,27 @@ namespace ParserTests.samples
         public void TestSingleValue()
         {
             var r = Parser.Parse("1");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.Equal(1, r.Result.Evaluate(new ExpressionContext())
-            );
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsNotNull();
+            Check.That(r.Result.Evaluate(new ExpressionContext())).IsEqualTo(1);
         }
 
         [Fact]
         public void TestTermMinus()
         {
             var r = Parser.Parse("1 - 1");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.Equal(0, r.Result.Evaluate(new ExpressionContext()));
+            Check.That(r.IsError).IsFalse();
+                        Check.That(r.Result).IsNotNull();
+                        Check.That(r.Result.Evaluate(new ExpressionContext())).IsEqualTo(0);
         }
 
         [Fact]
         public void TestTermPlus()
         {
             var r = Parser.Parse("1 + 1");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.Equal(2, r.Result.Evaluate(new ExpressionContext()));
+           Check.That(r.IsError).IsFalse();
+                       Check.That(r.Result).IsNotNull();
+                       Check.That(r.Result.Evaluate(new ExpressionContext())).IsEqualTo(2);
         }
 
 
@@ -107,20 +108,20 @@ namespace ParserTests.samples
         public void TestVariables()
         {
             var r = Parser.Parse("a * b + c");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
             var context = new ExpressionContext(new Dictionary<string, int> {{"a", 6}, {"b", 2}, {"c", 2}});
-            Assert.Equal(14, r.Result.Evaluate(context));
+            Check.That(r.IsError).IsFalse();
+                        Check.That(r.Result).IsNotNull();
+                        Check.That(r.Result.Evaluate(context)).IsEqualTo(14);
         }
 
         [Fact]
         public void TestVariablesAndNumbers()
         {
             var r = Parser.Parse("a * b + 2");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            var context = new ExpressionContext(new Dictionary<string, int> {{"a", 6}, {"b", 2}});
-            Assert.Equal(14, r.Result.Evaluate(context));
+            var context = new ExpressionContext(new Dictionary<string, int> {{"a", 6}, {"b", 2}});            
+            Check.That(r.IsError).IsFalse();
+                                    Check.That(r.Result).IsNotNull();
+                                    Check.That(r.Result.Evaluate(context)).IsEqualTo(14);
         }
     }
 }
