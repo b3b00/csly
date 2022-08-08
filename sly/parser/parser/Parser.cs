@@ -140,6 +140,12 @@ namespace sly.parser
                             expectedTokens);
                         errors.Add(expected);
                     }
+                    else
+                    {
+                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First<UnexpectedTokenSyntaxError<IN>>().UnexpectedToken, I18n,
+                            new LeadingToken<IN>[]{});
+                        errors.Add(expected);
+                    }
                 }
                 
                 result.Errors.AddRange(errors);
