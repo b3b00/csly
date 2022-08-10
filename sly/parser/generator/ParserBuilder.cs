@@ -82,6 +82,29 @@ namespace sly.parser.generator
                     result.Result = parser;
                     break;
                 }
+                case ParserType.ITERATIVE_LL_RECURSIVE_DESCENT:
+                {
+                    var configuration = ExtractParserConfiguration(parserInstance.GetType());
+                    var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
+                    if (foundRecursion)
+                    {
+                        var recs = string.Join("\n", recursions.Select<List<string>, string>(x => string.Join(" > ",x)));
+                        result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
+                            I18N.Instance.GetText(I18n,I18NMessage.LeftRecursion, recs),
+                            ErrorCodes.PARSER_LEFT_RECURSIVE));
+                        return result;
+
+                    }
+                    configuration.StartingRule = rootRule;
+                    var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
+                    var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
+                    parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
+                    
+                    parser.Instance = parserInstance;
+                    parser.Configuration = configuration;
+                    result.Result = parser;
+                    break;
+                }
                 case ParserType.EBNF_LL_RECURSIVE_DESCENT:
                 {
                     var builder = new EBNFParserBuilder<IN, OUT>(I18n);
@@ -144,9 +167,10 @@ namespace sly.parser.generator
                     parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule,I18n);
                     break;
                 }
+                case ParserType.ITERATIVE_LL_RECURSIVE_DESCENT:
                 default:
                 {
-                    parser = null;
+                    parser = new IterativeRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18n);
                     break;
                 }
             }

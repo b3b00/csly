@@ -95,6 +95,11 @@ namespace sly.parser.generator
                     parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule,I18n);
                     break;
                 }
+                case ParserType.ITERATIVE_LL_RECURSIVE_DESCENT:
+                {
+                    parser = new IterativeRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule,I18n);
+                    break;
+                }
                 case ParserType.EBNF_LL_RECURSIVE_DESCENT:
                 {
                     parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule,I18n);

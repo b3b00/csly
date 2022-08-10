@@ -415,11 +415,45 @@ return r";
         {
             Console.WriteLine("hum hum...");
             var parserInstance = new RuleParser<EbnfToken>();
-            var builder = new ParserBuilder<EbnfToken, IClause<EbnfToken>>();
+            var builder = new ParserBuilder<EbnfToken, GrammarNode<EbnfToken>>();
             var r = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "rule");
-
-            var parser = r.Result;
-            var rule = parser.Parse("a ( b ) ", "clauses");
+            if (r.IsOk)
+            {
+                var parser = r.Result;
+                var rule = parser.Parse("a ( b ) ", "clauses");
+            }
+            else
+            {
+                r.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
+        }
+        
+        private static void TestIterative()
+        {
+            Console.WriteLine("hum hum...");
+            var parserInstance = new ExpressionParser();
+            var builder = new ParserBuilder<ExpressionToken, int>();
+            var parserBuild = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            if (parserBuild.IsOk)
+            {
+                var parser = parserBuild.Result;
+                if (parser != null)
+                {
+                    var r = parser.Parse("2 + 2");
+                    if (r.IsOk)
+                    {
+                        Console.WriteLine($"2 + 2 = {r.Result}");
+                    }
+                    else
+                    {
+                        r.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+                    }
+                }
+            }
+            else
+            {
+                parserBuild.Errors.ForEach(x => Console.WriteLine(x.Message));
+            }
         }
 
 
@@ -433,7 +467,11 @@ return r";
             var Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
             return Parser;
         }
+        
 
+
+       
+        
         public static void TestContextualParser()
         {
             var buildResult = buildSimpleExpressionParserWithContext();
@@ -1134,7 +1172,8 @@ billy
         
         private static void Main(string[] args)
         {
-            TestTemplateFor();
+            TestIterative();
+            //TestTemplateFor();
             // testErrors();
             //TestContextualParser();
             //TestTokenCallBacks();
