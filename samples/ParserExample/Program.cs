@@ -433,7 +433,7 @@ return r";
             Console.WriteLine("hum hum...");
             var parserInstance = new ExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, int>();
-            var parserBuild = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            var parserBuild = builder.BuildParser(parserInstance, ParserType.ITERATIVE_LL_RECURSIVE_DESCENT, "expression");
             if (parserBuild.IsOk)
             {
                 var parser = parserBuild.Result;
