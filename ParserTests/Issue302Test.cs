@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using expressionparser;
+using NFluent;
 using ParserTests.Issue302;
 using sly.parser;
 using sly.parser.generator;
@@ -18,16 +19,17 @@ namespace ParserTests
             var parser = builder.BuildParser(parse_inst, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expr");
 
             var r = parser.Result.Parse("ba + bb",nameof(Issue302Parser)+"_expressions");
-            
-            Assert.True(r.IsOk);
-            
+
+            Check.That(r.IsOk).IsTrue();
+
             r = parser.Result.Parse("ba + bb");
-            
-            Assert.True(r.IsError);
-            Assert.Single(r.Errors);
+
+            Check.That(r.IsError).IsTrue();
+            Check.That(r.Errors).CountIs(1);
             var error = r.Errors.First() as UnexpectedTokenSyntaxError<Issue302Token>;
-            Assert.NotNull(error);
-            Assert.Equal(Issue302Token.PLUS,error.UnexpectedToken.TokenID);
+            Check.That(error).IsNotNull();
+            Check.That(error.UnexpectedToken.TokenID).IsEqualTo(Issue302Token.PLUS);
+            
         }
     }
 }
