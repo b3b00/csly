@@ -48,7 +48,7 @@ namespace ParserTests.lexer
 
     public enum AlphaNumId
     {
-        [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumeric)]
+        [AlphaNumId]
         ID
     }
 

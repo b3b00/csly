@@ -1,4 +1,5 @@
 using expressionparser;
+using NFluent;
 using simpleExpressionParser;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
@@ -59,8 +60,8 @@ namespace ParserTests
             string actual = graph.Compile().Replace("\r","").Replace("\n","");
             string expected =
                 @"digraph test {l1 [  label=""leaf1"" shape=doublecircle fontcolor=black height=0.50]l2 [  label=""leaf2"" shape=doublecircle fontcolor=red height=0.50]root [  label=""leaf1"" shape=ellipse fontcolor=blue height=0.50]root->l1 [  arrowshape=none];root->l2 [  arrowshape=normal];}";
-            Assert.Equal(expected,actual);
 
+            Check.That(actual).IsEqualTo(expected);
         }
 
         [Fact]
@@ -72,8 +73,8 @@ namespace ParserTests
             var  Parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
             var grammar = Parser.Result.Configuration.Dump();
             var result = Parser.Result.Parse("1+1");
-            Assert.False(result.IsError);
-            Assert.NotNull(result.SyntaxTree);
+            Check.That(result.IsError).IsFalse();
+            Check.That(result.SyntaxTree).IsNotNull();
             var tree = result.SyntaxTree;
             var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
             var root = graphviz.VisitTree(tree);

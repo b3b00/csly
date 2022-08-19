@@ -1,4 +1,5 @@
 using System.Linq;
+using NFluent;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
@@ -23,8 +24,8 @@ namespace ParserTests.Issue164
         {
             var parser = BuildParser();
             var result = parser.Parse("2 + 2");
-            Assert.True(result.IsOk);
-            Assert.Equal(4,result.Result);
+            Check.That(result.IsOk).IsTrue();
+            Check.That(result.Result).IsEqualTo(4);
         }
         
         [Fact]
@@ -32,21 +33,18 @@ namespace ParserTests.Issue164
         {
             var parser = BuildParser();
             var result = parser.Parse("2 ( 2");
-            Assert.True(result.IsError);
+            Check.That(result.IsError).IsTrue();
             var errors = result.Errors;
-            Assert.Single(errors);
+            Check.That(errors).CountIs(1);
             var error = errors.First();
-            Assert.IsType<UnexpectedTokenSyntaxError<TestOption164Lexer>>(error);
+            Check.That(error).IsInstanceOf<UnexpectedTokenSyntaxError<TestOption164Lexer>>();
             var unexpectedTokenError = error as UnexpectedTokenSyntaxError<TestOption164Lexer>;
-            Assert.NotNull(unexpectedTokenError);
-            Assert.NotNull(unexpectedTokenError.ExpectedTokens);
-            Assert.NotEmpty(unexpectedTokenError.ExpectedTokens);
-            Assert.Equal(4,unexpectedTokenError.ExpectedTokens.Count);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == TestOption164Lexer.PLUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == TestOption164Lexer.MINUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == TestOption164Lexer.TIMES);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == TestOption164Lexer.DIVIDE);
-            ;
+            Check.That(unexpectedTokenError).IsNotNull();
+            Check.That(unexpectedTokenError.ExpectedTokens).IsNotNull();
+            Check.That(unexpectedTokenError.ExpectedTokens).CountIs(4);
+            Check.That(unexpectedTokenError.ExpectedTokens.Select(x => x.TokenId))
+                .Contains(TestOption164Lexer.PLUS, TestOption164Lexer.MINUS, TestOption164Lexer.TIMES,
+                    TestOption164Lexer.DIVIDE);
         }
     }
 }

@@ -1,3 +1,5 @@
+using System.Linq;
+using NFluent;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
@@ -10,35 +12,38 @@ namespace ParserTests.Issue259
         public static void Issue259Test()
         {
             var expression = "1 < 2 AND 3 <= 4 AND 5 == 6 AND 7 >= 8 AND 9 > 10 AND 11 != 12 AND 13 <> 14";
-            
-            
+
+
             var startingRule = $"{nameof(Issue259Parser)}_expressions";
             var parserInstance = new Issue259Parser();
             var builder = new ParserBuilder<Issue259ExpressionToken, string>("en");
             var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
-            Assert.True(parser.IsOk);
-            Assert.NotNull(parser.Result);
-            
+            Check.That(parser.IsOk).IsTrue();
+            Check.That(parser.Result).IsNotNull();
+
             var parseResult = parser.Result.Parse(expression);
-            
-            Assert.True(parseResult.IsError);
-            Assert.Single(parseResult.Errors);
+
+            Check.That(parseResult.IsError).IsTrue();
+            Check.That(parseResult.Errors).CountIs(1);
+
 
             var error = parseResult.Errors[0];
 
             var unexpectedTokenError = error as UnexpectedTokenSyntaxError<Issue259ExpressionToken>;
-            Assert.NotNull(unexpectedTokenError);
-            Assert.Equal(Issue259ExpressionToken.COMPARISON, unexpectedTokenError.UnexpectedToken.TokenID);
-            Assert.Equal(">",unexpectedTokenError.UnexpectedToken.Value);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.ON);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.OFF);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.MINUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.HEX_NUMBER);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.DECIMAL_NUMBER);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.LVAR);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.SIMVAR);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == Issue259ExpressionToken.LPAREN);
-            
+            Check.That(unexpectedTokenError).IsNotNull();
+            Check.That(unexpectedTokenError.UnexpectedToken.TokenID).IsEqualTo(Issue259ExpressionToken.COMPARISON);
+            Check.That(unexpectedTokenError.UnexpectedToken.Value).IsEqualTo(">");
+            var expectedTokens = unexpectedTokenError.ExpectedTokens.Select(x => x.TokenId);
+            Check.That(expectedTokens).Contains(
+                Issue259ExpressionToken.ON,
+                Issue259ExpressionToken.OFF,
+                Issue259ExpressionToken.MINUS,
+                Issue259ExpressionToken.HEX_NUMBER,
+                Issue259ExpressionToken.DECIMAL_NUMBER,
+                Issue259ExpressionToken.LVAR,
+                Issue259ExpressionToken.SIMVAR,
+                Issue259ExpressionToken.LPAREN);
+
         }
     }
 }

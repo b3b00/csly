@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NFluent;
 using Xunit;
 using postProcessedLexerParser.expressionModel;
 
@@ -12,27 +13,29 @@ namespace ParserTests
             var Parser = postProcessedLexerParser.PostProcessedLexerParserBuilder.buildPostProcessedLexerParser();
             
             var r = Parser.Parse("2 * x");
-            Assert.False(r.IsError);
+            Check.That(r.IsError).IsFalse();
+            
             var res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
                 { { "x", 2 } }));
-          Assert.NotNull(res);
-          Assert.Equal(4,res.Value);
+            Check.That(res).IsNotNull();
+            Check.That(res.Value).IsEqualTo(4);
+          
             
             
             r = Parser.Parse("2  x");
-            Assert.False(r.IsError);
+            Check.That(r.IsError).IsFalse();
             res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
                 { { "x", 2 } }));
-            Assert.NotNull(res);
-            Assert.Equal(4,res.Value);
+            Check.That(res).IsNotNull();
+            Check.That(res.Value).IsEqualTo(4);
             
             
             r = Parser.Parse("2 ( x ) ");
-            Assert.False(r.IsError);
+            Check.That(r.IsError).IsFalse();
             res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
                 { { "x", 2 } }));
-            Assert.NotNull(res);
-            Assert.Equal(4,res.Value);
+            Check.That(res).IsNotNull();
+            Check.That(res.Value).IsEqualTo(4);
             
         }
     }

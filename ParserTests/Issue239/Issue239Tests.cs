@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NFluent;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
@@ -13,8 +14,8 @@ namespace ParserTests.Issue239
             var parserInstance = new Issue239Parser();
             var builder = new ParserBuilder<Issue239Lexer, object>();
             var pBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
-            Assert.True(pBuild.IsOk);
-            Assert.NotNull(pBuild.Result);
+            Check.That(pBuild.IsOk).IsTrue();
+            Check.That(pBuild.Result).IsNotNull();
             return pBuild.Result;
         }
 
@@ -25,10 +26,11 @@ namespace ParserTests.Issue239
         {
             var parser = BuildParser();
             var parseResult = parser.Parse("int x; int y; a = 12;");
-            Assert.True(parseResult.IsOk);
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsInstanceOf<List<object>>();
             Assert.IsAssignableFrom<List<object>>(parseResult.Result);
             var lst = parseResult.Result as List<object>;
-            Assert.Equal(3, lst.Count);
+            Check.That(lst).CountIs(3);
         }
     }
 }
