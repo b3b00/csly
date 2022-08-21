@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Xml.Schema;
 using expressionparser;
 using indented;
 using jsonparser;
@@ -713,45 +711,13 @@ namespace ParserTests
             return result;
         }
 
-        private void CheckString(JObject obj, string key, string value)
-        {
-            Check.That(obj.ContainsKey(key)).IsTrue();
-            Check.That(obj[key].IsValue).IsTrue();
-            
-            var val = (JValue) obj[key];
-            Check.That(val.IsString).IsTrue();
-            Check.That(val.GetValue<string>()).IsEqualTo(value);
-        }
-
-        private void CheckInt(JObject obj, string key, int value)
-        {
-            Check.That(obj.ContainsKey(key)).IsTrue();
-            Check.That(obj[key].IsValue).IsTrue();
-            
-            var val = (JValue) obj[key];
-            Check.That(val.IsInt).IsTrue();
-            Check.That(val.GetValue<int>()).IsEqualTo(value);
-        }
-
-
-        private void CheckInt(JList list, int index, int value)
-        {
-            Assert.True(list[index].IsValue);
-            var val = (JValue) list[index];
-            Check.That(val.IsInt).IsTrue();
-            Check.That(val.GetValue<int>()).IsEqualTo(value);
-        }
+        
 
         [Fact]
         public void TestBuildGroupParser()
         {
             var buildResult = BuildGroupParser();
             Check.That(buildResult.IsError).IsFalse();
-            // var optionParser = buildResult.Result;
-
-            // var result = optionParser.Parse("a , a", "root");
-            // Assert.False(result.IsError);
-            // Assert.Equal("R(a,B(b),c)", result.Result);
         }
 
         [Fact]
@@ -900,10 +866,10 @@ namespace ParserTests
             var list = (JList) result.Result;
             Check.That(list.Count).IsEqualTo(4);
             
-            CheckInt(list, 0, 1);
-            CheckInt(list, 1, 2);
-            CheckInt(list, 2, 3);
-            CheckInt(list, 3, 4);
+            Check.That(list).HasItem(0,1);
+            Check.That(list).HasItem(1,2);
+            Check.That(list).HasItem( 2,3);
+            Check.That(list).HasItem( 3,4);
         }
 
         [Fact]
@@ -918,10 +884,10 @@ namespace ParserTests
             
             var o = (JObject) result.Result;
             Check.That(o.Count).IsEqualTo(3);
-            Assert.Equal(3, o.Count);
-            CheckInt(o, "one", 1);
-            CheckInt(o, "two", 2);
-            CheckString(o, "three", "trois");
+            Check.That(o.Count).IsEqualTo(3);
+            Check.That(o).HasProperty("one", 1);
+            Check.That(o).HasProperty("two", 2);
+            Check.That(o).HasProperty("three", "trois");
         }
 
         [Fact]
@@ -1158,14 +1124,14 @@ namespace ParserTests
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a", "choice");
-            Assert.True(parseResult.IsOk);
-            Assert.Equal("A(a)",parseResult.Result);
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsEqualTo("A(a)");
             parseResult = builtParser.Result.Parse("b", "choice");
-            Assert.True(parseResult.IsOk);
-            Assert.Equal("B(b)",parseResult.Result);
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsEqualTo("B(b)");
             parseResult = builtParser.Result.Parse("c", "choice");
-            Assert.True(parseResult.IsOk);
-            Assert.Equal("C(c)",parseResult.Result);
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsEqualTo("C(c)");;
             parseResult = builtParser.Result.Parse("d", "choice");
             Check.That(parseResult.IsOk).IsFalse();
         }
@@ -1499,25 +1465,26 @@ else
             ParserBuilder<IndentedLangLexer2, Ast> builder = new ParserBuilder<IndentedLangLexer2, Ast>();
             var instance = new IndentedParser2();
             var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            Assert.True(parserRes.IsOk);
+            Check.That(parserRes.IsOk).IsTrue();
             var parser = parserRes.Result;
-            Assert.NotNull(parser);
+            Check.That(parser).IsNotNull();
+            
             var parseResult = parser.Parse(source);
-            Assert.True(parseResult.IsOk);
+            Check.That(parseResult.IsOk).IsTrue();
             var ast = parseResult.Result;
-            Assert.NotNull(ast);
-            Assert.IsAssignableFrom<Block>(ast);
+            Check.That(ast).IsNotNull();
+            Check.That(ast).IsInstanceOf<Block>();
             Block root = ast as Block;
-            Assert.Single(root.Statements);
-            Assert.IsAssignableFrom<IfThenElse>(root.Statements.First());
+            Check.That(root.Statements).CountIs(1);
+            Check.That(root.Statements.First()).IsInstanceOf<IfThenElse>();
             IfThenElse ifthenelse = root.Statements.First() as IfThenElse;
-            Assert.True(ifthenelse.IsCommented);
-            Assert.Contains("information", ifthenelse.Comment);
-            Assert.NotNull(ifthenelse.Cond);
-            Assert.NotNull(ifthenelse.Then);
-            Assert.Equal(2,ifthenelse.Then.Statements.Count);
-            Assert.NotNull(ifthenelse.Else);
-            Assert.Equal(2,ifthenelse.Else.Statements.Count);
+            Check.That(ifthenelse.IsCommented).IsTrue();
+            Check.That(ifthenelse.Comment).Contains("information");
+            Check.That(ifthenelse.Cond).IsNotNull();
+            Check.That(ifthenelse.Then).IsNotNull();
+            Check.That(ifthenelse.Then.Statements).CountIs(2);
+            Check.That(ifthenelse.Else).IsNotNull();
+            Check.That(ifthenelse.Else.Statements).CountIs(2);
         }
         
         [Fact]
@@ -1527,8 +1494,8 @@ else
             var builder = new ParserBuilder<DoNotIgnoreCommentsTokenWithChannels, DoNotIgnore>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
             
-            Assert.True(builtParser.IsOk);
-            Assert.NotNull(builtParser.Result);
+            Check.That(builtParser.IsOk).IsTrue();
+            Check.That(builtParser.Result).IsNotNull();
             var parser = builtParser.Result;
 
             var test = parser.Parse(@"
@@ -1552,57 +1519,57 @@ d
 
 ");
 
-            Assert.True(test.IsOk);
-            Assert.NotNull(test.Result);
-            Assert.IsType<IdentifierList>(test.Result);
+            Check.That(test.IsOk).IsTrue();
+            Check.That(test.Result).IsNotNull();
+            Check.That(test.Result).IsInstanceOf<IdentifierList>();
             var list = test.Result as IdentifierList;
-            Assert.Equal(6, list.Ids.Count);
+            Check.That(list.Ids).CountIs(6);
             
             var id = list.Ids[0];
-            Assert.Equal("a",id.Name);
-            Assert.False(id.IsCommented);
+            Check.That(id.Name).IsEqualTo("a");
+            Check.That(id.IsCommented).IsFalse();
 
             id = list.Ids[1];
-            Assert.True(id.IsCommented);
-            Assert.Equal("b1",id.Name);
-            Assert.Equal("commented b [1]\ncommented b [2]",id.Comment.Trim());    
+            Check.That(id.IsCommented).IsTrue();
+            Check.That(id.Name).IsEqualTo("b1");
+            Check.That(id.Comment.Trim()).IsEqualTo("commented b [1]\ncommented b [2]");    
             
             id = list.Ids[2];
-            Assert.True(id.IsCommented);
+            Check.That(id.IsCommented).IsTrue();
             Assert.Equal("b2",id.Name);
             Assert.Equal("commented b [1]\ncommented b [2]",id.Comment.Trim());    
             
             id = list.Ids[3];
-            Assert.True(id.IsCommented);
+            Check.That(id.IsCommented).IsTrue();
             Assert.Equal("c",id.Name);
             var comments = id.Comment;
             Assert.Equal("comment c @1\ncommented c @2\ncommented c @3",id.Comment.Trim());
             
             id = list.Ids[4];
             Assert.Equal("test",id.Name);
-            Assert.True(id.IsCommented); // catches comment from c  and d
+            Check.That(id.IsCommented).IsTrue(); // catches comment from c  and d
             Assert.Equal("comment c @1\ncommented c @2\ncommented c @3\ncommented d before",id.Comment.Trim());
             
             id = list.Ids[5];
-            Assert.True(id.IsCommented);
-            Assert.Equal("d",id.Name);
+            Check.That(id.IsCommented).IsTrue();
+            Check.That(id.Name).IsEqualTo("d");
             comments = id.Comment;
-            Assert.Equal("commented d before\ncommented d after",id.Comment.Trim());
+            Check.That(id.Comment.Trim()).IsEqualTo("commented d before\ncommented d after");
             
             test = parser.Parse(@"a 
 // commented b
 b");
 
-            Assert.True(test.IsOk);
-            Assert.NotNull(test.Result);
-            Assert.IsType<IdentifierList>(test.Result);
+            Check.That(test.IsOk).IsTrue();
+            Check.That(test.Result).IsNotNull();
+            Check.That(test.Result).IsInstanceOf<IdentifierList>();
             list = test.Result as IdentifierList;
-            Assert.Equal(2, list.Ids.Count);
-            Assert.False(list.Ids[0].IsCommented);
-            Assert.Equal("a",list.Ids[0].Name);
-            Assert.True(list.Ids[1].IsCommented);
-            Assert.Equal("b",list.Ids[1].Name);
-            Assert.Equal("commented b",list.Ids[1].Comment.Trim());    
+            Check.That(list.Ids).CountIs(2);
+            Check.That(list.Ids[0].IsCommented).IsFalse();
+            Check.That(list.Ids[0].Name).IsEqualTo("a");
+            Check.That(list.Ids[1].IsCommented).IsTrue();
+            Check.That(list.Ids[1].Name).IsEqualTo("b");
+            Check.That(list.Ids[1].Comment.Trim()).IsEqualTo("commented b");    
             ;
 
         }
