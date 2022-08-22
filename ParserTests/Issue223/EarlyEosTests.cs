@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using NFluent;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
 using Xunit;
@@ -12,8 +13,8 @@ namespace ParserTests.Issue223_EarlyEos
         public void Early_EOS_NRE()
         {
             var queryExpression = Parse("( java AND dotnet )");
-            Assert.IsType<GroupExpression>(queryExpression);
-            Assert.Equal("(java AND dotnet)", queryExpression.ToString());
+            Check.That(queryExpression).IsInstanceOf<GroupExpression>();
+            Check.That(queryExpression.ToString()).IsEqualTo("(java AND dotnet)");
         }
 
         private static Expression Parse(string query)

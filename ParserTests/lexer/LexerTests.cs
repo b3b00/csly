@@ -3,6 +3,7 @@ using System.Linq;
 using expressionparser;
 using jsonparser;
 using jsonparser.JsonModel;
+using NFluent;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser.generator;
@@ -34,12 +35,12 @@ namespace ParserTests.lexer
         {
             var lexer = GetJsonLexer();
             var tokens = lexer.Tokenize("1.68");
-            Assert.NotNull(tokens);
+            Check.That(tokens).IsNotNull();
             var tokenList = tokens.Tokens; 
-            Assert.NotEmpty(tokenList);
+            Check.That(tokenList).Not.IsEmpty();
             var token = tokenList[0];
-            Assert.NotNull(token);
-            Assert.Equal(1.68, token.DoubleValue);
+            Check.That(token).IsNotNull();
+            Check.That(token.DoubleValue).IsEqualTo(1.68);
         }
         
         [Fact]
@@ -48,32 +49,30 @@ namespace ParserTests.lexer
             var lexer = GetExpressionLexer();
             var expr = "1 + 2 \n* 3";
             var r = lexer.Tokenize(expr);
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             var tokens = r.Tokens;
-            Assert.Equal(6, tokens.Count);
+            Check.That(tokens).CountIs(6);
             var expectedTokensID = new List<ExpressionToken>
             {
                 ExpressionToken.INT, ExpressionToken.PLUS, ExpressionToken.INT,
                 ExpressionToken.TIMES, ExpressionToken.INT
             };
-            var tokensID = tokens.Take(5).Select(tok => tok.TokenID).ToList();
-            Assert.Equal(expectedTokensID, tokensID);
-
+            Check.That(tokens.Take(5).Extracting(x => x.TokenID)).Contains(expectedTokensID);
+            
             var expectedColumnPositions = new List<int>
             {
                 1, 3, 5, 1, 3
             };
 
-            var columnPositions = tokens.Take(5).Select(tok => tok.Position.Column).ToList();
-            Assert.Equal(expectedColumnPositions, columnPositions);
+            Check.That(tokens.Take(5).Extracting(x => x.Position.Column)).Contains(expectedColumnPositions);
+            
 
             var expectedLinePositions = new List<int>
             {
-                1, 3, 5, 1, 3
+                1, 1,1,2,2
             };
 
-            var linePositions = tokens.Take(5).Select(tok => tok.Position.Line).ToList();
-            Assert.Equal(expectedLinePositions, columnPositions);
+            Check.That(tokens.Take(5).Extracting(x => x.Position.Line)).Contains(expectedLinePositions);
         }
 
         [Fact]
@@ -83,34 +82,33 @@ namespace ParserTests.lexer
                        ", \"props\":\"val\" }";
             var lexer = GetJsonLexer();
             var r = lexer.Tokenize(json);
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             var tokens = r.Tokens;
-            Assert.Equal(10, tokens.Count);
+            Check.That(tokens).CountIs(10);
             var expectedTokensID = new List<JsonToken>
             {
                 JsonToken.ACCG, JsonToken.STRING, JsonToken.COLON, JsonToken.INT,
                 JsonToken.COMMA, JsonToken.STRING, JsonToken.COLON, JsonToken.STRING,
                 JsonToken.ACCD
             };
-            var tokensID = tokens.Take(9).Select(tok => tok.TokenID).ToList();
-            Assert.Equal(expectedTokensID, tokensID);
-
+            
+            Check.That(tokens.Take(9).Extracting(x => x.TokenID)).Contains(expectedTokensID);
+            
+            
             var expectedColumnPositions = new List<int>
             {
                 1, 3, 10, 12,
                 1, 3, 10, 11, 17
             };
 
-            var columnPositions = tokens.Take(9).Select(tok => tok.Position.Column).ToList();
-            Assert.Equal(expectedColumnPositions, columnPositions);
+            Check.That(tokens.Take(9).Extracting(x => x.Position.Column)).Contains(expectedColumnPositions);
 
             var expectedLinePositions = new List<int>
             {
                 1, 1, 1, 1, 2, 2, 2, 2, 2
             };
 
-            var linePositions = tokens.Take(9).Select(tok => tok.Position.Line).ToList();
-            Assert.Equal(expectedLinePositions, linePositions);
+            Check.That(tokens.Take(9).Extracting(x => x.Position.Line)).Contains(expectedLinePositions);
         }
 
         [Fact]
@@ -119,24 +117,22 @@ namespace ParserTests.lexer
             var lexer = GetExpressionLexer();
             var expr = "1 + 2 * 3";
             var r = lexer.Tokenize(expr);
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             var tokens = r.Tokens;
-            Assert.Equal(6, tokens.Count);
+            Check.That(tokens).CountIs(6);
             var expectedTokensID = new List<ExpressionToken>
             {
                 ExpressionToken.INT, ExpressionToken.PLUS, ExpressionToken.INT,
                 ExpressionToken.TIMES, ExpressionToken.INT
             };
-            var tokensID = tokens.Take(5).Select(tok => tok.TokenID).ToList();
-            Assert.Equal(expectedTokensID, tokensID);
+            Check.That(tokens.Take(5).Extracting(x => x.TokenID)).Contains(expectedTokensID);
 
             var expectedColumnPositions = new List<int>
             {
                 1, 3, 5, 7, 9
             };
 
-            var columnPositions = tokens.Take(5).Select(tok => tok.Position.Column).ToList();
-            Assert.Equal(expectedColumnPositions, columnPositions);
+            Check.That(tokens.Take(5).Extracting(x => x.Position.Column)).Contains(expectedColumnPositions);
         }
 
 
@@ -146,35 +142,33 @@ namespace ParserTests.lexer
             var json = "{ \"propi\": 12 , \"props\":\"val\" }";
             var lexer = GetJsonLexer();
             var r = lexer.Tokenize(json);
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             var tokens = r.Tokens;
-            Assert.Equal(10, tokens.Count);
+            Check.That(tokens).CountIs(10);
             var expectedTokensID = new List<JsonToken>
             {
                 JsonToken.ACCG, JsonToken.STRING, JsonToken.COLON, JsonToken.INT,
                 JsonToken.COMMA, JsonToken.STRING, JsonToken.COLON, JsonToken.STRING,
                 JsonToken.ACCD
             };
-            var tokensID = tokens.Take(9).Select(tok => tok.TokenID).ToList();
-            Assert.Equal(expectedTokensID, tokensID);
+            Check.That(tokens.Take(9).Extracting(x => x.TokenID)).Contains(expectedTokensID);
 
             var expectedColumnPositions = new List<int>
             {
                 1, 3, 10, 12, 15, 17, 24, 25, 31
             };
 
-            var columnPositions = tokens.Take(9).Select(tok => tok.Position.Column).ToList();
-            Assert.Equal(expectedColumnPositions, columnPositions);
+            Check.That(tokens.Take(9).Extracting(x => x.Position.Column)).Contains(expectedColumnPositions);
         }
 
         [Fact]
         public void TestMixedGenericRegexLexer()
         {
             var result = LexerBuilder.BuildLexer<MixedGenericRegexLexer>();
-            Assert.True(result.IsError);
+            Check.That(result.IsError).IsTrue();
             var errors = result.Errors;
-            Assert.Single(errors);
-            Assert.Equal(ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX,errors[0].Code);
+            Check.That(errors).CountIs(1);
+            Check.That(errors[0].Code).IsEqualTo(ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX);
         }
     }
 }
