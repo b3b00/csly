@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using csly.whileLang.model;
+using NFluent;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser;
@@ -106,42 +107,35 @@ namespace ParserTests
         public void BuildParserTest()
         {
             var parser = BuildParser();
-            Assert.True(parser.IsOk);
-            Assert.NotNull(parser.Result);
+            Check.That(parser.IsOk).IsTrue();
+            Check.That(parser.Result).IsNotNull();
             var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             // grammar is left associative so expression really is 
             // (2.0 - (2.0 + (bozzo  + Test))) = 2 - ( 2 + (42 + 0)) = 2 - (2 + 42) = 2 - 44 = -42
-            Assert.Equal(-42.0,r.Result);
+            Check.That(r.Result).IsEqualTo(-42.0d);
         }
         
         [Fact]
         public void BuildExpressionParserTest()
         {
             var parser = BuildExpressionParser();
-            Assert.True(parser.IsOk);
-            Assert.NotNull(parser.Result);
+            Check.That(parser.IsOk).IsTrue();
+            Check.That(parser.Result).IsNotNull();
             var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
             var tree = r.SyntaxTree;
             var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExplicitTokensTokens>();
             var dump = tree.Dump("\t");
-            // File.Delete(@"c:\temp\tree.txt");
-            // File.WriteAllText(@"c:\temp\tree.txt",dump);
-            //
             var json = $@"{{
 {tree.ToJson()}
 }}";
-            // File.Delete(@"c:\temp\tree.json");
-            // File.WriteAllText(@"c:\temp\tree.json",json);
-            //
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile();
-            // File.Delete("c:\\temp\\tree.dot");
-            // File.AppendAllText("c:\\temp\\tree.dot", graph);
-            Assert.True(r.IsOk);
+           
+            Check.That(r.IsOk).IsTrue();
              
             
-            Assert.Equal(2 - 2 + 42 + 0,r.Result);
+            Check.That(r.Result).IsEqualTo(2 - 2 + 42 + 0);
         }
 
         [Fact]
@@ -150,9 +144,9 @@ namespace ParserTests
             var parserInstance = new RegexLexAndExplicitTokensParser();
             var builder = new ParserBuilder<RegexLexAndExplicitTokensLexer, string>();
             var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(RegexLexAndExplicitTokensParser)+"_expressions");
-            Assert.True(result.IsError);
-            Assert.Single(result.Errors);
-            Assert.Equal(ErrorCodes.LEXER_CANNOT_USE_IMPLICIT_TOKENS_WITH_REGEX_LEXER,result.Errors.First().Code);
+            Check.That(result.IsError).IsTrue();
+            Check.That(result.Errors).CountIs(1);
+            Check.That(result.Errors.First().Code).IsEqualTo(ErrorCodes.LEXER_CANNOT_USE_IMPLICIT_TOKENS_WITH_REGEX_LEXER);
         }
         
         [Fact]
@@ -161,11 +155,11 @@ namespace ParserTests
             var parserInstance = new NoIdentifierParser();
             var builder = new ParserBuilder<NoIdentifierLexer, string>();
             var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result.IsError).IsFalse();
+            Check.That(result.Result).IsNotNull();
             var r = result.Result.Parse("test 1 test 2 test 3");
-            Assert.False(r.IsError);
-            Assert.Equal("test:1,test:2,test:3",r.Result);
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsEqualTo("test:1,test:2,test:3");
         }
         
         [Fact]
@@ -174,8 +168,8 @@ namespace ParserTests
             var parserInstance = new Parse();
             var builder = new ParserBuilder<Lex, string>();
             var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result.IsError).IsFalse();
+            Check.That(result.Result).IsNotNull();
             var r = result.Result.Parse(@"
 if a == 1.0 then
     b = 1.0 + 2.0 * 3.0
@@ -183,13 +177,13 @@ else
     b = 2.0 + a
 c = 3.0
 ");
-            Assert.False(r.IsError);
-            Assert.Equal(@"a == 1.0 :
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsEqualTo(@"a == 1.0 :
     - b = ( 1.0 + ( 2.0 * 3.0 ) )
     - b = ( 2.0 + a )
 
 c = 3.0
-",r.Result);
+");
         }
         
     }

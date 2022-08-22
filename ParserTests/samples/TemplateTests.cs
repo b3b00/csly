@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NFluent;
 using SimpleTemplate;
 using SimpleTemplate.model;
 using sly.parser;
@@ -15,8 +16,8 @@ namespace ParserTests.samples
             var builder = new ParserBuilder<TemplateLexer, ITemplate>();
             var instance = new TemplateParser();
             var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "template");
-            Assert.False(build.IsError);
-            Assert.NotNull(build.Result);
+            Check.That(build.IsError).IsFalse();
+            Check.That(build.Result).IsNotNull();
             return build.Result;
         }
 
@@ -33,11 +34,11 @@ namespace ParserTests.samples
             };
             
             var result = parser.Parse(source);
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
-            Assert.IsAssignableFrom<Template>(result.Result);
+            Check.That(result.IsError).IsFalse();
+            Check.That(result.Result).IsNotNull();
+            Check.That(result.Result).IsInstanceOf<Template>();
             var templated = result.Result.GetValue(context);
-            Assert.Equal("hello-mùndo-billy--bob-this is the end",templated);
+            Check.That(templated).IsEqualTo("hello-mùndo-billy--bob-this is the end");
         }
     }
 }

@@ -14,8 +14,7 @@ namespace ParserTests.Issue164
             var parserInstance = new TestOption164Parser();
             var builder = new ParserBuilder<TestOption164Lexer, int>();
             var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
-            Assert.True(parser.IsOk);
-            Assert.NotNull(parser.Result);
+            Check.That(parser).IsOkParser();
             return parser.Result;
         }
 
@@ -24,7 +23,7 @@ namespace ParserTests.Issue164
         {
             var parser = BuildParser();
             var result = parser.Parse("2 + 2");
-            Check.That(result.IsOk).IsTrue();
+            Check.That(result).ParseIsOk();
             Check.That(result.Result).IsEqualTo(4);
         }
         

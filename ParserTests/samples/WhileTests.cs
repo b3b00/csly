@@ -2,6 +2,7 @@
 using csly.whileLang.interpreter;
 using csly.whileLang.model;
 using csly.whileLang.parser;
+using NFluent;
 using sly.buildresult;
 using sly.parser;
 using sly.parser.generator;
@@ -43,23 +44,22 @@ namespace ParserTests.samples
         public void TestAssignAdd()
         {
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
+            Check.That(buildResult).IsOkParser();
             var parser = buildResult.Result;
             var result = parser.Parse("(a:=1+1)");
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result).ParseIsOk();
 
-            Assert.IsType<SequenceStatement>(result.Result);
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
-            Assert.IsType<AssignStatement>(seq.Get(0));
+            Check.That(seq.Get(0)).IsInstanceOf<AssignStatement>();
             var assign = seq.Get(0) as AssignStatement;
-            Assert.Equal("a", assign.VariableName);
+            Check.That(assign.VariableName).IsEqualTo("a");
             var val = assign.Value;
-            Assert.IsType<BinaryOperation>(val);
+            Check.That(val).IsInstanceOf<BinaryOperation>();
             var bin = val as BinaryOperation;
-            Assert.Equal(BinaryOperator.ADD, bin.Operator);
-            Assert.Equal(1, (bin.Left as IntegerConstant)?.Value);
-            Assert.Equal(1, (bin.Right as IntegerConstant)?.Value);
+            Check.That(bin.Operator).IsEqualTo(BinaryOperator.ADD);
+            Check.That((bin.Left as IntegerConstant)?.Value).IsEqualTo(1);
+            Check.That((bin.Right as IntegerConstant)?.Value).IsEqualTo(1);
         }
 
         [Fact]

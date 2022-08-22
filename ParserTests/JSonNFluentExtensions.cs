@@ -52,14 +52,89 @@ namespace ParserTests
                 .EndCheck();
             return ExtensibilityHelper.BuildCheckLink(context);
         }
-
-
-        public static void CheckInt(JList list, int index, int value)
+        
+        public static ICheckLink<ICheck<JList>> HasItem(this ICheck<JList> context, int index, double expectedValue)
         {
-            Assert.True(list[index].IsValue);
-            var val = (JValue) list[index];
-            Check.That(val.IsInt).IsTrue();
-            Check.That(val.GetValue<int>()).IsEqualTo(value);
+
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => index < 0 && index >= sut.Count,$"{index} is out of range")
+                .FailWhen(sut => !sut[index].IsValue, $" item at {index} is not a value")
+                .FailWhen(sut => sut[index].IsValue && !(sut[index] is JValue),  $" item at {index} is not a value")
+                .FailWhen(sut => sut[index] is JValue val && val.IsDouble && val.GetValue<double>() != expectedValue, "attribute {key} has not expected value {expectedValue}")
+                .OnNegate("The {checked} contains the {expected} whereas it should not.")
+                .DefineExpectedValue("list[{index}]:{expectedValue}")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
+
+        
+        public static ICheckLink<ICheck<JList>> HasItem(this ICheck<JList> context, int index, bool expectedValue)
+        {
+
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => index < 0 && index >= sut.Count,$"{index} is out of range")
+                .FailWhen(sut => !sut[index].IsValue, $" item at {index} is not a value")
+                .FailWhen(sut => sut[index].IsValue && !(sut[index] is JValue),  $" item at {index} is not a value")
+                .FailWhen(sut => sut[index] is JValue val && val.IsBool && val.GetValue<bool>() != expectedValue, "attribute {key} has not expected value {expectedValue}")
+                .OnNegate("The {checked} contains the {expected} whereas it should not.")
+                .DefineExpectedValue("list[{index}]:{expectedValue}")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
+
+        public static ICheckLink<ICheck<JList>> HasObjectItem(this ICheck<JList> context, int index, int expectedPropertycount)
+        {
+
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => index < 0 && index >= sut.Count,$"{index} is out of range")
+                .FailWhen(sut => !sut[index].IsObject, $" item at {index} is not an object")
+                .FailWhen(sut => sut[index].IsObject && !(sut[index] is JObject),  $" item at {index} is not a object")
+                .FailWhen(sut => sut[index] is JObject o && o.Count != expectedPropertycount, "attribute {key} has not expected property count {expectedValue}")
+                .OnNegate("The {checked} contains the {expected} whereas it should not.")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
+        
+        public static ICheckLink<ICheck<JList>> CountIs(this ICheck<JList> context, int expectedCount)
+        {
+
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => sut.Count != expectedCount,$"list dos not have expected count : {expectedCount}")
+                .OnNegate("The {checked} contains the {expected} count.")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
+        
+        public static ICheckLink<ICheck<JObject>> CountIs(this ICheck<JObject> context, int expectedCount)
+        {
+
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => sut.Count != expectedCount,$"list dos not have expected count : {expectedCount}")
+                .OnNegate("The {checked} contains the {expected} count.")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
+        
+       
+        
+        public static ICheckLink<ICheck<JList>> IsEmpty(this ICheck<JList> context)
+        {
+
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => sut.Count > 0,"The {checked} is not empty.")
+                .OnNegate("The {checked} is empty.")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
+        
+        public static ICheckLink<ICheck<JObject>> IsEmpty(this ICheck<JObject> context)
+        {
+
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => sut.Count > 0,"The {checked} is not empty.")
+                .OnNegate("The {checked} is empty.")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
         }
     }
 }

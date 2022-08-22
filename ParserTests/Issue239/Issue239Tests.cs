@@ -28,7 +28,6 @@ namespace ParserTests.Issue239
             var parseResult = parser.Parse("int x; int y; a = 12;");
             Check.That(parseResult.IsOk).IsTrue();
             Check.That(parseResult.Result).IsInstanceOf<List<object>>();
-            Assert.IsAssignableFrom<List<object>>(parseResult.Result);
             var lst = parseResult.Result as List<object>;
             Check.That(lst).CountIs(3);
         }

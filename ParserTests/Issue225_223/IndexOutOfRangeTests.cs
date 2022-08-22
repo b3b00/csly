@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using System.Text.RegularExpressions;
+using NFluent;
 using sly.parser.generator;
 using Xunit;
 
@@ -11,8 +13,8 @@ namespace ParserTests.Issue225_IndexOutOfRangeException
         public void Should_Not_IndexOutOfRange()
         {
             var queryExpression = Parse("(java AND dotnet)");
-            Assert.IsType<GroupExpression>(queryExpression);
-            Assert.Equal("(java AND dotnet)", queryExpression.ToString());
+            Check.That(queryExpression).IsInstanceOf<GroupExpression>();
+            Check.That(queryExpression.ToString()).IsEqualTo("(java AND dotnet)");
         }
 
         private static Expression Parse(string query)

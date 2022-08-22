@@ -1,8 +1,7 @@
 
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
+using NFluent;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser.generator;
@@ -20,12 +19,12 @@ namespace ParserTests.lexer
         public static void TestLexerModes()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MinimalXmlLexer>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var result = lexerRes.Result.Tokenize(@"hello
 <tag attr=""value"">inner text</tag>
 <!-- this is a comment -->
 <? PI attr=""test""?>");
-            Assert.True(result.IsOk);
+            Check.That(result.IsOk).IsTrue();
             var expectedTokens = new List<MinimalXmlLexer>()
             {
                 MinimalXmlLexer.CONTENT,
@@ -49,11 +48,10 @@ namespace ParserTests.lexer
                 MinimalXmlLexer.CLOSE_PI
             };
             var tokens = result.Tokens.Tokens;
-            Assert.Equal(expectedTokens.Count,tokens.Count-1);
-            for (int i = 0; i < expectedTokens.Count; i++)
-            {
-                Assert.Equal(expectedTokens[i],tokens[i].TokenID);
-            }
+            Check.That(expectedTokens).CountIs(tokens.Count-1);
+
+            Check.That(tokens.Extracting("TokenID")).Contains(expectedTokens);
+            
         }
 
         [Fact]
@@ -62,7 +60,7 @@ namespace ParserTests.lexer
             ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
             var parser = new MinimalXmlParser();
             var r = builder.BuildParser(parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
-            Assert.False(r.IsError);
+            Check.That(r.IsError).IsFalse();
             var pr = r.Result.Parse(@"
 <?xml version=""1.0""?>
 <!-- starting doc -->
@@ -76,9 +74,9 @@ namespace ParserTests.lexer
     </inner>                      
 </root>
 ");
-            Assert.True(pr.IsOk);
-            Assert.NotNull(pr.Result);
-            Assert.NotEmpty(pr.Result);
+            Check.That(pr.IsOk).IsTrue();
+            Check.That(pr.Result).IsNotNull();
+            Check.That(pr.Result).IsNotEmpty();
             
         }
     }

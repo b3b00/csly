@@ -1536,19 +1536,19 @@ d
             
             id = list.Ids[2];
             Check.That(id.IsCommented).IsTrue();
-            Assert.Equal("b2",id.Name);
-            Assert.Equal("commented b [1]\ncommented b [2]",id.Comment.Trim());    
+            Check.That(id.Name).IsEqualTo("b2");
+            Check.That(id.Comment.Trim()).IsEqualTo("commented b [1]\ncommented b [2]");    
             
             id = list.Ids[3];
             Check.That(id.IsCommented).IsTrue();
-            Assert.Equal("c",id.Name);
+            Check.That(id.Name).IsEqualTo("c");
             var comments = id.Comment;
-            Assert.Equal("comment c @1\ncommented c @2\ncommented c @3",id.Comment.Trim());
+            Check.That(id.Comment.Trim()).IsEqualTo("comment c @1\ncommented c @2\ncommented c @3");
             
             id = list.Ids[4];
-            Assert.Equal("test",id.Name);
+            Check.That(id.Name).IsEqualTo("test");
             Check.That(id.IsCommented).IsTrue(); // catches comment from c  and d
-            Assert.Equal("comment c @1\ncommented c @2\ncommented c @3\ncommented d before",id.Comment.Trim());
+            Check.That(id.Comment.Trim()).IsEqualTo("comment c @1\ncommented c @2\ncommented c @3\ncommented d before");
             
             id = list.Ids[5];
             Check.That(id.IsCommented).IsTrue();
