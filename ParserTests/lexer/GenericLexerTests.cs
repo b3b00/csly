@@ -745,7 +745,6 @@ namespace ParserTests.lexer
             Check.That(token.IntValue).IsEqualTo(1);
             token = tokens[1];
             Check.That(token.TokenID).IsEqualTo(Issue106.Period);
-            Assert.Equal(Issue106.Period, token.TokenID);
         }
 
         [Fact]
