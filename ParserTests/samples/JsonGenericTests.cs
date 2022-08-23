@@ -18,34 +18,7 @@ namespace ParserTests.samples
 
         private static Parser<JsonTokenGeneric, JSon> Parser;
 
-
-        private void AssertString(JObject obj, string key, string value)
-        {
-            Assert.True(obj.ContainsKey(key));
-            Assert.True(obj[key].IsValue);
-            var val = (JValue) obj[key];
-            Assert.True(val.IsString);
-            Assert.Equal(value, val.GetValue<string>());
-        }
-
-        private void AssertInt(JObject obj, string key, int value)
-        {
-            Assert.True(obj.ContainsKey(key));
-            Assert.True(obj[key].IsValue);
-            var val = (JValue) obj[key];
-            Assert.True(val.IsInt);
-            Assert.Equal(value, val.GetValue<int>());
-        }
-
-
-        private void AssertDouble(JObject obj, string key, double value)
-        {
-            Assert.True(obj.ContainsKey(key));
-            Assert.True(obj[key].IsValue);
-            var val = (JValue) obj[key];
-            Assert.True(val.IsDouble);
-            Assert.Equal(value, val.GetValue<double>());
-        }
+      
 
         [Fact]
         public void TestDoubleValue()
@@ -155,7 +128,7 @@ namespace ParserTests.samples
             var innerObj = (JObject) inner;
 
             Assert.Equal(1, innerObj.Count);
-            AssertInt(innerObj, "inner1", 1);
+            Check.That(innerObj).HasProperty("inner1", 1);
         }
 
         [Fact]
@@ -169,8 +142,8 @@ namespace ParserTests.samples
             Assert.True(r.Result.IsObject);
             var values = (JObject) r.Result;
             Assert.Equal(2, values.Count);
-            AssertString(values, "p1", "v1");
-            AssertString(values, "p2", "v2");
+            Check.That(values).HasProperty("p1", "v1");
+            Check.That(values).HasProperty("p2", "v2");
         }
 
         [Fact]
@@ -198,12 +171,12 @@ namespace ParserTests.samples
         public void TestSinglePropertyObjectValue()
         {
             var r = Parser.Parse("{\"prop\":\"value\"}");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.True(r.Result.IsObject);
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsNotNull();
+            Check.That(r.Result.IsObject).IsTrue();
             var values = (JObject) r.Result;
-            Assert.Equal(1, values.Count);
-            AssertString(values, "prop", "value");
+            Check.That(values).CountIs(1);
+            Check.That(values).HasProperty("prop", "value");
         }
 
         [Fact]

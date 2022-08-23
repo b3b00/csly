@@ -887,7 +887,7 @@ else
 ";
             
             var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer>();
-            Assert.True(lexRes.IsOk);
+            Check.That(lexRes.IsOk).IsTrue();
             var lexer = lexRes.Result;
             Check.That(lexer).IsNotNull();
             var tokResult = lexer.Tokenize(source);
@@ -912,7 +912,7 @@ else
 ";
             
             var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer2>();
-            Assert.True(lexRes.IsOk);
+            Check.That(lexRes.IsOk).IsTrue();
             var lexer = lexRes.Result;
             Check.That(lexer).IsNotNull();
             var tokResult = lexer.Tokenize(source);
