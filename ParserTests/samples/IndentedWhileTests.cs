@@ -277,18 +277,16 @@ b:=2
 c:=3";
             var result = parser.Parse(program);
             Check.That(result).IsOkParseResult();
-            Assert.IsType<SequenceStatement>(result.Result);
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
             Check.That(seq).CountIs(3);
 
-            string[] names = { "a", "b", "c" };
-            for (var i = 0; i < names.Length; i++)
-            {
-                Assert.IsType<AssignStatement>(seq.Get(i));
-                var assign = seq.Get(i) as AssignStatement;
-                Assert.Equal(names[i], assign.VariableName);
-                Assert.Equal(i + 1, (assign.Value as IntegerConstant).Value);
-            }
+
+
+            (string name, int value)[] values = new []{ ("a",1), ("b",2), ("c",3) };
+
+            Check.That(seq.Cast<AssignStatement>().Extracting(x => (x.VariableName,(x.Value as IntegerConstant).Value))).ContainsExactly(values);
+            
         }
 
 

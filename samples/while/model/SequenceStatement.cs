@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using csly.whileLang.compiler;
@@ -7,7 +8,7 @@ using Sigil;
 
 namespace csly.whileLang.model
 {
-    public class SequenceStatement : Statement
+    public class SequenceStatement : Statement, IEnumerable<Statement>
     {
         public SequenceStatement()
         {
@@ -72,6 +73,16 @@ namespace csly.whileLang.model
         public void AddRange(List<Statement> stmts)
         {
             Statements.AddRange(stmts);
+        }
+
+        public IEnumerator<Statement> GetEnumerator()
+        {
+            return Statements.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Statements.GetEnumerator();
         }
     }
 }
