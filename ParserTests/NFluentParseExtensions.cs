@@ -10,7 +10,7 @@ namespace ParserTests
 {
     public static class NFluentParseExtensions
     {
-        public static ICheckLink<ICheck<ParseResult<IN,OUT>>> ParseIsOk<IN,OUT>(this ICheck<ParseResult<IN,OUT>> context) where IN : struct
+        public static ICheckLink<ICheck<ParseResult<IN,OUT>>> IsOkParseResult<IN,OUT>(this ICheck<ParseResult<IN,OUT>> context) where IN : struct
         {
             ExtensibilityHelper.BeginCheck(context)
                 .FailWhen(sut => sut.IsError, "parse failed")

@@ -531,11 +531,11 @@ namespace ParserTests.lexer
             Check.That(parserResult).IsOkParser();
             var parser = parserResult.Result;
             var result = parser.Parse("15.01.2020");
-            Check.That(result).ParseIsOk();
+            Check.That(result).IsOkParseResult();
             
             Check.That(result.Result).IsEqualTo(new DateTime(2020,01,15));
             result = parser.Parse("3.14");
-            Check.That(result).ParseIsOk();
+            Check.That(result).IsOkParseResult();
             Check.That(result.Result).IsEqualTo(3.14);
         }
         

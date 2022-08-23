@@ -3,6 +3,7 @@ using csly.indentedWhileLang.compiler;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.interpreter;
 using csly.whileLang.model;
+using NFluent;
 using sly.buildresult;
 using sly.parser;
 using sly.parser.generator;
@@ -22,52 +23,38 @@ namespace ParserTests.samples
                 var whileParser = new IndentedWhileParserGeneric();
                 var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
                 Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+                Check.That(Parser).IsOkParser();
             }
 
             return Parser;
         }
 
 
-        public bool CheckIntVariable(InterpreterContext context, string variable, int value)
-        {
-            var ok = false;
-            if (context.GetVariable(variable) != null)
-            {
-                var v = context.GetVariable(variable).IntValue;
-                ok = v == value;
-            }
-
-            return ok;
-        }
-
         [Fact]
         public void TestAssignAdd()
         {
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             var result = parser.Parse("a:=1+1;");
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result).IsOkParseResult();
 
-            Assert.IsType<SequenceStatement>(result.Result);
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
-            Assert.IsType<AssignStatement>(seq.Get(0));
+            Check.That(seq.Get(0)).IsInstanceOf<AssignStatement>();
             var assign = seq.Get(0) as AssignStatement;
-            Assert.Equal("a", assign.VariableName);
+            Check.That(assign.VariableName).IsEqualTo("a");
             var val = assign.Value;
-            Assert.IsType<BinaryOperation>(val);
+            Check.That(val).IsInstanceOf<BinaryOperation>();
             var bin = val as BinaryOperation;
-            Assert.Equal(BinaryOperator.ADD, bin.Operator);
-            Assert.Equal(1, (bin.Left as IntegerConstant)?.Value);
-            Assert.Equal(1, (bin.Right as IntegerConstant)?.Value);
+            Check.That(bin.Operator).IsEqualTo(BinaryOperator.ADD);
+            Check.That((bin.Left as IntegerConstant)?.Value).IsEqualTo(1);
+            Check.That((bin.Right as IntegerConstant)?.Value).IsEqualTo(1);
         }
 
         [Fact]
         public void TestBuildParser()
         {
-            var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
+            var buildResult = buildParser();            
             var parser = buildResult.Result;
         }
 
@@ -75,7 +62,6 @@ namespace ParserTests.samples
         public void TestCounterProgram()
         {
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             string program = @"
 a:=0 
@@ -84,15 +70,13 @@ while a < 10 do
     a := a +1
 ";
             var result = parser.Parse(program);
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result).IsOkParseResult();
         }
 
         [Fact]
         public void TestCounterProgramExec()
         {
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             string program = @"
 a:=0 
@@ -101,12 +85,12 @@ while a < 10 do
     a := a +1
 ";
             var result = parser.Parse(program);
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result).IsOkParseResult();
             var interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result, true);
-            Assert.Single(context.variables);
-            Assert.True(CheckIntVariable(context, "a", 10));
+            Check.That(context.variables).IsSingle();
+            Check.That(context).HasVariableWithValue("a", 10);
+            
         }
 
         [Fact]
@@ -123,16 +107,14 @@ while i < 11 do
     i := i + 1 
 ";
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             var result = parser.Parse(program);
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result).IsOkParseResult();
             var interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result, true);
-            Assert.Equal(2, context.variables.Count);
-            Assert.True(CheckIntVariable(context, "i", 11));
-            Assert.True(CheckIntVariable(context, "r", 3628800));
+            Check.That(context.variables).CountIs(2);
+            Check.That(context).HasVariableWithValue("i", 11);
+            Check.That(context).HasVariableWithValue("r", 3628800);
         }
 
 
@@ -151,16 +133,15 @@ while i < 11 do
 return r";
             var compiler = new IndentedWhileCompiler();
             var func = compiler.CompileToFunction(program,true);
-            Assert.NotNull(func);
+            Check.That(func).IsNotNull();
             var f = func();
-            Assert.Equal(3628800, f);
+            Check.That(f).IsEqualTo(3628800);
         }
 
         [Fact]
         public void TestIfThenElse()
         {
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             var program = @"
 # TestIfThenElse
@@ -170,35 +151,34 @@ else
     b := ""world""
 ";
             var result = parser.Parse(program);
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result).IsOkParseResult();
 
-            Assert.IsType<SequenceStatement>(result.Result);
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
-            Assert.IsType<IfStatement>(seq.Get(0));
+            Check.That(seq.Get(0)).IsInstanceOf<IfStatement>();
             var si = seq.Get(0) as IfStatement;
             var cond = si.Condition;
-            Assert.IsType<BoolConstant>(cond);
-            Assert.True((cond as BoolConstant).Value);
+            Check.That(cond).IsInstanceOf<BoolConstant>();
+            Check.That((cond as BoolConstant).Value).IsTrue();
             var s = si.ThenStmt;
 
-            Assert.IsType<SequenceStatement>(si.ThenStmt);
+            Check.That(si.ThenStmt).IsInstanceOf<SequenceStatement>();
             var thenBlock = si.ThenStmt as SequenceStatement;
-            Assert.Equal(1, thenBlock.Count);
-            Assert.IsType<AssignStatement>(thenBlock.Get(0));
+            Check.That(thenBlock).CountIs(1);
+            Check.That(thenBlock.Get(0)).IsInstanceOf<AssignStatement>();
             var thenAssign = thenBlock.Get(0) as AssignStatement;
-            Assert.Equal("a", thenAssign.VariableName);
-            Assert.IsType<StringConstant>(thenAssign.Value);
-            Assert.Equal("hello", (thenAssign.Value as StringConstant).Value);
+            Check.That(thenAssign.VariableName).IsEqualTo("a");
+            Check.That(thenAssign.Value).IsInstanceOf<StringConstant>();
+            Check.That((thenAssign.Value as StringConstant).Value).IsEqualTo("hello");
 
-            Assert.IsType<SequenceStatement>(si.ElseStmt);
+            Check.That(si.ElseStmt).IsInstanceOf<SequenceStatement>();
             var elseBlock = si.ElseStmt as SequenceStatement;
-            Assert.Equal(1, elseBlock.Count);
-            Assert.IsType<AssignStatement>(elseBlock.Get(0));
+            Check.That(elseBlock).CountIs(1);
+            Check.That(elseBlock.Get(0)).IsInstanceOf<AssignStatement>();
             var elseAssign = elseBlock.Get(0) as AssignStatement;
-            Assert.Equal("b", elseAssign.VariableName);
-            Assert.IsType<StringConstant>(elseAssign.Value);
-            Assert.Equal("world", (elseAssign.Value as StringConstant).Value);
+            Check.That(elseAssign.VariableName).IsEqualTo("b");
+            Check.That(elseAssign.Value).IsInstanceOf<StringConstant>();
+            Check.That((elseAssign.Value as StringConstant).Value).IsEqualTo("world");
         }
 
         [Fact]
@@ -219,11 +199,9 @@ return a
 ";
             var compiler = new IndentedWhileCompiler();
             var func = compiler.CompileToFunction(program,true);
-            Assert.NotNull(func);
+            Check.That(func).IsNotNull();
             var f = func();
-            Assert.Equal(1, f);
-
-            
+            Check.That(f).IsEqualTo(1);
         }
 
 
@@ -231,7 +209,6 @@ return a
         public void TestInfiniteWhile()
         {
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             var program = @"
 # infinite loop
@@ -239,43 +216,41 @@ while true do
     skip
 ";
             var result = parser.Parse(program);
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result).IsOkParseResult();
 
-            Assert.IsType<SequenceStatement>(result.Result);
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
-            Assert.IsType<WhileStatement>(seq.Get(0));
+            Check.That(seq.Get(0)).IsInstanceOf<WhileStatement>();
             var whil = seq.Get(0) as WhileStatement;
             var cond = whil.Condition;
-            Assert.IsType<BoolConstant>(cond);
-            Assert.True((cond as BoolConstant).Value);
+            Check.That(cond).IsInstanceOf<BoolConstant>();
+            Check.That((cond as BoolConstant).Value).IsTrue();
             var s = whil.BlockStmt;
-            Assert.IsType<SequenceStatement>(whil.BlockStmt);
+            Check.That(whil.BlockStmt).IsInstanceOf<SequenceStatement>();
             var seqBlock = whil.BlockStmt as SequenceStatement;
-            Assert.Equal(1, seqBlock.Count);
-            Assert.IsType<SkipStatement>(seqBlock.Get(0));
+            Check.That(seqBlock).CountIs(1);
+            Check.That(seqBlock.Get(0)).IsInstanceOf<SkipStatement>();
         }
 
         [Fact]
         public void TestPrintBoolExpression()
         {
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             var result = parser.Parse("print true and false;");
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result).IsOkParseResult();
+            
 
-            Assert.IsType<SequenceStatement>(result.Result);
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
-            Assert.IsType<PrintStatement>(seq.Get(0));
+            Check.That(seq.Get(0)).IsInstanceOf<PrintStatement>();
             var print = seq.Get(0) as PrintStatement;
             var expr = print.Value;
-            Assert.IsType<BinaryOperation>(expr);
+            Check.That(expr).IsInstanceOf<BinaryOperation>();
             var bin = expr as BinaryOperation;
-            Assert.Equal(BinaryOperator.AND, bin.Operator);
-            Assert.True((bin.Left as BoolConstant)?.Value);
-            Assert.False((bin.Right as BoolConstant)?.Value);
+            Check.That(bin.Operator).IsEqualTo(BinaryOperator.AND);
+            Check.That((bin.Left as BoolConstant)?.Value).IsEqualTo(true);
+            Check.That((bin.Right as BoolConstant)?.Value).IsEqualTo(false);
         }
 
 
@@ -283,32 +258,28 @@ while true do
         public void TestSkip()
         {
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             var result = parser.Parse("skip;");
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result).IsOkParseResult();
 
-            Assert.IsType<SequenceStatement>(result.Result);
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
-            Assert.IsType<SkipStatement>(seq.Get(0));
+            Check.That(seq.Get(0)).IsInstanceOf<SkipStatement>();
         }
 
         [Fact]
         public void TestSkipAssignSequence()
         {
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             var program = @"a:=1
 b:=2
 c:=3";
             var result = parser.Parse(program);
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
+            Check.That(result).IsOkParseResult();
             Assert.IsType<SequenceStatement>(result.Result);
             var seq = result.Result as SequenceStatement;
-            Assert.Equal(3, seq.Count);
+            Check.That(seq).CountIs(3);
 
             string[] names = { "a", "b", "c" };
             for (var i = 0; i < names.Length; i++)
@@ -322,23 +293,21 @@ c:=3";
 
 
         [Fact]
-        public void TestSkipSkipSequence()
+        public void TestSkipSkipSkipSequence()
         {
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             var result = parser.Parse(@"
 skip
 skip
 skip");
-            Assert.False(result.IsError);
-            Assert.NotNull(result.Result);
-            Assert.IsType<SequenceStatement>(result.Result);
+            Check.That(result).IsOkParseResult();
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
-            Assert.Equal(3, seq.Count);
-            Assert.IsType<SkipStatement>(seq.Get(0));
-            Assert.IsType<SkipStatement>(seq.Get(1));
-            Assert.IsType<SkipStatement>(seq.Get(2));
+            Check.That(seq).CountIs(3);
+            Check.That(seq.Get(0)).IsInstanceOf<SkipStatement>();
+            Check.That(seq.Get(1)).IsInstanceOf<SkipStatement>();
+            Check.That(seq.Get(2)).IsInstanceOf<SkipStatement>();
         }
 
 
@@ -346,19 +315,18 @@ skip");
         public void TestIndentationError()
         {
             var buildResult = buildParser();
-            Assert.False(buildResult.IsError);
             var parser = buildResult.Result;
             var result = parser.Parse(@"
 # infinite loop
 while true do
     skip
   skip");
-            Assert.True(result.IsError);
-            Assert.Single(result.Errors);
+            Check.That(result.IsError).IsTrue();
+            Check.That(result.Errors).IsSingle();
             var error = result.Errors.First();
-            Assert.Equal(ErrorType.IndentationError,error.ErrorType);
-            Assert.Equal(4,error.Line);
-            Assert.Contains("Indentation error", error.ErrorMessage);
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.IndentationError);
+            Check.That(error.Line).IsEqualTo(4);
+            Check.That(error.ErrorMessage).Contains("Indentation error");
         }
     }
 }

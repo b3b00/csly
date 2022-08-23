@@ -23,7 +23,7 @@ namespace ParserTests.Issue164
         {
             var parser = BuildParser();
             var result = parser.Parse("2 + 2");
-            Check.That(result).ParseIsOk();
+            Check.That(result).IsOkParseResult();
             Check.That(result.Result).IsEqualTo(4);
         }
         
