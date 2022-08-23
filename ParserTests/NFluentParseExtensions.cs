@@ -40,6 +40,19 @@ namespace ParserTests
                 .EndCheck();
             return ExtensibilityHelper.BuildCheckLink(context);
         }
+        
+        public static ICheckLink<ICheck<Token<T>>> IsEqualTo<T>(this ICheck<Token<T>> context, T expectedTokenId, string expectedValue, int expectedLine, int expectedColumn) where T: struct
+        {
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => !sut.TokenID.Equals(expectedTokenId), "expecting {expected} found {checked}.")
+                .FailWhen(sut => !sut.Value.Equals(expectedValue), "expecting {expected} found {checked}.")
+                .FailWhen(sut => !sut.Position.Line.Equals(expectedLine), "expecting {expected} found {checked}.")
+                .FailWhen(sut => !sut.Position.Column.Equals(expectedColumn), "expecting {expected} found {checked}.")
+                .OnNegate("token is exact")
+                .DefineExpectedValue($"{expectedTokenId} : >{expectedValue}<")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
 
         public static ICheckLink<ICheck<IEnumerable<T>>> IsSingle<T>(this ICheck<IEnumerable<T>> context)
         {

@@ -4,6 +4,9 @@ namespace ParserTests.lexer
 {
     public enum GenericShortAttributes
     {
+        
+        EOF = 0,
+        
         [Double] DOUBLE = 1,
 
         // integer        

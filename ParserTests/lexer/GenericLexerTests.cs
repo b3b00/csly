@@ -169,14 +169,9 @@ namespace ParserTests.lexer
         C
     }
 
-    [Lexer(IgnoreEOL=false)]
+    [Lexer(IgnoreEOL=true)]
     public enum Issue177Generic
     {
-        [Lexeme(GenericToken.SugarToken,"\n",IsLineEnding = true)]
-        EOL = 1,
-
-        [Lexeme(GenericToken.SugarToken,"\r\n",IsLineEnding = true)]
-        EOL_WIN = 7,
 
         [Lexeme(GenericToken.Int)]
         INT = 2,
@@ -703,38 +698,35 @@ namespace ParserTests.lexer
 
             Check.That(lexer).IsNotNull();
             var res1 = lexer.Tokenize("'c'");
-            Assert.False(res1.IsError);
+            Check.That(res1.IsError).IsFalse();
             Console.WriteLine(res1.Tokens.ToString());
-            Assert.Equal(2, res1.Tokens.Count);
+            Check.That(res1.Tokens).CountIs(2);
             Token<CharTokens> token = res1.Tokens[0];
-            Assert.Equal('c', token.CharValue);
-            Assert.Equal(CharTokens.MyChar, token.TokenID);
+            Check.That(token.CharValue).IsEqualTo('c');
+            Check.That(token.TokenID).IsEqualTo(CharTokens.MyChar);
             var lastToken = res1.Tokens.Last();
 
             var source = "'\\''";
             var res2 = lexer.Tokenize(source);
-            Assert.False(res2.IsError);
-            Assert.Equal(2, res2.Tokens.Count);
+            Check.That(res2.IsError).IsFalse();
+            Check.That(res2.Tokens).CountIs(2);
             token = res2.Tokens[0];
-            Assert.Equal(source, token.Value);
-            Assert.Equal(CharTokens.MyChar, token.TokenID);
-
+            Check.That(token).IsEqualTo(CharTokens.MyChar, source);
+            
             var sourceU = "'\\u0066'";
             var res3 = lexer.Tokenize(sourceU);
-            Assert.False(res3.IsError);
-            Assert.Equal(2, res3.Tokens.Count);
+            Check.That(res3.IsError).IsFalse();
+            Check.That(res3.Tokens).CountIs(2);
             token = res3.Tokens[0];
-            Assert.Equal(sourceU, token.Value);
-            Assert.Equal(CharTokens.MyChar, token.TokenID);
+            Check.That(token).IsEqualTo(CharTokens.MyChar, sourceU);
         }
 
         [Fact]
         public void TestCharTokenDelimiterConflict()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CharTokensConflicts>>());
-            Assert.True(res.IsError);
-            Assert.Equal(2,res.Errors.Count);
-
+            Check.That(res.IsError).IsTrue();
+            Check.That(res.Errors).CountIs(2);
         }
 
         [Fact]
@@ -746,12 +738,13 @@ namespace ParserTests.lexer
             var r = lexer.Tokenize("1.");
             Check.That(r.IsOk).IsTrue();
             var tokens = r.Tokens;
-            Assert.NotNull(tokens);
+            Check.That(tokens).IsNotNull();
             Check.That(tokens).CountIs(3);
             var token = tokens[0];
-            Assert.Equal(Issue106.Integer, token.TokenID);
-            Assert.Equal(1, token.IntValue);
+            Check.That(token.TokenID).IsEqualTo(Issue106.Integer);
+            Check.That(token.IntValue).IsEqualTo(1);
             token = tokens[1];
+            Check.That(token.TokenID).IsEqualTo(Issue106.Period);
             Assert.Equal(Issue106.Period, token.TokenID);
         }
 
@@ -763,23 +756,19 @@ namespace ParserTests.lexer
             var lexer = res.Result as GenericLexer<Issue114>;
 
             var r = lexer?.Tokenize("// /&");
-            Assert.True(r.IsError);
-
-            Assert.Equal('&', r.Error.UnexpectedChar);
-
+            Check.That(r.IsError).IsTrue();
+            Check.That(r.Error.UnexpectedChar).IsEqualTo('&');
+            
             r = lexer?.Tokenize("/&");
-
-
-            Assert.Equal('&', r.Error.UnexpectedChar);
+            Check.That(r.Error.UnexpectedChar).IsEqualTo('&');
 
             r = lexer?.Tokenize("&/");
-            Assert.True(r.IsError);
-
-            Assert.Equal('&', r.Error.UnexpectedChar);
+            Check.That(r.IsError).IsTrue();
+            Check.That(r.Error.UnexpectedChar).IsEqualTo('&');
 
             r = lexer?.Tokenize("// &");
-            Assert.True(r.IsError);
-            Assert.Equal('&', r.Error.UnexpectedChar);
+            Check.That(r.IsError).IsTrue();
+            Check.That(r.Error.UnexpectedChar).IsEqualTo('&');
         }
 
         [Fact]
@@ -790,12 +779,14 @@ namespace ParserTests.lexer
             var lexer = res.Result;
 
             var result = lexer.Tokenize("--+");
-            Assert.True(result.IsOk);
-            Assert.Equal("BC0", ToTokens(result));
+            Check.That(result.IsOk).IsTrue();
+            Check.That(result.Tokens.Extracting(x => x.TokenID))
+                .ContainsExactly(new[] { Issue137.B, Issue137.C, default(Issue137) });
 
             result = lexer.Tokenize("--.");
-            Assert.True(result.IsOk);
-            Assert.Equal("BBA0", ToTokens(result));
+            Check.That(result.IsOk).IsTrue();
+            Check.That(result.Tokens.Extracting(x => x.TokenID))
+                .ContainsExactly(new[] { Issue137.B, Issue137.B, Issue137.A, default(Issue137) });
         }
 
         [Fact]
@@ -806,12 +797,13 @@ namespace ParserTests.lexer
             var lexer = res.Result;
 
             var result = lexer.Tokenize(".");
-            Assert.True(result.IsError);
-            Assert.Equal(ErrorType.UnexpectedChar,result.Error.ErrorType);
+            Check.That(result.IsError).IsTrue();
+            Check.That(result.Error.ErrorType).IsEqualTo(ErrorType.UnexpectedChar);
             
             result = lexer.Tokenize("--");
-            Assert.True(result.IsOk);
-            Assert.Equal("BB0", ToTokens(result));
+            Check.That(result.IsOk).IsTrue();
+            Check.That(result.Tokens.Extracting(x => x.TokenID))
+                .ContainsExactly(new[] { Issue138.B, Issue138.B,  default(Issue138) });
         }
 
         [Fact]
@@ -824,44 +816,30 @@ namespace ParserTests.lexer
             var result = lexer.Tokenize(@"1 2 
 2 3
 4 5");
-            Assert.True(result.IsOk);
-            Assert.Equal(9,result.Tokens.Count);
-            ;
+            Check.That(result.IsOk).IsTrue();
+            Check.That(result.Tokens).CountIs(7);
 
-            Action<Token<Issue177Generic>,int,int,int> assertToken = (Token<Issue177Generic> Token, int expectedLine, int expectedColumn, int expectedValue) => {
-                Assert.Equal(expectedValue,Token.IntValue);
-                Assert.Equal(expectedLine,Token.Position.Line);
-                Assert.Equal(expectedColumn,Token.Position.Column);
+            var expectations = new (int value, int line, int column)[]
+            {
+                (0, 0, 1),
+                (0, 2, 2),
+                (1, 0, 2),
+                (1, 2, 3),
+                (2, 0, 4),
+                (2, 2, 5)
             };
-            assertToken(result.Tokens[0],0,0,1);
-            assertToken(result.Tokens[1],0,2,2);
-            assertToken(result.Tokens[3],1,0,2);
-            assertToken(result.Tokens[4],1,2,3);
-            assertToken(result.Tokens[6],2,0,4);
-            assertToken(result.Tokens[7],2,2,5);
-
-//             var toks = ToTokens(result);
             
-//             var res2 = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Regex>>());
-//             Check.That(res.IsError).IsFalse();
-//             var lexer2 = res.Result;
-
-//             var result2 = lexer2.Tokenize(@"1
-// 2
-// 3");
-//             Assert.True(result2.IsOk);
-//             Assert.Equal(9,result2.Tokens.Count);
-            ;
+            Check.That(result.Tokens.Take(6).Extracting(x => (x.Position.Line,x.Position.Column,x.IntValue))).ContainsExactly(expectations);
         }
 
         [Fact]
         public void TestSameIntValuesError()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<SameIntValuesError>>());
-            Assert.True(lexerRes.IsError);
-            Assert.Null(lexerRes.Result);
-            Assert.Single(lexerRes.Errors);
-            Assert.Equal(ErrorCodes.LEXER_SAME_VALUE_USED_MANY_TIME,lexerRes.Errors.First().Code);
+            Check.That(lexerRes.IsError).IsTrue();
+            Check.That(lexerRes.Result).IsNull();
+            Check.That(lexerRes.Errors).IsSingle();
+            Check.That(lexerRes.Errors.First().Code).IsEqualTo(ErrorCodes.LEXER_SAME_VALUE_USED_MANY_TIME);
 
 
         }
@@ -870,25 +848,31 @@ namespace ParserTests.lexer
         public void TestIssue210()
         {
             var lexResult = LexerBuilder.BuildLexer<Issue210Token>(Issue210Extensions.AddExtensions);
-            Assert.True(lexResult.IsOk);
+            Check.That(lexResult.IsOk).IsTrue();
             var lexer = lexResult.Result;
             Check.That(lexer).IsNotNull();
             var r = lexer.Tokenize("?");
             Check.That(r.IsOk).IsTrue();
-            var l = ToTokens2(r);
-            Assert.Equal("QMARK[?]EOF[]",l);
             r = lexer.Tokenize("?special?");
             Check.That(r.IsOk).IsTrue();
-            l = ToTokens2(r);
-            Assert.Equal("SPECIAL[special]EOF[]",l);
+            Check.That(r.Tokens).CountIs(2);
+            Check.That(r.Tokens[0]).IsEqualTo(Issue210Token.SPECIAL, "special");
+            Check.That(r.Tokens[1]).IsEqualTo(Issue210Token.EOF, "");
+            
             r = lexer.Tokenize("x?x");
             Check.That(r.IsOk).IsTrue();
-            l = ToTokens2(r);
-            Assert.Equal("X[x]QMARK[?]X[x]EOF[]",l);
+            Check.That(r.Tokens).CountIs(4);
+            Check.That(r.Tokens[0]).IsEqualTo(Issue210Token.X, "x");
+            Check.That(r.Tokens[1]).IsEqualTo(Issue210Token.QMARK, "?");
+            Check.That(r.Tokens[2]).IsEqualTo(Issue210Token.X, "x");
+            Check.That(r.Tokens[3]).IsEqualTo(Issue210Token.EOF, "");
+            
+            
             r = lexer.Tokenize("??");
             Check.That(r.IsOk).IsTrue();
-            l = ToTokens2(r);
-            Assert.Equal("SPECIAL[]EOF[]",l);
+            Check.That(r.Tokens).CountIs(2);
+            Check.That(r.Tokens[0]).IsEqualTo(Issue210Token.SPECIAL, "");
+            Check.That(r.Tokens[1]).IsEqualTo(Issue210Token.EOF, "");
         }
 
         [Fact]
@@ -908,14 +892,12 @@ else
             var lexer = lexRes.Result;
             Check.That(lexer).IsNotNull();
             var tokResult = lexer.Tokenize(source);
-            Assert.True(tokResult.IsOk);
+            Check.That(tokResult.IsOk).IsTrue();
             var tokens = tokResult.Tokens;
-            Assert.NotNull(tokens);
-            Assert.Equal(22,tokens.Count);
-            var indents = tokens.Count(x => x.IsIndent);
-            var unindents = tokens.Count(x => x.IsUnIndent);
-            Assert.Equal(2,indents);
-            Assert.Equal(2,unindents);
+            Check.That(tokens).IsNotNull();
+            Check.That(tokens).CountIs(22);
+            Check.That(tokens.Where(x => x.IsIndent)).CountIs(2);
+            Check.That(tokens.Where(x => x.IsUnIndent)).CountIs(2);
         }
         
         [Fact]
@@ -935,45 +917,46 @@ else
             var lexer = lexRes.Result;
             Check.That(lexer).IsNotNull();
             var tokResult = lexer.Tokenize(source);
-            Assert.True(tokResult.IsOk);
+            Check.That(tokResult.IsOk).IsTrue();
             var tokens = tokResult.Tokens;
-            Assert.NotNull(tokens);
-            Assert.Equal(29,tokens.Count);
-            var indents = tokens.Count(x => x.IsIndent);
-            var unindents = tokens.Count(x => x.IsUnIndent);
-            Assert.Equal(2,indents);
-            Assert.Equal(2,unindents);
+            Check.That(tokens).IsNotNull();
+            Check.That(tokens).CountIs(29);
+            Check.That(tokens.Where(x => x.IsIndent)).CountIs(2);
+            Check.That(tokens.Where(x => x.IsUnIndent)).CountIs(2);
         }
 
         [Fact]
         public void TestGenericShortCode()
         {
             var build = LexerBuilder.BuildLexer<GenericShortAttributes>();
-            Assert.True(build.IsOk);
-            Assert.NotNull(build.Result);
+            Check.That(build.IsOk).IsTrue();
+            Check.That(build.Result).IsNotNull();
             var lexer = build.Result;
             var lexResult = lexer.Tokenize(@"1 + 2 + a + b * 8.3 hello / 'b\'jour'");
-            
-            Assert.True(lexResult.IsOk);
+
+            Check.That(lexResult.IsOk).IsTrue();
             var tokens = lexResult.Tokens;
-            Assert.Equal(13,tokens.Count);
-            Assert.Equal(GenericShortAttributes.INT,tokens[0].TokenID);
-            Assert.Equal(GenericShortAttributes.PLUS,tokens[3].TokenID);
-            Assert.Equal(GenericShortAttributes.IDENTIFIER,tokens[4].TokenID);
-            Assert.Equal(GenericShortAttributes.DOUBLE,tokens[8].TokenID);
-            Assert.Equal(GenericShortAttributes.HELLO,tokens[9].TokenID);
-            Assert.Equal(GenericShortAttributes.STRING,tokens[11].TokenID);
+            Check.That(tokens).CountIs(13);
+            Check.That(tokens.Extracting(x => x.TokenID)).ContainsExactly(
+                new[]
+                {
+                    GenericShortAttributes.INT,
+                    GenericShortAttributes.PLUS,
+                    GenericShortAttributes.INT,
+                    GenericShortAttributes.PLUS,
+                    GenericShortAttributes.IDENTIFIER,
+                    GenericShortAttributes.PLUS,
+                    GenericShortAttributes.IDENTIFIER,
+                    GenericShortAttributes.TIMES,
+                    GenericShortAttributes.DOUBLE,
+                    GenericShortAttributes.HELLO,
+                    GenericShortAttributes.DIVIDE,
+                    GenericShortAttributes.STRING,
+                    GenericShortAttributes.EOF
+                });
 
         }
 
-        private static string ToTokens<T>(LexerResult<T> result) where T : struct
-        {
-            return result.Tokens.Aggregate(new StringBuilder(), (buf, token) => buf.Append(token.TokenID)).ToString();
-        }
-        
-        private static string ToTokens2<T>(LexerResult<T> result) where T : struct
-        {
-            return string.Join("",result.Tokens.Select(x => $"{x.TokenID}[{x.Value}]"));
-        }
+      
     }
 }
