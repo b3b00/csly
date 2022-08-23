@@ -1,5 +1,6 @@
 ﻿using jsonparser;
 using jsonparser.JsonModel;
+using NFluent;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
@@ -44,49 +45,6 @@ namespace ParserTests.samples
             var val = (JValue) obj[key];
             Assert.True(val.IsDouble);
             Assert.Equal(value, val.GetValue<double>());
-        }
-
-
-        private void AssertString(JList list, int index, string value)
-        {
-            Assert.True(list[index].IsValue);
-            var val = (JValue) list[index];
-            Assert.True(val.IsString);
-            Assert.Equal(value, val.GetValue<string>());
-        }
-
-        private void AssertInt(JList list, int index, int value)
-        {
-            Assert.True(list[index].IsValue);
-            var val = (JValue) list[index];
-            Assert.True(val.IsInt);
-            Assert.Equal(value, val.GetValue<int>());
-        }
-
-
-        private void AssertDouble(JList list, int index, double value)
-        {
-            Assert.True(list[index].IsValue);
-            var val = (JValue) list[index];
-            Assert.True(val.IsDouble);
-            Assert.Equal(value, val.GetValue<double>());
-        }
-
-
-        private void AssertBool(JList list, int index, bool value)
-        {
-            Assert.True(list[index].IsValue);
-            var val = (JValue) list[index];
-            Assert.True(val.IsBool);
-            Assert.Equal(value, val.GetValue<bool>());
-        }
-
-
-        private void AssertObject(JList list, int index, int count)
-        {
-            Assert.True(list[index].IsObject);
-            var val = (JObject) list[index];
-            Assert.Equal(count, val.Count);
         }
 
         [Fact]
@@ -154,8 +112,8 @@ namespace ParserTests.samples
             Assert.True(r.Result.IsList);
             var list = (JList) r.Result;
             Assert.Equal(2, list.Count);
-            AssertInt(list, 0, 1);
-            AssertInt(list, 1, 2);
+            Check.That(list).HasItem(0, 1);
+            Check.That(list).HasItem(1, 2);
         }
 
         [Fact]
@@ -169,11 +127,11 @@ namespace ParserTests.samples
             Assert.True(r.Result.IsList);
             var list = (JList) r.Result;
             Assert.Equal(5, ((JList) r.Result).Count);
-            AssertInt(list, 0, 1);
+            Check.That(list).HasItem(0, 1);
             Assert.True(((JList) r.Result)[1].IsNull);
-            AssertObject(list, 2, 0);
-            AssertBool(list, 3, true);
-            AssertDouble(list, 4, 42.58d);
+            Check.That(list).HasObjectItem(2,0);
+            Check.That(list).HasItem(3, true);
+            Check.That(list).HasItem(4, 42.58d);
         }
 
         [Fact]
@@ -187,8 +145,9 @@ namespace ParserTests.samples
             Assert.True(r.Result.IsObject);
             var values = (JObject) r.Result;
             Assert.Equal(3, values.Count);
-            AssertString(values, "p1", "v1");
-            AssertString(values, "p2", "v2");
+            Check.That(values).HasProperty("p1", "v1");
+            Check.That(values).HasProperty("p1", "v1");
+            Check.That(values).HasProperty("p2", "v2");
 
             Assert.True(values.ContainsKey("p3"));
             var inner = values["p3"];
@@ -231,7 +190,7 @@ namespace ParserTests.samples
             Assert.True(r.Result.IsList);
             var list = (JList) r.Result;
             Assert.Equal(1, list.Count);
-            AssertInt(list, 0, 1);
+            Check.That(list).HasItem(0, 1);
         }
 
 
