@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using GenericLexerWithCallbacks;
 using indented;
+using NFluent;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser;
@@ -230,312 +231,296 @@ namespace ParserTests.lexer
         public void TestEmptyInput()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<Empty>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("");
-            Assert.True(r.IsOk);
-            Assert.Single(r.Tokens);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).IsSingle();
             var tok = r.Tokens[0];
-            Assert.Equal(Empty.EOS, tok.TokenID);
-            Assert.Equal("",        tok.Value);
+            Check.That(tok.TokenID).IsEqualTo(Empty.EOS);
+            Check.That(tok.Value).IsEqualTo("");
         }
 
         [Fact]
         public void TestIgnoredInput()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<Empty>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize(" \t\n ");
-            Assert.True(r.IsOk);
-            Assert.Single(r.Tokens);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).IsSingle();
             var tok = r.Tokens[0];
-            Assert.Equal(Empty.EOS, tok.TokenID);
-            Assert.Equal("",        tok.Value);
+            Check.That(tok.TokenID).IsEqualTo(Empty.EOS);
+            Check.That(tok.Value).IsEqualTo("");
         }
 
         [Fact]
         public void TestAlphaId()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<AlphaId>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
 
             var r = lexer.Tokenize("alpha");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-            Assert.Equal(AlphaId.ID, tok.TokenID);
-            Assert.Equal("alpha", tok.StringWithoutQuotes);
+            Check.That(tok.TokenID).IsEqualTo(AlphaId.ID);
+            Check.That(tok.StringWithoutQuotes).IsEqualTo("alpha");
         }
 
         [Fact]
         public void TestAlphaNumDashId()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<AlphaNumDashId>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("alpha-123_");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-            Assert.Equal(AlphaNumDashId.ID, tok.TokenID);
-            Assert.Equal("alpha-123_", tok.StringWithoutQuotes);
+            Check.That(tok.TokenID).IsEqualTo(AlphaNumDashId.ID);
+            Check.That(tok.StringWithoutQuotes).IsEqualTo("alpha-123_");
         }
 
         [Fact]
         public void TestAlphaNumDashIdStartsWithUnderscore()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<AlphaNumDashId>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("_alpha-123_");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-            Assert.Equal(AlphaNumDashId.ID, tok.TokenID);
-            Assert.Equal("_alpha-123_", tok.StringWithoutQuotes);
+            Check.That(tok.TokenID).IsEqualTo(AlphaNumDashId.ID);
+            Check.That(tok.StringWithoutQuotes).IsEqualTo("_alpha-123_");
         }
 
         [Fact]
         public void TestAlphaNumId()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<AlphaNumId>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("alpha123");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-            Assert.Equal(AlphaNumId.ID, tok.TokenID);
-            Assert.Equal("alpha123", tok.StringWithoutQuotes);
+            Check.That(tok.TokenID).IsEqualTo(AlphaNumId.ID);
+            Check.That(tok.StringWithoutQuotes).IsEqualTo("alpha123");
         }
 
         [Fact]
         public void TestCustomId()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<CustomId>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("a_-Bc ZyX-_");
-            Assert.True(r.IsOk);
-            Assert.Equal(3, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(3);
             var tok1 = r.Tokens[0];
-            Assert.Equal(CustomId.ID, tok1.TokenID);
-            Assert.Equal("a_-Bc",     tok1.Value);
+            Check.That(tok1).IsEqualTo(CustomId.ID, "a_-Bc");
+            
             var tok2 = r.Tokens[1];
-            Assert.Equal(CustomId.ID, tok2.TokenID);
-            Assert.Equal("ZyX-_",     tok2.Value);
+            Check.That(tok2).IsEqualTo(CustomId.ID, "ZyX-_");
         }
         
         [Fact]
         public void TestCustomIdReverseRange()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<CustomIdReverseRange>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("a_-Bc ZyX-_");
-            Assert.True(r.IsOk);
-            Assert.Equal(3, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(3);
             var tok1 = r.Tokens[0];
-            Assert.Equal(CustomIdReverseRange.ID, tok1.TokenID);
-            Assert.Equal("a_-Bc",     tok1.Value);
+            Check.That(tok1).IsEqualTo(CustomIdReverseRange.ID,"a_-Bc");
             var tok2 = r.Tokens[1];
-            Assert.Equal(CustomIdReverseRange.ID, tok2.TokenID);
-            Assert.Equal("ZyX-_",     tok2.Value);
+            Check.That(tok2).IsEqualTo(CustomIdReverseRange.ID, "ZyX-_");
         }
 
         [Fact]
         public void TestCustomIdWithOther()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<CustomId>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("_b_ -C-");
-            Assert.True(r.IsOk);
-            Assert.Equal(5, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(5);
             var tok1 = r.Tokens[0];
-            Assert.Equal(CustomId.OTHER, tok1.TokenID);
-            Assert.Equal("_",            tok1.Value);
+            Check.That(tok1).IsEqualTo(CustomId.OTHER,"_");
             var tok2 = r.Tokens[1];
-            Assert.Equal(CustomId.ID, tok2.TokenID);
-            Assert.Equal("b_",        tok2.Value);
+            Check.That(tok2).IsEqualTo(CustomId.ID,"b_");
             var tok3 = r.Tokens[2];
-            Assert.Equal(CustomId.OTHER, tok3.TokenID);
-            Assert.Equal("-",            tok3.Value);
+            Check.That(tok3).IsEqualTo(CustomId.OTHER,"-");
             var tok4 = r.Tokens[3];
-            Assert.Equal(CustomId.ID, tok4.TokenID);
-            Assert.Equal("C-",        tok4.Value);
+            Check.That(tok4).IsEqualTo(CustomId.ID,"C-");
         }
 
         [Fact]
         public void TestIgnoreWS()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<IgnoreWS>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("\n \n");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-            Assert.Equal(IgnoreWS.WS, tok.TokenID);
-            Assert.Equal(" ", tok.Value);
+            Check.That(tok).IsEqualTo(IgnoreWS.WS," ");
         }
 
         [Fact]
         public void TestIgnoreEOL()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<IgnoreEOL>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize(" \n ");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-            Assert.Equal(IgnoreEOL.EOL, tok.TokenID);
-            Assert.Equal("\n", tok.Value);
+            Check.That(tok).IsEqualTo(IgnoreEOL.EOL, "\n");
         }
 
         [Fact]
         public void TestWhiteSpace()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<WhiteSpace>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize(" \t ");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-            Assert.Equal(WhiteSpace.TAB, tok.TokenID);
-            Assert.Equal("\t",           tok.Value);
+            Check.That(tok).IsEqualTo(WhiteSpace.TAB, "\t");
         }
 
         [Fact]
         public void TestKeyWord()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<KeyWord>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("keyword KeYwOrD");
-            Assert.True(r.IsOk);
-            Assert.Equal(3, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(3);
             var tok1 = r.Tokens[0];
-            Assert.Equal(KeyWord.KEYWORD, tok1.TokenID);
-            Assert.Equal("keyword",       tok1.Value);
+            Check.That(tok1).IsEqualTo(KeyWord.KEYWORD, "keyword");
             var tok2 = r.Tokens[1];
-            Assert.Equal(default(KeyWord), tok2.TokenID);
-            Assert.Equal("KeYwOrD",        tok2.Value);
+            Check.That(tok2).IsEqualTo(default(KeyWord),"KeYwOrD");
         }
 
         [Fact]
         public void TestKeyWordIgnoreCase()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<KeyWordIgnoreCase>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("keyword KeYwOrD");
-            Assert.True(r.IsOk);
-            Assert.Equal(3, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(3);
             var tok1 = r.Tokens[0];
-            Assert.Equal(KeyWordIgnoreCase.KEYWORD, tok1.TokenID);
-            Assert.Equal("keyword",                 tok1.Value);
+            Check.That(tok1).IsEqualTo(KeyWordIgnoreCase.KEYWORD, "keyword");
             var tok2 = r.Tokens[1];
-            Assert.Equal(KeyWordIgnoreCase.KEYWORD, tok2.TokenID);
-            Assert.Equal("KeYwOrD",                 tok2.Value);
+            Check.That(tok2).IsEqualTo(KeyWordIgnoreCase.KEYWORD,"KeYwOrD");
         }
 
         [Fact]
         public void TestStringDelimiters()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<StringDelimiters>>());
-            Assert.True(lexerRes.IsOk);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var r = lexer.Tokenize("'that''s it'");
-            Assert.True(r.IsOk);
-            Assert.NotNull(r.Tokens);
-            Assert.NotEmpty(r.Tokens);
-            Assert.Equal(2,r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).IsNotNull();
+            Check.That(r.Tokens).Not.IsEmpty();
+            Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-
-            Assert.Equal("'that's it'",tok.Value);
-            Assert.Equal("that's it",tok.StringWithoutQuotes);
-
+            Check.That(tok.Value).IsEqualTo("'that's it'");
+            Check.That(tok.StringWithoutQuotes).IsEqualTo("that's it");
         }
 
         [Fact]
         public void TestBadEmptyStringDelimiter()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<BadEmptyStringDelimiter>>());
-            Assert.True(lexerRes.IsError);
-            Assert.Single(lexerRes.Errors);
+            Check.That(lexerRes.IsError).IsTrue();
+            Check.That(lexerRes.Errors).IsSingle();
             var error = lexerRes.Errors[0];
-            Assert.Equal(ErrorLevel.FATAL, error.Level);
-            Assert.Equal(ErrorCodes.LEXER_STRING_DELIMITER_MUST_BE_1_CHAR, error.Code);
+            Check.That(error.Level).IsEqualTo(ErrorLevel.FATAL);
+            Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_STRING_DELIMITER_MUST_BE_1_CHAR);
         }
 
         [Fact]
         public void TestBadLetterStringDelimiter()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<BadLetterStringDelimiter>>());
-            Assert.True(lexerRes.IsError);
-            Assert.Single(lexerRes.Errors);
+            Check.That(lexerRes.IsError).IsTrue();
+            Check.That(lexerRes.Errors).IsSingle();
             var error = lexerRes.Errors[0];
-            Assert.Equal(ErrorLevel.FATAL, error.Level);
-            Assert.Equal(ErrorCodes.LEXER_STRING_DELIMITER_CANNOT_BE_LETTER_OR_DIGIT, error.Code);
+            Check.That(error.Level).IsEqualTo(ErrorLevel.FATAL);
+            Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_STRING_DELIMITER_CANNOT_BE_LETTER_OR_DIGIT);
         }
 
         [Fact]
         public void TestBadEscapeStringDelimiterTooLong()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<BadEscapeStringDelimiterTooLong>>());
-            Assert.True(lexerRes.IsError);
-            Assert.Single(lexerRes.Errors);
+            Check.That(lexerRes.IsError).IsTrue();
+            Check.That(lexerRes.Errors).IsSingle();
             var error = lexerRes.Errors[0];
-            Assert.Equal(ErrorLevel.FATAL, error.Level);
-            Assert.Contains("must be 1 character length", error.Message);
+            Check.That(error.Level).IsEqualTo(ErrorLevel.FATAL);
+            Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_STRING_ESCAPE_CHAR_MUST_BE_1_CHAR);
         }
 
         [Fact]
         public void TestBadEscapeStringDelimiterLetter()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<BadEscapeStringDelimiterLetter>>());
-            Assert.True(lexerRes.IsError);
-            Assert.Single(lexerRes.Errors);
+            Check.That(lexerRes.IsError).IsTrue();
+            Check.That(lexerRes.Errors).IsSingle();
             var error = lexerRes.Errors[0];
-            Assert.Equal(ErrorLevel.FATAL, error.Level);
-            Assert.Contains("can not start with a letter", error.Message);
+            Check.That(error.Level).IsEqualTo(ErrorLevel.FATAL);
+            Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_STRING_ESCAPE_CHAR_CANNOT_BE_LETTER_OR_DIGIT);
         }
 
         [Fact]
         public void TestDefaultQuotedString()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DefaultQuotedString>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var source = "hello \\\"world ";
             var expected = "hello \"world ";
             var r = lexer.Tokenize($"\"{source}\"");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-            Assert.Equal(DefaultQuotedString.DefaultString, tok.TokenID);
-            Assert.Equal(expected, tok.StringWithoutQuotes);
+            Check.That(tok.TokenID).IsEqualTo(DefaultQuotedString.DefaultString);
+            Check.That(tok.StringWithoutQuotes).IsEqualTo(expected);
         }
 
         [Fact]
         public void TestDoubleQuotedString()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DoubleQuotedString>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var source = "hello \\\"world ";
             var expected = "hello \"world ";
             var r = lexer.Tokenize($"\"{source}\"");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-            Assert.Equal(DoubleQuotedString.DoubleString, tok.TokenID);
-            Assert.Equal(expected, tok.StringWithoutQuotes);
+            Check.That(tok.TokenID).IsEqualTo(DoubleQuotedString.DoubleString);
+            Check.That(tok.StringWithoutQuotes).IsEqualTo(expected);
         }
 
 
@@ -548,18 +533,15 @@ namespace ParserTests.lexer
             var builder = new ParserBuilder<Extensions,object>();
             var parserResult = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "root",
                 ExtendedGenericLexer.AddExtension);
-            Assert.True(parserResult.IsOk);
-            Assert.NotNull(parserResult.Result);
+            Check.That(parserResult).IsOkParser();
             var parser = parserResult.Result;
             var result = parser.Parse("15.01.2020");
-            Assert.True(result.IsOk);
-            Assert.Equal(new DateTime(2020,01,15), result.Result);
+            Check.That(result).ParseIsOk();
             
+            Check.That(result.Result).IsEqualTo(new DateTime(2020,01,15));
             result = parser.Parse("3.14");
-            Assert.True(result.IsOk);
-            Assert.Equal(3.14, result.Result);
-
-
+            Check.That(result).ParseIsOk();
+            Check.That(result.Result).IsEqualTo(3.14);
         }
         
         [Fact]
@@ -567,19 +549,16 @@ namespace ParserTests.lexer
         {
             var lexerRes =
                 LexerBuilder.BuildLexer(new BuildResult<ILexer<Extensions>>(), ExtendedGenericLexer.AddExtension);
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result as GenericLexer<Extensions>;
-            Assert.NotNull(lexer);
+            Check.That(lexer).IsNotNull();
 
             var r = lexer.Tokenize("20.02.2018 3.14");
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
 
-            Assert.Equal(3, r.Tokens.Count);
-            Assert.Equal(Extensions.DATE, r.Tokens[0].TokenID);
-            Assert.Equal("20.02.2018", r.Tokens[0].Value);
-            Assert.Equal(Extensions.DOUBLE, r.Tokens[1].TokenID);
-            Assert.Equal("3.14", r.Tokens[1].Value);
-
+            Check.That(r.Tokens).CountIs(3);
+            Check.That(r.Tokens[0]).IsEqualTo(Extensions.DATE, "20.02.2018");
+            Check.That(r.Tokens[1]).IsEqualTo(Extensions.DOUBLE, "3.14");
         }
         
         [Fact]
@@ -587,56 +566,54 @@ namespace ParserTests.lexer
         {
             var lexerRes =
                 LexerBuilder.BuildLexer(new BuildResult<ILexer<ShortExtensions>>(), ExtendedGenericLexer.AddShortExtension);
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result as GenericLexer<ShortExtensions>;
-            Assert.NotNull(lexer);
+            Check.That(lexer).IsNotNull();
 
             var r = lexer.Tokenize("20.02.2018 3.14");
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
 
-            Assert.Equal(3, r.Tokens.Count);
-            Assert.Equal(ShortExtensions.DATE, r.Tokens[0].TokenID);
-            Assert.Equal("20.02.2018", r.Tokens[0].Value);
-            Assert.Equal(ShortExtensions.DOUBLE, r.Tokens[1].TokenID);
-            Assert.Equal("3.14", r.Tokens[1].Value);
-
+            Check.That(r.Tokens).CountIs(3);
+            Check.That(r.Tokens[0]).IsEqualTo(ShortExtensions.DATE, "20.02.2018");
+            Check.That(r.Tokens[1]).IsEqualTo(ShortExtensions.DOUBLE, "3.14");
         }
 
         [Fact]
         public void TestExtensionsPreconditionFailure()
         {
             var lexerRes  = LexerBuilder.BuildLexer(new BuildResult<ILexer<Extensions>>(), ExtendedGenericLexer.AddExtension);
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result as GenericLexer<Extensions>;
-            Assert.NotNull(lexer);
+            Check.That(lexer).IsNotNull();
 
             var r = lexer.Tokenize("0.0.2018");
-            Assert.Equal(0,r.Error.Line);
-            Assert.Equal(3,r.Error.Column);
-            Assert.Equal('.',r.Error.UnexpectedChar);
+            Check.That(r.IsError).IsTrue();
+            Check.That(r.Error.Line).IsEqualTo(0);
+            Check.That(r.Error.Column).IsEqualTo(3);
+            Check.That(r.Error.UnexpectedChar).IsEqualTo('.');
         }
 
         [Fact]
         public void TestLexerError()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<AlphaNumDashId>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var source = "hello world  2 + 2 ";
              var r = lexer.Tokenize(source);
-             Assert.True(r.IsError);
+             Check.That(r.IsError).IsTrue();
             var error = r.Error;
-            Assert.Equal(0, error.Line);
-            Assert.Equal(13, error.Column);
-            Assert.Equal('2', error.UnexpectedChar);
-            Assert.Equal(ErrorType.UnexpectedChar,error.ErrorType);
+            Check.That(error.Line).IsEqualTo(0);
+            Check.That(error.Column).IsEqualTo(13);
+            Check.That(error.UnexpectedChar).IsEqualTo('2');
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedChar);
         }
 
         [Fact]
         public void TestManyString()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManyString>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var string1 = "\"hello \\\"world \"";
             var expectString1 = "\"hello \"world \"";
@@ -644,88 +621,87 @@ namespace ParserTests.lexer
             var expectString2 = "'that's it'";
             var source1 = $"{string1} {string2}";
             var r = lexer.Tokenize(source1);
-            Assert.True(r.IsOk);
-            Assert.Equal(3, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(3);
+            
             var tok1 = r.Tokens[0];
-            Assert.Equal(ManyString.STRING, tok1.TokenID);
-            Assert.Equal(expectString1, tok1.Value);
-            Assert.Equal('"',tok1.StringDelimiter);
+            Check.That(tok1).IsEqualTo(ManyString.STRING, expectString1);
+            Check.That(tok1.StringDelimiter).IsEqualTo('"');
 
             var tok2 = r.Tokens[1];
-            Assert.Equal(ManyString.STRING, tok2.TokenID);
-            Assert.Equal(expectString2, tok2.Value);
-            Assert.Equal('\'',tok2.StringDelimiter);
+            Check.That(tok2).IsEqualTo(ManyString.STRING, expectString2);
+            Check.That(tok2.StringDelimiter).IsEqualTo('\'');
+            
         }
 
         [Fact]
         public void TestSelfEscapedString()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<SelfEscapedString>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result as GenericLexer<SelfEscapedString>;
-            Assert.NotNull(lexer);
+            Check.That(lexer).IsNotNull();
             var r = lexer.Tokenize("'that''s it'");
 
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             var tokens = r.Tokens;
-            Assert.Equal(2, tokens.Count);
+            Check.That(tokens).CountIs(2);
             var tok = tokens[0];
-            Assert.Equal(SelfEscapedString.STRING, tok.TokenID);
-            Assert.Equal("'that's it'", tokens[0].Value);
+            Check.That(tok).IsEqualTo(SelfEscapedString.STRING, "'that's it'");
+                
+            
 
             r = lexer.Tokenize("'et voilà'");
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             tokens = r.Tokens;
-            Assert.Equal(2, tokens.Count);
+            Check.That(tokens).CountIs(2);
             tok = tokens[0];
-            Assert.Equal(SelfEscapedString.STRING, tok.TokenID);
-            Assert.Equal("'et voilà'", tokens[0].Value);
+            Check.That(tok).IsEqualTo(SelfEscapedString.STRING, "'et voilà'");
+            
         }
 
         [Fact]
         public void TestSingleQuotedString()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<SingleQuotedString>>());
-            Assert.False(lexerRes.IsError);
+            Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var source = "hello \\'world ";
-            var expected = "hello 'world ";
+            var expected = "'hello 'world '";
             var r = lexer.Tokenize($"'{source}'");
-            Assert.True(r.IsOk);
-            Assert.Equal(2, r.Tokens.Count);
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-            Assert.Equal(SingleQuotedString.SingleString, tok.TokenID);
-            Assert.Equal(expected, tok.StringWithoutQuotes);
+            Check.That(tok).IsEqualTo(SingleQuotedString.SingleString, expected);
         }
 
         [Fact]
         public void TestTokenCallbacks()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CallbackTokens>>());
-            Assert.False(res.IsError);
+            Check.That(res.IsError);
             var lexer = res.Result as GenericLexer<CallbackTokens>;
             CallBacksBuilder.BuildCallbacks(lexer);
 
 
             var r = lexer.Tokenize("aaa bbb");
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             var tokens = r.Tokens;
-            Assert.Equal(3, tokens.Count);
-            Assert.Equal("AAA", tokens[0].Value);
-            Assert.Equal("BBB", tokens[1].Value);
-            Assert.Equal(CallbackTokens.SKIP, tokens[1].TokenID);
+            Check.That(tokens).CountIs(3);
+            Check.That(tokens[0]).IsEqualTo(CallbackTokens.IDENTIFIER, "AAA");
+            Check.That(tokens[1]).IsEqualTo(CallbackTokens.SKIP, "BBB");
         }
 
         [Fact]
         public void TestCharTokens()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CharTokens>>());
-            Assert.False(res.IsError);
+            Check.That(res.IsError).IsFalse();
             var lexer = res.Result as GenericLexer<CharTokens>;
             var dump = lexer.ToString();
             var grpah = lexer.ToGraphViz();
 
-            Assert.NotNull(lexer);
+            Check.That(lexer).IsNotNull();
             var res1 = lexer.Tokenize("'c'");
             Assert.False(res1.IsError);
             Console.WriteLine(res1.Tokens.ToString());
@@ -765,13 +741,13 @@ namespace ParserTests.lexer
         public void TestIssue106()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue106>>());
-            Assert.False(res.IsError);
+            Check.That(res.IsError).IsFalse();
             var lexer = res.Result as GenericLexer<Issue106>;
             var r = lexer.Tokenize("1.");
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             var tokens = r.Tokens;
             Assert.NotNull(tokens);
-            Assert.Equal(3, tokens.Count);
+            Check.That(tokens).CountIs(3);
             var token = tokens[0];
             Assert.Equal(Issue106.Integer, token.TokenID);
             Assert.Equal(1, token.IntValue);
@@ -783,7 +759,7 @@ namespace ParserTests.lexer
         public void TestIssue114()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue114>>());
-            Assert.False(res.IsError);
+            Check.That(res.IsError).IsFalse();
             var lexer = res.Result as GenericLexer<Issue114>;
 
             var r = lexer?.Tokenize("// /&");
@@ -810,7 +786,7 @@ namespace ParserTests.lexer
         public void TestIssue137()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue137>>());
-            Assert.False(res.IsError);
+            Check.That(res.IsError).IsFalse();
             var lexer = res.Result;
 
             var result = lexer.Tokenize("--+");
@@ -826,7 +802,7 @@ namespace ParserTests.lexer
         public void TestIssue138()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue138>>());
-            Assert.False(res.IsError);
+            Check.That(res.IsError).IsFalse();
             var lexer = res.Result;
 
             var result = lexer.Tokenize(".");
@@ -842,7 +818,7 @@ namespace ParserTests.lexer
         public void TestIssue177()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Generic>>());
-            Assert.False(res.IsError);
+            Check.That(res.IsError).IsFalse();
             var lexer = res.Result;
 
             var result = lexer.Tokenize(@"1 2 
@@ -867,7 +843,7 @@ namespace ParserTests.lexer
 //             var toks = ToTokens(result);
             
 //             var res2 = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Regex>>());
-//             Assert.False(res.IsError);
+//             Check.That(res.IsError).IsFalse();
 //             var lexer2 = res.Result;
 
 //             var result2 = lexer2.Tokenize(@"1
@@ -896,21 +872,21 @@ namespace ParserTests.lexer
             var lexResult = LexerBuilder.BuildLexer<Issue210Token>(Issue210Extensions.AddExtensions);
             Assert.True(lexResult.IsOk);
             var lexer = lexResult.Result;
-            Assert.NotNull(lexer);
+            Check.That(lexer).IsNotNull();
             var r = lexer.Tokenize("?");
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             var l = ToTokens2(r);
             Assert.Equal("QMARK[?]EOF[]",l);
             r = lexer.Tokenize("?special?");
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             l = ToTokens2(r);
             Assert.Equal("SPECIAL[special]EOF[]",l);
             r = lexer.Tokenize("x?x");
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             l = ToTokens2(r);
             Assert.Equal("X[x]QMARK[?]X[x]EOF[]",l);
             r = lexer.Tokenize("??");
-            Assert.True(r.IsOk);
+            Check.That(r.IsOk).IsTrue();
             l = ToTokens2(r);
             Assert.Equal("SPECIAL[]EOF[]",l);
         }
@@ -930,7 +906,7 @@ else
             var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer>();
             Assert.True(lexRes.IsOk);
             var lexer = lexRes.Result;
-            Assert.NotNull(lexer);
+            Check.That(lexer).IsNotNull();
             var tokResult = lexer.Tokenize(source);
             Assert.True(tokResult.IsOk);
             var tokens = tokResult.Tokens;
@@ -957,7 +933,7 @@ else
             var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer2>();
             Assert.True(lexRes.IsOk);
             var lexer = lexRes.Result;
-            Assert.NotNull(lexer);
+            Check.That(lexer).IsNotNull();
             var tokResult = lexer.Tokenize(source);
             Assert.True(tokResult.IsOk);
             var tokens = tokResult.Tokens;

@@ -29,7 +29,6 @@ namespace ParserTests
             Check.That(error.UnexpectedToken.TokenID).IsEqualTo(ExpressionToken.PLUS);
             Check.That(error.Line).IsEqualTo(1);
             Check.That(error.Column).IsEqualTo(10);
-            Assert.Equal(10, error.Column);
         }
 
         [Fact]
@@ -99,7 +98,7 @@ namespace ParserTests
             Check.That(r.Errors[0]).IsInstanceOf<UnexpectedTokenSyntaxError<JsonToken>>();
             var error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
 
-            Assert.NotNull(error);
+            Check.That(error).IsNotNull();
             Check.That(error.UnexpectedToken.TokenID).IsEqualTo((JsonToken) 0);
             Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
             Check.That(error.Line).IsEqualTo(1);
