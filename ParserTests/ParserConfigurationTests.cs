@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using expressionparser;
+using NFluent;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser.generator;
@@ -294,14 +295,31 @@ namespace ParserTests
             var parserBuilder = new ParserBuilder<ExpressionToken, int>("en");
             var instance = new ParserConfigurationTests();
             var result = parserBuilder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "R");
-            Assert.True(result.IsError);
-            Assert.Equal(2, result.Errors.Count);
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).CountIs(2);
+            
             var warnerrors = result.Errors.Where(e => e.Level == ErrorLevel.WARN).ToList();
             var errorerrors = result.Errors.Where(e => e.Level == ErrorLevel.ERROR).ToList();
-            Assert.Single(warnerrors);
-            Assert.True(warnerrors[0].Message.Contains("R3") && warnerrors[0].Message.Contains("never used"));
-            Assert.Single(errorerrors);
-            Assert.True(errorerrors[0].Message.Contains("R2") && errorerrors[0].Message.Contains("not exist"));
+
+            var expectations = new[]
+            {
+                (ErrorLevel.ERROR, ErrorCodes.PARSER_REFERENCE_NOT_FOUND, "R2"),
+                (ErrorLevel.WARN, ErrorCodes.NOT_AN_ERROR, "R3")
+            };
+            
+            
+            Check.That(warnerrors).IsSingle();
+            var warn = warnerrors[0];
+            Check.That(warn.Code).IsEqualTo(ErrorCodes.NOT_AN_ERROR);
+            Check.That(warn.Message).Contains("R3");
+            Check.That(warn.Message).Contains("never used");
+            
+            Check.That(errorerrors).IsSingle();
+            var error = errorerrors[0];
+            Check.That(error.Code).IsEqualTo(ErrorCodes.PARSER_REFERENCE_NOT_FOUND);
+            Check.That(error.Message).Contains("R2");
+            Check.That(error.Message).Contains("not exist");
+            
         }
 
         [Fact]
@@ -310,8 +328,8 @@ namespace ParserTests
             var result = new BuildResult<ILexer<BadTokens>>();
             result = LexerBuilder.BuildLexer(result);
 
-            Assert.True(result.IsError);
-            Assert.Equal(2, result.Errors.Count);
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).CountIs(2);
             var errors = result.Errors.Where(e => e.Level == ErrorLevel.ERROR).ToList();
             var warnings = result.Errors.Where(e => e.Level == ErrorLevel.WARN).ToList();
             Assert.Single(errors);
@@ -329,17 +347,16 @@ namespace ParserTests
             var instance = new BadVisitorReturnParser();
             ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badreturn");
-            Assert.True(result.IsError);
-            Assert.Single(result.Errors);
-            Assert.Contains("incorrect return type", result.Errors.First().Message);
-            Assert.Contains("visitor BadReturn", result.Errors.First().Message);
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).IsSingle();
+            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE);
+            Check.That(result.Errors[0].Message).Contains("BadReturn");
             
             result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badreturn");
-            Assert.True(result.IsError);
-            Assert.Single(result.Errors);
-            Assert.Contains("incorrect return type", result.Errors.First().Message);
-            Assert.Contains("visitor BadReturn", result.Errors.First().Message);
-            ;
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).IsSingle();
+            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE);
+            Check.That(result.Errors[0].Message).Contains("BadReturn");
         }
         
         [Fact]
@@ -348,16 +365,18 @@ namespace ParserTests
             var instance = new BadTerminalArgParser();
             ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badtermarg");
-            Assert.True(result.IsError);
-            Assert.Single(result.Errors);
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).IsSingle();
             //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
-            Assert.Contains("parameter aArg has incorrect type", result.Errors.First().Message);
+            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
+            Check.That(result.Errors[0].Message).Contains("aArg");
+            
             
             result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badtermarg");
-            Assert.True(result.IsError);
-            Assert.Single(result.Errors);
-            //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
-            Assert.Contains("parameter aArg has incorrect type", result.Errors.First().Message);
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).IsSingle();
+            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
+            Check.That(result.Errors[0].Message).Contains("aArg");
             
             
            
@@ -370,17 +389,16 @@ namespace ParserTests
             var instance = new BadNonTerminalArgParser();
             ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badnontermarg");
-            Assert.True(result.IsError);
-            Assert.Single(result.Errors);
-            Assert.Equal(1, result.Errors.Count(x => x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
-            //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
-            Assert.Contains("parameter aArg has incorrect type", result.Errors.First().Message);
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).IsSingle();
+            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
+            Check.That(result.Errors[0].Message).Contains("parameter aArg has incorrect type");
             
             result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badnontermarg");
-            Assert.True(result.IsError);
-            Assert.Single(result.Errors);
-            //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
-            Assert.Contains("parameter aArg has incorrect type", result.Errors.First().Message);
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).IsSingle();
+            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
+            Check.That(result.Errors[0].Message).Contains("parameter aArg has incorrect type");
             
             
            
