@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics.CodeAnalysis;
 
 namespace sly.lexer
 {
@@ -50,6 +51,7 @@ namespace sly.lexer
                 token.PositionInTokenFlow = Tokens.Count;
         }
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             StringBuilder builder = new StringBuilder();
