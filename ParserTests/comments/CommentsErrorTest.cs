@@ -122,7 +122,7 @@ namespace ParserTests.comments
         public void MultipleAttributes()
         {
             var lexerRes6 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError6>>());
-            Check.That(lexerRes6).Not.IsOkParser();
+            Check.That(lexerRes6).Not.IsOk();
             Check.That(lexerRes6.Errors).CountIs(1);
             var expectedErrors = new[]
             {
@@ -135,7 +135,7 @@ namespace ParserTests.comments
             
 
             var lexerRes5 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError5>>());
-            Check.That(lexerRes5).Not.IsOkParser();
+            Check.That(lexerRes5).Not.IsOk();
             Check.That(lexerRes5.Errors).CountIs(1);
             expectedErrors = new[]
             {
@@ -146,7 +146,7 @@ namespace ParserTests.comments
             
 
             var lexerRes4 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError4>>());
-            Check.That(lexerRes4).Not.IsOkParser();
+            Check.That(lexerRes4).Not.IsOk();
             Check.That(lexerRes4.Errors).CountIs(1);
             expectedErrors = new[]
             {
@@ -161,19 +161,19 @@ namespace ParserTests.comments
         public void RedundantAttributes()
         {
             var lexerRes3 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError3>>());
-            Check.That(lexerRes3).Not.IsOkParser();
+            Check.That(lexerRes3).Not.IsOk();
             Check.That(lexerRes3.Errors).CountIs(1);
             Check.That(lexerRes3.Errors[0].Level).IsEqualTo(ErrorLevel.FATAL);
             Check.That(lexerRes3.Errors[0].Message).IsEqualTo("comment lexem can't be used together with single-line or multi-line comment lexems");
 
             var lexerRes2 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError2>>());
-            Check.That(lexerRes2).Not.IsOkParser();
+            Check.That(lexerRes2).Not.IsOk();
             Check.That(lexerRes2.Errors).CountIs(1);
             Check.That(lexerRes2.Errors[0].Level).IsEqualTo(ErrorLevel.FATAL);
             Check.That(lexerRes2.Errors[0].Message).IsEqualTo("comment lexem can't be used together with single-line or multi-line comment lexems");
 
             var lexerRes1 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError1>>());
-            Check.That(lexerRes1).Not.IsOkParser();
+            Check.That(lexerRes1).Not.IsOk();
             Check.That(lexerRes1.Errors).CountIs(1);
             Check.That(lexerRes1.Errors[0].Level).IsEqualTo(ErrorLevel.FATAL);
             Check.That(lexerRes1.Errors[0].Message).IsEqualTo("comment lexem can't be used together with single-line or multi-line comment lexems");
@@ -183,7 +183,7 @@ namespace ParserTests.comments
         public void MixedErrors()
         {
             var lexerRes10 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError10>>(),lang: "en");
-            Check.That(lexerRes10).Not.IsOkParser();
+            Check.That(lexerRes10).Not.IsOk();
             Check.That(lexerRes10.Errors).CountIs(4);
             (string message,ErrorLevel level)[] expectedErrors = new (string message,ErrorLevel level)[]
             {
@@ -198,7 +198,7 @@ namespace ParserTests.comments
             expectedErrors = new[] {("too many multi-line comment lexem", ErrorLevel.FATAL), ("too many single-line comment lexem", ErrorLevel.FATAL)};
 
             var lexerRes9 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError9>>(),lang: "en");
-            Check.That(lexerRes9).Not.IsOkParser();
+            Check.That(lexerRes9).Not.IsOk();
             Check.That(lexerRes9.Errors).CountIs(2);
             Check.That(lexerRes9.Errors.Extracting(x => (x.Message, x.Level))).Contains(expectedErrors);
 
@@ -208,7 +208,7 @@ namespace ParserTests.comments
             };
             
             var lexerRes8 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError8>>(),lang: "en");
-            Check.That(lexerRes8).Not.IsOkParser();
+            Check.That(lexerRes8).Not.IsOk();
             Check.That(lexerRes8.Errors).CountIs(2);
             Check.That(lexerRes8.Errors.Extracting(x => (x.Message, x.Level))).Contains(expectedErrors);
 
@@ -217,7 +217,7 @@ namespace ParserTests.comments
                 ("comment lexem can't be used together with single-line or multi-line comment lexems", ErrorLevel.FATAL)
             };
             var lexerRes7 = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsTokenError7>>());
-            Check.That(lexerRes7).Not.IsOkParser();
+            Check.That(lexerRes7).Not.IsOk();
             Check.That(lexerRes7.Errors).CountIs(2);
             Check.That(lexerRes7.Errors.Extracting(x => (x.Message, x.Level))).Contains(expectedErrors);
         }

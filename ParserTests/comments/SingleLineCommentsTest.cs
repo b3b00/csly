@@ -26,7 +26,7 @@ namespace ParserTests.comments
         public void TestGenericMultiLineCommentWithSingleLineComment()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<SingleLineCommentsToken>>());
-            Check.That(lexerRes).IsOkParser();
+            Check.That(lexerRes).IsOk();
             
             var lexer = lexerRes.Result as GenericLexer<SingleLineCommentsToken>;
 
@@ -45,7 +45,7 @@ comment on 2 lines */ 3.0");
         public void TestGenericSingleLineComment()
         {
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<SingleLineCommentsToken>>());
-            Check.That(lexerRes).IsOkParser();
+            Check.That(lexerRes).IsOk();
             var lexer = lexerRes.Result as GenericLexer<SingleLineCommentsToken>;
 
             var dump = lexer.ToString();

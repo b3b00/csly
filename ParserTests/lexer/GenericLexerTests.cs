@@ -528,14 +528,14 @@ namespace ParserTests.lexer
             var builder = new ParserBuilder<Extensions,object>();
             var parserResult = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "root",
                 ExtendedGenericLexer.AddExtension);
-            Check.That(parserResult).IsOkParser();
+            Check.That(parserResult).IsOk();
             var parser = parserResult.Result;
             var result = parser.Parse("15.01.2020");
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
             
             Check.That(result.Result).IsEqualTo(new DateTime(2020,01,15));
             result = parser.Parse("3.14");
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo(3.14);
         }
         

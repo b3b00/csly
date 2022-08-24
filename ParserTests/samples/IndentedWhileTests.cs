@@ -23,7 +23,7 @@ namespace ParserTests.samples
                 var whileParser = new IndentedWhileParserGeneric();
                 var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
                 Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
-                Check.That(Parser).IsOkParser();
+                Check.That(Parser).IsOk();
             }
 
             return Parser;
@@ -36,7 +36,7 @@ namespace ParserTests.samples
             var buildResult = buildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("a:=1+1;");
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
 
             Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
@@ -70,7 +70,7 @@ while a < 10 do
     a := a +1
 ";
             var result = parser.Parse(program);
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
         }
 
         [Fact]
@@ -85,7 +85,7 @@ while a < 10 do
     a := a +1
 ";
             var result = parser.Parse(program);
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
             var interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result, true);
             Check.That(context.variables).IsSingle();
@@ -109,7 +109,7 @@ while i < 11 do
             var buildResult = buildParser();
             var parser = buildResult.Result;
             var result = parser.Parse(program);
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
             var interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result, true);
             Check.That(context.variables).CountIs(2);
@@ -151,7 +151,7 @@ else
     b := ""world""
 ";
             var result = parser.Parse(program);
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
 
             Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
@@ -216,7 +216,7 @@ while true do
     skip
 ";
             var result = parser.Parse(program);
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
 
             Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
@@ -238,7 +238,7 @@ while true do
             var buildResult = buildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("print true and false;");
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
             
 
             Check.That(result.Result).IsInstanceOf<SequenceStatement>();
@@ -260,7 +260,7 @@ while true do
             var buildResult = buildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("skip;");
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
 
             Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
@@ -276,7 +276,7 @@ while true do
 b:=2
 c:=3";
             var result = parser.Parse(program);
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
             Check.That(seq).CountIs(3);
@@ -299,7 +299,7 @@ c:=3";
 skip
 skip
 skip");
-            Check.That(result).IsOkParseResult();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             var seq = result.Result as SequenceStatement;
             Check.That(seq).CountIs(3);

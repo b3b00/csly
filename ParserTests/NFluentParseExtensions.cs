@@ -10,7 +10,7 @@ namespace ParserTests
 {
     public static class NFluentParseExtensions
     {
-        public static ICheckLink<ICheck<ParseResult<IN,OUT>>> IsOkParseResult<IN,OUT>(this ICheck<ParseResult<IN,OUT>> context) where IN : struct
+        public static ICheckLink<ICheck<ParseResult<IN,OUT>>> IsOkParsing<IN,OUT>(this ICheck<ParseResult<IN,OUT>> context) where IN : struct
         {
             ExtensibilityHelper.BeginCheck(context)
                 .FailWhen(sut => sut.IsError, "parse failed")
@@ -19,8 +19,18 @@ namespace ParserTests
                 .EndCheck();
             return ExtensibilityHelper.BuildCheckLink(context);
         }
+        
+        public static ICheckLink<ICheck<LexerResult<IN>>> IsOkLexing<IN>(this ICheck<LexerResult<IN>> context) where IN : struct
+        {
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => sut.IsError, "lexing failed")
+                .FailWhen(sut => sut.Tokens == null, "lexing result is null")
+                .OnNegate("parse expected to fail.")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
 
-        public static ICheckLink<ICheck<BuildResult<T>>> IsOkParser<T>(this ICheck<BuildResult<T>> context) 
+        public static ICheckLink<ICheck<BuildResult<T>>> IsOk<T>(this ICheck<BuildResult<T>> context) 
         {
             ExtensibilityHelper.BeginCheck(context)
                 .FailWhen(sut => sut.IsError, "parse failed")

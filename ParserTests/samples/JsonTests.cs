@@ -14,7 +14,7 @@ namespace ParserTests.samples
             var jsonParser = new JSONParser();
             var builder = new ParserBuilder<JsonToken, JSon>();
             var build = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root");
-            Check.That(build).IsOkParser();
+            Check.That(build).IsOk();
             Parser = build.Result;
         }
 
@@ -31,7 +31,7 @@ namespace ParserTests.samples
         public void TestDoubleValue()
         {
             var r = Parser.Parse("0.1");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsValue).IsTrue();
             Check.That(((JValue) r.Result).IsDouble).IsTrue();
             Check.That(((JValue) r.Result).GetValue<double>()).IsEqualTo(0.1d);
@@ -42,7 +42,7 @@ namespace ParserTests.samples
         public void TestEmptyListValue()
         {
             var r = Parser.Parse("[]");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsList).IsTrue();
             Check.That(((JList) r.Result)).IsEmpty();
         }
@@ -51,7 +51,7 @@ namespace ParserTests.samples
         public void TestEmptyObjectValue()
         {
             var r = Parser.Parse("{}");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsObject).IsTrue();
             Check.That((JObject) r.Result).IsEmpty();
         }
@@ -60,7 +60,7 @@ namespace ParserTests.samples
         public void TestFalseBooleanValue()
         {
             var r = Parser.Parse("false");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsValue).IsTrue();
             var val = (JValue) r.Result;
             Check.That(val.IsBool).IsTrue();
@@ -71,7 +71,7 @@ namespace ParserTests.samples
         public void TestIntValue()
         {
             var r = Parser.Parse("1");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsValue).IsTrue();
             Check.That(((JValue) r.Result).IsInt).IsTrue();
             Check.That(((JValue) r.Result).GetValue<int>()).IsEqualTo(1);
@@ -81,7 +81,7 @@ namespace ParserTests.samples
         public void TestManyListValue()
         {
             var r = Parser.Parse("[1,2]");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsList).IsTrue();
             var list = (JList) r.Result;
             Check.That(list).CountIs(2);
@@ -93,7 +93,7 @@ namespace ParserTests.samples
         public void TestManyMixedListValue()
         {
             var r = Parser.Parse("[1,null,{},true,42.58]");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             object val = r.Result;
             Check.That(r.Result.IsList).IsTrue();
             var list = (JList) r.Result;
@@ -111,7 +111,7 @@ namespace ParserTests.samples
             var json = "{\"p1\":\"v1\",\"p2\":\"v2\",\"p3\":{\"inner1\":1}}";
 
             var r = Parser.Parse(json);
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsObject).IsTrue();
             var values = (JObject) r.Result;
             Check.That(values.Count).IsEqualTo(3);
@@ -133,7 +133,7 @@ namespace ParserTests.samples
             var json = "{\"p1\":\"v1\",\"p2\":\"v2\"}";
             json = "{\"p1\":\"v1\" , \"p2\":\"v2\" }";
             var r = Parser.Parse(json);
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsObject).IsTrue();
             var values = (JObject) r.Result;
             Check.That(values).CountIs(2);
@@ -145,7 +145,7 @@ namespace ParserTests.samples
         public void TestNullValue()
         {
             var r = Parser.Parse("null");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsNull).IsTrue();
         }
 
@@ -153,7 +153,7 @@ namespace ParserTests.samples
         public void TestSingleListValue()
         {
             var r = Parser.Parse("[1]");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsList).IsTrue();
             var list = (JList) r.Result;
             Check.That(list).CountIs(1);
@@ -165,7 +165,7 @@ namespace ParserTests.samples
         public void TestSinglePropertyObjectValue()
         {
             var r = Parser.Parse("{\"prop\":\"value\"}");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsObject).IsTrue();
             var values = (JObject) r.Result;
             Check.That(values).CountIs(1);
@@ -177,7 +177,7 @@ namespace ParserTests.samples
         {
             var val = "hello world!";
             var r = Parser.Parse("\"" + val + "\"");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsValue).IsTrue();
             Check.That(((JValue) r.Result).IsString).IsTrue();
             Check.That(((JValue) r.Result).GetValue<string>()).IsEqualTo(val);
@@ -187,7 +187,7 @@ namespace ParserTests.samples
         public void TestTrueBooleanValue()
         {
             var r = Parser.Parse("true");
-            Check.That(r).IsOkParseResult();
+            Check.That(r).IsOkParsing();
             Check.That(r.Result.IsValue).IsTrue();
             var val = (JValue) r.Result;
             Check.That(val.IsBool).IsTrue();
