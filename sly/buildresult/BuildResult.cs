@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -36,6 +37,8 @@ namespace sly.buildresult
             Errors.AddRange(errors);
         }
 
+        
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             if (IsOk)
