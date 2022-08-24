@@ -30,11 +30,14 @@ namespace ParserTests
         public string Program(List<string> statements)
         {
             StringBuilder builder = new StringBuilder();
+            bool first = true;
+            builder.Append("(");
             foreach (var statement in statements)
             {
-                builder.AppendLine(statement);
+                builder.Append($"{(first?"":",")}({statement})");
+                first = false;
             }
-
+            builder.Append(")");
             return builder.ToString();
         }
 
@@ -53,11 +56,7 @@ namespace ParserTests
         [Production("statement : 'if'[d] condition 'then'[d] statement 'else'[d] statement")]
         public string IfThenElse(string condition, string thenStatement, string elseStatement)
         {
-            StringBuilder builder = new StringBuilder();
-            builder.AppendLine($"{condition} :");
-            builder.AppendLine($"    - {thenStatement}");
-            builder.AppendLine($"    - {elseStatement}");
-            return builder.ToString();
+            return $"condition:({condition},({thenStatement}),({elseStatement}))";
         }
 
         [Operand]
@@ -168,8 +167,7 @@ namespace ParserTests
             var parserInstance = new Parse();
             var builder = new ParserBuilder<Lex, string>();
             var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
-            Check.That(result.IsError).IsFalse();
-            Check.That(result.Result).IsNotNull();
+            Check.That(result).IsOk();
             var r = result.Result.Parse(@"
 if a == 1.0 then
     b = 1.0 + 2.0 * 3.0
@@ -178,12 +176,8 @@ else
 c = 3.0
 ");
             Check.That(r.IsError).IsFalse();
-            Check.That(r.Result).IsEqualTo(@"a == 1.0 :
-    - b = ( 1.0 + ( 2.0 * 3.0 ) )
-    - b = ( 2.0 + a )
-
-c = 3.0
-");
+            //"(condition:(a == 1.0,(b = ( 1.0 + ( 2.0 * 3.0 ) )),(b = ( 2.0 + a ))))(c = 3.0)"
+            Check.That(r.Result).IsEqualTo("((condition:(a == 1.0,(b = ( 1.0 + ( 2.0 * 3.0 ) )),(b = ( 2.0 + a )))),(c = 3.0))");
         }
         
     }

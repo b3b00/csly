@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace sly.lexer.fsm
 {
     public static class EOLManager
     {
-        public static ReadOnlyMemory<char> GetToEndOfLine(ReadOnlyMemory<char> value, int position)
+        public static ReadOnlyMemory<char> GetToEndOfLine(this ReadOnlyMemory<char> value, int position)
         {
             var CurrentPosition = position;
             var spanValue = value.Span;
@@ -18,6 +19,16 @@ namespace sly.lexer.fsm
             }
 
             return value.Slice(position, CurrentPosition - position + (end == EOLType.Windows ? 2 : 1));
+        }
+
+        public static ReadOnlyMemory<char> RemoveEndOfLineChars(this ReadOnlyMemory<char> value)
+        {
+            int endPosition = value.Length-1;
+            while (new[] { '\n', '\r' }.Contains(value.At(endPosition)))
+            {
+                endPosition--;
+            }
+            return value.Slice(0,endPosition+1);
         }
 
         public static EOLType IsEndOfLine(ReadOnlyMemory<char> value, int position)

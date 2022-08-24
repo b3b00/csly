@@ -936,9 +936,9 @@ namespace sly.lexer
             if (comment.IsSingleLineComment)
             {
                 var position = lexerPosition.Index;
-                commentValue = EOLManager.GetToEndOfLine(source, position);
+                commentValue = source.GetToEndOfLine(position);
                 position = position + commentValue.Length;
-                comment.SpanValue = commentValue;
+                comment.SpanValue = commentValue.RemoveEndOfLineChars();
                 return new LexerPosition(position, lexerPosition.Line + 1, 0);
                 //LexerFsm.MovePosition(position, LexerFsm.CurrentLine + 1, 0);
             }

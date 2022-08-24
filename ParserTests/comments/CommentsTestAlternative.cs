@@ -97,7 +97,7 @@ comment on 2 lines ", 1, 2),
             {
                 (CommentsTokenAlternative.INT, "1", 0, 0),
                 (CommentsTokenAlternative.INT, "2", 1, 0),
-                (CommentsTokenAlternative.COMMENT, " single line comment\r\n", 1, 2),
+                (CommentsTokenAlternative.COMMENT, " single line comment", 1, 2),
                 (CommentsTokenAlternative.DOUBLE, "3.0", 2, 0),
             };
             Check.That(tokens.Extracting(x => (x.TokenID, x.Value, x.Position.Line, x.Position.Column)))
