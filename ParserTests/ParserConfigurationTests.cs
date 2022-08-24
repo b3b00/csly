@@ -298,27 +298,14 @@ namespace ParserTests
             Check.That(result).Not.IsOkParser();
             Check.That(result.Errors).CountIs(2);
             
-            var warnerrors = result.Errors.Where(e => e.Level == ErrorLevel.WARN).ToList();
-            var errorerrors = result.Errors.Where(e => e.Level == ErrorLevel.ERROR).ToList();
-
-            var expectations = new[]
-            {
-                (ErrorLevel.ERROR, ErrorCodes.PARSER_REFERENCE_NOT_FOUND, "R2"),
-                (ErrorLevel.WARN, ErrorCodes.NOT_AN_ERROR, "R3")
-            };
+            var warnErrors = result.Errors.Where(e => e.Level == ErrorLevel.WARN).ToList();
+            var errorErrors = result.Errors.Where(e => e.Level == ErrorLevel.ERROR).ToList();
             
+            Check.That(warnErrors).IsSingle();
+            Check.That(result).HasError(ErrorCodes.NOT_AN_ERROR,"[R3] is never used");
             
-            Check.That(warnerrors).IsSingle();
-            var warn = warnerrors[0];
-            Check.That(warn.Code).IsEqualTo(ErrorCodes.NOT_AN_ERROR);
-            Check.That(warn.Message).Contains("R3");
-            Check.That(warn.Message).Contains("never used");
-            
-            Check.That(errorerrors).IsSingle();
-            var error = errorerrors[0];
-            Check.That(error.Code).IsEqualTo(ErrorCodes.PARSER_REFERENCE_NOT_FOUND);
-            Check.That(error.Message).Contains("R2");
-            Check.That(error.Message).Contains("not exist");
+            Check.That(errorErrors).IsSingle();
+            Check.That(result).HasError(ErrorCodes.PARSER_REFERENCE_NOT_FOUND,"R2");
             
         }
 
@@ -332,13 +319,14 @@ namespace ParserTests
             Check.That(result.Errors).CountIs(2);
             var errors = result.Errors.Where(e => e.Level == ErrorLevel.ERROR).ToList();
             var warnings = result.Errors.Where(e => e.Level == ErrorLevel.WARN).ToList();
-            Assert.Single(errors);
+            Check.That(errors).IsSingle();
             var errorMessage = errors[0].Message;
-            Assert.True(errorMessage.Contains(BadTokens.BadRegex.ToString()) && errorMessage.Contains("BadRegex"));
-            Assert.Single(warnings);
+            Check.That(errorMessage).Contains(BadTokens.BadRegex.ToString());
+            Check.That(errorMessage).Contains("BadRegex");
+            Check.That(warnings).IsSingle();
             var warnMessage = warnings[0].Message;
-            Assert.True(warnMessage.Contains(BadTokens.MissingLexeme.ToString()) &&
-                        warnMessage.Contains("not have Lexeme"));
+            Check.That(warnMessage).Contains(BadTokens.MissingLexeme.ToString());
+            Check.That(warnMessage).Contains("not have Lexeme");
         }
 
         [Fact]
@@ -349,14 +337,13 @@ namespace ParserTests
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badreturn");
             Check.That(result).Not.IsOkParser();
             Check.That(result.Errors).IsSingle();
-            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE);
-            Check.That(result.Errors[0].Message).Contains("BadReturn");
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE,"BadReturn");
             
             result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badreturn");
             Check.That(result).Not.IsOkParser();
             Check.That(result.Errors).IsSingle();
-            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE);
-            Check.That(result.Errors[0].Message).Contains("BadReturn");
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE, "BadReturn");
+            
         }
         
         [Fact]
@@ -367,18 +354,12 @@ namespace ParserTests
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badtermarg");
             Check.That(result).Not.IsOkParser();
             Check.That(result.Errors).IsSingle();
-            //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
-            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
-            Check.That(result.Errors[0].Message).Contains("aArg");
-            
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE, "aArg");
             
             result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badtermarg");
             Check.That(result).Not.IsOkParser();
             Check.That(result.Errors).IsSingle();
-            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
-            Check.That(result.Errors[0].Message).Contains("aArg");
-            
-            
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE, "aArg");
            
         }
         
@@ -391,14 +372,12 @@ namespace ParserTests
             var result = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "badnontermarg");
             Check.That(result).Not.IsOkParser();
             Check.That(result.Errors).IsSingle();
-            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
-            Check.That(result.Errors[0].Message).Contains("parameter aArg has incorrect type");
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE,"parameter aArg has incorrect type");
             
             result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badnontermarg");
             Check.That(result).Not.IsOkParser();
             Check.That(result.Errors).IsSingle();
-            Check.That(result.Errors[0].Code).IsEqualTo(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
-            Check.That(result.Errors[0].Message).Contains("parameter aArg has incorrect type");
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE,"parameter aArg has incorrect type");
             
             
            
@@ -410,15 +389,14 @@ namespace ParserTests
             var instance = new BadManyArgParser();
             ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badmanyarg");
-            
-            Assert.True(result.IsError);
-            Assert.Equal(4,result.Errors.Count);
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).CountIs(4);
             
             //"visitor BadReturn for rule badtermarg :  A B ; parameter a has incorrect type : expected sly.lexer.Token`1[ParserTests.BadVisitorTokens], found SubBadVisitor"
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter aArg has incorrect type") && x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter bArg has incorrect type") && x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter cArg has incorrect type") && x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter dArg has incorrect type") && x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE,"parameter aArg has incorrect type");
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE,"parameter bArg has incorrect type");
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE,"parameter cArg has incorrect type");
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE,"parameter dArg has incorrect type");
            
         }
         
@@ -428,9 +406,9 @@ namespace ParserTests
             var instance = new BadGroupArgParser();
             ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badgrouparg");
-            Assert.True(result.IsError);
-            Assert.Single(result.Errors);
-            Assert.Contains("parameter aArg has incorrect type",result.Errors.First().Message);
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).IsSingle();
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE,"parameter aArg has incorrect type");
         }
         
         [Fact]
@@ -439,11 +417,10 @@ namespace ParserTests
             var instance = new BadArgNumberParser();
             ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badargnumber");
-            Assert.True(result.IsError);
-            Assert.Equal(3, result.Errors.Count);
-            Assert.Equal(2, result.Errors.Count(x => x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("visitor BadNonTermArg for rule badargnumber : A B  has incorrect argument number : expected 2 or 3, found 4")));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("visitor BadNonTermArg for rule badargnumber2 : A B  has incorrect argument number : expected 2 or 3, found 1")));
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).CountIs(3);
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER,"visitor BadNonTermArg for rule badargnumber : A B  has incorrect argument number : expected 2 or 3, found 4");
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER,"visitor BadNonTermArg for rule badargnumber2 : A B  has incorrect argument number : expected 2 or 3, found 1");
         }
         
         [Fact]
@@ -452,13 +429,12 @@ namespace ParserTests
             var instance = new BadOptionArgParser();
             ParserBuilder<BadVisitorTokens,BadVisitor> builder = new ParserBuilder<BadVisitorTokens, BadVisitor>("en");
             var result = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "badoptionarg");
-            Assert.True(result.IsError);
-            Assert.Equal(4,result.Errors.Count);
-            Assert.Equal(4, result.Errors.Count(x => x.Code == ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter a has incorrect type")));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter b has incorrect type")));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter c has incorrect type")));
-            Assert.True(result.Errors.Exists(x => x.Message.Contains("parameter d has incorrect type")));
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).CountIs(4);
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE, "parameter a has incorrect type");
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE, "parameter b has incorrect type");
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE, "parameter c has incorrect type");
+            Check.That(result).HasError(ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE, "parameter d has incorrect type");
         }
 
         [Fact]
@@ -468,10 +444,10 @@ namespace ParserTests
             var  parserInstance = new BnfRecursiveGrammar();
             
             
-            var Parser = builder.BuildParser(parserInstance,ParserType.LL_RECURSIVE_DESCENT,"clause");
-            Assert.True(Parser.IsError);
-            Assert.Single(Parser.Errors);
-            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE,Parser.Errors.First().Code);
+            var result = builder.BuildParser(parserInstance,ParserType.LL_RECURSIVE_DESCENT,"clause");
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).IsSingle();
+            Check.That(result).HasError(ErrorCodes.PARSER_LEFT_RECURSIVE,"first > second > third > first");
         }
         
         [Fact]
@@ -481,10 +457,10 @@ namespace ParserTests
             var  parserInstance = new EbnfRecursiveGrammar();
             
             
-            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
-            Assert.True(Parser.IsError);
-            Assert.Single(Parser.Errors);
-            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE,Parser.Errors.First().Code);
+            var result = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).IsSingle();
+            Check.That(result).HasError(ErrorCodes.PARSER_LEFT_RECURSIVE,"first > third > first");
         }
         
         [Fact]
@@ -493,11 +469,10 @@ namespace ParserTests
             var builder = new ParserBuilder<RecursivityToken, object>();
             var  parserInstance = new EbnfRecursiveOptionGrammar();
             
-            
-            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
-            Assert.True(Parser.IsError);
-            Assert.Single(Parser.Errors);
-            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE,Parser.Errors.First().Code);
+            var result = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"first > third > first");
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).IsSingle();
+            Check.That(result).HasError(ErrorCodes.PARSER_LEFT_RECURSIVE,"");
         }
         
         [Fact]
@@ -507,10 +482,10 @@ namespace ParserTests
             var  parserInstance = new EbnfRecursiveChoiceGrammar();
             
             
-            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
-            Assert.True(Parser.IsError);
-            Assert.Single(Parser.Errors);
-            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE,Parser.Errors.First().Code);
+            var result = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors);
+            Check.That(result).HasError(ErrorCodes.PARSER_LEFT_RECURSIVE,"first > third > first");
         }
         
         [Fact]
@@ -520,10 +495,10 @@ namespace ParserTests
             var  parserInstance = new EbnfRecursiveOptionalChoiceGrammar();
             
             
-            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
-            Assert.True(Parser.IsError);
-            Assert.Single(Parser.Errors);
-            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE,Parser.Errors.First().Code);
+            var result = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
+            Check.That(result).Not.IsOkParser();
+            Check.That(result.Errors).IsSingle();
+            Check.That(result).HasError(ErrorCodes.PARSER_LEFT_RECURSIVE,"first > third > first");
         }
     }
 }

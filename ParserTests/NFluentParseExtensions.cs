@@ -29,6 +29,18 @@ namespace ParserTests
                 .EndCheck();
             return ExtensibilityHelper.BuildCheckLink(context);
         }
+        
+        public static ICheckLink<ICheck<BuildResult<T>>> HasError<T>(this ICheck<BuildResult<T>> context, ErrorCodes expectedErrorCode, string expectedMessageNeedle) 
+        {
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => !sut.IsError, "parser has not failed.")
+                .FailWhen(sut => !sut.Errors.Any() , "parser has no error")
+                .FailWhen(sut => !sut.Errors.Exists(x => x.Code == expectedErrorCode && x.Message.Contains(expectedMessageNeedle)),"error {expected} not found in {checked}")
+                .DefineExpectedValue($"{expectedErrorCode} : >{expectedMessageNeedle}<")
+                .OnNegate("error {expected} found.")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
 
         public static ICheckLink<ICheck<Token<T>>> IsEqualTo<T>(this ICheck<Token<T>> context, T expectedTokenId, string expectedValue) where T: struct
         {

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace sly.buildresult
 {
@@ -33,6 +34,25 @@ namespace sly.buildresult
         public void AddErrors(List<InitializationError> errors)
         {
             Errors.AddRange(errors);
+        }
+
+        public override string ToString()
+        {
+            if (IsOk)
+            {
+                return $"parser is ok {typeof(R)}";
+            }
+            else
+            {
+                StringBuilder error = new StringBuilder();
+                error.AppendLine("parser is KO");
+                foreach (var initializationError in Errors)
+                {
+                    error.AppendLine($"{initializationError.Level} - {initializationError.Code} : {initializationError.Message}");
+                }
+
+                return error.ToString();
+            }
         }
     }
 }
