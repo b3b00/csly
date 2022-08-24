@@ -699,7 +699,6 @@ namespace ParserTests.lexer
             Check.That(lexer).IsNotNull();
             var res1 = lexer.Tokenize("'c'");
             Check.That(res1.IsError).IsFalse();
-            Console.WriteLine(res1.Tokens.ToString());
             Check.That(res1.Tokens).CountIs(2);
             Token<CharTokens> token = res1.Tokens[0];
             Check.That(token.CharValue).IsEqualTo('c');
