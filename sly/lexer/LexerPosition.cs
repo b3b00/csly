@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
-
-
-
+using System.Diagnostics.CodeAnalysis;
 
 namespace sly.lexer
 
@@ -50,6 +48,7 @@ namespace sly.lexer
             return $"line {Line}, column {Column}";
         }
 
+        [ExcludeFromCodeCoverage]
         public int CompareTo(object obj)
         {
             if (obj != null)
