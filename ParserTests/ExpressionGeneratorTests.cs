@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using expressionparser;
+using NFluent;
 using simpleExpressionParser;
 using sly.buildresult;
 using sly.lexer;
@@ -130,22 +131,24 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("1 / 2 / 3", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(1.0 / 2.0 / 3.0, r.Result);
+            Check.That(r).IsOkParsing();;
+            var expected = 1.0 / 2.0 / 3.0;
+            Check.That(r.Result).IsEqualTo(expected);
+            
 
             r = Parser.Result.Parse("(1 / 2 / 3)", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(1.0 / 2.0 / 3.0, r.Result);
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(expected);
             
 
             r = Parser.Result.Parse("1 / 2 / 3 / 4", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(1.0 / 2.0 / 3.0 / 4.0, r.Result);
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result).IsEqualTo(1.0/2.0/3.0/4.0);
 
 
             r = Parser.Result.Parse("1 / 2 * 3", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(1.0 / 2.0 * 3.0, r.Result);
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(1.0 /2.0 * 3.0);
         }
 
         [Fact]
@@ -153,52 +156,49 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("1 - 2 - 3", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(1.0 - 2.0 - 3.0, r.Result);
-
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(1.0-2.0-3.0);
 
             r = Parser.Result.Parse("1 - 2 - 3 - 4", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(1.0 - 2.0 - 3.0 - 4.0, r.Result);
-
+            Check.That(r).IsOkParsing();
 
             r = Parser.Result.Parse("1 - 2 + 3", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(1.0 - 2.0 + 3.0, r.Result);
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(1.0-2.0+3.0);
         }
 
         [Fact]
         public void TestBuild()
         {
             BuildParser();
-            Assert.False(Parser.IsError);
-            Assert.Equal(6, Parser.Result.Configuration.NonTerminals.Count);
+            
+            Check.That(Parser.Result.Configuration.NonTerminals).CountIs(6);
             var nonterminals = new List<NonTerminal<ExpressionToken>>();
             foreach (var pair in Parser.Result.Configuration.NonTerminals) nonterminals.Add(pair.Value);
-            var nt = nonterminals[0]; // operan
-            Assert.Single(nt.Rules);
-            Assert.Equal("operand", nt.Name);
+            var nt = nonterminals[0]; // operand
+            Check.That(nt.Rules).IsSingle();
+            Check.That(nt.Name).IsEqualTo("operand");
             nt = nonterminals[1];
-            Assert.Equal(3, nt.Rules.Count);
-            Assert.Contains("primary_value", nt.Name);
+            Check.That(nt.Rules).CountIs(3);
+            Check.That(nt.Name).Contains("primary_value");
             nt = nonterminals[2];
-            Assert.Single(nt.Rules);
-            Assert.Contains("10", nt.Name);
-            Assert.Contains("PLUS", nt.Name);
-            Assert.Contains("MINUS", nt.Name);
+            Check.That(nt.Rules).IsSingle();
+            Check.That(nt.Name).Contains("10");
+            Check.That(nt.Name).Contains("PLUS");
+            Check.That(nt.Name).Contains("MINUS");
             nt = nonterminals[3];
-            Assert.Single(nt.Rules);
-            Assert.Contains("50", nt.Name);
-            Assert.Contains("TIMES", nt.Name);
-            Assert.Contains("DIVIDE", nt.Name);
+            Check.That(nt.Rules).IsSingle();
+            Check.That(nt.Name).Contains("50");
+            Check.That(nt.Name).Contains("TIMES");
+            Check.That(nt.Name).Contains("DIVIDE");
             nt = nonterminals[4];
-            Assert.Equal(3, nt.Rules.Count);
-            Assert.Contains("100", nt.Name);
-            Assert.Contains("MINUS", nt.Name);
+            Check.That(nt.Rules).CountIs(3);
+            Check.That(nt.Name).Contains("100");
+            Check.That(nt.Name).Contains("MINUS");
             nt = nonterminals[5];
-            Assert.Single(nt.Rules);
-            Assert.Equal(StartingRule, nt.Name);
-            Assert.Single(nt.Rules[0].Clauses);
+            Check.That(nt.Rules).IsSingle();
+            Check.That(nt.Name).IsEqualTo(StartingRule);
+            Check.That(nt.Rules[0].Clauses).IsSingle();
         }
 
         [Fact]
@@ -206,8 +206,8 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("42/2", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(21, r.Result);
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(21);
         }
 
         [Fact]
@@ -215,9 +215,8 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("2*2", StartingRule);
-            Assert.False(r.IsError);
-            Assert.IsType<double>(r.Result);
-            Assert.Equal(4.0, r.Result);
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result).IsEqualTo(4.0);
         }
 
         [Fact]
@@ -225,8 +224,8 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("(-1 + 2)  * 3", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(3.0, r.Result);
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(3.0);
         }
 
         [Fact]
@@ -234,8 +233,8 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("10!", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(3628800.0, r.Result);
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(3628800.0);
         }
 
 
@@ -244,8 +243,8 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("-1 + 2  * 3", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(5, r.Result);
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(5.0);
         }
 
         [Fact]
@@ -253,8 +252,8 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("-1", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(-1, r.Result);
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(-1.0);
         }
 
 
@@ -263,8 +262,8 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("1", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(1, r.Result);
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(1.0);
         }
 
         [Fact]
@@ -272,8 +271,8 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("1 - 1", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(0, r.Result);
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(0.0);
         }
 
         [Fact]
@@ -281,9 +280,8 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("1 + 1", StartingRule);
-            Assert.False(r.IsError);
-            Assert.IsType<double>(r.Result);
-            Assert.Equal(2.0, r.Result);
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result).IsEqualTo(2.0);
         }
 
         [Fact]
@@ -291,8 +289,8 @@ namespace ParserTests
         {
             BuildParser();
             var r = Parser.Result.Parse("-1 * 2", StartingRule);
-            Assert.False(r.IsError);
-            Assert.Equal(-2, r.Result);
+            Check.That(r).IsOkParsing();;
+            Check.That(r.Result).IsEqualTo(-2.0);
         }
 
         [Fact]
@@ -302,28 +300,28 @@ namespace ParserTests
             var parserInstance = new Issue184ParserOne();
             var builder = new ParserBuilder<Issue184Token, double>();
             var issue184parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
-            Assert.True(issue184parser.IsOk);
+            Check.That(issue184parser).IsOk();
             var c = issue184parser.Result.Parse(" 2 + 2");
-            Assert.True(c.IsOk);
-            Assert.Equal(4.0,c.Result);
+            Check.That(c).IsOkParsing();
+            Check.That(c.Result).IsEqualTo(4.0);
             
             
             StartingRule = $"{nameof(Issue184Parser)}_expressions";
             var parserInstance2 = new Issue184Parser();
             var builder2 = new ParserBuilder<Issue184Token, double>();
             var issue184parser2 = builder.BuildParser(parserInstance2, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
-            Assert.True(issue184parser2.IsOk);
+            Check.That(issue184parser2).IsOk();
             var c2 = issue184parser2.Result.Parse(" 2 + 2");
-            Assert.True(c2.IsOk);
-            Assert.Equal(4.0,c2.Result);
+            Check.That(c).IsOkParsing();
+            Check.That(c.Result).IsEqualTo(4.0);
             
             c2 = issue184parser2.Result.Parse(" 2 + 2 / 2");
-            Assert.True(c2.IsOk);
-            Assert.Equal(2 + 2 / 2 ,c2.Result);
+            Check.That(c2).IsOkParsing();
+            Check.That(c2.Result).IsEqualTo(2 + 2 / 2);
             
             c2 = issue184parser2.Result.Parse(" 2 - 2 * 2");
-            Assert.True(c2.IsOk);
-            Assert.Equal(2 - 2 * 2 ,c2.Result);
+            Check.That(c2).IsOkParsing();
+            Check.That(c2.Result).IsEqualTo(2 - 2 * 2);
         }
 
         [Fact]
@@ -331,9 +329,10 @@ namespace ParserTests
         {
             var parserInstance = new ExpressionGeneratorError();
             var builder = new ParserBuilder<ExpressionToken, double>();
-            var exception = Assert.Throws<ParserConfigurationException>(() =>
-                builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule));
-            Assert.Contains("bad enum name MINUSCULE",exception.Message);
+            var exception = Check.ThatCode(() =>
+                    builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule))
+                .Throws<ParserConfigurationException>().Value;
+            Check.That(exception.Message).Contains("bad enum name MINUSCULE");
         }
 
         [Fact]
@@ -343,12 +342,12 @@ namespace ParserTests
             var parserInstance = new ShortOperationAttributesParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
             var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
-            Assert.True(buildResult.IsOk);
+            Check.That(buildResult).IsOk();
             var parser = buildResult.Result;
-            Assert.NotNull(parser);
+            
             var result = parser.Parse("-1 +2 * (5 + 6) - 4 ");
-            Assert.True(result.IsOk);
-            Assert.Equal(-1+2*(5+6)-4, result.Result);
+            Check.That(result).IsOkParsing();
+            Check.That(result.Result).IsEqualTo(-1+2*(5+6)-4);
 
         }
     }

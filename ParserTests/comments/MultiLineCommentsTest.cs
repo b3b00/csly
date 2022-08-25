@@ -96,8 +96,9 @@ comment on 2 lines ", 1, 2),
             var r = lexer.Tokenize(@"1
 2 // single line comment
 3.0");
-            Assert.True(r.IsError);
-            Assert.Equal('/', r.Error.UnexpectedChar);
+            Check.That(r).Not.IsOkLexing();
+            
+            Check.That(r.Error.UnexpectedChar).IsEqualTo('/');
         }
 
         [Fact]
