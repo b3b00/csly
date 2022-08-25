@@ -24,11 +24,10 @@ namespace ParserTests.samples
         public void TestDoubleValue()
         {
             var r = Parser.Parse("0.1");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.True(r.Result.IsValue);
-            Assert.True(((JValue) r.Result).IsDouble);
-            Assert.Equal(0.1d, ((JValue) r.Result).GetValue<double>());
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result.IsValue).IsTrue();
+            Check.That(((JValue) r.Result).IsDouble).IsTrue();
+            Check.That(((JValue) r.Result).GetValue<double>()).IsEqualTo(0.1d);
         }
 
 
@@ -36,55 +35,52 @@ namespace ParserTests.samples
         public void TestEmptyListValue()
         {
             var r = Parser.Parse("[]");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.True(r.Result.IsList);
-            Assert.Equal(0, ((JList) r.Result).Count);
+            Check.That(r).IsOkParsing();
+            
+            Check.That(r.Result.IsList).IsTrue();
+            Check.That(((JList) r.Result)).CountIs(0);
         }
 
         [Fact]
         public void TestEmptyObjectValue()
         {
             var r = Parser.Parse("{}");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.True(r.Result.IsObject);
-            Assert.Equal(0, ((JObject) r.Result).Count);
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result.IsObject).IsTrue();
+            Check.That(((JObject) r.Result)).CountIs(0);
         }
 
         [Fact]
         public void TestFalseBooleanValue()
         {
             var r = Parser.Parse("false");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.True(r.Result.IsValue);
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result.IsValue).IsTrue();
             var val = (JValue) r.Result;
-            Assert.True(val.IsBool);
-            Assert.False(val.GetValue<bool>());
+            Check.That(val.IsBool).IsTrue();
+            Check.That(val.GetValue<bool>()).IsFalse();
         }
 
         [Fact]
         public void TestIntValue()
         {
             var r = Parser.Parse("1");
-            Assert.False(r.IsError);
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.True(r.Result.IsValue);
-            Assert.True(((JValue) r.Result).IsInt);
-            Assert.Equal(1, ((JValue) r.Result).GetValue<int>());
+            Check.That(r).IsOkParsing();
+            
+            Check.That(r.Result.IsValue).IsTrue();
+            Check.That(((JValue) r.Result).IsInt).IsTrue();
+            
+            Check.That(((JValue) r.Result).GetValue<int>()).IsEqualTo(1);
         }
 
         [Fact]
         public void TestManyListValue()
         {
             var r = Parser.Parse("[1,2]");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.True(r.Result.IsList);
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result.IsList).IsTrue();
             var list = (JList) r.Result;
-            Assert.Equal(2, list.Count);
+            Check.That(list).CountIs(2);
             Check.That(list).HasItem(0, 1);
             Check.That(list).HasItem(1, 2);
         }
@@ -93,15 +89,13 @@ namespace ParserTests.samples
         public void TestManyMixedListValue()
         {
             var r = Parser.Parse("[1,null,{},true,42.58]");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.NotNull(r.Result);
+            Check.That(r).IsOkParsing();
             object val = r.Result;
-            Assert.True(r.Result.IsList);
+            Check.That(r.Result.IsList).IsTrue();
             var list = (JList) r.Result;
-            Assert.Equal(5, ((JList) r.Result).Count);
+            Check.That((JList) r.Result).CountIs(5);
             Check.That(list).HasItem(0, 1);
-            Assert.True(((JList) r.Result)[1].IsNull);
+            Check.That(((JList) r.Result)[1].IsNull).IsTrue();
             Check.That(list).HasObjectItem(2,0);
             Check.That(list).HasItem(3, true);
             Check.That(list).HasItem(4, 42.58d);
@@ -113,21 +107,20 @@ namespace ParserTests.samples
             var json = "{\"p1\":\"v1\",\"p2\":\"v2\",\"p3\":{\"inner1\":1}}";
 
             var r = Parser.Parse(json);
-            Assert.False(r.IsError);
-            Assert.NotNull(r);
-            Assert.True(r.Result.IsObject);
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result.IsObject).IsTrue();
             var values = (JObject) r.Result;
-            Assert.Equal(3, values.Count);
+            Check.That(values).CountIs(3);
             Check.That(values).HasProperty("p1", "v1");
             Check.That(values).HasProperty("p1", "v1");
             Check.That(values).HasProperty("p2", "v2");
 
-            Assert.True(values.ContainsKey("p3"));
+            Check.That(values).HasObjectProperty("p3");            
             var inner = values["p3"];
-            Assert.True(inner.IsObject);
+            Check.That(inner.IsObject).IsTrue();
             var innerObj = (JObject) inner;
 
-            Assert.Equal(1, innerObj.Count);
+            Check.That(innerObj).CountIs(1);
             Check.That(innerObj).HasProperty("inner1", 1);
         }
 
@@ -137,11 +130,11 @@ namespace ParserTests.samples
             var json = "{\"p1\":\"v1\",\"p2\":\"v2\"}";
             json = "{\"p1\":\"v1\" , \"p2\":\"v2\" }";
             var r = Parser.Parse(json);
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.True(r.Result.IsObject);
+            Check.That(r).IsOkParsing();
+            
+            Check.That(r.Result.IsObject).IsTrue();
             var values = (JObject) r.Result;
-            Assert.Equal(2, values.Count);
+            Check.That(values).CountIs(2);
             Check.That(values).HasProperty("p1", "v1");
             Check.That(values).HasProperty("p2", "v2");
         }
@@ -150,19 +143,19 @@ namespace ParserTests.samples
         public void TestNullValue()
         {
             var r = Parser.Parse("null");
-            Assert.False(r.IsError);
-            Assert.True(r.Result.IsNull);
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result.IsNull).IsTrue();
         }
 
         [Fact]
         public void TestSingleListValue()
         {
             var r = Parser.Parse("[1]");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.True(r.Result.IsList);
+            Check.That(r).IsOkParsing();
+            
+            Check.That(r.Result.IsList).IsTrue();
             var list = (JList) r.Result;
-            Assert.Equal(1, list.Count);
+            Check.That(list).CountIs(1);
             Check.That(list).HasItem(0, 1);
         }
 
@@ -184,24 +177,23 @@ namespace ParserTests.samples
         {
             var val = "hello";
             var r = Parser.Parse("\"" + val + "\"");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.True(r.Result.IsValue);
-            Assert.True(((JValue) r.Result).IsString);
-            Assert.Equal(val, ((JValue) r.Result).GetValue<string>());
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result.IsValue).IsTrue();
+            Check.That(((JValue) r.Result).IsString).IsTrue();
+            Check.That(((JValue) r.Result).GetValue<string>()).IsEqualTo(val);
         }
 
         [Fact]
         public void TestTrueBooleanValue()
         {
             var r = Parser.Parse("true");
-            Assert.False(r.IsError);
-            Assert.NotNull(r.Result);
-            Assert.True(r.Result.IsValue);
+            Check.That(r).IsOkParsing();
+            
+            Check.That(r.Result.IsValue).IsTrue();
             var val = (JValue) r.Result;
-            Assert.True(val.IsBool);
-            Assert.True(val.IsBool);
-            Assert.True(val.GetValue<bool>());
+            Check.That(val.IsBool).IsTrue();
+            Check.That(val.IsBool).IsTrue();
+            Check.That(val.GetValue<bool>()).IsTrue();
         }
     }
 }

@@ -39,6 +39,18 @@ namespace ParserTests
         }
         
         
+        public static ICheckLink<ICheck<JObject>> HasObjectProperty(this ICheck<JObject> context, string key)
+        {
+
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => !sut.ContainsKey(key), " does not contains key {expected}")
+                .FailWhen(sut => !(sut[key] is JObject), "attribute {expected} is not an object")
+                .DefineExpectedValue($"{key}")
+                .OnNegate("The {checked} contains the {expected} whereas it should not.")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
+        
         public static ICheckLink<ICheck<JList>> HasItem(this ICheck<JList> context, int index, int expectedValue)
         {
 
