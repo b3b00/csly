@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NFluent;
 using ParserTests.Issue251;
 using ParserTests.Issue260;
 using sly.buildresult;
@@ -192,22 +193,15 @@ namespace ParserTests
         public static void Issue218()
         {
             var lexerResult = LexerBuilder.BuildLexer<Token218>();
-            Assert.True(lexerResult.IsOk);
+            Check.That(lexerResult).IsOk();
             var lexer = lexerResult.Result;
             var result = lexer.Tokenize("a = 0.0;");
-            Assert.True(result.IsOk);
+            Check.That(result).IsOkLexing();
             var tokens = result.Tokens;
             var dump = string.Join(" ", tokens.Select(x => x.ToString()));
-            int n = 0;
-            int count = 0;
-            while ((n = dump.IndexOf("<<EOS>>", n)) != -1)
-            {
-                n++;
-                count++;
-            }
-            Assert.Equal(1, count);
-            var eoss = tokens.Where(x => x.IsEOS);
-            Assert.Single(eoss);
+
+            Check.That(tokens.Where(x => x.IsEOS)).IsSingle();
+            Check.That(tokens.Where(x => x.ToString().Contains("<<EOS>>"))).IsSingle();
         }
 
 
@@ -217,11 +211,10 @@ namespace ParserTests
             ParserBuilder<Issue219Lexer, I219Ast> builder = new ParserBuilder<Issue219Lexer, I219Ast>();
             Issue219ParserEBNF instance = new Issue219ParserEBNF();
             var bres = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            Assert.True(bres.IsOk);
+            Check.That(bres).IsOk();
             var parser = bres.Result;
-            Assert.NotNull(parser);
-            var exception = Assert.Throws<Exception219>(() => parser.Parse("a = 1 b = 2 c = 3"));
-            Assert.Equal("visitor error",exception.Message);                
+            var exception = Check.ThatCode(() => { parser.Parse("a = 1 b = 2 c = 3"); }).Throws<Exception219>().Value;
+            Check.That(exception.Message).IsEqualTo("visitor error");
         }
       
         [Fact]
@@ -230,11 +223,10 @@ namespace ParserTests
             ParserBuilder<Issue219Lexer, I219Ast> builder = new ParserBuilder<Issue219Lexer, I219Ast>();
             Issue219ParserBNF instance = new Issue219ParserBNF();
             var bres = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "root");
-            Assert.True(bres.IsOk);
+            Check.That(bres).IsOk();
             var parser = bres.Result;
-            Assert.NotNull(parser);
-            var exception = Assert.Throws<Exception219>(() => parser.Parse("a = 1"));
-            Assert.Equal("visitor error",exception.Message);                
+            var exception = Check.ThatCode(() => { parser.Parse("a = 1"); }).Throws<Exception219>().Value;
+            Check.That(exception.Message).IsEqualTo("visitor error");
         }
         
         [Fact]
@@ -242,27 +234,21 @@ namespace ParserTests
             ParserBuilder<Issue251Parser.Issue251Tokens,Issue251Parser.ExprClosure> builder = new ParserBuilder<Issue251Parser.Issue251Tokens, Issue251Parser.ExprClosure>();
             Issue251Parser instance = new Issue251Parser();
             var bres = builder.BuildParser(instance,ParserType.LL_RECURSIVE_DESCENT, "expr");
-            Assert.False(bres.IsOk);
-            Assert.Single(bres.Errors);
-            var error = bres.Errors.First();
-            Assert.Equal(ErrorCodes.PARSER_LEFT_RECURSIVE, error.Code);
+            Check.That(bres).Not.IsOk();
+            Check.That(bres).HasError(ErrorCodes.PARSER_LEFT_RECURSIVE, "expr > expr");
         }
 
         [Fact]
         public static void Issue261Test()
         {
             var buildResult = LexerBuilder.BuildLexer<Issue261Lexer>();
-            Assert.True(buildResult.IsOk);
-            Assert.NotNull(buildResult.Result);
+            Check.That(buildResult).IsOk();
             var lexer = buildResult.Result;
             var lex = lexer.Tokenize(@"""test""");
-            Assert.True(lex.IsOk);
+            Check.That(lex).IsOkLexing();
             var tokens = lex.Tokens;
-            Assert.NotNull(tokens);
-            Assert.Equal(2,tokens.Count);
-            Assert.Equal("test",tokens[0].StringWithoutQuotes);
-
-
+            Check.That(tokens).CountIs(2);
+            Check.That(tokens[0]).IsEqualTo(Issue261Lexer.test, @"""test""");
         }
 
         [Fact]
@@ -273,21 +259,18 @@ namespace ParserTests
 
             var result = builder
                 .BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression");
+
+            Check.That(result).IsOk();
             
-            Assert.True(result.IsOk);
-            
-            Assert.NotNull(result.Result);
-            Assert.IsType<Parser<Issue277Tokens, string>>(result.Result);
-            var parser = result.Result as Parser<Issue277Tokens, string>;
+            var parser = result.Result;
             
             var expression = "foo or bar or baz";
             
             var res = parser.Parse(expression);
-            Assert.True(res.IsOk);
-            Assert.NotNull(res.Result);
-            Assert.IsType<string>(res.Result);
-            var resAsString = res.Result as string;
-            Assert.Equal("foo | bar | baz", resAsString);
+            Check.That(res).IsOkParsing();
+            var resAsString = res.Result;
+            
+            Check.That(resAsString).IsEqualTo("foo | bar | baz");
         } 
     }
 }
