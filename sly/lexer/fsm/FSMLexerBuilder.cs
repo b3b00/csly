@@ -83,13 +83,7 @@ namespace sly.lexer.fsm
             return this;
         }
 
-        public FSMLexerBuilder<N> WhiteSpace(char spaceChar)
-        {
-            Fsm.WhiteSpaces.Add(spaceChar);
-            return this;
-        }
-
-        public FSMLexerBuilder<N> WhiteSpace(char[] spaceChars)
+        public FSMLexerBuilder<N> WhiteSpace(params char[] spaceChars)
         {
             if (spaceChars != null)
             {
