@@ -1,5 +1,6 @@
 using System.Linq;
 using expressionparser;
+using NFluent;
 using simpleExpressionParser;
 using sly.parser;
 using sly.parser.generator;
@@ -15,8 +16,7 @@ namespace ParserTests.Issue164
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
             var pBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
-            Assert.True(pBuild.IsOk);
-            Assert.NotNull(pBuild.Result);
+            Check.That(pBuild).IsOk();
             return pBuild.Result;
         }
         
@@ -27,8 +27,8 @@ namespace ParserTests.Issue164
         {
             var parser = BuildParser();
             var result = parser.Parse("2 + 2");
-            Assert.True(result.IsOk);
-            Assert.Equal(4.0,result.Result);
+            Check.That(result).IsOkParsing();
+            Check.That(result.Result).IsEqualTo(4.0);
         }
         
         [Fact]
@@ -36,22 +36,20 @@ namespace ParserTests.Issue164
         {
             var parser = BuildParser();
             var result = parser.Parse("2 ( 2");
-            Assert.True(result.IsError);
+            Check.That(result).Not.IsOkParsing();
             var errors = result.Errors;
-            Assert.Single(errors);
+            Check.That(errors).IsSingle();
             var error = errors.First();
-            Assert.IsType<UnexpectedTokenSyntaxError<ExpressionToken>>(error);
+            Check.That(error).IsInstanceOf<UnexpectedTokenSyntaxError<ExpressionToken>>();
             var unexpectedTokenError = error as UnexpectedTokenSyntaxError<ExpressionToken>;
-            Assert.NotNull(unexpectedTokenError);
-            Assert.NotNull(unexpectedTokenError.ExpectedTokens);
-            Assert.NotEmpty(unexpectedTokenError.ExpectedTokens);
-            Assert.Equal(5,unexpectedTokenError.ExpectedTokens.Count);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == ExpressionToken.PLUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == ExpressionToken.MINUS);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == ExpressionToken.TIMES);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == ExpressionToken.DIVIDE);
-            Assert.Contains(unexpectedTokenError.ExpectedTokens, x => x.TokenId == ExpressionToken.FACTORIAL);
-            ;
+            Check.That(unexpectedTokenError).IsNotNull();
+            Check.That(unexpectedTokenError.ExpectedTokens).IsNotNull();
+            Check.That(unexpectedTokenError.ExpectedTokens).Not.IsEmpty();
+            Check.That(unexpectedTokenError.ExpectedTokens).CountIs(5);
+            Check.That(unexpectedTokenError.ExpectedTokens.Extracting(x => x.TokenId)).Contains(new[]
+            {
+                ExpressionToken.FACTORIAL,ExpressionToken.DIVIDE,ExpressionToken.TIMES,ExpressionToken.MINUS,ExpressionToken.PLUS
+            });
         }
     }
 }
