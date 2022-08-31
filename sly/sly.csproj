@@ -16,6 +16,9 @@
     <StartupObject />
     <LangVersion>7.1</LangVersion>
     <PackageLicenseUrl>https://github.com/b3b00/csly/blob/dev/LICENSE</PackageLicenseUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
      <NoWarn>1701;1702;1705;1591</NoWarn>
