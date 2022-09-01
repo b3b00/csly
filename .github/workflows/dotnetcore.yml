@@ -87,7 +87,7 @@ jobs:
         prerelease: false   
     - name: Upload Release nuget Asset
       if: ${{ success() && matrix.os == 'windows-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
-      id: upload-release-asset 
+      id: upload-release-nuget-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
@@ -98,7 +98,7 @@ jobs:
         asset_content_type: application/zip
     - name: Upload Release symbols nuget Asset
       if: ${{ success() && matrix.os == 'windows-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
-      id: upload-release-asset 
+      id: upload-release-nuget-symbols-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
