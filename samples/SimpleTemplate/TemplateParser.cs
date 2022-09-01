@@ -87,7 +87,8 @@ namespace SimpleTemplate
                 TemplateLexer.LESSER => BinaryOperator.LESSER,
                 TemplateLexer.GREATER => BinaryOperator.GREATER,
                 TemplateLexer.EQUALS => BinaryOperator.EQUALS,
-                TemplateLexer.DIFFERENT => BinaryOperator.DIFFERENT
+                TemplateLexer.DIFFERENT => BinaryOperator.DIFFERENT,
+                _ => BinaryOperator.EQUALS
             };
 
             return new BinaryOperation(left, oper, right);
@@ -157,7 +158,8 @@ namespace SimpleTemplate
             oper = operatorToken.TokenID switch
             {
                 TemplateLexer.PLUS => BinaryOperator.ADD,
-                TemplateLexer.MINUS => BinaryOperator.SUB
+                TemplateLexer.MINUS => BinaryOperator.SUB,
+                _ => BinaryOperator.ADD
             };
 
             return new BinaryOperation(left, oper, right);
@@ -173,7 +175,8 @@ namespace SimpleTemplate
             oper = operatorToken.TokenID switch
             {
                 TemplateLexer.TIMES => BinaryOperator.MULTIPLY,
-                TemplateLexer.DIVIDE => BinaryOperator.DIVIDE
+                TemplateLexer.DIVIDE => BinaryOperator.DIVIDE,
+                _ => BinaryOperator.MULTIPLY
             };
 
             return new BinaryOperation(left, oper, right);

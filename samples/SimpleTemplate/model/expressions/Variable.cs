@@ -25,9 +25,7 @@ namespace SimpleTemplate.model.expressions
             {
                 return value;
             }
-
             throw new SystemException($"variable {Name} not found @ {Position}");
-            return "";
         }
     }
 }

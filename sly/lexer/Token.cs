@@ -69,7 +69,7 @@ namespace sly.lexer
             {
                 var list = new List<Token<T>>();
                 int position = PositionInTokenFlow + 1;
-                if (position >= 0 && position <= channel.Count - 1);
+                if (position >= 0 && position <= channel.Count - 1)
                 {
                     
                     for (int i = position; position < channel.Count; position++)
@@ -113,7 +113,7 @@ namespace sly.lexer
             {
                 var list = new List<Token<T>>();
                 int position = PositionInTokenFlow - 1;
-                if (position >= 0 && position <= channel.Count - 1);
+                if (position >= 0 && position <= channel.Count - 1)
                 {
                     
                     for (int i = position; position > 0; position--)
