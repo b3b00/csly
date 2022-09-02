@@ -67,7 +67,7 @@ jobs:
     - name: publish nuget
       if:  ${{success() && matrix.os == 'windows-latest' && env.PUBLISH_NUGET}}
       id: publish_nuget
-      uses: brandedoutcast/publish-nuget@v2.5.2
+      uses: brandedoutcast/publish-nuget@v2.5.5
       with:
           VERSION_REGEX: <version>(.*)<\/version>  
           PROJECT_FILE_PATH: ${{env.MAIN_CSPROJ}}
