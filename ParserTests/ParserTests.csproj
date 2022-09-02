@@ -22,6 +22,11 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutputFormat>lcov</CoverletOutputFormat>
+    <CoverletOutput>$(MSBuildThisFileDirectory)</CoverletOutput>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\samples\expressionParser\expressionParser.csproj" />
     <ProjectReference Include="..\samples\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj" />
     <ProjectReference Include="..\samples\IndentedWhile\indentedWhile.csproj" />
