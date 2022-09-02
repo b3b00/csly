@@ -746,20 +746,18 @@ namespace sly.lexer
                 var delim = "delim_same";
 
                 FSMBuilder.GoTo(start)
+                    
                     .Transition(stringDelimiterChar)
                     .Mark(in_string + StringCounter)
+                    
                     .ExceptTransitionTo(exceptDelimiter, in_string + StringCounter)
+                    
                     .Transition(stringDelimiterChar)
                     .Mark(escaped + StringCounter)
                     .End(GenericToken.String)
                     .CallBack(callback)
-                    .Transition(stringDelimiterChar)
-                    .Mark(delim + StringCounter)
-                    .ExceptTransitionTo(exceptDelimiter, in_string + StringCounter);
-
-                FSMBuilder.GoTo(delim + StringCounter)
-                    .TransitionTo(stringDelimiterChar, escaped + StringCounter)
-                    .ExceptTransitionTo(exceptDelimiter, in_string + StringCounter);
+                    .TransitionTo(stringDelimiterChar,in_string + StringCounter)
+                    .Transition(stringDelimiterChar);
             }
         }
         
