@@ -21,6 +21,18 @@ namespace sly.lexer
             IsError = true;
             Error = error;
         }
+        
+        public override string ToString()
+        {
+            if (IsOk)
+            {
+                return "lexing OK.";
+            }
+            else
+            {
+                return $"lexing failed : {Error}";
+            }
+        }
 
         
     }

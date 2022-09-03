@@ -69,7 +69,7 @@ namespace sly.lexer
         public bool HasGenericTokenParameters => GenericTokenParameters != null && GenericTokenParameters.Length > 0;
         
         public bool IsStaticGeneric => !HasGenericTokenParameters &&
-                                       GenericToken != GenericToken.String && GenericToken != GenericToken.Extension;
+                                       GenericToken != GenericToken.String && GenericToken != GenericToken.Extension && GenericToken != GenericToken.Double;
 
         public bool IsKeyWord => GenericToken == GenericToken.KeyWord;
 
@@ -82,6 +82,8 @@ namespace sly.lexer
         public bool IsIdentifier => GenericToken == GenericToken.Identifier;
 
         public bool IsExtension => GenericToken == GenericToken.Extension;
+        
+        public bool IsDouble => GenericToken == GenericToken.Double;
         public bool IsUpTo => GenericToken == GenericToken.UpTo;
     }
 }

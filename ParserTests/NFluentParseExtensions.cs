@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NFluent;
 using NFluent.Extensibility;
+using NFluent.Kernel;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser;
@@ -13,7 +14,7 @@ namespace ParserTests
         public static ICheckLink<ICheck<ParseResult<IN,OUT>>> IsOkParsing<IN,OUT>(this ICheck<ParseResult<IN,OUT>> context) where IN : struct
         {
             ExtensibilityHelper.BeginCheck(context)
-                .FailWhen(sut => sut.IsError, "parse failed")
+                .FailWhen(sut => sut.IsError, $"parse failed")
                 .FailWhen(sut => sut.Result == null, "parse result is null")
                 .OnNegate("parse expected to fail.")
                 .EndCheck();

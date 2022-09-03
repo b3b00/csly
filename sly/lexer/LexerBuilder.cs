@@ -411,6 +411,17 @@ namespace sly.lexer
                             lexer.AddLexeme(lexeme.GenericToken, tokenID);
                         }
 
+                        if (lexeme.IsDouble)
+                        {
+                            string separator = ".";
+                            if (lexeme.GenericTokenParameters != null && lexeme.GenericTokenParameters.Any())
+                            {
+                                separator = lexeme.GenericTokenParameters[0];
+                            }
+                            lexer.AddDouble(tokenID,separator ,result);
+                            lexer.AddLexeme(lexeme.GenericToken, tokenID);
+                        }
+
                         if (lexeme.IsKeyWord)
                         {
                             foreach (var param in lexeme.GenericTokenParameters)

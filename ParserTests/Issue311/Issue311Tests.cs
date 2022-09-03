@@ -75,4 +75,58 @@ public class Issue311Tests
         Check.That(tokens.Tokens).CountIs(4);
         Check.That(tokens.Tokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes))).ContainsExactly(expectations);
     }
+    
+    [Fact]
+    public void TestIssue311DoubleToken()
+    {
+        var lexRes = LexerBuilder.BuildLexer<Token311>();
+        Check.That(lexRes).IsOk();
+        var lexer = lexRes.Result;
+        
+        var expectations = new List<(Token311, string)>()
+        {
+            (Token311.STRING, "str1"),
+            (Token311.EQ, "eq"),
+            (Token311.DOUBLE, "42.42"),
+        };
+        
+        var lexed = lexer.Tokenize("'str1' eq 42.42");
+        Check.That(lexed).IsOkLexing();
+        var tokens = lexed.Tokens;
+        Check.That(tokens.Tokens).Not.IsNullOrEmpty();
+        Check.That(tokens.Tokens).CountIs(4);
+
+        var z = tokens.Tokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes)).ToList();
+        
+        Check.That(tokens.Tokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes))).ContainsExactly(expectations);
+
+        Check.That(tokens.Tokens[2].DoubleValue).IsEqualTo(42.42);
+    }
+
+    [Fact] 
+    public void TestComaDecimalSeparator()
+    {
+        var lexRes = LexerBuilder.BuildLexer<Token311ComaDecimal>();
+        Check.That(lexRes).IsOk();
+        var lexer = lexRes.Result;
+        
+        var expectations = new List<(Token311ComaDecimal, string)>()
+        {
+            (Token311ComaDecimal.STRING, "str1"),
+            (Token311ComaDecimal.EQ, "eq"),
+            (Token311ComaDecimal.DOUBLE, "42,42"),
+        };
+        
+        var lexed = lexer.Tokenize("'str1' eq 42,42");
+        Check.That(lexed).IsOkLexing();
+        var tokens = lexed.Tokens;
+        Check.That(tokens.Tokens).Not.IsNullOrEmpty();
+        Check.That(tokens.Tokens).CountIs(4);
+
+        List<(Token311ComaDecimal,string)> z = tokens.Tokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes)).ToList();
+        
+        Check.That(z).ContainsExactly(expectations);
+
+        Check.That(tokens.Tokens[2].DoubleValue).IsEqualTo(42.42);
+    }
 }
