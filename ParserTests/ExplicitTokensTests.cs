@@ -109,7 +109,7 @@ namespace ParserTests
             Check.That(parser.IsOk).IsTrue();
             Check.That(parser.Result).IsNotNull();
             var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
-            Check.That(r.IsOk).IsTrue();
+            Check.That(r).IsOkParsing();
             // grammar is left associative so expression really is 
             // (2.0 - (2.0 + (bozzo  + Test))) = 2 - ( 2 + (42 + 0)) = 2 - (2 + 42) = 2 - 44 = -42
             Check.That(r.Result).IsEqualTo(-42.0d);
@@ -122,6 +122,7 @@ namespace ParserTests
             Check.That(parser.IsOk).IsTrue();
             Check.That(parser.Result).IsNotNull();
             var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
+            Check.That(r).IsOkParsing();
             var tree = r.SyntaxTree;
             var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExplicitTokensTokens>();
             var dump = tree.Dump("\t");
@@ -131,9 +132,6 @@ namespace ParserTests
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile();
            
-            Check.That(r.IsOk).IsTrue();
-             
-            
             Check.That(r.Result).IsEqualTo(2 - 2 + 42 + 0);
         }
 
@@ -175,7 +173,7 @@ else
     b = 2.0 + a
 c = 3.0
 ");
-            Check.That(r.IsError).IsFalse();
+            Check.That(r).IsOkParsing();
             //"(condition:(a == 1.0,(b = ( 1.0 + ( 2.0 * 3.0 ) )),(b = ( 2.0 + a ))))(c = 3.0)"
             Check.That(r.Result).IsEqualTo("((condition:(a == 1.0,(b = ( 1.0 + ( 2.0 * 3.0 ) )),(b = ( 2.0 + a )))),(c = 3.0))");
         }

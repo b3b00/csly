@@ -19,7 +19,7 @@ namespace sly.lexer
         
         
         public char StringDelimiter = '"';
-        
+        public char DecimalDelimiter = '.';        
         public char CharDelimiter ='\'';
         public bool Notignored;
 
@@ -215,6 +215,7 @@ namespace sly.lexer
         {
             get
             {
+                var value  = Value.Replace(DecimalDelimiter, '.');
                 // Try parsing in the current culture
                 if (!double.TryParse(Value, NumberStyles.Any, CultureInfo.CurrentCulture,
                         out var result) &&

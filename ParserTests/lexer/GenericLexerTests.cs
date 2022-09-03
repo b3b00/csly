@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using GenericLexerWithCallbacks;
 using indented;
 using NFluent;
@@ -9,7 +8,6 @@ using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace ParserTests.lexer
 {
@@ -739,6 +737,7 @@ namespace ParserTests.lexer
             var tokens = r.Tokens;
             Check.That(tokens).IsNotNull();
             Check.That(tokens).CountIs(3);
+            Check.That(tokens.Extracting(x => x.TokenID)).Contains(new[] { Issue106.Integer, Issue106.Period });
             var token = tokens[0];
             Check.That(token.TokenID).IsEqualTo(Issue106.Integer);
             Check.That(token.IntValue).IsEqualTo(1);

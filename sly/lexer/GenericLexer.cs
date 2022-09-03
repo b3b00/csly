@@ -358,13 +358,6 @@ namespace sly.lexer
                     .Mark(in_int)
                     .RangeTransitionTo('0', '9', in_int)
                     .End(GenericToken.Int);
-                if (staticTokens.Contains<GenericToken>(GenericToken.Double))
-                    FSMBuilder.Transition('.')
-                        .Mark(start_double)
-                        .RangeTransition('0', '9')
-                        .Mark(in_double)
-                        .RangeTransitionTo('0', '9', in_double)
-                        .End(GenericToken.Double);
             }
 
             TempLexerFsm = FSMBuilder.Fsm;
@@ -493,13 +486,6 @@ namespace sly.lexer
 
             switch (generic)
             {
-                case GenericToken.Double:
-                    {
-                        doubleDerivedToken = token;
-                        FSMBuilder.GoTo(in_double);
-                        FSMBuilder.CallBack(callback);
-                        break;
-                    }
                 case GenericToken.Int:
                     {
                         intDerivedToken = token;
@@ -539,6 +525,32 @@ namespace sly.lexer
             }
 
             tokensForGeneric[specialValue] = token;
+        }
+
+        public void AddDouble(IN token, string separator, BuildResult<ILexer<IN>> result)
+        {
+            NodeCallback<GenericToken> callback = match =>
+            {
+                IN derivedToken = token;
+               
+
+                match.Properties[DerivedToken] = derivedToken;
+
+                return match;
+            };
+
+            var separatorChar = separator[0];
+
+            FSMBuilder.GoTo(in_int)
+                .Transition(separatorChar)
+                // .RangeTransition('0','9')
+                // .RangeTransition('0','9')
+                .RangeTransition('0', '9')
+                .Mark(in_double)
+                .RangeTransitionTo('0', '9', in_double)
+                .End(GenericToken.Double)
+                .CallBack(callback);
+            
         }
 
         public void AddKeyWord(IN token, string keyword, BuildResult<ILexer<IN>> result )

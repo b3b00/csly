@@ -11,6 +11,7 @@ namespace sly.lexer.fsm
         
         public char StringDelimiterChar { get; set; }
         
+        public char DecimalDelimiterChar { get; set; }
         public bool IsSuccess { get; set; }
 
         public bool IsEOS { get; }
