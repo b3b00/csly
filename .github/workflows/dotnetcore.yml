@@ -107,8 +107,8 @@ jobs:
         asset_path: ${{ steps.publish_nuget.outputs.SYMBOLS_PACKAGE_PATH }}
         asset_name: ${{ steps.publish_nuget.outputs.SYMBOLS_PACKAGE_NAME }}
         asset_content_type: application/zip
-    - name: Invoke refresh readme badges
-      uses: benc-uk/workflow-dispatch@v1
-      with:
-        workflow: refresh readme badges
-        token: ${{ secrets.RELEASE_PAT }}
+#    - name: Invoke refresh readme badges
+#      uses: benc-uk/workflow-dispatch@v1
+#      with:
+#        workflow: refresh readme badges
+#        token: ${{ secrets.RELEASE_PAT }}
