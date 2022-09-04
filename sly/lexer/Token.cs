@@ -19,18 +19,18 @@ namespace sly.lexer
         
         
         public char StringDelimiter = '"';
-        public char DecimalDelimiter = '.';        
+        public char DecimalSeparator = '.';        
         public char CharDelimiter ='\'';
         public bool Notignored;
 
 
         public Token(T token, string value, LexerPosition position, bool isCommentStart = false,
-            CommentType commentType = CommentType.Single, int? channel = null) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType,channel )
+            CommentType commentType = CommentType.Single, int? channel = null, char decimalSeparator = '.' ) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType,channel, decimalSeparator:decimalSeparator)
         {
         }
         
         public Token(T token, ReadOnlyMemory<char> value, LexerPosition position, bool isCommentStart = false,
-            CommentType commentType = CommentType.Single, int? channel = null, bool isWhiteSpace = false)
+            CommentType commentType = CommentType.Single, int? channel = null, bool isWhiteSpace = false, char decimalSeparator = '.' )
         {
             IsWhiteSpace = isWhiteSpace;
             IsEOS = false;
@@ -38,6 +38,7 @@ namespace sly.lexer
             SpanValue = value;
             Position = position;
             CommentType = commentType;
+            DecimalSeparator = decimalSeparator;
             if (CommentType != CommentType.No)
             {
                 if (channel == null)
@@ -59,6 +60,7 @@ namespace sly.lexer
             IsEOS = true;
             End = true;
             Position = new LexerPosition(0, 0, 0);
+            DecimalSeparator = '.';
         }
         
         
@@ -215,20 +217,12 @@ namespace sly.lexer
         {
             get
             {
-                var value  = Value.Replace(DecimalDelimiter, '.');
-                // Try parsing in the current culture
-                if (!double.TryParse(Value, NumberStyles.Any, CultureInfo.CurrentCulture,
-                        out var result) &&
-                    // Then try in US english
-                    !double.TryParse(Value, NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"),
-                        out result) &&
-                    // Then in neutral language
-                    !double.TryParse(Value, NumberStyles.Any, CultureInfo.InvariantCulture,
-                        out result))
-                {
-                    result = 0.0;
-                }
-
+                var val = Value.Replace(DecimalSeparator, '.');
+                var culture = CultureInfo.InvariantCulture;
+                double result = 0.0;
+                double.TryParse(val, NumberStyles.Any, CultureInfo.InvariantCulture,
+                    out result);
+                
                 return result;
             }
             set { }

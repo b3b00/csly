@@ -236,7 +236,7 @@ namespace sly.lexer
                 
                  ignored = r.IgnoredTokens.Select(x =>
                                 new Token<IN>(default(IN), x.SpanValue, x.Position, x.IsComment,
-                                    x.CommentType, x.Channel, x.IsWhiteSpace)).ToList();
+                                    x.CommentType, x.Channel, x.IsWhiteSpace, x.DecimalSeparator)).ToList();
                             tokens.AddRange(ignored);
                 
                 switch (r.IsSuccess)
@@ -550,6 +550,8 @@ namespace sly.lexer
                 .RangeTransitionTo('0', '9', in_double)
                 .End(GenericToken.Double)
                 .CallBack(callback);
+            
+            FSMBuilder.Fsm.DecimalSeparator = separatorChar;
             
         }
 
@@ -999,6 +1001,7 @@ namespace sly.lexer
             tok.IndentationLevel = match.IndentationLevel;
             tok.Notignored = match.Result.Notignored;
             tok.Channel = match.Result.Channel;
+            tok.DecimalSeparator = match.DecimalSeparator;
             return tok;
         }
 

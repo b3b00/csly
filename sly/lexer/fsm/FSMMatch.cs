@@ -11,7 +11,7 @@ namespace sly.lexer.fsm
         
         public char StringDelimiterChar { get; set; }
         
-        public char DecimalDelimiterChar { get; set; }
+        public char DecimalSeparator { get; set; }
         public bool IsSuccess { get; set; }
 
         public bool IsEOS { get; }
@@ -80,19 +80,20 @@ namespace sly.lexer.fsm
         }
         
 
-        public FSMMatch(bool success, N result, string value, LexerPosition position, int nodeId, LexerPosition newPosition, bool isLineEnding, bool isPop = false, bool isPush = false, string mode = null)
-            : this(success, result, new ReadOnlyMemory<char>(value.ToCharArray()), position, nodeId, newPosition, isLineEnding, isPop, isPush, mode)
+        public FSMMatch(bool success, N result, string value, LexerPosition position, int nodeId, LexerPosition newPosition, bool isLineEnding, bool isPop = false, bool isPush = false, string mode = null, char decimalSeparator = '.')
+            : this(success, result, new ReadOnlyMemory<char>(value.ToCharArray()), position, nodeId, newPosition, isLineEnding, isPop, isPush, mode, decimalSeparator)
         { }
 
         public FSMMatch(bool success, N result, ReadOnlyMemory<char> value, LexerPosition position, int nodeId,
-            LexerPosition newPosition, bool isLineEnding, bool isPop = false, bool isPush = false, string mode = null)
+            LexerPosition newPosition, bool isLineEnding, bool isPop = false, bool isPush = false, string mode = null, char decimalSeparator = '.')
         {
             Properties = new Dictionary<string, object>();
             IsSuccess = success;
             NodeId = nodeId;
             IsEOS = false;
-            Result = new Token<N>(result, value, position);
+            Result = new Token<N>(result, value, position, decimalSeparator:decimalSeparator);
             NewPosition = newPosition;
+            DecimalSeparator = decimalSeparator;
             if (isPush)
             {
                 NewPosition.Mode = mode;
