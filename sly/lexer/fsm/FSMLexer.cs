@@ -95,6 +95,7 @@ namespace sly.lexer.fsm
         }
 
         internal int NewNodeId => Nodes.Count;
+        public char DecimalSeparator { get; set; }
 
         internal bool HasCallback(int nodeId)
         {
@@ -255,7 +256,7 @@ namespace sly.lexer.fsm
                 {
                     // Remember the possible match
                     lexerPosition.Mode = this.Mode;
-                    result = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id,lexerPosition, currentNode.IsLineEnding, currentNode.IsPopModeNode, currentNode.IsPushModeNode, currentNode.PushToMode);
+                    result = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id,lexerPosition, currentNode.IsLineEnding, currentNode.IsPopModeNode, currentNode.IsPushModeNode, currentNode.PushToMode,DecimalSeparator);
                 }
 
                 lexerPosition.Index++;
@@ -455,7 +456,7 @@ namespace sly.lexer.fsm
                     if (WhiteSpaces.Contains(currentCharacter))
                     {
                         var whiteToken = new Token<N>(default(N),source.Slice(position.Index, 1), position, false, CommentType.No,
-                            Channels.WhiteSpaces,isWhiteSpace:true);
+                            Channels.WhiteSpaces,isWhiteSpace:true, decimalSeparator:DecimalSeparator);
                         ignoredTokens.Add(whiteToken);
                         whiteToken.IsWhiteSpace = true;
                         position.Index++;
