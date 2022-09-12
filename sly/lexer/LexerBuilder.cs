@@ -402,7 +402,13 @@ namespace sly.lexer
                 var tokenID = pair.Key;
 
                 var lexemes = pair.Value;
-                foreach (var lexeme in lexemes)
+                // first configure identifiers as they can be used for keywords
+                foreach (var lexeme in lexemes.Where(x => x.GenericToken == GenericToken.Identifier))
+                {
+                    lexer.AddLexeme(lexeme.GenericToken, tokenID);
+                }
+                
+                foreach (var lexeme in lexemes.Where(x => x.GenericToken != GenericToken.Identifier))
                 {
                     try
                     {
