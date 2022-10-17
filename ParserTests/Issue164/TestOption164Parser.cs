@@ -6,7 +6,7 @@ namespace ParserTests.Issue164
     public class TestOption164Parser
     {
         [Production("root: INT [PLUS|MINUS|TIMES|DIVIDE] INT")]
-        public int root(Token<TestOption164Lexer> left, Token<TestOption164Lexer> op, Token<TestOption164Lexer> right)
+        public int Root(Token<TestOption164Lexer> left, Token<TestOption164Lexer> op, Token<TestOption164Lexer> right)
         {
             int l = left.IntValue;
             int r = right.IntValue;

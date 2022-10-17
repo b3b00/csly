@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Newtonsoft.Json;
 
 namespace sly.lexer
 {
@@ -194,6 +195,7 @@ namespace sly.lexer
         
 
 
+        [JsonIgnore]
         public string StringWithoutQuotes
         {
             get
@@ -211,8 +213,10 @@ namespace sly.lexer
 
 
 
+        [JsonIgnore]
         public int IntValue => int.Parse(Value);
 
+        [JsonIgnore]
         public  double DoubleValue
         {
             get
@@ -228,6 +232,7 @@ namespace sly.lexer
             set { }
         }
 
+        [JsonIgnore]
         public char CharValue  {
             get
             {
@@ -250,6 +255,7 @@ namespace sly.lexer
         
         public bool IsLineEnding { get; set; }
         
+        [JsonIgnore]
         public TokenChannels<T> TokenChannels { get; set; }         
 
         public static Token<T> Empty()

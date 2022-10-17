@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Newtonsoft.Json;
 using sly.parser.generator;
 
 namespace sly.parser.syntax.tree
@@ -17,6 +18,7 @@ namespace sly.parser.syntax.tree
 
         public List<ISyntaxNode<IN>> Children { get; }
 
+        [JsonIgnore]
         public MethodInfo Visitor { get; set; }
 
         public bool IsByPassNode { get; set; } = false;
@@ -33,6 +35,7 @@ namespace sly.parser.syntax.tree
 
         #region expression syntax nodes
 
+        [JsonIgnore]
         public OperationMetaData<IN> Operation { get; set; } = null;
 
         public bool IsExpressionNode => Operation != null;
