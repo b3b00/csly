@@ -755,9 +755,7 @@ namespace sly.lexer
             else
             {
                 var exceptDelimiter = new[] { stringDelimiterChar };
-                var in_string = "in_string_same";
                 var escaped = "escaped_same";
-                var delim = "delim_same";
 
                 FSMBuilder.GoTo(start)
                     

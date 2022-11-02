@@ -46,6 +46,10 @@ namespace sly.parser.llparser
                                     many.Clause = newInnerNonTermClause;
                                     newclauses.Add(many);
                                 }
+                                else
+                                {
+                                    newclauses.Add(many);
+                                }
 
                                 break;
                             }
@@ -58,6 +62,10 @@ namespace sly.parser.llparser
                                     var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
                                     newInnerNonTermClause.IsGroup = true;
                                     option.Clause = newInnerNonTermClause;
+                                    newclauses.Add(option);
+                                }
+                                else
+                                {
                                     newclauses.Add(option);
                                 }
 

@@ -54,16 +54,27 @@ namespace sly.parser.syntax.grammar
             get
             {
                 if (Clauses != null && Clauses.Any<IClause<IN>>())
+                {
+                    bool contains = false;
                     foreach (var clause in Clauses)
                     {
                         switch (clause)
                         {
                             case GroupClause<IN> _:
-                                return true;
+                                contains = true;
+                                break;
                             case ManyClause<IN> many:
-                                return many.Clause is GroupClause<IN>;
+                                contains  |=  many.Clause is GroupClause<IN>;
+                                break;
                             case OptionClause<IN> option:
-                                return option.Clause is GroupClause<IN>;
+                                contains  |=  option.Clause is GroupClause<IN>;
+                                break;
+                        }
+
+                        if (contains)
+                        {
+                            return true;
+                        }
                         }
                     }
 

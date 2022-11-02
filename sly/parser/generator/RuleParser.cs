@@ -200,10 +200,27 @@ namespace sly.parser.generator
             return new GroupClause<IN>(clause);
         }
 
+        [Production("groupclause : STRING ")]
+        public GroupClause<IN> GroupClauseExplicit(Token<EbnfTokenGeneric> explicitToken)
+        {
+            var clause = BuildTerminalOrNonTerimal(explicitToken.Value,discard:true, explicitToken :true);
+            return new GroupClause<IN>(clause);
+        }
+
+        
+        
+
         [Production("groupclause : IDENTIFIER DISCARD ")]
         public GroupClause<IN> GroupClauseDiscarded(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> discarded)
         {
             var clause = BuildTerminalOrNonTerimal(id.Value, true);
+            return new GroupClause<IN>(clause);
+        }
+        
+        [Production("groupclause : STRING DISCARD ")]
+        public GroupClause<IN> GroupClauseExplicitDiscarded(Token<EbnfTokenGeneric> explicitToken, Token<EbnfTokenGeneric> discarded)
+        {
+            var clause = BuildTerminalOrNonTerimal(explicitToken.Value, true, explicitToken:true);
             return new GroupClause<IN>(clause);
         }
 
