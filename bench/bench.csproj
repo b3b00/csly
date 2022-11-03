@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.11.4" />
-    <PackageReference Include="sly" Version="2.9.1.1" />
+    <PackageReference Include="sly" Version="2.9.2" />
     <PackageReference Include="System.Memory" Version="4.5.5" />    
   </ItemGroup>
 
