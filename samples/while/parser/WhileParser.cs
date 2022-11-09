@@ -6,6 +6,7 @@ using sly.parser.generator;
 
 namespace csly.whileLang.parser
 {
+    [ParserRoot("statement")]
     public class WhileParser
     {
         #region COMPARISON OPERATIONS

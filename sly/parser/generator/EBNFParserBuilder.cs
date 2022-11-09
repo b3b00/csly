@@ -24,6 +24,15 @@ namespace sly.parser.generator
         public override BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType,
             string rootRule, BuildExtension<IN> extensionBuilder = null, LexerPostProcess<IN> lexerPostProcess = null)
         {
+            if (string.IsNullOrEmpty(rootRule))
+            {
+                var rootAttribute = parserInstance.GetType().GetCustomAttribute<ParserRootAttribute>();
+                if (rootAttribute  != null)
+                {
+                    rootRule = rootAttribute.RootRule;
+                }
+            }
+            
             var ruleparser = new RuleParser<IN>();
             var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>(I18n);
 
