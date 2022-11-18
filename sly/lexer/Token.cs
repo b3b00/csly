@@ -19,15 +19,20 @@ namespace sly.lexer
     {
         
         
+        [JsonIgnore]
         public char StringDelimiter = '"';
-        public char DecimalSeparator = '.';        
+        [JsonIgnore]
+        public char DecimalSeparator = '.';
+        [JsonIgnore]
         public char CharDelimiter ='\'';
+        [JsonIgnore]
         public bool Notignored;
 
 
         public Token(T token, string value, LexerPosition position, bool isCommentStart = false,
             CommentType commentType = CommentType.Single, int? channel = null, char decimalSeparator = '.' ) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType,channel, decimalSeparator:decimalSeparator)
-        {
+
+{
         }
         
         public Token(T token, ReadOnlyMemory<char> value, LexerPosition position, bool isCommentStart = false,
@@ -155,6 +160,7 @@ namespace sly.lexer
 
         public int Channel {get; set;} = 0;
 
+        [JsonIgnore]
         public  ReadOnlyMemory<char> SpanValue { get; set; }
         
         public LexerPosition Position { get; set; }
@@ -163,7 +169,9 @@ namespace sly.lexer
         
         public int PositionInTokenFlow { get; set; }
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public T TokenID { get; set; }
+
         public bool IsComment { get; set; }
 
         public bool Discarded { get; set; } = false;
@@ -182,12 +190,15 @@ namespace sly.lexer
         
         public bool IsImplicit { get; set; }
 
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public CommentType CommentType { get; set; } = CommentType.No;
 
         public bool IsEmpty { get; set; }
 
+        [JsonIgnore]
         public bool IsMultiLineComment => CommentType == CommentType.Multi;
 
+        [JsonIgnore]
         public bool IsSingleLineComment => CommentType == CommentType.Single;
 
         public string Value => SpanValue.ToString();
