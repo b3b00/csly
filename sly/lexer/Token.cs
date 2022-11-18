@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace sly.lexer
 {
@@ -169,7 +170,7 @@ namespace sly.lexer
         
         public int PositionInTokenFlow { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(StringEnumConverter))]
         public T TokenID { get; set; }
 
         public bool IsComment { get; set; }
@@ -190,7 +191,7 @@ namespace sly.lexer
         
         public bool IsImplicit { get; set; }
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
+        [JsonConverter(typeof(StringEnumConverter))]
         public CommentType CommentType { get; set; } = CommentType.No;
 
         public bool IsEmpty { get; set; }
