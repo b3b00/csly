@@ -30,7 +30,7 @@ namespace sly.parser.generator
             var methods = parserClass.GetMethods().ToList<MethodInfo>();
             methods = methods.Where<MethodInfo>(m =>
             {
-                var attributes = m.GetCustomAttributes(typeof(OperationAttribute),true).ToList<object>();
+                var attributes = m.GetCustomAttributes(typeof(OperationAttribute<IN>),true).ToList<object>();
                 
                 return attributes.Any<object>();
             }).ToList<MethodInfo>();
@@ -39,7 +39,7 @@ namespace sly.parser.generator
             methods.ForEach(m =>
             {
                 var attributes =
-                    (OperationAttribute[])m.GetCustomAttributes(typeof(OperationAttribute), true);
+                    (OperationAttribute<IN>[])m.GetCustomAttributes(typeof(OperationAttribute<IN>), true);
 
                 foreach (var attr in attributes)
                 {
@@ -59,6 +59,10 @@ namespace sly.parser.generator
                         {
                             explicitToken = attr.StringToken;
                         }
+                    }
+                    else if (attr.IsTokenID)
+                    {
+                        oper = attr.TokenID;
                     }
 
 

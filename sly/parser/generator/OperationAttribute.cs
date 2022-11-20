@@ -20,7 +20,7 @@ namespace sly.parser.generator
 
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class OperationAttribute : Attribute //where IN : struct
+    public class OperationAttribute<IN> : Attribute //where IN : struct
     {
         /// <summary>
         ///     token as an int as attribute can not be generics.
@@ -48,11 +48,25 @@ namespace sly.parser.generator
             Assoc = assoc;
             Precedence = precedence;
         }
+        
+        public OperationAttribute(IN token, Affix affix, Associativity assoc, int precedence)
+        {
+            TokenID = token;
+            IsTokenID = true;
+            IsStringToken = false;
+            IsIntToken = false;
+            Affix = affix;
+            Assoc = assoc;
+            Precedence = precedence;
+        }
 
         public bool IsIntToken { get; set; }
         
         public bool IsStringToken { get; set; }
+        
+        public bool IsTokenID { get; set; }
 
+        public IN TokenID { get; set; }    
 
         public int IntToken { get; set; } = -1;
         
