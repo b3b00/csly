@@ -53,7 +53,9 @@ namespace sly.lexer
 
                 if (matchedDefinition == null)
                 {
-                    return new LexerResult<T>(new LexicalError(currentLine, currentColumn, source[currentIndex],I18n));
+                    var error = new LexicalError(currentLine, currentColumn, source[currentIndex], I18n);
+                    var result = new LexerResult<T>(error,tokens);
+                    return result;
                 }
 
                 var value = source.Substring(currentIndex, matchLength);
@@ -95,7 +97,7 @@ namespace sly.lexer
         [ExcludeFromCodeCoverage]
         public LexerResult<T> Tokenize(ReadOnlyMemory<char> source)
         {
-            return new LexerResult<T>(new LexicalError(0, 0, '.',I18n));
+            return Tokenize(source.ToString());
         }
     }
 }
