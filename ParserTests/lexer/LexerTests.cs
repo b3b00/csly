@@ -170,5 +170,22 @@ namespace ParserTests.lexer
             Check.That(errors).CountIs(1);
             Check.That(errors[0].Code).IsEqualTo(ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX);
         }
+        
+        
+        [Fact]
+        public void TestTokensAndError()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ExpressionToken>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var lexer = lexerRes.Result;
+
+            var errorSource = "1 + 2 @";
+
+            var lexingResult = lexer.Tokenize(errorSource);
+            Check.That(lexingResult.IsError).IsTrue();
+            Check.That(lexingResult.Tokens).IsNotNull();
+            Check.That(lexingResult.Tokens).CountIs(3);
+            Check.That(lexingResult.Error.UnexpectedChar).IsEqualTo('@');
+        }
     }
 }
