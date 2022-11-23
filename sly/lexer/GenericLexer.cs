@@ -197,7 +197,7 @@ namespace sly.lexer
                 {
                     var result = r.Result;
                     var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue, I18n);
-                    return new LexerResult<IN>(error);
+                    return new LexerResult<IN>(error,tokens);
                 }
                 case true when r.Result.IsComment:
                     position = r.NewPosition;
@@ -247,13 +247,13 @@ namespace sly.lexer
                         {
                             var result = r.Result;
                             var error = new IndentationError(result.Position.Line, result.Position.Column,I18n);
-                            return new LexerResult<IN>(error);
+                            return new LexerResult<IN>(error,tokens);
                         }
                         else
                         {
                             var result = r.Result;
                             var error = new LexicalError(result.Position.Line, result.Position.Column, result.CharValue,I18n);
-                            return new LexerResult<IN>(error);
+                            return new LexerResult<IN>(error,tokens);
                         }
                     }
                     case true when r.Result.IsComment:
