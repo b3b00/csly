@@ -3,6 +3,7 @@ using System.Linq;
 using GenericLexerWithCallbacks;
 using indented;
 using NFluent;
+using simpleExpressionParser;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser;
@@ -954,6 +955,24 @@ else
 
         }
 
+        
+        [Fact]
+        public void TestTokensAndError()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<SimpleExpressionToken>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var lexer = lexerRes.Result;
+
+            var errorSource = "1 + 2 @";
+
+            var lexingResult = lexer.Tokenize(errorSource);
+            Check.That(lexingResult.IsError).IsTrue();
+            Check.That(lexingResult.Tokens).IsNotNull();
+            Check.That(lexingResult.Tokens).CountIs(3);
+            Check.That(lexingResult.Error.UnexpectedChar).IsEqualTo('@');
+            
+            
+        }
       
     }
 }
