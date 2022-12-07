@@ -110,7 +110,7 @@ namespace sly.lexer
 
         public const string multi_line_comment_start = "multi_line_comment_start";
 
-        protected readonly Dictionary<GenericToken, Dictionary<string, IN>> derivedTokens;
+        protected readonly Dictionary<GenericToken, Dictionary<string, (IN tokenId, bool isPop, bool isPush, string mode)>> derivedTokens;
         protected IN doubleDerivedToken;
         protected char EscapeStringDelimiterChar;
 
@@ -144,7 +144,7 @@ namespace sly.lexer
 
         public GenericLexer(Config config, GenericToken[] staticTokens)
         {
-            derivedTokens = new Dictionary<GenericToken, Dictionary<string, IN>>();
+            derivedTokens = new Dictionary<GenericToken, Dictionary<string, (IN tokenId, bool isPop, bool isPush, string mode)>>();
             ExtensionBuilder = config.ExtensionBuilder;
             KeyWordComparer = config.KeyWordComparer;
             SubLexersFsm = new Dictionary<string, FSMLexer<GenericToken>>();
@@ -212,7 +212,6 @@ namespace sly.lexer
             {
                 ComputePositionWhenIgnoringEOL(r, tokens, LexerFsm);
                 var transcoded = Transcode(r);
-                
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
                 {
                     transcoded = callback(transcoded);
@@ -284,6 +283,7 @@ namespace sly.lexer
         private FSMLexer<GenericToken> SetLexerMode(FSMMatch<GenericToken> r, Stack<FSMLexer<GenericToken>> lexersStack)
         {
             FSMLexer<GenericToken> LexerFsm = lexersStack.Peek();
+            
             if (!r.IsEOS)
             {
                 if (r.IsPop)
@@ -453,7 +453,7 @@ namespace sly.lexer
                             {
                                 var possibleTokens = derivedTokens[GenericToken.Identifier];
                                 if (possibleTokens.ContainsKey(match.Result.Value))
-                                    match.Properties[DerivedToken] = possibleTokens[match.Result.Value];
+                                    match.Properties[DerivedToken] = possibleTokens[match.Result.Value].tokenId;
                                 else
                                     match.Properties[DerivedToken] = identifierDerivedToken;
                             }
@@ -503,7 +503,7 @@ namespace sly.lexer
             }
         }
 
-        public void AddLexeme(GenericToken genericToken,BuildResult<ILexer<IN>> result, IN token, string specialValue)
+        public void AddLexeme(GenericToken genericToken,BuildResult<ILexer<IN>> result, IN token, bool isPop, bool isPush, string mode, string specialValue)
         {
             if (genericToken == GenericToken.SugarToken)
             {
@@ -514,17 +514,17 @@ namespace sly.lexer
             {
                 if (genericToken == GenericToken.Identifier)
                 {
-                    tokensForGeneric = new Dictionary<string, IN>(KeyWordComparer);
+                    tokensForGeneric = new Dictionary<string, (IN tokenId, bool isPop, bool isPush, string mode)>(KeyWordComparer);
                 }
                 else
                 {
-                    tokensForGeneric = new Dictionary<string, IN>();
+                    tokensForGeneric = new Dictionary<string, (IN tokenId, bool isPop, bool isPush, string mode)>();
                 }
 
                 derivedTokens[genericToken] = tokensForGeneric;
             }
 
-            tokensForGeneric[specialValue] = token;
+            tokensForGeneric[specialValue] = (token,isPop,isPush,mode);
         }
 
         public void AddDouble(IN token, string separator, BuildResult<ILexer<IN>> result)
@@ -555,14 +555,21 @@ namespace sly.lexer
             
         }
 
-        public void AddKeyWord(IN token, string keyword, BuildResult<ILexer<IN>> result )
+        public void AddKeyWord(IN token, string keyword, bool isPop, bool isPush, string mode, BuildResult<ILexer<IN>> result )
         {
             NodeCallback<GenericToken> callback = match =>
             {
-                IN derivedToken;
+                IN derivedToken = default;
                 if (derivedTokens.TryGetValue(GenericToken.Identifier, out var derived))
                 {
-                    if (!derived.TryGetValue(match.Result.Value, out derivedToken))
+                    if (derived.TryGetValue(match.Result.Value, out (IN tokenId, bool isPop, bool isPush, string mode) derived2))
+                    {
+                        derivedToken = derived2.tokenId;
+                        match.IsPush = derived2.isPush;
+                        match.IsPop = derived2.isPop;
+                        match.NewPosition.Mode = derived2.mode ?? ModeAttribute.DefaultLexerMode;
+                    }
+                    else
                     {
                         derivedToken = identifierDerivedToken;
                     }
@@ -577,7 +584,7 @@ namespace sly.lexer
                 return match;
             };
 
-            AddLexeme(GenericToken.Identifier, result, token, keyword);
+            AddLexeme(GenericToken.Identifier, result, token,isPop,isPush,mode, keyword);
             var node = FSMBuilder.GetNode(in_identifier);
             if (!FSMBuilder.Fsm.HasCallback(node.Id))
             {

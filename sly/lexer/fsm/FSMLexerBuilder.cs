@@ -5,11 +5,11 @@ using sly.lexer.fsm.transitioncheck;
 
 namespace sly.lexer.fsm
 {
-    public delegate FSMMatch<IN> NodeCallback<IN>(FSMMatch<IN> node);
+    public delegate FSMMatch<IN> NodeCallback<IN>(FSMMatch<IN> node)  where IN : struct;
 
     public delegate bool TransitionPrecondition(ReadOnlyMemory<char> value);
 
-    public class FSMLexerBuilder<N>
+    public class FSMLexerBuilder<N>  where N : struct
     {
         private int CurrentState;
 
