@@ -120,7 +120,7 @@ namespace ParserTests
     public class BadOptionArgParser
     {
         [Production("badoptionarg : a? B? (A B)? [A|B]?")]
-        public SubBadVisitor BadOptionArg(BadVisitor a, ValueOption<Token<BadVisitorTokens>> b, Group<BadVisitor,BadVisitorTokens> c, string d)
+        public SubBadVisitor BadOptionArg(BadVisitor a, ValueOption<Token<BadVisitorTokens>> b, Group<BadVisitorTokens,BadVisitor> c, string d)
         {
             return null;
         }

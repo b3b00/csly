@@ -14,7 +14,7 @@ namespace sly.lexer
         public const int Comments = 2;
     }
     
-    public class TokenChannels<IN> : IEnumerable<Token<IN>>
+    public class TokenChannels<IN> : IEnumerable<Token<IN>>  where IN : struct
     {
         
         

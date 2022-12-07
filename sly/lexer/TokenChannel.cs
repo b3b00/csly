@@ -4,7 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace sly.lexer
 {
-    public class TokenChannel<IN>
+    public class TokenChannel<IN>  where IN : struct
     {
         public readonly List<Token<IN>> Tokens;
         

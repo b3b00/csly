@@ -5,7 +5,7 @@ using sly.lexer;
 
 namespace sly.parser.parser
 {
-    public class Group<IN, OUT>
+    public class Group<IN, OUT> where IN : struct
     {
         public List<GroupItem<IN, OUT>> Items;
 
