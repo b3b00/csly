@@ -432,7 +432,7 @@ namespace sly.lexer
                         {
                             foreach (var param in lexeme.GenericTokenParameters)
                             {
-                                lexer.AddKeyWord(tokenID, param, result);
+                                lexer.AddKeyWord(tokenID, param,lexeme.IsPop,lexeme.IsPush,lexeme.Pushtarget, result);
                             }
                         }
 
@@ -553,7 +553,7 @@ namespace sly.lexer
                             {
                                 var resultx = new BuildResult<ILexer<IN>>();
                                 result.Errors.AddRange(resultx.Errors);
-                                lexer.AddKeyWord(default(IN), explicitToken, resultx);
+                                lexer.AddKeyWord(default(IN), explicitToken,false,false,ModeAttribute.DefaultLexerMode, resultx);
                                 ;
                             }
                             else
