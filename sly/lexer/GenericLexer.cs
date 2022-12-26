@@ -301,7 +301,8 @@ namespace sly.lexer
                 }
                 else
                 {
-                    LexerFsm = SubLexersFsm[r.NewPosition.Mode];
+                    // TODO : do NOT change mode stay until push or pop happen.
+                    //LexerFsm = SubLexersFsm[r.NewPosition.Mode];
                 }
             }
 
