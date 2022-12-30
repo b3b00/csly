@@ -99,6 +99,16 @@ namespace sly.parser.generator
 
             configuration.UsesOperations = operationsByPrecedence.Any<KeyValuePair<int, List<OperationMetaData<IN>>>>(); 
             result.Result = configuration;
+            var rec = LeftRecursionChecker<IN, OUT>.CheckLeftRecursion(configuration);
+            if (rec.foundRecursion)
+            {
+                var recs = string.Join("\n", rec.recursions.Select<List<string>, string>(x => string.Join(" > ",x)));
+                result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
+                    I18N.Instance.GetText(I18n,I18NMessage.LeftRecursion,recs),
+                    ErrorCodes.PARSER_LEFT_RECURSIVE));
+                return result;
+            }
+            
             return result;
         }
 
