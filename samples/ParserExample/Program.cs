@@ -17,8 +17,10 @@ using GenericLexerWithCallbacks;
 using indented;
 using jsonparser;
 using jsonparser.JsonModel;
+using NFluent;
 using ParserTests;
 using ParserTests.Issue239;
+using ParserTests.Issue332;
 using ParserTests.lexer;
 using simpleExpressionParser;
 using SimpleTemplate;
@@ -1134,7 +1136,8 @@ billy
         
         private static void Main(string[] args)
         {
-            TestTemplateFor();
+            TestIssue332();
+            //TestTemplateFor();
             // testErrors();
             //TestContextualParser();
             //TestTokenCallBacks();
@@ -1300,6 +1303,19 @@ billy
             ;
         }
 
+        private static void TestIssue332()
+        {
+            ParserBuilder<Issue332Token, object> Parser = new ParserBuilder<Issue332Token, object>();
+            Issue332Parser oparser = new Issue332Parser();
+            var r = Parser.BuildParser(oparser,ParserType.EBNF_LL_RECURSIVE_DESCENT);
+            Check.That(r).Not.IsOk();
+            foreach (var error in r.Errors)
+            {
+                Console.WriteLine(error.Message);
+            }
+            
+        }
+        
         private static List<Token<ExpressionToken>> postProcess(List<Token<ExpressionToken>> tokens)
         {
             var mayLeft = new List<ExpressionToken>()
