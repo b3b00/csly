@@ -1,0 +1,7 @@
+{
+    "name": "CSLY",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    }
+}
