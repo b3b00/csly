@@ -10,11 +10,74 @@ using Xunit;
 
 namespace ParserTests.lexer
 {
-   
+    public enum ModesAndCommentsLexer
+    {
+        [Mode]
+        [SingleLineComment("#")]
+        SINGLELINE = 1,
+        
+        [Mode]
+        [MultiLineComment("/*","*/")]
+        MULTILINE = 2,
+        
+        [Mode("default","IN")]
+        [AlphaId]
+        ID = 3,
+        
+        [Push("IN")]
+        [Mode]
+        [Sugar(">>>")]
+        IN = 4,
+        
+        [Pop]
+        [Mode("IN")]
+        [Sugar("<<<")]
+        OUT = 5,
+        
+        [Mode("IN")]
+        [Keyword("toto")]
+        TOTO = 6
+    }
     
     
     public class LexerModesTest
     {
+
+        [Fact]
+        public static void TestModesAndComments()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ModesAndCommentsLexer>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var result = lexerRes.Result.Tokenize(@"
+hello
+# comment
+>>>
+toto
+<<<
+world");
+            Check.That(result.IsOk).IsTrue();
+            var expectedTokens = new List<ModesAndCommentsLexer>()
+            {
+                ModesAndCommentsLexer.ID,
+                ModesAndCommentsLexer.IN,
+                ModesAndCommentsLexer.TOTO,
+                ModesAndCommentsLexer.OUT,
+                ModesAndCommentsLexer.ID
+            };
+            var tokens = result.Tokens.GetChannel(Channels.Main).Tokens;
+            Check.That(expectedTokens).CountIs(tokens.Count-1);
+            Check.That(tokens.Extracting("TokenID")).Contains(expectedTokens);
+            
+            expectedTokens = new List<ModesAndCommentsLexer>()
+            {
+                ModesAndCommentsLexer.SINGLELINE
+            };
+            tokens = result.Tokens.GetChannel(Channels.Comments).Tokens;
+            Check.That(expectedTokens).CountIs(tokens.Count-1);
+            Check.That(tokens.Extracting("TokenID")).Contains(expectedTokens);
+
+        }
+        
         [Fact]
         public static void TestLexerModes()
         {
