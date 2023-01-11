@@ -1,12 +1,17 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace sly.lexer
 {
     public class TokenChannel<IN>  where IN : struct
     {
         public readonly List<Token<IN>> Tokens;
+
+        public List<Token<IN>> NotNullTokens => Tokens.Where(x => x != null).ToList();
+        
+        public List<Token<IN>> NotNullOrEosTokens => Tokens.Where(x => x != null && !x.IsEOS).ToList(); 
         
         public int ChannelId;
         public int Count => Tokens.Count;

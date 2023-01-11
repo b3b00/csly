@@ -38,7 +38,6 @@ namespace sly.lexer
             var type = enumVal.GetType();
             var memInfo = type.GetMember(enumVal.ToString());
             var attributes = (T[]) memInfo[0].GetCustomAttributes(typeof(T), false);
-
             return attributes;
         }
     }
@@ -487,16 +486,13 @@ namespace sly.lexer
 
             AddExtensions<IN>(Extensions, extensionBuilder, lexer);
 
-            var comments = GetCommentsAttribute<IN>(result,lang);
             
+            var allComments = GetCommentsAttribute<IN>(result,lang);
+            var CommentsForSubLexer = allComments.Where(x => attributes.Keys.ToList().Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
             if (!result.IsError)
             {
-                foreach (var comment in comments)
+                foreach (var comment in CommentsForSubLexer)
                 {
-                    
-                    ;
-
-                   
 
                     foreach (var commentAttr in comment.Value)
                     {
