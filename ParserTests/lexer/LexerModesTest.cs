@@ -12,11 +12,11 @@ namespace ParserTests.lexer
 {
     public enum ModesAndCommentsLexer
     {
-        [Mode]
+        [Mode("default")]
         [SingleLineComment("#")]
         SINGLELINE = 1,
         
-        [Mode]
+        [Mode("default","IN")]
         [MultiLineComment("/*","*/")]
         MULTILINE = 2,
         
@@ -64,17 +64,58 @@ world");
                 ModesAndCommentsLexer.OUT,
                 ModesAndCommentsLexer.ID
             };
-            var tokens = result.Tokens.GetChannel(Channels.Main).Tokens;
-            Check.That(expectedTokens).CountIs(tokens.Count-1);
+            var tokens = result.Tokens.GetChannel(Channels.Main).NotNullOrEosTokens;
+            Check.That(expectedTokens).CountIs(tokens.Count);
             Check.That(tokens.Extracting("TokenID")).Contains(expectedTokens);
             
             expectedTokens = new List<ModesAndCommentsLexer>()
             {
                 ModesAndCommentsLexer.SINGLELINE
             };
-            tokens = result.Tokens.GetChannel(Channels.Comments).Tokens;
-            Check.That(expectedTokens).CountIs(tokens.Count-1);
+            tokens = result.Tokens.GetChannel(Channels.Comments).NotNullOrEosTokens;
+            Check.That(expectedTokens).CountIs(tokens.Count);
             Check.That(tokens.Extracting("TokenID")).Contains(expectedTokens);
+
+        }
+        
+        [Fact]
+        public static void TestModesAndCommentFailure()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ModesAndCommentsLexer>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var result = lexerRes.Result.Tokenize(@"
+hello
+# comment
+>>>
+# single line comments can not be in IN mode
+toto
+<<<
+world");
+            Check.That(result).Not.IsOkLexing();
+            
+
+        }
+        
+        [Fact]
+        public static void TestModesAndCommentInManyMode()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ModesAndCommentsLexer>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var result = lexerRes.Result.Tokenize(@"
+hello
+# comment
+/* 
+multi line comments can be in default mode 
+/*
+>>>
+/* 
+multi line comments can be in IN mode 
+/*
+toto
+<<<
+world");
+            Check.That(result).IsOkLexing();
+            
 
         }
         
