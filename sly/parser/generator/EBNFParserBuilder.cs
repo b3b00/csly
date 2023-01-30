@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using sly.buildresult;
 using sly.i18n;
+using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser.generator.visitor;
 using sly.parser.llparser;
@@ -16,23 +17,23 @@ namespace sly.parser.generator
     /// </summary>
     internal class EBNFParserBuilder<IN, OUT> : ParserBuilder<IN, OUT> where IN : struct
     {
-        
         public EBNFParserBuilder(string i18n = null) : base(i18n)
         {
         }
-        
+
         public override BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType,
-            string rootRule, BuildExtension<IN> extensionBuilder = null, LexerPostProcess<IN> lexerPostProcess = null)
+            string rootRule, Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
+            LexerPostProcess<IN> lexerPostProcess = null)
         {
             if (string.IsNullOrEmpty(rootRule))
             {
                 var rootAttribute = parserInstance.GetType().GetCustomAttribute<ParserRootAttribute>();
-                if (rootAttribute  != null)
+                if (rootAttribute != null)
                 {
                     rootRule = rootAttribute.RootRule;
                 }
             }
-            
+
             var ruleparser = new RuleParser<IN>();
             var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>(I18n);
 
@@ -46,24 +47,25 @@ namespace sly.parser.generator
             try
             {
                 configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
-                LeftRecursionChecker<IN,OUT> recursionChecker = new LeftRecursionChecker<IN,OUT>();
-                
+                LeftRecursionChecker<IN, OUT> recursionChecker = new LeftRecursionChecker<IN, OUT>();
+
                 // check left recursion.
-                var (foundRecursion, recursions) = LeftRecursionChecker<IN,OUT>.CheckLeftRecursion(configuration);
+                var (foundRecursion, recursions) = LeftRecursionChecker<IN, OUT>.CheckLeftRecursion(configuration);
                 if (foundRecursion)
                 {
-                    var recs = string.Join("\n", recursions.Select<List<string>, string>(x => string.Join(" > ",x)));
+                    var recs = string.Join("\n", recursions.Select<List<string>, string>(x => string.Join(" > ", x)));
                     result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
-                        I18N.Instance.GetText(I18n,I18NMessage.LeftRecursion,recs),
+                        I18N.Instance.GetText(I18n, I18NMessage.LeftRecursion, recs),
                         ErrorCodes.PARSER_LEFT_RECURSIVE));
                     return result;
                 }
-                
+
                 configuration.StartingRule = rootRule;
             }
             catch (Exception e)
             {
-                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message,ErrorCodes.PARSER_UNKNOWN_ERROR));
+                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message,
+                    ErrorCodes.PARSER_UNKNOWN_ERROR));
                 return result;
             }
 
@@ -71,15 +73,17 @@ namespace sly.parser.generator
 
             SyntaxTreeVisitor<IN, OUT> visitor = null;
             visitor = new EBNFSyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
-            var parser = new Parser<IN, OUT>(I18n,syntaxParser, visitor);
+            var parser = new Parser<IN, OUT>(I18n, syntaxParser, visitor);
             parser.Configuration = configuration;
-            var lexerResult = BuildLexer(extensionBuilder,lexerPostProcess, configuration.GetAllExplicitTokenClauses().Select(x => x.ExplicitToken).Distinct().ToList());
+            var lexerResult = BuildLexer(extensionBuilder, lexerPostProcess,
+                configuration.GetAllExplicitTokenClauses().Select(x => x.ExplicitToken).Distinct().ToList());
             if (lexerResult.IsError)
             {
                 foreach (var lexerResultError in lexerResult.Errors)
                 {
                     result.AddError(lexerResultError);
                 }
+
                 return result;
             }
             else
@@ -101,12 +105,12 @@ namespace sly.parser.generator
             {
                 case ParserType.LL_RECURSIVE_DESCENT:
                 {
-                    parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule,I18n);
+                    parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18n);
                     break;
                 }
                 case ParserType.EBNF_LL_RECURSIVE_DESCENT:
                 {
-                    parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule,I18n);
+                    parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18n);
                     break;
                 }
                 default:
@@ -138,7 +142,7 @@ namespace sly.parser.generator
             methods.ForEach(m =>
             {
                 var attributes =
-                    (ProductionAttribute[]) m.GetCustomAttributes(typeof(ProductionAttribute), true);
+                    (ProductionAttribute[])m.GetCustomAttributes(typeof(ProductionAttribute), true);
 
                 foreach (var attr in attributes)
                 {
@@ -146,7 +150,7 @@ namespace sly.parser.generator
                     var parseResult = grammarParser.Parse(ruleString);
                     if (!parseResult.IsError)
                     {
-                        var rule = (Rule<IN>) parseResult.Result;
+                        var rule = (Rule<IN>)parseResult.Result;
                         rule.RuleString = ruleString;
                         rule.SetVisitor(m);
                         NonTerminal<IN> nonT = null;

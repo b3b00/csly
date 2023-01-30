@@ -12,22 +12,19 @@ namespace sly.lexer.fsm
         {
             return memory.Span[index];
         }
-        
+
         public static T At<T>(this ReadOnlyMemory<T> memory, LexerPosition position)
         {
             return memory.Span[position.Index];
         }
     }
 
-    public delegate void BuildExtension<IN>(IN token, LexemeAttribute lexem, GenericLexer<IN> lexer) where IN : struct;
-    
     public delegate List<Token<IN>> LexerPostProcess<IN>(List<Token<IN>> tokens) where IN : struct;
 
-    public class FSMLexer<N>  where N : struct
+    public class FSMLexer<N> where N : struct
     {
-        
         public string Mode { get; set; }
-        
+
         private readonly Dictionary<int, FSMNode<N>> Nodes;
 
         public char StringDelimiter = '"';
@@ -52,9 +49,9 @@ namespace sly.lexer.fsm
         public bool IgnoreEOL { get; set; }
 
         public bool AggregateEOL { get; set; }
-        
+
         public bool IndentationAware { get; set; }
-        
+
         public string Indentation { get; set; }
 
 
@@ -71,10 +68,9 @@ namespace sly.lexer.fsm
                 dump.Append(fsmNode.Value.Id);
                 var shape = fsmNode.Value.IsEnd ? "doublecircle" : "circle";
                 dump.AppendLine($@"[shape={shape} label=""{fsmNode.Value.GraphVizNodeLabel()}""] ");
-
             }
-            
-            foreach (var transition in Transitions.Values.SelectMany<List<FSMTransition>, FSMTransition>(x => x) )
+
+            foreach (var transition in Transitions.Values.SelectMany<List<FSMTransition>, FSMTransition>(x => x))
                 dump.AppendLine(transition.ToGraphViz<N>(Nodes));
 
             dump.AppendLine("}");
@@ -154,7 +150,6 @@ namespace sly.lexer.fsm
 
         #region run
 
-        
         public FSMMatch<N> Run(string source, LexerPosition position)
         {
             return Run(new ReadOnlyMemory<char>(source.ToCharArray()), position);
@@ -168,6 +163,7 @@ namespace sly.lexer.fsm
             {
                 return 0;
             }
+
             string id = source.Slice(index, Indentation.Length).ToString();
             while (id == Indentation)
             {
@@ -175,6 +171,7 @@ namespace sly.lexer.fsm
                 index += Indentation.Length;
                 id = source.Slice(index, Indentation.Length).ToString();
             }
+
             return count;
         }
 
@@ -182,44 +179,43 @@ namespace sly.lexer.fsm
         {
             List<Char> indentations = new List<char>();
             int i = 0;
-            if (index  >= source.Length)
+            if (index >= source.Length)
             {
                 return new List<char>();
                 ;
             }
-            char current = source.At<char>(index+i);
-            while (i < source.Length && (current == ' ' || current == '\t' ))
+
+            char current = source.At<char>(index + i);
+            while (i < source.Length && (current == ' ' || current == '\t'))
             {
                 indentations.Add(current);
                 i++;
-                current = source.At<char>(index+i);
+                current = source.At<char>(index + i);
             }
 
             return indentations;
         }
-        
-      
-        
+
+
         public FSMMatch<N> Run(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
-
             if (IndentationAware)
             {
-                var ind = ConsumeIndents(source, lexerPosition); 
+                var ind = ConsumeIndents(source, lexerPosition);
                 if (ind != null)
                 {
                     return ind;
                 }
             }
-            
+
             // if line start :
-            
+
             // consume tabs and count them
             // if count = previousCount +1 => add an indent token
             // if count = previousCount -1 => add an unindent token
             // else ....
-            
-            var ignoredTokens = ConsumeIgnored(source,lexerPosition);
+
+            var ignoredTokens = ConsumeIgnored(source, lexerPosition);
 
             if (IndentationAware) // could start of line
             {
@@ -256,7 +252,9 @@ namespace sly.lexer.fsm
                 {
                     // Remember the possible match
                     lexerPosition.Mode = this.Mode;
-                    result = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id,lexerPosition, currentNode.IsLineEnding, currentNode.IsPopModeNode, currentNode.IsPushModeNode, currentNode.PushToMode,DecimalSeparator);
+                    result = new FSMMatch<N>(true, currentNode.Value, currentValue, position, currentNode.Id,
+                        lexerPosition, currentNode.IsLineEnding, currentNode.IsPopModeNode, currentNode.IsPushModeNode,
+                        currentNode.PushToMode, DecimalSeparator);
                 }
 
                 lexerPosition.Index++;
@@ -287,21 +285,20 @@ namespace sly.lexer.fsm
             }
 
             var errorChar = source.Slice(lexerPosition.Index, 1);
-            var ko = new FSMMatch<N>(false, default(N), errorChar, lexerPosition, -1,lexerPosition, false);
+            var ko = new FSMMatch<N>(false, default(N), errorChar, lexerPosition, -1, lexerPosition, false);
             return ko;
         }
 
         private FSMMatch<N> ConsumeIndents(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
-            
             if (lexerPosition.IsStartOfLine)
             {
                 var indents = GetIndentations(source, lexerPosition.Index);
-                
+
                 var currentIndentations = lexerPosition.Indentations.ToList<string>();
 
                 int uIndentCount = 0;
-                
+
                 int indentPosition = 0;
                 if (currentIndentations.Any<string>())
                 {
@@ -309,7 +306,7 @@ namespace sly.lexer.fsm
                     int indentCharCount = 0;
                     while (i < currentIndentations.Count && indentPosition < indents.Count)
                     {
-                        var current = currentIndentations[currentIndentations.Count-i-1];
+                        var current = currentIndentations[currentIndentations.Count - i - 1];
                         int j = 0;
                         if (indentPosition + current.Length > indents.Count)
                         {
@@ -328,7 +325,8 @@ namespace sly.lexer.fsm
                                 var actual = indents[j + indentPosition];
                                 if (actual != reference)
                                 {
-                                    var ko = new FSMMatch<N>(false, default(N), " ", lexerPosition, -1, lexerPosition, false)
+                                    var ko = new FSMMatch<N>(false, default(N), " ", lexerPosition, -1, lexerPosition,
+                                        false)
                                     {
                                         IsIndentationError = true
                                     };
@@ -345,7 +343,7 @@ namespace sly.lexer.fsm
                         {
                             var t = indents.Skip<char>(indentCharCount).ToArray<char>();
                             var newTab = new string(t);
-                            var indent = FSMMatch<N>.Indent(lexerPosition.Indentations.Count<string>()+1);
+                            var indent = FSMMatch<N>.Indent(lexerPosition.Indentations.Count<string>() + 1);
                             indent.Result = new Token<N>
                             {
                                 IsIndent = true,
@@ -356,8 +354,8 @@ namespace sly.lexer.fsm
                             indent.NewPosition.Column += indents.Count;
                             indent.NewPosition.Indentations = indent.NewPosition.Indentations.Push(newTab);
                             return indent;
-                            
                         }
+
                         indentPosition += current.Length;
                         i++;
                     }
@@ -368,8 +366,8 @@ namespace sly.lexer.fsm
                         currentIndentations.Reverse();
                         var unindented = currentIndentations.Take<string>(i).ToList<string>();
                         var spaces = unindented.Select<string, int>(x => x.Length).Sum();
-                        
-                        var uIndent = FSMMatch<N>.UIndent(uIndentCount,uIndentCount);
+
+                        var uIndent = FSMMatch<N>.UIndent(uIndentCount, uIndentCount);
                         uIndent.Result = new Token<N>
                         {
                             IsIndent = true,
@@ -383,6 +381,7 @@ namespace sly.lexer.fsm
                         {
                             uIndent.NewPosition.Indentations = uIndent.NewPosition.Indentations.Pop();
                         }
+
                         return uIndent;
                     }
                     else
@@ -408,9 +407,11 @@ namespace sly.lexer.fsm
                         indent.NewPosition = lexerPosition.Clone();
                         indent.NewPosition.Index += indents.Count;
                         indent.NewPosition.Column += indents.Count;
-                        indent.NewPosition.Indentations = indent.NewPosition.Indentations.Push(new string(indents.ToArray()));
+                        indent.NewPosition.Indentations =
+                            indent.NewPosition.Indentations.Push(new string(indents.ToArray()));
                         return indent;
                     }
+
                     ;
                     return null;
                 }
@@ -439,13 +440,12 @@ namespace sly.lexer.fsm
         public FSMNode<N> GetNext(int from, char token)
         {
             var node = Nodes[from];
-            
+
             return Move(node, token, "".AsMemory());
         }
 
         private List<Token<N>> ConsumeIgnored(ReadOnlyMemory<char> source, LexerPosition position)
         {
-
             bool eolReached = false;
             List<Token<N>> ignoredTokens = new List<Token<N>>();
             while (position.Index < source.Length && !(eolReached && IndentationAware))
@@ -455,8 +455,9 @@ namespace sly.lexer.fsm
                     var currentCharacter = source.At<char>(position.Index);
                     if (WhiteSpaces.Contains(currentCharacter))
                     {
-                        var whiteToken = new Token<N>(default(N),source.Slice(position.Index, 1), position, false, CommentType.No,
-                            Channels.WhiteSpaces,isWhiteSpace:true, decimalSeparator:DecimalSeparator);
+                        var whiteToken = new Token<N>(default(N), source.Slice(position.Index, 1), position, false,
+                            CommentType.No,
+                            Channels.WhiteSpaces, isWhiteSpace: true, decimalSeparator: DecimalSeparator);
                         ignoredTokens.Add(whiteToken);
                         whiteToken.IsWhiteSpace = true;
                         position.Index++;
@@ -484,10 +485,10 @@ namespace sly.lexer.fsm
 
                 break;
             }
+
             return ignoredTokens;
         }
 
         #endregion
-        
     }
 }
