@@ -26,8 +26,4 @@
     <EmbeddedResource Remove="BenchmarkDotNet.Artifacts\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\sly\sly.csproj" />
-  </ItemGroup>
-
 </Project>
