@@ -15,7 +15,7 @@ namespace sly.lexer
         No
     }
 
-    [DebuggerDisplay("{TokenID} : {Value} - {IsImplicit}")]
+    [DebuggerDisplay("{TokenID} : {Value} - {IsExplicit}")]
     public class Token<T> where T:struct
     {
         
@@ -189,7 +189,7 @@ namespace sly.lexer
         
         public bool IsEOL { get; set; }
         
-        public bool IsImplicit { get; set; }
+        public bool IsExplicit { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
         public CommentType CommentType { get; set; } = CommentType.No;
@@ -308,7 +308,7 @@ namespace sly.lexer
                 value = $"<<UINDENT({IndentationLevel})>>";
             }
 
-            if (IsImplicit)
+            if (IsExplicit)
             {
                 value = $"[{Value.Replace("\r", "").Replace("\n", "")}]";
             }
@@ -342,7 +342,7 @@ namespace sly.lexer
                 value = $"<<UINDENT({IndentationLevel})>>";
             }
 
-            if (IsImplicit)
+            if (IsExplicit)
             {
                 value = $"[{Value.Replace("\r", "").Replace("\n", "")}]";
             }

@@ -247,6 +247,7 @@ namespace sly.parser.llparser
             result.EndingPosition = !result.IsError ? position + 1 : position;
             var token = tokens[position];
             token.Discarded = terminal.Discarded;
+            token.IsExplicit = terminal.IsExplicitToken;
             result.Root = new SyntaxLeaf<IN>(token, terminal.Discarded);
             result.HasByPassNodes = false;
             if (result.IsError)
