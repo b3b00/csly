@@ -29,6 +29,10 @@ namespace sly.parser.generator.visitor
             {
                 return Leaf(leaf.Token.TokenID, "<<UNINDENT");
             }
+            else if (leaf.Token.IsExplicit)
+            {
+                return Leaf(leaf.Token.Value);
+            }
             return Leaf(leaf.Token.TokenID, leaf.Token.Value);
         }
 
@@ -43,6 +47,25 @@ namespace sly.parser.generator.visitor
             {
                 label += "\n";
             }
+            var esc = value.Replace("\"", "\\\"");
+            label += "\\\"" + esc + "\\\"";
+            var node = new DotNode(NodeCounter.ToString())
+            {
+                // Set all available properties
+                Shape = "doublecircle",
+                Label = label,
+                FontColor = "",
+                Style = "",
+                Height = 0.5f
+            };
+            NodeCounter++;
+            Graph.Add(node);
+            return node;
+        }
+        
+        private DotNode Leaf(string value)
+        {
+            string label = "";
             var esc = value.Replace("\"", "\\\"");
             label += "\\\"" + esc + "\\\"";
             var node = new DotNode(NodeCounter.ToString())
