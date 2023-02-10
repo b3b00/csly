@@ -50,6 +50,38 @@ comment", 1, 2)
                 .Contains(expectations);
        
         }
+        
+        [Fact]
+        public void EmptySingleLineComment()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<CommentsToken>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var lexer = lexerRes.Result as GenericLexer<CommentsToken>;
+
+            var dump = lexer.ToString();
+
+            var code = @"1
+2 
+//";
+
+            var r = lexer.Tokenize(code);
+            Check.That(r.IsOk).IsTrue();
+            var tokens = r.Tokens;
+
+            Check.That(tokens).CountIs(4);
+
+            var expectations = new (CommentsToken token, string Value, int line, int column)[]
+            {
+                (CommentsToken.INT, "1", 0, 0),
+                (CommentsToken.INT, "2", 1, 0),
+                (CommentsToken.COMMENT, @" not ending
+comment", 1, 2)
+            };
+
+            Check.That(tokens.Extracting(x => (x.TokenID, x.Value, x.Position.Line, x.Position.Column)))
+                .Contains(expectations);
+       
+        }
 
         [Fact]
         public void TestGenericMultiLineComment()
