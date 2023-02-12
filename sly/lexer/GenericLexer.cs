@@ -982,9 +982,23 @@ namespace sly.lexer
             if (comment.IsSingleLineComment)
             {
                 var position = lexerPosition.Index;
-                commentValue = source.GetToEndOfLine(position);
+                if (position < source.Length -1)
+                {
+                    commentValue = source.GetToEndOfLine(position);
+                }
+                else
+                {
+                    commentValue = "".ToCharArray();
+                }
                 position = position + commentValue.Length;
-                comment.SpanValue = commentValue.RemoveEndOfLineChars();
+                if (commentValue.Length > comment.SpanValue.Length)
+                {
+                    comment.SpanValue = commentValue.RemoveEndOfLineChars();    
+                }
+                else
+                {
+                    comment.SpanValue = "".ToCharArray();
+                }
                 return new LexerPosition(position, lexerPosition.Line + 1, 0);
                 //LexerFsm.MovePosition(position, LexerFsm.CurrentLine + 1, 0);
             }

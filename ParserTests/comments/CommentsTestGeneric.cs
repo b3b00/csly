@@ -60,7 +60,9 @@ comment", 1, 2)
 
             var dump = lexer.ToString();
 
-            var code = @"1
+            var code = @"//
+1 
+//
 2 
 //";
 
@@ -68,15 +70,18 @@ comment", 1, 2)
             Check.That(r.IsOk).IsTrue();
             var tokens = r.Tokens;
 
-            Check.That(tokens).CountIs(4);
+            Check.That(tokens).CountIs(6);
 
             var expectations = new (CommentsToken token, string Value, int line, int column)[]
             {
-                (CommentsToken.INT, "1", 0, 0),
-                (CommentsToken.INT, "2", 1, 0),
-                (CommentsToken.COMMENT, @" not ending
-comment", 1, 2)
+                (CommentsToken.COMMENT, @"", 0, 0),
+                (CommentsToken.INT, "1", 1, 0),
+                (CommentsToken.COMMENT, @"", 2, 0),
+                (CommentsToken.INT, "2", 3, 0),
+                (CommentsToken.COMMENT, @"", 4, 0)
             };
+            
+            
 
             Check.That(tokens.Extracting(x => (x.TokenID, x.Value, x.Position.Line, x.Position.Column)))
                 .Contains(expectations);
