@@ -90,6 +90,8 @@ namespace ParserTests
             var parserInstance = new ExplicitTokensParser();
             var builder = new ParserBuilder<ExplicitTokensTokens, double>();
             var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression");
+
+            
             return result;
         }
         
@@ -109,6 +111,9 @@ namespace ParserTests
             Check.That(parser.IsOk).IsTrue();
             Check.That(parser.Result).IsNotNull();
             var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
+            
+            
+            
             Check.That(r).IsOkParsing();
             // grammar is left associative so expression really is 
             // (2.0 - (2.0 + (bozzo  + Test))) = 2 - ( 2 + (42 + 0)) = 2 - (2 + 42) = 2 - 44 = -42
@@ -129,9 +134,12 @@ namespace ParserTests
             var json = $@"{{
 {tree.ToJson()}
 }}";
+            
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile();
-           
+            Check.That(graph).Contains(@"label=""\""bozzo\""""")
+                .And.Contains(@"label=""\""+\""""");
+            
             Check.That(r.Result).IsEqualTo(2 - 2 + 42 + 0);
         }
 

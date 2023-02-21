@@ -1,13 +1,14 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+using sly.lexer;
 using sly.parser.generator.visitor.dotgraph;
 using sly.parser.syntax.tree;
 
 namespace sly.parser.generator.visitor
 {
     [ExcludeFromCodeCoverage]
-    public class GraphVizEBNFSyntaxTreeVisitor<IN> where IN : struct
+    public class GraphVizEBNFSyntaxTreeVisitor<IN>  : IConcreteSyntaxTreeVisitor<IN,DotNode> where IN : struct
     {
         public DotGraph Graph { get; private set; }
 
@@ -18,22 +19,106 @@ namespace sly.parser.generator.visitor
 
         private int NodeCounter = 0;
 
-
-        private DotNode Leaf(SyntaxLeaf<IN> leaf)
+        public DotNode VisitTree(ISyntaxNode<IN> root)
         {
-            if (leaf.Token.IsIndent)
+            Graph = new DotGraph("syntaxtree", true);
+            
+            ConcreteSyntaxTreeWalker<IN,DotNode> walker = new ConcreteSyntaxTreeWalker<IN,DotNode>(this);
+            var dot =  walker.Visit(root);
+            return dot;
+        }
+
+        private DotNode Node(string label)
+        {
+            var node = new DotNode(NodeCounter.ToString())
             {
-                return Leaf(leaf.Token.TokenID, "INDENT>>");
-            }
-            else if (leaf.Token.IsUnIndent)
+                // Set all available properties
+                Shape = "ellipse",
+                Label = label,
+                FontColor = "black",
+                Style = null,
+                Height = 0.5f
+            };
+            NodeCounter++;
+            Graph.Add(node);
+            return node;
+        }
+
+        public DotNode VisitOptionNode(bool exists, DotNode child)
+        {
+            if (!exists)
             {
-                return Leaf(leaf.Token.TokenID, "<<UNINDENT");
+                return VisitLeaf(new Token<IN>() { TokenID = default(IN), SpanValue = "<NONE>".ToCharArray() });
             }
-            else if (leaf.Token.IsExplicit)
+            return child;
+        }
+
+        public DotNode VisitNode(SyntaxNode<IN> node, IList<DotNode> children)
+        {
+            DotNode result = null;
+
+            result = Node(GetNodeLabel(node));
+            //children.ForEach(c =>
+            foreach (var child in children)
             {
-                return Leaf(leaf.Token.Value);
+                if (child != null) // Prevent arrows with null destinations
+                {
+                    var edge = new DotArrow(result, child)
+                    {
+                        // Set all available properties
+                        ArrowHeadShape = "none"
+                    };
+                    Graph.Add(edge);
+                    //Graph.Add(child);
+                }
             }
-            return Leaf(leaf.Token.TokenID, leaf.Token.Value);
+            return result;
+        }
+
+        public DotNode VisitManyNode(ManySyntaxNode<IN> node, IList<DotNode> children)
+        {
+            DotNode result = null;
+
+            result = Node(GetNodeLabel(node));
+            Graph.Add(result);
+            //children.ForEach(c =>
+            foreach (var child in children)
+            {
+                if (child != null) // Prevent arrows with null destinations
+                {
+                    var edge = new DotArrow(result, child)
+                    {
+                        // Set all available properties
+                        ArrowHeadShape = "none"
+                    };
+                    Graph.Add(edge);
+                }
+            }
+            return result;
+        }
+
+        public DotNode VisitEpsilon()
+        {
+            return VisitLeaf(new Token<IN>() { TokenID = default(IN), SpanValue = "epsilon".ToCharArray() });
+        }
+
+       
+
+        public DotNode VisitLeaf(Token<IN> token)
+        {
+            if (token.IsIndent)
+            {
+                return Leaf(token.TokenID, "INDENT>>");
+            }
+            else if (token.IsUnIndent)
+            {
+                return Leaf(token.TokenID, "<<UNINDENT");
+            }
+            else if (token.IsExplicit)
+            {
+                return Leaf(token.Value);
+            }
+            return Leaf(token.TokenID, token.Value);
         }
 
         private DotNode Leaf(IN type, string value)
@@ -81,124 +166,14 @@ namespace sly.parser.generator.visitor
             Graph.Add(node);
             return node;
         }
-
-        public DotNode VisitTree(ISyntaxNode<IN> root)
-        {
-            Graph = new DotGraph("syntaxtree", true);
-            return Visit(root);
-        }
-
-        private DotNode Node(string label)
-        {
-            var node = new DotNode(NodeCounter.ToString())
-            {
-                // Set all available properties
-                Shape = "ellipse",
-                Label = label,
-                FontColor = "black",
-                Style = null,
-                Height = 0.5f
-            };
-            NodeCounter++;
-            Graph.Add(node);
-            return node;
-        }
-
-        protected DotNode Visit(ISyntaxNode<IN> n)
-        {
-            switch (n)
-            {
-                case SyntaxLeaf<IN> leaf:
-                    return Visit(leaf);
-                case GroupSyntaxNode<IN> node:
-                    return Visit(node);
-                case ManySyntaxNode<IN> node:
-                    return Visit(node);
-                case OptionSyntaxNode<IN> node:
-                    return Visit(node);
-                case SyntaxNode<IN> node:
-                    return Visit(node);
-                case SyntaxEpsilon<IN> epsilon:
-                {
-                    return Leaf(default(IN), "Epsilon");
-                }
-                default:
-                    return Leaf(default(IN),"NULL");
-            }
-        }
-
-        private DotNode Visit(GroupSyntaxNode<IN> node)
-        {
-            return Visit(node as SyntaxNode<IN>);
-        }
-
-        private DotNode Visit(OptionSyntaxNode<IN> node)
-        {
-            var child = node.Children != null && node.Children.Any<ISyntaxNode<IN>>() ? node.Children[0] : null;
-            if (child == null || node.IsEmpty)
-            {
-                return Leaf(default(IN),"<NONE>");
-            }
-            var r = Visit(child);
-            return r;
-        }
-
+        
+        
         private string GetNodeLabel(SyntaxNode<IN> node)
         {
             string label = node.Name;
             return label;
         }
 
-        private DotNode Visit(SyntaxNode<IN> node)
-        {
-            DotNode result = null;
 
-
-            var children = new List<DotNode>();
-
-            foreach (var n in node.Children)
-            {
-                var v = Visit(n);
-
-                children.Add(v);
-            }
-
-           
-
-            result = Node(GetNodeLabel(node));
-            Graph.Add(result);
-            children.ForEach(c =>
-            {
-                if (c != null) // Prevent arrows with null destinations
-                {
-                    var edge = new DotArrow(result, c)
-                    {
-                        // Set all available properties
-                        ArrowHeadShape = "none"
-                    };
-                    Graph.Add(edge);
-                }
-            });
-            return result;
-        }
-
-        private DotNode Visit(ManySyntaxNode<IN> node)
-        {
-            return Visit(node as SyntaxNode<IN>);
-        }
-
-
-        private DotNode Visit(SyntaxLeaf<IN> leaf)
-        {
-            if (leaf.Token.IsIndent)
-            {
-                return Leaf(leaf.Token.TokenID, "INDENT>>");
-            }
-            else if (leaf.Token.IsUnIndent)
-            {
-                return Leaf(leaf.Token.TokenID, "<<UNINDENT");
-            }
-            return Leaf(leaf.Token.TokenID, leaf.Token.Value);
-        }
     }
 }
