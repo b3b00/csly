@@ -179,6 +179,16 @@ namespace ParserTests.lexer
         
     }
     
+    public enum Issue348
+    {
+        [Lexeme(GenericToken.String, "\"", "\\")] STriNG
+    }
+    
+    public enum Issue348Bis
+    {
+        [Lexeme(GenericToken.String, "\"","^")] STriNG
+    }
+    
     [Lexer]
     public enum Issue186MixedGenericAndRegexLexer
     {
@@ -499,6 +509,44 @@ namespace ParserTests.lexer
             var tok = r.Tokens[0];
             Check.That(tok.TokenID).IsEqualTo(DefaultQuotedString.DefaultString);
             Check.That(tok.StringWithoutQuotes).IsEqualTo(expected);
+        }
+
+        [Fact]
+        public void TestIssue348()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue348>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var lexer = lexerRes.Result;
+            string source = "\\\"te\\\\st\\\"";
+            
+
+            var r = lexer.Tokenize($"\"{source}\"");
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
+            var tok = r.Tokens[0];
+            Check.That(tok.TokenID).IsEqualTo(Issue348.STriNG);
+            Check.That(tok.Value).IsEqualTo("\"\"te\\\\st\"\"");
+            Check.That(tok.StringWithoutQuotes).IsEqualTo("\"te\\\\st\"");
+        }
+        [Fact]
+        public void TestIssue348Bis()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue348Bis>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var lexer = lexerRes.Result;
+            string source = "^\"te\\\\st^\"";
+            string expected = "\"\"te\\\\st\"\"";
+
+            var glex = lexer as GenericLexer<Issue348Bis>;
+            var g = glex.FSMBuilder.Fsm.ToGraphViz();
+            var r = lexer.Tokenize($"\"{source}\"");
+            Check.That(r.IsOk).IsTrue();
+            Check.That(r.Tokens).CountIs(2);
+            var tok = r.Tokens[0];
+            Check.That(tok.TokenID).IsEqualTo(Issue348Bis.STriNG);
+            Check.That(tok.Value).IsEqualTo(expected);
+            Check.That(tok.StringWithoutQuotes).IsEqualTo("\"te\\\\st\"");
+            
         }
 
         [Fact]
