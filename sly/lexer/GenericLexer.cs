@@ -614,50 +614,22 @@ namespace sly.lexer
             ReadOnlyMemory<char> stringValue)
         {
             var value = stringValue;
-            var i = 1;
-            var substitutionHappened = false;
-            var escaping = false;
-            var r = string.Empty;
-            while (i < value.Length - 1)
+            string newValue = "";
+            int i = 0;
+            while (i < value.Length)
             {
-                var current = value.At<char>(i);
-                if (current == escapeStringDelimiterChar && i < value.Length - 2)
+                char current = value.At(i);
+                if (current == escapeStringDelimiterChar)
                 {
-                    escaping = true;
-                    if (!substitutionHappened)
-                    {
-                        r = value.Slice(0, i).ToString();
-                        substitutionHappened = true;
-                    }
-                }
-                else
-                {
-                    if (escaping)
-                    {
-                        if (current != stringDelimiterChar)
-                        {
-                            r += escapeStringDelimiterChar;
-                        }
-
-                        escaping = false;
-                    }
-
-                    if (substitutionHappened)
-                    {
-                        r += current;
-                    }
+                    i++;
                 }
 
+                newValue += value.At(i);
                 i++;
+
             }
 
-            if (substitutionHappened)
-            {
-                r += value.At<char>(value.Length - 1);
-                value = r.AsMemory();
-            }
-
-            return value;
+            return newValue.AsMemory();
         }
 
         public ReadOnlyMemory<char> sameCharEscaper(char escapeStringDelimiterChar, char stringDelimiterChar,

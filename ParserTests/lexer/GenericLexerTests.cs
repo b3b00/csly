@@ -517,7 +517,7 @@ namespace ParserTests.lexer
             var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue348>>());
             Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
-            string source = "\\\"te\\\\st\\\"";
+            string source = "\\\"te\\\\\\\\st\\\"";
             
 
             var r = lexer.Tokenize($"\"{source}\"");
