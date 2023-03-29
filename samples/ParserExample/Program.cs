@@ -1136,7 +1136,9 @@ billy
         
         private static void Main(string[] args)
         {
-            TestIssue332();
+            Issue351();
+            //EscapeIt();
+            // TestIssue332();
             //TestTemplateFor();
             // testErrors();
             //TestContextualParser();
@@ -1314,6 +1316,47 @@ billy
                 Console.WriteLine(error.Message);
             }
             
+        }
+        
+        private static void EscapeIt()
+        {
+            char escape = '\\';
+            char delim = '"';
+            var value = "\\\"te\\\\\\\\st\\\"";
+            string newValue = "";
+            int i = 0;
+            while (i < value.Length)
+            {
+                char current = value[i];
+                if (current == escape)
+                {
+                    i++;
+                }
+
+                newValue += value[i];
+                i++;
+
+            }
+
+            ;
+        }
+
+        private static void Issue351()
+        {
+            var parserInstance = new ExpressionParser();
+            var builder = new ParserBuilder<ExpressionToken, int>();
+            var parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression").Result;
+            var r = parser.Parse("1+1+");
+            if (r.IsError)
+            {
+                r.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+            }
+            else
+            {
+                ;
+            }
+
+            ;
         }
         
         private static List<Token<ExpressionToken>> postProcess(List<Token<ExpressionToken>> tokens)

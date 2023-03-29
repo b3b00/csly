@@ -182,9 +182,7 @@ namespace sly.parser.llparser
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                     result.Root = children[0];
                 result.Root = node;
-                result.IsEnded = result.EndingPosition >= tokens.Count - 1
-                                 || result.EndingPosition == tokens.Count - 2 &&
-                                 tokens[tokens.Count - 1].IsEOS;
+                result.IsEnded = tokens[result.EndingPosition].IsEOS;
             }
 
 
