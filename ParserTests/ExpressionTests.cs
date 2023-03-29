@@ -89,5 +89,19 @@ namespace ParserTests
             Check.That(r.IsError).IsFalse();
             Check.That(r.Result).IsEqualTo(2);
         }
+        
+        [Fact]
+        public void TestIssue351NotReachingEOS()
+        {
+            var r = Parser.Parse("1 + 1 + 1");
+            Check.That(r.IsError).IsFalse();
+            
+            r = Parser.Parse("1 + 1 + ");
+            Check.That(r.IsError).IsTrue();
+            Check.That(r.Errors).CountIs(1);
+            
+            
+            
+        }
     }
 }
