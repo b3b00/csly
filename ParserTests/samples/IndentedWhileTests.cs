@@ -35,7 +35,7 @@ namespace ParserTests.samples
         {
             var buildResult = buildParser();
             var parser = buildResult.Result;
-            var result = parser.Parse("a:=1+1;");
+            var result = parser.Parse("a:=1+1");
             Check.That(result).IsOkParsing();
 
             Check.That(result.Result).IsInstanceOf<SequenceStatement>();
@@ -237,7 +237,7 @@ while true do
         {
             var buildResult = buildParser();
             var parser = buildResult.Result;
-            var result = parser.Parse("print true and false;");
+            var result = parser.Parse("print true and false");
             Check.That(result).IsOkParsing();
             
 
@@ -259,7 +259,7 @@ while true do
         {
             var buildResult = buildParser();
             var parser = buildResult.Result;
-            var result = parser.Parse("skip;");
+            var result = parser.Parse("skip");
             Check.That(result).IsOkParsing();
 
             Check.That(result.Result).IsInstanceOf<SequenceStatement>();
