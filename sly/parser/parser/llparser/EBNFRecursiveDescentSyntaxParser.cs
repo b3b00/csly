@@ -153,9 +153,7 @@ namespace sly.parser.llparser
                     node.ExpressionAffix = rule.ExpressionAffix;
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
-                    result.IsEnded = currentPosition >= tokens.Count - 1
-                                     || currentPosition == tokens.Count - 2 &&
-                                     tokens[tokens.Count - 1].IsEOS; 
+                    result.IsEnded = tokens[result.EndingPosition].IsEOS;
                 }
             }
 
