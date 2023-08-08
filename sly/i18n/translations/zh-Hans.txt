@@ -1,0 +1,52 @@
+﻿#
+#   Unexpected tokens
+#
+UnexpectedTokenExpecting=意外的 "{0}" ({1}). 期望为 {2}. 
+UnexpectedEosExpecting=意外的流结尾. 期望为 {0}. 
+UnexpectedToken=意外的 "{0}" ({1}).
+UnexpectedEos=意外的流结尾.
+
+#
+# lexer errors
+#
+UnexpectedChar =词法错误, 第 {1} 行, 第 {2} 列 : 未识别符号 '{0}';
+
+
+##########################################
+#
+# lexer initialization
+#
+
+CannotMixGenericAndRegex=不能在同个词法分析器中混用 Regex 词素和 Generic 词素
+DuplicateStringCharDelimiters=字符或字符串词素分隔符 {0} 被使用 {1} 次. 这会导致词法分析冲突
+TooManyComment=过多的注释词素
+TooManyMultilineComment=过多的多行注释词素
+TooManySingleLineComment=过多的单选注释词素
+CannotMixCommentAndSingleOrMulti=注释词素不能和单行或多行注释词素同时使用
+SameValueUsedManyTime=整型值 {0} 在词素枚举 {2} 中被使用 {1} 次
+StringDelimiterMustBe1Char=词素错误 {0} :  StringToken 词素分隔符 <{1}> 必须为1个字符长度.
+StringDelimiterCannotBeLetterOrDigit=词素错误 {0} :  StringToken 词素分隔符 <{1}> 不能以字母开头.
+StringEscapeCharMustBe1Char=词素错误 {0} :  StringToken 词素转义符  <{1}> 必须为1个字符长度.
+StringEscapeCharCannotBeLetterOrDigit=词素错误 {0} :  StringToken 词素转义符 <{1}> 不能以字母开头.
+CharDelimiterMustBe1Char=词素错误 {0} :  CharToken 词素分隔符 <{1}> 必须为1个字符长度.
+CharDelimiterCannotBeLetter=词素错误 {0} :  CharToken 词素分隔符 <{1}> 不能以字母或数字开头.
+CharEscapeCharMustBe1Char=词素错误 {0} :  CharToken 词素转义符  <{1}> 必须为1个字符长度.
+CharEscapeCharCannotBeLetterOrDigit=词素错误 {0} :  CharToken 词素转义符 <{1}> 不能以字母或数字开头.
+SugarTokenCannotStartWithLetter=词素错误 {0} :  SugarToken 词素 <{1}>  不能以字母开头.
+CannotUseExplicitTokensWithRegexLexer=显式的 Tokens 不能和 Regex 词法分析器一起使用. 请改用 Generic 词法分析器.
+
+##############################################
+#
+#   Parser initialization
+#
+
+
+MissingOperand =缺少 [operand] 特性;
+ReferenceNotFound ={1} 中引用的 {0} 不存在.
+MixedChoices ={0} 中含有混用终结符和非终结符的 {1}.
+NonTerminalChoiceCannotBeDiscarded ={0} : {1} 不能被标记为丢弃，因为它是非终结符.
+IncorrectVisitorReturnType =规则 {1} 的访问者 {0} 返回类型错误 : 期望为 {2}, 实际为 {3}
+IncorrectVisitorParameterType =规则 {1} 的访问者 {0} ; 参数 {2} 类型错误 : 期望为 {3}, 实际为 {4}.
+IncorrectVisitorParameterNumber =规则 {1} 的访问者 {0} 参数个数错误 : 期望为 {2} 或 {3}, 实际为 {4}
+LeftRecursion =检测到左递归 : {0}
+NonTerminalNeverUsed=非终结符 [{0}] 从未被使用.

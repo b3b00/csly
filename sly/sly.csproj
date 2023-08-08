@@ -38,5 +38,6 @@
     <EmbeddedResource Include="i18n\translations\fr.txt" />
     <None Remove="i18n\translations\fr.txt" />
     <EmbeddedResource Include="i18n\translations\en.txt" />
+    <EmbeddedResource Include="i18n\translations\zh-Hans.txt" />
   </ItemGroup>
 </Project>
