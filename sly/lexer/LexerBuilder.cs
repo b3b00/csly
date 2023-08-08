@@ -482,14 +482,9 @@ namespace sly.lexer
                         if (lexeme.IsDate)
                         {
                             DateFormat format = DateFormat.DDMMYYYY;
-                            if (lexeme.GenericTokenParameters != null && lexeme.GenericTokenParameters.Any())
+                            if (lexeme.GenericTokenParameters != null && lexeme.GenericTokenParameters.Any() && !Enum.TryParse<DateFormat>(lexeme.GenericTokenParameters[0], out format))
                             {
-                                if (!Enum.TryParse<DateFormat>(lexeme.GenericTokenParameters[0], out format))
-                                {
-                                    // TODO : throw initialization error :: shoudl not happen
-                                    format = DateFormat.DDMMYYYY;
-                                }
-                                
+                                format = DateFormat.DDMMYYYY;
                             }
 
                             lexer.AddDate(tokenID, format, lexeme.GenericTokenParameters[1].First(), result);

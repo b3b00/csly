@@ -579,7 +579,7 @@ namespace sly.lexer
             {
                 if (format == DateFormat.DDMMYYYY)
                 {
-                    return value.Length == 3 && value.At(2) == separator;;
+                    return value.Length == 3 && value.At(2) == separator;
                 }
                 else if (format == DateFormat.YYYYMMDD)
                 {
@@ -609,9 +609,25 @@ namespace sly.lexer
             FSMBuilder.GoTo(in_int);
             FSMBuilder.Transition(separator, checkDate)
                 .RepetitionTransition(2, "[0-9]")
-                .Transition(separator)
-                .RepetitionTransition(format == DateFormat.DDMMYYYY ? 4 : (format == DateFormat.YYYYMMDD ? 2 : 4),
-                    "[0-9]")
+                .Transition(separator);
+            var repetitions = 2;
+            switch (format)
+            {
+                case DateFormat.DDMMYYYY:
+                {
+                    repetitions = 4;
+                    break;
+                }
+                case DateFormat.YYYYMMDD:
+                {
+                    repetitions = 2;
+                    break;
+                }
+            }
+
+
+
+            FSMBuilder.RepetitionTransition(repetitions, "[0-9]")
                 .Mark(end_date)
                 .End(GenericToken.Date)
                 .CallBack(callback);
