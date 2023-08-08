@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GenericLexerWithCallbacks;
 using indented;
@@ -35,6 +36,19 @@ namespace ParserTests.lexer
         
         [Date(DateFormat.YYYYMMDD,'-')]
         ENGLISH_DATE,
+    }
+    
+    public enum DateAndExpressions
+    {
+        
+        [Int]
+        INT,
+        
+        [Sugar("-")]
+        MINUS,
+        
+        [Date(DateFormat.YYYYMMDD,'-')]
+        DATE,
     }
     
     public enum DoubleQuotedString
@@ -1055,7 +1069,7 @@ else
         public void TestDate()
         {
             DateTime date = new DateTime(2023, 08, 03);
-            
+
             var englishDateLexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DateTokenEnglishDashed>>());
             Check.That(englishDateLexerRes.IsError).IsFalse();
             var englishDateLexer = englishDateLexerRes.Result;
@@ -1091,7 +1105,7 @@ else
         public void TestManyDate()
         {
             DateTime date = new DateTime(2023, 08, 08);
-            
+
             var englishDateLexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManyDateToken>>());
             Check.That(englishDateLexerRes.IsError).IsFalse();
             var manyDateLexer = englishDateLexerRes.Result;
@@ -1111,5 +1125,26 @@ else
             Check.That(mannyDateLexerResult.Tokens[1].Value).IsEqualTo("2023-08-08");
             Check.That(mannyDateLexerResult.Tokens[1].DateTimeValue).IsEqualTo(date);
         }
+
+
+        [Fact]
+        public void TestDateAndExpressions()
+        {
+
+
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DateAndExpressions>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var lexer = lexerRes.Result;
+
+            var lexerResult = lexer.Tokenize("1978-12- 2023-08-08");
+            Check.That(lexerResult).IsOkLexing();
+            Check.That(lexerResult.Tokens).IsNotNull();
+            Check.That(lexerResult.Tokens).CountIs(6);
+            Check.That(lexerResult.Tokens.Extracting(x => x.TokenID).Take(5)).IsEqualTo(new List<DateAndExpressions>()
+            {
+                DateAndExpressions.INT, DateAndExpressions.MINUS, DateAndExpressions.INT, DateAndExpressions.MINUS, DateAndExpressions.DATE
+            });
+        }
     }
+
 }
