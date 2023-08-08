@@ -27,6 +27,15 @@ namespace ParserTests.lexer
         [Int]
         INT
     }
+
+    public enum ManyDateToken
+    {
+        [Date(DateFormat.DDMMYYYY,'/')]
+        FRENCH_DATE,
+        
+        [Date(DateFormat.YYYYMMDD,'-')]
+        ENGLISH_DATE,
+    }
     
     public enum DoubleQuotedString
     {
@@ -237,12 +246,12 @@ namespace ParserTests.lexer
         EOS = 0
         
     }
-    
-    
+
+
 
     public class GenericLexerTests
     {
-   
+
         public GenericLexerTests()
         {
         }
@@ -343,11 +352,11 @@ namespace ParserTests.lexer
             Check.That(r.Tokens).CountIs(3);
             var tok1 = r.Tokens[0];
             Check.That(tok1).IsEqualTo(CustomId.ID, "a_-Bc");
-            
+
             var tok2 = r.Tokens[1];
             Check.That(tok2).IsEqualTo(CustomId.ID, "ZyX-_");
         }
-        
+
         [Fact]
         public void TestCustomIdReverseRange()
         {
@@ -358,7 +367,7 @@ namespace ParserTests.lexer
             Check.That(r.IsOk).IsTrue();
             Check.That(r.Tokens).CountIs(3);
             var tok1 = r.Tokens[0];
-            Check.That(tok1).IsEqualTo(CustomIdReverseRange.ID,"a_-Bc");
+            Check.That(tok1).IsEqualTo(CustomIdReverseRange.ID, "a_-Bc");
             var tok2 = r.Tokens[1];
             Check.That(tok2).IsEqualTo(CustomIdReverseRange.ID, "ZyX-_");
         }
@@ -373,13 +382,13 @@ namespace ParserTests.lexer
             Check.That(r.IsOk).IsTrue();
             Check.That(r.Tokens).CountIs(5);
             var tok1 = r.Tokens[0];
-            Check.That(tok1).IsEqualTo(CustomId.OTHER,"_");
+            Check.That(tok1).IsEqualTo(CustomId.OTHER, "_");
             var tok2 = r.Tokens[1];
-            Check.That(tok2).IsEqualTo(CustomId.ID,"b_");
+            Check.That(tok2).IsEqualTo(CustomId.ID, "b_");
             var tok3 = r.Tokens[2];
-            Check.That(tok3).IsEqualTo(CustomId.OTHER,"-");
+            Check.That(tok3).IsEqualTo(CustomId.OTHER, "-");
             var tok4 = r.Tokens[3];
-            Check.That(tok4).IsEqualTo(CustomId.ID,"C-");
+            Check.That(tok4).IsEqualTo(CustomId.ID, "C-");
         }
 
         [Fact]
@@ -392,7 +401,7 @@ namespace ParserTests.lexer
             Check.That(r.IsOk).IsTrue();
             Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
-            Check.That(tok).IsEqualTo(IgnoreWS.WS," ");
+            Check.That(tok).IsEqualTo(IgnoreWS.WS, " ");
         }
 
         [Fact]
@@ -433,7 +442,7 @@ namespace ParserTests.lexer
             var tok1 = r.Tokens[0];
             Check.That(tok1).IsEqualTo(KeyWord.KEYWORD, "keyword");
             var tok2 = r.Tokens[1];
-            Check.That(tok2).IsEqualTo(default(KeyWord),"KeYwOrD");
+            Check.That(tok2).IsEqualTo(default(KeyWord), "KeYwOrD");
         }
 
         [Fact]
@@ -448,7 +457,7 @@ namespace ParserTests.lexer
             var tok1 = r.Tokens[0];
             Check.That(tok1).IsEqualTo(KeyWordIgnoreCase.KEYWORD, "keyword");
             var tok2 = r.Tokens[1];
-            Check.That(tok2).IsEqualTo(KeyWordIgnoreCase.KEYWORD,"KeYwOrD");
+            Check.That(tok2).IsEqualTo(KeyWordIgnoreCase.KEYWORD, "KeYwOrD");
         }
 
         [Fact]
@@ -534,7 +543,7 @@ namespace ParserTests.lexer
             Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             string source = "\\\"te\\\\\\\\st\\\"";
-            
+
 
             var r = lexer.Tokenize($"\"{source}\"");
             Check.That(r.IsOk).IsTrue();
@@ -544,6 +553,7 @@ namespace ParserTests.lexer
             Check.That(tok.Value).IsEqualTo("\"\"te\\\\st\"\"");
             Check.That(tok.StringWithoutQuotes).IsEqualTo("\"te\\\\st\"");
         }
+
         [Fact]
         public void TestIssue348Bis()
         {
@@ -562,7 +572,7 @@ namespace ParserTests.lexer
             Check.That(tok.TokenID).IsEqualTo(Issue348Bis.STriNG);
             Check.That(tok.Value).IsEqualTo(expected);
             Check.That(tok.StringWithoutQuotes).IsEqualTo("\"te\\\\st\"");
-            
+
         }
 
         [Fact]
@@ -582,26 +592,26 @@ namespace ParserTests.lexer
         }
 
 
-        
-        
+
+
         [Fact]
         public void TestParserWithLexerExtensions()
         {
             ParserUsingLexerExtensions parserInstance = new ParserUsingLexerExtensions();
-            var builder = new ParserBuilder<Extensions,object>();
+            var builder = new ParserBuilder<Extensions, object>();
             var parserResult = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "root",
                 ExtendedGenericLexer.AddExtension);
             Check.That(parserResult).IsOk();
             var parser = parserResult.Result;
             var result = parser.Parse("15.01.2020");
             Check.That(result).IsOkParsing();
-            
-            Check.That(result.Result).IsEqualTo(new DateTime(2020,01,15));
+
+            Check.That(result.Result).IsEqualTo(new DateTime(2020, 01, 15));
             result = parser.Parse("3.14");
             Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo(3.14);
         }
-        
+
         [Fact]
         public void TestExtensions()
         {
@@ -618,12 +628,13 @@ namespace ParserTests.lexer
             Check.That(r.Tokens[0]).IsEqualTo(Extensions.DATE, "20.02.2018");
             Check.That(r.Tokens[1]).IsEqualTo(Extensions.DOUBLE, "3.14");
         }
-        
+
         [Fact]
         public void TestShortExtensions()
         {
             var lexerRes =
-                LexerBuilder.BuildLexer(new BuildResult<ILexer<ShortExtensions>>(), ExtendedGenericLexer.AddShortExtension);
+                LexerBuilder.BuildLexer(new BuildResult<ILexer<ShortExtensions>>(),
+                    ExtendedGenericLexer.AddShortExtension);
             Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result as GenericLexer<ShortExtensions>;
             Check.That(lexer).IsNotNull();
@@ -639,7 +650,8 @@ namespace ParserTests.lexer
         [Fact]
         public void TestExtensionsPreconditionFailure()
         {
-            var lexerRes  = LexerBuilder.BuildLexer(new BuildResult<ILexer<Extensions>>(), ExtendedGenericLexer.AddExtension);
+            var lexerRes =
+                LexerBuilder.BuildLexer(new BuildResult<ILexer<Extensions>>(), ExtendedGenericLexer.AddExtension);
             Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result as GenericLexer<Extensions>;
             Check.That(lexer).IsNotNull();
@@ -658,8 +670,8 @@ namespace ParserTests.lexer
             Check.That(lexerRes.IsError).IsFalse();
             var lexer = lexerRes.Result;
             var source = "hello world  2 + 2 ";
-             var r = lexer.Tokenize(source);
-             Check.That(r.IsError).IsTrue();
+            var r = lexer.Tokenize(source);
+            Check.That(r.IsError).IsTrue();
             var error = r.Error;
             Check.That(error.Line).IsEqualTo(0);
             Check.That(error.Column).IsEqualTo(13);
@@ -681,7 +693,7 @@ namespace ParserTests.lexer
             var r = lexer.Tokenize(source1);
             Check.That(r.IsOk).IsTrue();
             Check.That(r.Tokens).CountIs(3);
-            
+
             var tok1 = r.Tokens[0];
             Check.That(tok1).IsEqualTo(ManyString.STRING, expectString1);
             Check.That(tok1.StringDelimiter).IsEqualTo('"');
@@ -689,7 +701,7 @@ namespace ParserTests.lexer
             var tok2 = r.Tokens[1];
             Check.That(tok2).IsEqualTo(ManyString.STRING, expectString2);
             Check.That(tok2.StringDelimiter).IsEqualTo('\'');
-            
+
         }
 
         [Fact]
@@ -706,8 +718,8 @@ namespace ParserTests.lexer
             Check.That(tokens).CountIs(2);
             var tok = tokens[0];
             Check.That(tok).IsEqualTo(SelfEscapedString.STRING, "'that's it'");
-                
-            
+
+
 
             r = lexer.Tokenize("'et voilà'");
             Check.That(r.IsOk).IsTrue();
@@ -715,7 +727,7 @@ namespace ParserTests.lexer
             Check.That(tokens).CountIs(2);
             tok = tokens[0];
             Check.That(tok).IsEqualTo(SelfEscapedString.STRING, "'et voilà'");
-            
+
         }
 
         [Fact]
@@ -774,7 +786,7 @@ namespace ParserTests.lexer
             Check.That(res2.Tokens).CountIs(2);
             token = res2.Tokens[0];
             Check.That(token).IsEqualTo(CharTokens.MyChar, source);
-            
+
             var sourceU = "'\\u0066'";
             var res3 = lexer.Tokenize(sourceU);
             Check.That(res3.IsError).IsFalse();
@@ -820,7 +832,7 @@ namespace ParserTests.lexer
             var r = lexer?.Tokenize("// /&");
             Check.That(r.IsError).IsTrue();
             Check.That(r.Error.UnexpectedChar).IsEqualTo('&');
-            
+
             r = lexer?.Tokenize("/&");
             Check.That(r.Error.UnexpectedChar).IsEqualTo('&');
 
@@ -861,11 +873,11 @@ namespace ParserTests.lexer
             var result = lexer.Tokenize(".");
             Check.That(result.IsError).IsTrue();
             Check.That(result.Error.ErrorType).IsEqualTo(ErrorType.UnexpectedChar);
-            
+
             result = lexer.Tokenize("--");
             Check.That(result.IsOk).IsTrue();
             Check.That(result.Tokens.Extracting(x => x.TokenID))
-                .ContainsExactly(new[] { Issue138.B, Issue138.B,  default(Issue138) });
+                .ContainsExactly(new[] { Issue138.B, Issue138.B, default(Issue138) });
         }
 
         [Fact]
@@ -890,8 +902,9 @@ namespace ParserTests.lexer
                 (2, 0, 4),
                 (2, 2, 5)
             };
-            
-            Check.That(result.Tokens.Take(6).Extracting(x => (x.Position.Line,x.Position.Column,x.IntValue))).ContainsExactly(expectations);
+
+            Check.That(result.Tokens.Take(6).Extracting(x => (x.Position.Line, x.Position.Column, x.IntValue)))
+                .ContainsExactly(expectations);
         }
 
         [Fact]
@@ -920,7 +933,7 @@ namespace ParserTests.lexer
             Check.That(r.Tokens).CountIs(2);
             Check.That(r.Tokens[0]).IsEqualTo(Issue210Token.SPECIAL, "special");
             Check.That(r.Tokens[1]).IsEqualTo(Issue210Token.EOF, "");
-            
+
             r = lexer.Tokenize("x?x");
             Check.That(r.IsOk).IsTrue();
             Check.That(r.Tokens).CountIs(4);
@@ -928,8 +941,8 @@ namespace ParserTests.lexer
             Check.That(r.Tokens[1]).IsEqualTo(Issue210Token.QMARK, "?");
             Check.That(r.Tokens[2]).IsEqualTo(Issue210Token.X, "x");
             Check.That(r.Tokens[3]).IsEqualTo(Issue210Token.EOF, "");
-            
-            
+
+
             r = lexer.Tokenize("??");
             Check.That(r.IsOk).IsTrue();
             Check.That(r.Tokens).CountIs(2);
@@ -940,7 +953,7 @@ namespace ParserTests.lexer
         [Fact]
         public void TestIndented()
         {
-            var source =@"if truc == 1
+            var source = @"if truc == 1
     un = 1
     deux = 2
 else
@@ -948,7 +961,7 @@ else
     quatre = 4
 
 ";
-            
+
             var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer>();
             Check.That(lexRes.IsOk).IsTrue();
             var lexer = lexRes.Result;
@@ -961,11 +974,11 @@ else
             Check.That(tokens.Where(x => x.IsIndent)).CountIs(2);
             Check.That(tokens.Where(x => x.IsUnIndent)).CountIs(2);
         }
-        
+
         [Fact]
         public void TestIndented2()
         {
-            var source =@"if truc == 1
+            var source = @"if truc == 1
     un = 1
     deux = 2
 else
@@ -973,7 +986,7 @@ else
     quatre = 4
 
 ";
-            
+
             var lexRes = LexerBuilder.BuildLexer<IndentedLangLexer2>();
             Check.That(lexRes.IsOk).IsTrue();
             var lexer = lexRes.Result;
@@ -1019,7 +1032,7 @@ else
 
         }
 
-        
+
         [Fact]
         public void TestTokensAndError()
         {
@@ -1034,10 +1047,10 @@ else
             Check.That(lexingResult.Tokens).IsNotNull();
             Check.That(lexingResult.Tokens).CountIs(3);
             Check.That(lexingResult.Error.UnexpectedChar).IsEqualTo('@');
-            
-            
+
+
         }
-        
+
         [Fact]
         public void TestDate()
         {
@@ -1053,10 +1066,8 @@ else
             Check.That(englishDateLexingResult.Tokens).CountIs(2);
             Check.That(englishDateLexingResult.Tokens[0].TokenID).IsEqualTo(DateTokenEnglishDashed.DATE);
             Check.That(englishDateLexingResult.Tokens[0].Value).IsEqualTo(source);
-            // TODO check value
 
-          
-            
+
             var frenchDateLexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DateTokenWithFrenchSlashed>>());
             Check.That(frenchDateLexerRes.IsError).IsFalse();
             var franchDateLexer = frenchDateLexerRes.Result;
@@ -1069,8 +1080,28 @@ else
             Check.That(frenchDateLexingResult.Tokens).CountIs(2);
             Check.That(frenchDateLexingResult.Tokens[0].TokenID).IsEqualTo(DateTokenWithFrenchSlashed.DATE);
             Check.That(frenchDateLexingResult.Tokens[0].Value).IsEqualTo(source);
-            // TODO check value
+
         }
-      
+
+        [Fact]
+        public void TestManyDate()
+        {
+            var englishDateLexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManyDateToken>>());
+            Check.That(englishDateLexerRes.IsError).IsFalse();
+            var manyDateLexer = englishDateLexerRes.Result;
+
+            var source = @"
+08/08/2023
+2023-08-08
+";
+            var mannyDateLexerResult = manyDateLexer.Tokenize(source);
+            Check.That(mannyDateLexerResult).IsOkLexing();
+            Check.That(mannyDateLexerResult.Tokens).IsNotNull();
+            Check.That(mannyDateLexerResult.Tokens).CountIs(3);
+            Check.That(mannyDateLexerResult.Tokens[0].TokenID).IsEqualTo(ManyDateToken.FRENCH_DATE);
+            Check.That(mannyDateLexerResult.Tokens[0].Value).IsEqualTo("08/08/2023");
+            Check.That(mannyDateLexerResult.Tokens[1].TokenID).IsEqualTo(ManyDateToken.ENGLISH_DATE);
+            Check.That(mannyDateLexerResult.Tokens[1].Value).IsEqualTo("2023-08-08");
+        }
     }
 }
