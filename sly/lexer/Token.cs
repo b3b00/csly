@@ -229,6 +229,9 @@ namespace sly.lexer
         public int IntValue => int.Parse(Value);
 
         [JsonIgnore]
+        public DateTime DateTimeValue { get; set; }
+        
+        [JsonIgnore]
         public  double DoubleValue
         {
             get

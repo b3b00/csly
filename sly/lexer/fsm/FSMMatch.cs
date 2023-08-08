@@ -42,6 +42,7 @@ namespace sly.lexer.fsm
         
         public List<Token<N>> IgnoredTokens { get; set; }
         
+        public DateTime DateTimeValue { get; set; }
         
         public FSMMatch(bool success)
         {

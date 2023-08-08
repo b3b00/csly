@@ -1054,6 +1054,8 @@ else
         [Fact]
         public void TestDate()
         {
+            DateTime date = new DateTime(2023, 08, 03);
+            
             var englishDateLexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DateTokenEnglishDashed>>());
             Check.That(englishDateLexerRes.IsError).IsFalse();
             var englishDateLexer = englishDateLexerRes.Result;
@@ -1066,6 +1068,7 @@ else
             Check.That(englishDateLexingResult.Tokens).CountIs(2);
             Check.That(englishDateLexingResult.Tokens[0].TokenID).IsEqualTo(DateTokenEnglishDashed.DATE);
             Check.That(englishDateLexingResult.Tokens[0].Value).IsEqualTo(source);
+            Check.That(englishDateLexingResult.Tokens[0].DateTimeValue).IsEqualTo(date);
 
 
             var frenchDateLexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DateTokenWithFrenchSlashed>>());
@@ -1080,12 +1083,15 @@ else
             Check.That(frenchDateLexingResult.Tokens).CountIs(2);
             Check.That(frenchDateLexingResult.Tokens[0].TokenID).IsEqualTo(DateTokenWithFrenchSlashed.DATE);
             Check.That(frenchDateLexingResult.Tokens[0].Value).IsEqualTo(source);
+            Check.That(frenchDateLexingResult.Tokens[0].DateTimeValue).IsEqualTo(date);
 
         }
 
         [Fact]
         public void TestManyDate()
         {
+            DateTime date = new DateTime(2023, 08, 08);
+            
             var englishDateLexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManyDateToken>>());
             Check.That(englishDateLexerRes.IsError).IsFalse();
             var manyDateLexer = englishDateLexerRes.Result;
@@ -1100,8 +1106,10 @@ else
             Check.That(mannyDateLexerResult.Tokens).CountIs(3);
             Check.That(mannyDateLexerResult.Tokens[0].TokenID).IsEqualTo(ManyDateToken.FRENCH_DATE);
             Check.That(mannyDateLexerResult.Tokens[0].Value).IsEqualTo("08/08/2023");
+            Check.That(mannyDateLexerResult.Tokens[0].DateTimeValue).IsEqualTo(date);
             Check.That(mannyDateLexerResult.Tokens[1].TokenID).IsEqualTo(ManyDateToken.ENGLISH_DATE);
             Check.That(mannyDateLexerResult.Tokens[1].Value).IsEqualTo("2023-08-08");
+            Check.That(mannyDateLexerResult.Tokens[1].DateTimeValue).IsEqualTo(date);
         }
     }
 }
