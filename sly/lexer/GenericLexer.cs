@@ -591,7 +591,19 @@ namespace sly.lexer
             NodeCallback<GenericToken> callback = delegate(FSMMatch<GenericToken> match)
             {
                 match.Properties[GenericLexer<IN>.DerivedToken] = token;
-                // TODO : parse date ?
+                var elements = match.Result.Value.Split(separator);
+                DateTime date;
+                if (format == DateFormat.DDMMYYYY)
+                {
+                    date = new DateTime(int.Parse(elements[2]), int.Parse(elements[1]), int.Parse(elements[0]));
+                }
+                else
+                {
+                    date = new DateTime(int.Parse(elements[0]), int.Parse(elements[1]), int.Parse(elements[2]));
+                }
+
+                match.DateTimeValue = date;
+
                 return match;
             };
             FSMBuilder.GoTo(in_int);
@@ -1057,6 +1069,7 @@ namespace sly.lexer
             tok.Notignored = match.Result.Notignored;
             tok.Channel = match.Result.Channel;
             tok.DecimalSeparator = match.DecimalSeparator;
+            tok.DateTimeValue = match.DateTimeValue;
             return tok;
         }
 
