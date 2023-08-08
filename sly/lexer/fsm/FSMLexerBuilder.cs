@@ -66,7 +66,7 @@ namespace sly.lexer.fsm
             if (Marks.ContainsKey(mark)) node = GetNode(Marks[mark]);
             return node;
         }
-
+        
         #endregion
 
         #region special chars
