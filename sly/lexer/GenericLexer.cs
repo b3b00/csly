@@ -15,6 +15,7 @@ namespace sly.lexer
         Identifier,
         Int,
         Double,
+        Date,
         KeyWord,
         String,
         Char,
@@ -105,6 +106,7 @@ namespace sly.lexer
         public const string escape_string = "escape_string";
         public const string escape_char = "escape_char";
         public const string in_up_to = "in_upto";
+        public const string end_date = "end_date";
 
 
         public const string single_line_comment_start = "single_line_comment_start";
@@ -364,7 +366,8 @@ namespace sly.lexer
 
             // numeric
             if (staticTokens.Contains<GenericToken>(GenericToken.Int) ||
-                staticTokens.Contains<GenericToken>(GenericToken.Double))
+                staticTokens.Contains<GenericToken>(GenericToken.Double) || 
+                staticTokens.Contains<GenericToken>(GenericToken.Date)) 
             {
                 FSMBuilder = FSMBuilder.GoTo(start)
                     .RangeTransition('0', '9')
@@ -568,6 +571,38 @@ namespace sly.lexer
                 .CallBack(callback);
 
             FSMBuilder.Fsm.DecimalSeparator = separatorChar;
+        }
+
+        public void AddDate(IN token, DateFormat format, char separator, BuildResult<ILexer<IN>> result)
+        {
+            TransitionPrecondition checkDate = delegate(ReadOnlyMemory<char> value)
+            {
+                if (format == DateFormat.DDMMYYYY)
+                {
+                    return value.Length == 3 && value.At(2) == separator;;
+                }
+                else if (format == DateFormat.YYYYMMDD)
+                {
+                    return value.Length == 5 && value.At(4) == separator;
+                }
+
+                return false;
+            }; 
+            NodeCallback<GenericToken> callback = delegate(FSMMatch<GenericToken> match)
+            {
+                match.Properties[GenericLexer<IN>.DerivedToken] = token;
+                // TODO : parse date ?
+                return match;
+            };
+            FSMBuilder.GoTo(in_int);
+            FSMBuilder.Transition(separator, checkDate)
+                .RepetitionTransition(2, "[0-9]")
+                .Transition(separator)
+                .RepetitionTransition(format == DateFormat.DDMMYYYY ? 4 : (format == DateFormat.YYYYMMDD ? 2 : 4),
+                    "[0-9]")
+                .Mark(end_date)
+                .End(GenericToken.Date)
+                .CallBack(callback);
         }
 
         public void AddKeyWord(IN token, string keyword, bool isPop, bool isPush, string mode,

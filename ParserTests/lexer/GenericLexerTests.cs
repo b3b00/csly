@@ -12,6 +12,22 @@ using Xunit;
 
 namespace ParserTests.lexer
 {
+
+    public enum DateTokenEnglishDashed
+    {
+        [Date(DateFormat.YYYYMMDD,'-')]
+        DATE,
+    }
+    
+    public enum DateTokenWithFrenchSlashed
+    {
+        [Date(DateFormat.DDMMYYYY,'/')]
+        DATE,
+        
+        [Int]
+        INT
+    }
+    
     public enum DoubleQuotedString
     {
         [Lexeme(GenericToken.String, "\"")] DoubleString
@@ -1020,6 +1036,40 @@ else
             Check.That(lexingResult.Error.UnexpectedChar).IsEqualTo('@');
             
             
+        }
+        
+        [Fact]
+        public void TestDate()
+        {
+            var englishDateLexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DateTokenEnglishDashed>>());
+            Check.That(englishDateLexerRes.IsError).IsFalse();
+            var englishDateLexer = englishDateLexerRes.Result;
+
+            var source = "2023-08-03";
+
+            var englishDateLexingResult = englishDateLexer.Tokenize(source);
+            Check.That(englishDateLexingResult).IsOkLexing();
+            Check.That(englishDateLexingResult.Tokens).IsNotNull();
+            Check.That(englishDateLexingResult.Tokens).CountIs(2);
+            Check.That(englishDateLexingResult.Tokens[0].TokenID).IsEqualTo(DateTokenEnglishDashed.DATE);
+            Check.That(englishDateLexingResult.Tokens[0].Value).IsEqualTo(source);
+            // TODO check value
+
+          
+            
+            var frenchDateLexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DateTokenWithFrenchSlashed>>());
+            Check.That(frenchDateLexerRes.IsError).IsFalse();
+            var franchDateLexer = frenchDateLexerRes.Result;
+
+            source = "03/08/2023";
+
+            var frenchDateLexingResult = franchDateLexer.Tokenize(source);
+            Check.That(frenchDateLexingResult).IsOkLexing();
+            Check.That(frenchDateLexingResult.Tokens).IsNotNull();
+            Check.That(frenchDateLexingResult.Tokens).CountIs(2);
+            Check.That(frenchDateLexingResult.Tokens[0].TokenID).IsEqualTo(DateTokenWithFrenchSlashed.DATE);
+            Check.That(frenchDateLexingResult.Tokens[0].Value).IsEqualTo(source);
+            // TODO check value
         }
       
     }
