@@ -29,6 +29,19 @@ namespace ParserTests.lexer
         INT
     }
 
+    public enum DateAndDoubleToken
+    {
+        [Double(".")]
+        DOUBLE,
+        
+        [Date(DateFormat.DDMMYYYY,'.')]
+        FRENCH_DATE,
+        
+        [Date(DateFormat.YYYYMMDD,'.')]
+        ENGLISH_DATE,
+        
+    }
+    
     public enum ManyDateToken
     {
         [Date(DateFormat.DDMMYYYY,'/')]
@@ -1099,6 +1112,31 @@ else
             Check.That(frenchDateLexingResult.Tokens[0].Value).IsEqualTo(source);
             Check.That(frenchDateLexingResult.Tokens[0].DateTimeValue).IsEqualTo(date);
 
+        }
+        
+        [Fact]
+        public void TestDateAndDouble()
+        {
+            DateTime date = new DateTime(2023, 08, 03);
+
+            var englishDateLexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DateAndDoubleToken>>());
+            Check.That(englishDateLexerRes.IsError).IsFalse();
+            var englishDateLexer = englishDateLexerRes.Result;
+
+            var source = $"{date.ToString("yyyy.MM.dd")} 3.14 {date.ToString("dd.MM.yyyy")}";
+
+            var lexingResult = englishDateLexer.Tokenize(source);
+            Check.That(lexingResult).IsOkLexing();
+            Check.That(lexingResult.Tokens).IsNotNull();
+            Check.That(lexingResult.Tokens).CountIs(4);
+            Check.That(lexingResult.Tokens.Extracting(x => x.TokenID).Take(3)).IsEqualTo(new List<DateAndDoubleToken>()
+            {
+                DateAndDoubleToken.ENGLISH_DATE, DateAndDoubleToken.DOUBLE, DateAndDoubleToken.FRENCH_DATE
+            });
+            Check.That(lexingResult.Tokens[0].DateTimeValue).IsEqualTo(date);
+            Check.That(lexingResult.Tokens[1].DoubleValue).IsEqualTo(3.14);
+            Check.That(lexingResult.Tokens[2].DateTimeValue).IsEqualTo(date);
+            
         }
 
         [Fact]

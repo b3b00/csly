@@ -573,7 +573,24 @@ namespace sly.lexer
             FSMBuilder.Fsm.DecimalSeparator = separatorChar;
         }
 
-        public void AddDate(IN token, DateFormat format, char separator, BuildResult<ILexer<IN>> result)
+        public void AddDate(IN token, DateFormat format, char separator, LexemeAttribute doubleLexeme,
+            BuildResult<ILexer<IN>> result)
+        {
+            if (doubleLexeme != null)
+            {
+                char decimalSeparator = (doubleLexeme.HasGenericTokenParameters)
+                    ? doubleLexeme.GenericTokenParameters[0][0]
+                    : '.';
+                if (decimalSeparator == separator)
+                {
+                    AddDoubleWhenDoubleTokenPresent(token, format, separator);
+                    return;
+                }
+            }
+            AddDoubleWhenNoDoubleToken(token, format, separator);
+        }
+
+        private void AddDoubleWhenNoDoubleToken(IN token, DateFormat format, char separator)
         {
             TransitionPrecondition checkDate = delegate(ReadOnlyMemory<char> value)
             {
@@ -587,7 +604,7 @@ namespace sly.lexer
                 }
 
                 return false;
-            }; 
+            };
             NodeCallback<GenericToken> callback = delegate(FSMMatch<GenericToken> match)
             {
                 match.Properties[GenericLexer<IN>.DerivedToken] = token;
@@ -626,7 +643,64 @@ namespace sly.lexer
             }
 
 
+            FSMBuilder.RepetitionTransition(repetitions, "[0-9]")
+                .Mark(end_date)
+                .End(GenericToken.Date)
+                .CallBack(callback);
+        }
+        
+        private void AddDoubleWhenDoubleTokenPresent(IN token, DateFormat format, char separator)
+        {
+            TransitionPrecondition checkDate = delegate(ReadOnlyMemory<char> value)
+            {
+                if (format == DateFormat.DDMMYYYY)
+                {
+                    bool match = value.Length == 6 && value.At(2) == separator && value.At(5) == separator; 
+                    return match;
+                }
+                else if (format == DateFormat.YYYYMMDD)
+                {
+                    bool match = value.Length == 8 && value.At(4)  == separator && value.At(7)  == separator;
+                    return match;
+                }
 
+                return false;
+            };
+            NodeCallback<GenericToken> callback = delegate(FSMMatch<GenericToken> match)
+            {
+                match.Properties[GenericLexer<IN>.DerivedToken] = token;
+                var elements = match.Result.Value.Split(separator);
+                DateTime date;
+                if (format == DateFormat.DDMMYYYY)
+                {
+                    date = new DateTime(int.Parse(elements[2]), int.Parse(elements[1]), int.Parse(elements[0]));
+                }
+                else
+                {
+                    date = new DateTime(int.Parse(elements[0]), int.Parse(elements[1]), int.Parse(elements[2]));
+                }
+
+                match.DateTimeValue = date;
+
+                return match;
+            };
+            FSMBuilder.GoTo(in_double);
+            FSMBuilder.Transition(separator, checkDate);
+            var repetitions = 2;
+            switch (format)
+            {
+                case DateFormat.DDMMYYYY:
+                {
+                    repetitions = 4;
+                    break;
+                }
+                case DateFormat.YYYYMMDD:
+                {
+                    repetitions = 2;
+                    break;
+                }
+            }
+            
             FSMBuilder.RepetitionTransition(repetitions, "[0-9]")
                 .Mark(end_date)
                 .End(GenericToken.Date)

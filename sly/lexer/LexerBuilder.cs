@@ -398,6 +398,9 @@ namespace sly.lexer
             config.ExtensionBuilder = extensionBuilder;
             var lexer = new GenericLexer<IN>(config, tokens);
             var Extensions = new Dictionary<IN, LexemeAttribute>();
+            
+            var doubleLexeme = attributes.Values.ToList().SelectMany(x => x).FirstOrDefault(x => x.IsDouble);
+            
             foreach (var pair in attributes)
             {
                 var tokenID = pair.Key;
@@ -409,6 +412,8 @@ namespace sly.lexer
                     lexer.AddLexeme(lexeme.GenericToken, tokenID);
                 }
 
+               
+                
                 foreach (var lexeme in lexemes.Where(x => x.GenericToken != GenericToken.Identifier))
                 {
                     try
@@ -487,7 +492,7 @@ namespace sly.lexer
                                 format = DateFormat.DDMMYYYY;
                             }
 
-                            lexer.AddDate(tokenID, format, lexeme.GenericTokenParameters[1].First(), result);
+                            lexer.AddDate(tokenID, format, lexeme.GenericTokenParameters[1].First(), doubleLexeme, result);
                             lexer.AddLexeme(lexeme.GenericToken, tokenID);
                         }
                     }
