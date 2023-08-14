@@ -1,9 +1,9 @@
 using sly.lexer;
 
-namespace ParserTests.errorAccuracy;
+namespace ParserTests.errorAccuracyIssue381;
 
 [Lexer(IgnoreWS = true, IgnoreEOL = true)]
-public enum ErrorAccuracyToken
+public enum ErrorAccuracyIssue381Token
 {
     Eof = 0,
 
@@ -47,7 +47,6 @@ public enum ErrorAccuracyToken
     [Lexeme(GenericToken.SugarToken, ",")] Comma = 54,
     [Lexeme(GenericToken.SugarToken, ":")] Colon = 55,
     [Lexeme(GenericToken.SugarToken, "(")] Lparen = 56,
-    [Sugar("(")]
     [Lexeme(GenericToken.SugarToken, ")")] Rparen = 57,
 
     [Lexeme(GenericToken.SugarToken, "==")]

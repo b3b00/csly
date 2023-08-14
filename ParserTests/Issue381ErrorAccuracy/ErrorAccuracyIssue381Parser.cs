@@ -1,13 +1,10 @@
-using System;
 using System.Collections.Generic;
-using csly.whileLang.model;
-using indented;
-using postProcessedLexerParser.expressionModel;
+using ParserTests.errorAccuracyIssue381;
 using sly.lexer;
 using sly.parser.generator;
 using sly.parser.parser;
 
-namespace ParserTests.issue381ErrorAccuracy;
+namespace ParserTests.Issue381ErrorAccuracy;
 
 public class ErrorAccuracyIssue381Parser
 {

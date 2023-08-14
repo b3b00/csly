@@ -1,15 +1,15 @@
-using System;
+using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestPlatform.Common.Utilities;
 using NFluent;
-using ParserTests.Issue164;
+using ParserTests.errorAccuracyIssue381;
 using sly.parser;
 using sly.parser.generator;
+using sly.parser.syntax.grammar;
 using Xunit;
 
-namespace ParserTests.errorAccuracy;
+namespace ParserTests.Issue381ErrorAccuracy;
 
-public class ErrorMessageAccuracyTests
+public class ErrorMessageAccuracyIssue381Tests
 {
     private static Parser<ErrorAccuracyIssue381Token, object> BuildParser()
     {
@@ -37,11 +37,14 @@ variable = function(glop, ""a"", ""b"",
         Check.That(r).Not.IsOkParsing();
         var error = r.Errors.First();
         Check.That(r.Errors).IsSingle();
-        var eror = r.Errors.First() as UnexpectedTokenSyntaxError<ErrorAccuracyIssue381Token>;
-        Check.That(error).IsNotNull();
-        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
-        Check.That(error.Column).IsEqualTo(12);
-        Check.That(error.Line).IsEqualTo(4);
-        Check.That(error.ErrorMessage).Contains("STRING");
+        var unexpected = r.Errors.First() as UnexpectedTokenSyntaxError<ErrorAccuracyIssue381Token>;
+        Check.That(unexpected).IsNotNull();
+        Check.That(unexpected.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(unexpected.Column).IsEqualTo(12);
+        Check.That(unexpected.Line).IsEqualTo(4);
+        Check.That(unexpected.UnexpectedToken.TokenID).IsEqualTo(ErrorAccuracyIssue381Token.String);
+        Check.That(unexpected.ExpectedTokens.Select(x => x.TokenId)).IsEquivalentTo(
+            new List<ErrorAccuracyIssue381Token>()
+                { ErrorAccuracyIssue381Token.Comma, ErrorAccuracyIssue381Token.Rparen });
     }
 }
