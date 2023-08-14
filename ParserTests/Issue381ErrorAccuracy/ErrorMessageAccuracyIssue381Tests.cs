@@ -25,15 +25,15 @@ public class ErrorMessageAccuracyIssue381Tests
     public void TestAccuracy()
     {
         string source = @"
-variable = function(glop, ""a"", ""b"", 
-            ""i1"", ""1"",
-            ""i2"", ""2""
-            ""i3"", ""3"",
-            ""i4"", ""4"")
+        variable = function(someVariable, ""string1"", ""string2"", 
+            ""string3"", ""value1"",
+            ""string4"", ""value2""
+            ""string5"", ""value3"",
+            ""string6"", ""value4""
 ";
 
         var parser = BuildParser();
-        var r = parser.Parse(source);
+        var r = parser.Parse(source,"statements");
         Check.That(r).Not.IsOkParsing();
         var error = r.Errors.First();
         Check.That(r.Errors).IsSingle();
@@ -42,9 +42,11 @@ variable = function(glop, ""a"", ""b"",
         Check.That(unexpected.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
         Check.That(unexpected.Column).IsEqualTo(12);
         Check.That(unexpected.Line).IsEqualTo(4);
+        Check.That(unexpected.UnexpectedToken.StringWithoutQuotes).IsEqualTo("string5");
         Check.That(unexpected.UnexpectedToken.TokenID).IsEqualTo(ErrorAccuracyIssue381Token.String);
-        Check.That(unexpected.ExpectedTokens.Select(x => x.TokenId)).IsEquivalentTo(
-            new List<ErrorAccuracyIssue381Token>()
+        Check.That(unexpected.ExpectedTokens.Extracting(x => x.TokenId))
+            .Contains(new List<ErrorAccuracyIssue381Token>()
                 { ErrorAccuracyIssue381Token.Comma, ErrorAccuracyIssue381Token.Rparen });
+        
     }
 }

@@ -351,6 +351,7 @@ namespace sly.parser.llparser
                     currentPosition = innerResult.EndingPosition;
                     lastInnerResult = innerResult;
                     hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
+                    innerErrors.AddRange(lastInnerResult.Errors);
                 }
                 else
                 {
@@ -359,7 +360,6 @@ namespace sly.parser.llparser
                         innerErrors.AddRange(innerResult.Errors);
                     }
                 }
-
                 stillOk =  innerResult != null && !innerResult.IsError && currentPosition < tokens.Count;
             }
 
