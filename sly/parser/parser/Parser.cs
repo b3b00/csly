@@ -16,6 +16,8 @@ namespace sly.parser
     {   
         public Action<ISyntaxNode<IN>> SyntaxParseCallback { get; set; }
 
+        public Dictionary<IN, Dictionary<string, string>> LexemeLabels => Lexer.LexemeLabels;
+
         public Parser(string i18n, ISyntaxParser<IN, OUT> syntaxParser, SyntaxTreeVisitor<IN, OUT> visitor)
         {
             I18n = i18n;
@@ -136,13 +138,13 @@ namespace sly.parser
                     var expectedTokens =  expectingTokens != null && expectingTokens.Any() ? expectingTokens?.ToArray() : null;
                     if (expectedTokens != null)
                     {
-                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First<UnexpectedTokenSyntaxError<IN>>().UnexpectedToken, I18n,
+                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First<UnexpectedTokenSyntaxError<IN>>().UnexpectedToken, LexemeLabels, I18n,
                             expectedTokens);
                         errors.Add(expected);
                     }
                     else
                     {
-                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First<UnexpectedTokenSyntaxError<IN>>().UnexpectedToken, I18n,
+                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First<UnexpectedTokenSyntaxError<IN>>().UnexpectedToken, LexemeLabels, I18n,
                             new LeadingToken<IN>[]{});
                         errors.Add(expected);
                     }

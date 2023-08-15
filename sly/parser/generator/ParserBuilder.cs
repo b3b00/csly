@@ -116,6 +116,7 @@ namespace sly.parser.generator
                 else
                 {
                     parser.Lexer = lexerResult.Result;
+                    parser.SyntaxParser.LexemeLabels = lexerResult.Result.LexemeLabels;
                     parser.Instance = parserInstance;
                     result.Result = parser;
                 }

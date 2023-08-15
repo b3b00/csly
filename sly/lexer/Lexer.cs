@@ -12,7 +12,7 @@ namespace sly.lexer
     /// <typeparam name="T">T is the enum Token type</typeparam>
     public class Lexer<T> : ILexer<T> where T : struct
     {
-        public Dictionary<T, Dictionary<string, string>> Labels { get; set; }
+        public Dictionary<T, Dictionary<string, string>> LexemeLabels { get; set; }
         public string I18n { get; set; }
         public LexerPostProcess<T> LexerPostProcess { get; set; }
 

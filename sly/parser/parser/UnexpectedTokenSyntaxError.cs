@@ -12,9 +12,11 @@ namespace sly.parser
     public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable where T : struct
     {
         private string I18n;
-        
-        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, string i18n=null, params LeadingToken<T>[] expectedTokens )
+
+        private Dictionary<T, Dictionary<string, string>> Labels;
+        public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, Dictionary<T, Dictionary<string, string>> labels, string i18n=null, params LeadingToken<T>[] expectedTokens )
         {
+            Labels = labels;
             I18n = i18n;
             ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
             
@@ -101,14 +103,29 @@ namespace sly.parser
                 {
                     foreach (var t in ExpectedTokens)
                     {
-                        expecting.Append(t.ToString());
+                        if (t.IsExplicitToken)
+                        {
+                            expecting.Append(t.ToString());
+                        }
+                        else
+                        {
+                            var lbl = t.ToString();
+                            if (Labels.TryGetValue(t.TokenId, out var labels))
+                            {
+                                if (labels.TryGetValue(I18n, out var label))
+                                {
+                                    lbl = label;
+                                }
+                            }
+                            expecting.Append(lbl);
+                        }
                         expecting.Append(", ");
                     }
                 }
 
-                string value = UnexpectedToken.ToString();
+                string value = UnexpectedToken.Value;
                 
-                return I18N.Instance.GetText(I18n,i18NMessage, value, UnexpectedToken.TokenID.ToString(), expecting.ToString());
+                return I18N.Instance.GetText(I18n,i18NMessage, value, UnexpectedToken.Label.ToString(), expecting.ToString());
             }
         }
 

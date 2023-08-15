@@ -18,7 +18,8 @@ namespace sly.parser.llparser
             ComputeSubRules(configuration);
             InitializeStartingTokens(Configuration, startingNonTerminal);
         }
-
+        
+        public Dictionary<IN, Dictionary<string, string>> LexemeLabels { get; set; }
 
         #region parsing
 
@@ -46,7 +47,7 @@ namespace sly.parser.llparser
 
             if (matchingRuleCount == 0)
             {
-                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], I18n, nt.PossibleLeadingTokens.ToArray()));
+                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], LexemeLabels, I18n, nt.PossibleLeadingTokens.ToArray()));
             }
 
             SyntaxParseResult<IN> result = null;
@@ -80,7 +81,7 @@ namespace sly.parser.llparser
 
                     if (errors.Count == 0)
                     {
-                        errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastPosition], null));
+                        errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastPosition],LexemeLabels, null));
                     }
                 }
             }
@@ -135,7 +136,7 @@ namespace sly.parser.llparser
                                 else
                                 {
                                     var tok = tokens[currentPosition];
-                                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tok, I18n,
+                                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tok, LexemeLabels, I18n,
                                         terminalClause.ExpectedToken));
                                 }
 
@@ -250,7 +251,7 @@ namespace sly.parser.llparser
             result.HasByPassNodes = false;
             if (result.IsError)
             {
-                result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(token, I18n, terminal.ExpectedToken));
+                result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
                 result.AddExpecting(terminal.ExpectedToken);
             }
             return result;
