@@ -7,6 +7,8 @@ namespace sly.parser
     public interface ISyntaxParser<IN, OUT> where IN : struct
     {
         string StartingNonTerminal { get; set; }
+        
+        Dictionary<IN, Dictionary<string, string>> LexemeLabels { get; set; }
 
         SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null);
 

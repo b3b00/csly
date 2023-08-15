@@ -9,7 +9,7 @@ namespace sly.lexer
     public interface ILexer<T> where T : struct
     {
         
-        Dictionary<T, Dictionary<string, string>> Labels { get; set; }
+        Dictionary<T, Dictionary<string, string>> LexemeLabels { get; set; }
         
         void AddDefinition(TokenDefinition<T> tokenDefinition);
         LexerResult<T> Tokenize(string source);

@@ -111,7 +111,30 @@ namespace sly.lexer
                 result = Build<IN>(attributes, result, extensionBuilder, lang, explicitTokens);
                 if (!result.IsError)
                 {
-                    result.Result.LexerPostProcess = lexerPostProcess;
+                    var labels = result.Result.LexemeLabels;
+                    LexerPostProcess<IN> post = tokens =>
+                    {
+
+                        var labeledTokens = tokens.Select(token =>
+                        {
+                            token.Label = token.TokenID.ToString();
+                            if (labels.TryGetValue(token.TokenID, out var tokenLabels))
+                            {
+                                if (tokenLabels.TryGetValue(lang, out string label))
+                                {
+                                    token.Label = label;
+                                }
+                            }
+                            return token;
+                        }).ToList();
+                        if (lexerPostProcess != null)
+                        {
+                            return lexerPostProcess(labeledTokens);
+                        }
+
+                        return labeledTokens;
+                    }; 
+                    result.Result.LexerPostProcess = post;
                 }
             }
 
@@ -164,11 +187,11 @@ namespace sly.lexer
             if (result.IsOk && result.Result != null)
             {
                 // TODO add some checks (uniqueness of translation,...)
-                result.Result.Labels = new Dictionary<IN, Dictionary<string, string>>();
+                result.Result.LexemeLabels = new Dictionary<IN, Dictionary<string, string>>();
                 foreach (var kvp in attributes)
                 {
                     var labels = kvp.Value.labels.ToDictionary(x => x.Language, x => x.Label);
-                    result.Result.Labels[kvp.Key] = labels;
+                    result.Result.LexemeLabels[kvp.Key] = labels;
                 }
                 
                 

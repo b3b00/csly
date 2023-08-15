@@ -173,6 +173,8 @@ namespace sly.lexer
         [JsonConverter(typeof(StringEnumConverter))]
         public T TokenID { get; set; }
 
+        public string Label { get; set; }
+        
         public bool IsComment { get; set; }
 
         public bool Discarded { get; set; } = false;

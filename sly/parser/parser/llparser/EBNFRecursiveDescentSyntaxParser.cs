@@ -51,7 +51,7 @@ namespace sly.parser.llparser
                                 else
                                 {
                                     var tok = tokens[currentPosition];
-                                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,I18n,
+                                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,LexemeLabels, I18n,
                                         termClause.ExpectedToken));
                                 }
 
@@ -577,7 +577,7 @@ namespace sly.parser.llparser
             {
                 var terminalAlternates = choice.Choices.Cast<TerminalClause<IN>>();
                 var expected = terminalAlternates.Select(x => x.ExpectedToken).ToList();
-                result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition],I18n,expected.ToArray()));
+                result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition], LexemeLabels, I18n,expected.ToArray()));
             }
             
             return result;

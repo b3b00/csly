@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using sly.i18n;
 using sly.lexer;
 using sly.lexer.fsm;
 
@@ -7,6 +8,8 @@ namespace jsonparser
 {
     public class JSONLexer : ILexer<JsonToken>
     {
+        public Dictionary<JsonToken, Dictionary<string, string>>LexemeLabels { get; set; }
+        
         public string I18n { get; set; }
         public LexerPostProcess<JsonToken> LexerPostProcess { get; set; }
 
