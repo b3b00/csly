@@ -9,43 +9,6 @@ using sly.lexer.fsm.transitioncheck;
 
 namespace sly.lexer
 {
-    public enum GenericToken
-    {
-        Default,
-        Identifier,
-        Int,
-        Double,
-        Date,
-        KeyWord,
-        String,
-        Char,
-        SugarToken,
-
-        Extension,
-
-        Comment,
-        UpTo
-    }
-
-    public enum IdentifierType
-    {
-        Alpha,
-        AlphaNumeric,
-        AlphaNumericDash,
-        Custom
-    }
-
-    public enum EOLType
-    {
-        Windows,
-        Nix,
-
-        Mac,
-        Environment,
-
-        No
-    }
-
     public class GenericLexer<IN> : ILexer<IN> where IN : struct
     {
         public class Config
@@ -86,6 +49,8 @@ namespace sly.lexer
 
         public LexerPostProcess<IN> LexerPostProcess { get; set; }
 
+        public Dictionary<IN, List<LexemeLabelAttribute>> Labels { get; set; }
+        
         public string I18n { get; set; }
 
         public const string in_string = "in_string";
