@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using sly.i18n;
 using sly.lexer.fsm;
 
 namespace sly.lexer
@@ -11,6 +12,7 @@ namespace sly.lexer
     /// <typeparam name="T">T is the enum Token type</typeparam>
     public class Lexer<T> : ILexer<T> where T : struct
     {
+        public Dictionary<T, List<LexemeLabelAttribute>> Labels { get; set; }
         public string I18n { get; set; }
         public LexerPostProcess<T> LexerPostProcess { get; set; }
 
