@@ -152,8 +152,27 @@ namespace sly.lexer
                 {
                     result = BuildGenericSubLexers<IN>(attributes, extensionBuilder, result, lang, explicitTokens);
                 }
+
+                result = SetLabels(attributes, result);
             }
 
+            return result;
+        }
+
+        private static BuildResult<ILexer<IN>> SetLabels<IN>(Dictionary<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)> attributes, BuildResult<ILexer<IN>> result) where IN : struct
+        {
+            if (result.IsOk && result.Result != null)
+            {
+                // TODO add some checks (uniqueness of translation,...)
+                result.Result.Labels = new Dictionary<IN, Dictionary<string, string>>();
+                foreach (var kvp in attributes)
+                {
+                    var labels = kvp.Value.labels.ToDictionary(x => x.Language, x => x.Label);
+                    result.Result.Labels[kvp.Key] = labels;
+                }
+                
+                
+            }
             return result;
         }
 
