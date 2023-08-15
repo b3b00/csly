@@ -49,7 +49,7 @@ namespace sly.lexer
 
         public LexerPostProcess<IN> LexerPostProcess { get; set; }
 
-        public Dictionary<IN, List<LexemeLabelAttribute>> Labels { get; set; }
+        public Dictionary<IN, Dictionary<string, string>> Labels { get; set; }
         
         public string I18n { get; set; }
 
