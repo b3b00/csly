@@ -1,7 +1,7 @@
 #
 #   Unexpected tokens
 #
-UnexpectedTokenExpecting=unexpected {0} {1}. Expecting {2}.
+UnexpectedTokenExpecting=unexpected '{0}' {1}. Expecting {2}.
 UnexpectedEosExpecting=unexpected end of stream. Expecting {0}.
 UnexpectedToken=unexpected {0} {1}.
 UnexpectedEos=unexpected end of stream.
