@@ -42,12 +42,14 @@ Eof = 0,
 
         [Lexeme(GenericToken.SugarToken, "#")] Hash = 50,
         [Lexeme(GenericToken.SugarToken, ";")] SemiColon = 51,
-        [Lexeme(GenericToken.SugarToken, "{")] LBrack = 52,
-        [Lexeme(GenericToken.SugarToken, "}")] RBrack = 53,
+        [Lexeme(GenericToken.SugarToken, "{")] LBrace = 52,
+        [Lexeme(GenericToken.SugarToken, "}")] RBrace = 53,
         [Lexeme(GenericToken.SugarToken, ",")] Comma = 54,
         [Lexeme(GenericToken.SugarToken, ":")] Colon = 55,
         [Lexeme(GenericToken.SugarToken, "(")] Lparen = 56,
         [Lexeme(GenericToken.SugarToken, ")")] Rparen = 57,
+        [Lexeme(GenericToken.SugarToken, "[")] Lbrack = 158,
+        [Lexeme(GenericToken.SugarToken, "]")] Rbrack = 159,
 
         [Lexeme(GenericToken.SugarToken, "==")]
         Equal = 58,

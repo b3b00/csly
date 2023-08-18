@@ -141,7 +141,7 @@ public class ErrorAccuracyIssue381Parser
         }
 
         [Operand]
-        [Production("optionsoperand : LBrack[d] option ( Comma option)* RBrack[d]")]
+        [Production("optionsoperand : Lbrack[d] option ( Comma option)* RBrack[d]")]
         public object Options(object head, List<Group<ErrorAccuracyIssue381Token, object>> tail)
         {
             return null;
@@ -177,9 +177,22 @@ public class ErrorAccuracyIssue381Parser
         {
             return null;
         }
+        
+        [Operand]
+        [Production("statement : Lbrack[d] args2 Rbrack[d]")]
+        public object Array(object args)
+        {
+            return null;
+        }
 
         [Production("args : ErrorAccuracyIssue381Parser_expressions (Comma[d] ErrorAccuracyIssue381Parser_expressions)*")]
         public object Arguments(object head, List<Group<ErrorAccuracyIssue381Token, object>> tail)
+        {
+            return null;
+        }
+        
+        [Production("args2 :  (Comma[d] ErrorAccuracyIssue381Parser_expressions)+")]
+        public object Arguments2(List<Group<ErrorAccuracyIssue381Token, object>> tail)
         {
             return null;
         }
