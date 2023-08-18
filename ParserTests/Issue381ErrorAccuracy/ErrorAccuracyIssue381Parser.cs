@@ -141,7 +141,7 @@ public class ErrorAccuracyIssue381Parser
         }
 
         [Operand]
-        [Production("optionsoperand : Lbrack[d] option ( Comma option)* RBrack[d]")]
+        [Production("optionsoperand : Lbrack[d] option ( Comma option)* Rbrack[d]")]
         public object Options(object head, List<Group<ErrorAccuracyIssue381Token, object>> tail)
         {
             return null;
