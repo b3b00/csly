@@ -29,24 +29,6 @@ namespace BravoLights.Connections
         {
             var lvar = (LvarExpression)variable;
             var name = lvar.LVarName;
-
-            lock (this)
-            {
-                handlers.TryGetValue(name, out var existingHandlersForDefinition);
-                var newListeners = (EventHandler<ValueChangedEventArgs>)Delegate.Combine(existingHandlersForDefinition, handler);
-                handlers[name] = newListeners;
-
-                if (existingHandlersForDefinition == null)
-                {
-                    // First subscription for this variable
-                    if (lvarIds.TryGetValue(name, out var id))
-                    {
-                        wasmChannel.Subscribe(id);
-                    }
-                }
-
-                SendLastValue(name, handler);
-            }
         }
 
         public void RemoveListener(IVariable variable, EventHandler<ValueChangedEventArgs> handler)
@@ -54,27 +36,7 @@ namespace BravoLights.Connections
             var lvar = (LvarExpression)variable;
             var name = lvar.LVarName;
 
-            lock (this)
-            {
-                handlers.TryGetValue(name, out var existingHandlersForDefinition);
-                var newListeners = (EventHandler<ValueChangedEventArgs>)Delegate.Remove(existingHandlersForDefinition, handler);
-
-                if (newListeners == null)
-                {
-                    handlers.Remove(name);
-                    // No more subscriptions for this variable
-                    if (lvarIds.TryGetValue(name, out var id))
-                    {
-                        wasmChannel.Unsubscribe(id);
-                    }
-                }
-                else
-                {
-                    handlers[name] = newListeners;
-                }
-
-                SendLastValue(name, handler);
-            }
+            
         }
 
         private void SendLastValue(string name, EventHandler<ValueChangedEventArgs> handler)
