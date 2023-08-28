@@ -53,9 +53,6 @@ namespace sly.lexer
         public Token<IN> this[int index]
         {
             get => GetToken(index);
-            set
-            {
-            }
         }
 
         public int Count => Tokens.Count;

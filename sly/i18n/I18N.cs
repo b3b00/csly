@@ -7,7 +7,7 @@ namespace sly.i18n
 {
     public class I18N
     {
-        public static IDictionary<string, IDictionary<I18NMessage, string>> Translations;
+        public readonly IDictionary<string, IDictionary<I18NMessage, string>> Translations;
 
         private static I18N _instance;
 

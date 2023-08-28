@@ -484,7 +484,7 @@ namespace ParserTests
             
             var result = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
             Check.That(result).Not.IsOk();
-            Check.That(result.Errors);
+            Check.That(result.Errors).IsSingle();
             Check.That(result).HasError(ErrorCodes.PARSER_LEFT_RECURSIVE,"first > third > first");
         }
         

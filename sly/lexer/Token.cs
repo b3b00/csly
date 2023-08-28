@@ -246,7 +246,6 @@ namespace sly.lexer
                 
                 return result;
             }
-            set { }
         }
 
         [JsonIgnore]

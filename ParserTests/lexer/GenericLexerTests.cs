@@ -776,7 +776,7 @@ namespace ParserTests.lexer
         public void TestTokenCallbacks()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CallbackTokens>>());
-            Check.That(res.IsError);
+            Check.That(res.IsError).IsFalse();
             var lexer = res.Result as GenericLexer<CallbackTokens>;
             CallBacksBuilder.BuildCallbacks(lexer);
 
@@ -1182,6 +1182,8 @@ else
             {
                 DateAndExpressions.INT, DateAndExpressions.MINUS, DateAndExpressions.INT, DateAndExpressions.MINUS, DateAndExpressions.DATE
             });
+            
+            
         }
     }
 
