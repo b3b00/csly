@@ -782,16 +782,22 @@ namespace sly.lexer
         public void AddStringLexem(IN token, BuildResult<ILexer<IN>> result, string stringDelimiter,
             string escapeDelimiterChar = "\\")
         {
-            if (string.IsNullOrEmpty(stringDelimiter) || stringDelimiter.Length > 1)
+            if (string.IsNullOrEmpty(stringDelimiter) || stringDelimiter.Length > 1) {
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
                     I18N.Instance.GetText(I18n, I18NMessage.StringDelimiterMustBe1Char, stringDelimiter,
                         token.ToString()),
                     ErrorCodes.LEXER_STRING_DELIMITER_MUST_BE_1_CHAR));
+                return;
+            }
+
             if (stringDelimiter.Length == 1 && char.IsLetterOrDigit(stringDelimiter[0]))
+            {
                 result.AddError(new InitializationError(ErrorLevel.FATAL,
                     I18N.Instance.GetText(I18n, I18NMessage.StringDelimiterCannotBeLetterOrDigit, stringDelimiter,
                         token.ToString()),
                     ErrorCodes.LEXER_STRING_DELIMITER_CANNOT_BE_LETTER_OR_DIGIT));
+                return;
+            }
 
             if (string.IsNullOrEmpty(escapeDelimiterChar) || escapeDelimiterChar.Length > 1)
                 result.AddError(new InitializationError(ErrorLevel.FATAL,
