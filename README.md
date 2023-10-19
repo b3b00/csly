@@ -81,7 +81,7 @@ Csly provides native support for indentation. Head to [Indented Languages](https
 Comments or whitespace are almost every time discardable. But sometimes it makes sens to preserve them : 
 
 - use comments to generate auto doc (think javadoc, c#'s xmldoc or python's docstring )
-- introduce meta data without clutering your grammar
+- introduce meta data without cluttering your grammar
 
 So CSLY borrowed the (antlr channel concept)[https://datacadamia.com/antlr/channel]. 
 Every lexeme can be redirected to a specific channel. By default comments go to channel 2.
@@ -100,7 +100,7 @@ Documentation is also a work in progress event though you can have it a glance l
 Lexemes are often similar from one language to another. Csly introduces a generic lexer that defines common lexemes and which can be reused across languages. 
 The built-in generic lexer has better performance than a regex-based lexer.
 
->### Reuse common token definition and take avantage of better lexer performance.
+>### Reuse common token definition and take advantage of better lexer performance.
 
 See [Generic lexer](https://github.com/b3b00/csly/wiki/GenericLexer) for the generic lexer implementation and [Lexer](https://github.com/b3b00/wiki/Lexer) for a general presentation on rolling your own.
 
