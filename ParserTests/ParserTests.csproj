@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <Authors>b3b00</Authors>
   </PropertyGroup>
   <ItemGroup>

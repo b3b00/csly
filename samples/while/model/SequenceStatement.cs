@@ -25,7 +25,7 @@ namespace csly.whileLang.model
             Statements = seq;
         }
 
-        private List<Statement> Statements { get; }
+        public List<Statement> Statements { get; }
         public int Count => Statements.Count;
 
         public Scope CompilerScope { get; set; }
