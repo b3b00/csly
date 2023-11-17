@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2005
@@ -19,25 +19,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleExpressionParser", "s
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "while", "samples\while\while.csproj", "{E0375D19-488A-4D5C-83E9-683552D5F4E5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericLexerWithCallbacks", "samples\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj", "{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenericLexerWithCallbacks", "samples\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj", "{FFCA5A16-0388-4A8E-8B40-0D1FDA5D4B7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bench", "bench\bench.csproj", "{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bench", "bench\bench.csproj", "{ED78DBA7-450B-4FE9-B72C-E7FE5C38538B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "bench2.4", "bench2.4\bench2.4.csproj", "{0C41A177-688F-44AA-9387-D05662DBA360}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "bench2.4", "bench2.4\bench2.4.csproj", "{0C41A177-688F-44AA-9387-D05662DBA360}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "benchCurrent", "benchCurrent\benchCurrent.csproj", "{269BB2E0-E9D3-4E62-A119-8C9F7D1F4DC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "benchCurrent", "benchCurrent\benchCurrent.csproj", "{269BB2E0-E9D3-4E62-A119-8C9F7D1F4DC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "profiler", "profiler\profiler.csproj", "{85CF8E29-15CB-4C9D-A070-71CF96216DD0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "profiler", "profiler\profiler.csproj", "{85CF8E29-15CB-4C9D-A070-71CF96216DD0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "indented", "samples\indented\indented.csproj", "{7C6C4A13-2AE5-4070-A2E1-05B6A83DC97C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "indented", "samples\indented\indented.csproj", "{7C6C4A13-2AE5-4070-A2E1-05B6A83DC97C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "indentedWhile", "samples\IndentedWhile\indentedWhile.csproj", "{B1FAADF0-208D-4A0A-A24D-D7BF4E33DCB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "indentedWhile", "samples\IndentedWhile\indentedWhile.csproj", "{B1FAADF0-208D-4A0A-A24D-D7BF4E33DCB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "postProcessedLexerParser", "samples\postProcessedLexerParser\postProcessedLexerParser.csproj", "{8F703C3C-0D10-4F43-AC2E-14843D59E460}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "postProcessedLexerParser", "samples\postProcessedLexerParser\postProcessedLexerParser.csproj", "{8F703C3C-0D10-4F43-AC2E-14843D59E460}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XML", "samples\XML\XML.csproj", "{81E72CFA-A6D6-4DB4-B3B5-E167064E7858}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XML", "samples\XML\XML.csproj", "{81E72CFA-A6D6-4DB4-B3B5-E167064E7858}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTemplate", "samples\SimpleTemplate\SimpleTemplate.csproj", "{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleTemplate", "samples\SimpleTemplate\SimpleTemplate.csproj", "{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11}"
 EndProject
 Global
 	GlobalSection(Performance) = preSolution

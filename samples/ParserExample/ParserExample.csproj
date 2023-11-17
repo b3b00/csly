@@ -1,28 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
-	<Authors>b3b00</Authors>
+    <TargetFramework>net8.0</TargetFramework>
+    <Authors>b3b00</Authors>
   </PropertyGroup>
-
   <ItemGroup>
     <None Remove="test.json" />
   </ItemGroup>
-
   <ItemGroup>
     <Content Include="test.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-
-
-
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-    <!--PackageReference Include="Wasi.Sdk" Version="0.1.2-preview.10061" /-->
-  </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\ParserTests\ParserTests.csproj" />
     <ProjectReference Include="..\expressionParser\expressionParser.csproj" />
@@ -37,9 +26,10 @@
     <ProjectReference Include="..\while\while.csproj" />
     <ProjectReference Include="..\XML\XML.csproj" />
   </ItemGroup>
-  
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-     <NoWarn>1701;1702;1705;1591</NoWarn>
-</PropertyGroup>
-
+    <NoWarn>1701;1702;1705;1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
 </Project>
