@@ -140,12 +140,11 @@ namespace sly.parser.generator.visitor
     {
         public SyntaxTreeVisitor(ParserConfiguration<IN, OUT> conf, object parserInstance)
         {
-            ParserClass = ParserClass;
             Configuration = conf;
             ParserVsisitorInstance = parserInstance;
         }
 
-        public Type ParserClass { get; set; }
+        
 
         public object ParserVsisitorInstance { get; set; }
 
