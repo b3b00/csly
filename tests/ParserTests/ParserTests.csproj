@@ -22,18 +22,16 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\src\samples\expressionParser\expressionParser.csproj" />
-    <ProjectReference Include="..\src\samples\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj" />
-    <ProjectReference Include="..\src\samples\IndentedWhile\indentedWhile.csproj" />
-    <ProjectReference Include="..\src\samples\indented\indented.csproj" />
-    <ProjectReference Include="..\src\samples\postProcessedLexerParser\postProcessedLexerParser.csproj" />
-    <ProjectReference Include="..\src\samples\SimpleExpressionParser\SimpleExpressionParser.csproj" />
-    <ProjectReference Include="..\src\samples\SimpleTemplate\SimpleTemplate.csproj" />
-    <ProjectReference Include="..\src\samples\while\while.csproj" />
-    <ProjectReference Include="..\src\samples\XML\XML.csproj" />
-    <ProjectReference Include="..\sly\sly.csproj" />
-    <ProjectReference Include="..\src\samples\expressionParser\expressionParser.csproj" />
-    <ProjectReference Include="..\src\samples\jsonparser\jsonparser.csproj" />
+    <ProjectReference Include="..\..\src\samples\expressionParser\expressionParser.csproj" />
+    <ProjectReference Include="..\..\src\samples\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj" />
+    <ProjectReference Include="..\..\src\samples\IndentedWhile\indentedWhile.csproj" />
+    <ProjectReference Include="..\..\src\samples\indented\indented.csproj" />
+    <ProjectReference Include="..\..\src\samples\jsonparser\jsonparser.csproj" />
+    <ProjectReference Include="..\..\src\samples\postProcessedLexerParser\postProcessedLexerParser.csproj" />
+    <ProjectReference Include="..\..\src\samples\SimpleExpressionParser\SimpleExpressionParser.csproj" />
+    <ProjectReference Include="..\..\src\samples\SimpleTemplate\SimpleTemplate.csproj" />
+    <ProjectReference Include="..\..\src\samples\while\while.csproj" />
+    <ProjectReference Include="..\..\src\samples\XML\XML.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
