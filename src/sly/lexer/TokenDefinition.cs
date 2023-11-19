@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
 
 namespace sly.lexer
 {
@@ -26,7 +27,7 @@ namespace sly.lexer
         public TokenDefinition(T token, string regex, int channel = Channels.Main, bool isIgnored = false, bool isEndOfLine = false)
         {
             TokenID = token;
-            Regex = new Regex(regex, RegexOptions.Compiled);
+            Regex = new Regex(regex, RegexOptions.Compiled,TimeSpan.FromMilliseconds(500));
             IsIgnored = isIgnored;
             IsEndOfLine = isEndOfLine;
             Channel = channel;

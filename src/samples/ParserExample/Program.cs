@@ -528,8 +528,8 @@ return r";
             var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile();
-            File.Delete("c:\\temp\\tree.dot");
-            File.AppendAllText("c:\\temp\\tree.dot", graph);
+            // File.Delete("c:\\temp\\tree.dot");
+            // File.AppendAllText("c:\\temp\\tree.dot", graph);
         }
 
         private static void benchLexer()
@@ -986,7 +986,7 @@ else
                     new GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer>();
                 var root = grapher.VisitTree(node);
                 var graph = grapher.Graph.Compile();
-                File.WriteAllText(@"c:\tmp\graph.dot", graph);
+                // File.WriteAllText(@"c:\tmp\graph.dot", graph);
             };
             var parseResult = parser.Parse(source);
             Assert.True(parseResult.IsOk);
@@ -1096,7 +1096,7 @@ billy
                 b.AppendLine();
             }
             
-            File.WriteAllText(@"c:\temp\tokens.txt",b.ToString());
+            // File.WriteAllText(@"c:\temp\tokens.txt",b.ToString());
             
             
             foreach (var token in tokens.Tokens.Tokens)
