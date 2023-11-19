@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Authors>b3b00</Authors>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\sly\sly.csproj" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+     <NoWarn>1701;1702;1705;1591</NoWarn>
+</PropertyGroup>
+</Project>

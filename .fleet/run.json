@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+                    "name": "Debug example",
+                    "type": "dotnet",
+                    "projectPath": "samples/ParserExample/ParserExample.csproj",
+            "targetFramework": "net6.0",
+                     
+                    "args": []
+                }
+    ]
+}
