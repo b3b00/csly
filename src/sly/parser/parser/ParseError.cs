@@ -28,8 +28,8 @@
             var comparison = 0;
             if (obj is ParseError unexpectedError)
             {
-                var lineComparison = Line.CompareTo(unexpectedError != null ? unexpectedError.Line : 0);
-                var columnComparison = Column.CompareTo(unexpectedError != null ? unexpectedError.Column : 0);
+                var lineComparison = Line.CompareTo(unexpectedError.Line);
+                var columnComparison = Column.CompareTo(unexpectedError.Column);
 
                 if (lineComparison > 0) comparison = 1;
                 if (lineComparison == 0) comparison = columnComparison;
