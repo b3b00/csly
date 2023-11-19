@@ -16,10 +16,10 @@ permissions:
 jobs:  
   build:
     env:
-      TESTS_PROJECT: 'ParserTests/ParserTests.csproj' # path to test project or solution
+      TESTS_PROJECT: 'tests/ParserTests/ParserTests.csproj' # path to test project or solution
       PUBLISH_NUGET: true # if true a nuget will be published on version change
       RUN_TESTS: true # if true tests are run and coverage data is published to coveralls and a coverage report is produced.
-      MAIN_CSPROJ: 'sly/sly.csproj' # main project (for nuget packaging)
+      MAIN_CSPROJ: 'src/sly/sly.csproj' # main project (for nuget packaging)
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
