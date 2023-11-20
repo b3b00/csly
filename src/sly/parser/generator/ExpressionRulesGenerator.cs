@@ -87,14 +87,15 @@ namespace sly.parser.generator
             });
 
             
-            
+            if (operationsByPrecedence.Count > 0)
+            {
                 var operandNonTerminal = GetOperandNonTerminal(parserClass,configuration, result);
 
 
                 if (operandNonTerminal != null && operationsByPrecedence.Count > 0)
                     GenerateExpressionParser(configuration, operandNonTerminal, operationsByPrecedence,
                         parserClass.Name);
-            
+            }
 
             configuration.UsesOperations = operationsByPrecedence.Any<KeyValuePair<int, List<OperationMetaData<IN>>>>(); 
             result.Result = configuration;
