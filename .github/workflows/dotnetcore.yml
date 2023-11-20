@@ -77,14 +77,15 @@ jobs:
     - name: Create Release
       if: ${{ success() && matrix.os == 'windows-latest' && steps.publish_nuget.outputs.VERSION != ''  && steps.publish_nuget.outputs.VERSION != null }}
       id: create_release
-      uses: b3b00/create-release@latest
+      uses: b3b00/create-release@1.0.0
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
       with:
         tag_name: ${{ steps.publish_nuget.outputs.VERSION }}
         release_name: Release ${{ steps.publish_nuget.outputs.VERSION }}
         draft: false
-        prerelease: false   
+        prerelease: false
+        failsOnCreationError: false   
     - name: Upload Release nuget Asset
       if: ${{ success() && matrix.os == 'windows-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
       id: upload-release-nuget-asset 
