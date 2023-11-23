@@ -146,7 +146,7 @@ namespace sly.lexer
             return Tokenize(memorySource);
         }
 
-        public LexerResult<IN> Tokenize(ReadOnlyMemory<char> memorySource)
+        public LexerResult<IN> Tokenize(ReadOnlyMemory<char> source)
         {
             Stack<FSMLexer<GenericToken>> lexersStack = new Stack<FSMLexer<GenericToken>>();
 
@@ -155,9 +155,9 @@ namespace sly.lexer
             LexerPosition position = new LexerPosition();
 
             var tokens = new List<Token<IN>>();
-            string src = memorySource.ToString();
+            string src = source.ToString();
 
-            var r = LexerFsm.Run(memorySource, new LexerPosition());
+            var r = LexerFsm.Run(source, new LexerPosition());
             LexerFsm = SetLexerMode(r, lexersStack);
 
             var ignored = r.IgnoredTokens.Select(x =>
@@ -176,7 +176,7 @@ namespace sly.lexer
                 }
                 case true when r.Result.IsComment:
                     position = r.NewPosition;
-                    position = ConsumeComment(r.Result, memorySource, position);
+                    position = ConsumeComment(r.Result, source, position);
                     break;
                 case true when !r.Result.IsComment:
                     position = r.NewPosition;
@@ -206,7 +206,7 @@ namespace sly.lexer
                 }
 
                 tokens.Add(transcoded);
-                r = LexerFsm.Run(memorySource, position);
+                r = LexerFsm.Run(source, position);
                 LexerFsm = SetLexerMode(r, lexersStack);
 
                 ignored = r.IgnoredTokens.Select(x =>
@@ -234,7 +234,7 @@ namespace sly.lexer
                     }
                     case true when r.Result.IsComment:
                         position = r.NewPosition;
-                        position = ConsumeComment(r.Result, memorySource, position);
+                        position = ConsumeComment(r.Result, source, position);
                         break;
                     case true when !r.Result.IsComment:
                         position = r.NewPosition;

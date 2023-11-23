@@ -443,7 +443,7 @@ namespace sly.lexer
             var lexer = new GenericLexer<IN>(config, tokens);
             var Extensions = new Dictionary<IN, LexemeAttribute>();
             
-            var doubleLexeme = attributes.Values.ToList().SelectMany(x => x).FirstOrDefault(x => x.IsDouble);
+            var doubleLexeme = attributes.Values.SelectMany(x => x).FirstOrDefault(x => x.IsDouble);
             
             foreach (var pair in attributes)
             {
