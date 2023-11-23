@@ -1,6 +1,6 @@
 namespace sly.lexer
 {
-    public enum EOLType
+    public enum EolType
     {
         Windows,
         Nix,

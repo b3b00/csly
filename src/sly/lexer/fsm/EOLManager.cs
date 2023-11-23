@@ -12,13 +12,13 @@ namespace sly.lexer.fsm
             var spanValue = value.Span;
             var current = spanValue[CurrentPosition];
             var end = IsEndOfLine(value, CurrentPosition);
-            while (CurrentPosition < value.Length && end == EOLType.No)
+            while (CurrentPosition < value.Length && end == EolType.No)
             {
                 CurrentPosition++;
                 end = IsEndOfLine(value, CurrentPosition);
             }
 
-            return value.Slice(position, CurrentPosition - position + (end == EOLType.Windows ? 2 : 1));
+            return value.Slice(position, CurrentPosition - position + (end == EolType.Windows ? 2 : 1));
         }
 
         public static ReadOnlyMemory<char> RemoveEndOfLineChars(this ReadOnlyMemory<char> value)
@@ -31,20 +31,20 @@ namespace sly.lexer.fsm
             return value.Slice(0,endPosition+1);
         }
 
-        public static EOLType IsEndOfLine(ReadOnlyMemory<char> value, int position)
+        public static EolType IsEndOfLine(ReadOnlyMemory<char> value, int position)
         {
-            var end = EOLType.No;
+            var end = EolType.No;
             var n = value.At<char>(position);
             switch (n)
             {
                 case '\n':
-                    end = EOLType.Nix;
+                    end = EolType.Nix;
                     break;
                 case '\r' when value.At<char>(position + 1) == '\n':
-                    end = EOLType.Windows;
+                    end = EolType.Windows;
                     break;
                 case '\r':
-                    end = EOLType.Mac;
+                    end = EolType.Mac;
                     break;
             }
 
@@ -60,9 +60,9 @@ namespace sly.lexer.fsm
             while (i < value.Length)
             {
                 var end = IsEndOfLine(value, i);
-                if (end != EOLType.No)
+                if (end != EolType.No)
                 {
-                    if (end == EOLType.Windows) i ++;
+                    if (end == EolType.Windows) i ++;
                     var line = value.Slice(previousStart, i - previousStart);
                     lineLengths.Add(line.Length);
                     lines.Add(line.ToString());

@@ -469,9 +469,9 @@ namespace sly.lexer.fsm
                 if (IgnoreEOL)
                 {
                     var eol = EOLManager.IsEndOfLine(source, position.Index);
-                    if (eol != EOLType.No)
+                    if (eol != EolType.No)
                     {
-                        position.Index += eol == EOLType.Windows ? 2 : 1;
+                        position.Index += eol == EolType.Windows ? 2 : 1;
                         position.Column = 0;
                         position.Line++;
                         eolReached = true;

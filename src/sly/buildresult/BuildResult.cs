@@ -32,6 +32,11 @@ namespace sly.buildresult
             Errors.Add(error);
         }
 
+        public void AddInitializationError(ErrorLevel level, string message, ErrorCodes errorCode)
+        {
+            Errors.Add(new InitializationError(level,message,errorCode));
+        }
+
         public void AddErrors(List<InitializationError> errors)
         {
             Errors.AddRange(errors);

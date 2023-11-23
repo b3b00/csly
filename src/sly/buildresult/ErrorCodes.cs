@@ -44,6 +44,8 @@ namespace sly.buildresult
         
         LEXER_CANNOT_USE_IMPLICIT_TOKENS_WITH_REGEX_LEXER = 17,
         
+        LEXER_MANY_LEXEM_WITH_SAME_LABEL = 18,
+        
         #endregion
 
         #region Parser

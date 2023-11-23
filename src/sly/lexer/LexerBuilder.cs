@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using sly.buildresult;
@@ -118,12 +119,10 @@ namespace sly.lexer
                         var labeledTokens = tokens.Select(token =>
                         {
                             token.Label = token.TokenID.ToString();
-                            if (labels.TryGetValue(token.TokenID, out var tokenLabels))
+                            if (labels.TryGetValue(token.TokenID, out var tokenLabels) 
+                                && tokenLabels.TryGetValue(lang, out string label))
                             {
-                                if (tokenLabels.TryGetValue(lang, out string label))
-                                {
-                                    token.Label = label;
-                                }
+                                token.Label = label;
                             }
                             return token;
                         }).ToList();
@@ -182,20 +181,41 @@ namespace sly.lexer
             return result;
         }
 
-        private static BuildResult<ILexer<IN>> SetLabels<IN>(Dictionary<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)> attributes, BuildResult<ILexer<IN>> result) where IN : struct
+        private static BuildResult<ILexer<IN>> SetLabels<IN>(
+            Dictionary<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)> attributes,
+            BuildResult<ILexer<IN>> result) where IN : struct
         {
             if (result.IsOk && result.Result != null)
             {
-                // TODO add some checks (uniqueness of translation,...)
                 result.Result.LexemeLabels = new Dictionary<IN, Dictionary<string, string>>();
                 foreach (var kvp in attributes)
                 {
                     var labels = kvp.Value.labels.ToDictionary(x => x.Language, x => x.Label);
                     result.Result.LexemeLabels[kvp.Key] = labels;
                 }
-                
-                
+
+
+                for (int i = 0; i < result.Result.LexemeLabels.Values.Count; i++)
+                {
+                    var l = result.Result.LexemeLabels.Values.ToList()[i];
+                    for (int j = i + 1; j < result.Result.LexemeLabels.Values.Count; j++)
+                    {
+                        var l2 = result.Result.LexemeLabels.Values.ToList()[j];
+
+                        var duplicate = l.Where(x => l2.Values.Contains(x.Value)).ToList();
+                        if (duplicate.Any())
+                        {
+                            var message = I18N.Instance.GetText(CultureInfo.CurrentCulture.TwoLetterISOLanguageName,
+                                I18NMessage.ManyLexemWithSamelabel,
+                                string.Join(", ", duplicate.Select(x => $@"""{x.Value}""")));
+                            result.AddInitializationError(ErrorLevel.WARN, message,
+                                ErrorCodes.LEXER_MANY_LEXEM_WITH_SAME_LABEL);
+                        }
+
+                    }
+                }
             }
+
             return result;
         }
 
@@ -542,8 +562,8 @@ namespace sly.lexer
                     }
                     catch (Exception e)
                     {
-                        result.AddError(new InitializationError(ErrorLevel.FATAL, e.Message,
-                            ErrorCodes.LEXER_UNKNOWN_ERROR));
+                        result.AddInitializationError(ErrorLevel.FATAL, e.Message,
+                            ErrorCodes.LEXER_UNKNOWN_ERROR);
                     }
                 }
             }

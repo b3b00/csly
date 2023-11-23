@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using expressionparser;
+using expressionparser.model;
 using GenericLexerWithCallbacks;
 using indented;
 using NFluent;
 using simpleExpressionParser;
 using sly.buildresult;
+using sly.i18n;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
@@ -16,54 +19,43 @@ namespace ParserTests.lexer
 
     public enum DateTokenEnglishDashed
     {
-        [Date(DateFormat.YYYYMMDD,'-')]
-        DATE,
+        [Date(DateFormat.YYYYMMDD, '-')] DATE,
     }
-    
+
     public enum DateTokenWithFrenchSlashed
     {
-        [Date(DateFormat.DDMMYYYY,'/')]
-        DATE,
-        
-        [Int]
-        INT
+        [Date(DateFormat.DDMMYYYY, '/')] DATE,
+
+        [Int] INT
     }
 
     public enum DateAndDoubleToken
     {
-        [Double(".")]
-        DOUBLE,
-        
-        [Date(DateFormat.DDMMYYYY,'.')]
-        FRENCH_DATE,
-        
-        [Date(DateFormat.YYYYMMDD,'.')]
-        ENGLISH_DATE,
-        
+        [Double(".")] DOUBLE,
+
+        [Date(DateFormat.DDMMYYYY, '.')] FRENCH_DATE,
+
+        [Date(DateFormat.YYYYMMDD, '.')] ENGLISH_DATE,
+
     }
-    
+
     public enum ManyDateToken
     {
-        [Date(DateFormat.DDMMYYYY,'/')]
-        FRENCH_DATE,
-        
-        [Date(DateFormat.YYYYMMDD,'-')]
-        ENGLISH_DATE,
+        [Date(DateFormat.DDMMYYYY, '/')] FRENCH_DATE,
+
+        [Date(DateFormat.YYYYMMDD, '-')] ENGLISH_DATE,
     }
-    
+
     public enum DateAndExpressions
     {
-        
-        [Int]
-        INT,
-        
-        [Sugar("-")]
-        MINUS,
-        
-        [Date(DateFormat.YYYYMMDD,'-')]
-        DATE,
+
+        [Int] INT,
+
+        [Sugar("-")] MINUS,
+
+        [Date(DateFormat.YYYYMMDD, '-')] DATE,
     }
-    
+
     public enum DoubleQuotedString
     {
         [Lexeme(GenericToken.String, "\"")] DoubleString
@@ -87,8 +79,7 @@ namespace ParserTests.lexer
 
     public enum ManyString
     {
-        [Lexeme(GenericToken.String, "'", "'")]
-        [Lexeme(GenericToken.String)]
+        [Lexeme(GenericToken.String, "'", "'")] [Lexeme(GenericToken.String)]
         STRING
     }
 
@@ -100,8 +91,7 @@ namespace ParserTests.lexer
 
     public enum AlphaNumId
     {
-        [AlphaNumId]
-        ID
+        [AlphaNumId] ID
     }
 
     public enum AlphaNumDashId
@@ -121,13 +111,12 @@ namespace ParserTests.lexer
         [Lexeme(GenericToken.SugarToken, "-", "_")]
         OTHER
     }
-    
+
     public enum CustomIdReverseRange
     {
         EOS,
 
-        [CustomId("Z-Az-a", "-_9-0A-Za-z")]
-        ID,
+        [CustomId("Z-Az-a", "-_9-0A-Za-z")] ID,
 
         [Lexeme(GenericToken.SugarToken, "-", "_")]
         OTHER
@@ -136,8 +125,7 @@ namespace ParserTests.lexer
     [Lexer(IgnoreWS = false)]
     public enum IgnoreWS
     {
-        [Lexeme(GenericToken.SugarToken, " ")]
-        WS
+        [Lexeme(GenericToken.SugarToken, " ")] WS
     }
 
     [Lexer(IgnoreEOL = false)]
@@ -158,8 +146,7 @@ namespace ParserTests.lexer
     {
         EOS,
 
-        [Lexeme(GenericToken.Identifier)]
-        ID
+        [Lexeme(GenericToken.Identifier)] ID
     }
 
     public enum KeyWord
@@ -177,14 +164,11 @@ namespace ParserTests.lexer
 
     public enum Issue106
     {
-        [Lexeme(GenericToken.Int)]
-        Integer = 5,
+        [Lexeme(GenericToken.Int)] Integer = 5,
 
-        [Lexeme(GenericToken.Double)]
-        Double = 6,
+        [Lexeme(GenericToken.Double)] Double = 6,
 
-        [Lexeme(GenericToken.SugarToken, ".")]
-        Period
+        [Lexeme(GenericToken.SugarToken, ".")] Period
     }
 
     public enum Issue114
@@ -199,12 +183,12 @@ namespace ParserTests.lexer
     // Test that the FSMLexer properly backtracks.
     public enum Issue137
     {
-        [Lexeme(GenericToken.SugarToken, ".")]
-        A = 1,
-        [Lexeme(GenericToken.SugarToken, "-")]
-        B,
+        [Lexeme(GenericToken.SugarToken, ".")] A = 1,
+        [Lexeme(GenericToken.SugarToken, "-")] B,
+
         [Lexeme(GenericToken.SugarToken, "-+")]
         C,
+
         [Lexeme(GenericToken.SugarToken, "---")]
         E
     }
@@ -214,42 +198,41 @@ namespace ParserTests.lexer
     {
         [Lexeme(GenericToken.SugarToken, "..")]
         A = 1,
-        [Lexeme(GenericToken.SugarToken, "-")]
-        B,
+        [Lexeme(GenericToken.SugarToken, "-")] B,
+
         [Lexeme(GenericToken.SugarToken, "---")]
         C
     }
 
-    [Lexer(IgnoreEOL=true)]
+    [Lexer(IgnoreEOL = true)]
     public enum Issue177Generic
     {
 
-        [Lexeme(GenericToken.Int)]
-        INT = 2,
-        
+        [Lexeme(GenericToken.Int)] INT = 2,
+
         EOS = 0
-        
+
     }
-    
+
     public enum Issue348
     {
-        [Lexeme(GenericToken.String, "\"", "\\")] STriNG
+        [Lexeme(GenericToken.String, "\"", "\\")]
+        STriNG
     }
-    
+
     public enum Issue348Bis
     {
-        [Lexeme(GenericToken.String, "\"","^")] STriNG
+        [Lexeme(GenericToken.String, "\"", "^")]
+        STriNG
     }
-    
+
     [Lexer]
     public enum Issue186MixedGenericAndRegexLexer
     {
-        [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)]
+        [Lexeme(GenericToken.Identifier, IdentifierType.Alpha)]
         ID = 1,
 
-        [Lexeme("[0-9]+")]
-        
-        INT = 2
+        [Lexeme("[0-9]+")] INT = 2
     }
 
     public class Issue186MixedGenericAndRegexParser
@@ -260,18 +243,16 @@ namespace ParserTests.lexer
             return null;
         }
     }
-    
-    [Lexer(IgnoreEOL=false)]
+
+    [Lexer(IgnoreEOL = false)]
     public enum Issue177Regex
     {
-        [Lexeme("\r\n",IsLineEnding = true)]
-        EOL = 1,
-        
-        [Lexeme("\\d+")]
-        INT = 2,
-        
+        [Lexeme("\r\n", IsLineEnding = true)] EOL = 1,
+
+        [Lexeme("\\d+")] INT = 2,
+
         EOS = 0
-        
+
     }
 
 
@@ -1113,7 +1094,7 @@ else
             Check.That(frenchDateLexingResult.Tokens[0].DateTimeValue).IsEqualTo(date);
 
         }
-        
+
         [Fact]
         public void TestDateAndDouble()
         {
@@ -1136,7 +1117,7 @@ else
             Check.That(lexingResult.Tokens[0].DateTimeValue).IsEqualTo(date);
             Check.That(lexingResult.Tokens[1].DoubleValue).IsEqualTo(3.14);
             Check.That(lexingResult.Tokens[2].DateTimeValue).IsEqualTo(date);
-            
+
         }
 
         [Fact]
@@ -1180,11 +1161,56 @@ else
             Check.That(lexerResult.Tokens).CountIs(6);
             Check.That(lexerResult.Tokens.Extracting(x => x.TokenID).Take(5)).IsEqualTo(new List<DateAndExpressions>()
             {
-                DateAndExpressions.INT, DateAndExpressions.MINUS, DateAndExpressions.INT, DateAndExpressions.MINUS, DateAndExpressions.DATE
+                DateAndExpressions.INT, DateAndExpressions.MINUS, DateAndExpressions.INT, DateAndExpressions.MINUS,
+                DateAndExpressions.DATE
             });
-            
-            
-        }
-    }
 
+
+        }
+
+        [Fact]
+        public void TestI18nLexerError() // issue #380
+        {
+            var StartingRule = $"{nameof(SimpleExpressionParserWithContext)}_expressions";
+            var parserInstance = new SimpleExpressionParserWithContext();
+
+            // fr
+            var frBuilder = new ParserBuilder<ExpressionToken, int>("fr");
+            var frParser = frBuilder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+            Check.That(frParser).IsOk();
+            var frParseResult = frParser.Result.Parse("1 + + 2");
+
+            Check.That(frParseResult).Not.IsOkParsing();
+            Check.That(frParseResult.Errors).IsSingle();
+            var frError = frParseResult.Errors[0];
+            Check.That(frError).IsNotNull();
+            Check.That(frError.ErrorMessage).Contains("plus inattendu");
+
+            // en
+            var enBuilder = new ParserBuilder<ExpressionToken, int>("en");
+            var enParser = enBuilder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
+            Check.That(enParser).IsOk();
+            var enParseResult = enParser.Result.Parse("1 + + 2");
+
+            Check.That(enParseResult).Not.IsOkParsing();
+            Check.That(enParseResult.Errors).IsSingle();
+            var enError = enParseResult.Errors[0];
+            Check.That(enError).IsNotNull();
+            Check.That(enError.ErrorMessage).Contains("unexpected plus sign");
+        }
+
+        [Fact]
+        public void TestI18nDuplicateLabel()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DuplicateLabels>>());
+            Check.That(lexerRes).IsOk(); // not a blocking error, lexer should still be able to lex correctly.
+            Check.That(lexerRes.Errors).IsSingle();
+            var error = lexerRes.Errors[0];
+            Check.That(error).IsNotNull();
+            Check.That(error.Level).IsEqualTo(ErrorLevel.WARN);
+            Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_MANY_LEXEM_WITH_SAME_LABEL);
+            Check.That(error.Message).Contains("left paranthesis").And.Contains("paranthèse ouvrante");
+        }
+
+    }
 }

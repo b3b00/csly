@@ -1,7 +1,7 @@
 #
 #   Unexpected tokens
 #
-UnexpectedTokenExpecting=unexpected '{0}' {1}. Expecting {2}.
+UnexpectedTokenExpecting=unexpected {1} ('{0}'). Expecting {2}.
 UnexpectedEosExpecting=unexpected end of stream. Expecting {0}.
 UnexpectedToken=unexpected {0} {1}.
 UnexpectedEos=unexpected end of stream.
@@ -34,6 +34,7 @@ CharEscapeCharMustBe1Char=bad lexem {0} :  CharToken lexeme escape char  <{1}> m
 CharEscapeCharCannotBeLetterOrDigit=bad lexem {0} :  CharToken lexeme escape char lexeme <{1}> can not start with a letter or digit.
 SugarTokenCannotStartWithLetter=bad lexem {0} :  SugarToken lexeme <{1}>  can not start with a letter.
 CannotUseExplicitTokensWithRegexLexer=Explicit tokens can not be used with a regex lexer. please switch to generic lexer.
+ManyLexemWithSamelabel=Many token use the same label ({0}). This could cause inaccurate error messages.
 
 ##############################################
 #

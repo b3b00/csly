@@ -35,6 +35,8 @@ namespace sly.i18n
         IncorrectVisitorParameterNumber,
         LeftRecursion,
         NonTerminalNeverUsed,
-        CannotUseExplicitTokensWithRegexLexer
+        CannotUseExplicitTokensWithRegexLexer,
+        ManyLexemWithSamelabel
+        
     }
 }

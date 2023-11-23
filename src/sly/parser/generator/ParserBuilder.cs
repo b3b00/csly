@@ -483,10 +483,10 @@ namespace sly.parser.generator
                 var foundReturn = returnInfo.ParameterType;
                 if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
                 {
-                    result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    result.AddInitializationError(ErrorLevel.FATAL,
                         I18N.Instance.GetText(I18n, I18NMessage.IncorrectVisitorReturnType, visitor.Name,
                             rule.RuleString, typeof(OUT).FullName, returnInfo.ParameterType.Name),
-                        ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE);
                 }
 
                 var realClauses = rule.Clauses.Where<IClause<IN>>(x =>
@@ -497,11 +497,11 @@ namespace sly.parser.generator
                 if (visitor.GetParameters().Length != realClauses.Count &&
                     visitor.GetParameters().Length != realClauses.Count + 1)
                 {
-                    result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    result.AddInitializationError(ErrorLevel.FATAL,
                         I18N.Instance.GetText(I18n, I18NMessage.IncorrectVisitorParameterNumber, visitor.Name,
                             rule.RuleString, realClauses.Count.ToString(), (realClauses.Count + 1).ToString(),
                             visitor.GetParameters().Length.ToString()),
-                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER);
                     // do not go further : it will cause an out of bound error.
                     return result;
                 }
@@ -655,10 +655,10 @@ namespace sly.parser.generator
                     var foundReturn = returnInfo?.ParameterType;
                     if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
                     {
-                        result.AddError(new InitializationError(ErrorLevel.FATAL,
+                        result.AddInitializationError(ErrorLevel.FATAL,
                             I18N.Instance.GetText(I18n, I18NMessage.IncorrectVisitorReturnType, visitor.Name,
                                 rule.RuleString, typeof(OUT).FullName, returnInfo.ParameterType.Name),
-                            ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE));
+                            ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE);
                     }
 
                     if (operation.IsUnary)
@@ -666,9 +666,9 @@ namespace sly.parser.generator
                         var parameters = visitor.GetParameters();
                         if (parameters.Length != 2 && parameters.Length != 3)
                         {
-                            result.AddError(new InitializationError(ErrorLevel.FATAL,
+                            result.AddInitializationError(ErrorLevel.FATAL,
                                 $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : 2 or 3, found {parameters.Length}",
-                                ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
+                                ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER);
                             // do not go further : it will cause an out of bound error.
                             return result;
                         }
@@ -693,9 +693,9 @@ namespace sly.parser.generator
                         var parameters = visitor.GetParameters();
                         if (parameters.Length != 3 && parameters.Length != 4)
                         {
-                            result.AddError(new InitializationError(ErrorLevel.FATAL,
+                            result.AddInitializationError(ErrorLevel.FATAL,
                                 $"visitor {visitor.Name} for rule {rule.RuleString} has incorrect argument number : 3 or 4, found {parameters.Length}",
-                                ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
+                                ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER);
                             // do not go further : it will cause an out of bound error.
                             return result;
                         }
@@ -719,10 +719,10 @@ namespace sly.parser.generator
         {
             if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
             {
-                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                result.AddInitializationError(ErrorLevel.FATAL,
                     I18N.Instance.GetText(I18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
                         rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
-                    ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE));
+                    ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
             }
 
             return result;
