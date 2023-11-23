@@ -11,13 +11,13 @@ namespace sly.parser
 {
     public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable where T : struct
     {
-        private string I18n;
+        private readonly string _i18N;
 
-        private Dictionary<T, Dictionary<string, string>> Labels;
+        private readonly Dictionary<T, Dictionary<string, string>> _labels;
         public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, Dictionary<T, Dictionary<string, string>> labels, string i18n=null, params LeadingToken<T>[] expectedTokens )
         {
-            Labels = labels;
-            I18n = i18n;
+            _labels = labels;
+            _i18N = i18n;
             ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
             
             UnexpectedToken = unexpectedToken;
@@ -35,7 +35,7 @@ namespace sly.parser
 
         public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, string i18n = null, List<LeadingToken<T>> expectedTokens = null) 
         {
-            I18n = i18n;
+            _i18N = i18n;
             ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
             
             UnexpectedToken = unexpectedToken;
@@ -110,12 +110,9 @@ namespace sly.parser
                         else
                         {
                             var lbl = t.ToString();
-                            if (Labels.TryGetValue(t.TokenId, out var labels))
+                            if (_labels.TryGetValue(t.TokenId, out var labels) && labels.TryGetValue(_i18N, out var label))
                             {
-                                if (labels.TryGetValue(I18n, out var label))
-                                {
-                                    lbl = label;
-                                }
+                                lbl = label;
                             }
                             expecting.Append(lbl);
                         }
@@ -125,7 +122,7 @@ namespace sly.parser
 
                 string value = UnexpectedToken.Value;
                 
-                return I18N.Instance.GetText(I18n,i18NMessage, $"{value} ({UnexpectedToken.Position.ToString()})", UnexpectedToken.Label.ToString(), expecting.ToString());
+                return I18N.Instance.GetText(_i18N,i18NMessage, $"{value} ({UnexpectedToken.Position.ToString()})", UnexpectedToken.Label.ToString(), expecting.ToString());
             }
         }
 
