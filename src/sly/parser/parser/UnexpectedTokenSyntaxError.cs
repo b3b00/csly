@@ -101,22 +101,9 @@ namespace sly.parser
                 
                 if (ExpectedTokens != null && ExpectedTokens.Any())
                 {
-                    foreach (var t in ExpectedTokens)
+                    foreach (var expected in ExpectedTokens)
                     {
-                        if (t.IsExplicitToken)
-                        {
-                            expecting.Append(t.ToString());
-                        }
-                        else
-                        {
-                            var lbl = t.ToString();
-                            if (_labels.TryGetValue(t.TokenId, out var labels) && labels.TryGetValue(_i18N, out var label))
-                            {
-                                lbl = label;
-                            }
-                            expecting.Append(lbl);
-                        }
-                        expecting.Append(", ");
+                        expecting.Append(GetMessageForExpectedToken(expected));
                     }
                 }
 
@@ -124,6 +111,28 @@ namespace sly.parser
                 
                 return I18N.Instance.GetText(_i18N,i18NMessage, $"{value} ({UnexpectedToken.Position.ToString()})", UnexpectedToken.Label.ToString(), expecting.ToString());
             }
+        }
+
+        private string GetMessageForExpectedToken(LeadingToken<T> expected)
+        {
+            var message = new StringBuilder();
+            if (expected.IsExplicitToken)
+            {
+                message.Append(expected.ToString());
+            }
+            else
+            {
+                var lbl = expected.ToString();
+                if (_labels.TryGetValue(expected.TokenId, out var labels) && labels.TryGetValue(_i18N, out var label))
+                {
+                    lbl = label;
+                }
+
+                message.Append(lbl);
+            }
+
+            message.Append(", ");
+            return message.ToString();
         }
 
         [ExcludeFromCodeCoverage]
