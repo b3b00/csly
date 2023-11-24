@@ -18,7 +18,7 @@ namespace sly.parser.llparser
             ComputeSubRules(configuration);
             InitializeStartingTokens(Configuration, startingNonTerminal);
         }
-        
+
         public Dictionary<IN, Dictionary<string, string>> LexemeLabels { get; set; }
 
         #region parsing
@@ -47,7 +47,8 @@ namespace sly.parser.llparser
 
             if (matchingRuleCount == 0)
             {
-                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], LexemeLabels, I18n, nt.PossibleLeadingTokens.ToArray()));
+                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], LexemeLabels, I18n,
+                    nt.PossibleLeadingTokens.ToArray()));
             }
 
             SyntaxParseResult<IN> result = null;
@@ -81,7 +82,7 @@ namespace sly.parser.llparser
 
                     if (errors.Count == 0)
                     {
-                        errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastPosition],LexemeLabels, null));
+                        errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastPosition], LexemeLabels, null));
                     }
                 }
             }
@@ -93,8 +94,12 @@ namespace sly.parser.llparser
 
                 if (errors.Count > 0)
                 {
-                    var lastErrorPosition = errors.Select<UnexpectedTokenSyntaxError<IN>, int>(e => e.UnexpectedToken.PositionInTokenFlow).ToList<int>().Max();
-                    var lastErrors = errors.Where<UnexpectedTokenSyntaxError<IN>>(e => e.UnexpectedToken.PositionInTokenFlow == lastErrorPosition)
+                    var lastErrorPosition = errors
+                        .Select<UnexpectedTokenSyntaxError<IN>, int>(e => e.UnexpectedToken.PositionInTokenFlow)
+                        .ToList<int>().Max();
+                    var lastErrors = errors
+                        .Where<UnexpectedTokenSyntaxError<IN>>(e =>
+                            e.UnexpectedToken.PositionInTokenFlow == lastErrorPosition)
                         .ToList<UnexpectedTokenSyntaxError<IN>>();
                     result.Errors = lastErrors;
                 }
@@ -251,9 +256,11 @@ namespace sly.parser.llparser
             result.HasByPassNodes = false;
             if (result.IsError)
             {
-                result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
+                result.Errors.Add(
+                    new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
                 result.AddExpecting(terminal.ExpectedToken);
             }
+
             return result;
         }
 
@@ -320,46 +327,37 @@ namespace sly.parser.llparser
             bool hasOk = false;
             SyntaxParseResult<IN> maxOk = null;
             SyntaxParseResult<IN> maxKo = null;
-            if (rulesResults.Count > 0)
+            foreach (var rulesResult in rulesResults)
             {
-                foreach (var rulesResult in rulesResults)
+                if (rulesResult.IsOk)
                 {
-                    if (rulesResult.IsOk)
+                    hasOk = true;
+                    if (rulesResult.EndingPosition > okEndingPosition)
                     {
-                        hasOk = true;
-                        if (rulesResult.EndingPosition > okEndingPosition)
-                        {
-                            okEndingPosition = rulesResult.EndingPosition;
-                            maxOk = rulesResult;
-                        }
-                    }
-
-                    if (rulesResult.IsError)
-                    {
-                        if (rulesResult.EndingPosition > koEndingPosition)
-                        {
-                            koEndingPosition = rulesResult.EndingPosition;
-                            maxKo = rulesResult;
-                        }
+                        okEndingPosition = rulesResult.EndingPosition;
+                        maxOk = rulesResult;
                     }
                 }
 
-                if (hasOk)
+                if (rulesResult.IsError)
                 {
-                    max = maxOk;
+                    if (rulesResult.EndingPosition > koEndingPosition)
+                    {
+                        koEndingPosition = rulesResult.EndingPosition;
+                        maxKo = rulesResult;
+                    }
                 }
-                else
-                {
-                    max = maxKo;
-                }
+            }
+
+            if (hasOk)
+            {
+                max = maxOk;
             }
             else
             {
-                max = new SyntaxParseResult<IN>();
-                max.IsError = true;
-                max.Root = null;
-                max.IsEnded = false;
+                max = maxKo;
             }
+
 
             var result = new SyntaxParseResult<IN>();
             result.Errors = errors;
@@ -418,7 +416,7 @@ namespace sly.parser.llparser
             InitializeStartingTokens(configuration, StartingNonTerminal);
         }
 
-        
+
 
         #endregion
     }
