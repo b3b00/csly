@@ -32,38 +32,38 @@ jobs:
         dotnet-version: 7.0.x
     - name: Clean artifacts and nugets 
       run: dotnet clean  --configuration Release && dotnet nuget locals all --clear
-#    - name: Build with dotnet
-#      run: dotnet build --configuration Release
-#    - name: Test with dotnet
-#      uses: b3b00/coverlet-action@1.2.7
-#      id: 'coverlet'
-#      if: env.RUN_TESTS
-#      with:
-#        testProject: ${{env.TESTS_PROJECT}}
-#        output: 'lcov.net7.0.info'
-#        threshold: 80
-#        outputFormat: 'lcov'
-#        excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*,[postProcessedLexerParser]*,[XML]*,[SimpleTemplate]*'
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+    - name: Test with dotnet
+      uses: b3b00/coverlet-action@1.2.8
+      id: 'coverlet'
+      if: env.RUN_TESTS
+      with:
+        testProject: ${{env.TESTS_PROJECT}}
+        output: 'lcov.net7.0.info'
+        threshold: 80
+        outputFormat: 'lcov'
+        excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*,[postProcessedLexerParser]*,[XML]*,[SimpleTemplate]*'
 
-#    - name: coveralls
-#      uses: coverallsapp/github-action@v1.1.1
-#      if: matrix.os == 'windows-latest' && env.RUN_TESTS
-#      with:
-#        github-token: ${{secrets.GITHUB_TOKEN }}
-#        path-to-lcov: ${{steps.coverlet.outputs.coverageFile}}
-#        #base-path: ${{github.workspace}}
-#    - name: ReportGenerator
-#      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
-#      with:
-#        reports: ${{steps.coverlet.outputs.coverageFile}}
-#        targetdir: 'coveragereport'
-#        reporttypes: 'HtmlInline;MarkdownSummary'
-#        verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
-#        tag: '${{ github.run_number }}_${{ github.run_id }}'
-##    - name: Publish coverage summary
-##      uses: marocchino/sticky-pull-request-comment@v2
-##      with:
-##           path: coveragereport/Summary.md
+    - name: coveralls
+      uses: coverallsapp/github-action@v1.1.1
+      if: matrix.os == 'windows-latest' && env.RUN_TESTS
+      with:
+        github-token: ${{secrets.GITHUB_TOKEN }}
+        path-to-lcov: ${{steps.coverlet.outputs.coverageFile}}
+        #base-path: ${{github.workspace}}
+    - name: ReportGenerator
+      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
+      with:
+        reports: ${{steps.coverlet.outputs.coverageFile}}
+        targetdir: 'coveragereport'
+        reporttypes: 'HtmlInline;MarkdownSummary'
+        verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
+        tag: '${{ github.run_number }}_${{ github.run_id }}'
+    - name: Publish coverage summary
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+           path: coveragereport/Summary.md
     - name: publish nuget
       if:  ${{success() && matrix.os == 'windows-latest' && env.PUBLISH_NUGET}}
       id: publish_nuget
