@@ -23,6 +23,55 @@ namespace ParserTests
         }
 
     }
+    
+    public class ExpressionGeneratorExplicitOperatorAsNames
+    {
+
+        
+        [Operation((int)SimpleExpressionToken.PLUS, Affix.InFix, Associativity.Right, 10)]
+        [Operation("'MINUS'", Affix.InFix, Associativity.Left, 10)]
+        [Operation("'TIMES'", Affix.InFix, Associativity.Left, 20)]
+        public double BinaryTermExpression(double left, Token<SimpleExpressionToken> operation, double right)
+        {
+            if (operation.Value == "MINUS")
+            {
+                return left - right;
+            }
+            if (operation.Value == "TIMES")
+            {
+                return left * right;
+            }
+            return left + right;
+        }
+        
+        [Prefix((int) SimpleExpressionToken.MINUS,  Associativity.Right, 100)]
+        public double PreFixExpression(Token<SimpleExpressionToken> operation, double value)
+        {
+            return -value;
+        }
+
+        [Operand]
+        [Production("value : DOUBLE")]
+        public double doubleValue(Token<SimpleExpressionToken> val)
+        {
+            return val.DoubleValue;
+        }
+        
+        [Operand]
+        [Production("value : INT")]
+        public double intValue(Token<SimpleExpressionToken> val)
+        {
+            return val.DoubleValue;
+        }
+        
+        [Operand]
+        [Production("group : LPAREN ExpressionGeneratorExplicitOperatorAsNames_expressions RPAREN")]
+        public double OperandGroup(Token<SimpleExpressionToken> lparen, double value, Token<SimpleExpressionToken> rparen)
+        {
+            return value;
+        }
+
+    }
 
 
     public class ShortOperationAttributesParser
@@ -349,6 +398,21 @@ namespace ParserTests
             Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo(-1+2*(5+6)-4);
 
+        }
+        
+        [Fact]
+        public void TestExplicitOperatorAsNames()
+        {
+            StartingRule = $"{nameof(ExpressionGeneratorExplicitOperatorAsNames)}_expressions";
+            var parserInstance = new ExpressionGeneratorExplicitOperatorAsNames();
+            var builder = new ParserBuilder<SimpleExpressionToken, double>();
+            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            Check.That(buildResult).IsOk();
+            var parser = buildResult.Result;
+            
+            var result = parser.Parse("-1 +2 TIMES (5 + 6) MINUS 4 ");
+            Check.That(result).IsOkParsing();
+            Check.That(result.Result).IsEqualTo(-1+2*(5+6)-4);
         }
     }
 }

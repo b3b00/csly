@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using sly.parser.syntax.tree;
 
@@ -16,6 +17,7 @@ namespace sly.parser
 
         public List<ParseError> Errors { get; set; }
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             if (IsOk)
