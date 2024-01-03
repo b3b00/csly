@@ -18,8 +18,7 @@
 
 
 
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  <ItemGroup>    
     <!--PackageReference Include="Wasi.Sdk" Version="0.1.2-preview.10061" /-->
   </ItemGroup>
 
