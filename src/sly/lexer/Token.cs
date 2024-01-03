@@ -1,10 +1,11 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace sly.lexer
 {
@@ -170,7 +171,7 @@ namespace sly.lexer
         
         public int PositionInTokenFlow { get; set; }
 
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public T TokenID { get; set; }
 
         public string Label { get; set; }
@@ -193,7 +194,7 @@ namespace sly.lexer
         
         public bool IsExplicit { get; set; }
 
-        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public CommentType CommentType { get; set; } = CommentType.No;
 
         public bool IsEmpty { get; set; }

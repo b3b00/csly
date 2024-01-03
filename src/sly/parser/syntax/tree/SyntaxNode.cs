@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using sly.parser.generator;
 
 namespace sly.parser.syntax.tree
