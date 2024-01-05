@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
@@ -70,6 +71,27 @@ namespace sly.parser.syntax.grammar
         {
             return ToString();
         }
+
+
+        public bool Equals(IClause<T> clause)
+        {
+            if (clause is TerminalClause<T> other)
+            {
+                return Equals(other);
+            }
+
+            return false;
+        }
+        protected bool Equals(TerminalClause<T> other)
+        {
+            if (IsExplicitToken)
+            {
+                return other.ExplicitToken == ExplicitToken;
+            }
+            
+            return ExpectedToken.Equals(other.ExpectedToken);
+        }
+
     }
 
 

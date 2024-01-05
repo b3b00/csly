@@ -45,5 +45,39 @@ namespace sly.parser.syntax.grammar
         {
             return ToString();
         }
+
+        public bool Equals(IClause<T> clause)
+        {
+            if (clause is ChoiceClause<T> other)
+            {
+                return Equals(other);
+            }
+
+            return false;
+        } 
+        
+        protected bool Equals(ChoiceClause<T> other)
+        {
+            if (other.Choices.Count != Choices.Count)
+            {
+                return false;
+            }
+
+            if (other.IsTerminalChoice != IsTerminalChoice)
+            {
+                return false;
+            }
+
+            return other.Choices.All(x => Choices.Exists(y => y.Equals(x)));
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((ChoiceClause<T>)obj);
+        }
+
     }
 }

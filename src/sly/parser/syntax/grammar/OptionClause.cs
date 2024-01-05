@@ -30,5 +30,32 @@ namespace sly.parser.syntax.grammar
         {
             return $"{Clause}?";
         }
+
+        public bool Equals(IClause<T> clause)
+        {
+            if (clause is OptionClause<T> other)
+            {
+                return Equals(other);
+            }
+            return false;
+        }
+        
+        protected bool Equals(OptionClause<T> other)
+        {
+            return Equals(Clause, other.Clause);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((OptionClause<T>)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return (Clause != null ? Clause.GetHashCode() : 0);
+        }
     }
 }

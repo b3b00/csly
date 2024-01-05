@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
@@ -30,5 +31,30 @@ namespace sly.parser.syntax.grammar
         {
             return $"{NonTerminalName}(NT)";
         }
+
+        public bool Equals(IClause<T> clause)
+        {
+            if (clause is NonTerminalClause<T> other)
+            {
+                return Equals(other);
+            }
+
+            return false;
+        }
+        
+        protected bool Equals(NonTerminalClause<T> other)
+        {
+            return NonTerminalName == other.NonTerminalName && IsGroup == other.IsGroup;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((NonTerminalClause<T>)obj);
+        }
+
+       
     }
 }
