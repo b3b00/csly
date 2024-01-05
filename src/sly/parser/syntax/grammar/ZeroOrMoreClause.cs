@@ -30,7 +30,7 @@ namespace sly.parser.syntax.grammar
 
         public override bool Equals(IClause<T> other)
         {
-            if (other != null && other is OneOrMoreClause<T> otherOneOrMore)
+            if (other is OneOrMoreClause<T> otherOneOrMore)
             {
                 return Clause.Equals(otherOneOrMore.Clause);
             }

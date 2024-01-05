@@ -38,20 +38,17 @@ namespace sly.parser.syntax.grammar
         
         public bool Equals(IClause<T> other)
         {
-            if (other != null && other is ClauseSequence<T> sequence)
+            if (other is ClauseSequence<T> sequence && sequence.Clauses.Count == Clauses.Count)
             {
-                if (sequence.Clauses.Count == Clauses.Count)
+                for (int i = 0; i < Clauses.Count; i++)
                 {
-                    for (int i = 0; i < Clauses.Count; i++)
+                    if (!Clauses[i].Equals(sequence.Clauses[i]))
                     {
-                        if (!Clauses[i].Equals(sequence.Clauses[i]))
-                        {
-                            return false;
-                        }
+                        return false;
                     }
-
-                    return true;
                 }
+
+                return true;
             }
 
             return false;
