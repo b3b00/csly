@@ -21,6 +21,7 @@ using NFluent;
 using ParserTests;
 using ParserTests.Issue239;
 using ParserTests.Issue332;
+using ParserTests.Issue414;
 using ParserTests.lexer;
 using simpleExpressionParser;
 using SimpleTemplate;
@@ -1133,10 +1134,40 @@ billy
             }
 
         }
+
+        private static void Issue414()
+        {
+            var parserInstance = new Issue414Parser();
+            var builder = new ParserBuilder<Issue414Token, string>();
+            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "block");//line-based, 1 statement per line.
+            var parser = buildResult.Result;
+            string source = "funcA(funcC(B==2));";
+            Stopwatch chrono = new Stopwatch();
+            chrono.Start();
+            var result = parser.Parse(source);
+            chrono.Stop();
+            Console.WriteLine($"{result.Result} : {chrono.ElapsedMilliseconds} ms");
+        }
+        
+        private static void Issue414Expr()
+        {
+            var parserInstance = new Issue414ExpressionParser();
+            var builder = new ParserBuilder<Issue414Token, string>();
+            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "block");//line-based, 1 statement per line.
+            var parser = buildResult.Result;
+            string source = "funcA(funcC(B==2));";
+            Stopwatch chrono = new Stopwatch();
+            chrono.Start();
+            var result = parser.Parse(source);
+            chrono.Stop();
+            Console.WriteLine($"{result.Result} : {chrono.ElapsedMilliseconds} ms");
+        }
         
         private static void Main(string[] args)
         {
-            Issue351();
+            Issue414();
+            Issue414Expr();
+            //Issue351();
             //EscapeIt();
             // TestIssue332();
             //TestTemplateFor();
