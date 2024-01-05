@@ -19,12 +19,12 @@ namespace sly.parser.llparser
         #region parsing
 
         public override SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position,
-            string nonTerminalName)
+            string nonTerminalName, SyntaxParsingContext<IN> parsingContext)
         {
             
             if (rule.IsInfixExpressionRule && rule.IsExpressionRule)
             {
-                return ParseInfixExpressionRule(tokens, rule, position, nonTerminalName);
+                return ParseInfixExpressionRule(tokens, rule, position, nonTerminalName, parsingContext);
             }
             
             var currentPosition = position;
@@ -42,7 +42,7 @@ namespace sly.parser.llparser
                             case TerminalClause<IN> termClause:
                             {
                                 var termRes =
-                                    ParseTerminal(tokens, termClause, currentPosition);
+                                    ParseTerminal(tokens, termClause, currentPosition, parsingContext);
                                 if (!termRes.IsError)
                                 {
                                     children.Add(termRes.Root);
@@ -61,7 +61,7 @@ namespace sly.parser.llparser
                             case NonTerminalClause<IN> terminalClause:
                             {
                                 var nonTerminalResult =
-                                    ParseNonTerminal(tokens, terminalClause, currentPosition);
+                                    ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
                                 if (!nonTerminalResult.IsError)
                                 {
                                     errors.AddRange(nonTerminalResult.Errors);
@@ -83,10 +83,10 @@ namespace sly.parser.llparser
                                 switch (clause)
                                 {
                                     case OneOrMoreClause<IN> oneOrMore:
-                                        manyResult = ParseOneOrMore(tokens, oneOrMore, currentPosition);
+                                        manyResult = ParseOneOrMore(tokens, oneOrMore, currentPosition, parsingContext);
                                         break;
                                     case ZeroOrMoreClause<IN> zeroOrMore:
-                                        manyResult = ParseZeroOrMore(tokens, zeroOrMore, currentPosition);
+                                        manyResult = ParseZeroOrMore(tokens, zeroOrMore, currentPosition, parsingContext);
                                         break;
                                 }
                                 if (!manyResult.IsError)
@@ -106,14 +106,14 @@ namespace sly.parser.llparser
                             }
                             case OptionClause<IN> option:
                             {
-                                var optionResult = ParseOption(tokens, option, rule, currentPosition);
+                                var optionResult = ParseOption(tokens, option, rule, currentPosition, parsingContext);
                                 currentPosition = optionResult.EndingPosition;
                                 children.Add(optionResult.Root);
                                 break;
                             }
                             case ChoiceClause<IN> choice:
                             {
-                                var choiceResult = ParseChoice(tokens, choice, currentPosition);
+                                var choiceResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
                                 currentPosition = choiceResult.EndingPosition;
                                 if (choiceResult.IsError && choiceResult.Errors != null && choiceResult.Errors.Any<UnexpectedTokenSyntaxError<IN>>())
                                 {
@@ -163,7 +163,7 @@ namespace sly.parser.llparser
 
         public virtual SyntaxParseResult<IN> ParseInfixExpressionRule(IList<Token<IN>> tokens, Rule<IN> rule,
             int position,
-            string nonTerminalName)
+            string nonTerminalName, SyntaxParsingContext<IN> parsingContext)
         {
             var currentPosition = position;
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
@@ -178,7 +178,7 @@ namespace sly.parser.llparser
                         SyntaxParseResult<IN> firstResult = null;
                         if (first is NonTerminalClause<IN> firstNonTerminal)
                         {
-                            firstResult = ParseNonTerminal(tokens, firstNonTerminal, currentPosition);
+                            firstResult = ParseNonTerminal(tokens, firstNonTerminal, currentPosition, parsingContext);
 
                             if (firstResult.IsError)
                             {
@@ -193,7 +193,7 @@ namespace sly.parser.llparser
                         {
                             case ChoiceClause<IN> secondChoice:
                             {
-                                secondResult = ParseChoice(tokens, secondChoice, currentPosition);
+                                secondResult = ParseChoice(tokens, secondChoice, currentPosition, parsingContext);
 
                                 if (secondResult.IsError)
                                 {
@@ -213,7 +213,7 @@ namespace sly.parser.llparser
                             }
                             case TerminalClause<IN> secondTerminal:
                             {
-                                secondResult = ParseTerminal(tokens, secondTerminal, currentPosition);
+                                secondResult = ParseTerminal(tokens, secondTerminal, currentPosition, parsingContext);
 
                                 if (secondResult.IsError)
                                 {
@@ -235,7 +235,7 @@ namespace sly.parser.llparser
                         SyntaxParseResult<IN> thirdResult;
                         if (third is NonTerminalClause<IN> thirdNonTerminal)
                         {
-                            thirdResult = ParseNonTerminal(tokens, thirdNonTerminal, currentPosition);
+                            thirdResult = ParseNonTerminal(tokens, thirdNonTerminal, currentPosition, parsingContext);
                             if (thirdResult.IsError)
                             {
                                 return thirdResult;
@@ -296,8 +296,13 @@ namespace sly.parser.llparser
                    && rule.Clauses[2] is NonTerminalClause<IN>;
         }
 
-        public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position)
+        public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position,
+            SyntaxParsingContext<IN> parsingContext)
         {
+            if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
+            {
+                return parseResult;
+            }
             var result = new SyntaxParseResult<IN>();
             var manyNode = new ManySyntaxNode<IN>("");
             var currentPosition = position;
@@ -317,12 +322,12 @@ namespace sly.parser.llparser
                 {
                     case TerminalClause<IN> term:
                         manyNode.IsManyTokens = true;
-                        innerResult = ParseTerminal(tokens, term, currentPosition);
+                        innerResult = ParseTerminal(tokens, term, currentPosition,parsingContext);
                         hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
                         break;
                     case NonTerminalClause<IN> nonTerm:
                     {
-                        innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
+                        innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition, parsingContext);
                         hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
                         if (nonTerm.IsGroup)
                             manyNode.IsManyGroups = true;
@@ -332,13 +337,13 @@ namespace sly.parser.llparser
                     }
                     case GroupClause<IN> _:
                         manyNode.IsManyGroups = true;
-                        innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition);
+                        innerResult = ParseNonTerminal(tokens, innerClause as NonTerminalClause<IN>, currentPosition, parsingContext);
                         hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
                         break;
                     case ChoiceClause<IN> choice:
                         manyNode.IsManyTokens = choice.IsTerminalChoice;
                         manyNode.IsManyValues = choice.IsNonTerminalChoice;
-                        innerResult = ParseChoice(tokens, choice, currentPosition);
+                        innerResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
                         hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
                         break;
                     default:
@@ -370,11 +375,18 @@ namespace sly.parser.llparser
             result.Root = manyNode;
             result.IsEnded = lastInnerResult != null && lastInnerResult.IsEnded;
             result.HasByPassNodes = hasByPasNodes;
+            parsingContext.Memoize(clause,position,result);
             return result;
         }
 
-        public SyntaxParseResult<IN> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN> clause, int position)
+        public SyntaxParseResult<IN> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN> clause, int position,
+            SyntaxParsingContext<IN> parsingContext)
         {
+            if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
+            {
+                return parseResult;
+            }
+            
             var result = new SyntaxParseResult<IN>();
             var manyNode = new ManySyntaxNode<IN>("");
             var currentPosition = position;
@@ -391,12 +403,12 @@ namespace sly.parser.llparser
             {
                 case TerminalClause<IN> terminalClause:
                     manyNode.IsManyTokens = true;
-                    firstInnerResult = ParseTerminal(tokens, terminalClause, currentPosition);
+                    firstInnerResult = ParseTerminal(tokens, terminalClause, currentPosition, parsingContext);
                     hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
                     break;
                 case NonTerminalClause<IN> nonTerm:
                 {
-                    firstInnerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
+                    firstInnerResult = ParseNonTerminal(tokens, nonTerm, currentPosition, parsingContext);
                     hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
                     if (nonTerm.IsGroup)
                         manyNode.IsManyGroups = true;
@@ -407,7 +419,7 @@ namespace sly.parser.llparser
                 case ChoiceClause<IN> choice:
                     manyNode.IsManyTokens = choice.IsTerminalChoice;
                     manyNode.IsManyValues = choice.IsNonTerminalChoice;
-                    firstInnerResult = ParseChoice(tokens, choice, currentPosition);
+                    firstInnerResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
                     hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
                     break;
                 default:
@@ -420,7 +432,7 @@ namespace sly.parser.llparser
                 lastInnerResult = firstInnerResult;
                 currentPosition = firstInnerResult.EndingPosition;
                 var more = new ZeroOrMoreClause<IN>(innerClause);
-                var nextResult = ParseZeroOrMore(tokens, more, currentPosition);
+                var nextResult = ParseZeroOrMore(tokens, more, currentPosition, parsingContext);
                 if (nextResult != null && !nextResult.IsError)
                 {
                     currentPosition = nextResult.EndingPosition;
@@ -449,12 +461,17 @@ namespace sly.parser.llparser
             result.Root = manyNode;
             result.IsEnded = lastInnerResult != null && lastInnerResult.IsEnded;
             result.HasByPassNodes = hasByPasNodes;
+            parsingContext.Memoize(clause,position,result);
             return result;
         }
 
         public SyntaxParseResult<IN> ParseOption(IList<Token<IN>> tokens, OptionClause<IN> clause, Rule<IN> rule,
-            int position)
+            int position, SyntaxParsingContext<IN> parsingContext)
         {
+            if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
+            {
+                return parseResult;
+            }
             var result = new SyntaxParseResult<IN>();
             var currentPosition = position;
             var innerClause = clause.Clause;
@@ -464,13 +481,13 @@ namespace sly.parser.llparser
             switch (innerClause)
             {
                 case TerminalClause<IN> term:
-                    innerResult = ParseTerminal(tokens, term, currentPosition);
+                    innerResult = ParseTerminal(tokens, term, currentPosition, parsingContext);
                     break;
                 case NonTerminalClause<IN> nonTerm:
-                    innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition);
+                    innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition, parsingContext);
                     break;
                 case ChoiceClause<IN> choice:
-                    innerResult = ParseChoice(tokens, choice, currentPosition);
+                    innerResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
                     break;
                 default:
                     throw new InvalidOperationException("unable to apply repeater to " + innerClause.GetType().Name);
@@ -531,12 +548,17 @@ namespace sly.parser.llparser
                 result.HasByPassNodes = innerResult.HasByPassNodes;
             }
 
+            parsingContext.Memoize(clause, position, result);
             return result;
         }
         
-        public SyntaxParseResult<IN> ParseChoice(IList<Token<IN>> tokens, ChoiceClause<IN> choice, 
-            int position)
+        public SyntaxParseResult<IN> ParseChoice(IList<Token<IN>> tokens, ChoiceClause<IN> clause,
+            int position, SyntaxParsingContext<IN> parsingContext)
         {
+            if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
+            {
+                return parseResult;
+            }
             var currentPosition = position;
 
             SyntaxParseResult<IN> result = new SyntaxParseResult<IN>
@@ -547,39 +569,39 @@ namespace sly.parser.llparser
             };
              
 
-            foreach (var alternate in choice.Choices)
+            foreach (var alternate in clause.Choices)
             {
                 switch (alternate)
                 {
                     case TerminalClause<IN> terminalAlternate:
-                        result = ParseTerminal(tokens, terminalAlternate, currentPosition);
+                        result = ParseTerminal(tokens, terminalAlternate, currentPosition, parsingContext);
                         break;
                     case NonTerminalClause<IN> nonTerminalAlternate:
-                        result = ParseNonTerminal(tokens, nonTerminalAlternate, currentPosition);
+                        result = ParseNonTerminal(tokens, nonTerminalAlternate, currentPosition, parsingContext);
                         break;
                     default:
-                        throw new InvalidOperationException("unable to apply repeater inside  " + choice.GetType().Name);
+                        throw new InvalidOperationException("unable to apply repeater inside  " + clause.GetType().Name);
                 }
 
                 if (result.IsOk)
                 {
-                    if (choice.IsTerminalChoice && choice.IsDiscarded && result.Root is SyntaxLeaf<IN> leaf)
+                    if (clause.IsTerminalChoice && clause.IsDiscarded && result.Root is SyntaxLeaf<IN> leaf)
                     {
                         var discardedToken = new SyntaxLeaf<IN>(leaf.Token, true);
                         result.Root = discardedToken;
                     }
-
+                    parsingContext.Memoize(clause,position,result);
                     return result;
                 }
             }
 
-            if (result.IsError && choice.IsTerminalChoice)
+            if (result.IsError && clause.IsTerminalChoice)
             {
-                var terminalAlternates = choice.Choices.Cast<TerminalClause<IN>>();
+                var terminalAlternates = clause.Choices.Cast<TerminalClause<IN>>();
                 var expected = terminalAlternates.Select(x => x.ExpectedToken).ToList();
                 result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition], LexemeLabels, I18n,expected.ToArray()));
             }
-            
+            parsingContext.Memoize(clause,position,result);
             return result;
         }
 
