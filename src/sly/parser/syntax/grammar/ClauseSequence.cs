@@ -35,5 +35,29 @@ namespace sly.parser.syntax.grammar
         {
             return Clauses.Select<IClause<T>, string>(c => c.Dump()).Aggregate<string>((d1, d2) => d1 + " " + d2);
         }
+        
+        public bool Equals(IClause<T> other)
+        {
+            if (other != null)
+            {
+                if (other is ClauseSequence<T> sequence)
+                {
+                    if (sequence.Clauses.Count == Clauses.Count)
+                    {
+                        for (int i = 0; i < Clauses.Count; i++)
+                        {
+                            if (!Clauses[i].Equals(sequence.Clauses[i]))
+                            {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 }

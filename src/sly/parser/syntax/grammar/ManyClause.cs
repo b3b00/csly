@@ -7,5 +7,6 @@
         public abstract bool MayBeEmpty();
 
         public abstract string Dump();
+        public abstract bool Equals(IClause<T> other);
     }
 }

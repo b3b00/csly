@@ -42,7 +42,31 @@ namespace sly.parser.syntax.grammar
             return dump.ToString();
         }
 
-        
+
+        public bool Equals(IClause<T> other)
+        {
+            if (other != null)
+            {
+                if (other is GroupClause<T> group)
+                {
+                    if (group.Clauses.Count == Clauses.Count)
+                    {
+                        for (int i = 0; i < Clauses.Count; i++)
+                        {
+                            if (!Clauses[i].Equals(group.Clauses[i]))
+                            {
+                                return false;
+                            }
+                        }
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {

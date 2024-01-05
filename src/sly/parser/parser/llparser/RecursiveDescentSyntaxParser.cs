@@ -197,7 +197,6 @@ namespace sly.parser.llparser
                 result.IsEnded = tokens[result.EndingPosition].IsEOS;
             }
 
-
             return result;
         }
 
@@ -280,12 +279,7 @@ namespace sly.parser.llparser
         public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, NonTerminalClause<IN> nonTermClause,
             int currentPosition, SyntaxParsingContext<IN> parsingContext)
         {
-            SyntaxParseResult<IN> result = null;
-            if (!parsingContext.TryGetParseResult(nonTermClause,currentPosition, out result))
-            {
-                result = ParseNonTerminal(tokens, nonTermClause.NonTerminalName, currentPosition, parsingContext);
-                parsingContext.Memoize(nonTermClause,currentPosition,result);
-            }
+            var result = ParseNonTerminal(tokens, nonTermClause.NonTerminalName, currentPosition, parsingContext);
             return result;
         }
 
@@ -341,7 +335,10 @@ namespace sly.parser.llparser
                         allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
                 });
                 // allAcceptableTokens = allAcceptableTokens.ToList();
-                return NoMatchingRuleError(tokens, currentPosition, allAcceptableTokens);
+                
+                var noMatching =  NoMatchingRuleError(tokens, currentPosition, allAcceptableTokens);
+                parsingContext.Memoize(new NonTerminalClause<IN>(nonTerminalName),currentPosition,noMatching);
+                return noMatching;
             }
 
             errors.AddRange(innerRuleErrors);

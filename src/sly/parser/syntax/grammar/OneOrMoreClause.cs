@@ -26,5 +26,18 @@ namespace sly.parser.syntax.grammar
         {
             return Clause.Dump()+"+";
         }
+
+        public override bool Equals(IClause<T> other)
+        {
+            if (other != null)
+            {
+                if (other is OneOrMoreClause<T> otherOneOrMore)
+                {
+                    return Clause.Equals(otherOneOrMore.Clause);
+                } 
+            }
+
+            return false;
+        }
     }
 }

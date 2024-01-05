@@ -1,9 +1,10 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using sly.lexer;
 
 namespace sly.parser.syntax.grammar
 {
-    public class LeadingToken<IN> where IN:struct
+    public class LeadingToken<IN> : IEquatable<LeadingToken<IN>> where IN:struct 
     {
         public IN TokenId { get; set; }
         
@@ -48,5 +49,26 @@ namespace sly.parser.syntax.grammar
                 return TokenId.ToString();
             }
         }
+
+        public bool Equals(LeadingToken<IN> other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            if (IsExplicitToken)
+            {
+                return other.IsExplicitToken && ExplicitToken == other.ExplicitToken;
+            }
+            return TokenId.Equals(other.TokenId);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((LeadingToken<IN>)obj);
+        }
+
+        
     }
 }
