@@ -27,17 +27,13 @@ namespace sly.parser.syntax.grammar
             var t = Clause.Dump() + "*";
             return t;
         }
-        
+
         public override bool Equals(IClause<T> other)
         {
-            if (other != null)
+            if (other != null && other is OneOrMoreClause<T> otherOneOrMore)
             {
-                if (other is OneOrMoreClause<T> otherOneOrMore)
-                {
-                    return Clause.Equals(otherOneOrMore.Clause);
-                } 
+                return Clause.Equals(otherOneOrMore.Clause);
             }
-
             return false;
         }
     }

@@ -68,7 +68,7 @@ namespace sly.parser.syntax.grammar
                 return false;
             }
 
-            return other.Choices.All(x => Choices.Exists(y => y.Equals(x)));
+            return other.Choices.TrueForAll(x => Choices.Exists(y => y.Equals(x)));
         }
 
         public override bool Equals(object obj)
