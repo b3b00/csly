@@ -79,5 +79,10 @@ namespace sly.parser.syntax.grammar
             return Equals((ChoiceClause<T>)obj);
         }
 
+        public override int GetHashCode()
+        {
+            return Dump().GetHashCode();
+        }
+
     }
 }

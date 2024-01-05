@@ -69,6 +69,9 @@ namespace sly.parser.syntax.grammar
             return Equals((LeadingToken<IN>)obj);
         }
 
-        
+        public override int GetHashCode()
+        {
+            return IsExplicitToken ? this.ExplicitToken.GetHashCode() : TokenId.GetHashCode();
+        }
     }
 }
