@@ -15,5 +15,6 @@ namespace sly.parser
         void Init(ParserConfiguration<IN, OUT> configuration, string root);
 
         string Dump();
+        void Reset();
     }
 }

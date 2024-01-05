@@ -3,14 +3,16 @@ using sly.parser.generator;
 
 namespace ParserTests.Issue414;
 
-public class Issue414Parser
+public class Issue414ExpressionParser
 {
  #region boolean
+    [Operand]
     [Production("boolean: TRUE")]
     public string BooleanTrue(Token<Issue414Token> trueToken)
     {
         return "true";
     }
+    [Operand]
     [Production("boolean: FALSE")]
     public string BooleanFalse(Token<Issue414Token> falseToken)
     {
@@ -20,6 +22,7 @@ public class Issue414Parser
 
     #region variable
 
+    [Operand]
     [Production("variable: IDENTIFIER")]
     public string VariableIdentifier(Token<Issue414Token> idToken)
     {
@@ -29,7 +32,8 @@ public class Issue414Parser
     #endregion
 
     #region group
-    [Production("group: LPAREN expression RPAREN")]
+    [Operand]
+    [Production("group: LPAREN Issue414ExpressionParser_expressions RPAREN")]
     public string Group(Token<Issue414Token> lparen, string expression, Token<Issue414Token> rparen)
     {
         return "(" + expression + ")";
@@ -44,23 +48,28 @@ public class Issue414Parser
         return boolean;
     }
 
+    [Operand]
     [Production("primary: INT")]
     public string PrimaryInt(Token<Issue414Token> intToken)
     {
         return intToken.IntValue.ToString();
     }
+    
+    [Operand]
     [Production("primary: DOUBLE")]
     public string PrimaryDouble(Token<Issue414Token> doubleToken)
     {
         return doubleToken.DoubleValue.ToString();
     }
-
-    [Production("primary: variable")]
-    public string PrimaryIdentifier(string variable)
-    {
-        return variable;
-    }
-
+    //
+    // [Production("primary: variable")]
+    // public string PrimaryIdentifier(string variable)
+    // {
+    //     return variable;
+    // }
+    //
+    
+    [Operand]
     [Production("primary: STRING")]
     public string PrimaryString(Token<Issue414Token> strToken)
     {
@@ -68,12 +77,13 @@ public class Issue414Parser
         return str;
     }
 
-    [Production("primary: group")]
-    public string PrimaryGroup(string group)
-    {
-        return group;
-    }
+    // [Production("primary: group")]
+    // public string PrimaryGroup(string group)
+    // {
+    //     return group;
+    // }
 
+    [Operand]
     [Production("primary : functioncall")]
     public string PrimaryFunctioncall(string functioncall)
     {
@@ -109,7 +119,7 @@ public class Issue414Parser
     #endregion
 
     #region statement
-    [Production("statement : expression SEMICOLON")]
+    [Production("statement : Issue414ExpressionParser_expressions SEMICOLON")]
     public string Statementstring(string expression, Token<Issue414Token> semicolonToken)
     {
         return expression + ";";
@@ -133,7 +143,7 @@ public class Issue414Parser
 
     #region assign
     // A := ...
-    [Production("assign : variable ASSIGN expression")]
+    [Production("assign : variable ASSIGN Issue414ExpressionParser_expressions")]
     public string AssignExpression(string variable, Token<Issue414Token> assignToken, string right)
     {
         return variable + ":=" + right;
@@ -149,89 +159,56 @@ public class Issue414Parser
     //        factorlevel (*, ) ->
     //          primary
 
-    [Production("expression : logiclevel AND expression")]
-    [Production("expression : logiclevel OR expression")]
-    public string LogicExpression(string left, Token<Issue414Token> operatorToken, string right)
+    [Infix("AND",Associativity.Left,10)]
+    [Infix("OR",Associativity.Left,10)]
+    public string Boolean(string left, Token<Issue414Token> operatorToken, string right)
     {
         return left + operatorToken.Value + right;
     }
 
-    [Production("expression : logiclevel")]
-    public string LogicExpression(string comparelevel)
-    {
-        return comparelevel;
-    }
 
-
-    [Production("logiclevel : comparelevel GREATER logiclevel")]
-    [Production("logiclevel : comparelevel LESSER logiclevel")]
-    [Production("logiclevel : comparelevel EQUALS logiclevel")]
-    [Production("logiclevel : comparelevel DIFFERENT logiclevel")]
-    public string CompareExpression(string left, Token<Issue414Token> operatorToken, string right)
+    [Infix("GREATER",Associativity.Left,20)]
+    [Infix("LESSER",Associativity.Left,20)]
+    [Infix("EQUALS",Associativity.Left,20)]
+    [Infix("DIFFERENT",Associativity.Left,20)]
+ public string Compare(string left, Token<Issue414Token> operatorToken, string right)
     {
         return left + operatorToken.Value + right;
     }
 
-    [Production("logiclevel : comparelevel")]
-    public string CompareExpression(string comparelevel)
-    {
-        return comparelevel;
-    }
+    
 
-    [Production("comparelevel : sumlevel PLUS comparelevel")]
-    public string PlusExpression(string left, Token<Issue414Token> operatorToken, string right)
+    [Infix("PLUS",Associativity.Left,30)]
+    [Infix("MINUS",Associativity.Left,30)]
+    
+    public string Term(string left, Token<Issue414Token> operatorToken, string right)
     {
-        return left + "+" + right;
+        return left + operatorToken.Value + right;
     }
-    [Production("comparelevel : sumlevel MINUS comparelevel")]
-    public string MinusExpression(string left, Token<Issue414Token> operatorToken, string right)
-    {
-        return left + "-" + right;
-    }
-
-    [Production("comparelevel : sumlevel")]
-    public string CalcExpression(string sumlevel)
-    {
-        return sumlevel;
-    }
+    
     #endregion
 
     #region sumlevel (term)
-    [Production("sumlevel : factorlevel TIMES sumlevel")]
-    public string Times(string left, Token<Issue414Token> operatorToken, string right)
+    [Infix("TIMES",Associativity.Left,40)]
+    [Infix("DIVIDE",Associativity.Left,40)]
+    public string Factor(string left, Token<Issue414Token> operatorToken, string right)
     {
-        return left + "*" + right;
+        return left + operatorToken.Value + right;
     }
-    [Production("sumlevel : factorlevel DIVIDE sumlevel")]
-    public string Divide(string left, Token<Issue414Token> operatorToken, string right)
-    {
-        return left + "/" + right;
-    }
-
-    [Production("sumlevel : factorlevel")]
-    public string Sumlevel_Factor(string factorValue)
-    {
-        return factorValue;
-    }
+    
     #endregion
 
     #region factor
-    [Production("factorlevel : primary")]
-    public string PrimaryFactor(string primValue)
-    {
-        return primValue;
-    }
+    
 
-    [Production("factorlevel : MINUS factorlevel")]
-    public string Factor(Token<Issue414Token> minus, string factorValue)
+    [Prefix("MINUS",Associativity.Right,50)]
+    public string UnaryMinus(Token<Issue414Token> minus, string factorValue)
     {
         return "-" + factorValue;
     }
     #endregion
 
     #region functioncall
-    // function : variable ( parameters )
-    // function : variable ( )
     [Production("functioncall : variable LPAREN callparameters RPAREN")]
     public string Functioncall(string variableExpression, Token<Issue414Token> lparen, string parameters, Token<Issue414Token> rparen)
     {
@@ -244,13 +221,13 @@ public class Issue414Parser
         return variableExpression + "()";
     }
 
-    [Production("callparameters : expression COMMA callparameters")]
+    [Production("callparameters : Issue414ExpressionParser_expressions COMMA callparameters")]
     public string Function(string paramExpression, Token<Issue414Token> comma, string parameters)
     {
         return paramExpression + ", " + parameters;
     }
 
-    [Production("callparameters : expression")]
+    [Production("callparameters : Issue414ExpressionParser_expressions")]
     public string Function(string paramExpression)
     {
         return paramExpression;
