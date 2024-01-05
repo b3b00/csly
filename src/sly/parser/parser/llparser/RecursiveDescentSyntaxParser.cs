@@ -12,9 +12,12 @@ namespace sly.parser.llparser
         public RecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal,
             string i18n)
         {
+            
             I18n = i18n;
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
+            _memoizedNonTerminalResults =
+                new Dictionary<(string nonTerminalName, int position), SyntaxParseResult<IN>>();
             ComputeSubRules(configuration);
             InitializeStartingTokens(Configuration, startingNonTerminal);
         }
@@ -265,15 +268,34 @@ namespace sly.parser.llparser
         }
 
 
+        private Dictionary<(string nonTerminalName, int position), SyntaxParseResult<IN>> _memoizedNonTerminalResults;
+
+        public void Reset()
+        {
+            _memoizedNonTerminalResults.Clear();
+        }
+        
         public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, NonTerminalClause<IN> nonTermClause,
             int currentPosition)
         {
-            return ParseNonTerminal(tokens, nonTermClause.NonTerminalName, currentPosition);
+            SyntaxParseResult<IN> result = null;
+            if (!_memoizedNonTerminalResults.TryGetValue((nonTermClause.NonTerminalName,currentPosition), out result))
+            {
+                result = ParseNonTerminal(tokens, nonTermClause.NonTerminalName, currentPosition);
+                _memoizedNonTerminalResults[(nonTermClause.NonTerminalName, currentPosition)] = result;
+            }
+            return result;
         }
 
+        
+        
         public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, string nonTerminalName,
             int currentPosition)
         {
+            if (_memoizedNonTerminalResults.TryGetValue((nonTerminalName,currentPosition), out var  memoizedResult))
+            {
+                return memoizedResult;
+            }
             var startPosition = currentPosition;
             var nt = Configuration.NonTerminals[nonTerminalName];
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
@@ -379,7 +401,7 @@ namespace sly.parser.llparser
                     }
                 }
             }
-
+            _memoizedNonTerminalResults[(nonTerminalName, currentPosition)] = result;
             return result;
         }
 
