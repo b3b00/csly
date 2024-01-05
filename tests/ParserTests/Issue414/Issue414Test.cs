@@ -23,7 +23,7 @@ public class Issue414Tests
         Check.ThatCode(() =>
         {
             result = parser.Parse(source);
-        }).LastsLessThan(10000, TimeUnit.Milliseconds);
+        }).LastsLessThan(1000, TimeUnit.Milliseconds);
         Check.That(result).IsOkParsing();
     }
     

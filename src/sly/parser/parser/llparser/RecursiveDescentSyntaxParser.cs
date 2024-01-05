@@ -16,8 +16,6 @@ namespace sly.parser.llparser
             I18n = i18n;
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
-            _memoizedNonTerminalResults =
-                new Dictionary<(string nonTerminalName, int position), SyntaxParseResult<IN>>();
             ComputeSubRules(configuration);
             InitializeStartingTokens(Configuration, startingNonTerminal);
         }
@@ -27,6 +25,11 @@ namespace sly.parser.llparser
         #region parsing
 
         public SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
+        {
+            return SafeParse(tokens, new SyntaxParsingContext<IN>(), startingNonTerminal);
+        }
+        
+        public SyntaxParseResult<IN> SafeParse(IList<Token<IN>> tokens, SyntaxParsingContext<IN> parsingContext, string startingNonTerminal = null)
         {
             var start = startingNonTerminal ?? StartingNonTerminal;
             var NonTerminals = Configuration.NonTerminals;
@@ -43,7 +46,7 @@ namespace sly.parser.llparser
                 if (!tokens[0].IsEOS && rule.PossibleLeadingTokens.Any(x => x.Match(tokens[0])))
                 {
                     matchingRuleCount++;
-                    var r = Parse(tokens, rule, 0, start);
+                    var r = Parse(tokens, rule, 0, start, parsingContext);
                     rs.Add(r);
                 }
             }
@@ -119,7 +122,7 @@ namespace sly.parser.llparser
 
 
         public virtual SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position,
-            string nonTerminalName)
+            string nonTerminalName, SyntaxParsingContext<IN> parsingContext)
         {
             var currentPosition = position;
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
@@ -135,7 +138,7 @@ namespace sly.parser.llparser
                         {
                             case TerminalClause<IN> terminalClause:
                             {
-                                var termRes = ParseTerminal(tokens, terminalClause, currentPosition);
+                                var termRes = ParseTerminal(tokens, terminalClause, currentPosition, parsingContext);
                                 if (!termRes.IsError)
                                 {
                                     children.Add(termRes.Root);
@@ -154,7 +157,7 @@ namespace sly.parser.llparser
                             case NonTerminalClause<IN> terminalClause:
                             {
                                 var nonTerminalResult =
-                                    ParseNonTerminal(tokens, terminalClause, currentPosition);
+                                    ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
                                 if (!nonTerminalResult.IsError)
                                 {
                                     children.Add(nonTerminalResult.Root);
@@ -247,8 +250,13 @@ namespace sly.parser.llparser
             return node;
         }
 
-        public SyntaxParseResult<IN> ParseTerminal(IList<Token<IN>> tokens, TerminalClause<IN> terminal, int position)
+        public SyntaxParseResult<IN> ParseTerminal(IList<Token<IN>> tokens, TerminalClause<IN> terminal, int position,
+            SyntaxParsingContext<IN> parsingContext)
         {
+            if (parsingContext.TryGetParseResult(terminal, position, out var parseResult))
+            {
+                return parseResult;
+            }
             var result = new SyntaxParseResult<IN>();
             result.IsError = !terminal.Check(tokens[position]);
             result.EndingPosition = !result.IsError ? position + 1 : position;
@@ -263,26 +271,20 @@ namespace sly.parser.llparser
                     new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
                 result.AddExpecting(terminal.ExpectedToken);
             }
-
+            parsingContext.Memoize(terminal,position,result);
             return result;
         }
 
 
-        private Dictionary<(string nonTerminalName, int position), SyntaxParseResult<IN>> _memoizedNonTerminalResults;
-
-        public void Reset()
-        {
-            _memoizedNonTerminalResults.Clear();
-        }
         
         public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, NonTerminalClause<IN> nonTermClause,
-            int currentPosition)
+            int currentPosition, SyntaxParsingContext<IN> parsingContext)
         {
             SyntaxParseResult<IN> result = null;
-            if (!_memoizedNonTerminalResults.TryGetValue((nonTermClause.NonTerminalName,currentPosition), out result))
+            if (!parsingContext.TryGetParseResult(nonTermClause,currentPosition, out result))
             {
-                result = ParseNonTerminal(tokens, nonTermClause.NonTerminalName, currentPosition);
-                _memoizedNonTerminalResults[(nonTermClause.NonTerminalName, currentPosition)] = result;
+                result = ParseNonTerminal(tokens, nonTermClause.NonTerminalName, currentPosition, parsingContext);
+                parsingContext.Memoize(nonTermClause,currentPosition,result);
             }
             return result;
         }
@@ -290,9 +292,9 @@ namespace sly.parser.llparser
         
         
         public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, string nonTerminalName,
-            int currentPosition)
+            int currentPosition, SyntaxParsingContext<IN> parsingContext)
         {
-            if (_memoizedNonTerminalResults.TryGetValue((nonTerminalName,currentPosition), out var  memoizedResult))
+            if (parsingContext.TryGetParseResult(new NonTerminalClause<IN>(nonTerminalName),currentPosition, out var memoizedResult))
             {
                 return memoizedResult;
             }
@@ -312,7 +314,7 @@ namespace sly.parser.llparser
                 if (startPosition < tokens.Count && !tokens[startPosition].IsEOS &&
                     innerrule.PossibleLeadingTokens.Any(x => x.Match(tokens[startPosition])) || innerrule.MayBeEmpty)
                 {
-                    var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTerminalName);
+                    var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTerminalName, parsingContext);
                     rulesResults.Add(innerRuleRes);
 
                     var other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
@@ -401,7 +403,7 @@ namespace sly.parser.llparser
                     }
                 }
             }
-            _memoizedNonTerminalResults[(nonTerminalName, currentPosition)] = result;
+            parsingContext.Memoize(new NonTerminalClause<IN>(nonTerminalName),currentPosition,result);
             return result;
         }
 
@@ -431,6 +433,9 @@ namespace sly.parser.llparser
 
             return error;
         }
+
+
+        
 
         public virtual void Init(ParserConfiguration<IN, OUT> configuration, string root)
         {
