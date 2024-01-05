@@ -55,6 +55,9 @@ namespace sly.parser.syntax.grammar
             return Equals((NonTerminalClause<T>)obj);
         }
 
-       
+        public override int GetHashCode()
+        {
+            return Dump().GetHashCode();
+        }
     }
 }
