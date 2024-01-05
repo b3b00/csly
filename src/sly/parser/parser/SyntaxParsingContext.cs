@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using sly.parser.syntax.grammar;
@@ -8,12 +7,7 @@ namespace sly.parser
    
     public class SyntaxParsingContext<IN> where IN : struct
     {
-        private Dictionary<string, SyntaxParseResult<IN>> _memoizedNonTerminalResults;
-
-        public SyntaxParsingContext()
-        {
-            _memoizedNonTerminalResults = new Dictionary<string, SyntaxParseResult<IN>>();
-        }
+        private readonly Dictionary<string, SyntaxParseResult<IN>> _memoizedNonTerminalResults = new Dictionary<string, SyntaxParseResult<IN>>();
 
         private string GetKey(IClause<IN> clause, int position)
         {
