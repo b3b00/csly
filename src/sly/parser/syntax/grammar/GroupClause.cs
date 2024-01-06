@@ -45,20 +45,17 @@ namespace sly.parser.syntax.grammar
 
         public bool Equals(IClause<T> other)
         {
-            if (other is GroupClause<T> group && group.Clauses.Count == Clauses.Count)
+            if (!(other is GroupClause<T> group) || group.Clauses.Count != Clauses.Count) return false;
+            for (int i = 0; i < Clauses.Count; i++)
             {
-                for (int i = 0; i < Clauses.Count; i++)
+                if (!Clauses[i].Equals(group.Clauses[i]))
                 {
-                    if (!Clauses[i].Equals(group.Clauses[i]))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
-
-                return true;
             }
 
-            return false;
+            return true;
+
         }
 
         [ExcludeFromCodeCoverage]

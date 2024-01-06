@@ -273,7 +273,7 @@ return r";
                     }
                     catch (Exception e)
                     {
-                        ;
+                        Console.WriteLine(e.Message);
                     }
                 });
                 t.Start();
@@ -1352,7 +1352,6 @@ billy
         private static void EscapeIt()
         {
             char escape = '\\';
-            char delim = '"';
             var value = "\\\"te\\\\\\\\st\\\"";
             string newValue = "";
             int i = 0;

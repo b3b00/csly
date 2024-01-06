@@ -82,7 +82,7 @@ namespace sly.parser.syntax.grammar
 
             return false;
         }
-        protected bool Equals(TerminalClause<T> other)
+        private bool Equals(TerminalClause<T> other)
         {
             if (IsExplicitToken)
             {
@@ -103,7 +103,7 @@ namespace sly.parser.syntax.grammar
     
     public sealed class IndentTerminalClause<T> : TerminalClause<T> where T : struct
     {
-        private IndentationType ExpectedIndentation;
+        private readonly IndentationType ExpectedIndentation;
         
         public IndentTerminalClause(IndentationType expectedIndentation, bool discard) : base(new LeadingToken<T>(default(T)))
         {

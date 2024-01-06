@@ -80,7 +80,7 @@ namespace sly.lexer
                     if (enumAttributes.Length == 0 && singleCommentAttributes.Length == 0 &&
                         multiCommentAttributes.Length == 0 && commentAttributes.Length == 0)
                     {
-                        result?.AddError(new LexerInitializationError(ErrorLevel.WARN,
+                        result.AddError(new LexerInitializationError(ErrorLevel.WARN,
                             $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme",
                             ErrorCodes.NOT_AN_ERROR));
                     }

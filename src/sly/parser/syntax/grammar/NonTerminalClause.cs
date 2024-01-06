@@ -42,7 +42,7 @@ namespace sly.parser.syntax.grammar
             return false;
         }
         
-        protected bool Equals(NonTerminalClause<T> other)
+        private  bool Equals(NonTerminalClause<T> other)
         {
             return NonTerminalName == other.NonTerminalName && IsGroup == other.IsGroup;
         }

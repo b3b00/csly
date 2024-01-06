@@ -22,7 +22,7 @@ namespace sly.parser.syntax.grammar
             Choices = choices;
         }
         
-        public ChoiceClause(IClause<T> choice, List<IClause<T>> choices) : this(choice)
+        public ChoiceClause(IClause<T> choice, IEnumerable<IClause<T>> choices) : this(choice)
         {
             Choices.AddRange(choices);
         }
@@ -56,7 +56,7 @@ namespace sly.parser.syntax.grammar
             return false;
         } 
         
-        protected bool Equals(ChoiceClause<T> other)
+        private bool Equals(ChoiceClause<T> other)
         {
             if (other.Choices.Count != Choices.Count)
             {
