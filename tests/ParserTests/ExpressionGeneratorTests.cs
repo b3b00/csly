@@ -7,6 +7,7 @@ using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
+using ParserTests.Issue184;
 
 namespace ParserTests
 {

@@ -57,7 +57,7 @@ namespace sly.parser.syntax.grammar
             }
             else
             {
-                b.Append(ExpectedToken.ToString());
+                b.Append(ExpectedToken);
             }
 
             if (Discarded) b.Append("[d]");
@@ -101,7 +101,7 @@ namespace sly.parser.syntax.grammar
         UnIndent
     }
     
-    public class IndentTerminalClause<T> : TerminalClause<T> where T : struct
+    public sealed class IndentTerminalClause<T> : TerminalClause<T> where T : struct
     {
         private IndentationType ExpectedIndentation;
         

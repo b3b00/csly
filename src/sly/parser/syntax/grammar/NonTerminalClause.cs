@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
-    public class NonTerminalClause<T> : IClause<T>
+    public sealed class NonTerminalClause<T> : IClause<T>
     {
         public NonTerminalClause(string name)
         {

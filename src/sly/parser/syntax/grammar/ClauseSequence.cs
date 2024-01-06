@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace sly.parser.syntax.grammar
 {
-    public class ClauseSequence<T> : IClause<T>
+    public sealed class ClauseSequence<T> : IClause<T>
     {
         public ClauseSequence(IClause<T> item)
         {

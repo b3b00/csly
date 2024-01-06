@@ -4,7 +4,7 @@ using sly.lexer;
 
 namespace sly.parser.syntax.grammar
 {
-    public class LeadingToken<IN> : IEquatable<LeadingToken<IN>> where IN:struct 
+    public sealed class LeadingToken<IN> : IEquatable<LeadingToken<IN>> where IN:struct 
     {
         public IN TokenId { get; set; }
         
