@@ -1,7 +1,7 @@
 ﻿using sly.lexer;
 using sly.parser.generator;
 
-namespace ParserTests
+namespace ParserTests.Issue184
 {
     public class Issue184Parser
     {

@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
-    public class OptionClause<T> : IClause<T>
+    public sealed class OptionClause<T> : IClause<T>
     {
         public OptionClause(IClause<T> clause)
         {

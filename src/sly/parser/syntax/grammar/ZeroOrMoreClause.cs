@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
-    public class ZeroOrMoreClause<T> : ManyClause<T>
+    public sealed class ZeroOrMoreClause<T> : ManyClause<T>
     {
         
         public ZeroOrMoreClause(IClause<T> clause)

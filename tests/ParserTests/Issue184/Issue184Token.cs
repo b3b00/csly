@@ -1,6 +1,6 @@
 using sly.lexer;
 
-namespace ParserTests
+namespace ParserTests.Issue184
 {
     public enum Issue184Token
     {
