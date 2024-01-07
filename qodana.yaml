@@ -20,7 +20,15 @@ profile:
 #  - name: <SomeDisabledInspectionId>
 #    paths:
 #      - <path/where/not/run/inspection>
-
+exclude:
+  - name: All
+    paths:
+      - src/samples/ParserExample
+      - src/profiler
+      - src/benchCurrent
+      - src/bench2.4
+      - src/bench
+      
 #Execute shell command before Qodana execution (Applied in CI/CD pipeline)
 #bootstrap: sh ./prepare-qodana.sh
 
