@@ -11,20 +11,9 @@ namespace sly.i18n
 
         private static I18N _instance;
 
-        public static I18N Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new I18N();
-                }
+        public static I18N Instance => _instance ?? (_instance = new I18N());
 
-                return _instance;
-            }
-        }
-
-        protected I18N()
+        private I18N()
         {
             Translations = new Dictionary<string, IDictionary<I18NMessage, string>>();
         }
@@ -32,19 +21,13 @@ namespace sly.i18n
         public string GetText(string lang, I18NMessage key, params string[] args)
         {
             lang = lang ?? CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
-            IDictionary<I18NMessage, string> translation = new Dictionary<I18NMessage, string>();
-            if (!Translations.TryGetValue(lang, out translation))
+            if (!Translations.TryGetValue(lang, out var translation))
             {
                 translation = Load(lang);
             }
 
-            string pattern = null;
-            if (translation.TryGetValue(key, out pattern))
-            {
-                return string.Format(pattern, args);
-            }
-
-            return "";
+            
+            return translation.TryGetValue(key, out var pattern) ? string.Format(pattern, args) : "";
         }
 
 
@@ -52,19 +35,18 @@ namespace sly.i18n
         {
             var translation = new Dictionary<I18NMessage, string>();
             Assembly assembly = GetType().Assembly;
-            var res = assembly.GetManifestResourceNames();
             using (var stream = assembly.GetManifestResourceStream($"sly.i18n.translations.{lang}.txt"))
             {
                 if (stream != null)
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    using (var reader = new StreamReader(stream))
                     {
-                        string line = reader.ReadLine();
+                        var line = reader.ReadLine();
                         while (line != null)
                         {
                             if (!line.StartsWith("#"))
                             {
-                                var items = line.Split(new[] {'='});
+                                var items = line.Split('=');
                                 if (items.Length == 2)
                                 {
                                     var key = EnumConverter.ConvertStringToEnum<I18NMessage>(items[0]);

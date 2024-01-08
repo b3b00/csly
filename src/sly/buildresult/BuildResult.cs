@@ -7,7 +7,7 @@ namespace sly.buildresult
 {
     public class BuildResult<R>
     {
-        public BuildResult() : this(default(R))
+        public BuildResult() : this(default)
         { }
 
         public BuildResult(R result)
@@ -22,7 +22,7 @@ namespace sly.buildresult
 
         public bool IsError
         {
-            get { return Errors.Any<InitializationError>(e => e.Level != ErrorLevel.WARN); }
+            get { return Errors.Any(e => e.Level != ErrorLevel.WARN); }
         }
 
         public bool IsOk => !IsError;
@@ -37,12 +37,12 @@ namespace sly.buildresult
             Errors.Add(new InitializationError(level,message,errorCode));
         }
 
-        public void AddErrors(List<InitializationError> errors)
+        public void AddErrors(IEnumerable<InitializationError> errors)
         {
             Errors.AddRange(errors);
         }
 
-        
+
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
@@ -50,17 +50,16 @@ namespace sly.buildresult
             {
                 return $"parser is ok {typeof(R)}";
             }
-            else
-            {
-                StringBuilder error = new StringBuilder();
-                error.AppendLine("parser is KO");
-                foreach (var initializationError in Errors)
-                {
-                    error.AppendLine($"{initializationError.Level} - {initializationError.Code} : {initializationError.Message}");
-                }
 
-                return error.ToString();
+            var error = new StringBuilder();
+            error.AppendLine("parser is KO");
+            foreach (var initializationError in Errors)
+            {
+                error.AppendLine(
+                    $"{initializationError.Level} - {initializationError.Code} : {initializationError.Message}");
             }
+
+            return error.ToString();
         }
     }
 }

@@ -9,10 +9,10 @@
             Code = code;
         }
 
-        public ErrorLevel Level { get; set; }
+        public ErrorLevel Level { get;  }
 
-        public string Message { get; set; }
+        public string Message { get;  }
         
-        public ErrorCodes Code {get; set;}
+        public ErrorCodes Code {get; }
     }
 }
