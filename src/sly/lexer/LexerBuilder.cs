@@ -51,7 +51,7 @@ namespace sly.lexer
             var attributes = new Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)>();
 
             var values = Enum.GetValues(typeof(IN));
-            var grouped = values.Cast<IN>().GroupBy<IN, IN>(x => x).ToList<IGrouping<IN, IN>>();
+            var grouped = values.Cast<IN>().GroupBy(x => x).ToList();
             foreach (var group in grouped)
             {
                 var v = group.Key;
@@ -606,7 +606,7 @@ namespace sly.lexer
                             fsmBuilder.ConstantTransition(commentAttr.MultiLineCommentStart);
                             fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
                             fsmBuilder.End(GenericToken.Comment);
-                            fsmBuilder.CallBack(GetCallbackMulti<IN>(comment.Key, commentAttr.DoNotIgnore,
+                            fsmBuilder.CallBack(GetCallbackMulti(comment.Key, commentAttr.DoNotIgnore,
                                 commentAttr.Channel));
                         }
                     }
@@ -682,13 +682,13 @@ namespace sly.lexer
             var allLexemes = attributes.Values.SelectMany<List<LexemeAttribute>, LexemeAttribute>(a => a);
 
             var allDelimiters = allLexemes
-                .Where<LexemeAttribute>(a => a.IsString || a.IsChar)
-                .Where<LexemeAttribute>(a => a.HasGenericTokenParameters)
-                .Select<LexemeAttribute, string>(a => a.GenericTokenParameters[0]);
+                .Where(a => a.IsString || a.IsChar)
+                .Where(a => a.HasGenericTokenParameters)
+                .Select(a => a.GenericTokenParameters[0]);
 
-            var duplicates = allDelimiters.GroupBy<string, string>(x => x)
-                .Where<IGrouping<string, string>>(g => g.Count<string>() > 1)
-                .Select(y => new { Element = y.Key, Counter = y.Count<string>() });
+            var duplicates = allDelimiters.GroupBy(x => x)
+                .Where(g => g.Count() > 1)
+                .Select(y => new { Element = y.Key, Counter = y.Count() });
 
             foreach (var duplicate in duplicates)
             {
@@ -712,16 +712,16 @@ namespace sly.lexer
             {
                 var tokenID = (IN)(object)value;
                 var enumAttributes = value.GetAttributesOfType<CommentAttribute>();
-                if (enumAttributes != null && enumAttributes.Any<CommentAttribute>())
-                    attributes[tokenID] = enumAttributes.ToList<CommentAttribute>();
+                if (enumAttributes != null && enumAttributes.Any())
+                    attributes[tokenID] = enumAttributes.ToList();
             }
 
-            var commentCount = attributes.Values.Select<List<CommentAttribute>, int>(l =>
-                l?.Count<CommentAttribute>(attr => attr.GetType() == typeof(CommentAttribute)) ?? 0).Sum();
-            var multiLineCommentCount = attributes.Values.Select<List<CommentAttribute>, int>(l =>
-                l?.Count<CommentAttribute>(attr => attr.GetType() == typeof(MultiLineCommentAttribute)) ?? 0).Sum();
-            var singleLineCommentCount = attributes.Values.Select<List<CommentAttribute>, int>(l =>
-                l?.Count<CommentAttribute>(attr => attr.GetType() == typeof(SingleLineCommentAttribute)) ?? 0).Sum();
+            var commentCount = attributes.Values.Select(l =>
+                l?.Count(attr => attr.GetType() == typeof(CommentAttribute)) ?? 0).Sum();
+            var multiLineCommentCount = attributes.Values.Select(l =>
+                l?.Count(attr => attr.GetType() == typeof(MultiLineCommentAttribute)) ?? 0).Sum();
+            var singleLineCommentCount = attributes.Values.Select(l =>
+                l?.Count(attr => attr.GetType() == typeof(SingleLineCommentAttribute)) ?? 0).Sum();
 
             if (commentCount > 1)
             {

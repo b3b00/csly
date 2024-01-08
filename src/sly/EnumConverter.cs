@@ -25,7 +25,7 @@ namespace sly
         public static IN ConvertStringToEnum<IN>(string name)  where IN : struct
         {
             IN token = default(IN);
-            if (!Enum.TryParse<IN>(name, out token))
+            if (!Enum.TryParse(name, out token))
             {
                 throw new ParserConfigurationException($"bad enum name {name} on Operation definition.");
             }
@@ -34,8 +34,7 @@ namespace sly
         
         public static bool IsEnumValue<IN>(string name)  where IN : struct
         {
-            
-            return Enum.TryParse<IN>(name, out IN token);
+            return Enum.TryParse(name, out IN token);
         }
     }
 }

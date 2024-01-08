@@ -129,22 +129,22 @@ namespace sly.parser
             else
             {
                 result.Errors = new List<ParseError>();
-                var unexpectedTokens = syntaxResult.Errors.ToList<UnexpectedTokenSyntaxError<IN>>();
-                var byEnding = unexpectedTokens.GroupBy<UnexpectedTokenSyntaxError<IN>, LexerPosition>(x => x.UnexpectedToken.Position).OrderBy<IGrouping<LexerPosition, UnexpectedTokenSyntaxError<IN>>, LexerPosition>(x => x.Key);
+                var unexpectedTokens = syntaxResult.Errors.ToList();
+                var byEnding = unexpectedTokens.GroupBy(x => x.UnexpectedToken.Position).OrderBy(x => x.Key);
                 var errors = new List<ParseError>();  
                 foreach (var expecting in byEnding)
                 {
-                    var expectingTokens = expecting.SelectMany<UnexpectedTokenSyntaxError<IN>, LeadingToken<IN>>(x => x.ExpectedTokens ?? new List<LeadingToken<IN>>()).Distinct();
+                    var expectingTokens = expecting.SelectMany(x => x.ExpectedTokens ?? new List<LeadingToken<IN>>()).Distinct();
                     var expectedTokens =  expectingTokens != null && expectingTokens.Any() ? expectingTokens?.ToArray() : null;
                     if (expectedTokens != null)
                     {
-                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First<UnexpectedTokenSyntaxError<IN>>().UnexpectedToken, LexemeLabels, I18n,
+                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, LexemeLabels, I18n,
                             expectedTokens);
                         errors.Add(expected);
                     }
                     else
                     {
-                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First<UnexpectedTokenSyntaxError<IN>>().UnexpectedToken, LexemeLabels, I18n,
+                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, LexemeLabels, I18n,
                             new LeadingToken<IN>[]{});
                         errors.Add(expected);
                     }

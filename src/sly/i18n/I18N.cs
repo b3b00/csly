@@ -34,7 +34,7 @@ namespace sly.i18n
         private IDictionary<I18NMessage,string> Load(string lang)
         {
             var translation = new Dictionary<I18NMessage, string>();
-            Assembly assembly = GetType().Assembly;
+            var assembly = GetType().Assembly;
             using (var stream = assembly.GetManifestResourceStream($"sly.i18n.translations.{lang}.txt"))
             {
                 if (stream != null)

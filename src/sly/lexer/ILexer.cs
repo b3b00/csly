@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using sly.i18n;
 using sly.lexer.fsm;
 
 namespace sly.lexer

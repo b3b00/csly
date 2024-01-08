@@ -115,7 +115,7 @@ namespace sly.parser.llparser
                             {
                                 var choiceResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
                                 currentPosition = choiceResult.EndingPosition;
-                                if (choiceResult.IsError && choiceResult.Errors != null && choiceResult.Errors.Any<UnexpectedTokenSyntaxError<IN>>())
+                                if (choiceResult.IsError && choiceResult.Errors != null && choiceResult.Errors.Any())
                                 {
                                     errors.AddRange(choiceResult.Errors);
                                 }

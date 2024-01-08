@@ -35,7 +35,7 @@ namespace sly.parser.syntax.grammar
         {
             get
             {
-                var key = string.Join("_", Clauses.Select<IClause<IN>, string>(c => c.ToString()));
+                var key = string.Join("_", Clauses.Select(c => c.ToString()));
                 
                 if (Clauses.Count == 1) 
                     key += "_";
@@ -53,7 +53,7 @@ namespace sly.parser.syntax.grammar
         {
             get
             {
-                if (Clauses != null && Clauses.Any<IClause<IN>>())
+                if (Clauses != null && Clauses.Any())
                 {
                     bool contains = false;
                     foreach (var clause in Clauses)
@@ -89,7 +89,7 @@ namespace sly.parser.syntax.grammar
                                   || Clauses.Count == 1 && Clauses[0].MayBeEmpty();
 
 
-        public OperationMetaData<IN> GetOperation(IN token = default(IN))
+        public OperationMetaData<IN> GetOperation(IN token = default)
         {
             if (IsExpressionRule)
             {
@@ -106,13 +106,13 @@ namespace sly.parser.syntax.grammar
         {
             if (IsExpressionRule)
             {
-                return VisitorMethodsForOperation.Values.ToList<OperationMetaData<IN>>();
+                return VisitorMethodsForOperation.Values.ToList();
             }
 
             return null;
         }
 
-        public MethodInfo GetVisitor(IN token = default(IN))
+        public MethodInfo GetVisitor(IN token = default)
         {
             MethodInfo visitor = null;
             if (IsExpressionRule)

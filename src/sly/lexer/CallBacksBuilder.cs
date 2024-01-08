@@ -18,17 +18,17 @@ namespace sly.lexer
 
         public static void ExtractCallBacks<IN>(Type callbackClass, GenericLexer<IN> lexer) where IN : struct
         {
-            var methods = callbackClass.GetMethods().ToList<MethodInfo>();
+            var methods = callbackClass.GetMethods().ToList();
             methods = methods.Where<MethodInfo>(m =>
             {
-                var attributes = m.GetCustomAttributes().ToList<Attribute>();
+                var attributes = m.GetCustomAttributes().ToList();
                 var attr = attributes.Find(a => a.GetType() == typeof(TokenCallbackAttribute));
                 return m.IsStatic && attr != null;
             }).ToList<MethodInfo>();
 
             foreach (var method in methods)
             {
-                var attributes = method.GetCustomAttributes(typeof(TokenCallbackAttribute), false).Cast<TokenCallbackAttribute>().ToList<TokenCallbackAttribute>();
+                var attributes = method.GetCustomAttributes(typeof(TokenCallbackAttribute), false).Cast<TokenCallbackAttribute>().ToList();
                 AddCallback<IN>(lexer, method, EnumConverter.ConvertIntToEnum<IN>(attributes[0].EnumValue));
             }
         }

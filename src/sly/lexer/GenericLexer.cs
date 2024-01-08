@@ -295,11 +295,10 @@ namespace sly.lexer
 
                 if (r.IsLineEnding) // only compute if token is eol
                 {
-                    var eols = tokens.Where<Token<IN>>(t => t.IsLineEnding).ToList<Token<IN>>();
-                    int line = eols.Any<Token<IN>>() ? eols.Count : 0;
+                    var eols = tokens.Where(t => t.IsLineEnding).ToList();
+                    int line = eols.Any() ? eols.Count : 0;
                     int column = 0;
                     int index = newPosition.Index;
-                    // r.Result.Position.Line = line+1;
                     r.NewPosition.Line = line + 1;
                     r.NewPosition.Column = column;
                 }
@@ -323,16 +322,16 @@ namespace sly.lexer
             // start machine definition
             FSMBuilder.Mark(start);
 
-            if (staticTokens.Contains<GenericToken>(GenericToken.Identifier) ||
-                staticTokens.Contains<GenericToken>(GenericToken.KeyWord))
+            if (staticTokens.Contains(GenericToken.Identifier) ||
+                staticTokens.Contains(GenericToken.KeyWord))
             {
                 InitializeIdentifier(config);
             }
 
             // numeric
-            if (staticTokens.Contains<GenericToken>(GenericToken.Int) ||
-                staticTokens.Contains<GenericToken>(GenericToken.Double) || 
-                staticTokens.Contains<GenericToken>(GenericToken.Date)) 
+            if (staticTokens.Contains(GenericToken.Int) ||
+                staticTokens.Contains(GenericToken.Double) || 
+                staticTokens.Contains(GenericToken.Date)) 
             {
                 FSMBuilder = FSMBuilder.GoTo(start)
                     .RangeTransition('0', '9')
@@ -527,8 +526,6 @@ namespace sly.lexer
 
             FSMBuilder.GoTo(in_int)
                 .Transition(separatorChar)
-                // .RangeTransition('0','9')
-                // .RangeTransition('0','9')
                 .RangeTransition('0', '9')
                 .Mark(in_double)
                 .RangeTransitionTo('0', '9', in_double)
@@ -572,7 +569,7 @@ namespace sly.lexer
             };
             NodeCallback<GenericToken> callback = delegate(FSMMatch<GenericToken> match)
             {
-                match.Properties[GenericLexer<IN>.DerivedToken] = token;
+                match.Properties[DerivedToken] = token;
                 var elements = match.Result.Value.Split(separator);
                 DateTime date;
                 if (format == DateFormat.DDMMYYYY)
@@ -633,7 +630,7 @@ namespace sly.lexer
             };
             NodeCallback<GenericToken> callback = delegate(FSMMatch<GenericToken> match)
             {
-                match.Properties[GenericLexer<IN>.DerivedToken] = token;
+                match.Properties[DerivedToken] = token;
                 var elements = match.Result.Value.Split(separator);
                 DateTime date;
                 if (format == DateFormat.DDMMYYYY)
@@ -772,7 +769,7 @@ namespace sly.lexer
 
             if (substitutionHappened)
             {
-                r += value.At<char>(value.Length - 1);
+                r += value.At(value.Length - 1);
                 value = r.AsMemory();
             }
 
@@ -969,9 +966,9 @@ namespace sly.lexer
                 return match;
             };
 
-            Func<int, TransitionPrecondition> precond = (int i) =>
+            Func<int, TransitionPrecondition> precond = (i) =>
             {
-                return (ReadOnlyMemory<char> value) => { return value.Length == i + 1; };
+                return (value) => { return value.Length == i + 1; };
             };
 
             FSMBuilder.GoTo(start);
@@ -1021,8 +1018,6 @@ namespace sly.lexer
                         FSMBuilder.GoTo(startNode);
                         FSMBuilder.SafeTransition(exceptionChar);
                         FSMBuilder.Mark(end);
-                        // FSMBuilder.End(GenericToken.AllExcept)
-                        //     .CallBack(callback);
 
                         startNode = start;
                     }
@@ -1080,7 +1075,6 @@ namespace sly.lexer
                     comment.SpanValue = "".ToCharArray();
                 }
                 return new LexerPosition(position, lexerPosition.Line + 1, 0);
-                //LexerFsm.MovePosition(position, LexerFsm.CurrentLine + 1, 0);
             }
             else if (comment.IsMultiLineComment)
             {
@@ -1099,12 +1093,11 @@ namespace sly.lexer
                 var newLine = lexerPosition.Line + lines.Count - 1;
                 int newColumn;
                 if (lines.Count > 1)
-                    newColumn = lines.Last<int>() + MultiLineCommentEnd.Length;
+                    newColumn = lines.Last() + MultiLineCommentEnd.Length;
                 else
                     newColumn = lexerPosition.Column + lines[0] + MultiLineCommentEnd.Length;
 
                 return new LexerPosition(newPosition, newLine, newColumn);
-                // LexerFsm.MovePosition(newPosition, newLine, newColumn);
             }
 
             return lexerPosition;

@@ -8,10 +8,10 @@ namespace sly.parser.syntax.grammar
     {
 
         public bool IsDiscarded { get; set; } = false;
-        public bool IsTerminalChoice => Choices.Select<IClause<T>, bool>(c => c is TerminalClause<T>).Aggregate<bool>((x, y) => x && y);
-        public bool IsNonTerminalChoice => Choices.Select<IClause<T>, bool>(c => c is NonTerminalClause<T>).Aggregate<bool>((x, y) => x && y);
+        public bool IsTerminalChoice => Choices.Select(c => c is TerminalClause<T>).Aggregate((x, y) => x && y);
+        public bool IsNonTerminalChoice => Choices.Select(c => c is NonTerminalClause<T>).Aggregate((x, y) => x && y);
             
-        public  List<IClause<T>> Choices { get; set; }
+        public  List<IClause<T>> Choices { get; }
         public ChoiceClause(IClause<T> clause)
         {
             Choices = new List<IClause<T>> {clause};
@@ -31,7 +31,7 @@ namespace sly.parser.syntax.grammar
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            var choices = string.Join(" | ", Choices.Select<IClause<T>, string>(c => c.Dump()));
+            var choices = string.Join(" | ", Choices.Select(c => c.Dump()));
             return $"[ {choices} ]";
         }
 

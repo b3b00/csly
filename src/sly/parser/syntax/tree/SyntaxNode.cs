@@ -23,7 +23,7 @@ namespace sly.parser.syntax.tree
 
         public bool IsByPassNode { get; set; } = false;
 
-        public bool IsEmpty => Children == null || !Children.Any<ISyntaxNode<IN>>();
+        public bool IsEmpty => Children == null || !Children.Any();
 
         public Affix ExpressionAffix { get; set; }
 
