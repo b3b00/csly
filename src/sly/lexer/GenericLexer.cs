@@ -430,11 +430,10 @@ namespace sly.lexer
                 {
                     case GenericToken.Identifier:
                     {
-                        if (derivedTokens.ContainsKey(GenericToken.Identifier))
+                        if (derivedTokens.TryGetValue(GenericToken.Identifier, out var possibleTokens))
                         {
-                            var possibleTokens = derivedTokens[GenericToken.Identifier];
-                            if (possibleTokens.ContainsKey(match.Result.Value))
-                                match.Properties[DerivedToken] = possibleTokens[match.Result.Value].tokenId;
+                            if (possibleTokens.TryGetValue(match.Result.Value, out var possibleToken))
+                                match.Properties[DerivedToken] = possibleToken.tokenId;
                             else
                                 match.Properties[DerivedToken] = identifierDerivedToken;
                         }
@@ -1114,7 +1113,7 @@ namespace sly.lexer
             tok.Position = inTok.Position;
             tok.Discarded = inTok.Discarded;
             tok.StringDelimiter = match.StringDelimiterChar;
-            tok.TokenID = match.Properties.ContainsKey(DerivedToken) ? (IN)match.Properties[DerivedToken] : default(IN);
+            tok.TokenID = match.Properties.TryGetValue(DerivedToken, out var property) ? (IN)property : default;
             tok.IsLineEnding = match.IsLineEnding;
             tok.IsEOS = match.IsEOS;
             tok.IsIndent = match.IsIndent;

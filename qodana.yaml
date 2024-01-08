@@ -10,4 +10,4 @@ exclude:
       - src/bench2.4
       - src/benchCurrent
       - src/profiler
-      - src/samples/ParserExample
+      - src/samples

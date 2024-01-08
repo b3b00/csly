@@ -636,7 +636,6 @@ namespace sly.lexer
                                 result.Errors.AddRange(resultx.Errors);
                                 lexer.AddKeyWord(default(IN), explicitToken, false, false,
                                     ModeAttribute.DefaultLexerMode, resultx);
-                                ;
                             }
                             else
                             {

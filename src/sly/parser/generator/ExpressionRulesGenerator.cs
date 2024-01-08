@@ -79,8 +79,8 @@ namespace sly.parser.generator
                     }
 
                     var operations = new List<OperationMetaData<IN>>();
-                    if (operationsByPrecedence.ContainsKey(operation.Precedence))
-                        operations = operationsByPrecedence[operation.Precedence];
+                    if (operationsByPrecedence.TryGetValue(operation.Precedence, out var value))
+                        operations = value;
                     operations.Add(operation);
                     operationsByPrecedence[operation.Precedence] = operations;
                 }

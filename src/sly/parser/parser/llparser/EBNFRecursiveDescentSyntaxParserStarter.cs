@@ -169,9 +169,8 @@ namespace sly.parser.llparser
             Dictionary<string, NonTerminal<IN>> nonTerminals)
         {
             InitStartingTokensForNonTerminal(nonTerminals, nonterm.NonTerminalName);
-            if (nonTerminals.ContainsKey(nonterm.NonTerminalName))
+            if (nonTerminals.TryGetValue(nonterm.NonTerminalName, out var firstNonTerminal))
             {
-                var firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
                 firstNonTerminal.Rules.ForEach(r => { rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens); });
                 rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
             }

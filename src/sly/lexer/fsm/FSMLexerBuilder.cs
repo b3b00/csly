@@ -40,8 +40,8 @@ namespace sly.lexer.fsm
 
         public FSMLexerBuilder<N> GoTo(string mark)
         {
-            if (Marks.ContainsKey(mark))
-                GoTo(Marks[mark]);
+            if (Marks.TryGetValue(mark, out var mark1))
+                GoTo(mark1);
             else
                 throw new ArgumentException($"mark {mark} does not exist in current builder");
             return this;
@@ -63,7 +63,7 @@ namespace sly.lexer.fsm
         public FSMNode<N> GetNode(string mark)
         {
             FSMNode<N> node = null;
-            if (Marks.ContainsKey(mark)) node = GetNode(Marks[mark]);
+            if (Marks.TryGetValue(mark, out var mark1)) node = GetNode(mark1);
             return node;
         }
         

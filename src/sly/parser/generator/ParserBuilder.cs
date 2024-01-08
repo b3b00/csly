@@ -473,10 +473,6 @@ namespace sly.parser.generator
             if (!rule.IsExpressionRule)
             {
                 var visitor = rule.GetVisitor();
-                if (visitor == null)
-                {
-                    ;
-                }
 
                 var returnInfo = visitor.ReturnParameter;
                 var expectedReturn = typeof(OUT);

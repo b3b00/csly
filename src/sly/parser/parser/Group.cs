@@ -7,9 +7,9 @@ namespace sly.parser.parser
 {
     public class Group<IN, OUT> where IN : struct
     {
-        public List<GroupItem<IN, OUT>> Items;
+        public readonly List<GroupItem<IN, OUT>> Items;
 
-        public Dictionary<string, GroupItem<IN, OUT>> ItemsByName;
+        private Dictionary<string, GroupItem<IN, OUT>> ItemsByName;
 
         public Group()
         {
@@ -33,12 +33,12 @@ namespace sly.parser.parser
 
         public OUT Value(string name)
         {
-            return ItemsByName.ContainsKey(name) ? ItemsByName[name].Value : default(OUT);
+            return ItemsByName.TryGetValue(name, out var value) ? value.Value : default(OUT);
         }
 
         public Token<IN> Token(string name)
         {
-            return ItemsByName.ContainsKey(name) ? ItemsByName[name].Token : null;
+            return ItemsByName.TryGetValue(name, out var value) ? value.Token : null;
         }
 
         public void Add(string name, Token<IN> token)

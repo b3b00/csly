@@ -93,8 +93,8 @@ namespace sly.parser.syntax.grammar
         {
             if (IsExpressionRule)
             {
-                var operation = VisitorMethodsForOperation.ContainsKey(token)
-                    ? VisitorMethodsForOperation[token]
+                var operation = VisitorMethodsForOperation.TryGetValue(token, out var value)
+                    ? value
                     : null;
                 return operation;
             }
@@ -117,8 +117,8 @@ namespace sly.parser.syntax.grammar
             MethodInfo visitor = null;
             if (IsExpressionRule)
             {
-                var operation = VisitorMethodsForOperation.ContainsKey(token)
-                    ? VisitorMethodsForOperation[token]
+                var operation = VisitorMethodsForOperation.TryGetValue(token, out var value)
+                    ? value
                     : null;
                 visitor = operation?.VisitorMethod;
             }

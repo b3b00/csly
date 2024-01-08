@@ -120,9 +120,8 @@ namespace sly.parser.llparser
         protected virtual void InitStartingTokensForNonTerminal(Dictionary<string, NonTerminal<IN>> nonTerminals,
             string name)
         {
-            if (nonTerminals.ContainsKey(name))
+            if (nonTerminals.TryGetValue(name, out var nt))
             {
-                var nt = nonTerminals[name];
                 nt.Rules.ForEach(r => InitStartingTokensForRule(nonTerminals, r));
             }
         }
@@ -130,38 +129,33 @@ namespace sly.parser.llparser
         protected void InitStartingTokensForRule(Dictionary<string, NonTerminal<IN>> nonTerminals,
             Rule<IN> rule)
         {
-            if (rule.PossibleLeadingTokens == null || rule.PossibleLeadingTokens.Count == 0)
+            if (rule.PossibleLeadingTokens != null && rule.PossibleLeadingTokens.Count != 0) return;
+            rule.PossibleLeadingTokens = new List<LeadingToken<IN>>();
+            if (rule.Clauses.Count <= 0) return;
+            var first = rule.Clauses[0];
+            switch (first)
             {
-                rule.PossibleLeadingTokens = new List<LeadingToken<IN>>();
-                if (rule.Clauses.Count > 0)
+                case TerminalClause<IN> term:
+                    rule.PossibleLeadingTokens.Add(term.ExpectedToken);
+                    rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
+                    break;
+                case NonTerminalClause<IN> nonTerminalClause:
                 {
-                    var first = rule.Clauses[0];
-                    switch (first)
+                    InitStartingTokensForNonTerminal(nonTerminals, nonTerminalClause.NonTerminalName);
+                    if (nonTerminals.TryGetValue(nonTerminalClause.NonTerminalName, out var firstNonTerminal))
                     {
-                        case TerminalClause<IN> term:
-                            rule.PossibleLeadingTokens.Add(term.ExpectedToken);
-                            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
-                            break;
-                        case NonTerminalClause<IN> nonterm:
+                        firstNonTerminal.Rules.ForEach(r =>
                         {
-                            InitStartingTokensForNonTerminal(nonTerminals, nonterm.NonTerminalName);
-                            if (nonTerminals.ContainsKey(nonterm.NonTerminalName))
-                            {
-                                var firstNonTerminal = nonTerminals[nonterm.NonTerminalName];
-                                firstNonTerminal.Rules.ForEach(r =>
-                                {
-                                    rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
-                                });
-                                rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.ToList();
-                            }
-
-                            break;
-                        }
-                        default:
-                            InitStartingTokensForRuleExtensions(first,rule,nonTerminals);
-                            break;
+                            rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
+                        });
+                        rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.ToList();
                     }
+
+                    break;
                 }
+                default:
+                    InitStartingTokensForRuleExtensions(first,rule,nonTerminals);
+                    break;
             }
         }
 

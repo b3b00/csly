@@ -9,9 +9,10 @@ namespace postProcessedLexerParser.expressionModel
 
         public static double Sin(IEnumerable<double?> parameters)
         {
-            if (parameters.Count() == 1 && parameters.First().HasValue)
+            var enumerable = parameters as double?[] ?? parameters.ToArray();
+            if (enumerable.Any() && enumerable.First().HasValue)
             {
-                return Math.Sin(parameters.First().Value);
+                return Math.Sin(enumerable.First().Value);
             }
 
             return 0.0;
@@ -19,27 +20,30 @@ namespace postProcessedLexerParser.expressionModel
         
         public static double Cos(IEnumerable<double?> parameters)
         {
-            if (parameters.Count() == 1 && parameters.First().HasValue)
+            var enumerable = parameters as double?[] ?? parameters.ToArray();
+            if (enumerable.Count() == 1 && enumerable.First().HasValue)
             {
-                return Math.Cos(parameters.First().Value);
+                return Math.Cos(enumerable.First().Value);
             }
             return 0.0;
         }
         
         public static double Tan(IEnumerable<double?> parameters)
         {
-            if (parameters.Count() == 1 && parameters.First().HasValue)
+            var enumerable = parameters as double?[] ?? parameters.ToArray();
+            if (enumerable.Count() == 1 && enumerable.First().HasValue)
             {
-                return Math.Tan(parameters.First().Value);
+                return Math.Tan(enumerable.First().Value);
             }
             return 0.0;
         }
         
         public static double Sqrt(IEnumerable<double?> parameters)
         {
-            if (parameters.Count() == 1 && parameters.First().HasValue)
+            var enumerable = parameters as double?[] ?? parameters.ToArray();
+            if (enumerable.Count() == 1 && enumerable.First().HasValue)
             {
-                return Math.Sqrt(parameters.First().Value);
+                return Math.Sqrt(enumerable.First().Value);
             }
             return 0.0;
         }

@@ -109,9 +109,8 @@ namespace sly.parser.generator
             
             foreach (var leftClause in leftClauses)
             {
-                if (configuration.NonTerminals.ContainsKey(leftClause))
+                if (configuration.NonTerminals.TryGetValue(leftClause, out var newNonTerminal))
                 {
-                    var newNonTerminal = configuration.NonTerminals[leftClause];
                     if (newNonTerminal != null)
                     {
                         var nPath = BuildPath(currentPath, leftClause);
@@ -123,10 +122,6 @@ namespace sly.parser.generator
                         }
 
                     }
-                }
-                else
-                {
-                    ;
                 }
             }
 
