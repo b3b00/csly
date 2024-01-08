@@ -347,7 +347,6 @@ namespace sly.lexer
             var modesAttribute = typeof(IN).GetCustomAttribute<ModesAttribute>();
             if (modesAttribute != null)
             {
-                config.Modes = modesAttribute.Modes;
             }
 
             var statics = new List<GenericToken>();

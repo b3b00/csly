@@ -43,8 +43,6 @@ namespace sly.lexer
 
             public IEqualityComparer<string> KeyWordComparer =>
                 KeyWordIgnoreCase ? StringComparer.OrdinalIgnoreCase : null;
-
-            public IList<string> Modes { get; set; }
         }
 
         public LexerPostProcess<IN> LexerPostProcess { get; set; }
@@ -832,7 +830,6 @@ namespace sly.lexer
                 match.Result.SpanValue = value;
 
                 match.StringDelimiterChar = stringDelimiterChar;
-                match.IsString = true;
                 if (stringDelimiterChar != escapeStringDelimiterChar)
                 {
                     match.Result.SpanValue = diffCharEscaper(escapeStringDelimiterChar, stringDelimiterChar,

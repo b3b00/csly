@@ -39,8 +39,8 @@ namespace sly.parser.syntax.grammar
             }
             return false;
         }
-        
-        protected bool Equals(OptionClause<T> other)
+
+        private bool Equals(OptionClause<T> other)
         {
             return Equals(Clause, other.Clause);
         }

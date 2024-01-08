@@ -9,11 +9,10 @@
 
         internal N Value { get; set; }
 
-        internal int Id { get; set; } = 0;
+        internal int Id { get; set; }
 
-        internal bool IsEnd { get; set; } = false;
+        internal bool IsEnd { get; set; }
 
-        internal bool IsStart { get; set; } = false;
         public string Mark { get; internal set; }
         public bool IsLineEnding { get; set; }
         

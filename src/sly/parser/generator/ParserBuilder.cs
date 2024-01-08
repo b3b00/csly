@@ -171,7 +171,7 @@ namespace sly.parser.generator
             {
                 var nt = "";
                 var rule = "";
-                var i = ruleString.IndexOf(":");
+                var i = ruleString.IndexOf(":", StringComparison.Ordinal);
                 if (i > 0)
                 {
                     nt = ruleString.Substring(0, i).Trim();
@@ -198,17 +198,15 @@ namespace sly.parser.generator
         protected virtual ParserConfiguration<IN, OUT> ExtractParserConfiguration(Type parserClass)
         {
             var conf = new ParserConfiguration<IN, OUT>();
-            var functions = new Dictionary<string, MethodInfo>();
             var nonTerminals = new Dictionary<string, NonTerminal<IN>>();
-            var methods = parserClass.GetMethods().ToList<MethodInfo>();
-            methods = methods.Where<MethodInfo>(m =>
+            var methods = parserClass.GetMethods().ToList();
+            methods = methods.Where(m =>
             {
-                var attributes = m.GetCustomAttributes().ToList<Attribute>();
+                var attributes = m.GetCustomAttributes().ToList();
                 var attr = attributes.Find(a => a.GetType() == typeof(ProductionAttribute));
                 return attr != null;
-            }).ToList<MethodInfo>();
+            }).ToList();
 
-            parserClass.GetMethods();
             methods.ForEach(m =>
             {
                 var attributes = (ProductionAttribute[])m.GetCustomAttributes(typeof(ProductionAttribute), true);
@@ -222,8 +220,7 @@ namespace sly.parser.generator
                     r.SetVisitor(m);
                     r.NonTerminalName = ntAndRule.Item1;
                     var key = $"{ntAndRule.Item1}__{r.Key}";
-                    functions[key] = m;
-                    NonTerminal<IN> nonT = null;
+                    NonTerminal<IN> nonT ;
                     if (!nonTerminals.ContainsKey(ntAndRule.Item1))
                         nonT = new NonTerminal<IN>(ntAndRule.Item1, new List<Rule<IN>>());
                     else

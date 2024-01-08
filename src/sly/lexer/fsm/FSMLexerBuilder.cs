@@ -22,7 +22,6 @@ namespace sly.lexer.fsm
             CurrentState = 0;
             Marks = new Dictionary<string, int>();
             Fsm.AddNode(default(N));
-            Fsm.GetNode(0).IsStart = true;
         }
 
         public FSMLexer<N> Fsm { get; }

@@ -54,9 +54,9 @@ namespace sly.parser.syntax.grammar
             }
 
             return false;
-        } 
-        
-        protected bool Equals(ChoiceClause<T> other)
+        }
+
+        private bool Equals(ChoiceClause<T> other)
         {
             if (other.Choices.Count != Choices.Count)
             {

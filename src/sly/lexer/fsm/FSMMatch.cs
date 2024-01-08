@@ -7,8 +7,6 @@ namespace sly.lexer.fsm
     {
         public Dictionary<string, object> Properties { get; }
 
-        public bool IsString { get; set; }
-        
         public char StringDelimiterChar { get; set; }
         
         public char DecimalSeparator { get; set; }
