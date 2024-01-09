@@ -167,7 +167,7 @@ namespace sly.lexer
                     }
                     else
                     {
-                        result = BuildRegexLexer<IN>(attributes, result, lang);
+                        result = BuildRegexLexer<IN>(attributes, result);
                     }
                 }
                 else if (hasGenericLexemes)
@@ -233,7 +233,7 @@ namespace sly.lexer
 
 
         private static BuildResult<ILexer<IN>> BuildRegexLexer<IN>(Dictionary<IN, (List<LexemeAttribute> lexemes,List<LexemeLabelAttribute> labels)> attributes,
-            BuildResult<ILexer<IN>> result, string lang = null) where IN : struct
+            BuildResult<ILexer<IN>> result) where IN : struct
         {
             var lexer = new Lexer<IN>();
             foreach (var pair in attributes)

@@ -452,7 +452,7 @@ namespace sly.lexer.fsm
                     var currentCharacter = source.At<char>(position.Index);
                     if (WhiteSpaces.Contains(currentCharacter))
                     {
-                        var whiteToken = new Token<N>(default(N), source.Slice(position.Index, 1), position, false,
+                        var whiteToken = new Token<N>(default(N), source.Slice(position.Index, 1), position, 
                             CommentType.No,
                             Channels.WhiteSpaces, isWhiteSpace: true, decimalSeparator: DecimalSeparator);
                         ignoredTokens.Add(whiteToken);

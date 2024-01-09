@@ -91,7 +91,7 @@ namespace sly.parser.generator
         [Production("choices : STRING")]
         public IClause<IN> ChoicesString(Token<EbnfTokenGeneric> head)
         {
-            var choice = BuildTerminalOrNonTerimal(head.Value, discard: false,explicitToken:true);
+            var choice = BuildTerminalOrNonTerimal(head.Value, discard: false);
             return new ChoiceClause<IN>(choice);
         }
         
@@ -105,7 +105,7 @@ namespace sly.parser.generator
         [Production("choices : STRING OR choices ")]
         public IClause<IN> ChoicesManyImplicit(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> discardOr, ChoiceClause<IN> tail)
         {
-            var headClause = BuildTerminalOrNonTerimal(head.Value,discard:false,explicitToken:true); 
+            var headClause = BuildTerminalOrNonTerimal(head.Value,discard:false); 
             return new ChoiceClause<IN>(headClause,tail.Choices);
         }
         
@@ -119,13 +119,13 @@ namespace sly.parser.generator
 
         [Production("clause : STRING")]
         public IClause<IN> ExplicitTokenClause(Token<EbnfTokenGeneric> explicitToken) {
-            var clause = BuildTerminalOrNonTerimal(explicitToken.Value,discard:false, explicitToken :true);
+            var clause = BuildTerminalOrNonTerimal(explicitToken.Value,discard:false);
             return clause;
         }
         
         [Production("clause : STRING DISCARD")]
         public IClause<IN> ExplicitTokenClauseDiscarded(Token<EbnfTokenGeneric> explicitToken, Token<EbnfTokenGeneric> discard) {
-            var clause = BuildTerminalOrNonTerimal(explicitToken.Value,discard:true, explicitToken :true);
+            var clause = BuildTerminalOrNonTerimal(explicitToken.Value,discard:true);
             return clause;
         }
 
@@ -203,7 +203,7 @@ namespace sly.parser.generator
         [Production("groupclause : STRING ")]
         public GroupClause<IN> GroupClauseExplicit(Token<EbnfTokenGeneric> explicitToken)
         {
-            var clause = BuildTerminalOrNonTerimal(explicitToken.Value,discard:true, explicitToken :true);
+            var clause = BuildTerminalOrNonTerimal(explicitToken.Value,discard:true);
             return new GroupClause<IN>(clause);
         }
 
@@ -220,7 +220,7 @@ namespace sly.parser.generator
         [Production("groupclause : STRING DISCARD ")]
         public GroupClause<IN> GroupClauseExplicitDiscarded(Token<EbnfTokenGeneric> explicitToken, Token<EbnfTokenGeneric> discarded)
         {
-            var clause = BuildTerminalOrNonTerimal(explicitToken.Value, true, explicitToken:true);
+            var clause = BuildTerminalOrNonTerimal(explicitToken.Value, true);
             return new GroupClause<IN>(clause);
         }
 
@@ -235,7 +235,7 @@ namespace sly.parser.generator
         #endregion
 
 
-        private IClause<IN> BuildTerminalOrNonTerimal(string name, bool discard = false, bool explicitToken = false)
+        private IClause<IN> BuildTerminalOrNonTerimal(string name, bool discard = false)
         {
             
             var token = default(IN);

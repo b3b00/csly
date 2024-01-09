@@ -273,7 +273,7 @@ return r";
                     }
                     catch (Exception e)
                     {
-                        ;
+                        Console.WriteLine($"error {e.Message} : {e.StackTrace}");
                     }
                 });
                 t.Start();
@@ -1168,7 +1168,6 @@ billy
             Issue414();
             Issue414Expr();
             //Issue351();
-            //EscapeIt();
             // TestIssue332();
             //TestTemplateFor();
             // testErrors();
@@ -1349,29 +1348,6 @@ billy
             
         }
         
-        private static void EscapeIt()
-        {
-            char escape = '\\';
-            char delim = '"';
-            var value = "\\\"te\\\\\\\\st\\\"";
-            string newValue = "";
-            int i = 0;
-            while (i < value.Length)
-            {
-                char current = value[i];
-                if (current == escape)
-                {
-                    i++;
-                }
-
-                newValue += value[i];
-                i++;
-
-            }
-
-            ;
-        }
-
         private static void Issue351()
         {
             var parserInstance = new ExpressionParser();

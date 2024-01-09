@@ -30,13 +30,13 @@ namespace sly.lexer
         public bool Notignored;
 
 
-        public Token(T token, string value, LexerPosition position, bool isCommentStart = false,
-            CommentType commentType = CommentType.Single, int? channel = null, char decimalSeparator = '.' ) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,isCommentStart,commentType,channel, decimalSeparator:decimalSeparator)
+        public Token(T token, string value, LexerPosition position, 
+            CommentType commentType = CommentType.Single, int? channel = null, char decimalSeparator = '.' ) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,commentType,channel, decimalSeparator:decimalSeparator)
 
 {
         }
         
-        public Token(T token, ReadOnlyMemory<char> value, LexerPosition position, bool isCommentStart = false,
+        public Token(T token, ReadOnlyMemory<char> value, LexerPosition position, 
             CommentType commentType = CommentType.Single, int? channel = null, bool isWhiteSpace = false, char decimalSeparator = '.' )
         {
             IsWhiteSpace = isWhiteSpace;

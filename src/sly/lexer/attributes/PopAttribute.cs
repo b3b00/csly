@@ -5,7 +5,7 @@ namespace sly.lexer
     [AttributeUsage(AttributeTargets.Field)]
     public class PopAttribute : Attribute
     {
-        public PopAttribute(string mode = null)
+        public PopAttribute()
         {
         }
     }
