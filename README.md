@@ -11,6 +11,8 @@
 [![NuGet](https://img.shields.io/nuget/v/sly.svg?kill_cache=1)](https://www.nuget.org/packages/sly)
 
 
+[![Qodana](https://github.com/b3b00/csly/actions/workflows/qodana.yml/badge.svg?branch=dev)](https://github.com/b3b00/csly/actions/workflows/qodana.yml)
+
 Csly is inspired by the Python lex yacc library ([PLY](http://www.dabeaz.com/ply/)) and aims
 to simplify generating lexer/parsers in C#.
 
