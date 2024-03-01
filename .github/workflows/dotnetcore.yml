@@ -35,7 +35,7 @@ jobs:
     - name: Build with dotnet
       run: dotnet build --configuration Release
     - name: Test with dotnet
-      uses: b3b00/coverlet-action@1.2.9
+      uses: b3b00/coverlet-action@1.3.0
       id: 'coverlet'
       if: env.RUN_TESTS
       with:
