@@ -1088,7 +1088,7 @@ namespace sly.lexer
                 var newLine = lexerPosition.Line + lines.Count - 1;
                 int newColumn;
                 if (lines.Count > 1)
-                    newColumn = lines.Last() + MultiLineCommentEnd.Length;
+                    newColumn = lines[lines.Count-1] + MultiLineCommentEnd.Length;
                 else
                     newColumn = lexerPosition.Column + lines[0] + MultiLineCommentEnd.Length;
 

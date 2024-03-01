@@ -24,7 +24,7 @@ namespace sly.parser.generator
     {
         #region API
 
-        public string I18n { get; set; }
+        public string I18N { get; set; }
 
         public ParserBuilder(string i18n)
         {
@@ -33,7 +33,7 @@ namespace sly.parser.generator
                 i18n = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
             }
 
-            I18n = i18n;
+            I18N = i18n;
         }
 
         public ParserBuilder() : this(null)
@@ -44,9 +44,10 @@ namespace sly.parser.generator
         ///     Builds a parser (lexer, syntax parser and syntax tree visitor) according to a parser definition instance
         /// </summary>
         /// <typeparam name="IN"></typeparam>
-        /// <param name="parserInstance">
-        ///     a parser definition instance , containing
-        ///     [Reduction] methods for grammar rules
+        ///     <param name="parserInstance">
+        ///         a parser definition instance , containing
+        ///         [Production] methods for grammar rules
+        ///     </param>
         ///     <param name="parserType">
         ///         a ParserType enum value stating the analyser type (LR, LL ...) for now only LL recurive
         ///         descent parser available
@@ -70,7 +71,7 @@ namespace sly.parser.generator
                         var recs = string.Join("\n",
                             recursions.Select<List<string>, string>(x => string.Join(" > ", x)));
                         result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
-                            I18N.Instance.GetText(I18n, I18NMessage.LeftRecursion, recs),
+                            i18n.I18N.Instance.GetText(I18N, I18NMessage.LeftRecursion, recs),
                             ErrorCodes.PARSER_LEFT_RECURSIVE));
                         return result;
                     }
@@ -78,7 +79,7 @@ namespace sly.parser.generator
                     configuration.StartingRule = rootRule;
                     var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
                     var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
-                    parser = new Parser<IN, OUT>(I18n, syntaxParser, visitor);
+                    parser = new Parser<IN, OUT>(I18N, syntaxParser, visitor);
 
                     parser.Instance = parserInstance;
                     parser.Configuration = configuration;
@@ -87,7 +88,7 @@ namespace sly.parser.generator
                 }
                 case ParserType.EBNF_LL_RECURSIVE_DESCENT:
                 {
-                    var builder = new EBNFParserBuilder<IN, OUT>(I18n);
+                    var builder = new EBNFParserBuilder<IN, OUT>(I18N);
                     result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,
                         extensionBuilder, lexerPostProcess);
                     break;
@@ -142,20 +143,10 @@ namespace sly.parser.generator
             ParserType parserType, string rootRule)
         {
             ISyntaxParser<IN, OUT> parser = null;
-            switch (parserType)
+            if(parserType == ParserType.LL_RECURSIVE_DESCENT)
             {
-                case ParserType.LL_RECURSIVE_DESCENT:
-                {
-                    parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18n);
-                    break;
-                }
-                default:
-                {
-                    parser = null;
-                    break;
-                }
+                parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
             }
-
             return parser;
         }
 
@@ -169,15 +160,12 @@ namespace sly.parser.generator
             Tuple<string, string> result = null;
             if (ruleString != null)
             {
-                var nt = "";
-                var rule = "";
                 var i = ruleString.IndexOf(":", StringComparison.Ordinal);
-                if (i > 0)
+                if (i <= 0) 
                 {
-                    nt = ruleString.Substring(0, i).Trim();
-                    rule = ruleString.Substring(i + 1);
-                    result = new Tuple<string, string>(nt, rule);
+                    return result;
                 }
+                result = new Tuple<string, string>(ruleString.Substring(0, i).Trim(), ruleString.Substring(i + 1));
             }
 
             return result;
@@ -188,7 +176,7 @@ namespace sly.parser.generator
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
             LexerPostProcess<IN> lexerPostProcess = null, IList<string> explicitTokens = null)
         {
-            var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18n,
+            var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18N,
                 lexerPostProcess, explicitTokens);
 
             return lexer;
@@ -219,7 +207,6 @@ namespace sly.parser.generator
                     var r = BuildNonTerminal(ntAndRule);
                     r.SetVisitor(m);
                     r.NonTerminalName = ntAndRule.Item1;
-                    var key = $"{ntAndRule.Item1}__{r.Key}";
                     NonTerminal<IN> nonT ;
                     if (!nonTerminals.ContainsKey(ntAndRule.Item1))
                         nonT = new NonTerminal<IN>(ntAndRule.Item1, new List<Rule<IN>>());
@@ -249,15 +236,11 @@ namespace sly.parser.generator
                 var token = default(IN);
                 try
                 {
-                    var tIn = typeof(IN);
-                    var b = Enum.TryParse<IN>(item, out token);
+                    var b = Enum.TryParse(item, out token);
                     if (b)
                     {
                         isTerminal = true;
                     }
-
-                    //token = (IN)Enum.Parse(tIn , item);
-                    //isTerminal = true;
                 }
                 catch (ArgumentException)
                 {
@@ -282,7 +265,6 @@ namespace sly.parser.generator
             }
 
             rule.Clauses = clauses;
-            //rule.Key = ntAndRule.Item1 + "_" + ntAndRule.Item2.Replace(" ", "_");
 
             return rule;
         }
@@ -293,17 +275,26 @@ namespace sly.parser.generator
 
         private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result)
         {
-            var checkers = new List<ParserChecker<IN, OUT>>();
-            checkers.Add(CheckUnreachable);
-            checkers.Add(CheckNotFound);
-            checkers.Add(CheckAlternates);
-            checkers.Add(CheckVisitorsSignature);
+            var checkers = new List<ParserChecker<IN, OUT>>
+            {
+                CheckUnreachable,
+                CheckNotFound,
+                CheckAlternates,
+                CheckVisitorsSignature
+            };
 
-            if (result.Result != null && !result.IsError)
-                foreach (var checker in checkers)
-                    if (checker != null)
-                        result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>()
-                            .ForEach(nt => result = checker(result, nt));
+            if (result.Result == null || result.IsError)
+            {
+                return result;
+            }
+
+            foreach (var checker in checkers)
+            {
+                if (checker != null)
+                    result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>()
+                        .ForEach(nt => result = checker(result, nt));
+            }
+
             return result;
         }
 
@@ -312,20 +303,21 @@ namespace sly.parser.generator
         {
             var conf = result.Result.Configuration;
             var found = false;
-            if (nonTerminal.Name != conf.StartingRule)
+            if (nonTerminal.Name == conf.StartingRule)
             {
-                foreach (var nt in result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>())
-                    if (nt.Name != nonTerminal.Name)
-                    {
-                        found = NonTerminalReferences(nt, nonTerminal.Name);
-                        if (found) break;
-                    }
-
-                if (!found)
-                    result.AddError(new ParserInitializationError(ErrorLevel.WARN,
-                        I18N.Instance.GetText(I18n, I18NMessage.NonTerminalNeverUsed, nonTerminal.Name),
-                        ErrorCodes.NOT_AN_ERROR));
+                return result;
             }
+            foreach (var nt in result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>())
+                if (nt.Name != nonTerminal.Name)
+                {
+                    found = NonTerminalReferences(nt, nonTerminal.Name);
+                    if (found) break;
+                }
+
+            if (!found)
+                result.AddError(new ParserInitializationError(ErrorLevel.WARN,
+                    i18n.I18N.Instance.GetText(I18N, I18NMessage.NonTerminalNeverUsed, nonTerminal.Name),
+                    ErrorCodes.NOT_AN_ERROR));
 
             return result;
         }
@@ -367,9 +359,8 @@ namespace sly.parser.generator
                                     found = innerNonTerminal.NonTerminalName == referenceName;
                                     break;
                                 case ChoiceClause<IN> innerChoice when innerChoice.IsNonTerminalChoice:
-                                    found = innerChoice.Choices.Where<IClause<IN>>(c =>
-                                            (c as NonTerminalClause<IN>).NonTerminalName == referenceName)
-                                        .Any<IClause<IN>>();
+                                    found = innerChoice.Choices
+                                        .Any(c => (c as NonTerminalClause<IN>)?.NonTerminalName == referenceName);
                                     break;
                             }
 
@@ -411,7 +402,7 @@ namespace sly.parser.generator
                 if (clause is NonTerminalClause<IN> ntClause)
                     if (!conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
                         result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                            I18N.Instance.GetText(I18n, I18NMessage.ReferenceNotFound, ntClause.NonTerminalName,
+                            i18n.I18N.Instance.GetText(I18N, I18NMessage.ReferenceNotFound, ntClause.NonTerminalName,
                                 rule.RuleString),
                             ErrorCodes.PARSER_REFERENCE_NOT_FOUND));
             return result;
@@ -420,28 +411,27 @@ namespace sly.parser.generator
         private BuildResult<Parser<IN, OUT>> CheckAlternates(BuildResult<Parser<IN, OUT>> result,
             NonTerminal<IN> nonTerminal)
         {
-            var conf = result.Result.Configuration;
-
             foreach (var rule in nonTerminal.Rules)
             {
                 foreach (var clause in rule.Clauses)
                 {
-                    if (clause is ChoiceClause<IN> choice)
+                    if (!(clause is ChoiceClause<IN> choice))
                     {
-                        if (!choice.IsTerminalChoice && !choice.IsNonTerminalChoice)
-                        {
-                            result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                I18N.Instance.GetText(I18n, I18NMessage.MixedChoices, rule.RuleString,
-                                    choice.ToString()),
-                                ErrorCodes.PARSER_MIXED_CHOICES));
-                        }
-                        else if (choice.IsDiscarded && choice.IsNonTerminalChoice)
-                        {
-                            result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                                I18N.Instance.GetText(I18n, I18NMessage.NonTerminalChoiceCannotBeDiscarded,
-                                    rule.RuleString, choice.ToString()),
-                                ErrorCodes.PARSER_NON_TERMINAL_CHOICE_CANNOT_BE_DISCARDED));
-                        }
+                        continue;
+                    }
+                    if (!choice.IsTerminalChoice && !choice.IsNonTerminalChoice)
+                    {
+                        result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
+                            i18n.I18N.Instance.GetText(I18N, I18NMessage.MixedChoices, rule.RuleString,
+                                choice.ToString()),
+                            ErrorCodes.PARSER_MIXED_CHOICES));
+                    }
+                    else if (choice.IsDiscarded && choice.IsNonTerminalChoice)
+                    {
+                        result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
+                            i18n.I18N.Instance.GetText(I18N, I18NMessage.NonTerminalChoiceCannotBeDiscarded,
+                                rule.RuleString, choice.ToString()),
+                            ErrorCodes.PARSER_NON_TERMINAL_CHOICE_CANNOT_BE_DISCARDED));
                     }
                 }
             }
@@ -473,12 +463,12 @@ namespace sly.parser.generator
 
                 var returnInfo = visitor.ReturnParameter;
                 var expectedReturn = typeof(OUT);
-                var foundReturn = returnInfo.ParameterType;
+                var foundReturn = returnInfo?.ParameterType;
                 if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
                 {
                     result.AddInitializationError(ErrorLevel.FATAL,
-                        I18N.Instance.GetText(I18n, I18NMessage.IncorrectVisitorReturnType, visitor.Name,
-                            rule.RuleString, typeof(OUT).FullName, returnInfo.ParameterType.Name),
+                        i18n.I18N.Instance.GetText(I18N, I18NMessage.IncorrectVisitorReturnType, visitor.Name,
+                            rule.RuleString, typeof(OUT).FullName, returnInfo?.ParameterType.Name),
                         ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE);
                 }
 
@@ -491,7 +481,7 @@ namespace sly.parser.generator
                     visitor.GetParameters().Length != realClauses.Count + 1)
                 {
                     result.AddInitializationError(ErrorLevel.FATAL,
-                        I18N.Instance.GetText(I18n, I18NMessage.IncorrectVisitorParameterNumber, visitor.Name,
+                        i18n.I18N.Instance.GetText(I18N, I18NMessage.IncorrectVisitorParameterNumber, visitor.Name,
                             rule.RuleString, realClauses.Count.ToString(), (realClauses.Count + 1).ToString(),
                             visitor.GetParameters().Length.ToString()),
                         ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER);
@@ -506,17 +496,15 @@ namespace sly.parser.generator
 
                     switch (clause)
                     {
-                        case TerminalClause<IN> terminal:
+                        case TerminalClause<IN> _:
                         {
                             var expected = typeof(Token<IN>);
-                            var found = arg.ParameterType;
                             result = CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
                         case NonTerminalClause<IN> nonTerminal:
                         {
-                            Type expected = null;
-                            var found = arg.ParameterType;
+                            Type expected;
                             if (nonTerminal.IsGroup)
                             {
                                 expected = typeof(Group<IN, OUT>);
@@ -532,11 +520,10 @@ namespace sly.parser.generator
                         case ManyClause<IN> many:
                         {
                             Type expected = null;
-                            Type found = arg.ParameterType;
                             var innerClause = many.Clause;
                             switch (innerClause)
                             {
-                                case TerminalClause<IN> term:
+                                case TerminalClause<IN> _:
                                 {
                                     expected = typeof(List<Token<IN>>);
                                     break;
@@ -554,7 +541,7 @@ namespace sly.parser.generator
 
                                     break;
                                 }
-                                case GroupClause<IN> group:
+                                case GroupClause<IN> _:
                                 {
                                     expected = typeof(Group<IN, OUT>);
                                     break;
@@ -577,21 +564,19 @@ namespace sly.parser.generator
                             result = CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
-                        case GroupClause<IN> group:
-                        {
+                        case GroupClause<IN> _: {
                             Type expected = typeof(Group<IN, OUT>);
-                            Type found = arg.ParameterType;
+                            
                             result = CheckArgType(result, rule, expected, visitor, arg);
                             break;
                         }
                         case OptionClause<IN> option:
                         {
                             Type expected = null;
-                            Type found = arg.ParameterType;
                             var innerClause = option.Clause;
                             switch (innerClause)
                             {
-                                case TerminalClause<IN> term:
+                                case TerminalClause<IN> _:
                                 {
                                     expected = typeof(Token<IN>);
                                     break;
@@ -609,7 +594,7 @@ namespace sly.parser.generator
 
                                     break;
                                 }
-                                case GroupClause<IN> group:
+                                case GroupClause<IN> _:
                                 {
                                     expected = typeof(ValueOption<Group<IN, OUT>>);
                                     break;
@@ -649,7 +634,7 @@ namespace sly.parser.generator
                     if (!expectedReturn.IsAssignableFrom(foundReturn) && foundReturn != expectedReturn)
                     {
                         result.AddInitializationError(ErrorLevel.FATAL,
-                            I18N.Instance.GetText(I18n, I18NMessage.IncorrectVisitorReturnType, visitor.Name,
+                            i18n.I18N.Instance.GetText(I18N, I18NMessage.IncorrectVisitorReturnType, visitor.Name,
                                 rule.RuleString, typeof(OUT).FullName, returnInfo.ParameterType.Name),
                             ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE);
                     }
@@ -713,7 +698,7 @@ namespace sly.parser.generator
             if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
             {
                 result.AddInitializationError(ErrorLevel.FATAL,
-                    I18N.Instance.GetText(I18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
+                    i18n.I18N.Instance.GetText(I18N, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
                         rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
                     ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
             }

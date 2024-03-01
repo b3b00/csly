@@ -197,7 +197,7 @@ namespace sly.parser.llparser
 
                                 if (secondResult.IsError)
                                 {
-                                    if (firstResult.Root is SyntaxNode<IN> node)
+                                    if (firstResult.Root is SyntaxNode<IN>)
                                     {
                                         firstResult.Errors.AddRange(secondResult.Errors);
                                         firstResult.AddExpectings(secondResult.Expecting);
@@ -217,7 +217,7 @@ namespace sly.parser.llparser
 
                                 if (secondResult.IsError)
                                 {
-                                    if (firstResult.Root is SyntaxNode<IN> node)
+                                    if (firstResult.Root is SyntaxNode<IN>)
                                     {
                                         firstResult.Errors.AddRange(secondResult.Errors);
                                         firstResult.AddExpectings(secondResult.Expecting);
@@ -539,8 +539,6 @@ namespace sly.parser.llparser
             }
             else
             {
-                var node = innerResult.Root;
-                
                 var children = new List<ISyntaxNode<IN>> {innerResult.Root};
                 result.Root =
                     new OptionSyntaxNode<IN>( rule.NonTerminalName,children, rule.GetVisitor());

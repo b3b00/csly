@@ -109,19 +109,17 @@ namespace sly.parser.generator
             
             foreach (var leftClause in leftClauses)
             {
-                if (configuration.NonTerminals.TryGetValue(leftClause, out var newNonTerminal))
+                if (configuration.NonTerminals.TryGetValue(leftClause, out var newNonTerminal) && newNonTerminal != null)
                 {
-                    if (newNonTerminal != null)
+                    var nPath = BuildPath(currentPath, leftClause);
+                    var (foundRRuleRecursion, recursion) = CheckLeftRecursion(configuration, newNonTerminal, nPath);
+                    if (!foundRRuleRecursion)
                     {
-                        var nPath = BuildPath(currentPath, leftClause);
-                        var (foundRRuleRecursion, recursion) = CheckLeftRecursion(configuration, newNonTerminal, nPath);
-                        if (foundRRuleRecursion)
-                        {
-                            foundRecursion = true;
-                            recursions.AddRange(recursion);
-                        }
-
+                        continue;
                     }
+                    foundRecursion = true;
+                    recursions.AddRange(recursion);
+
                 }
             }
 

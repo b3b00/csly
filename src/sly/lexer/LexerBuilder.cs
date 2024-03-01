@@ -344,11 +344,6 @@ namespace sly.lexer
                 config.IndentationAware = lexerAttribute.IndentationAWare;
             }
 
-            var modesAttribute = typeof(IN).GetCustomAttribute<ModesAttribute>();
-            if (modesAttribute != null)
-            {
-            }
-
             var statics = new List<GenericToken>();
             foreach (var lexeme in attributes.Values.SelectMany<List<LexemeAttribute>, LexemeAttribute>(list => list))
             {

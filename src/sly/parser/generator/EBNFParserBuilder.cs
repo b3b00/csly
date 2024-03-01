@@ -35,7 +35,7 @@ namespace sly.parser.generator
             }
 
             var ruleparser = new RuleParser<IN>();
-            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>(I18n);
+            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>(I18N);
 
             var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
 
@@ -55,7 +55,7 @@ namespace sly.parser.generator
                 {
                     var recs = string.Join("\n", recursions.Select<List<string>, string>(x => string.Join(" > ", x)));
                     result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
-                        I18N.Instance.GetText(I18n, I18NMessage.LeftRecursion, recs),
+                        i18n.I18N.Instance.GetText(I18N, I18NMessage.LeftRecursion, recs),
                         ErrorCodes.PARSER_LEFT_RECURSIVE));
                     return result;
                 }
@@ -73,7 +73,7 @@ namespace sly.parser.generator
 
             SyntaxTreeVisitor<IN, OUT> visitor = null;
             visitor = new EBNFSyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
-            var parser = new Parser<IN, OUT>(I18n, syntaxParser, visitor);
+            var parser = new Parser<IN, OUT>(I18N, syntaxParser, visitor);
             parser.Configuration = configuration;
             var lexerResult = BuildLexer(extensionBuilder, lexerPostProcess,
                 configuration.GetAllExplicitTokenClauses().Select(x => x.ExplicitToken).Distinct().ToList());
@@ -105,12 +105,12 @@ namespace sly.parser.generator
             {
                 case ParserType.LL_RECURSIVE_DESCENT:
                 {
-                    parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18n);
+                    parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
                     break;
                 }
                 case ParserType.EBNF_LL_RECURSIVE_DESCENT:
                 {
-                    parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18n);
+                    parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
                     break;
                 }
                 default:

@@ -113,7 +113,7 @@ namespace sly.lexer.fsm
             if (HasState(nodeId))
                 if (Transitions.TryGetValue(nodeId, out var leavingTransitions))
                 {
-                    transition = leavingTransitions.FirstOrDefault(t => t.Match(token));
+                    transition = leavingTransitions.Find(t => t.Match(token));
                 }
 
             return transition;
