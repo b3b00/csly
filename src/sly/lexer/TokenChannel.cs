@@ -9,9 +9,12 @@ namespace sly.lexer
     {
         public readonly List<Token<IN>> Tokens;
 
-        public List<Token<IN>> NotNullTokens => Tokens.Where(x => x != null).ToList();
+        private List<Token<IN>> _notNullTokens = new List<Token<IN>>();
+
+        public List<Token<IN>> NotNullTokens => _notNullTokens;
         
-        public List<Token<IN>> NotNullOrEosTokens => Tokens.Where(x => x != null && !x.IsEOS).ToList(); 
+        private List<Token<IN>> _notNullOrEosTokens;
+        public List<Token<IN>> NotNullOrEosTokens => _notNullOrEosTokens; 
         
         public int ChannelId;
         public int Count => Tokens.Count;
@@ -19,11 +22,14 @@ namespace sly.lexer
         public TokenChannel(List<Token<IN>> tokens, int channelId)
         {
             Tokens = tokens;
+            _notNullTokens = tokens.Where(x => x != null).ToList();
+            _notNullOrEosTokens = tokens.Where(x => x != null && !x.IsEOS).ToList();
             ChannelId = channelId;
         }
 
-        public TokenChannel(int channelId) : this(new List<Token<IN>>(),channelId)
+        public TokenChannel(int channelId) : this(new List<Token<IN>>(), channelId)
         {
+            
         }
 
         private Token<IN> GetToken(int i)
@@ -41,6 +47,8 @@ namespace sly.lexer
                 }
             }
             Tokens[i] = token;
+            _notNullTokens = Tokens.Where(x => x != null).ToList();
+            _notNullOrEosTokens = Tokens.Where(x => x != null && !x.IsEOS).ToList();
         }
         
         public Token<IN> this[int key]
@@ -54,6 +62,8 @@ namespace sly.lexer
             Tokens.Add(token);
             if (token != null) 
                 token.PositionInTokenFlow = Tokens.Count;
+            _notNullTokens = Tokens.Where(x => x != null).ToList();
+            _notNullOrEosTokens = Tokens.Where(x => x != null && !x.IsEOS).ToList();
         }
 
         [ExcludeFromCodeCoverage]
