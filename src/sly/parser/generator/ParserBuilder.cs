@@ -360,7 +360,7 @@ namespace sly.parser.generator
                                     break;
                                 case ChoiceClause<IN> innerChoice when innerChoice.IsNonTerminalChoice:
                                     found = innerChoice.Choices
-                                        .Any(c => (c as NonTerminalClause<IN>)?.NonTerminalName == referenceName);
+                                        .Exists(c => (c as NonTerminalClause<IN>)?.NonTerminalName == referenceName);
                                     break;
                             }
 

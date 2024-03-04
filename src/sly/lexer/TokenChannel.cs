@@ -9,7 +9,7 @@ namespace sly.lexer
     {
         public readonly List<Token<IN>> Tokens;
 
-        private List<Token<IN>> _notNullTokens = new List<Token<IN>>();
+        private List<Token<IN>> _notNullTokens;
 
         public List<Token<IN>> NotNullTokens => _notNullTokens;
         
@@ -69,14 +69,11 @@ namespace sly.lexer
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
             builder.Append("#").Append(ChannelId).Append(" ");
-            foreach (var token in Tokens)
+            foreach (var token in Tokens.Where(token => token != null))
             {
-                if (token != null)
-                {
-                    builder.Append(token.ToString()).Append(" > ");
-                }
+                builder.Append(token).Append(" > ");
             }
             return builder.ToString();
         }
