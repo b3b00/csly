@@ -11,10 +11,10 @@
     <RepositoryUrl>https://github.com/b3b00/sly</RepositoryUrl>
     <License>https://github.com/b3b00/sly/blob/master/LICENSE</License>
     <PackageVersion>2.9.8</PackageVersion>
-    <ApplicationIcon />
+    <ApplicationIcon/>
     <OutputType>Library</OutputType>
-    <StartupObject />
-    <LangVersion>7.1</LangVersion>
+    <StartupObject/>
+    <LangVersion>latest</LangVersion>
     <PackageLicenseUrl>https://github.com/b3b00/csly/blob/dev/LICENSE</PackageLicenseUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
@@ -22,22 +22,22 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-     <NoWarn>1701;1702;1705;1591</NoWarn>
+    <NoWarn>1701;1702;1705;1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-    <PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
-    <PackageReference Include="System.Memory" Version="4.5.5" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2"/>
+    <PackageReference Include="System.Collections.Immutable" Version="8.0.0"/>
+    <PackageReference Include="System.Memory" Version="4.5.5"/>
+    <PackageReference Include="System.ValueTuple" Version="4.5.0"/>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="i18n\translations\fr.txt" />
-    <None Remove="i18n\translations\fr.txt" />
-    <EmbeddedResource Include="i18n\translations\en.txt" />
-    <EmbeddedResource Include="i18n\translations\zh-Hans.txt" />
+    <EmbeddedResource Include="i18n\translations\fr.txt"/>
+    <None Remove="i18n\translations\fr.txt"/>
+    <EmbeddedResource Include="i18n\translations\en.txt"/>
+    <EmbeddedResource Include="i18n\translations\zh-Hans.txt"/>
   </ItemGroup>
 </Project>

@@ -5,22 +5,17 @@ namespace sly
 {
     public static class EnumConverter
     {
-        public static IN ConvertIntToEnum<IN>(int intValue)
-        {
-            var genericType = typeof(IN);
-            if (genericType.IsEnum)
-                foreach (IN value in Enum.GetValues(genericType))
-                {
-                    var test = Enum.Parse(typeof(IN), value.ToString()) as Enum;
-                    var val = Convert.ToInt32(test);
-                    if (val == intValue)
-                    {
-                        return value;
-                    }
-                }
 
-            return default(IN);
+        public static T ConvertIntToEnum<T>(int value) where T : struct
+        {
+            if (Enum.IsDefined(typeof(T), value))
+            {
+                return (T) Enum.ToObject(typeof(T), value);
+            }
+            return default;
         }
+
+
         
         public static IN ConvertStringToEnum<IN>(string name)  where IN : struct
         {

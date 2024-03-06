@@ -1160,7 +1160,7 @@ billy
             chrono.Start();
             var result = parser.Parse(source);
             chrono.Stop();
-            Console.WriteLine($"{result.Result} : {chrono.ElapsedMilliseconds} ms");
+            Console.WriteLine($"with expressions : {result.Result} : {chrono.ElapsedMilliseconds} ms");
         }
         
         private static void Main(string[] args)
