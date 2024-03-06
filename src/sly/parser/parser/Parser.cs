@@ -61,13 +61,13 @@ namespace sly.parser
 
 
 
-        public ParseResult<IN, OUT> Parse(string source, string startingNonTerminal = null)
+        public ParseResult<IN, OUT> Parse(string source, string startingNonTerminal = null, bool optimizeRulesIteration = true)
         {
-            return ParseWithContext(source,new NoContext(),startingNonTerminal);
+            return ParseWithContext(source,new NoContext(),startingNonTerminal, optimizeRulesIteration);
         }
 
 
-        public ParseResult<IN, OUT> ParseWithContext(string source, object context, string startingNonTerminal = null)
+        public ParseResult<IN, OUT> ParseWithContext(string source, object context, string startingNonTerminal = null, bool optimizeRulesIteration = true)
         {
             ParseResult<IN, OUT> result = null;
             var lexingResult = Lexer.Tokenize(source);
@@ -98,7 +98,7 @@ namespace sly.parser
                 }
             }
 
-            result = ParseWithContext(tokensWithoutComments, context, startingNonTerminal);
+            result = ParseWithContext(tokensWithoutComments, context, startingNonTerminal, optimizeRulesIteration);
 
 
             return result;
@@ -107,12 +107,12 @@ namespace sly.parser
 
 
 
-        public ParseResult<IN, OUT> ParseWithContext(IList<Token<IN>> tokens, object parsingContext = null, string startingNonTerminal = null)
+        public ParseResult<IN, OUT> ParseWithContext(IList<Token<IN>> tokens, object parsingContext = null, string startingNonTerminal = null, bool optimizeRulesIteration = true)
         {
             var result = new ParseResult<IN, OUT>();
 
             var cleaner = new SyntaxTreeCleaner<IN>();
-            var syntaxResult = SyntaxParser.Parse(tokens, startingNonTerminal);
+            var syntaxResult = SyntaxParser.Parse(tokens, startingNonTerminal, optimizeRulesIteration);
             syntaxResult.UsesOperations = Configuration.UsesOperations;
             syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);
             if (!syntaxResult.IsError && syntaxResult.Root != null)

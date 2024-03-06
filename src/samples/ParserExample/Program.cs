@@ -1144,9 +1144,17 @@ billy
             string source = "funcA(funcC(B==2));";
             Stopwatch chrono = new Stopwatch();
             chrono.Start();
-            var result = parser.Parse(source);
+            var result = parser.Parse(source, optimizeRulesIteration:false);
             chrono.Stop();
-            Console.WriteLine($"{result.Result} : {chrono.ElapsedMilliseconds} ms");
+            Console.WriteLine($"no rule optimization :: {result.Result} : {chrono.ElapsedMilliseconds} ms");
+            
+            chrono.Reset();
+            chrono.Start();
+            result = parser.Parse(source,optimizeRulesIteration:true);
+            chrono.Stop();
+            Console.WriteLine($"with rule optimization :: {result.Result} : {chrono.ElapsedMilliseconds} ms");
+            
+            
         }
         
         private static void Issue414Expr()

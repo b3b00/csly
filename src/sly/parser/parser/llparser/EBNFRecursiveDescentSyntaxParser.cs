@@ -13,6 +13,7 @@ namespace sly.parser.llparser
         public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal, string i18n)
             : base(configuration, startingNonTerminal, i18n)
         {
+            
         }
 
 

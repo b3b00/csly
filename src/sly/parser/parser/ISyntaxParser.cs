@@ -10,7 +10,7 @@ namespace sly.parser
         
         Dictionary<IN, Dictionary<string, string>> LexemeLabels { get; set; }
 
-        SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null);
+        SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null, bool optimizeRulesIteration = true);
 
         void Init(ParserConfiguration<IN, OUT> configuration, string root);
 

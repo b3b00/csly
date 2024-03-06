@@ -18,7 +18,7 @@ namespace sly.parser.llparser
         {
             var newNonTerms = new List<NonTerminal<IN>>();
             foreach (var nonTerm in configuration.NonTerminals)
-            foreach (var rule in nonTerm.Value.Rules)
+            foreach (var rule in nonTerm.Value.Rules.OrderBy(x => x.Clauses[0].Dump()))
             {
                 var newclauses = new List<IClause<IN>>();
                 if (rule.ContainsSubRule)

@@ -9,6 +9,15 @@ namespace sly.parser
     {
         private readonly Dictionary<string, SyntaxParseResult<IN>> _memoizedNonTerminalResults = new Dictionary<string, SyntaxParseResult<IN>>();
 
+        private bool _optimize = true;
+
+        public bool Optimize => _optimize;
+        
+        public SyntaxParsingContext(bool optimize = true)
+        {
+            _optimize = optimize;
+        }
+        
         private string GetKey(IClause<IN> clause, int position)
         {
             return $"{clause.Dump()} -- @{position}";

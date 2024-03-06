@@ -22,14 +22,16 @@ namespace sly.parser.llparser
 
         public Dictionary<IN, Dictionary<string, string>> LexemeLabels { get; set; }
 
+        
+        
         #region parsing
 
-        public SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
+        public SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null, bool optimizeRulesIteration = true)
         {
-            return SafeParse(tokens, new SyntaxParsingContext<IN>(), startingNonTerminal);
+            return SafeParse(tokens, new SyntaxParsingContext<IN>(optimizeRulesIteration), startingNonTerminal, optimizeRulesIteration);
         }
         
-        public SyntaxParseResult<IN> SafeParse(IList<Token<IN>> tokens, SyntaxParsingContext<IN> parsingContext, string startingNonTerminal = null)
+        public SyntaxParseResult<IN> SafeParse(IList<Token<IN>> tokens, SyntaxParsingContext<IN> parsingContext, string startingNonTerminal = null, bool optimizeRulesIteration = true)
         {
             var start = startingNonTerminal ?? StartingNonTerminal;
             var NonTerminals = Configuration.NonTerminals;
@@ -41,7 +43,12 @@ namespace sly.parser.llparser
 
             var matchingRuleCount = 0;
 
-            foreach (var rule in nt.Rules)
+            var rules = nt.Rules;
+            if (parsingContext.Optimize)
+            {
+                rules = rules.OrderBy(x => x.Clauses[0].Dump()).ToList();
+            }
+            foreach (var rule in rules)
             {
                 if (!tokens[0].IsEOS && rule.PossibleLeadingTokens.Any(x => x.Match(tokens[0])))
                 {
@@ -298,6 +305,10 @@ namespace sly.parser.llparser
 
             var i = 0;
             var rules = nt.Rules;
+            if (parsingContext.Optimize)
+            {
+                rules = rules.OrderBy(x => x.Clauses[0].Dump()).ToList();
+            }
 
             var innerRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
             var greaterIndex = 0;
