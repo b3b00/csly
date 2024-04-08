@@ -253,7 +253,7 @@ namespace sly.parser.generator
                 nonTerminal.Rules.Add(rule);
                 if (isLastLevel)
                 {
-                    // TODO if next = operand => add rule (name : operand)
+                    // if next = operand => add rule (name : operand)
                     var rule2 = new Rule<IN>
                     {
                         ExpressionAffix = Affix.NotOperator,
