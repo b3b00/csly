@@ -5,7 +5,7 @@ using sly.lexer;
 using sly.parser.generator;
 using Xunit;
 
-namespace ParserTests.Issue364;
+namespace ParserTests.Issue527;
 
 
 [Lexer]
@@ -41,18 +41,14 @@ public class Issue427MinimalParser
 {
 
     [Production("root : Issue427MinimalParser_expressions")]
-    public static int Root(int value)
-    {
-        return value;
-    }
+    public static int Root(int value) => value;
 
     [Operand]
     [Production("operand : INTEGER")]
-    public static int IntegerTag(Token<Issue427Lexer> expressionToken) => int.Parse(expressionToken.Value.ToString());
+    public static int operand(Token<Issue427Lexer> expressionToken) => expressionToken.IntValue;
 
     [Operation((int) Issue427Lexer.PLUS, Affix.InFix, Associativity.Left, 10)]
     public static int Addition(int left, Token<Issue427Lexer> operatorToken, int right) => left + right;
-
 
 }
 
@@ -68,16 +64,25 @@ public class Issue427Tests
         Check.That(r).IsOk();
         var parser = r.Result;
         var result = parser.Parse("2 + 3");
-        Console.WriteLine(result.IsOk);
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo(5);
 
         result = parser.Parse("(2 + 3)");
-        Console.WriteLine(result.IsOk);
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo(5);
         
-        result = parser.Parse("((2+3)+4)");
-        Console.WriteLine(result.IsOk);
 
         result = parser.Parse("(2+3)+4)");
-        Console.WriteLine(result.IsOk);
+        Check.That(result).Not.IsOkParsing();
+        
+        
+        result = parser.Parse("(2+3)+4");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo(9);
+        
+        result = parser.Parse("((2+3)+4)");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo(9);
 
 
 
