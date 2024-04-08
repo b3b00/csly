@@ -37,6 +37,27 @@ public class Issue427Parser
     public static int Expression (int expression) => expression;
 }
 
+public class Issue427BisParser
+{
+    [Production("main : expression")]
+    public static int RootTag(int expression) => expression;
+
+    [Operand]
+    [Production("operand : INTEGER")]
+    public static int IntegerTag(Token<Issue427Lexer> expressionToken) => int.Parse(expressionToken.Value.ToString());
+
+    [Operation((int) Issue427Lexer.PLUS, Affix.InFix, Associativity.Left, 10)]
+    public static int Addition(int left, Token<Issue427Lexer> operatorToken, int right) => left + right;
+
+    [Production("group : LPAREN [d] Issue427BisParser_expressions RPAREN [d]")]
+    [Operand]
+    public static int Group(int value) => value;
+    
+    
+    [Production("expression : Issue427BisParser_expressions")]
+    public static int Expression (int expression) => expression;
+}
+
 public class Issue427MinimalParser
 {
 
@@ -59,6 +80,25 @@ public class Issue427Tests
     {
         ParserBuilder<Issue427Lexer, int> Parser = new ParserBuilder<Issue427Lexer, int>("en");
         Issue427Parser oparser = new Issue427Parser();
+        
+        var r = Parser.BuildParser(oparser,ParserType.LL_RECURSIVE_DESCENT,"main");
+        Check.That(r).IsOk();
+        var parser = r.Result;
+        var result = parser.Parse("2 + 3");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo(5);
+
+
+
+
+
+    }
+    
+    [Fact]
+    public void TestIssue427Bis()
+    {
+        ParserBuilder<Issue427Lexer, int> Parser = new ParserBuilder<Issue427Lexer, int>("en");
+        var oparser = new Issue427BisParser();
         
         var r = Parser.BuildParser(oparser,ParserType.LL_RECURSIVE_DESCENT,"main");
         Check.That(r).IsOk();
