@@ -195,7 +195,7 @@ namespace sly.parser.generator
                 var name = GetNonTerminalNameForPrecedence(precedence, operationsByPrecedence, operandNonTerminal);
                 var nextName = GetNonTerminalNameForPrecedence(nextPrecedence, operationsByPrecedence, operandNonTerminal);
 
-                var nonTerminal = BuildPrecedenceNonTerminal(name, nextName, operations);
+                var nonTerminal = BuildPrecedenceNonTerminal(name, nextName, operations, nextPrecedence < 0);
 
                 configuration.NonTerminals[nonTerminal.Name] = nonTerminal;
             }
@@ -213,7 +213,7 @@ namespace sly.parser.generator
             entrypoint.Rules.Add(rule);
         }
 
-        private NonTerminal<IN> BuildPrecedenceNonTerminal(string name, string nextName, List<OperationMetaData<IN>> operations)
+        private NonTerminal<IN> BuildPrecedenceNonTerminal(string name, string nextName, List<OperationMetaData<IN>> operations, bool isLastLevel = false)
         {
             var nonTerminal = new NonTerminal<IN>(name, new List<Rule<IN>>());
 
@@ -242,7 +242,7 @@ namespace sly.parser.generator
                 rule.Clauses.Add(new NonTerminalClause<IN>(nextName));
                 rule.Clauses.Add(InFixClauses.Count == 1 ? InFixClauses[0] : new ChoiceClause<IN>(InFixClauses));
                 rule.Clauses.Add(new NonTerminalClause<IN>(name));
-
+                     
                 InFixOps.ForEach(x =>
                 {
                     rule.SetVisitor(x);
@@ -251,6 +251,20 @@ namespace sly.parser.generator
 
                 });
                 nonTerminal.Rules.Add(rule);
+                if (isLastLevel)
+                {
+                    // TODO if next = operand => add rule (name : operand)
+                    var rule2 = new Rule<IN>
+                    {
+                        ExpressionAffix = Affix.NotOperator,
+                        IsExpressionRule = true,
+                        NonTerminalName = name,
+                        IsByPassRule = true
+                    };
+
+                    rule2.Clauses.Add(new NonTerminalClause<IN>(nextName));
+                    nonTerminal.Rules.Add(rule2);
+                }
             }
 
 
