@@ -60,8 +60,6 @@ namespace sly.lexer
             Tokens.Add(token);
             if (token != null) 
                 token.PositionInTokenFlow = Tokens.Count;
-            _notNullTokens = Tokens.Where(x => x != null).ToList();
-            _notNullOrEosTokens = Tokens.Where(x => x != null && !x.IsEOS).ToList();
         }
 
         [ExcludeFromCodeCoverage]
