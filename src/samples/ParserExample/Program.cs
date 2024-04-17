@@ -1162,9 +1162,29 @@ billy
             chrono.Stop();
             Console.WriteLine($"with expressions : {result.Result} : {chrono.ElapsedMilliseconds} ms");
         }
-        
+
+
+        private static void BroadWindow()
+        {
+            
+            var whileParser = new IndentedWhileParserGeneric();
+            var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
+            var buildResult = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+            
+            var parser = buildResult.Result;
+            string program = @"
+a:=0 
+while a < 10 do 
+    print a
+    a := a +1
+";
+            var result = parser.Parse(program);
+            Console.WriteLine($"{result.IsOk}");
+        }
         private static void Main(string[] args)
         {
+            BroadWindow();
+            return;
             Issue414();
             Issue414Expr();
             //Issue351();

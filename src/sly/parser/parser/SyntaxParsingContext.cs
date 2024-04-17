@@ -22,10 +22,6 @@ namespace sly.parser
         public bool TryGetParseResult(IClause<IN> clause, int position, out SyntaxParseResult<IN> result)
         {
             bool found = _memoizedNonTerminalResults.TryGetValue(GetKey(clause, position), out result);
-            if (!found)
-            {
-                Debug.WriteLine($"NOT FOUND ! {clause} - {position}");
-            }
             return found;
         }
     }

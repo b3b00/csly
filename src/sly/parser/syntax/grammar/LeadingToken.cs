@@ -11,11 +11,21 @@ namespace sly.parser.syntax.grammar
         public string ExplicitToken { get; set; }
         
         public bool IsExplicitToken { get; set; }
+        
+        public bool IsIndent { get; set; }
+        
+        public bool IsUnindent { get; set; }
 
         public LeadingToken(IN tokenId)
         {
             TokenId = tokenId;
             IsExplicitToken = false;
+        }
+
+        public LeadingToken(bool isIndent, bool isUnindent)
+        {
+            IsUnindent = isUnindent;
+            IsIndent = isIndent;
         }
         
         public LeadingToken(IN tokenId, string explicitToken)
@@ -31,10 +41,16 @@ namespace sly.parser.syntax.grammar
             {
                 return ExplicitToken == token.Value;
             }
-            else
+            if (IsIndent)
             {
-                return TokenId.Equals(token.TokenID);
+                return token.IsIndent;
             }
+            if (IsUnindent)
+            {
+                return token.IsUnIndent;
+            }
+
+            return TokenId.Equals(token.TokenID);
         }
 
         [ExcludeFromCodeCoverage]

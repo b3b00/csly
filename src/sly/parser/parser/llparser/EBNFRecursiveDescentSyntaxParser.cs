@@ -21,7 +21,6 @@ namespace sly.parser.llparser
         public override SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position,
             string nonTerminalName, SyntaxParsingContext<IN> parsingContext)
         {
-            
             if (rule.IsInfixExpressionRule && rule.IsExpressionRule)
             {
                 return ParseInfixExpressionRule(tokens, rule, position, nonTerminalName, parsingContext);
@@ -31,7 +30,7 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
             var children = new List<ISyntaxNode<IN>>();
-            if (rule.PossibleLeadingTokens.Any(x => x.Match(tokens[position])) || rule.MayBeEmpty)
+            if (rule.Match(tokens,position,Configuration))
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
                     children = new List<ISyntaxNode<IN>>();
@@ -169,7 +168,7 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
             var children = new List<ISyntaxNode<IN>>();
-            if (!tokens[position].IsEOS && rule.PossibleLeadingTokens.Any(x => x.Match(tokens[position])))
+            if (!tokens[position].IsEOS && rule.Match(tokens,position,Configuration))
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
                     if (MatchExpressionRuleScheme(rule))
