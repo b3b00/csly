@@ -19,6 +19,7 @@ namespace sly.lexer
         public void SetTokens(List<Token<IN>> tokens)
         {
             Tokens = new TokenChannels<IN>(tokens);
+            Tokens.PreCompute();
         }
         
         public LexerResult(LexicalError error, List<Token<IN>> tokens)

@@ -47,8 +47,6 @@ namespace sly.lexer
                 }
             }
             Tokens[i] = token;
-            _notNullTokens = Tokens.Where(x => x != null).ToList();
-            _notNullOrEosTokens = Tokens.Where(x => x != null && !x.IsEOS).ToList();
         }
         
         public Token<IN> this[int key]
@@ -76,6 +74,12 @@ namespace sly.lexer
                 builder.Append(token).Append(" > ");
             }
             return builder.ToString();
+        }
+
+        public void PreCompute()
+        {
+            _notNullTokens = Tokens.Where(x => x != null).ToList();
+            _notNullOrEosTokens = Tokens.Where(x => x != null && !x.IsEOS).ToList();
         }
     }
 }
