@@ -105,7 +105,7 @@ namespace sly.parser.syntax.grammar
     {
         private IndentationType ExpectedIndentation;
         
-        public IndentTerminalClause(IndentationType expectedIndentation, bool discard) : base(new LeadingToken<T>(default(T)))
+        public IndentTerminalClause(IndentationType expectedIndentation, bool discard) : base(new LeadingToken<T>(expectedIndentation == IndentationType.Indent, expectedIndentation == IndentationType.UnIndent ))
         {
             ExpectedIndentation = expectedIndentation;
             Discarded = discard;

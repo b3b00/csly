@@ -36,10 +36,6 @@ namespace sly.parser
                 return false;
             }
             bool found = _memoizedNonTerminalResults.TryGetValue(GetKey(clause, position), out result);
-            if (!found)
-            {
-                Debug.WriteLine($"NOT FOUND ! {clause} - {position}");
-            }
             return found;
         }
     }

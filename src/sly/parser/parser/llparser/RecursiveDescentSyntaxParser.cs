@@ -43,7 +43,7 @@ namespace sly.parser.llparser
 
             foreach (var rule in nt.Rules)
             {
-                if (!tokens[0].IsEOS && rule.PossibleLeadingTokens.Any(x => x.Match(tokens[0])))
+                if (!tokens[0].IsEOS && rule.Match(tokens,0,Configuration))
                 {
                     matchingRuleCount++;
                     var r = Parse(tokens, rule, 0, start, parsingContext);
@@ -128,7 +128,7 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
             var children = new List<ISyntaxNode<IN>>();
-            if (!tokens[position].IsEOS && rule.PossibleLeadingTokens.Any(x => x.Match(tokens[position])))
+            if (!tokens[position].IsEOS && rule.Match(tokens,position,Configuration))
                 if (rule.Clauses != null && rule.Clauses.Count > 0)
                 {
                     children = new List<ISyntaxNode<IN>>();
@@ -306,7 +306,7 @@ namespace sly.parser.llparser
             {
                 var innerrule = rules[i];
                 if (startPosition < tokens.Count && !tokens[startPosition].IsEOS &&
-                    innerrule.PossibleLeadingTokens.Any(x => x.Match(tokens[startPosition])) || innerrule.MayBeEmpty)
+                    innerrule.Match(tokens,startPosition,Configuration))
                 {
                     var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTerminalName, parsingContext);
                     rulesResults.Add(innerRuleRes);

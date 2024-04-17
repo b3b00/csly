@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using sly.lexer;
 using sly.parser.generator;
 
 namespace sly.parser.syntax.grammar
@@ -138,6 +140,47 @@ namespace sly.parser.syntax.grammar
         public void SetVisitor(OperationMetaData<IN> operation)
         {
             VisitorMethodsForOperation[operation.OperatorToken] = operation;
+        }
+
+        
+        
+        public bool Match<OUT>(IList<Token<IN>> tokens, int position, ParserConfiguration<IN,OUT> configuration)
+        {
+            bool activateBroadWindow = false;
+            if (activateBroadWindow && Clauses.Count >= 2 && Clauses[0] is TerminalClause<IN> startingTerminalClause && Clauses[1] is NonTerminalClause<IN> nTerm)
+            {
+                if (startingTerminalClause.MayBeEmpty())
+                {
+                    return true;
+                }
+                if (!startingTerminalClause.MayBeEmpty() && startingTerminalClause.Check(tokens[position]))
+                {
+                    var secondPossibleLeadings =
+                        configuration.NonTerminals[nTerm.NonTerminalName].PossibleLeadingTokens;
+                    if (secondPossibleLeadings.Any(x => x.Match(tokens[position+1])) || nTerm.MayBeEmpty())
+                    {
+                        return true;
+                    }
+                }
+
+                
+
+                return false;
+            }
+
+            return PossibleLeadingTokens.Any(x => x.Match(tokens[position])) || MayBeEmpty;
+        }
+
+        public string Dump()
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append(NonTerminalName).Append(" : ");
+            foreach (var clause in Clauses)
+            {
+                builder.Append(clause.Dump()).Append(" ");
+            }
+
+            return builder.ToString();
         }
     }
 }
