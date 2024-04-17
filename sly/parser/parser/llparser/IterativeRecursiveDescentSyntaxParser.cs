@@ -12,7 +12,8 @@ namespace sly.parser.llparser
 {
     public partial class IterativeRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
     {
-        public IterativeRecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal,
+        public IterativeRecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration,
+            string startingNonTerminal,
             string i18n)
         {
             I18n = i18n;
@@ -30,24 +31,28 @@ namespace sly.parser.llparser
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var nt = NonTerminals[start];
 
-            
-            
+
             Stack<IStackItem<IN>> stack = new Stack<IStackItem<IN>>();
 
             var root = new RuleStackItem<IN>(null, null, tokens, 0);
-            
+
+
+            if (tokens == null)
+            {
+                Console.WriteLine($"IterativeParser.Parse(42) :: tokens are null");
+            }
 
             int position = 0;
             PushNonTerminal(root, nt, stack, tokens, position);
 
             while (stack.Any() || stack.Peek().IsRoot)
             {
-                // Console.WriteLine();
-                // Console.WriteLine("-------------------");
-                // foreach (var stackItem in stack)
-                // {
-                //     Console.WriteLine(stackItem.Dump());
-                // }
+                Console.WriteLine();
+                Console.WriteLine("-------------------");
+                foreach (var stackItem in stack)
+                {
+                    Console.WriteLine(stackItem.Dump());
+                }
 
                 var current = stack.Pop();
 
@@ -55,13 +60,14 @@ namespace sly.parser.llparser
                 {
                     position = current.Position;
                 }
-                
+
                 if (current is ClauseStackItem<IN> currentClause)
                 {
                     switch (currentClause.Clause)
                     {
                         case TerminalClause<IN> terminalClause:
                         {
+                            Console.WriteLine($"testing terminal {terminalClause.ExpectedToken}");
                             if (terminalClause.Check(currentClause.Tokens[position]))
                             {
                                 position++;
@@ -71,6 +77,7 @@ namespace sly.parser.llparser
                                 {
                                     Console.Write(tokens[i].Value + " ");
                                 }
+
                                 Console.WriteLine();
 
                                 var leaf = new SyntaxLeaf<IN>(currentClause.Tokens[position - 1],
@@ -82,7 +89,7 @@ namespace sly.parser.llparser
                                     Root = leaf,
                                     IsError = false
                                 };
-                                
+
                                 currentClause.Parent.AddChild(result);
                             }
                             else
@@ -95,11 +102,11 @@ namespace sly.parser.llparser
                                     Errors = new List<UnexpectedTokenSyntaxError<IN>>(),
                                     Root = null,
                                     IsError = true,
-                                    Expecting = new List<LeadingToken<IN>>() {terminalClause.ExpectedToken}
+                                    Expecting = new List<LeadingToken<IN>>() { terminalClause.ExpectedToken }
                                 };
-                                
+
                                 currentClause.Parent.AddChild(result);
-                                
+
                                 BackTrack(stack, true);
                             }
 
@@ -124,7 +131,8 @@ namespace sly.parser.llparser
                     if (currentRule.IsSuccess)
                     {
                         // TODO build node and set it to parent;
-                        var node = new SyntaxNode<IN>(currentRule.NonTerminal, currentRule.CurrentChildren.Select(x => x.Root).ToList(),
+                        var node = new SyntaxNode<IN>(currentRule.NonTerminal,
+                            currentRule.CurrentChildren.Select(x => x.Root).ToList(),
                             currentRule.CurrentRule.GetVisitor());
                         var result = new SyntaxParseResult<IN>()
                         {
@@ -135,6 +143,7 @@ namespace sly.parser.llparser
                         BackTrack(stack, false);
                         continue; // ?
                     }
+
                     if (currentRule.IsDone)
                     {
                         BackTrack(stack, true);
@@ -149,32 +158,44 @@ namespace sly.parser.llparser
             return null;
         }
 
-        protected void BackTrack(Stack<IStackItem<IN>> stack, bool backtracked = false) {
-    while (!stack.Peek().IsRuleTrial)
-    {
-        stack.Pop();
-    }
-    Console.WriteLine($"backtracked to {(stack.Peek() as RuleStackItem<IN>)?.NonTerminal}");
-    stack.Peek().HasBackTracked = true;
+        protected void BackTrack(Stack<IStackItem<IN>> stack, bool backtracked = false)
+        {
+            while (!stack.Peek().IsRuleTrial)
+            {
+                stack.Pop();
+            }
+
+            Console.WriteLine($"backtracked to {(stack.Peek() as RuleStackItem<IN>)?.NonTerminal}");
+            stack.Peek().HasBackTracked = true;
         }
 
-        protected void PushRule(RuleStackItem<IN> parent, Rule<IN> rule, Stack<IStackItem<IN>> stack, IList<Token<IN>> tokens, int position)
+        protected void PushRule(RuleStackItem<IN> parent, Rule<IN> rule, Stack<IStackItem<IN>> stack,
+            IList<Token<IN>> tokens, int position)
         {
             Console.WriteLine($"choosing rule {rule.RuleString}");
+            if (tokens == null)
+            {
+                Console.WriteLine($"IterativerParsers.PushRule() :: tokens are null");
+            }
+
             for (int i = rule.Clauses.Count - 1; i >= 0; i--)
             {
-                stack.Push(new ClauseStackItem<IN>(parent, rule.Clauses[i],tokens,position));
+                stack.Push(new ClauseStackItem<IN>(parent, rule.Clauses[i], tokens, position));
             }
         }
 
-        protected void PushNonTerminal(RuleStackItem<IN> parent, NonTerminal<IN> nt, Stack<IStackItem<IN>> stack, IList<Token<IN>> tokens, int position)
+        protected void PushNonTerminal(RuleStackItem<IN> parent, NonTerminal<IN> nt, Stack<IStackItem<IN>> stack,
+            IList<Token<IN>> tokens, int position)
         {
-            
-            
             var ruleTrial = new RuleStackItem<IN>(parent, nt, tokens, position);
             if (ruleTrial.RulesTrials.Any())
             {
                 stack.Push(ruleTrial);
+                if (tokens == null)
+                {
+                    Console.WriteLine($"IetartoiveParser.PushNonTerminal() :: tokens are null");
+                }
+
                 PushRule(ruleTrial, ruleTrial.RulesTrials.First(), stack, tokens, position);
             }
             else
@@ -183,14 +204,14 @@ namespace sly.parser.llparser
                 BackTrack(stack, true);
             }
         }
-        
+
 
         public virtual void Init(ParserConfiguration<IN, OUT> configuration, string root)
         {
             if (root != null) StartingNonTerminal = root;
             InitializeStartingTokens(configuration, StartingNonTerminal);
         }
-        
+
 
         //
         // #region parsing
@@ -594,6 +615,5 @@ namespace sly.parser.llparser
         //
         //
         // #endregion
-       
     }
 }

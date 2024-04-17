@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using sly.lexer;
 using sly.parser.syntax.grammar;
@@ -34,6 +35,11 @@ namespace sly.parser.llparser.iterative
             Parent = parent;
             Clause = clause;
             Position = position;
+            if (tokens == null)
+            {
+                Console.WriteLine($"ClauseStackItem : tokens are null");
+            }
+            
             Tokens = tokens;
         }
         

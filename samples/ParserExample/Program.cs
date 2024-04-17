@@ -439,10 +439,10 @@ return r";
                 var parser = parserBuild.Result;
                 if (parser != null)
                 {
-                    var r = parser.Parse("2 * 2");
+                    var r = parser.Parse("2 + 2");
                     if (r.IsOk)
                     {
-                        Console.WriteLine($"2 * 2 = {r.Result}");
+                        Console.WriteLine($"2 + 2 = {r.Result}");
                     }
                     else
                     {
