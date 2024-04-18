@@ -63,7 +63,7 @@ namespace benchCurrent
         
         public void TestJson()
         {
-            MemoizeFlag.Value = Memoize;
+            
             
             if (BenchedParser == null)
             {
@@ -71,6 +71,7 @@ namespace benchCurrent
             }
             else
             {
+                BenchedParser.Configuration.UseMemoization = Memoize;
                 var ignored = BenchedParser.Parse(content);    
             }
         }

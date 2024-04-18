@@ -26,7 +26,7 @@ namespace sly.parser.llparser
 
         public SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
         {
-            return SafeParse(tokens, new SyntaxParsingContext<IN>(), startingNonTerminal);
+            return SafeParse(tokens, new SyntaxParsingContext<IN>(Configuration.UseMemoization), startingNonTerminal);
         }
         
         public SyntaxParseResult<IN> SafeParse(IList<Token<IN>> tokens, SyntaxParsingContext<IN> parsingContext, string startingNonTerminal = null)
