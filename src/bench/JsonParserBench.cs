@@ -14,7 +14,7 @@ using sly.parser;
 using sly.parser.generator;
 using bench.json;
 using bench.json.model;
-
+using BenchmarkDotNet.Diagnosers;
 
 
 namespace bench
@@ -25,6 +25,7 @@ namespace bench
     [MarkdownExporter]
     [JsonExporter("-custom", indentJson: true, excludeMeasurements: true)]
     [Config(typeof(Config))]
+    [EventPipeProfiler(EventPipeProfile.CpuSampling)]
     public class JsonParserBench
     {
 
@@ -34,7 +35,8 @@ namespace bench
             public Config()
             {
                 var baseJob = Job.MediumRun.With(CsProjCoreToolchain.NetCoreApp70);
-                Add(baseJob.WithNuGet("sly", "2.9.9").WithId("2.9.9"));
+                Add(baseJob.WithNuGet("sly", "2.9.7.0").WithId("2.9.7.0"));
+                // Add(baseJob.WithNuGet("sly", "2.9.9").WithId("2.9.9"));
                 Add(baseJob.WithNuGet("sly", "3.0.1").WithId("3.0.1"));
                 Add(EnvironmentAnalyser.Default);
             }

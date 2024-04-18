@@ -1,5 +1,5 @@
 using System.IO;
-using benchCurrent.json;
+using bench.json;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
@@ -21,7 +21,7 @@ namespace benchCurrent
         {
             public Config()
             {
-                var baseJob = Job.MediumRun.With(CsProjCoreToolchain.Current.Value);
+                var baseJob = Job.MediumRun.With(CsProjCoreToolchain.NetCoreApp70);
             }
         }
 

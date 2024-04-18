@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
-using benchCurrent.json.JsonModel;
+using bench.json.model;
 using sly.lexer;
 using sly.parser.generator;
 
-namespace benchCurrent.json
+namespace bench.json
 {
     public static class DictionaryExtensionMethods
     {
