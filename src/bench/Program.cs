@@ -12,11 +12,11 @@ namespace bench
             var summary = BenchmarkRunner.Run<JsonParserBench>();
 
         }
+
         static void Main(string[] args)
         {
             try
             {
-                Console.WriteLine("Hello World!");
                 BenchJson();
             }
             catch (Exception e)
