@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using benchCurrent.json;
-using benchCurrent.json.JsonModel;
+using bench.json;
+using bench.json.model;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
@@ -23,7 +23,7 @@ namespace benchCurrent
         {
             public Config()
             {
-                var baseJob = Job.MediumRun.With(CsProjCoreToolchain.Current.Value);
+                var baseJob = Job.MediumRun.With(CsProjCoreToolchain.NetCoreApp70);
             }
         }
 
@@ -56,10 +56,15 @@ namespace benchCurrent
             Console.WriteLine($"parser {BenchedParser}");
         }
 
+        [Params(true,false)]
+        public bool Memoize { get; set; }
+        
         [Benchmark]
         
         public void TestJson()
         {
+            MemoizeFlag.Value = Memoize;
+            
             if (BenchedParser == null)
             {
                 Console.WriteLine("parser is null");
