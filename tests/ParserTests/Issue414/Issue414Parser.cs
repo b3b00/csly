@@ -3,6 +3,7 @@ using sly.parser.generator;
 
 namespace ParserTests.Issue414;
 
+[UseMemoization]
 public class Issue414Parser
 {
  #region boolean

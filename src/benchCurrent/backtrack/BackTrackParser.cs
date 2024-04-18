@@ -3,6 +3,8 @@ using sly.parser.generator;
 
 namespace benchCurrent.backtrack;
 
+
+[UseMemoization]
 public class BackTrackParser
 {
     

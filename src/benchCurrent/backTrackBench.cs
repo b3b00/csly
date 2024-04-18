@@ -62,7 +62,6 @@ namespace benchCurrent
         public void TestBackTrack()
         {
             
-            MemoizeFlag.Value = Memoize;
             
             if (BenchedParser == null)
             {
@@ -71,6 +70,7 @@ namespace benchCurrent
             else
             {
                 Console.WriteLine("parse");
+                BenchedParser.Configuration.UseMemoization = Memoize;
                 var ignored = BenchedParser.Parse(content);
                 Console.WriteLine("parsed");
             }
