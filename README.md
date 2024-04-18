@@ -137,4 +137,4 @@ or with dotnet core
 
 # Special thanks to
 
-<a href="https://jb.gg/OpenSource"><img height="200" src="logos/jetbrains-variant-2.svg"><a>
+<a href="https://jb.gg/OpenSource"><img height="200" src="src/logos/jetbrains-variant-2.svg"><a>
