@@ -8,7 +8,9 @@ namespace benchCurrent
 
         private static void BenchJson() {
            
-            var summary = BenchmarkRunner.Run<JsonParserBench>();
+            // var summary = BenchmarkRunner.Run<JsonParserBench>();
+            
+            var summary2 = BenchmarkRunner.Run<BackTrackBench>();
 
         }
         static void Main(string[] args)
