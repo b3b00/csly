@@ -6,6 +6,10 @@ namespace ParserTests.lexer
     {
         [Extension] DATE,
 
-        [Double] DOUBLE
+        [Double] DOUBLE,
+        
+        [Extension]
+        TEST
+        
     }
 }

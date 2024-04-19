@@ -647,12 +647,19 @@ namespace ParserTests.lexer
             var lexer = lexerRes.Result as GenericLexer<ShortExtensions>;
             Check.That(lexer).IsNotNull();
 
-            var r = lexer.Tokenize("20.02.2018 3.14");
+            var r = lexer.Tokenize("20.02.2018 3.14 #***#");
             Check.That(r.IsOk).IsTrue();
 
-            Check.That(r.Tokens).CountIs(3);
+            Check.That(r.Tokens).CountIs(4);
             Check.That(r.Tokens[0]).IsEqualTo(ShortExtensions.DATE, "20.02.2018");
             Check.That(r.Tokens[1]).IsEqualTo(ShortExtensions.DOUBLE, "3.14");
+            Check.That(r.Tokens[2]).IsEqualTo(ShortExtensions.TEST, "#***#");
+            
+            r = lexer.Tokenize("#***");
+            Check.That(r).Not.IsOkLexing();
+            Check.That(r.Error).IsNotNull();
+            Check.That(r.Error.UnexpectedChar).IsEqualTo('*');
+            Check.That(r.Error.Column).IsEqualTo(3);
         }
 
         [Fact]

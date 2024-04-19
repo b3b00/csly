@@ -50,18 +50,34 @@ namespace ParserTests.lexer
             {
                 NodeCallback<GenericToken> callback = match =>
                 {
-                    match.Properties[GenericLexer<Extensions>.DerivedToken] = Extensions.DATE;
+                    match.Properties[GenericLexer<ShortExtensions>.DerivedToken] = ShortExtensions.DATE;
                     return match;
                 };
 
                 var fsmBuilder = lexer.FSMBuilder;
 
-                fsmBuilder.GoTo(GenericLexer<Extensions>.in_double)
+                fsmBuilder.GoTo(GenericLexer<ShortExtensions>.in_double)
                     .Transition('.', CheckDate)
                     .Mark("start_date")
                     .RepetitionTransition(4, "[0-9]")
                     .End(GenericToken.Extension)
                     .CallBack(callback);
+            }
+
+            if (token == ShortExtensions.TEST)
+            {
+                NodeCallback<GenericToken> callbackTEST = (FSMMatch<GenericToken> match) =>
+                {
+                    // this store the token id the the FSMMatch object to be later returned by GenericLexer.Tokenize 
+                    match.Properties[GenericLexer<ShortExtensions>.DerivedToken] = ShortExtensions.TEST;
+                    return match;
+                };
+                var builder = lexer.FSMBuilder;
+                builder.GoTo("start").Transition('#').Mark("in-ext").Transition('#').End(GenericToken.Extension).CallBack(callbackTEST);
+                //var builder = lexer.FSMBuilder;
+                builder.GoTo("in-ext").TransitionTo('*',"in-ext");
+                //var builder = lexer.FSMBuilder;
+                builder.GoTo("in-ext").Transition('€').End(GenericToken.Extension).CallBack(callbackTEST);
             }
         }
     }
