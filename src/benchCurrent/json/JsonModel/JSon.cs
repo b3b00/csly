@@ -1,4 +1,4 @@
-﻿namespace benchCurrent.json.JsonModel
+﻿namespace bench.json.model
 {
     public abstract class JSon
     {

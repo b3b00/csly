@@ -1,19 +1,21 @@
 using sly.lexer;
 using sly.parser.generator;
 
-namespace ParserTests.Issue414;
+namespace benchCurrent.backtrack;
+
 
 [UseMemoization]
-public class Issue414Parser
+public class BackTrackParser
 {
- #region boolean
+    
+  #region boolean
     [Production("boolean: TRUE")]
-    public string BooleanTrue(Token<Issue414Token> trueToken)
+    public string BooleanTrue(Token<BackTrackToken> trueToken)
     {
         return "true";
     }
     [Production("boolean: FALSE")]
-    public string BooleanFalse(Token<Issue414Token> falseToken)
+    public string BooleanFalse(Token<BackTrackToken> falseToken)
     {
         return "false";
     }
@@ -22,7 +24,7 @@ public class Issue414Parser
     #region variable
 
     [Production("variable: IDENTIFIER")]
-    public string VariableIdentifier(Token<Issue414Token> idToken)
+    public string VariableIdentifier(Token<BackTrackToken> idToken)
     {
         var varName = idToken.StringWithoutQuotes;
         return varName;
@@ -31,7 +33,7 @@ public class Issue414Parser
 
     #region group
     [Production("group: LPAREN expression RPAREN")]
-    public string Group(Token<Issue414Token> lparen, string expression, Token<Issue414Token> rparen)
+    public string Group(Token<BackTrackToken> lparen, string expression, Token<BackTrackToken> rparen)
     {
         return "(" + expression + ")";
     }
@@ -46,12 +48,12 @@ public class Issue414Parser
     }
 
     [Production("primary: INT")]
-    public string PrimaryInt(Token<Issue414Token> intToken)
+    public string PrimaryInt(Token<BackTrackToken> intToken)
     {
         return intToken.IntValue.ToString();
     }
     [Production("primary: DOUBLE")]
-    public string PrimaryDouble(Token<Issue414Token> doubleToken)
+    public string PrimaryDouble(Token<BackTrackToken> doubleToken)
     {
         return doubleToken.DoubleValue.ToString();
     }
@@ -63,7 +65,7 @@ public class Issue414Parser
     }
 
     [Production("primary: STRING")]
-    public string PrimaryString(Token<Issue414Token> strToken)
+    public string PrimaryString(Token<BackTrackToken> strToken)
     {
         var str = strToken.StringWithoutQuotes;
         return str;
@@ -86,7 +88,7 @@ public class Issue414Parser
     #region begin end
 
     [Production("begin_end : LCURLYBRACE block RCURLYBRACE")]
-    public string BeginEnd(Token<Issue414Token> lcurlybraceToken, string block, Token<Issue414Token> rcurlybraceToken)
+    public string BeginEnd(Token<BackTrackToken> lcurlybraceToken, string block, Token<BackTrackToken> rcurlybraceToken)
     {
         return "{" + "\r\n" + block + "\r\n" + "}";
     }
@@ -111,14 +113,14 @@ public class Issue414Parser
 
     #region statement
     [Production("statement : expression SEMICOLON")]
-    public string Statementstring(string expression, Token<Issue414Token> semicolonToken)
+    public string Statementstring(string expression, Token<BackTrackToken> semicolonToken)
     {
         return expression + ";";
     }
 
     // A := ...
     [Production("statement : assign SEMICOLON")]
-    public string StatementAssign(string assign, Token<Issue414Token> semicolonToken)
+    public string StatementAssign(string assign, Token<BackTrackToken> semicolonToken)
     {
         return assign + ";";
     }
@@ -135,7 +137,7 @@ public class Issue414Parser
     #region assign
     // A := ...
     [Production("assign : variable ASSIGN expression")]
-    public string AssignExpression(string variable, Token<Issue414Token> assignToken, string right)
+    public string AssignExpression(string variable, Token<BackTrackToken> assignToken, string right)
     {
         return variable + ":=" + right;
     }
@@ -150,9 +152,9 @@ public class Issue414Parser
     //        factorlevel (*, ) ->
     //          primary
 
-    [Production("expression : logiclevel AND expression")]
-    [Production("expression : logiclevel OR expression")]
-    public string LogicExpression(string left, Token<Issue414Token> operatorToken, string right)
+    [Production("expression : logiclevel [AND|OR] expression")]
+    
+    public string LogicExpression(string left, Token<BackTrackToken> operatorToken, string right)
     {
         return left + operatorToken.Value + right;
     }
@@ -164,11 +166,8 @@ public class Issue414Parser
     }
 
 
-    [Production("logiclevel : comparelevel GREATER logiclevel")]
-    [Production("logiclevel : comparelevel LESSER logiclevel")]
-    [Production("logiclevel : comparelevel EQUALS logiclevel")]
-    [Production("logiclevel : comparelevel DIFFERENT logiclevel")]
-    public string CompareExpression(string left, Token<Issue414Token> operatorToken, string right)
+    [Production("logiclevel : comparelevel [GREATER|LESSER|EQUALS|DIFFERENT] logiclevel")]
+    public string CompareExpression(string left, Token<BackTrackToken> operatorToken, string right)
     {
         return left + operatorToken.Value + right;
     }
@@ -179,16 +178,16 @@ public class Issue414Parser
         return comparelevel;
     }
 
-    [Production("comparelevel : sumlevel PLUS comparelevel")]
-    public string PlusExpression(string left, Token<Issue414Token> operatorToken, string right)
+    [Production("comparelevel : sumlevel [PLUS|MINUS] comparelevel")]
+    public string PlusExpression(string left, Token<BackTrackToken> operatorToken, string right)
     {
-        return left + "+" + right;
+        return left + operatorToken.Value + right;
     }
-    [Production("comparelevel : sumlevel MINUS comparelevel")]
-    public string MinusExpression(string left, Token<Issue414Token> operatorToken, string right)
-    {
-        return left + "-" + right;
-    }
+    // [Production("comparelevel : sumlevel MINUS comparelevel")]
+    // public string MinusExpression(string left, Token<BackTrackToken> operatorToken, string right)
+    // {
+    //     return left + "-" + right;
+    // }
 
     [Production("comparelevel : sumlevel")]
     public string CalcExpression(string sumlevel)
@@ -198,16 +197,16 @@ public class Issue414Parser
     #endregion
 
     #region sumlevel (term)
-    [Production("sumlevel : factorlevel TIMES sumlevel")]
-    public string Times(string left, Token<Issue414Token> operatorToken, string right)
+    [Production("sumlevel : factorlevel [TIMES|DIVIDE] sumlevel")]
+    public string Times(string left, Token<BackTrackToken> operatorToken, string right)
     {
-        return left + "*" + right;
+        return left + operatorToken.Value + right;
     }
-    [Production("sumlevel : factorlevel DIVIDE sumlevel")]
-    public string Divide(string left, Token<Issue414Token> operatorToken, string right)
-    {
-        return left + "/" + right;
-    }
+    // [Production("sumlevel : factorlevel DIVIDE sumlevel")]
+    // public string Divide(string left, Token<BackTrackToken> operatorToken, string right)
+    // {
+    //     return left + "/" + right;
+    // }
 
     [Production("sumlevel : factorlevel")]
     public string Sumlevel_Factor(string factorValue)
@@ -224,7 +223,7 @@ public class Issue414Parser
     }
 
     [Production("factorlevel : MINUS factorlevel")]
-    public string Factor(Token<Issue414Token> minus, string factorValue)
+    public string Factor(Token<BackTrackToken> minus, string factorValue)
     {
         return "-" + factorValue;
     }
@@ -234,19 +233,19 @@ public class Issue414Parser
     // function : variable ( parameters )
     // function : variable ( )
     [Production("functioncall : variable LPAREN callparameters RPAREN")]
-    public string Functioncall(string variableExpression, Token<Issue414Token> lparen, string parameters, Token<Issue414Token> rparen)
+    public string Functioncall(string variableExpression, Token<BackTrackToken> lparen, string parameters, Token<BackTrackToken> rparen)
     {
         return variableExpression + "(" + parameters + ")";
     }
 
     [Production("functioncall : variable LPAREN RPAREN")]
-    public string Functioncall(string variableExpression, Token<Issue414Token> lparen, Token<Issue414Token> rparen)
+    public string Functioncall(string variableExpression, Token<BackTrackToken> lparen, Token<BackTrackToken> rparen)
     {
         return variableExpression + "()";
     }
 
     [Production("callparameters : expression COMMA callparameters")]
-    public string Function(string paramExpression, Token<Issue414Token> comma, string parameters)
+    public string Function(string paramExpression, Token<BackTrackToken> comma, string parameters)
     {
         return paramExpression + ", " + parameters;
     }

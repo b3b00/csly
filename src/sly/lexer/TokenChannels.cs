@@ -67,13 +67,17 @@ namespace sly.lexer
         {
             token.TokenChannels = this;
             TokenChannel<IN> channel = null;
+            var mx = _tokenChannels?.Values != null && _tokenChannels.Values.Any() ?  _tokenChannels.Values.Max(x => x.Count) : 0;
+            
             if (!TryGet(token.Channel, out channel))
             {
+                
+                
                 channel = new TokenChannel<IN>(token.Channel);
                 int shift = 0;
                 if (_tokenChannels.Values.Any())
                 {
-                    shift = _tokenChannels.Values.Max(x => x.Count);
+                    shift = mx;
                 }
                 for (int i = 0; i < shift; i++)
                 {
@@ -82,7 +86,7 @@ namespace sly.lexer
                 _tokenChannels[token.Channel] = channel;
             }
 
-            int index = _tokenChannels.Values.Max(x => x.Count);
+            int index = mx;
             foreach (var VARIABLE in _tokenChannels.Values)
             {
                 for (int i = channel.Count; i < index; i++)
@@ -115,6 +119,14 @@ namespace sly.lexer
         public override string ToString()
         {
             return string.Join("\n", _tokenChannels.Values.Select(x => x.ToString()).ToArray());
+        }
+
+        public void PreCompute()
+        {
+            foreach (var channel in _tokenChannels)
+            {
+                channel.Value.PreCompute();
+            }
         }
     }
 }

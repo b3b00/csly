@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using bench.json;
 using bench.json.model;
+using benchCurrent.backtrack;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
@@ -15,7 +16,7 @@ namespace benchCurrent
     [MemoryDiagnoser]
     
     [Config(typeof(Config))]
-    public class JsonParserBench
+    public class BackTrackBench
     {
 
 
@@ -27,7 +28,7 @@ namespace benchCurrent
             }
         }
 
-        private Parser<JsonTokenGeneric,JSon> BenchedParser;
+        private Parser<BackTrackToken,string> BenchedParser;
 
         private string content = "";
 
@@ -35,16 +36,15 @@ namespace benchCurrent
         public void Setup()
         {
             Console.WriteLine(("SETUP"));
-            content = File.ReadAllText("test.json");
-            Console.WriteLine("json read.");
-            var jsonParser = new EbnfJsonGenericParser();
-            var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
+            content = "funcA(funcC(B==2));";
             
-            var result = builder.BuildParser(jsonParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            Console.WriteLine("parser built.");
+            var backTrackParser = new BackTrackParser();
+            var builder = new ParserBuilder<BackTrackToken, string>();
+            
+            var result = builder.BuildParser(backTrackParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "block");
+            
             if (result.IsError)
             {
-                Console.WriteLine("ERROR");
                 result.Errors.ForEach(Console.WriteLine);
             }
             else
@@ -52,8 +52,6 @@ namespace benchCurrent
                 Console.WriteLine("parser ok");
                 BenchedParser = result.Result;
             }
-            
-            Console.WriteLine($"parser {BenchedParser}");
         }
 
         [Params(true,false)]
@@ -61,7 +59,7 @@ namespace benchCurrent
         
         [Benchmark]
         
-        public void TestJson()
+        public void TestBackTrack()
         {
             
             
@@ -71,8 +69,10 @@ namespace benchCurrent
             }
             else
             {
+                Console.WriteLine("parse");
                 BenchedParser.Configuration.UseMemoization = Memoize;
-                var ignored = BenchedParser.Parse(content);    
+                var ignored = BenchedParser.Parse(content);
+                Console.WriteLine("parsed");
             }
         }
 

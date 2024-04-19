@@ -23,12 +23,10 @@ namespace bench
         {
             public Config()
             {
-                var baseJob = Job.MediumRun.With(CsProjCoreToolchain.Current.Value);
-                Add(baseJob.WithNuGet("sly", "2.2.5.1").WithId("2.2.5.1"));
-                Add(baseJob.WithNuGet("sly", "2.2.5.2").WithId("2.2.5.2"));
+                var baseJob = Job.MediumRun.With(CsProjCoreToolchain.NetCoreApp70);
+                Add(baseJob.WithNuGet("sly", "2.9.9").WithId("2.9.9"));
+                Add(baseJob.WithNuGet("sly", "3.0.0").WithId("3.0.0"));
                 Add(EnvironmentAnalyser.Default);
-                Add(baseJob.WithNuGet("sly", "2.2.5.3").WithId("2.2.5.3"));
-                Add(baseJob.WithNuGet("sly", "2.3.0.1").WithId("2.3.0.1"));
             }
         }
 
