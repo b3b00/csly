@@ -12,8 +12,10 @@ namespace sly.parser.generator
         public Dictionary<string, NonTerminal<IN>> NonTerminals { get; set; }
 
         public bool UsesOperations { get; set; }
-        
-        public bool UseMemoization { get; set; }
+
+        public bool UseMemoization { get; set; } = false;
+
+        public bool BroadenTokenWindow { get; set; } = false;
 
         public void AddNonTerminalIfNotExists(NonTerminal<IN> nonTerminal)
         {

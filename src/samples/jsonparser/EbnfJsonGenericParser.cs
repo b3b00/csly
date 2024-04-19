@@ -6,6 +6,7 @@ using sly.parser.generator;
 
 namespace jsonparser
 {
+    [BroadenTokenWindow]
     public class EbnfJsonGenericParser
     {
         #region root
