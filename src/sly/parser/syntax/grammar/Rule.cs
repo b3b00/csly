@@ -157,7 +157,7 @@ namespace sly.parser.syntax.grammar
                 {
                     var secondPossibleLeadings =
                         configuration.NonTerminals[nTerm.NonTerminalName].PossibleLeadingTokens;
-                    if (secondPossibleLeadings.Any(x => x.Match(tokens[position+1])) || nTerm.MayBeEmpty())
+                    if (secondPossibleLeadings.Exists(x => x.Match(tokens[position+1])) || nTerm.MayBeEmpty())
                     {
                         return true;
                     }
@@ -168,7 +168,7 @@ namespace sly.parser.syntax.grammar
                 return false;
             }
 
-            return PossibleLeadingTokens.Any(x => x.Match(tokens[position])) || MayBeEmpty;
+            return PossibleLeadingTokens.Exists(x => x.Match(tokens[position])) || MayBeEmpty;
         }
 
         public string Dump()
