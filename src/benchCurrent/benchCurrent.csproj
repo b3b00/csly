@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\samples\IndentedWhile\indentedWhile.csproj" />
     <ProjectReference Include="..\sly\sly.csproj" />
   </ItemGroup>
 

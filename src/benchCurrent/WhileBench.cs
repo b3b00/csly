@@ -7,6 +7,8 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Toolchains.CsProj;
+using csly.indentedWhileLang.parser;
+using csly.whileLang.model;
 using sly.parser;
 using sly.parser.generator;
 
@@ -16,7 +18,7 @@ namespace benchCurrent
     [MemoryDiagnoser]
     
     [Config(typeof(Config))]
-    public class BackTrackBench
+    public class WhileBench
     {
 
 
@@ -28,7 +30,7 @@ namespace benchCurrent
             }
         }
 
-        private Parser<BackTrackToken,string> BenchedParser;
+        private Parser<IndentedWhileTokenGeneric,WhileAST> BenchedParser;
 
         private string content = "";
 
@@ -36,10 +38,23 @@ namespace benchCurrent
         public void Setup()
         {
             Console.WriteLine(("SETUP"));
-            content = "funcA(funcC(B==2));";
+            content = @"r:=1
+i:=1
+while i < 11 do 
+    r := r * i
+    print r
+    print i
+    i := i + 1
+b := false 
+if i == 589 then
+    b := true
+if i == 1857 then
+    b := false
+print b
+";
             
-            var backTrackParser = new BackTrackParser();
-            var builder = new ParserBuilder<BackTrackToken, string>();
+            var backTrackParser = new IndentedWhileParserGeneric();
+            var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
             
             var result = builder.BuildParser(backTrackParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "block");
             

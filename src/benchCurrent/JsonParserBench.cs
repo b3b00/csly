@@ -59,6 +59,9 @@ namespace benchCurrent
         [Params(true,false)]
         public bool Memoize { get; set; }
         
+        [Params(true,false)]
+        public bool Broaden { get; set; }
+        
         [Benchmark]
         
         public void TestJson()
@@ -72,6 +75,7 @@ namespace benchCurrent
             else
             {
                 BenchedParser.Configuration.UseMemoization = Memoize;
+                BenchedParser.Configuration.BroadenTokenWindow = Broaden;
                 var ignored = BenchedParser.Parse(content);    
             }
         }

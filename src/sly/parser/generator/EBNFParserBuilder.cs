@@ -34,8 +34,9 @@ namespace sly.parser.generator
                 }
             }
 
-            var memoizationAttribute = parserInstance.GetType().GetCustomAttribute<UseMemoizationAttribute>();
-            bool useMemoization = memoizationAttribute != null;
+            bool useMemoization = parserInstance.GetType().GetCustomAttribute<UseMemoizationAttribute>() != null;
+            
+            bool broadenTokenWindow = parserInstance.GetType().GetCustomAttribute<BroadenTokenWindowAttribute>() != null;
 
             var ruleparser = new RuleParser<IN>();
             var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>(I18N);
@@ -51,6 +52,7 @@ namespace sly.parser.generator
             {
                 configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
                 configuration.UseMemoization = useMemoization;
+                configuration.BroadenTokenWindow = broadenTokenWindow;
                 LeftRecursionChecker<IN, OUT> recursionChecker = new LeftRecursionChecker<IN, OUT>();
 
                 // check left recursion.
