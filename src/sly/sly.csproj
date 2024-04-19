@@ -8,19 +8,23 @@
     <Authors>b3b00</Authors>
     <version>3.1.0</version>
     <PackageProjectUrl>https://github.com/b3b00/sly</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/b3b00/sly</RepositoryUrl>
-    <License>https://github.com/b3b00/sly/blob/master/LICENSE</License>
+    <RepositoryUrl>https://github.com/b3b00/sly</RepositoryUrl>    
     <PackageVersion>3.1.0</PackageVersion>
     <ApplicationIcon/>
     <OutputType>Library</OutputType>
     <StartupObject/>
-    <LangVersion>latest</LangVersion>
-    <PackageLicenseUrl>https://github.com/b3b00/csly/blob/dev/LICENSE</PackageLicenseUrl>
+    <LangVersion>latest</LangVersion>    
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
+  <PropertyGroup>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="LICENSE" Pack="true" PackagePath=""/>
+  </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;1705;1591</NoWarn>
   </PropertyGroup>
