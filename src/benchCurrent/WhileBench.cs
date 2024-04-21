@@ -12,6 +12,7 @@ using csly.whileLang.model;
 using sly.parser;
 using sly.parser.generator;
 
+
 namespace benchCurrent
 {
 
@@ -51,6 +52,48 @@ if i == 589 then
 if i == 1857 then
     b := false
 print b
+
+r:=1
+i:=1
+while i < 11 do 
+    r := r * i
+    print r
+    print i
+    i := i + 1
+b := false 
+if i == 589 then
+    b := true
+if i == 1857 then
+    b := false
+print b
+
+r:=1
+i:=1
+while i < 11 do 
+    r := r * i
+    print r
+    print i
+    i := i + 1
+b := false 
+if i == 589 then
+    b := true
+if i == 1857 then
+    b := false
+print b
+
+r:=1
+i:=1
+while i < 11 do 
+    r := r * i
+    print r
+    print i
+    i := i + 1
+b := false 
+if i == 589 then
+    b := true
+if i == 1857 then
+    b := false
+print b
 ";
             
             var backTrackParser = new IndentedWhileParserGeneric();
@@ -77,7 +120,7 @@ print b
         
         [Benchmark]
         
-        public void TestBackTrack()
+        public void TestWhile()
         {
             if (BenchedParser == null)
             {
