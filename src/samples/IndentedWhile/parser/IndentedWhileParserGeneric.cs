@@ -3,9 +3,11 @@ using System.Linq;
 using csly.whileLang.model;
 using sly.lexer;
 using sly.parser.generator;
+using sly.parser.parser;
 
 namespace csly.indentedWhileLang.parser
 {
+    [UseMemoization]
     public class IndentedWhileParserGeneric
     {
         #region COMPARISON OPERATIONS
@@ -92,10 +94,13 @@ namespace csly.indentedWhileLang.parser
             return seq;
         }
 
-        [Production("statement: IF[d] IndentedWhileParserGeneric_expressions THEN[d] block ELSE[d] block")]
-        public WhileAST ifStmt( WhileAST cond, WhileAST thenStmt, Statement elseStmt)
+        [Production("statement: IF[d] IndentedWhileParserGeneric_expressions THEN[d] block (ELSE[d] block)?")]
+        public WhileAST ifStmt( WhileAST cond, WhileAST thenStmt, ValueOption<Group<IndentedWhileTokenGeneric, WhileAST>> optionalElseStmt)
         {
-            var stmt = new IfStatement(cond as Expression, thenStmt as Statement, elseStmt);
+            var elseGroup = optionalElseStmt.Match(
+                x => x, () => null)?.Value(0);
+            
+            var stmt = new IfStatement(cond as Expression, thenStmt as Statement, elseGroup as Statement);
             return stmt;
         }
 

@@ -39,9 +39,12 @@ namespace csly.whileLang.model
             dmp.AppendLine(ThenStmt.Dump("\t\t" + tab));
             dmp.AppendLine($"{tab})");
 
-            dmp.AppendLine($"{tab + "\t"}(ELSE");
-            dmp.AppendLine(ElseStmt.Dump("\t\t" + tab));
-            dmp.AppendLine($"{tab + "\t"})");
+            if (ElseStmt != null)
+            {
+                dmp.AppendLine($"{tab + "\t"}(ELSE");
+                dmp.AppendLine(ElseStmt.Dump("\t\t" + tab));
+                dmp.AppendLine($"{tab + "\t"})");
+            }
 
             dmp.AppendLine($"{tab})");
             return dmp.ToString();

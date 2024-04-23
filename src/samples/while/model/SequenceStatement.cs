@@ -36,7 +36,7 @@ namespace csly.whileLang.model
         {
             var dump = new StringBuilder();
             dump.AppendLine($"{tab}(SEQUENCE [");
-            Statements.ForEach(c => dump.AppendLine($"{c.Dump(tab + "\t")},"));
+            Statements.ForEach(c => dump.AppendLine($"{c.Dump(tab + "\t")}"));
             dump.AppendLine($"{tab}] )");
             return dump.ToString();
         }

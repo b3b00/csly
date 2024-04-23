@@ -2,7 +2,7 @@
 
 namespace csly.indentedWhileLang.parser
 {
-    [Lexer(IndentationAWare = true)]
+    [Lexer(IndentationAWare = true, Indentation = "\t")]
     public enum IndentedWhileTokenGeneric
     {
         #region keywords 0 -> 19
@@ -50,7 +50,7 @@ namespace csly.indentedWhileLang.parser
 
         #region literals 20 -> 29
 
-        [Lexeme(GenericToken.Identifier)] IDENTIFIER = 20,
+        [Lexeme(GenericToken.Identifier,IdentifierType.AlphaNumericDash)] IDENTIFIER = 20,
 
         [Lexeme(GenericToken.String)] STRING = 21,
 
