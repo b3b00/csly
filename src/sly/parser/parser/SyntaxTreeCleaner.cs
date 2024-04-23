@@ -66,8 +66,8 @@ namespace sly.parser.parser
             {
                 var newLeft = result;
                 var newTop = (SyntaxNode<IN>) result.Right;
-                newLeft.Children[2] = newTop.Left;
-                newTop.Children[0] = newLeft;
+                newLeft.Right = newTop.Left;
+                newTop.Left = newLeft;
                 result = newTop;
             }
 

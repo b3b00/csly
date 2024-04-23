@@ -63,6 +63,17 @@ namespace sly.parser.syntax.tree
 
                 return l;
             }
+            set
+            {
+                if (IsExpressionNode)
+                {
+                    if (IsBinaryOperationNode && IsBinaryOperationNode)
+                    {
+                        Children[0] = value;
+                    }
+                         
+                }
+            }
         }
 
         public ISyntaxNode<IN> Right
@@ -80,6 +91,17 @@ namespace sly.parser.syntax.tree
                 }
 
                 return r;
+            }
+            set
+            {
+                if (IsExpressionNode)
+                {
+                        var rightIndex = -1;
+                        if (IsBinaryOperationNode)
+                            rightIndex = 2;
+                        else if (IsUnaryOperationNode) rightIndex = 1;
+                        if (rightIndex > 0) Children[rightIndex] = value;
+                }
             }
         }
         
