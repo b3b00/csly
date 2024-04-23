@@ -124,6 +124,14 @@ namespace sly.lexer
                             {
                                 token.Label = label;
                             }
+                            else if (token.IsUnIndent)
+                            {
+                                token.Label = "<<UINDENT>>";
+                            }
+                            else if (token.IsIndent)
+                            {
+                                token.Label = "<<INDENT>>";
+                            }
                             return token;
                         }).ToList();
                         if (lexerPostProcess != null)
