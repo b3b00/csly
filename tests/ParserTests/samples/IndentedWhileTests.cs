@@ -326,5 +326,22 @@ while true do
             Check.That(error.Line).IsEqualTo(4);
             Check.That(error.ErrorMessage).Contains("Indentation error");
         }
+        
+        [Fact]
+        public void TestEmptyLines()
+        {
+            var buildResult = buildParser();
+            var parser = buildResult.Result;
+            var program = @"
+# infinite loop
+i:= 2
+
+while true do
+
+    skip
+";
+            var result = parser.Parse(program);
+            Check.That(result).IsOkParsing();
+        }
     }
 }

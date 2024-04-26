@@ -452,7 +452,7 @@ namespace sly.lexer.fsm
                     var currentCharacter = source.At<char>(position.Index);
                     if (WhiteSpaces.Contains(currentCharacter))
                     {
-                        var whiteToken = new Token<N>(default(N), source.Slice(position.Index, 1), position, 
+                        var whiteToken = new Token<N>(default(N), source.Slice(position.Index, 1), position,
                             CommentType.No,
                             Channels.WhiteSpaces, isWhiteSpace: true, decimalSeparator: DecimalSeparator);
                         ignoredTokens.Add(whiteToken);
@@ -472,11 +472,17 @@ namespace sly.lexer.fsm
                         position.Column = 0;
                         position.Line++;
                         eolReached = true;
+                        while (position.Index < source.Length && eol != EolType.No)
+                        {
+                            eol = EOLManager.IsEndOfLine(source, position.Index);
+                            if (eol != EolType.No)
+                            {
+                                position.Index += eol == EolType.Windows ? 2 : 1;
+                                position.Column = 0;
+                                position.Line++;
+                            } 
+                        }
                         continue;
-                    }
-                    else
-                    {
-                        break;
                     }
                 }
 
