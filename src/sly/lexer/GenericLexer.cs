@@ -20,6 +20,8 @@ namespace sly.lexer
                 IgnoreWS = true;
                 WhiteSpace = new[] { ' ', '\t' };
             }
+            
+            public bool HasImplicitIdentifier { get; set; }
 
             public IdentifierType IdType { get; set; }
 
@@ -43,6 +45,10 @@ namespace sly.lexer
 
             public IEqualityComparer<string> KeyWordComparer =>
                 KeyWordIgnoreCase ? StringComparer.OrdinalIgnoreCase : null;
+
+            public StringComparison KeyWordComparison =>
+                KeyWordIgnoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
         }
 
         public LexerPostProcess<IN> LexerPostProcess { get; set; }
@@ -80,6 +86,8 @@ namespace sly.lexer
             Dictionary<GenericToken, Dictionary<string, (IN tokenId, bool isPop, bool isPush, string mode)>>
             derivedTokens;
 
+        internal Config LexerConfig;
+        
         protected IN doubleDerivedToken;
         protected char EscapeStringDelimiterChar;
 
@@ -105,6 +113,8 @@ namespace sly.lexer
 
         private readonly IEqualityComparer<string> KeyWordComparer;
 
+        private readonly StringComparison KeyWordComparison;
+
         public GenericLexer(IdentifierType idType = IdentifierType.Alpha,
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
             params GenericToken[] staticTokens)
@@ -112,14 +122,15 @@ namespace sly.lexer
         {
         }
 
-        public GenericLexer(Config config, GenericToken[] staticTokens)
+        public GenericLexer(Config lexerConfig, GenericToken[] staticTokens)
         {
+            LexerConfig = lexerConfig;
             derivedTokens =
                 new Dictionary<GenericToken, Dictionary<string, (IN tokenId, bool isPop, bool isPush, string mode)>>();
-            ExtensionBuilder = config.ExtensionBuilder;
-            KeyWordComparer = config.KeyWordComparer;
+            ExtensionBuilder = lexerConfig.ExtensionBuilder;
+            KeyWordComparer = lexerConfig.KeyWordComparer;
             SubLexersFsm = new Dictionary<string, FSMLexer<GenericToken>>();
-            InitializeStaticLexer(config, staticTokens);
+            InitializeStaticLexer(lexerConfig, staticTokens);
         }
 
         public string SingleLineComment { get; set; }
@@ -322,6 +333,7 @@ namespace sly.lexer
             if (staticTokens.Contains(GenericToken.Identifier) ||
                 staticTokens.Contains(GenericToken.KeyWord))
             {
+                config.HasImplicitIdentifier = !staticTokens.Contains(GenericToken.Identifier);
                 InitializeIdentifier(config);
             }
 
@@ -673,17 +685,40 @@ namespace sly.lexer
                 IN derivedToken = default;
                 if (derivedTokens.TryGetValue(GenericToken.Identifier, out var derived))
                 {
-                    if (derived.TryGetValue(match.Result.Value,
-                            out (IN tokenId, bool isPop, bool isPush, string mode) derived2))
+                    if (!LexerConfig.HasImplicitIdentifier)
                     {
-                        derivedToken = derived2.tokenId;
-                        match.IsPush = derived2.isPush;
-                        match.IsPop = derived2.isPop;
-                        match.NewPosition.Mode = derived2.mode ?? ModeAttribute.DefaultLexerMode;
+                        if (derived.TryGetValue(match.Result.Value,
+                                out (IN tokenId, bool isPop, bool isPush, string mode) derived2))
+                        {
+                            derivedToken = derived2.tokenId;
+                            match.IsPush = derived2.isPush;
+                            match.IsPop = derived2.isPop;
+                            match.NewPosition.Mode = derived2.mode ?? ModeAttribute.DefaultLexerMode;
+                        }
+                        else
+                        {
+                            derivedToken = identifierDerivedToken;
+                        }
                     }
                     else
                     {
-                        derivedToken = identifierDerivedToken;
+                        var matchingKeyWords = derived.Keys.Where(x => match.Result.Value.StartsWith(x, LexerConfig.KeyWordComparison)).ToList();
+                        if (matchingKeyWords.Any())
+                        {
+                            string keyword = null;
+                            (IN tokenId, bool isPop, bool isPush, string mode) derived2 = (default, false, false, null);
+                            matchingKeyWords.OrderBy(x => x.Length);
+                            keyword = matchingKeyWords.Last();
+                            derived2 = derived[keyword];
+                            derivedToken = derived2.tokenId;
+                            match.IsPush = derived2.isPush;
+                            match.IsPop = derived2.isPop;
+                            // recompute position
+                            int delta = match.Result.Value.Length - keyword.Length;
+                            match.NewPosition.Index -= delta;
+                            match.NewPosition.Column -= delta;
+                            match.NewPosition.Mode = derived2.mode ?? ModeAttribute.DefaultLexerMode;
+                        } 
                     }
                 }
                 else
