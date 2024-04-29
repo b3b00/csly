@@ -9,15 +9,18 @@ namespace sly.parser.syntax.tree
 {
     public class SyntaxNode<IN> : ISyntaxNode<IN> where IN : struct
     {
+        
         public SyntaxNode(string name, List<ISyntaxNode<IN>> children = null, MethodInfo visitor = null)
         {
+            _isEpsilon = children == null || !children.Any() || (children.Count == 1 && children[0].IsEpsilon);
             Name = name;
             Children = children ?? new List<ISyntaxNode<IN>>();
             Visitor = visitor;
         }
-        
-        public bool IsEpsilon => false;
 
+        private bool _isEpsilon = false;
+        public bool IsEpsilon => _isEpsilon;
+    
         public List<ISyntaxNode<IN>> Children { get; }
 
         [JsonIgnore]
