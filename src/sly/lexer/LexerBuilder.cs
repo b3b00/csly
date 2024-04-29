@@ -624,7 +624,9 @@ namespace sly.lexer
                         {
                             // no identifier pattern has been defined. Creating a default one to allow explicit keyword tokens
                             (lexer as GenericLexer<IN>).InitializeIdentifier(new GenericLexer<IN>.Config()
-                                { IdType = IdentifierType.Alpha });
+                                { IdType = IdentifierType.Alpha, HasImplicitIdentifier = true});
+                            config.HasImplicitIdentifier = true;
+                            lexer.LexerConfig.HasImplicitIdentifier = true;
                         }
 
                         var x = fsmBuilder.Fsm.Run(explicitToken, new LexerPosition());
