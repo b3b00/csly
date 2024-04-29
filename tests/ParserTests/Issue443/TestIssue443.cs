@@ -23,8 +23,10 @@ public class Item : INode
 
 public class TemplateNode : INode
 {
+    public List<INode> Items { get; set; }
     public TemplateNode(List<INode> items)
     {
+        Items = items;
     }
 }
 
@@ -71,8 +73,18 @@ public class TestIssue443
         var result = parser.Result.Parse(@"
 ");
         Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsInstanceOf<TemplateNode>();
+        var template = result.Result as TemplateNode;
+        Check.That(template).IsNotNull();
+        Check.That(template.Items).CountIs(1);
+        
         
         result = parser.Result.Parse("");
         Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsInstanceOf<TemplateNode>();
+        template = result.Result as TemplateNode;
+        Check.That(template).IsNotNull();
+        Check.That(template.Items).IsEmpty();
+
     }
 }
