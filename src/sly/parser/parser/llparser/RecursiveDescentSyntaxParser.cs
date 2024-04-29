@@ -52,12 +52,7 @@ namespace sly.parser.llparser
                 else if (tokens[0].IsEOS && rule.MayBeEmpty)
                 {
                     matchingRuleCount++;
-                    var r = (new SyntaxParseResult<IN>()
-                    {
-                        Root =new SyntaxEpsilon<IN>(),
-                            IsError =false,
-                            IsEnded = true
-                    });
+                    var r = Parse(tokens, rule, 0, start, parsingContext);
                     rs.Add(r);
                 }
             }

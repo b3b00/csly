@@ -152,7 +152,8 @@ namespace sly.parser.llparser
                     node.ExpressionAffix = rule.ExpressionAffix;
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
-                    result.IsEnded = tokens[result.EndingPosition].IsEOS;
+                    result.IsEnded = tokens[result.EndingPosition].IsEOS  
+                                     || node.IsEpsilon && tokens[result.EndingPosition+1].IsEOS;  
                 }
             }
 
