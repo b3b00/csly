@@ -10,7 +10,7 @@ namespace sly.parser.syntax.tree
             Discarded = discarded;
         }
         
-        
+        public bool IsEpsilon => false;
 
         public Token<IN> Token { get;  }
         public bool Discarded { get; }

@@ -15,7 +15,7 @@ namespace ParserTests
         {
             ExtensibilityHelper.BeginCheck(context)
                 .FailWhen(sut => sut.IsError, $"parse failed")
-                .FailWhen(sut => sut.Result == null, "parse result is null")
+                .FailWhen(sut => sut.Result == null  && !sut.SyntaxTree.IsEpsilon, "parse result is null")
                 .OnNegate("parse expected to fail.")
                 .EndCheck();
             return ExtensibilityHelper.BuildCheckLink(context);

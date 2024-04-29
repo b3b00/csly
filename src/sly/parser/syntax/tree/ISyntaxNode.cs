@@ -2,6 +2,8 @@
 {
     public interface ISyntaxNode<IN> where IN : struct
     {
+
+        public bool IsEpsilon { get;}
         
         bool Discarded { get;  }
         string Name { get; }

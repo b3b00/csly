@@ -15,6 +15,8 @@ namespace sly.parser.syntax.tree
             Children = children ?? new List<ISyntaxNode<IN>>();
             Visitor = visitor;
         }
+        
+        public bool IsEpsilon => false;
 
         public List<ISyntaxNode<IN>> Children { get; }
 
