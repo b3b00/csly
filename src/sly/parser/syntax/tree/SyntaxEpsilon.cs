@@ -5,6 +5,7 @@ namespace sly.parser.syntax.tree
 {
     public class SyntaxEpsilon<IN> : ISyntaxNode<IN> where IN : struct
     {
+        public bool IsEpsilon => true;
         public bool Discarded { get; } = false;
         public string Name => "Epsilon";
 
