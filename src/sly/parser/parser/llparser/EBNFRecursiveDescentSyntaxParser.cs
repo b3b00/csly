@@ -304,7 +304,7 @@ namespace sly.parser.llparser
                 return parseResult;
             }
             var result = new SyntaxParseResult<IN>();
-            var manyNode = new ManySyntaxNode<IN>("");
+            var manyNode = new ManySyntaxNode<IN>($"{clause.Clause.ToString()}*");
             var currentPosition = position;
             var innerClause = clause.Clause;
             var stillOk = true;
@@ -388,7 +388,7 @@ namespace sly.parser.llparser
             }
             
             var result = new SyntaxParseResult<IN>();
-            var manyNode = new ManySyntaxNode<IN>("");
+            var manyNode = new ManySyntaxNode<IN>($"{clause.Clause.ToString()}+");
             var currentPosition = position;
             var innerClause = clause.Clause;
             bool isError;
