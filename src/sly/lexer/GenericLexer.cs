@@ -677,7 +677,7 @@ namespace sly.lexer
                 .CallBack(callback);
         }
 
-        public void AddKeyWord(IN token, string keyword, bool isPop, bool isPush, string mode,
+        public void AddKeyWord(IN token, string keyword, bool isPop, bool isPush, bool isExplicit, string mode,
             BuildResult<ILexer<IN>> result)
         {
             NodeCallback<GenericToken> callback = match =>
@@ -694,6 +694,7 @@ namespace sly.lexer
                             match.IsPush = derived2.isPush;
                             match.IsPop = derived2.isPop;
                             match.NewPosition.Mode = derived2.mode ?? ModeAttribute.DefaultLexerMode;
+                            match.Result.IsExplicit = isExplicit;
                         }
                         else
                         {
@@ -713,10 +714,13 @@ namespace sly.lexer
                             derivedToken = derived2.tokenId;
                             match.IsPush = derived2.isPush;
                             match.IsPop = derived2.isPop;
+                            match.Result.IsExplicit = isExplicit;
+                            match.Properties[DerivedToken] = derived2.tokenId;
                             // recompute position
                             int delta = match.Result.Value.Length - keyword.Length;
                             match.NewPosition.Index -= delta;
                             match.NewPosition.Column -= delta;
+                            match.Result.SpanValue = match.Result.SpanValue.Slice(0, keyword.Length); 
                             match.NewPosition.Mode = derived2.mode ?? ModeAttribute.DefaultLexerMode;
                         } 
                     }
