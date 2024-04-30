@@ -18,7 +18,7 @@ namespace sly.lexer
                 IdType = IdentifierType.Alpha;
                 IgnoreEOL = true;
                 IgnoreWS = true;
-                WhiteSpace = new[] { ' ', '\t' };
+                WhiteSpace = new[] { ' ', '\t', (char)160 };
             }
             
             public bool HasImplicitIdentifier { get; set; }

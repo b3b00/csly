@@ -343,5 +343,18 @@ while true do
             var result = parser.Parse(program);
             Check.That(result).IsOkParsing();
         }
+        
+        [Fact]
+        public void TestMissingUIndents()
+        {
+            var buildResult = buildParser();
+            var parser = buildResult.Result;
+            var program = @"
+if true then
+        if false then
+            x := 28";
+            var result = parser.Parse(program);
+            Check.That(result).IsOkParsing();
+        }
     }
 }

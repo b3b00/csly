@@ -19,7 +19,6 @@ namespace sly.parser
             _labels = labels;
             _i18N = i18n;
             ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
-            
             UnexpectedToken = unexpectedToken;
             if (expectedTokens != null)
             {
