@@ -79,8 +79,40 @@ namespace sly.parser
                 result.Errors.Add(lexingResult.Error);
                 return result;
             }
+            
 
             var tokens = lexingResult.Tokens.Tokens;
+
+            
+            var indents = tokens
+                .Where(x => x.IsIndent || x.IsUnIndent);
+            if (indents.Any())
+            {
+                var finalIndentation = indents
+                    .Select(x => x.IsIndent ? 1 : -1)
+                    .Aggregate((int x, int y) => x + y);
+                if (finalIndentation > 0)
+                {
+                    tokens = tokens.Take(tokens.Count - 1).ToList();
+                    for (int i = 0; i < finalIndentation; i++)
+                    {
+                        tokens.Add(new Token<IN>()
+                        {
+                            IsUnIndent = true,
+                            IsEOS = false,
+                            IsEOL = false,
+                            IndentationLevel = finalIndentation-i-1
+                        });
+                    }
+                    tokens.Add(new Token<IN>()
+                    {
+                        IsEOS = true
+                    });
+                }
+            }
+
+
+
             if (Lexer.LexerPostProcess != null)
             {
                 tokens = Lexer.LexerPostProcess(tokens);
