@@ -706,21 +706,18 @@ namespace sly.lexer
                         var matchingKeyWords = derived.Keys.Where(x => match.Result.Value.StartsWith(x, LexerConfig.KeyWordComparison)).ToList();
                         if (matchingKeyWords.Any())
                         {
-                            string keyword = null;
-                            (IN tokenId, bool isPop, bool isPush, string mode) derived2 = (default, false, false, null);
-                            matchingKeyWords.OrderBy(x => x.Length);
-                            keyword = matchingKeyWords.Last();
-                            derived2 = derived[keyword];
+                            string matchingKeyword =  matchingKeyWords.OrderBy(x => x.Length).Last();
+                            var derived2 = derived[matchingKeyword];
                             derivedToken = derived2.tokenId;
                             match.IsPush = derived2.isPush;
                             match.IsPop = derived2.isPop;
                             match.Result.IsExplicit = isExplicit;
                             match.Properties[DerivedToken] = derived2.tokenId;
                             // recompute position
-                            int delta = match.Result.Value.Length - keyword.Length;
+                            int delta = match.Result.Value.Length - matchingKeyword.Length;
                             match.NewPosition.Index -= delta;
                             match.NewPosition.Column -= delta;
-                            match.Result.SpanValue = match.Result.SpanValue.Slice(0, keyword.Length); 
+                            match.Result.SpanValue = match.Result.SpanValue.Slice(0, matchingKeyword.Length); 
                             match.NewPosition.Mode = derived2.mode ?? ModeAttribute.DefaultLexerMode;
                         } 
                     }
