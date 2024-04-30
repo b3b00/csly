@@ -6,6 +6,7 @@ using sly.buildresult;
 using sly.lexer;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
+using sly.parser.llparser;
 using sly.parser.parser;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
@@ -83,31 +84,34 @@ namespace sly.parser
 
             var tokens = lexingResult.Tokens.Tokens;
 
-            
-            var indents = tokens
-                .Where(x => x.IsIndent || x.IsUnIndent);
-            if (indents.Any())
+            if (SyntaxParser is EBNFRecursiveDescentSyntaxParser<IN,OUT> ebnf && ebnf.Configuration.AutoCloseIndentations)
             {
-                var finalIndentation = indents
-                    .Select(x => x.IsIndent ? 1 : -1)
-                    .Aggregate((int x, int y) => x + y);
-                if (finalIndentation > 0)
+                var indents = tokens
+                    .Where(x => x.IsIndent || x.IsUnIndent);
+                if (indents.Any())
                 {
-                    tokens = tokens.Take(tokens.Count - 1).ToList();
-                    for (int i = 0; i < finalIndentation; i++)
+                    var finalIndentation = indents
+                        .Select(x => x.IsIndent ? 1 : -1)
+                        .Aggregate((int x, int y) => x + y);
+                    if (finalIndentation > 0)
                     {
+                        tokens = tokens.Take(tokens.Count - 1).ToList();
+                        for (int i = 0; i < finalIndentation; i++)
+                        {
+                            tokens.Add(new Token<IN>()
+                            {
+                                IsUnIndent = true,
+                                IsEOS = false,
+                                IsEOL = false,
+                                IndentationLevel = finalIndentation - i - 1
+                            });
+                        }
+
                         tokens.Add(new Token<IN>()
                         {
-                            IsUnIndent = true,
-                            IsEOS = false,
-                            IsEOL = false,
-                            IndentationLevel = finalIndentation-i-1
+                            IsEOS = true
                         });
                     }
-                    tokens.Add(new Token<IN>()
-                    {
-                        IsEOS = true
-                    });
                 }
             }
 
