@@ -8,6 +8,7 @@ using sly.parser.parser;
 namespace csly.indentedWhileLang.parser
 {
     [UseMemoization]
+    [AutoCloseIndentations]
     public class IndentedWhileParserGeneric
     {
         #region COMPARISON OPERATIONS

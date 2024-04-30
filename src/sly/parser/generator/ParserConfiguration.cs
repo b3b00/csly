@@ -16,6 +16,8 @@ namespace sly.parser.generator
         public bool UseMemoization { get; set; } = false;
 
         public bool BroadenTokenWindow { get; set; } = false;
+        
+        public bool AutoCloseIndentations { get; set; } 
 
         public void AddNonTerminalIfNotExists(NonTerminal<IN> nonTerminal)
         {

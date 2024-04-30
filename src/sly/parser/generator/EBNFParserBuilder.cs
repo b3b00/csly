@@ -38,6 +38,8 @@ namespace sly.parser.generator
             
             bool broadenTokenWindow = parserInstance.GetType().GetCustomAttribute<BroadenTokenWindowAttribute>() != null;
 
+            bool autoCloseIndentations = parserInstance.GetType().GetCustomAttribute<AutoCloseIndentations>() != null;
+
             var ruleparser = new RuleParser<IN>();
             var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>(I18N);
 
@@ -53,6 +55,7 @@ namespace sly.parser.generator
                 configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
                 configuration.UseMemoization = useMemoization;
                 configuration.BroadenTokenWindow = broadenTokenWindow;
+                configuration.AutoCloseIndentations = autoCloseIndentations;
                 LeftRecursionChecker<IN, OUT> recursionChecker = new LeftRecursionChecker<IN, OUT>();
 
                 // check left recursion.
