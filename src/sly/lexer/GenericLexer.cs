@@ -111,9 +111,7 @@ namespace sly.lexer
 
         protected char StringDelimiterChar;
 
-        private readonly IEqualityComparer<string> KeyWordComparer;
-
-        private readonly StringComparison KeyWordComparison;
+        private readonly IEqualityComparer<string> _keyWordComparer;
 
         public GenericLexer(IdentifierType idType = IdentifierType.Alpha,
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
@@ -128,7 +126,7 @@ namespace sly.lexer
             derivedTokens =
                 new Dictionary<GenericToken, Dictionary<string, (IN tokenId, bool isPop, bool isPush, string mode)>>();
             ExtensionBuilder = lexerConfig.ExtensionBuilder;
-            KeyWordComparer = lexerConfig.KeyWordComparer;
+            _keyWordComparer = lexerConfig.KeyWordComparer;
             SubLexersFsm = new Dictionary<string, FSMLexer<GenericToken>>();
             InitializeStaticLexer(lexerConfig, staticTokens);
         }
@@ -505,7 +503,7 @@ namespace sly.lexer
                 if (genericToken == GenericToken.Identifier)
                 {
                     tokensForGeneric =
-                        new Dictionary<string, (IN tokenId, bool isPop, bool isPush, string mode)>(KeyWordComparer);
+                        new Dictionary<string, (IN tokenId, bool isPop, bool isPush, string mode)>(_keyWordComparer);
                 }
                 else
                 {

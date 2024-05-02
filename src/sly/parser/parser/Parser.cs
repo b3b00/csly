@@ -111,41 +111,7 @@ namespace sly.parser
             return result;
         }
 
-        private List<Token<IN>> AutoCloseIndentation(List<Token<IN>> tokens)
-        {
-            if (SyntaxParser is EBNFRecursiveDescentSyntaxParser<IN,OUT> ebnf && ebnf.Configuration.AutoCloseIndentations)
-            {
-                var indents = tokens
-                    .Where(x => x.IsIndent || x.IsUnIndent);
-                if (indents.Any())
-                {
-                    var finalIndentation = indents
-                        .Select(x => x.IsIndent ? 1 : -1)
-                        .Aggregate((int x, int y) => x + y);
-                    if (finalIndentation > 0)
-                    {
-                        tokens = tokens.Take(tokens.Count - 1).ToList();
-                        for (int i = 0; i < finalIndentation; i++)
-                        {
-                            tokens.Add(new Token<IN>()
-                            {
-                                IsUnIndent = true,
-                                IsEOS = false,
-                                IsEOL = false,
-                                IndentationLevel = finalIndentation - i - 1
-                            });
-                        }
-
-                        tokens.Add(new Token<IN>()
-                        {
-                            IsEOS = true
-                        });
-                    }
-                }
-            }
-
-            return tokens;
-        }
+        
 
 
         public ParseResult<IN, OUT> ParseWithContext(IList<Token<IN>> tokens, object parsingContext = null, string startingNonTerminal = null)
@@ -196,6 +162,42 @@ namespace sly.parser
             }
 
             return result;
+        }
+        
+        private List<Token<IN>> AutoCloseIndentation(List<Token<IN>> tokens)
+        {
+            if (SyntaxParser is EBNFRecursiveDescentSyntaxParser<IN,OUT> ebnf && ebnf.Configuration.AutoCloseIndentations)
+            {
+                var indents = tokens
+                    .Where(x => x.IsIndentation);
+                if (indents.Any())
+                {
+                    var finalIndentation = indents
+                        .Select(x => x.IsIndent ? 1 : -1)
+                        .Aggregate((int x, int y) => x + y);
+                    if (finalIndentation > 0)
+                    {
+                        tokens = tokens.Take(tokens.Count - 1).ToList();
+                        for (int i = 0; i < finalIndentation; i++)
+                        {
+                            tokens.Add(new Token<IN>()
+                            {
+                                IsUnIndent = true,
+                                IsEOS = false,
+                                IsEOL = false,
+                                IndentationLevel = finalIndentation - i - 1
+                            });
+                        }
+
+                        tokens.Add(new Token<IN>()
+                        {
+                            IsEOS = true
+                        });
+                    }
+                }
+            }
+
+            return tokens;
         }
     }
 }

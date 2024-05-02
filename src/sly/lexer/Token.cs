@@ -184,6 +184,8 @@ namespace sly.lexer
         public bool IsIndent { get; set; }
         
         public bool IsUnIndent { get; set; }
+
+        public bool IsIndentation => IsIndent || IsUnIndent;
         
         public int IndentationLevel { get; set; }
         
