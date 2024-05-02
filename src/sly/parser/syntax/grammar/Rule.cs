@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -32,19 +33,6 @@ namespace sly.parser.syntax.grammar
         public Affix ExpressionAffix { get; set; }
 
         public string RuleString { get; set;  }
-
-        public string Key
-        {
-            get
-            {
-                var key = string.Join("_", Clauses.Select(c => c.ToString()));
-                
-                if (Clauses.Count == 1) 
-                    key += "_";
-
-                return IsExpressionRule ? key.Replace(" | ", "_") : key;
-            }
-        }
 
         public List<IClause<IN>> Clauses { get; set; }
         public List<LeadingToken<IN>> PossibleLeadingTokens { get; set; }
@@ -171,6 +159,7 @@ namespace sly.parser.syntax.grammar
             return PossibleLeadingTokens.Exists(x => x.Match(tokens[position])) || MayBeEmpty;
         }
 
+        [ExcludeFromCodeCoverage]
         public string Dump()
         {
             StringBuilder builder = new StringBuilder();

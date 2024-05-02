@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace sly.lexer
@@ -116,6 +117,7 @@ namespace sly.lexer
             return Tokens.GetEnumerator();
         }
 
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return string.Join("\n", _tokenChannels.Values.Select(x => x.ToString()).ToArray());

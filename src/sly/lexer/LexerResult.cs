@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+
 namespace sly.lexer
 {
     public class LexerResult<IN> where IN : struct
@@ -29,6 +31,7 @@ namespace sly.lexer
             SetTokens(tokens);
         }
         
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             if (IsOk)
