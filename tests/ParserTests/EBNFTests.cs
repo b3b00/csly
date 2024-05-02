@@ -1573,5 +1573,26 @@ b");
             ;
 
         }
+
+        [Fact]
+        public void TestNotClosingIndents()
+        {
+            var source =@"
+if truc == 1
+    un = 1
+    deux = 2";
+            ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
+            var instance = new IndentedParser();
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Check.That(parserRes.IsOk).IsTrue();
+            
+            var parser = parserRes.Result;
+            Check.That(parser).IsNotNull();
+            var parseResult = parser.Parse(source);
+            Check.That(parseResult.IsOk).Not.IsTrue();
+            Check.That(parseResult.Errors).CountIs(1);
+            var error = parseResult.Errors[0];
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+        }
     }
 }

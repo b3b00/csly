@@ -38,7 +38,7 @@ namespace sly.parser.generator
             
             bool broadenTokenWindow = parserInstance.GetType().GetCustomAttribute<BroadenTokenWindowAttribute>() != null;
 
-            bool autoCloseIndentations = parserInstance.GetType().GetCustomAttribute<AutoCloseIndentations>() != null;
+            bool autoCloseIndentations = parserInstance.GetType().GetCustomAttribute<AutoCloseIndentationsAttribute>() != null;
 
             var ruleparser = new RuleParser<IN>();
             var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN>>(I18N);

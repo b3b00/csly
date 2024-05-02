@@ -84,6 +84,35 @@ namespace sly.parser
 
             var tokens = lexingResult.Tokens.Tokens;
 
+            tokens = AutoCloseIndentation(tokens);
+
+
+
+            if (Lexer.LexerPostProcess != null)
+            {
+                tokens = Lexer.LexerPostProcess(tokens);
+            }
+            var position = 0;
+            var tokensWithoutComments = new List<Token<IN>>();
+            for (var i = 0; i < tokens.Count; i++)
+            {
+                var token = tokens[i];
+                if (!token.IsComment || token.Notignored)
+                {
+                    token.PositionInTokenVisibleFlow = position;
+                    tokensWithoutComments.Add(token);
+                    position++;
+                }
+            }
+
+            result = ParseWithContext(tokensWithoutComments, context, startingNonTerminal);
+
+
+            return result;
+        }
+
+        private List<Token<IN>> AutoCloseIndentation(List<Token<IN>> tokens)
+        {
             if (SyntaxParser is EBNFRecursiveDescentSyntaxParser<IN,OUT> ebnf && ebnf.Configuration.AutoCloseIndentations)
             {
                 var indents = tokens
@@ -115,32 +144,8 @@ namespace sly.parser
                 }
             }
 
-
-
-            if (Lexer.LexerPostProcess != null)
-            {
-                tokens = Lexer.LexerPostProcess(tokens);
-            }
-            var position = 0;
-            var tokensWithoutComments = new List<Token<IN>>();
-            for (var i = 0; i < tokens.Count; i++)
-            {
-                var token = tokens[i];
-                if (!token.IsComment || token.Notignored)
-                {
-                    token.PositionInTokenVisibleFlow = position;
-                    tokensWithoutComments.Add(token);
-                    position++;
-                }
-            }
-
-            result = ParseWithContext(tokensWithoutComments, context, startingNonTerminal);
-
-
-            return result;
+            return tokens;
         }
-
-
 
 
         public ParseResult<IN, OUT> ParseWithContext(IList<Token<IN>> tokens, object parsingContext = null, string startingNonTerminal = null)
