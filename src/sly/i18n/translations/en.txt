@@ -9,7 +9,7 @@ UnexpectedEos=unexpected end of stream.
 #
 # lexer errors
 #
-UnexpectedChar =Lexical Error, line {1}, column {2} : Unrecognized symbol '{0}';
+UnexpectedChar =Lexical Error, line {1}, column {2} : Unrecognized symbol '{0}' ({3})
 
 
 ##########################################
