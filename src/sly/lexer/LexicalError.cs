@@ -19,7 +19,7 @@ namespace sly.lexer
         
         public char UnexpectedChar { get; set; }
 
-        public override string ErrorMessage => I18N.Instance.GetText(I18n,I18NMessage.UnexpectedChar,UnexpectedChar.ToString(), Line.ToString(), Column.ToString());
+        public override string ErrorMessage => I18N.Instance.GetText(I18n,I18NMessage.UnexpectedChar,UnexpectedChar.ToString(), Line.ToString(), Column.ToString(), ((int)UnexpectedChar).ToString());
 
         [ExcludeFromCodeCoverage]
         public override string ToString()
