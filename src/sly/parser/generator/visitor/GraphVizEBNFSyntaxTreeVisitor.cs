@@ -28,15 +28,17 @@ namespace sly.parser.generator.visitor
             return dot;
         }
 
-        private DotNode Node(string label)
+        private DotNode Node(string label, bool nodeIsByPassNode)
         {
+            var shape = nodeIsByPassNode ? "ellipse" : "mrecord";
+            var style = nodeIsByPassNode ? "dotted" : "solid";
             var node = new DotNode(NodeCounter.ToString())
             {
                 // Set all available properties
-                Shape = "ellipse",
+                Shape = shape,
+                Style = style,
                 Label = label,
                 FontColor = "black",
-                Style = null,
                 Height = 0.5f
             };
             NodeCounter++;
@@ -57,7 +59,7 @@ namespace sly.parser.generator.visitor
         {
             DotNode result = null;
 
-            result = Node(GetNodeLabel(node));
+            result = Node(GetNodeLabel(node),node.IsByPassNode);
             //children.ForEach(c =>
             foreach (var child in children)
             {
@@ -79,7 +81,7 @@ namespace sly.parser.generator.visitor
         {
             DotNode result = null;
 
-            result = Node(GetNodeLabel(node));
+            result = Node(GetNodeLabel(node),node.IsByPassNode);
             Graph.Add(result);
             //children.ForEach(c =>
             foreach (var child in children)
