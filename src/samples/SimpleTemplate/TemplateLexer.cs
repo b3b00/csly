@@ -4,24 +4,9 @@ using sly.lexer;
 namespace SimpleTemplate
 {
     
-    [Lexer(IgnoreEOL = false)]
+    [Lexer(IgnoreEOL = true)]
     public enum TemplateLexer
     {
-
-        NOT_A_TOKEN = 0,
-        
-        [Sugar(" ",28)]
-        [Mode]
-        SP,
-        [Sugar("\t", 28)]
-        [Mode]
-        TAB,
-        [Sugar("\r\n",28,IsLineEnding = true)]
-        [Mode]
-        CRLF,
-        [Sugar("\n",28,IsLineEnding = true)]
-        [Mode]
-        LF,
  
         #region TEXT
    

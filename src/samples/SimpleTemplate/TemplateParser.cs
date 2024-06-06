@@ -10,6 +10,7 @@ using sly.parser.parser;
 
 namespace SimpleTemplate
 {
+    [ParserRoot("template")]
     public class TemplateParser
     {
         
