@@ -4,8 +4,13 @@ using sly.parser.generator;
 
 namespace simpleExpressionParser
 {
+    [ParserRoot("root")]
     public class SimpleExpressionParser
     {
+
+        [Production("root : SimpleExpressionParser_expressions")]
+        public double Root(double value) => value;
+        
         [Operation((int) ExpressionToken.PLUS, Affix.InFix, Associativity.Right, 10)]
         [Operation("MINUS", Affix.InFix, Associativity.Left, 10)]
         public double BinaryTermExpression(double left, Token<ExpressionToken> operation, double right)

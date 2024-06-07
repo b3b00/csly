@@ -9,6 +9,7 @@ namespace csly.indentedWhileLang.parser
 {
     [UseMemoization]
     [AutoCloseIndentations]
+    [ParserRoot("program")]
     public class IndentedWhileParserGeneric
     {
         #region COMPARISON OPERATIONS
