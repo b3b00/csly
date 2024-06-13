@@ -222,30 +222,30 @@ namespace ParserTests
         {
             BuildParser();
             
-            Check.That(Parser.Result.Configuration.NonTerminals).CountIs(6);
+            Check.That(Parser.Result.Configuration.NonTerminals).CountIs(7);
             var nonterminals = new List<NonTerminal<ExpressionToken>>();
             foreach (var pair in Parser.Result.Configuration.NonTerminals) nonterminals.Add(pair.Value);
-            var nt = nonterminals[0]; // operand
+            var nt = nonterminals[1]; // operand
             Check.That(nt.Rules).IsSingle();
             Check.That(nt.Name).IsEqualTo("operand");
-            nt = nonterminals[1];
+            nt = nonterminals[2];
             Check.That(nt.Rules).CountIs(3);
             Check.That(nt.Name).Contains("primary_value");
-            nt = nonterminals[2];
+            nt = nonterminals[3];
             Check.That(nt.Rules).IsSingle();
             Check.That(nt.Name).Contains("10");
             Check.That(nt.Name).Contains("PLUS");
             Check.That(nt.Name).Contains("MINUS");
-            nt = nonterminals[3];
+            nt = nonterminals[4];
             Check.That(nt.Rules).IsSingle();
             Check.That(nt.Name).Contains("50");
             Check.That(nt.Name).Contains("TIMES");
             Check.That(nt.Name).Contains("DIVIDE");
-            nt = nonterminals[4];
+            nt = nonterminals[5];
             Check.That(nt.Rules).CountIs(3);
             Check.That(nt.Name).Contains("100");
             Check.That(nt.Name).Contains("MINUS");
-            nt = nonterminals[5];
+            nt = nonterminals[6];
             Check.That(nt.Rules).IsSingle();
             Check.That(nt.Name).IsEqualTo(StartingRule);
             Check.That(nt.Rules[0].Clauses).IsSingle();

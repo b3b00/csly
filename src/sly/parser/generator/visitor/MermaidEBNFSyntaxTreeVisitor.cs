@@ -153,7 +153,6 @@ namespace sly.parser.generator.visitor
         private MermaidNode Leaf(string value)
         {
             string label = "";
-            //var esc = value.Replace("\"", "\\\"");
             label += $"'{value}'";
             var node = new MermaidNode(NodeCounter.ToString())
             {
