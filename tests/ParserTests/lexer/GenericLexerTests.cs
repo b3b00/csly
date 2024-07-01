@@ -17,6 +17,19 @@ using Xunit;
 namespace ParserTests.lexer
 {
 
+    public enum HexaTokenDefault
+    {
+        [Hexa]HEXA,
+    }
+    
+    public enum HexaTokenConflictId
+    {
+        [Hexa("hexa")]HEXA,
+        
+        [AlphaId] ID
+    }
+    
+    
     public enum DateTokenEnglishDashed
     {
         [Date(DateFormat.YYYYMMDD, '-')] DATE,
@@ -1173,6 +1186,46 @@ else
             });
 
 
+        }
+
+        [Fact]
+        public void TestDefaultHexa()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<HexaTokenDefault>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var lexer = lexerRes.Result;
+
+            var lexerResult = lexer.Tokenize("0xAA 0x123 0xAb89CF");
+            Check.That(lexerResult).IsOkLexing();
+            Check.That(lexerResult.Tokens).IsNotNull();
+            Check.That(lexerResult.Tokens).CountIs(4);
+            Check.That(lexerResult.Tokens.Extracting(x => (x.TokenID,x.HexaIntValue)).Take(3)).IsEqualTo(new List<(HexaTokenDefault,long)>()
+            {
+                (HexaTokenDefault.HEXA,Convert.ToInt32("AA",16)),
+                (HexaTokenDefault.HEXA,Convert.ToInt32("123",16)),
+                (HexaTokenDefault.HEXA,Convert.ToInt32("AB89CF",16))
+            });
+        }
+        
+        [Fact]
+        public void TestHexaConflictId()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<HexaTokenConflictId>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var lexer = lexerRes.Result;
+
+            var lexerResult = lexer.Tokenize("hexaAA hexa123 hexaAb89CF hello");
+            Check.That(lexerResult).IsOkLexing();
+            Check.That(lexerResult.Tokens).IsNotNull();
+            Check.That(lexerResult.Tokens).CountIs(5);
+            Check.That(lexerResult.Tokens.Extracting(x => (x.TokenID,x.HexaIntValue)).Take(3)).IsEqualTo(new List<(HexaTokenConflictId,long)>()
+            {
+                (HexaTokenConflictId.HEXA,Convert.ToInt32("AA",16)),
+                (HexaTokenConflictId.HEXA,Convert.ToInt32("123",16)),
+                (HexaTokenConflictId.HEXA,Convert.ToInt32("AB89CF",16))
+            });
+            Check.That(lexerResult.Tokens[3].TokenID).IsEqualTo(HexaTokenConflictId.ID);
+            Check.That(lexerResult.Tokens[3].Value).IsEqualTo("hello");
         }
 
         [Fact]
