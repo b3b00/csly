@@ -501,6 +501,17 @@ namespace sly.lexer
                             lexer.AddLexeme(lexeme.GenericToken, tokenID);
                         }
 
+                        if (lexeme.IsHexa)
+                        {
+                            string prefix = "0x";
+                            if (lexeme.GenericTokenParameters != null && lexeme.GenericTokenParameters.Any())
+                            {
+                               prefix = lexeme.GenericTokenParameters[0];
+                            }
+
+                            lexer.AddHexa(tokenID, prefix, result);
+                        }
+
                         if (lexeme.IsKeyWord)
                         {
                             foreach (var param in lexeme.GenericTokenParameters)

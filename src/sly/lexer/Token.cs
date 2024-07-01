@@ -29,6 +29,9 @@ namespace sly.lexer
         [JsonIgnore]
         public bool Notignored;
 
+        [JsonIgnore] public string hexaPrefix = "0x";
+        
+
 
         public Token(T token, string value, LexerPosition position, 
             CommentType commentType = CommentType.Single, int? channel = null, char decimalSeparator = '.' ) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,commentType,channel, decimalSeparator:decimalSeparator)
@@ -231,6 +234,9 @@ namespace sly.lexer
 
         [JsonIgnore]
         public int IntValue => int.Parse(Value);
+        
+        [JsonIgnore]
+        public long HexaIntValue => Convert.ToInt32(Value.Substring(hexaPrefix.Length), 16);
 
         [JsonIgnore]
         public DateTime DateTimeValue { get; set; }
@@ -257,11 +263,8 @@ namespace sly.lexer
                 var result = Value;
                 if (CharDelimiter != (char) 0)
                 {
-                    if (result.StartsWith(CharDelimiter.ToString()))  {
-                        result = result.Substring(1);
-                    }
-                    if (result.EndsWith(CharDelimiter.ToString())) {
-                        result = result.Substring(0, result.Length - 1);
+                    if (result.StartsWith(CharDelimiter.ToString()) && result.EndsWith(CharDelimiter.ToString()) && result.Length > 2) {
+                        result = result.Substring(1, result.Length - 1);
                     }
                 }
                 return result[0];

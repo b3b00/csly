@@ -9,6 +9,8 @@ namespace sly.lexer.fsm
 
         public char StringDelimiterChar { get; set; }
         
+        public string HexaPrefix { get; set; }
+        
         public char DecimalSeparator { get; set; }
         public bool IsSuccess { get; set; }
 

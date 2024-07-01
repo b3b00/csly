@@ -68,6 +68,7 @@ namespace sly.lexer
         public const string in_int = "in_int";
         public const string start_double = "start_double";
         public const string in_double = "in_double";
+        public const string in_hexa = "in_hexa";
         public const string in_identifier = "in_identifier";
         public const string token_property = "token";
         public const string DerivedToken = "derivedToken";
@@ -539,6 +540,36 @@ namespace sly.lexer
                 .CallBack(callback);
 
             FSMBuilder.Fsm.DecimalSeparator = separatorChar;
+        }
+
+        public void AddHexa(IN token, string prefix, BuildResult<ILexer<IN>> result)
+        {
+            NodeCallback<GenericToken> callback = match =>
+            {
+                IN derivedToken = token;
+                
+                match.HexaPrefix = prefix;
+
+                match.Properties[DerivedToken] = derivedToken;
+
+                return match;
+            };
+            FSMBuilder.GoTo(start);
+            if (!string.IsNullOrEmpty(prefix))
+            {
+                FSMBuilder.GoTo(start);
+                
+                for (int i = 0; i < prefix.Length; i++)
+                {
+                    FSMBuilder.SafeTransition(prefix[i]);
+                }
+
+                FSMBuilder.MultiRangeTransition(('0', '9'), ('a', 'f'), ('A', 'F'))
+                    .Mark(in_hexa)
+                    .MultiRangeTransitionTo(in_hexa, ('0', '9'), ('a', 'f'), ('A', 'F'))
+                    .End(GenericToken.Hexa)
+                    .CallBack(callback);
+            }
         }
 
         public void AddDate(IN token, DateFormat format, char separator, LexemeAttribute doubleLexeme,
@@ -1143,6 +1174,7 @@ namespace sly.lexer
             tok.Position = inTok.Position;
             tok.Discarded = inTok.Discarded;
             tok.StringDelimiter = match.StringDelimiterChar;
+            tok.hexaPrefix = match.HexaPrefix;
             tok.TokenID = match.Properties.TryGetValue(DerivedToken, out var property) ? (IN)property : default;
             tok.IsLineEnding = match.IsLineEnding;
             tok.IsEOS = match.IsEOS;

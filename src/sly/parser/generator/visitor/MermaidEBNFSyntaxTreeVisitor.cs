@@ -119,14 +119,18 @@ namespace sly.parser.generator.visitor
             }
             else if (token.IsExplicit)
             {
-                return Leaf(token.Value);
+                return Leaf(token.StringWithoutQuotes);
             }
-            return Leaf(token.TokenID, token.Value);
+            return Leaf(token.TokenID, token.StringWithoutQuotes);
         }
 
         private MermaidNode Leaf(IN type, string value)
         {
-            string label = type.ToString();
+            if (value.Contains("pi"))
+            {
+                Console.WriteLine("3.14");
+            }
+            string label = "\""+type.ToString();
             if (label == "0")
             {
                 label = "";
@@ -135,7 +139,7 @@ namespace sly.parser.generator.visitor
             {
                 label += "\n";
             }
-            label += $"'{value}'";
+            label += $"'{value}'\"";
             var node = new MermaidNode(NodeCounter.ToString())
             {
                 // Set all available properties
@@ -153,7 +157,7 @@ namespace sly.parser.generator.visitor
         private MermaidNode Leaf(string value)
         {
             string label = "";
-            label += $"'{value}'";
+            label += $@"""'{value}'""";
             var node = new MermaidNode(NodeCounter.ToString())
             {
                 // Set all available properties
@@ -171,7 +175,7 @@ namespace sly.parser.generator.visitor
         
         private string GetNodeLabel(SyntaxNode<IN> node)
         {
-            string label = node.Name;
+            string label = $@"""{node.Name}""";
             return label;
         }
 

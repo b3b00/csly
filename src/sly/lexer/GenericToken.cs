@@ -5,6 +5,7 @@ namespace sly.lexer
         Default,
         Identifier,
         Int,
+        Hexa,
         Double,
         Date,
         KeyWord,

@@ -86,6 +86,8 @@ namespace sly.lexer
         public bool IsDouble => GenericToken == GenericToken.Double;
         public bool IsUpTo => GenericToken == GenericToken.UpTo;
 
+        public bool IsHexa => GenericToken == GenericToken.Hexa;
+        
         public bool IsDate => GenericToken == GenericToken.Date;
     }
 }
