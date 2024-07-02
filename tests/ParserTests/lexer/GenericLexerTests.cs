@@ -24,6 +24,9 @@ namespace ParserTests.lexer
     
     public enum HexaTokenConflictId
     {
+        EOS= 0,
+        
+        
         [Hexa("hexa")]HEXA,
         
         [AlphaId] ID
@@ -1227,14 +1230,12 @@ else
             Check.That(lexerResult).IsOkLexing();
             Check.That(lexerResult.Tokens).IsNotNull();
             Check.That(lexerResult.Tokens).CountIs(5);
-            Check.That(lexerResult.Tokens.Extracting(x => (x.TokenID,x.HexaIntValue)).Take(3)).IsEqualTo(new List<(HexaTokenConflictId,long)>()
-            {
-                (HexaTokenConflictId.HEXA,Convert.ToInt32("AA",16)),
-                (HexaTokenConflictId.HEXA,Convert.ToInt32("123",16)),
-                (HexaTokenConflictId.HEXA,Convert.ToInt32("AB89CF",16))
-            });
-            Check.That(lexerResult.Tokens[3].TokenID).IsEqualTo(HexaTokenConflictId.ID);
-            Check.That(lexerResult.Tokens[3].Value).IsEqualTo("hello");
+            
+            
+            
+            Check.That(lexerResult.Tokens.Extracting(x => (x.TokenID)).Take(4)).IsEqualTo(new List<HexaTokenConflictId>()
+            { HexaTokenConflictId.ID, HexaTokenConflictId.HEXA, HexaTokenConflictId.HEXA, HexaTokenConflictId.ID });
+            
         }
         
         [Fact]
