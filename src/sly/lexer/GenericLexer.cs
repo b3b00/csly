@@ -564,7 +564,7 @@ namespace sly.lexer
                     FSMBuilder.SafeTransition(prefix[i]);
                 }
 
-                FSMBuilder.MultiRangeTransition(('0', '9'), ('a', 'f'), ('A', 'F'))
+                FSMBuilder.MultiRangeTransition((x) => x.ToString().StartsWith(prefix),('0', '9'), ('a', 'f'), ('A', 'F'))
                     .Mark(in_hexa)
                     .MultiRangeTransitionTo(in_hexa, ('0', '9'), ('a', 'f'), ('A', 'F'))
                     .End(GenericToken.Hexa)

@@ -22,6 +22,13 @@ namespace ParserTests.lexer
         [Hexa]HEXA,
     }
     
+      public enum HexaToken6x
+        {
+            [Hexa("6x")]HEXA,
+            
+            [Int] INT
+        }
+    
     public enum HexaTokenConflictId
     {
         EOS= 0,
@@ -1217,6 +1224,28 @@ else
                 (HexaTokenDefault.HEXA,Convert.ToInt32("123",16)),
                 (HexaTokenDefault.HEXA,Convert.ToInt32("AB89CF",16))
             });
+        }
+        
+        [Fact]
+        public void Test6xHexa()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<HexaToken6x>>());
+            Check.That(lexerRes.IsError).IsFalse();
+            var lexer = lexerRes.Result;
+
+            var lexerResult = lexer.Tokenize("6xAA 6x123 6xAb89CF");
+            Check.That(lexerResult).IsOkLexing();
+            Check.That(lexerResult.Tokens).IsNotNull();
+            Check.That(lexerResult.Tokens).CountIs(4);
+            Check.That(lexerResult.Tokens.Extracting(x => (x.TokenID,x.HexaIntValue)).Take(3)).IsEqualTo(new List<(HexaToken6x,long)>()
+            {
+                (HexaToken6x.HEXA,Convert.ToInt32("AA",16)),
+                (HexaToken6x.HEXA,Convert.ToInt32("123",16)),
+                (HexaToken6x.HEXA,Convert.ToInt32("AB89CF",16))
+            });
+            
+            lexerResult = lexer.Tokenize("0xAA");
+            Check.That(lexerResult).Not.IsOkLexing();
         }
         
         [Fact]
