@@ -153,6 +153,9 @@ namespace sly.parser.generator
                 var attributes =
                     (ProductionAttribute[])m.GetCustomAttributes(typeof(ProductionAttribute), true);
 
+                var nodeNames = (NodeNameAttribute[])m.GetCustomAttributes(typeof(NodeNameAttribute), true);
+                string nodeName = nodeNames != null && nodeNames.Any() ? nodeNames[0].Name : null;
+               
                 foreach (var attr in attributes)
                 {
                     var ruleString = attr.RuleString;
@@ -160,6 +163,7 @@ namespace sly.parser.generator
                     if (!parseResult.IsError)
                     {
                         var rule = (Rule<IN>)parseResult.Result;
+                        rule.NodeName = nodeName;
                         rule.RuleString = ruleString;
                         rule.SetVisitor(m);
                         NonTerminal<IN> nonT = null;

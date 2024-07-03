@@ -149,6 +149,7 @@ namespace sly.parser.llparser
                 else
                 {
                     node = new SyntaxNode<IN>( nonTerminalName,  children);
+                    node.Name = rule.NodeName ?? nonTerminalName;
                     node.ExpressionAffix = rule.ExpressionAffix;
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
