@@ -16,8 +16,11 @@ namespace sly.parser.syntax.grammar
             VisitorMethodsForOperation = new Dictionary<IN, OperationMetaData<IN>>();
             Visitor = null;
             IsSubRule = false;
+            NodeName = "";
         }
 
+        public string NodeName { get; set; } = null;
+        
         public bool IsByPassRule { get; set; } = false;
 
         // visitors for operation rules

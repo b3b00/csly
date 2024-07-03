@@ -1183,10 +1183,11 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            BroadWindow();
-            return;
-            Issue414();
-            Issue414Expr();
+            NodeNames();
+            // BroadWindow();
+            // return;
+            // Issue414();
+            // Issue414Expr();
             //Issue351();
             // TestIssue332();
             //TestTemplateFor();
@@ -1381,6 +1382,29 @@ while a < 10 do
             else
             {
                 ;
+            }
+
+            ;
+        }
+        
+        private static void NodeNames()
+        {
+            var parserInstance = new ExpressionParser();
+            var builder = new ParserBuilder<ExpressionToken, int>();
+            var parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression").Result;
+            var r = parser.Parse("1+1");
+            if (r.IsError)
+            {
+                r.Errors.ForEach(x => Console.WriteLine(x.ErrorMessage));
+            }
+            else
+            {
+                ;
+                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
+                var root = graphviz.VisitTree(r.SyntaxTree);
+                string graph = graphviz.Graph.Compile();
+                File.Delete("c:\\temp\\tree.dot");
+                File.AppendAllText("c:\\temp\\tree.dot", graph);
             }
 
             ;

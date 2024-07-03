@@ -198,13 +198,15 @@ namespace sly.parser.generator
             methods.ForEach(m =>
             {
                 var attributes = (ProductionAttribute[])m.GetCustomAttributes(typeof(ProductionAttribute), true);
-
+                var nodeNames = (NodeNameAttribute[])m.GetCustomAttributes(typeof(NodeNameAttribute), true);
+                string nodeName = nodeNames != null && nodeNames.Any() ? nodeNames[0].Name : null;
                 foreach (var attr in attributes)
                 {
                     var ntAndRule = ExtractNTAndRule(attr.RuleString);
 
 
                     var r = BuildNonTerminal(ntAndRule);
+                    r.NodeName = nodeName;
                     r.SetVisitor(m);
                     r.NonTerminalName = ntAndRule.Item1;
                     NonTerminal<IN> nonT ;

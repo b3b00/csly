@@ -195,7 +195,7 @@ namespace sly.parser.llparser
                 if (rule.IsSubRule)
                     node = new GroupSyntaxNode<IN>(nonTerminalName, children);
                 else
-                    node = new SyntaxNode<IN>(nonTerminalName, children);
+                    node = new SyntaxNode<IN>(rule.NodeName ?? nonTerminalName, children);
                 node = ManageExpressionRules(rule, node);
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                     result.Root = children[0];
