@@ -35,7 +35,8 @@ comment
         var doubleQuotedString = mainTokens[4];
         Check.That(doubleQuotedString.TokenID).IsEqualTo(Issue457Lexer.STRING);
         Check.That(doubleQuotedString.StringWithoutQuotes).IsEqualTo("double quoted string");
-        
+
+        Check.That(tokens.GetChannels()).CountIs(2);
         Check.That(tokens.GetChannel(Channels.Comments)).IsNotNull();
         var commentTokens = tokens.GetChannel(Channels.Comments);
         Check.That(commentTokens.Count).IsEqualTo(4); // 2 leading null tokens (1 and 0xABC)
