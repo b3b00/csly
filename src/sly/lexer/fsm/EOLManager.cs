@@ -23,6 +23,10 @@ namespace sly.lexer.fsm
 
         public static ReadOnlyMemory<char> RemoveEndOfLineChars(this ReadOnlyMemory<char> value)
         {
+            if (IsEndOfLine(value, 0) != EolType.No)
+            {
+                return "".AsMemory();
+            }
             int endPosition = value.Length-1;
             while (new[] { '\n', '\r' }.Contains(value.At(endPosition)))
             {

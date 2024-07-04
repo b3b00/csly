@@ -1128,7 +1128,7 @@ namespace sly.lexer
                 position = position + commentValue.Length;
                 if (commentValue.Length > comment.SpanValue.Length)
                 {
-                    comment.SpanValue = commentValue.RemoveEndOfLineChars();    
+                    comment.SpanValue = commentValue.RemoveEndOfLineChars();
                 }
                 else
                 {
