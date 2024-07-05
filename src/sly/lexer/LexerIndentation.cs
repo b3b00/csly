@@ -7,7 +7,7 @@ namespace sly.lexer;
 public class LexerIndentation
 {
     private IList<string> _indentations = new List<string>() {""};
-    private int _currentLevel = -1;
+    private int _currentLevel = 0;
 
     public int CurrentLevel => _currentLevel;
 

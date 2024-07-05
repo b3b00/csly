@@ -1427,6 +1427,11 @@ else
                 var r = l.Result.Tokenize(source);
                 if (r.IsOk)
                 {
+                    foreach (var t in r.Tokens.Tokens)
+                    {
+                        Console.WriteLine(t);
+                    }
+
                     Console.WriteLine("Oh Yeah !!!");
                 }
                 else
