@@ -1169,7 +1169,7 @@ namespace sly.lexer
                     newColumn = lexerPosition.Column + lines[0] + MultiLineCommentEnd.Length;
 
                 var newLexerPosition = lexerPosition.Clone();
-                newLexerPosition.Index = position;
+                newLexerPosition.Index = newPosition;
                 newLexerPosition.Line = newLine;
                 newLexerPosition.Column = newColumn;
                 return newLexerPosition;  //new LexerPosition(newPosition, newLine, newColumn);
