@@ -87,6 +87,16 @@ namespace sly.lexer
                 Mode = Mode
             };
         }
+
+        public static bool operator ==(LexerPosition p1, LexerPosition p2)
+        {
+            return p1.Index == p2.Index;
+        }
+        
+        public static bool operator !=(LexerPosition p1, LexerPosition p2)
+        {
+            return p1.Index != p2.Index;
+        }
     }
     
 

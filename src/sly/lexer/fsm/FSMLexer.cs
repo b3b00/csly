@@ -204,7 +204,7 @@ namespace sly.lexer.fsm
             
             if (IndentationAware)
             {
-                if (lexerPosition.Line == 44 && lexerPosition.Column == 0)
+                if (lexerPosition.Line == 225 && lexerPosition.Column == 25)
                 {
                     ;
                 }
@@ -220,19 +220,24 @@ namespace sly.lexer.fsm
 
                 if (ind != null && ind.IsNoIndent)
                 {
+                    if (lexerPosition != ind.NewPosition)
+                    {
+                        lexerPosition = ind.NewPosition;
+                        return ind;
+                    }
                     lexerPosition = ind.NewPosition;
                 }
             }
 
             var ignoredTokens = ConsumeIgnored(source, lexerPosition);
 
-            if (lexerPosition.Line == 2 && lexerPosition.Column == 0)
+            if (lexerPosition.Line == 226 && lexerPosition.Column == 0)
             {
                 ;
             }
             if (IndentationAware) // could start of line
             {
-                if (lexerPosition.Line == 57 && lexerPosition.Column == 0)
+                if (lexerPosition.Line == 226 && lexerPosition.Column == 0)
                 {
                     ;
                 }
@@ -248,6 +253,11 @@ namespace sly.lexer.fsm
 
                 if (ind != null && ind.IsNoIndent)
                 {
+                    if (lexerPosition != ind.NewPosition)
+                    {
+                        lexerPosition = ind.NewPosition;
+                        return ind;
+                    }
                     lexerPosition = ind.NewPosition;
                 }
             }
@@ -535,7 +545,7 @@ namespace sly.lexer.fsm
                 {
                     ;
                 }
-                
+
                 var shifts = GetIndentations(source, lexerPosition.Index);
                 string currentShift = string.Join("", shifts);
                 var indentation = lexerPosition.Indentation.Indent(currentShift);

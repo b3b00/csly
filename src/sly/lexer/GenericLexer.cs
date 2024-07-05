@@ -175,6 +175,11 @@ namespace sly.lexer
 
             switch (r.IsSuccess)
             {
+                case true when r.IsNoIndent:
+                {
+                    position = r.NewPosition;
+                    break;
+                }
                 case false when !r.IsEOS:
                 {
                     var result = r.Result;
@@ -214,10 +219,11 @@ namespace sly.lexer
                 // Console.WriteLine(transcoded.ToString());
                 tokens.Add(transcoded);
            
-                if (position.Line == 1 && position.Column == 10 && typeof(IN).Name == "IndentedLangLexer")
+                if (position.Line == 225)
                 {
                     ;
                 }
+                Console.WriteLine(position.Line);
 
                 r = LexerFsm.Run(source, position);
                 LexerFsm = SetLexerMode(r, lexersStack);
@@ -229,6 +235,11 @@ namespace sly.lexer
 
                 switch (r.IsSuccess)
                 {
+                    case true when r.IsNoIndent:
+                    {
+                        position = r.NewPosition;
+                        break;
+                    }
                     case false when !r.IsEOS:
                     {
                         if (r.IsIndentationError)
