@@ -1183,7 +1183,8 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            NodeNames();
+            IndentRefactoring();
+            //NodeNames();
             // BroadWindow();
             // return;
             // Issue414();
@@ -1408,6 +1409,31 @@ while a < 10 do
             }
 
             ;
+        }
+
+        private static void IndentRefactoring()
+        {
+            var l = LexerBuilder.BuildLexer<IndentedLangLexer>();
+            if (l.IsOk)
+            {
+                var source =@"if truc == 1
+    un = 1
+    deux = 2
+else
+    trois = 3
+    quatre = 4
+
+";
+                var r = l.Result.Tokenize(source);
+                if (r.IsOk)
+                {
+                    Console.WriteLine("Oh Yeah !!!");
+                }
+                else
+                {
+                    Console.WriteLine(r.Error.ErrorMessage);
+                }
+            }
         }
         
         private static List<Token<ExpressionToken>> postProcess(List<Token<ExpressionToken>> tokens)

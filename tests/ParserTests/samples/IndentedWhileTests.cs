@@ -5,6 +5,7 @@ using csly.whileLang.interpreter;
 using csly.whileLang.model;
 using NFluent;
 using sly.buildresult;
+using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
@@ -325,6 +326,14 @@ while true do
             Check.That(error.ErrorType).IsEqualTo(ErrorType.IndentationError);
             Check.That(error.Line).IsEqualTo(4);
             Check.That(error.ErrorMessage).Contains("Indentation error");
+            
+            result = parser.Parse(@"
+# infinite loop
+while true do
+    skip
+skip");
+            Check.That(result.IsOk).IsTrue();
+           // TODO : more tests?
         }
         
         [Fact]
@@ -355,6 +364,29 @@ if true then
             x := 28";
             var result = parser.Parse(program);
             Check.That(result).IsOkParsing();
+        }
+        
+        [Fact]
+        public void TestIndentationError_emptyIndentLine()
+        {
+            BuildResult<ILexer<IndentedWhileTokenGeneric>> _lexer = LexerBuilder.BuildLexer<IndentedWhileTokenGeneric>();
+
+            Check.That(_lexer).IsOk();
+            
+            var program = @"
+if true then
+
+        if false then
+            x := 28";
+            var lexed = _lexer.Result.Tokenize(program);
+            Check.That(lexed).IsOkLexing();
+            Check.That(lexed.Tokens.Tokens).Not.IsEmpty();
+            Check.That(lexed.Tokens.Tokens.Last().IsEOS).IsTrue();
+            var lastToken = lexed.Tokens.Tokens[lexed.Tokens.Tokens.Count - 2];
+            Check.That(lastToken).IsNotNull();
+            Check.That(lastToken.TokenID)
+                .IsEqualTo(IndentedWhileTokenGeneric.INT);
+            Check.That(lastToken.IntValue).IsEqualTo(28);
         }
     }
 }

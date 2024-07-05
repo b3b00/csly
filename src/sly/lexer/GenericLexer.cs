@@ -211,8 +211,14 @@ namespace sly.lexer
                         tokens.Add(transcoded);
                     }
                 }
-
+                // Console.WriteLine(transcoded.ToString());
                 tokens.Add(transcoded);
+           
+                if (position.Line == 1 && position.Column == 10 && typeof(IN).Name == "IndentedLangLexer")
+                {
+                    ;
+                }
+
                 r = LexerFsm.Run(source, position);
                 LexerFsm = SetLexerMode(r, lexersStack);
 
@@ -1134,7 +1140,12 @@ namespace sly.lexer
                 {
                     comment.SpanValue = "".ToCharArray();
                 }
-                return new LexerPosition(position, lexerPosition.Line + 1, 0);
+
+                var newPosition = lexerPosition.Clone();
+                newPosition.Index = position;
+                newPosition.Line++;
+                newPosition.Column = 0;
+                return newPosition; //new LexerPosition(position, lexerPosition.Line + 1, 0);
             }
             else if (comment.IsMultiLineComment)
             {
@@ -1157,7 +1168,11 @@ namespace sly.lexer
                 else
                     newColumn = lexerPosition.Column + lines[0] + MultiLineCommentEnd.Length;
 
-                return new LexerPosition(newPosition, newLine, newColumn);
+                var newLexerPosition = lexerPosition.Clone();
+                newLexerPosition.Index = position;
+                newLexerPosition.Line = newLine;
+                newLexerPosition.Column = newColumn;
+                return newLexerPosition;  //new LexerPosition(newPosition, newLine, newColumn);
             }
 
             return lexerPosition;

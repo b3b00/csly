@@ -19,6 +19,8 @@ namespace sly.lexer.fsm
         public bool IsIndent { get; set; }
         
         public bool IsUnIndent { get; set; }
+
+        public bool IsNoIndent { get; set; } = false;
         
         public int UnIndentCount { get; set; }
         

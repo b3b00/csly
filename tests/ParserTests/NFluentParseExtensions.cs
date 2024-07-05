@@ -24,6 +24,7 @@ namespace ParserTests
         public static ICheckLink<ICheck<LexerResult<IN>>> IsOkLexing<IN>(this ICheck<LexerResult<IN>> context) where IN : struct
         {
             ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => sut == null, "lexer result is null")
                 .FailWhen(sut => sut.IsError, "lexing failed")
                 .FailWhen(sut => sut.Tokens == null, "lexing result is null")
                 .OnNegate("parse expected to fail.")

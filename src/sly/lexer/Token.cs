@@ -339,7 +339,7 @@ namespace sly.lexer
                 return $"<<WS>>[{Value}]";
             }
 
-            string value = $"{TokenID} [{Value.Replace("\r","").Replace("\n","")}]";
+            string value = $"{TokenID} [{Value}]";
                 
             if (IsIndent)
             {

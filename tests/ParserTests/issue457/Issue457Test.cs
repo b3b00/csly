@@ -45,4 +45,33 @@ comment
         Check.That(singleLineComment.TokenID).IsEqualTo(Issue457Lexer.COMMENT);
         Check.That(singleLineComment.Value).IsEmpty();
     }
+    
+    [Fact]
+    public void TestIssue457EmptyLineWithIndents()
+    {
+        BuildResult<ILexer<Issue457Lexer>> _lexer = LexerBuilder.BuildLexer<Issue457Lexer>();
+        Check.That(_lexer).IsOk();
+        string source = @"
+label recap_emily_questions:
+	hide screen phone_icon
+	scene black
+	if _return == ""Forgive her"":
+		# Set variables here 
+
+		scene recap02_01 # v5 s411a
+		menu:
+
+			""Stay friends"":
+				# Set variables for this decision here 
+				# Emily Friend here 
+			
+			""Start having sex again"":
+				# Set variables for this decision here
+				# Emily RS here
+				$ CharacterService.set_relationship(emily, Relationship.FWB)
+
+";
+        var result = _lexer.Result.Tokenize(source);
+        Check.That(result).IsOkLexing();
+    }
 }
