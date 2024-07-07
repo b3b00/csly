@@ -216,16 +216,18 @@ namespace sly.lexer
                         tokens.Add(transcoded);
                     }
                 }
-                // Console.WriteLine(transcoded.ToString());
-                tokens.Add(transcoded);
-           
-                if (position.Line == 225)
+                if (!r.IsNoIndent)
                 {
-                    ;
+                    tokens.Add(transcoded);
                 }
-                Console.WriteLine(position.Line);
+
+                
 
                 r = LexerFsm.Run(source, position);
+                if (r.IsNoIndent)
+                {
+                    position = r.NewPosition;
+                }
                 LexerFsm = SetLexerMode(r, lexersStack);
 
                 ignored = r.IgnoredTokens.Select(x =>
@@ -1183,7 +1185,7 @@ namespace sly.lexer
                 newLexerPosition.Index = newPosition;
                 newLexerPosition.Line = newLine;
                 newLexerPosition.Column = newColumn;
-                return newLexerPosition;  //new LexerPosition(newPosition, newLine, newColumn);
+                return newLexerPosition;  
             }
 
             return lexerPosition;
