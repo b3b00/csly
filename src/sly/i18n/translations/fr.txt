@@ -33,7 +33,7 @@ CharDelimiterMustBe1Char=bad lexem {0} :  CharToken lexeme delimiter char <{1}> 
 CharDelimiterCannotBeLetter=bad lexem {0} :  CharToken lexeme delimiter char <{1}> can not start with a letter or digit.
 CharEscapeCharMustBe1Char=bad lexem {0} :  CharToken lexeme escape char  <{1}> must be 1 character length.
 CharEscapeCharCannotBeLetterOrDigit=bad lexem {0} :  CharToken lexeme escape char lexeme <{1}> can not start with a letter or digit.
-SugarTokenCannotStartWithLetter=bad lexem {0} :  SugarToken lexeme <{1}>  can not start with a letter.
+SugarTokenCannotStartLikeAnIdentifier=bad lexem {0} :  SugarToken lexeme <{1}>  can not start like an identifier.
 CannotUseExplicitTokensWithRegexLexer=Explicit tokens can not be used with a regex lexer. please switch to generic lexer.
 ManyLexemWithSamelabel=Many token use the same labels ({0}). This could cause inaccurate error messages.
 

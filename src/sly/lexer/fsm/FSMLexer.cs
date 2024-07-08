@@ -204,17 +204,9 @@ namespace sly.lexer.fsm
             
             if (IndentationAware)
             {
-                if (lexerPosition.Line == 225 && lexerPosition.Column == 25)
-                {
-                    ;
-                }
                 var ind = indenter(source, lexerPosition);
                 if (ind != null && !ind.IsNoIndent)
                 {
-                    if (ind.IsIndentationError)
-                    {
-                        Console.WriteLine("ERRRRROOOOORRR ! indentation is shitty !!!");
-                    }
                     return ind;
                 }
 
@@ -263,10 +255,6 @@ namespace sly.lexer.fsm
 
             // Make a note of where current token starts
             var position = lexerPosition.Clone();
-            if (position.Line == 1 && position.Column == 9)
-            {
-                ;
-            }
             FSMMatch<N> result = null;
             var currentNode = Nodes[0];
             while (lexerPosition.Index < source.Length)

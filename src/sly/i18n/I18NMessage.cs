@@ -23,7 +23,7 @@ namespace sly.i18n
         CharDelimiterCannotBeLetter,
         CharEscapeCharMustBe1Char,
         CharEscapeCharCannotBeLetterOrDigit,
-        SugarTokenCannotStartWithLetter,
+        SugarTokenCannotStartLikeAnIdentifier,
         
         
         MissingOperand,

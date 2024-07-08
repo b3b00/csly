@@ -32,7 +32,7 @@ CharDelimiterMustBe1Char=词素错误 {0} :  CharToken 词素分隔符 <{1}> 必
 CharDelimiterCannotBeLetter=词素错误 {0} :  CharToken 词素分隔符 <{1}> 不能以字母或数字开头.
 CharEscapeCharMustBe1Char=词素错误 {0} :  CharToken 词素转义符  <{1}> 必须为1个字符长度.
 CharEscapeCharCannotBeLetterOrDigit=词素错误 {0} :  CharToken 词素转义符 <{1}> 不能以字母或数字开头.
-SugarTokenCannotStartWithLetter=词素错误 {0} :  SugarToken 词素 <{1}>  不能以字母开头.
+SugarTokenCannotStartLikeAnIdentifier=词素错误 {0} :  SugarToken 词素 <{1}>  不能以字母开头.
 CannotUseExplicitTokensWithRegexLexer=显式的 Tokens 不能和 Regex 词法分析器一起使用. 请改用 Generic 词法分析器.
 ManyLexemWithSamelabel=多个词素使用了相同的标签 ({0}). 这可能会导致不准确的错误消息.
 

@@ -1029,10 +1029,18 @@ namespace sly.lexer
         public void AddSugarLexem(IN token, BuildResult<ILexer<IN>> buildResult, string specialValue,
             bool isLineEnding = false, int? channel = null)
         {
-            if (char.IsLetter(specialValue[0]))
+            
+            if (specialValue == "_")
+            {
+                ;
+            }
+            
+            var t =  new ReadOnlyMemory<char>(new [] {specialValue[0] });
+            var node = FSMBuilder.Fsm.Run(t, new LexerPosition());
+            if (node?.Result != null && node.Result.TokenID == GenericToken.Identifier)
             {
                 buildResult.AddInitializationError(ErrorLevel.FATAL,
-                    I18N.Instance.GetText(I18n, I18NMessage.SugarTokenCannotStartWithLetter, specialValue,
+                    I18N.Instance.GetText(I18n, I18NMessage.SugarTokenCannotStartLikeAnIdentifier, specialValue,
                         token.ToString()),
                     ErrorCodes.LEXER_SUGAR_TOKEN_CANNOT_START_WITH_LETTER);
                 return;
