@@ -6,7 +6,7 @@ namespace XML
     [Lexer()]
     public enum MinimalXmlLexer
     {
-        NOT_A_TOKEN = 0,
+        EOS = 0,
         
         
         #region sea

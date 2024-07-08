@@ -175,6 +175,11 @@ namespace sly.lexer
 
             switch (r.IsSuccess)
             {
+                case true when r.IsNoIndent:
+                {
+                    position = r.NewPosition;
+                    break;
+                }
                 case false when !r.IsEOS:
                 {
                     var result = r.Result;
@@ -211,9 +216,18 @@ namespace sly.lexer
                         tokens.Add(transcoded);
                     }
                 }
+                if (!r.IsNoIndent)
+                {
+                    tokens.Add(transcoded);
+                }
 
-                tokens.Add(transcoded);
+                
+
                 r = LexerFsm.Run(source, position);
+                if (r.IsNoIndent)
+                {
+                    position = r.NewPosition;
+                }
                 LexerFsm = SetLexerMode(r, lexersStack);
 
                 ignored = r.IgnoredTokens.Select(x =>
@@ -223,6 +237,11 @@ namespace sly.lexer
 
                 switch (r.IsSuccess)
                 {
+                    case true when r.IsNoIndent:
+                    {
+                        position = r.NewPosition;
+                        break;
+                    }
                     case false when !r.IsEOS:
                     {
                         if (r.IsIndentationError)
@@ -1010,10 +1029,18 @@ namespace sly.lexer
         public void AddSugarLexem(IN token, BuildResult<ILexer<IN>> buildResult, string specialValue,
             bool isLineEnding = false, int? channel = null)
         {
-            if (char.IsLetter(specialValue[0]))
+            
+            if (specialValue == "_")
+            {
+                ;
+            }
+            
+            var t =  new ReadOnlyMemory<char>(new [] {specialValue[0] });
+            var node = FSMBuilder.Fsm.Run(t, new LexerPosition());
+            if (node?.Result != null && node.Result.TokenID == GenericToken.Identifier)
             {
                 buildResult.AddInitializationError(ErrorLevel.FATAL,
-                    I18N.Instance.GetText(I18n, I18NMessage.SugarTokenCannotStartWithLetter, specialValue,
+                    I18N.Instance.GetText(I18n, I18NMessage.SugarTokenCannotStartLikeAnIdentifier, specialValue,
                         token.ToString()),
                     ErrorCodes.LEXER_SUGAR_TOKEN_CANNOT_START_WITH_LETTER);
                 return;
@@ -1134,7 +1161,12 @@ namespace sly.lexer
                 {
                     comment.SpanValue = "".ToCharArray();
                 }
-                return new LexerPosition(position, lexerPosition.Line + 1, 0);
+
+                var newPosition = lexerPosition.Clone();
+                newPosition.Index = position;
+                newPosition.Line++;
+                newPosition.Column = 0;
+                return newPosition; //new LexerPosition(position, lexerPosition.Line + 1, 0);
             }
             else if (comment.IsMultiLineComment)
             {
@@ -1157,7 +1189,11 @@ namespace sly.lexer
                 else
                     newColumn = lexerPosition.Column + lines[0] + MultiLineCommentEnd.Length;
 
-                return new LexerPosition(newPosition, newLine, newColumn);
+                var newLexerPosition = lexerPosition.Clone();
+                newLexerPosition.Index = newPosition;
+                newLexerPosition.Line = newLine;
+                newLexerPosition.Column = newColumn;
+                return newLexerPosition;  
             }
 
             return lexerPosition;
