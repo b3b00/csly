@@ -74,4 +74,22 @@ label recap_emily_questions:
         var result = _lexer.Result.Tokenize(source);
         Check.That(result).IsOkLexing();
     }
+
+    [Fact]
+    public void TestUnderscoreIdentifierConflict()
+    {
+	    BuildResult<ILexer<Issue457Lexer>> _lexer = LexerBuilder.BuildLexer<Issue457Lexer>();
+	    Check.That(_lexer).IsOk();
+	    string source = @"
+_
+_identifier
+";
+	    var result = _lexer.Result.Tokenize(source);
+	    Check.That(result).IsOkLexing();
+	    Check.That(result.Tokens).CountIs(3);
+	    Check.That(result.Tokens.Tokens[0].TokenID).IsEqualTo(Issue457Lexer.UNDERBAR);
+	    Check.That(result.Tokens.Tokens[1].TokenID).IsEqualTo(Issue457Lexer.IDENTIFIER);
+	    Check.That(result.Tokens.Tokens[0].Value).IsEqualTo("_");
+	    Check.That(result.Tokens.Tokens[1].Value).IsEqualTo("_identifier");
+    }
 }

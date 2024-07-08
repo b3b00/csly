@@ -556,11 +556,6 @@ namespace sly.lexer.fsm
                         indent.NewPosition.Indentations = indent.NewPosition.Indentations.Push(currentShift);
                         indent.NewPosition.Indentations2.Add(currentShift);
                         indent.NewPosition.PreviousIndentation = currentShift;
-                        if (lexerPosition.Line == 43 && lexerPosition.Column == 0)
-                        {
-                            ;
-                        }
-                        //Console.WriteLine($">>> {lexerPosition.Line},{lexerPosition.Column} INDENT :: {string.Join(" ",indent.NewPosition.Indentation.IndentationsLength.Select(x => x.ToString()))}");
                         return indent;
                     }
                     case LexerIndentationType.UIndent:

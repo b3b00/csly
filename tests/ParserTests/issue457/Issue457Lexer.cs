@@ -182,6 +182,6 @@ public enum Issue457Lexer
 		[Lexeme(GenericToken.SugarToken, "<=")] lESSTHANEQUALS,
 		[Lexeme(GenericToken.SugarToken, ">=")] GREATERTHANEQUALS,
 		[Lexeme(GenericToken.SugarToken, "->")] BECOMES,
-//		[Lexeme(GenericToken.SugarToken, "_")] UNDERBAR,
+		[Lexeme(GenericToken.SugarToken, "_")] UNDERBAR,
 		#endregion
 }
