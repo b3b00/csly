@@ -200,11 +200,11 @@ namespace sly.lexer.fsm
         public FSMMatch<N> Run(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
 
-            Func<ReadOnlyMemory<char>, LexerPosition, FSMMatch<N>> indenter = ConsumeIndents3;
+            
             
             if (IndentationAware)
             {
-                var ind = indenter(source, lexerPosition);
+                var ind = ConsumeIndents3(source, lexerPosition);
                 if (ind != null && !ind.IsNoIndent)
                 {
                     return ind;
@@ -225,13 +225,9 @@ namespace sly.lexer.fsm
 
             if (IndentationAware) // could start of line
             {
-                var ind = indenter(source, lexerPosition);
+                var ind = ConsumeIndents3(source, lexerPosition);
                 if (ind != null && !ind.IsNoIndent)
                 {
-                    if (ind.IsIndentationError)
-                    {
-                        Console.WriteLine("ERRRRROOOOORRR ! indentation is shitty !!!");
-                    }
                     return ind;
                 }
 
@@ -310,212 +306,6 @@ namespace sly.lexer.fsm
             return ko;
         }
 
-        private FSMMatch<N> ConsumeIndents(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
-        {
-            if (lexerPosition.IsStartOfLine)
-            {
-                var indents = GetIndentations(source, lexerPosition.Index);
-
-                var currentIndentations = lexerPosition.Indentations.ToList<string>();
-
-                int uIndentCount = 0;
-
-                int indentPosition = 0;
-                if (currentIndentations.Any<string>())
-                {
-                    int i = 0;
-                    int indentCharCount = 0;
-                    while (i < currentIndentations.Count && indentPosition < indents.Count)
-                    {
-                        var current = currentIndentations[currentIndentations.Count - i - 1];
-                        int j = 0;
-                        if (indentPosition + current.Length > indents.Count)
-                        {
-                            // erreur d'indentation
-                            var ko = new FSMMatch<N>(false, default(N), " ", lexerPosition, -1, lexerPosition, false)
-                            {
-                                IsIndentationError = true
-                            };
-                            return ko;
-                        }
-                        else
-                        {
-                            while (j < current.Length && indentPosition + j < indents.Count)
-                            {
-                                var reference = current[j];
-                                var actual = indents[j + indentPosition];
-                                if (actual != reference)
-                                {
-                                    var ko = new FSMMatch<N>(false, default(N), " ", lexerPosition, -1, lexerPosition,
-                                        false)
-                                    {
-                                        IsIndentationError = true
-                                    };
-                                    return ko;
-                                }
-
-                                indentCharCount++;
-
-                                j++;
-                            }
-                        }
-
-                        if (indentCharCount < indents.Count)
-                        {
-                            var t = indents.Skip<char>(indentCharCount).ToArray<char>();
-                            var newTab = new string(t);
-                            var indent = FSMMatch<N>.Indent(lexerPosition.Indentations.Count<string>() + 1);
-                            indent.Result = new Token<N>
-                            {
-                                IsIndent = true,
-                                Position = lexerPosition.Clone()
-                            };
-                            indent.NewPosition = lexerPosition.Clone();
-                            indent.NewPosition.Index += indents.Count;
-                            indent.NewPosition.Column += indents.Count;
-                            indent.NewPosition.Indentations = indent.NewPosition.Indentations.Push(newTab);
-                            return indent;
-                        }
-
-                        indentPosition += current.Length;
-                        i++;
-                    }
-
-                    if (i < currentIndentations.Count)
-                    {
-                        uIndentCount = currentIndentations.Count - i;
-                        currentIndentations.Reverse();
-                        var unindented = currentIndentations.Take<string>(i).ToList<string>();
-                        var spaces = unindented.Select<string, int>(x => x.Length).Sum();
-
-                        var uIndent = FSMMatch<N>.UIndent(uIndentCount, uIndentCount);
-                        uIndent.Result = new Token<N>
-                        {
-                            IsIndent = true,
-                            Position = lexerPosition.Clone()
-                        };
-                        uIndent.NewPosition = lexerPosition.Clone();
-                        uIndent.NewPosition.Index += spaces;
-                        uIndent.NewPosition.Column += spaces;
-                        uIndent.NewPosition.CurrentIndentation = i;
-                        for (int iu = 0; iu < uIndentCount; iu++)
-                        {
-                            uIndent.NewPosition.Indentations = uIndent.NewPosition.Indentations.Pop();
-                        }
-
-                        return uIndent;
-                    }
-                    else
-                    {
-                        if (i == currentIndentations.Count)
-                        {
-                            lexerPosition.Column += indents.Count;
-                            lexerPosition.Index += indents.Count;
-                            return null;
-                        }
-                    }
-                }
-                else
-                {
-                    if (indents.Any<char>())
-                    {
-                        var indent = FSMMatch<N>.Indent(1);
-                        indent.Result = new Token<N>
-                        {
-                            IsIndent = true,
-                            Position = lexerPosition.Clone()
-                        };
-                        indent.NewPosition = lexerPosition.Clone();
-                        indent.NewPosition.Index += indents.Count;
-                        indent.NewPosition.Column += indents.Count;
-                        indent.NewPosition.Indentations =
-                            indent.NewPosition.Indentations.Push(new string(indents.ToArray()));
-                        return indent;
-                    }
-
-                    return null;
-                }
-            }
-
-            return null;
-        }
-
-        private FSMMatch<N> ConsumeIndents2(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
-        {
-            if (lexerPosition.IsStartOfLine)
-            {
-                var shifts = GetIndentations(source, lexerPosition.Index);
-                string currentShift = string.Join("",shifts);
-                var previousIndentations = lexerPosition.Indentations2;
-                var last = previousIndentations != null && previousIndentations.Any() ? previousIndentations.OrderBy(x => x.Length).Last() : "";
-                last = lexerPosition.PreviousIndentation;
-                bool isIndent = false;
-                bool isUindent = false;
-                
-                // indent : check if current leading whitespace starts with previous indent
-                if (currentShift.Length > last.Length && currentShift.StartsWith(last))
-                {
-                    var indent = FSMMatch<N>.Indent(lexerPosition.Indentations.Count<string>() + 1);
-                    indent.Result = new Token<N>
-                    {
-                        IsIndent = true,
-                        IsUnIndent = false,
-                        Position = lexerPosition.Clone()
-                    };
-                    indent.IsNoIndent = false;
-                    indent.NewPosition = lexerPosition.Clone();
-                    indent.NewPosition.Index += currentShift.Length;
-                    indent.NewPosition.Column += currentShift.Length;
-                    indent.NewPosition.Indentations = indent.NewPosition.Indentations.Push(currentShift);
-                    indent.NewPosition.Indentations2.Add(currentShift);
-                    indent.NewPosition.PreviousIndentation = currentShift;
-                    return indent;
-                } 
-                // unindent : check if previous indent starts with current leading whitespaces
-                if (currentShift.Length < last.Length && last.StartsWith(currentShift))
-                {
-                    var uIndent = FSMMatch<N>.UIndent(lexerPosition.Indentations.Count<string>() + 1);
-                    uIndent.Result = new Token<N>
-                    {
-                        IsIndent = false,
-                        IsUnIndent = true,
-                        Position = lexerPosition.Clone()
-                    };
-                    uIndent.IsNoIndent = false;
-                    uIndent.NewPosition = lexerPosition.Clone();
-                    uIndent.NewPosition.Index += currentShift.Length;
-                    uIndent.NewPosition.Column += currentShift.Length;
-                    uIndent.NewPosition.Indentations = uIndent.NewPosition.Indentations.Push(currentShift);
-                    uIndent.NewPosition.Indentations2.Add(currentShift);
-                    uIndent.NewPosition.PreviousIndentation = currentShift;
-                    return uIndent;
-                }
-                // same indentation level : check if leading white spaces are the same
-                if (currentShift.Length == last.Length && last == currentShift)
-                {
-                    var noIndent = FSMMatch<N>.Indent(lexerPosition.Indentations.Count<string>());
-                    noIndent.IsNoIndent = true;
-                    noIndent.NewPosition = lexerPosition.Clone();
-                    noIndent.NewPosition.Index += currentShift.Length;
-                    noIndent.NewPosition.Column += currentShift.Length;
-                    noIndent.NewPosition.PreviousIndentation = currentShift;
-                    
-                    // TODO : here return something that clearly states that this is a no indentation shift ? 
-                    return noIndent;
-                }
-                // current leading white spaces does not match previous indent => this is an error
-                var ko = new FSMMatch<N>(false, default(N), " ", lexerPosition, -1, lexerPosition,
-                    false)
-                {
-                    IsNoIndent = false,
-                    IsIndentationError = true
-                };
-                return ko;
-            }
-
-            return null;
-        }
-
         private FSMMatch<N> ConsumeIndents3(ReadOnlyMemory<char> source, LexerPosition lexerPosition)
         {
             if (lexerPosition.IsStartOfLine)
@@ -577,8 +367,7 @@ namespace sly.lexer.fsm
                         noIndent.NewPosition.Index += currentShift.Length;
                         noIndent.NewPosition.Column += currentShift.Length;
                         noIndent.NewPosition.PreviousIndentation = currentShift;
-                    
-                        // Console.WriteLine($"-- NO INDENT :: {string.Join(" ",noIndent.NewPosition.Indentation.IndentationsLength.Select(x => x.ToString()))}");
+                        
                         return noIndent;
                     }
                     case LexerIndentationType.Error:
