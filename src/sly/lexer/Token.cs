@@ -188,6 +188,7 @@ namespace sly.lexer
         
         public bool IsUnIndent { get; set; } = false;
 
+        [JsonIgnore]
         public bool IsNoIndent { get; set; } = false;
 
         public bool IsIndentation => IsIndent || IsUnIndent || IsNoIndent;

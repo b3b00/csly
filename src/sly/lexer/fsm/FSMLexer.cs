@@ -317,7 +317,7 @@ namespace sly.lexer.fsm
                 {
                     case LexerIndentationType.Indent:
                     {
-                        var indent = FSMMatch<N>.Indent(lexerPosition.Indentations.Count<string>() + 1);
+                        var indent = FSMMatch<N>.Indent(lexerPosition.Indentation.CurrentLevel);
                         indent.Result = new Token<N>
                         {
                             IsIndent = true,
@@ -331,14 +331,11 @@ namespace sly.lexer.fsm
                         indent.NewPosition = lexerPosition.Clone();
                         indent.NewPosition.Index += currentShift.Length;
                         indent.NewPosition.Column += currentShift.Length;
-                        indent.NewPosition.Indentations = indent.NewPosition.Indentations.Push(currentShift);
-                        indent.NewPosition.Indentations2.Add(currentShift);
-                        indent.NewPosition.PreviousIndentation = currentShift;
                         return indent;
                     }
                     case LexerIndentationType.UIndent:
                     {
-                        var uIndent = FSMMatch<N>.UIndent(lexerPosition.Indentations.Count<string>() + 1);
+                        var uIndent = FSMMatch<N>.UIndent(lexerPosition.Indentation.CurrentLevel);
                         uIndent.Result = new Token<N>
                         {
                             IsIndent = false,
@@ -352,22 +349,17 @@ namespace sly.lexer.fsm
                         uIndent.NewPosition = lexerPosition.Clone();
                         uIndent.NewPosition.Index += currentShift.Length;
                         uIndent.NewPosition.Column += currentShift.Length;
-                        uIndent.NewPosition.Indentations = uIndent.NewPosition.Indentations.Push(currentShift);
-                        uIndent.NewPosition.Indentations2.Add(currentShift);
-                        uIndent.NewPosition.PreviousIndentation = currentShift;
                         return uIndent;
                     }
                     case LexerIndentationType.None:
                     {
-                        var noIndent = FSMMatch<N>.Indent(lexerPosition.Indentations.Count<string>());
+                        var noIndent = FSMMatch<N>.Indent(lexerPosition.Indentation.CurrentLevel);
                         noIndent.IsNoIndent = true;
                         noIndent.IsIndent = false;
                         noIndent.IsUnIndent = false;
                         noIndent.NewPosition = lexerPosition.Clone();
                         noIndent.NewPosition.Index += currentShift.Length;
                         noIndent.NewPosition.Column += currentShift.Length;
-                        noIndent.NewPosition.PreviousIndentation = currentShift;
-                        
                         return noIndent;
                     }
                     case LexerIndentationType.Error:
