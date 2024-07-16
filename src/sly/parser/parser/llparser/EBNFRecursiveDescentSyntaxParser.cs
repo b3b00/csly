@@ -149,7 +149,7 @@ namespace sly.parser.llparser
                 else
                 {
                     node = new SyntaxNode<IN>( nonTerminalName,  children);
-                    node.Name = rule.NodeName ?? nonTerminalName;
+                    node.Name = string.IsNullOrEmpty(rule.NodeName) ? nonTerminalName : rule.NodeName;
                     node.ExpressionAffix = rule.ExpressionAffix;
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
