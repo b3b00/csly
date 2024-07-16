@@ -40,6 +40,27 @@ comment on 2 lines */ 3.0");
             var tokens = r.Tokens;
             Check.That(r.Error.UnexpectedChar).IsEqualTo('*');
         }
+        
+        [Fact]
+        public void TestCommentOnLastLine()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<SingleLineCommentsToken>>());
+            Check.That(lexerRes).IsOk();
+            
+            var lexer = lexerRes.Result as GenericLexer<SingleLineCommentsToken>;
+
+            var dump = lexer.ToString();
+
+            var r =lexer?.Tokenize(@"
+1.0
+// this is the final comment");
+            Check.That(r).IsOkLexing();
+            var comment = r.Tokens[1];
+            Check.That(comment).IsNotNull();
+            Check.That(comment.TokenID).IsEqualTo(SingleLineCommentsToken.COMMENT);
+            Check.That(comment.Value).Contains("this is the final comment");
+
+        }
 
         [Fact]
         public void TestGenericSingleLineComment()
