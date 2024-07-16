@@ -54,10 +54,12 @@ comment on 2 lines */ 3.0");
             var r =lexer?.Tokenize(@"
 1.0
 // this is the final comment");
-            Check.That(r.IsOk).IsTrue();
-            
-            var tokens = r.Tokens;
-            Check.That(r.Error.UnexpectedChar).IsEqualTo('*');
+            Check.That(r).IsOkLexing();
+            var comment = r.Tokens[1];
+            Check.That(comment).IsNotNull();
+            Check.That(comment.TokenID).IsEqualTo(SingleLineCommentsToken.COMMENT);
+            Check.That(comment.Value).Contains("this is the final comment");
+
         }
 
         [Fact]

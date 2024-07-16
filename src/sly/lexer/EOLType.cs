@@ -8,6 +8,8 @@ namespace sly.lexer
         Mac,
         Environment,
 
+        Eof,
+        
         No
     }
 }
