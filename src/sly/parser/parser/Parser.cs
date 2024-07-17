@@ -50,11 +50,7 @@ namespace sly.parser
                 Configuration.StartingRule = startingRule;
                 SyntaxParser.StartingNonTerminal = startingRule;
             }
-
-            if (exprResult.IsError)
-                result.AddErrors(exprResult.Errors);
-            else
-                result.Result.Configuration = Configuration;
+           
             return exprResult;
         }
 

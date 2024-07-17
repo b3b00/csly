@@ -129,6 +129,7 @@ namespace sly.parser.generator
             if (!operandMethods.Any<MethodInfo>())
             {
                 result.AddError(new ParserInitializationError(ErrorLevel.FATAL, I18N.Instance.GetText(I18n,I18NMessage.MissingOperand),ErrorCodes.PARSER_MISSING_OPERAND));
+                return null;
             }
 
             string operandNonTerminalName = null;
