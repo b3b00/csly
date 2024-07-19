@@ -40,6 +40,15 @@ namespace sly.parser.generator
             {
                 var attributes =
                     (OperationAttribute[])m.GetCustomAttributes(typeof(OperationAttribute), true);
+                var names = 
+                    (NodeNameAttribute[])m.GetCustomAttributes(typeof(NodeNameAttribute), true);
+                
+                string nodeName = null;
+                // a visitor method can only have 1 node name (NodeNameAttribute is not multiple)
+                if (names != null && names.Length > 0)
+                {
+                    nodeName = names[0].Name;
+                }
 
                 foreach (var attr in attributes)
                 {
@@ -67,11 +76,11 @@ namespace sly.parser.generator
                     OperationMetaData<IN> operation = null;
                     if (!isEnumValue && !string.IsNullOrEmpty(explicitToken) && explicitToken.StartsWith("'") && explicitToken.EndsWith("'")) 
                     {
-                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, explicitToken);
+                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, explicitToken ,nodeName);
                     }
                     else if (isEnumValue)
                     {
-                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper);
+                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper, nodeName);
                     }
                     else
                     {
@@ -346,7 +355,7 @@ namespace sly.parser.generator
         {
             if (precedence > 0)
             {
-                var tokens = operationsByPrecedence[precedence].Select<OperationMetaData<IN>, string>(o => o.Operatorkey).ToList<string>();
+                var tokens = operationsByPrecedence[precedence].Select<OperationMetaData<IN>, string>(o => o.Operatorkey).Distinct().ToList<string>();
                 return GetNonTerminalNameForPrecedence(precedence, tokens);
             }
 
@@ -360,7 +369,7 @@ namespace sly.parser.generator
                 .ToList<string>()
                 .Aggregate<string>((s1, s2) => $"{s1}_{s2}");
             
-            return $"expr_{precedence}_{operatorsPart}";
+            return $"{operatorsPart}";
         }
     }
 }

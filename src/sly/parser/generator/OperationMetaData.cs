@@ -5,22 +5,24 @@ namespace sly.parser.generator
 {
     public class OperationMetaData<T> where T : struct
     {
-        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, T oper)
+        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, T oper, string nodeName)
         {
             Precedence = precedence;
             Associativity = assoc;
             VisitorMethod = method;
             OperatorToken = oper;
             Affix = affix;
+            NodeNodeName = nodeName;
         }
         
-        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, string oper)
+        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, string oper, string nodeNodeName)
         {
             Precedence = precedence;
             Associativity = assoc;
             VisitorMethod = method;
             ExplicitOperatorToken = oper;
             Affix = affix;
+            NodeNodeName = nodeNodeName;
         }
 
         public int Precedence { get; set; }
@@ -31,9 +33,11 @@ namespace sly.parser.generator
 
         public T OperatorToken { get; set; }
 
-        public string Operatorkey => IsExplicitOperatorToken ? ExplicitOperatorToken : OperatorToken.ToString();
+        public string Operatorkey => NodeNodeName ?? (IsExplicitOperatorToken ? ExplicitOperatorToken : OperatorToken.ToString());
 
         public Affix Affix { get; set; }
+        
+        public string NodeNodeName { get; set; }
 
         public bool IsBinary => Affix == Affix.InFix;
 

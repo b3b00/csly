@@ -36,6 +36,7 @@ namespace simpleExpressionParser
 
         [Operation((int) ExpressionToken.TIMES, Affix.InFix, Associativity.Right, 50)]
         [Operation("DIVIDE", Affix.InFix, Associativity.Left, 50)]
+        [NodeName("multiplication_or_division")]
         public double BinaryFactorExpression(double left, Token<ExpressionToken> operation, double right)
         {
             double result = 0;
@@ -73,6 +74,7 @@ namespace simpleExpressionParser
 
         [Operand]
         [Production("operand : primary_value")]
+        [NodeName("double")]
         public double OperandValue(double value)
         {
             return value;
@@ -80,18 +82,21 @@ namespace simpleExpressionParser
 
 
         [Production("primary_value : DOUBLE")]
+        [NodeName("double")]
         public double OperandDouble(Token<ExpressionToken> value)
         {
             return value.DoubleValue;
         }
         
         [Production("primary_value : INT")]
+        [NodeName("integer")]
         public double OperandInt(Token<ExpressionToken> value)
         {
             return value.DoubleValue;
         }
 
         [Production("primary_value : LPAREN SimpleExpressionParser_expressions RPAREN")]
+        [NodeName("group")]
         public double OperandParens(Token<ExpressionToken> lparen, double value, Token<ExpressionToken> rparen)
         {
             return value;
