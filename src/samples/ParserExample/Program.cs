@@ -18,6 +18,7 @@ using indented;
 using jsonparser;
 using jsonparser.JsonModel;
 using NFluent;
+using ParserExample.aot;
 using ParserTests;
 using ParserTests.Issue239;
 using ParserTests.Issue332;
@@ -1183,7 +1184,8 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            IndentRefactoring();
+            TestAot();
+            // IndentRefactoring();
             //NodeNames();
             // BroadWindow();
             // return;
@@ -1602,6 +1604,13 @@ else
             
             Console.WriteLine("x x = "+(res.HasValue ? res.Value.ToString() : "?"));
             
+        }
+
+
+        private static void TestAot()
+        {
+            var aot = new AotParserAndlexer();
+            aot.InitializeCenericLexer();
         }
     }
 
