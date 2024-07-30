@@ -13,7 +13,7 @@ public abstract class AbstractClauseParseStrategy<IN, OUT> : IClauseParseStrateg
 
     public ParserConfiguration<IN, OUT> Configuration { get; set; }
 
-    public abstract SyntaxParseResult<IN> Parse(IClause<IN> clause, IList<Token<IN>> tokens, int position,
+    public abstract SyntaxParseResult<IN> Parse(Rule<IN> rule, IClause<IN> clause, IList<Token<IN>> tokens, int position,
         SyntaxParsingContext<IN> parsingContext);
     
     protected SyntaxParseResult<IN> NoMatchingRuleError(IList<Token<IN>> tokens, int currentPosition,

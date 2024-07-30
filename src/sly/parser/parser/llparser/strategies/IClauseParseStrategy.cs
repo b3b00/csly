@@ -15,7 +15,7 @@ public interface IClauseParseStrategy<IN, OUT> where IN : struct
     
     IParseStrategist<IN, OUT> Strategist { get; set; }
 
-    SyntaxParseResult<IN> Parse(IClause<IN> clause, IList<Token<IN>> tokens, int position,
+    SyntaxParseResult<IN> Parse(Rule<IN> rule, IClause<IN> clause, IList<Token<IN>> tokens, int position,
         SyntaxParsingContext<IN> parsingContext);
 
     

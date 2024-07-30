@@ -7,7 +7,7 @@ namespace sly.parser.llparser.strategies;
 
 public class OptionParseStrategy<IN, OUT> : AbstractClauseParseStrategy<IN, OUT> where IN : struct
 {
-    public override SyntaxParseResult<IN> Parse(IClause<IN> clause, IList<Token<IN>> tokens, int position, SyntaxParsingContext<IN> parsingContext)
+    public override SyntaxParseResult<IN> Parse(Rule<IN> rule, IClause<IN> clause, IList<Token<IN>> tokens, int position, SyntaxParsingContext<IN> parsingContext)
     {
         OptionClause<IN> optionClause = clause as OptionClause<IN>;
         
