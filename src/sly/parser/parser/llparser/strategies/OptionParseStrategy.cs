@@ -21,7 +21,8 @@ public class OptionParseStrategy<IN, OUT> : AbstractClauseParseStrategy<IN, OUT>
 
         SyntaxParseResult<IN> innerResult = null;
 
-        Strategist.Parse(innerClause, tokens, position, parsingContext);
+        innerResult = Strategist.Parse(rule, innerClause, tokens, position, parsingContext);
+            //rule, innerClause, tokens, rule, position, parsingContext);
        
         
         if (innerResult.IsError)

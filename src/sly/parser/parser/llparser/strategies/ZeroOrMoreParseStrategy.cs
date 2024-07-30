@@ -32,7 +32,7 @@ public class ZeroOrMoreParseStrategy<IN, OUT> : AbstractClauseParseStrategy<IN, 
         while (stillOk)
         {
             SyntaxParseResult<IN> innerResult = null;
-            innerResult = Strategist.Parse(innerClause, tokens, currentPosition, parsingContext);
+            innerResult = Strategist.Parse(rule, innerClause, tokens, currentPosition, parsingContext);
             hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
             // switch (innerClause)
             // {

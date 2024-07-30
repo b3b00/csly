@@ -1,13 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using sly.lexer;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 using System.Linq;
+using sly.parser.llparser.strategies;
 
 namespace sly.parser.llparser
 {
-    public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
+    public partial class RecursiveDescentSyntaxParser<IN, OUT> : IParseStrategist<IN,OUT> where IN : struct
     {
         public RecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal,
             string i18n)
@@ -144,6 +146,7 @@ namespace sly.parser.llparser
                         {
                             case TerminalClause<IN> terminalClause:
                             {
+                                Parse(rule,terminalClause)
                                 var termRes = ParseTerminal(tokens, terminalClause, currentPosition, parsingContext);
                                 if (!termRes.IsError)
                                 {
@@ -205,6 +208,8 @@ namespace sly.parser.llparser
 
             return result;
         }
+
+     
 
         protected SyntaxNode<IN> ManageExpressionRules(Rule<IN> rule, SyntaxNode<IN> node)
         {
@@ -449,5 +454,53 @@ namespace sly.parser.llparser
 
 
         #endregion
+
+        private Dictionary<Type, IClauseParseStrategy<IN,OUT>> Strategies =
+            new Dictionary<Type, IClauseParseStrategy<IN, OUT>>();
+
+        public IClauseParseStrategy<IN, OUT> GetStrategy(IClause<IN> clause)
+        {
+            IClauseParseStrategy<IN,OUT> strategy = null;
+            if (!Strategies.TryGetValue(clause.GetType(), out strategy))
+            {
+                switch (clause)
+                {
+                    case TerminalClause<IN> _:
+                    {
+                        strategy = new TerminalClauseParseStrategy<IN, OUT>()
+                        {
+                            Configuration = Configuration,
+                            LexemeLabels = LexemeLabels,
+                            I18n = I18n,
+                            Strategist = this
+                        };
+                        break;
+                    } 
+                    case NonTerminalClause<IN> _:
+                    {
+                        strategy = new NonTerminalClauseParseStrategy<IN, OUT>()
+                        {
+                            Configuration = Configuration,
+                            LexemeLabels = LexemeLabels,
+                            I18n = I18n,
+                            Strategist = this
+                        };
+                        break;
+                    } 
+                }
+                Strategies[clause.GetType()] = strategy;
+            }
+
+            return strategy;
+
+        }
+        
+        
+        public SyntaxParseResult<IN> Parse(Rule<IN> rule, IClause<IN> clause, IList<Token<IN>> tokens, int position, SyntaxParsingContext<IN> parsingContext)
+        {
+            var strategy = GetStrategy(clause);
+            return strategy.Parse(rule, clause, tokens, position, parsingContext);
+        }
+
     }
 }

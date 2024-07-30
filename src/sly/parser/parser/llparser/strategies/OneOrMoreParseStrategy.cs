@@ -29,7 +29,7 @@ public class OneOrMoreParseStrategy<IN, OUT> : AbstractClauseParseStrategy<IN, O
             SyntaxParseResult<IN> firstInnerResult = null;
             var innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 
-            firstInnerResult = Strategist.Parse(innerClause, tokens, position, parsingContext);
+            firstInnerResult = Strategist.Parse(rule, innerClause, tokens, position, parsingContext);
             hasByPasNodes = hasByPasNodes || firstInnerResult.HasByPassNodes;
             
             

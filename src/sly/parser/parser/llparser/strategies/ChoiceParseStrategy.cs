@@ -29,7 +29,7 @@ public class ChoiceParseStrategy<IN, OUT> : AbstractClauseParseStrategy<IN, OUT>
 
         foreach (var alternate in choiceClause.Choices)
         {
-            result = Strategist.Parse(alternate, tokens, position, parsingContext);
+            result = Strategist.Parse(rule, alternate, tokens, position, parsingContext);
 
             if (result.IsOk)
             {
