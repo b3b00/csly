@@ -1029,12 +1029,6 @@ namespace sly.lexer
         public void AddSugarLexem(IN token, BuildResult<ILexer<IN>> buildResult, string specialValue,
             bool isLineEnding = false, int? channel = null)
         {
-            
-            if (specialValue == "_")
-            {
-                ;
-            }
-            
             var t =  new ReadOnlyMemory<char>(new [] {specialValue[0] });
             var node = FSMBuilder.Fsm.Run(t, new LexerPosition());
             if (node?.Result != null && node.Result.TokenID == GenericToken.Identifier)
@@ -1166,7 +1160,7 @@ namespace sly.lexer
                 newPosition.Index = position;
                 newPosition.Line++;
                 newPosition.Column = 0;
-                return newPosition; //new LexerPosition(position, lexerPosition.Line + 1, 0);
+                return newPosition;
             }
             else if (comment.IsMultiLineComment)
             {
@@ -1210,7 +1204,7 @@ namespace sly.lexer
             tok.Position = inTok.Position;
             tok.Discarded = inTok.Discarded;
             tok.StringDelimiter = match.StringDelimiterChar;
-            tok.hexaPrefix = match.HexaPrefix;
+            tok.HexaPrefix = match.HexaPrefix;
             tok.TokenID = match.Properties.TryGetValue(DerivedToken, out var property) ? (IN)property : default;
             tok.IsLineEnding = match.IsLineEnding;
             tok.IsEOS = match.IsEOS;

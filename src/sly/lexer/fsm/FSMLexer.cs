@@ -214,7 +214,6 @@ namespace sly.lexer.fsm
                 {
                     if (lexerPosition != ind.NewPosition)
                     {
-                        lexerPosition = ind.NewPosition;
                         return ind;
                     }
                     lexerPosition = ind.NewPosition;
@@ -235,7 +234,6 @@ namespace sly.lexer.fsm
                 {
                     if (lexerPosition != ind.NewPosition)
                     {
-                        lexerPosition = ind.NewPosition;
                         return ind;
                     }
                     lexerPosition = ind.NewPosition;

@@ -18,7 +18,8 @@ namespace sly.lexer.fsm
                 end = IsEndOfLine(value, CurrentPosition);
             }
 
-            return value.Slice(position, CurrentPosition - position + (end == EolType.Eof ? 0 : end == EolType.Windows ? 2 : 1));
+            int eolLength = end == EolType.Windows ? 2 : 1;
+            return value.Slice(position, CurrentPosition - position + (end == EolType.Eof ? 0 : eolLength));
         }
 
         public static ReadOnlyMemory<char> RemoveEndOfLineChars(this ReadOnlyMemory<char> value)
