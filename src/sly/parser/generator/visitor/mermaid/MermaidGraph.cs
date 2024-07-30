@@ -7,41 +7,35 @@ namespace sly.parser.generator.visitor.mermaid
 {
     public class MermaidGraph
     {
-        private readonly string GraphName;
-        private readonly bool Directed;
-        private List<MermaidNode> nodes;
-        private List<MermaidArrow> edges;
+        private readonly List<MermaidNode> _nodes;
+        private readonly List<MermaidArrow> _edges;
         
-        public MermaidGraph(string graphName, bool directed)
+        public MermaidGraph()
         {
-            GraphName = graphName;
-            Directed = directed;
-            nodes = new List<MermaidNode>();
-            edges = new List<MermaidArrow>();
+            _nodes = new List<MermaidNode>();
+            _edges = new List<MermaidArrow>();
         }
 
         public void Add(MermaidNode node)
         {
-            nodes.Add(node);
+            _nodes.Add(node);
         }
 
         public void Add(MermaidArrow edge)
         {
-            edges.Add(edge);
+            _edges.Add(edge);
         }
 
         public string Compile()
         {
             StringBuilder builder = new StringBuilder();
-            // builder.Append(Directed ? "digraph" : "graph");
-            // builder.AppendLine($" {GraphName} {{");
             builder.AppendLine("flowchart TD");
-            foreach (var node in nodes)
+            foreach (var node in _nodes)
             {
                 builder.AppendLine(node.ToGraph());
             }
 
-            foreach (var edge in edges)
+            foreach (var edge in _edges)
             {
                 builder.AppendLine(edge.ToGraph());
             }
@@ -51,13 +45,13 @@ namespace sly.parser.generator.visitor.mermaid
 
         public List<MermaidNode> FindRoots()
         {
-            var roots = edges.Where(x => !edges.Any(y => y.Destination?.Name == x.Source?.Name));
+            var roots = _edges.Where(x => _edges.All(y => y.Destination?.Name != x.Source?.Name));
             return roots.Select(x => x.Source).ToList();
         }
 
         public IList<MermaidArrow> FindEgdes(MermaidNode node)
         {
-            var nodeEdges = edges.Where(x => x.Source?.Name == node.Name);
+            var nodeEdges = _edges.Where(x => x.Source?.Name == node.Name);
             return nodeEdges.ToList();
         }
 

@@ -15,14 +15,14 @@ namespace sly.parser.generator.visitor
 
         public MermaidEBNFSyntaxTreeVisitor()
         {
-            Graph = new MermaidGraph("syntaxtree", true);
+            Graph = new MermaidGraph();
         }
 
         private int NodeCounter = 0;
 
         public MermaidNode VisitTree(ISyntaxNode<IN> root)
         {
-            Graph = new MermaidGraph("syntaxtree", true);
+            Graph = new MermaidGraph();
             
             ConcreteSyntaxTreeWalker<IN,MermaidNode> walker = new ConcreteSyntaxTreeWalker<IN,MermaidNode>(this);
             var dot =  walker.Visit(root);
