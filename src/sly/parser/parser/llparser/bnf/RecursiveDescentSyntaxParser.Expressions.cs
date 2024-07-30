@@ -36,16 +36,15 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
     
                         if (operatorIndex >= 0)
                             if (node.Children[operatorIndex] is SyntaxLeaf<IN> operatorNode)
-                                if (operatorNode != null)
+                            {
+                                var visitor = rule.GetVisitor(operatorNode.Token.TokenID);
+                                if (visitor != null)
                                 {
-                                    var visitor = rule.GetVisitor(operatorNode.Token.TokenID);
-                                    if (visitor != null)
-                                    {
-                                        node.Visitor = visitor;
-                                        node.Operation = rule.GetOperation(operatorNode.Token.TokenID);
-                                    }
+                                    node.Visitor = visitor;
+                                    node.Operation = rule.GetOperation(operatorNode.Token.TokenID);
                                 }
-    
+                            }
+
                         break;
                     }
                     case false:
