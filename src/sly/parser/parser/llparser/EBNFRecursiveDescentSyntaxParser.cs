@@ -8,6 +8,9 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.llparser
 {
+    
+    
+    
     public partial  class EBNFRecursiveDescentSyntaxParser<IN, OUT> : RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
     {
         public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal, string i18n)
