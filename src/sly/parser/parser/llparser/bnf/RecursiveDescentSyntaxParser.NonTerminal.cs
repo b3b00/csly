@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using sly.lexer;
 using sly.parser.syntax.grammar;
 
@@ -48,7 +49,6 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                     innerRuleRes.Errors.Count == 0 || other)
                 {
                     greaterIndex = innerRuleRes.EndingPosition;
-                    //innerRuleErrors.Clear();
                     innerRuleErrors.AddRange(innerRuleRes.Errors);
                 }
 
@@ -66,7 +66,6 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 if (r != null && r.PossibleLeadingTokens != null)
                     allAcceptableTokens.AddRange(r.PossibleLeadingTokens);
             });
-            // allAcceptableTokens = allAcceptableTokens.ToList();
 
             var noMatching = NoMatchingRuleError(tokens, currentPosition, allAcceptableTokens);
             parsingContext.Memoize(new NonTerminalClause<IN>(nonTerminalName), currentPosition, noMatching);
@@ -92,13 +91,10 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 }
             }
 
-            if (rulesResult.IsError)
+            if (rulesResult.IsError && rulesResult.EndingPosition > koEndingPosition)
             {
-                if (rulesResult.EndingPosition > koEndingPosition)
-                {
-                    koEndingPosition = rulesResult.EndingPosition;
-                    maxKo = rulesResult;
-                }
+                koEndingPosition = rulesResult.EndingPosition;
+                maxKo = rulesResult;
             }
         }
 
@@ -120,17 +116,12 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         result.IsEnded = max.IsEnded;
         result.HasByPassNodes = max.HasByPassNodes;
 
-        if (rulesResults.Count > 0)
+
+        List<UnexpectedTokenSyntaxError<IN>> terr = new List<UnexpectedTokenSyntaxError<IN>>();
+        foreach (var ruleResult in rulesResults)
         {
-            List<UnexpectedTokenSyntaxError<IN>> terr = new List<UnexpectedTokenSyntaxError<IN>>();
-            foreach (var ruleResult in rulesResults)
-            {
-                terr.AddRange(ruleResult.Errors);
-                foreach (var err in ruleResult.Errors)
-                {
-                    result.AddExpectings(err.ExpectedTokens);
-                }
-            }
+            terr.AddRange(ruleResult.Errors);
+            result.AddExpectings(ruleResult.Errors.SelectMany(x => x.ExpectedTokens));
         }
 
         parsingContext.Memoize(new NonTerminalClause<IN>(nonTerminalName), currentPosition, result);
