@@ -12,7 +12,7 @@ using sly.buildresult;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
-using sly.parser.llparser;
+using sly.parser.llparser.ebnf;
 using sly.parser.parser;
 using sly.parser.syntax.grammar;
 using Xunit;

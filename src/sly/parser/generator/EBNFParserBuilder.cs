@@ -7,7 +7,8 @@ using sly.i18n;
 using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser.generator.visitor;
-using sly.parser.llparser;
+using sly.parser.llparser.bnf;
+using sly.parser.llparser.ebnf;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
