@@ -1,8 +1,10 @@
 using System.Diagnostics.CodeAnalysis;
+using sly.lexer;
+using sly.parser.syntax.tree;
 
 namespace sly.parser.syntax.grammar
 {
-    public sealed class OptionClause<T> : IClause<T>
+    public sealed class OptionClause<T> : IClause<T> where T : struct
     {
         public OptionClause(IClause<T> clause)
         {
@@ -30,6 +32,17 @@ namespace sly.parser.syntax.grammar
         {
             return $"{Clause}?";
         }
+
+        public bool IsTerminalOption()
+        {
+            return Clause is TerminalClause<T> || (Clause is OptionClause<T> option && option.IsTerminalOption());
+        }
+
+        public bool IsNonTerminalOption()
+        {
+            return Clause is NonTerminalClause<T> || (Clause is OptionClause<T> option && option.IsNonTerminalOption());
+        }
+        
 
         public bool Equals(IClause<T> clause)
         {

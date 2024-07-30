@@ -23,49 +23,35 @@ public class OptionParseStrategy<IN, OUT> : AbstractClauseParseStrategy<IN, OUT>
 
         Strategist.Parse(innerClause, tokens, position, parsingContext);
        
-
+        
         if (innerResult.IsError)
         {
-            switch (innerClause)
+            if (optionClause.IsTerminalOption())
             {
-                case TerminalClause<IN> _:
-                    result = new SyntaxParseResult<IN>();
-                    result.IsError = true;
-                    result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(),false);
-                    result.EndingPosition = position;
-                    break;
-                case ChoiceClause<IN> choiceClause:
-                {
-                    if (choiceClause.IsTerminalChoice)
-                    {
-                        result = new SyntaxParseResult<IN>();
-                        result.IsError = false;
-                        result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(),false);
-                        result.EndingPosition = position;
-                    }
-                    else if (choiceClause.IsNonTerminalChoice)
-                    {
-                        result = new SyntaxParseResult<IN>();
-                        result.IsError = false;
-                        result.Root = new SyntaxEpsilon<IN>();
-                        result.EndingPosition = position;
-                    }
-
-                    break;
-                }
-                default:
-                {
-                    result = new SyntaxParseResult<IN>();
-                    result.IsError = true;
-                    var children = new List<ISyntaxNode<IN>> {innerResult.Root};
-                    if (innerResult.IsError) children.Clear();
-                    result.Root = new OptionSyntaxNode<IN>( rule.NonTerminalName, children,
-                        rule.GetVisitor());
-                    (result.Root as OptionSyntaxNode<IN>).IsGroupOption = optionClause.IsGroupOption;
-                    result.EndingPosition = position;
-                    break;
-                }
+                result = new SyntaxParseResult<IN>();
+                result.IsError = true;
+                result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(),false);
+                result.EndingPosition = position;   
             }
+            else if (optionClause.IsNonTerminalOption())
+            {
+                result = new SyntaxParseResult<IN>();
+                result.IsError = false;
+                result.Root = new SyntaxEpsilon<IN>();
+                result.EndingPosition = position;
+            }
+            else
+            {
+                result = new SyntaxParseResult<IN>();
+                result.IsError = true;
+                var children = new List<ISyntaxNode<IN>> {innerResult.Root};
+                if (innerResult.IsError) children.Clear();
+                result.Root = new OptionSyntaxNode<IN>( rule.NonTerminalName, children,
+                    rule.GetVisitor());
+                (result.Root as OptionSyntaxNode<IN>).IsGroupOption = optionClause.IsGroupOption;
+                result.EndingPosition = position;
+            }
+           
         }
         else
         {
