@@ -3,9 +3,9 @@ using sly.lexer;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 
-namespace sly.parser.llparser;
+namespace sly.parser.llparser.bnf;
 
-public partial class RecursiveDescentSyntaxParser<IN, OUT>
+public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 

@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
+using sly.parser;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 
-namespace sly.parser.llparser;
+namespace sly.parser.llparser.ebnf;
 
-public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
+public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 

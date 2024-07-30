@@ -2,8 +2,9 @@
 using System.Linq;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
+using sly.parser.llparser.bnf;
 
-namespace sly.parser.llparser
+namespace sly.parser.llparser.ebnf
 {
     public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
     {

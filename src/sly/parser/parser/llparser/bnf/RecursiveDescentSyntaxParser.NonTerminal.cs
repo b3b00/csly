@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using sly.lexer;
 using sly.parser.syntax.grammar;
 
-namespace sly.parser.llparser;
+namespace sly.parser.llparser.bnf;
 
-public partial class RecursiveDescentSyntaxParser<IN, OUT>
+public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 

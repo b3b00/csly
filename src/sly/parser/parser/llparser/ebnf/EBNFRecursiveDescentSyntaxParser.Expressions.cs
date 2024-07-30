@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using sly.lexer;
+using sly.parser;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 
-namespace sly.parser.llparser;
+namespace sly.parser.llparser.ebnf;
 
 public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
 {

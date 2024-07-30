@@ -3,7 +3,7 @@ using System.Linq;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
 
-namespace sly.parser.llparser
+namespace sly.parser.llparser.bnf
 {
     public partial class RecursiveDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> where IN : struct
     {

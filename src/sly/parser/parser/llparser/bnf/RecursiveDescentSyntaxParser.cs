@@ -5,7 +5,7 @@ using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 using System.Linq;
 
-namespace sly.parser.llparser
+namespace sly.parser.llparser.bnf
 {
     public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
     {
