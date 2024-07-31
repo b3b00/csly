@@ -110,11 +110,11 @@ namespace sly.lexer.fsm
         public FSMTransition GetTransition(int nodeId, char token)
         {
             FSMTransition transition = null;
-            if (HasState(nodeId))
-                if (Transitions.TryGetValue(nodeId, out var leavingTransitions))
-                {
-                    transition = leavingTransitions.Find(t => t.Match(token));
-                }
+            if (!HasState(nodeId)) return null;
+            if (Transitions.TryGetValue(nodeId, out var leavingTransitions))
+            {
+                transition = leavingTransitions.Find(t => t.Match(token));
+            }
 
             return transition;
         }

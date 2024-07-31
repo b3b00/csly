@@ -22,7 +22,7 @@ namespace sly.lexer
             Mode = mode;
         }
         
-        public LexerPosition(int index, int line, int column, int currentIndentation, string mode = ModeAttribute.DefaultLexerMode) : this(index, line, column, mode)
+        private LexerPosition(int index, int line, int column, int currentIndentation, string mode = ModeAttribute.DefaultLexerMode) : this(index, line, column, mode)
         {
             CurrentIndentation = currentIndentation;
         }
@@ -48,19 +48,15 @@ namespace sly.lexer
         [ExcludeFromCodeCoverage]
         public int CompareTo(object obj)
         {
-            if (obj != null)
+            if (obj is not LexerPosition position) return 1;
+            
+            if (Line < position.Line)
             {
-                if (obj is LexerPosition position)
-                {
-                    if (Line < position.Line)
-                    {
-                        return -1;
-                    }
-                    if (Line == position.Line)
-                    {
-                        return Column.CompareTo(position.Column);
-                    }
-                }
+                return -1;
+            }
+            if (Line == position.Line)
+            {
+                return Column.CompareTo(position.Column);
             }
 
             return 1;

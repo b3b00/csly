@@ -18,98 +18,96 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
         var errors = new List<UnexpectedTokenSyntaxError<IN>>();
         var isError = false;
         var children = new List<ISyntaxNode<IN>>();
-        if (!tokens[position].IsEOS && rule.Match(tokens, position, Configuration))
-            if (rule.Clauses != null && rule.Clauses.Count > 0)
+        if (!tokens[position].IsEOS && rule.Match(tokens, position, Configuration) && rule.Clauses != null &&
+            rule.Clauses.Count > 0 && MatchExpressionRuleScheme(rule))
+        {
+            var first = rule.Clauses[0];
+            SyntaxParseResult<IN> firstResult = null;
+            if (first is NonTerminalClause<IN> firstNonTerminal)
             {
-                if (MatchExpressionRuleScheme(rule))
-                {
-                    var first = rule.Clauses[0];
-                    SyntaxParseResult<IN> firstResult = null;
-                    if (first is NonTerminalClause<IN> firstNonTerminal)
-                    {
-                        firstResult = ParseNonTerminal(tokens, firstNonTerminal, currentPosition, parsingContext);
+                firstResult = ParseNonTerminal(tokens, firstNonTerminal, currentPosition, parsingContext);
 
-                        if (firstResult.IsError)
+                if (firstResult.IsError)
+                {
+                    return firstResult;
+                }
+            }
+
+            currentPosition = firstResult.EndingPosition;
+            var second = rule.Clauses[1];
+            SyntaxParseResult<IN> secondResult = null;
+            switch (second)
+            {
+                case ChoiceClause<IN> secondChoice:
+                {
+                    secondResult = ParseChoice(tokens, secondChoice, currentPosition, parsingContext);
+
+                    if (secondResult.IsError)
+                    {
+                        if (firstResult.Root is SyntaxNode<IN>)
                         {
+                            firstResult.Errors.AddRange(secondResult.Errors);
+                            firstResult.AddExpectings(secondResult.Expecting);
+                            return firstResult;
+                        }
+                    }
+                    else
+                    {
+                        currentPosition = secondResult.EndingPosition;
+                    }
+
+                    break;
+                }
+                case TerminalClause<IN> secondTerminal:
+                {
+                    secondResult = ParseTerminal(tokens, secondTerminal, currentPosition, parsingContext);
+
+                    if (secondResult.IsError)
+                    {
+                        if (firstResult.Root is SyntaxNode<IN>)
+                        {
+                            firstResult.Errors.AddRange(secondResult.Errors);
+                            firstResult.AddExpectings(secondResult.Expecting);
                             return firstResult;
                         }
                     }
 
-                    currentPosition = firstResult.EndingPosition;
-                    var second = rule.Clauses[1];
-                    SyntaxParseResult<IN> secondResult = null;
-                    switch (second)
-                    {
-                        case ChoiceClause<IN> secondChoice:
-                        {
-                            secondResult = ParseChoice(tokens, secondChoice, currentPosition, parsingContext);
-
-                            if (secondResult.IsError)
-                            {
-                                if (firstResult.Root is SyntaxNode<IN>)
-                                {
-                                    firstResult.Errors.AddRange(secondResult.Errors);
-                                    firstResult.AddExpectings(secondResult.Expecting);
-                                    return firstResult;
-                                }
-                            }
-                            else
-                            {
-                                currentPosition = secondResult.EndingPosition;
-                            }
-
-                            break;
-                        }
-                        case TerminalClause<IN> secondTerminal:
-                        {
-                            secondResult = ParseTerminal(tokens, secondTerminal, currentPosition, parsingContext);
-
-                            if (secondResult.IsError)
-                            {
-                                if (firstResult.Root is SyntaxNode<IN>)
-                                {
-                                    firstResult.Errors.AddRange(secondResult.Errors);
-                                    firstResult.AddExpectings(secondResult.Expecting);
-                                    return firstResult;
-                                }
-                            }
-
-                            break;
-                        }
-                    }
-
-
-                    currentPosition = secondResult.EndingPosition;
-                    var third = rule.Clauses[2];
-                    SyntaxParseResult<IN> thirdResult;
-                    if (third is NonTerminalClause<IN> thirdNonTerminal)
-                    {
-                        thirdResult = ParseNonTerminal(tokens, thirdNonTerminal, currentPosition, parsingContext);
-                        if (thirdResult.IsError)
-                        {
-                            return thirdResult;
-                        }
-                        else
-                        {
-                            children = new List<ISyntaxNode<IN>>();
-                            children.Add(firstResult.Root);
-                            children.Add(secondResult.Root);
-                            children.Add(thirdResult.Root);
-                            currentPosition = thirdResult.EndingPosition;
-                            var finalNode = new SyntaxNode<IN>(nonTerminalName, children);
-                            finalNode.ExpressionAffix = rule.ExpressionAffix;
-                            finalNode = ManageExpressionRules(rule, finalNode);
-                            var finalResult = new SyntaxParseResult<IN>();
-                            finalResult.Root = finalNode;
-                            finalResult.IsEnded = currentPosition >= tokens.Count - 1
-                                                  || currentPosition == tokens.Count - 2 &&
-                                                  tokens[tokens.Count - 1].IsEOS;
-                            finalResult.EndingPosition = currentPosition;
-                            return finalResult;
-                        }
-                    }
+                    break;
                 }
             }
+
+
+            currentPosition = secondResult.EndingPosition;
+            var third = rule.Clauses[2];
+            SyntaxParseResult<IN> thirdResult;
+            if (third is NonTerminalClause<IN> thirdNonTerminal)
+            {
+                thirdResult = ParseNonTerminal(tokens, thirdNonTerminal, currentPosition, parsingContext);
+                if (thirdResult.IsError)
+                {
+                    return thirdResult;
+                }
+                else
+                {
+                    children = new List<ISyntaxNode<IN>>();
+                    children.Add(firstResult.Root);
+                    children.Add(secondResult.Root);
+                    children.Add(thirdResult.Root);
+                    currentPosition = thirdResult.EndingPosition;
+                    var finalNode = new SyntaxNode<IN>(nonTerminalName, children);
+                    finalNode.ExpressionAffix = rule.ExpressionAffix;
+                    finalNode = ManageExpressionRules(rule, finalNode);
+                    var finalResult = new SyntaxParseResult<IN>();
+                    finalResult.Root = finalNode;
+                    finalResult.IsEnded = currentPosition >= tokens.Count - 1
+                                          || currentPosition == tokens.Count - 2 &&
+                                          tokens[tokens.Count - 1].IsEOS;
+                    finalResult.EndingPosition = currentPosition;
+                    return finalResult;
+                }
+            }
+        }
+
 
         var result = new SyntaxParseResult<IN>();
         result.IsError = false;

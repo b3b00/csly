@@ -45,9 +45,10 @@ namespace sly.parser.generator.visitor
                 var v = Visit(n, context);
 
                 if (v.IsValue) group.Add(n.Name, v.ValueResult);
-                if (v.IsToken)
-                    if (!v.Discarded)
-                        group.Add(n.Name, v.TokenResult);
+                if (v.IsToken && !v.Discarded)
+                {
+                    group.Add(n.Name, v.TokenResult);
+                }
             }
 
 

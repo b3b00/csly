@@ -999,7 +999,7 @@ namespace sly.lexer
                 return;
             }
             
-            var charDelimiterChar = charDelimiter[0];
+            var charDelimiterChar = charDelimiter![0];
 
             var escapeChar = escapeDelimiterChar![0];
 

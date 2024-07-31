@@ -18,66 +18,68 @@ namespace sly.parser.llparser.bnf
         {
             var newNonTerms = new List<NonTerminal<IN>>();
             foreach (var nonTerm in configuration.NonTerminals)
-            foreach (var rule in nonTerm.Value.Rules)
             {
-                var newclauses = new List<IClause<IN>>();
-                if (rule.ContainsSubRule)
+                foreach (var rule in nonTerm.Value.Rules)
                 {
-                    foreach (var clause in rule.Clauses)
-                        switch (clause)
-                        {
-                            case GroupClause<IN> group:
+                    var newclauses = new List<IClause<IN>>();
+                    if (rule.ContainsSubRule)
+                    {
+                        foreach (var clause in rule.Clauses)
+                            switch (clause)
                             {
-                                var newNonTerm = CreateSubRule(group);
-                                newNonTerms.Add(newNonTerm);
-                                var newClause = new NonTerminalClause<IN>(newNonTerm.Name);
-                                newClause.IsGroup = true;
-                                newclauses.Add(newClause);
-                                break;
-                            }
-                            case ManyClause<IN> many:
-                            {
-                                if (many.Clause is GroupClause<IN> manyGroup)
+                                case GroupClause<IN> group:
                                 {
-                                    var newNonTerm = CreateSubRule(manyGroup);
+                                    var newNonTerm = CreateSubRule(group);
                                     newNonTerms.Add(newNonTerm);
-                                    var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
-                                    newInnerNonTermClause.IsGroup = true;
-                                    many.Clause = newInnerNonTermClause;
-                                    newclauses.Add(many);
+                                    var newClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                    newClause.IsGroup = true;
+                                    newclauses.Add(newClause);
+                                    break;
                                 }
-                                else
+                                case ManyClause<IN> many:
                                 {
-                                    newclauses.Add(many);
-                                }
+                                    if (many.Clause is GroupClause<IN> manyGroup)
+                                    {
+                                        var newNonTerm = CreateSubRule(manyGroup);
+                                        newNonTerms.Add(newNonTerm);
+                                        var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                        newInnerNonTermClause.IsGroup = true;
+                                        many.Clause = newInnerNonTermClause;
+                                        newclauses.Add(many);
+                                    }
+                                    else
+                                    {
+                                        newclauses.Add(many);
+                                    }
 
-                                break;
+                                    break;
+                                }
+                                case OptionClause<IN> option:
+                                {
+                                    if (option.Clause is GroupClause<IN> optionGroup)
+                                    {
+                                        var newNonTerm = CreateSubRule(optionGroup);
+                                        newNonTerms.Add(newNonTerm);
+                                        var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                        newInnerNonTermClause.IsGroup = true;
+                                        option.Clause = newInnerNonTermClause;
+                                        newclauses.Add(option);
+                                    }
+                                    else
+                                    {
+                                        newclauses.Add(option);
+                                    }
+
+                                    break;
+                                }
+                                default:
+                                    newclauses.Add(clause);
+                                    break;
                             }
-                            case OptionClause<IN> option:
-                            {
-                                if (option.Clause is GroupClause<IN> optionGroup)
-                                {
-                                    var newNonTerm = CreateSubRule(optionGroup);
-                                    newNonTerms.Add(newNonTerm);
-                                    var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
-                                    newInnerNonTermClause.IsGroup = true;
-                                    option.Clause = newInnerNonTermClause;
-                                    newclauses.Add(option);
-                                }
-                                else
-                                {
-                                    newclauses.Add(option);
-                                }
 
-                                break;
-                            }
-                            default:
-                                newclauses.Add(clause);
-                                break;
-                        }
-
-                    rule.Clauses.Clear();
-                    rule.Clauses.AddRange(newclauses);
+                        rule.Clauses.Clear();
+                        rule.Clauses.AddRange(newclauses);
+                    }
                 }
             }
 

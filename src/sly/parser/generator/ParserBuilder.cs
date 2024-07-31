@@ -400,17 +400,19 @@ namespace sly.parser.generator
         {
             var conf = result.Result.Configuration;
             foreach (var rule in nonTerminal.Rules)
-            foreach (var clause in rule.Clauses)
             {
+                foreach (var clause in rule.Clauses)
                 {
-                    if (clause is NonTerminalClause<IN> ntClause &&
-                        !conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
                     {
-                        result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                            i18n.I18N.Instance.GetText(I18N, I18NMessage.ReferenceNotFound,
-                                ntClause.NonTerminalName,
-                                rule.RuleString),
-                            ErrorCodes.PARSER_REFERENCE_NOT_FOUND));
+                        if (clause is NonTerminalClause<IN> ntClause &&
+                            !conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
+                        {
+                            result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
+                                i18n.I18N.Instance.GetText(I18N, I18NMessage.ReferenceNotFound,
+                                    ntClause.NonTerminalName,
+                                    rule.RuleString),
+                                ErrorCodes.PARSER_REFERENCE_NOT_FOUND));
+                        }
                     }
                 }
             }
@@ -645,7 +647,7 @@ namespace sly.parser.generator
                     {
                         result.AddInitializationError(ErrorLevel.FATAL,
                             i18n.I18N.Instance.GetText(I18N, I18NMessage.IncorrectVisitorReturnType, visitor.Name,
-                                rule.RuleString, typeof(OUT).FullName, returnInfo.ParameterType.Name),
+                                rule.RuleString, typeof(OUT).FullName, returnInfo!.ParameterType.Name),
                             ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE);
                     }
 

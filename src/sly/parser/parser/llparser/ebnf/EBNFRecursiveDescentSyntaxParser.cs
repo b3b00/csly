@@ -31,105 +31,105 @@ namespace sly.parser.llparser.ebnf
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
             var children = new List<ISyntaxNode<IN>>();
-            if (rule.Match(tokens,position,Configuration))
-                if (rule.Clauses != null && rule.Clauses.Count > 0)
+            if (rule.Match(tokens, position, Configuration) && rule.Clauses != null && rule.Clauses.Count > 0)
+            {
+                children = new List<ISyntaxNode<IN>>();
+                foreach (var clause in rule.Clauses)
                 {
-                    children = new List<ISyntaxNode<IN>>();
-                    foreach (var clause in rule.Clauses)
+                    switch (clause)
                     {
-                        switch (clause)
+                        case TerminalClause<IN> termClause:
                         {
-                            case TerminalClause<IN> termClause:
+                            var termRes =
+                                ParseTerminal(tokens, termClause, currentPosition, parsingContext);
+                            if (!termRes.IsError)
                             {
-                                var termRes =
-                                    ParseTerminal(tokens, termClause, currentPosition, parsingContext);
-                                if (!termRes.IsError)
-                                {
-                                    children.Add(termRes.Root);
-                                    currentPosition = termRes.EndingPosition;
-                                }
-                                else
-                                {
-                                    var tok = tokens[currentPosition];
-                                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tok,LexemeLabels, I18n,
-                                        termClause.ExpectedToken));
-                                }
-
-                                isError = isError || termRes.IsError;
-                                break;
+                                children.Add(termRes.Root);
+                                currentPosition = termRes.EndingPosition;
                             }
-                            case NonTerminalClause<IN> terminalClause:
+                            else
                             {
-                                var nonTerminalResult =
-                                    ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
-                                if (!nonTerminalResult.IsError)
-                                {
-                                    errors.AddRange(nonTerminalResult.Errors);
-                                    children.Add(nonTerminalResult.Root);
-                                    currentPosition = nonTerminalResult.EndingPosition;
-                                }
-                                else
-                                {
-                                    errors.AddRange(nonTerminalResult.Errors);
-                                }
-
-                                isError = isError || nonTerminalResult.IsError;
-                                break;
+                                var tok = tokens[currentPosition];
+                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok, LexemeLabels, I18n,
+                                    termClause.ExpectedToken));
                             }
-                            case OneOrMoreClause<IN> _:
-                            case ZeroOrMoreClause<IN> _:
-                            {
-                                SyntaxParseResult<IN> manyResult = null;
-                                switch (clause)
-                                {
-                                    case OneOrMoreClause<IN> oneOrMore:
-                                        manyResult = ParseOneOrMore(tokens, oneOrMore, currentPosition, parsingContext);
-                                        break;
-                                    case ZeroOrMoreClause<IN> zeroOrMore:
-                                        manyResult = ParseZeroOrMore(tokens, zeroOrMore, currentPosition, parsingContext);
-                                        break;
-                                }
-                                if (!manyResult.IsError)
-                                {
-                                    errors.AddRange(manyResult.Errors);
-                                    children.Add(manyResult.Root);
-                                    currentPosition = manyResult.EndingPosition;
-                                }
-                                else
-                                {
-                                    if (manyResult.Errors != null && manyResult.Errors.Count > 0)
-                                        errors.AddRange(manyResult.Errors);
-                                }
 
-                                isError = manyResult.IsError;
-                                break;
-                            }
-                            case OptionClause<IN> option:
-                            {
-                                var optionResult = ParseOption(tokens, option, rule, currentPosition, parsingContext);
-                                currentPosition = optionResult.EndingPosition;
-                                children.Add(optionResult.Root);
-                                break;
-                            }
-                            case ChoiceClause<IN> choice:
-                            {
-                                var choiceResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
-                                currentPosition = choiceResult.EndingPosition;
-                                if (choiceResult.IsError && choiceResult.Errors != null && choiceResult.Errors.Any())
-                                {
-                                    errors.AddRange(choiceResult.Errors);
-                                }
-
-                                isError = choiceResult.IsError;
-
-                                children.Add(choiceResult.Root);
-                                break;
-                            }
+                            isError = isError || termRes.IsError;
+                            break;
                         }
+                        case NonTerminalClause<IN> terminalClause:
+                        {
+                            var nonTerminalResult =
+                                ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
+                            if (!nonTerminalResult.IsError)
+                            {
+                                errors.AddRange(nonTerminalResult.Errors);
+                                children.Add(nonTerminalResult.Root);
+                                currentPosition = nonTerminalResult.EndingPosition;
+                            }
+                            else
+                            {
+                                errors.AddRange(nonTerminalResult.Errors);
+                            }
 
-                        if (isError) break;
+                            isError = isError || nonTerminalResult.IsError;
+                            break;
+                        }
+                        case OneOrMoreClause<IN> _:
+                        case ZeroOrMoreClause<IN> _:
+                        {
+                            SyntaxParseResult<IN> manyResult = null;
+                            switch (clause)
+                            {
+                                case OneOrMoreClause<IN> oneOrMore:
+                                    manyResult = ParseOneOrMore(tokens, oneOrMore, currentPosition, parsingContext);
+                                    break;
+                                case ZeroOrMoreClause<IN> zeroOrMore:
+                                    manyResult = ParseZeroOrMore(tokens, zeroOrMore, currentPosition, parsingContext);
+                                    break;
+                            }
+
+                            if (!manyResult.IsError)
+                            {
+                                errors.AddRange(manyResult.Errors);
+                                children.Add(manyResult.Root);
+                                currentPosition = manyResult.EndingPosition;
+                            }
+                            else
+                            {
+                                if (manyResult.Errors != null && manyResult.Errors.Count > 0)
+                                    errors.AddRange(manyResult.Errors);
+                            }
+
+                            isError = manyResult.IsError;
+                            break;
+                        }
+                        case OptionClause<IN> option:
+                        {
+                            var optionResult = ParseOption(tokens, option, rule, currentPosition, parsingContext);
+                            currentPosition = optionResult.EndingPosition;
+                            children.Add(optionResult.Root);
+                            break;
+                        }
+                        case ChoiceClause<IN> choice:
+                        {
+                            var choiceResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
+                            currentPosition = choiceResult.EndingPosition;
+                            if (choiceResult.IsError && choiceResult.Errors != null && choiceResult.Errors.Any())
+                            {
+                                errors.AddRange(choiceResult.Errors);
+                            }
+
+                            isError = choiceResult.IsError;
+
+                            children.Add(choiceResult.Root);
+                            break;
+                        }
                     }
+
+                    if (isError) break;
                 }
+            }
 
             var result = new SyntaxParseResult<IN>();
             result.IsError = isError;

@@ -134,56 +134,55 @@ namespace sly.parser.llparser.bnf
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
             var children = new List<ISyntaxNode<IN>>();
-            if (!tokens[position].IsEOS && rule.Match(tokens,position,Configuration))
-                if (rule.Clauses != null && rule.Clauses.Count > 0)
+            if (!tokens[position].IsEOS && rule.Match(tokens, position, Configuration) && rule.Clauses is { Count: > 0 })
+            {
+                children = new List<ISyntaxNode<IN>>();
+                foreach (var clause in rule.Clauses)
                 {
-                    children = new List<ISyntaxNode<IN>>();
-                    foreach (var clause in rule.Clauses)
+                    switch (clause)
                     {
-                        switch (clause)
+                        case TerminalClause<IN> terminalClause:
                         {
-                            case TerminalClause<IN> terminalClause:
+                            var termRes = ParseTerminal(tokens, terminalClause, currentPosition, parsingContext);
+                            if (!termRes.IsError)
                             {
-                                var termRes = ParseTerminal(tokens, terminalClause, currentPosition, parsingContext);
-                                if (!termRes.IsError)
-                                {
-                                    children.Add(termRes.Root);
-                                    currentPosition = termRes.EndingPosition;
-                                }
-                                else
-                                {
-                                    var tok = tokens[currentPosition];
-                                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tok, LexemeLabels, I18n,
-                                        terminalClause.ExpectedToken));
-                                }
-
-                                isError =  termRes.IsError;
-                                break;
+                                children.Add(termRes.Root);
+                                currentPosition = termRes.EndingPosition;
                             }
-                            case NonTerminalClause<IN> terminalClause:
+                            else
                             {
-                                var nonTerminalResult =
-                                    ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
-                                if (!nonTerminalResult.IsError)
-                                {
-                                    children.Add(nonTerminalResult.Root);
-                                    currentPosition = nonTerminalResult.EndingPosition;
-                                    if (nonTerminalResult.Errors != null && nonTerminalResult.Errors.Count > 0)
-                                        errors.AddRange(nonTerminalResult.Errors);
-                                }
-                                else
-                                {
-                                    errors.AddRange(nonTerminalResult.Errors);
-                                }
-
-                                isError = nonTerminalResult.IsError;
-                                break;
+                                var tok = tokens[currentPosition];
+                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok, LexemeLabels, I18n,
+                                    terminalClause.ExpectedToken));
                             }
+
+                            isError = termRes.IsError;
+                            break;
                         }
+                        case NonTerminalClause<IN> terminalClause:
+                        {
+                            var nonTerminalResult =
+                                ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
+                            if (!nonTerminalResult.IsError)
+                            {
+                                children.Add(nonTerminalResult.Root);
+                                currentPosition = nonTerminalResult.EndingPosition;
+                                if (nonTerminalResult.Errors != null && nonTerminalResult.Errors.Count > 0)
+                                    errors.AddRange(nonTerminalResult.Errors);
+                            }
+                            else
+                            {
+                                errors.AddRange(nonTerminalResult.Errors);
+                            }
 
-                        if (isError) break;
+                            isError = nonTerminalResult.IsError;
+                            break;
+                        }
                     }
+
+                    if (isError) break;
                 }
+            }
 
             var result = new SyntaxParseResult<IN>();
             result.IsError = isError;
