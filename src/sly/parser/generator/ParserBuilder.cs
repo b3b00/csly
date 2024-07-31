@@ -312,7 +312,7 @@ namespace sly.parser.generator
             foreach (var nt in result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>())
                 if (nt.Name != nonTerminal.Name)
                 {
-                    found = NonTerminalReferences(nt, nonTerminal.Name);
+                    found = IsNonTerminalReferencing(nt, nonTerminal.Name);
                     if (found) break;
                 }
 
@@ -325,7 +325,7 @@ namespace sly.parser.generator
         }
 
 
-        private static bool NonTerminalReferences(NonTerminal<IN> nonTerminal, string referenceName)
+        private static bool IsNonTerminalReferencing(NonTerminal<IN> nonTerminal, string referenceName)
         {
             var found = false;
             var iRule = 0;
@@ -401,12 +401,20 @@ namespace sly.parser.generator
             var conf = result.Result.Configuration;
             foreach (var rule in nonTerminal.Rules)
             foreach (var clause in rule.Clauses)
-                if (clause is NonTerminalClause<IN> ntClause)
-                    if (!conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
+            {
+                {
+                    if (clause is NonTerminalClause<IN> ntClause &&
+                        !conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
+                    {
                         result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                            i18n.I18N.Instance.GetText(I18N, I18NMessage.ReferenceNotFound, ntClause.NonTerminalName,
+                            i18n.I18N.Instance.GetText(I18N, I18NMessage.ReferenceNotFound,
+                                ntClause.NonTerminalName,
                                 rule.RuleString),
                             ErrorCodes.PARSER_REFERENCE_NOT_FOUND));
+                    }
+                }
+            }
+
             return result;
         }
 

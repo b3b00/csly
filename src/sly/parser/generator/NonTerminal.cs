@@ -24,7 +24,8 @@ namespace sly.parser.generator
 
         public bool IsSubRule { get; set; }
 
-        public List<LeadingToken<IN>> PossibleLeadingTokens => Rules.SelectMany<Rule<IN>, LeadingToken<IN>>(r => r.PossibleLeadingTokens).ToList<LeadingToken<IN>>();
+        public List<LeadingToken<IN>> GetPossibleLeadingTokens() => Rules.SelectMany<Rule<IN>, LeadingToken<IN>>(r => r.PossibleLeadingTokens)
+            .ToList<LeadingToken<IN>>();
 
         [ExcludeFromCodeCoverage]
         public string Dump()

@@ -60,7 +60,7 @@ namespace sly.parser.llparser.bnf
             if (matchingRuleCount == 0)
             {
                 errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], LexemeLabels, I18n,
-                    nt.PossibleLeadingTokens.ToArray()));
+                    nt.GetPossibleLeadingTokens().ToArray()));
             }
 
             SyntaxParseResult<IN> result = null;

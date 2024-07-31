@@ -20,7 +20,7 @@ public class Issue328Tests
         Check.That(lex).IsOkLexing();
         var tokens = lex.Tokens;
         
-        var z = tokens.Tokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes)).ToList();
+        var z = tokens.MainTokens().Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes)).ToList();
        
         var expectations = new List<(Issue328Token, string)>()
         {
@@ -34,7 +34,7 @@ public class Issue328Tests
         };
         
         
-        Check.That(tokens.Tokens.Take(7).Extracting(x => (x.TokenID, x.StringWithoutQuotes))).ContainsExactly(expectations);
+        Check.That(tokens.MainTokens().Take(7).Extracting(x => (x.TokenID, x.StringWithoutQuotes))).ContainsExactly(expectations);
        
     }
 

@@ -1070,13 +1070,13 @@ namespace ParserTests
 
             var nonTerm = conf.NonTerminals["testNonTerm"];
             Check.That(nonTerm).IsNotNull();
-            Check.That(nonTerm.PossibleLeadingTokens).CountIs(2);
-            Check.That(nonTerm.PossibleLeadingTokens.Select(x => x.TokenId)).Contains(expected);
+            Check.That(nonTerm.GetPossibleLeadingTokens()).CountIs(2);
+            Check.That(nonTerm.GetPossibleLeadingTokens().Select(x => x.TokenId)).Contains(expected);
             
             var term = conf.NonTerminals["testTerm"];
             Check.That(term).IsNotNull();
-            Check.That(term.PossibleLeadingTokens).CountIs(2);
-            Check.That(term.PossibleLeadingTokens.Select(x => x.TokenId)).Contains(expected);
+            Check.That(term.GetPossibleLeadingTokens()).CountIs(2);
+            Check.That(term.GetPossibleLeadingTokens().Select(x => x.TokenId)).Contains(expected);
         }
 
         #endregion

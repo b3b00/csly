@@ -37,7 +37,7 @@ namespace sly.parser.llparser.ebnf
                                 InitStartingTokensForNonTerminal(nonTerminals, nonTerminalClause.NonTerminalName);
                                 NonTerminal<IN> nonTerminal = nonTerminals[nonTerminalClause.NonTerminalName];
                                 {
-                                    rule.PossibleLeadingTokens.AddRange(nonTerminal.PossibleLeadingTokens);
+                                    rule.PossibleLeadingTokens.AddRange(nonTerminal.GetPossibleLeadingTokens());
                                 }
                                 break;
                             }
@@ -90,7 +90,7 @@ namespace sly.parser.llparser.ebnf
                                 InitStartingTokensForNonTerminal(nonTerminals, terminalClause.NonTerminalName);
                                 NonTerminal<IN> nonTerminal = nonTerminals[terminalClause.NonTerminalName];
                                 {
-                                    rule.PossibleLeadingTokens.AddRange(nonTerminal.PossibleLeadingTokens);
+                                    rule.PossibleLeadingTokens.AddRange(nonTerminal.GetPossibleLeadingTokens());
                                 }
                                 break;
                             }

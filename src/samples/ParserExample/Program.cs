@@ -1017,7 +1017,7 @@ else
             var source = @"hello - {= world =} - billy - {% if (a == 1) %} - bob - {%else%} - boubou - {%endif%}";
             
             var tokens = genericLexer.Tokenize(source);
-            foreach (var token in tokens.Tokens.Tokens)
+            foreach (var token in tokens.Tokens.MainTokens())
             {
                 Console.WriteLine(token);
             }
@@ -1100,7 +1100,7 @@ billy
             // File.WriteAllText(@"c:\temp\tokens.txt",b.ToString());
             
             
-            foreach (var token in tokens.Tokens.Tokens)
+            foreach (var token in tokens.Tokens.MainTokens())
             {
                 
                 Console.WriteLine(token);
@@ -1320,7 +1320,7 @@ while a < 10 do
                     var lexResult = lexer.Tokenize(@"1 + 2 + a + b * 8.3 hello / 'b\'jour'");
                     if (lexResult.IsOk)
                     {
-                        lexResult.Tokens.Tokens.ForEach(x => Console.WriteLine(x));
+                        lexResult.Tokens.MainTokens().ForEach(x => Console.WriteLine(x));
                     }
                     else
                     {
@@ -1427,7 +1427,7 @@ else
                 var r = l.Result.Tokenize(source);
                 if (r.IsOk)
                 {
-                    foreach (var t in r.Tokens.Tokens)
+                    foreach (var t in r.Tokens.MainTokens())
                     {
                         Console.WriteLine(t);
                     }

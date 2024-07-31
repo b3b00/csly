@@ -323,8 +323,7 @@ namespace sly.lexer
                 {
                     var eols = tokens.Where(t => t.IsLineEnding).ToList();
                     int line = eols.Any() ? eols.Count : 0;
-                    int column = 0;
-                    int index = newPosition.Index;
+                    int column = 0;                    
                     r.NewPosition.Line = line + 1;
                     r.NewPosition.Column = column;
                 }

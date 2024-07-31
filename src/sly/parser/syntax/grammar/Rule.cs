@@ -147,7 +147,7 @@ namespace sly.parser.syntax.grammar
                 if (!startingTerminalClause.MayBeEmpty() && startingTerminalClause.Check(tokens[position]))
                 {
                     var secondPossibleLeadings =
-                        configuration.NonTerminals[nTerm.NonTerminalName].PossibleLeadingTokens;
+                        configuration.NonTerminals[nTerm.NonTerminalName].GetPossibleLeadingTokens();
                     if (secondPossibleLeadings.Exists(x => x.Match(tokens[position+1])) || nTerm.MayBeEmpty())
                     {
                         return true;

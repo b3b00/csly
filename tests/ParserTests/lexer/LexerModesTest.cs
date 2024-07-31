@@ -151,7 +151,7 @@ world");
                 MinimalXmlLexer.VALUE,
                 MinimalXmlLexer.CLOSE_PI
             };
-            var tokens = result.Tokens.Tokens;
+            var tokens = result.Tokens.MainTokens();
             Check.That(expectedTokens).CountIs(tokens.Count-1);
 
             Check.That(tokens.Extracting("TokenID")).Contains(expectedTokens);

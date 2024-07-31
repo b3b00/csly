@@ -79,7 +79,7 @@ namespace sly.parser
             }
             
 
-            var tokens = lexingResult.Tokens.Tokens;
+            var tokens = lexingResult.Tokens.MainTokens();
 
             tokens = AutoCloseIndentation(tokens);
 

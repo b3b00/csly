@@ -380,9 +380,10 @@ if true then
             x := 28";
             var lexed = _lexer.Result.Tokenize(program);
             Check.That(lexed).IsOkLexing();
-            Check.That(lexed.Tokens.Tokens).Not.IsEmpty();
-            Check.That(lexed.Tokens.Tokens.Last().IsEOS).IsTrue();
-            var lastToken = lexed.Tokens.Tokens[lexed.Tokens.Tokens.Count - 2];
+            var mainTokens = lexed.Tokens.MainTokens();
+            Check.That(mainTokens).Not.IsEmpty();
+            Check.That(mainTokens.Last().IsEOS).IsTrue();
+            var lastToken = mainTokens[mainTokens.Count - 2];
             Check.That(lastToken).IsNotNull();
             Check.That(lastToken.TokenID)
                 .IsEqualTo(IndentedWhileTokenGeneric.INT);

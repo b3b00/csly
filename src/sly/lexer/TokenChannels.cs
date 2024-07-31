@@ -21,7 +21,7 @@ namespace sly.lexer
         
         private readonly Dictionary<int, TokenChannel<IN>> _tokenChannels;
 
-        public List<Token<IN>> Tokens => GetChannel(Channels.Main).Tokens.Where(x => x != null).ToList();
+        public List<Token<IN>> MainTokens() => GetChannel(Channels.Main).Tokens.Where(x => x != null).ToList();
          
         
 
@@ -56,11 +56,11 @@ namespace sly.lexer
             get => GetToken(index);
         }
 
-        public int Count => Tokens.Count;
+        public int Count => MainTokens().Count;
 
         private Token<IN> GetToken(int index)
         {
-            var list = Tokens;
+            var list = MainTokens();
             return list[index];
         }
 
@@ -109,12 +109,12 @@ namespace sly.lexer
 
         public IEnumerator<Token<IN>> GetEnumerator()
         {
-            return Tokens.GetEnumerator();
+            return MainTokens().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return Tokens.GetEnumerator();
+            return MainTokens().GetEnumerator();
         }
 
         [ExcludeFromCodeCoverage]
