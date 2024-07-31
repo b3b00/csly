@@ -150,7 +150,7 @@ namespace sly.parser.generator.visitor
                             args.Add(context);
                         }
 
-                        if (method == null) method = node.Visitor;
+                        method = node.Visitor;
                         var t = method.Invoke(ParserVsisitorInstance, args.ToArray());
                         var res = (OUT) t;
                         result = SyntaxVisitorResult<IN, OUT>.NewValue(res);

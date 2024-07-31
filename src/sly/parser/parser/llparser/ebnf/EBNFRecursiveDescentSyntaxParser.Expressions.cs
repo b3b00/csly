@@ -112,26 +112,22 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
             }
 
         var result = new SyntaxParseResult<IN>();
-        result.IsError = isError;
+        result.IsError = false;
         result.Errors = errors;
         result.EndingPosition = currentPosition;
-        if (!isError)
-        {
-            SyntaxNode<IN> node = null;
-            if (rule.IsSubRule)
-                node = new GroupSyntaxNode<IN>(nonTerminalName, children);
-            else
-                node = new SyntaxNode<IN>(nonTerminalName, children);
-            node = ManageExpressionRules(rule, node);
-            if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
-                result.Root = children[0];
-            result.Root = node;
-            result.IsEnded = result.EndingPosition >= tokens.Count - 1
-                             || result.EndingPosition == tokens.Count - 2 &&
-                             tokens[tokens.Count - 1].IsEOS;
-        }
 
-
+        SyntaxNode<IN> node = null;
+        if (rule.IsSubRule)
+            node = new GroupSyntaxNode<IN>(nonTerminalName, children);
+        else
+            node = new SyntaxNode<IN>(nonTerminalName, children);
+        node = ManageExpressionRules(rule, node);
+        if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
+            result.Root = children[0];
+        result.Root = node;
+        result.IsEnded = result.EndingPosition >= tokens.Count - 1
+                         || result.EndingPosition == tokens.Count - 2 &&
+                         tokens[tokens.Count - 1].IsEOS;
         return result;
     }
 
