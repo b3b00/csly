@@ -880,12 +880,17 @@ namespace sly.lexer
                     I18N.Instance.GetText(I18n, I18NMessage.StringEscapeCharMustBe1Char, escapeDelimiterChar,
                         token.ToString()),
                     ErrorCodes.LEXER_STRING_ESCAPE_CHAR_MUST_BE_1_CHAR);
-            if (escapeDelimiterChar.Length == 1 && char.IsLetterOrDigit(escapeDelimiterChar[0]))
+            if (!string.IsNullOrEmpty(escapeDelimiterChar) && escapeDelimiterChar.Length == 1 && char.IsLetterOrDigit(escapeDelimiterChar[0]))
                 result.AddInitializationError(ErrorLevel.FATAL,
                     I18N.Instance.GetText(I18n, I18NMessage.StringEscapeCharCannotBeLetterOrDigit, escapeDelimiterChar,
                         token.ToString()),
                     ErrorCodes.LEXER_STRING_ESCAPE_CHAR_CANNOT_BE_LETTER_OR_DIGIT);
 
+            if (result.IsError)
+            {
+                return;
+            }
+            
             StringDelimiterChar = (char)0;
             var stringDelimiterChar = (char)0;
 
@@ -899,7 +904,7 @@ namespace sly.lexer
                 StringDelimiterChar = stringDelimiter[0];
                 stringDelimiterChar = stringDelimiter[0];
 
-                EscapeStringDelimiterChar = escapeDelimiterChar[0];
+                EscapeStringDelimiterChar = escapeDelimiterChar![0];
                 escapeStringDelimiterChar = escapeDelimiterChar[0];
             }
 
@@ -969,7 +974,7 @@ namespace sly.lexer
                 result.AddInitializationError(ErrorLevel.FATAL,
                     I18N.Instance.GetText(I18n, I18NMessage.CharDelimiterMustBe1Char, charDelimiter, token.ToString()),
                     ErrorCodes.LEXER_CHAR_DELIMITER_MUST_BE_1_CHAR);
-            if (charDelimiter.Length == 1 && char.IsLetterOrDigit(charDelimiter[0]))
+            if (!string.IsNullOrEmpty(charDelimiter) && charDelimiter.Length == 1 && char.IsLetterOrDigit(charDelimiter[0]))
                 result.AddInitializationError(ErrorLevel.FATAL,
                     I18N.Instance.GetText(I18n, I18NMessage.CharDelimiterCannotBeLetter, charDelimiter,
                         token.ToString()),
@@ -980,7 +985,7 @@ namespace sly.lexer
                     I18N.Instance.GetText(I18n, I18NMessage.CharEscapeCharMustBe1Char, escapeDelimiterChar,
                         token.ToString()),
                     ErrorCodes.LEXER_CHAR_ESCAPE_CHAR_MUST_BE_1_CHAR);
-            if (escapeDelimiterChar.Length == 1 && char.IsLetterOrDigit(escapeDelimiterChar[0]))
+            if (!string.IsNullOrEmpty(escapeDelimiterChar) && escapeDelimiterChar.Length == 1 && char.IsLetterOrDigit(escapeDelimiterChar[0]))
                 result.AddInitializationError(ErrorLevel.FATAL,
                     I18N.Instance.GetText(I18n, I18NMessage.CharEscapeCharCannotBeLetterOrDigit, escapeDelimiterChar,
                         token.ToString()),
@@ -988,9 +993,15 @@ namespace sly.lexer
 
             CharCounter++;
 
+
+            if (result.IsError)
+            {
+                return;
+            }
+            
             var charDelimiterChar = charDelimiter[0];
 
-            var escapeChar = escapeDelimiterChar[0];
+            var escapeChar = escapeDelimiterChar![0];
 
 
             NodeCallback<GenericToken> callback = match =>

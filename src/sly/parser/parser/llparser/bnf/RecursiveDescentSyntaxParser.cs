@@ -157,7 +157,7 @@ namespace sly.parser.llparser.bnf
                                         terminalClause.ExpectedToken));
                                 }
 
-                                isError = isError || termRes.IsError;
+                                isError =  termRes.IsError;
                                 break;
                             }
                             case NonTerminalClause<IN> terminalClause:
@@ -176,7 +176,7 @@ namespace sly.parser.llparser.bnf
                                     errors.AddRange(nonTerminalResult.Errors);
                                 }
 
-                                isError = isError || nonTerminalResult.IsError;
+                                isError = nonTerminalResult.IsError;
                                 break;
                             }
                         }
