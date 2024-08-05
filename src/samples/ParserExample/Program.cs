@@ -131,6 +131,26 @@ namespace ParserExample
         }
 
 
+        private static void BenchSimpleExpression()
+        {
+            SimpleExpressionParser p = new SimpleExpressionParser();
+            var builder = new ParserBuilder<ExpressionToken, double>();
+            
+            var Parser = builder.BuildParser(p, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            if (Parser.IsOk)
+            {
+                for (int i = 0; i < 50; i++)
+                {
+                    var r = Parser.Result.Parse("1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20");
+                    if (r.IsOk)
+                    {
+                        Console.WriteLine(r.Result);
+                    }    
+                }
+                
+            }
+        }
+
         private static void TestFactorial()
         {
             var whileParser = new WhileParserGeneric();
@@ -1183,7 +1203,8 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            IndentRefactoring();
+            BenchSimpleExpression();
+            // IndentRefactoring();
             //NodeNames();
             // BroadWindow();
             // return;

@@ -27,8 +27,8 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         result.HasByPassNodes = false;
         if (result.IsError)
         {
-            result.Errors.Add(
-                new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
+            result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
+            
             result.AddExpecting(terminal.ExpectedToken);
         }
 

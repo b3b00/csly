@@ -14,11 +14,34 @@ namespace sly.parser
 
         public bool IsOk => !IsError;
 
-        public List<UnexpectedTokenSyntaxError<IN>> Errors { get; set; } = new List<UnexpectedTokenSyntaxError<IN>>();
+        
+        
+        private List<UnexpectedTokenSyntaxError<IN>> Errors { get; set; } //= new List<UnexpectedTokenSyntaxError<IN>>();
 
         public int EndingPosition { get; set; }
 
         public bool IsEnded { get; set; }
+
+        private void InitErrors()
+        {
+            if (Errors == null) { 
+                Errors = new List<UnexpectedTokenSyntaxError<IN>>();
+            }
+        }
+        
+        public void AddErrors(IList<UnexpectedTokenSyntaxError<IN>> errors)
+        {
+            InitErrors();
+            Errors.AddRange(errors);
+        }
+
+        public void AddError(UnexpectedTokenSyntaxError<IN> error)
+        {
+            InitErrors();
+            Errors.Add(error);
+        }
+
+        public IList<UnexpectedTokenSyntaxError<IN>> GetErrors() => Errors;
         
         public List<LeadingToken<IN>> Expecting {get; set;}
 
