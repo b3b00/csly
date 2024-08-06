@@ -9,7 +9,7 @@ var builder = new AotLexerBuilder();
 var lexer = builder.FluentInitializeCenericLexer();
 if (lexer != null)
 {
-    string source = "2 + 2 * ( 3 / 8)";
+    string source = "2 + 2 * ( 3 / 8) PLUS 42.42";
     Console.WriteLine($"tokenize >{source}<");    
     var lexingResult = lexer.Tokenize(source);
     if (lexingResult.IsOk)
