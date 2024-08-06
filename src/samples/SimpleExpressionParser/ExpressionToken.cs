@@ -1,7 +1,7 @@
 ﻿using sly.i18n;
 using sly.lexer;
 
-namespace expressionparser
+namespace simpleExpressionParser
 {
     public enum ExpressionToken
     {

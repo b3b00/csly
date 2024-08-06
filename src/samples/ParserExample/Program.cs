@@ -38,6 +38,7 @@ using sly.parser.parser;
 using XML;
 using Xunit;
 using ExpressionContext = postProcessedLexerParser.expressionModel.ExpressionContext;
+using ExpressionToken = simpleExpressionParser.ExpressionToken;
 using IfThenElse = indented.IfThenElse;
 
 namespace ParserExample
@@ -133,8 +134,8 @@ namespace ParserExample
 
         private static void BenchSimpleExpression()
         {
-            SimpleExpressionParser p = new SimpleExpressionParser();
-            var builder = new ParserBuilder<ExpressionToken, double>();
+            GenericSimpleExpressionParser p = new GenericSimpleExpressionParser();
+            var builder = new ParserBuilder<GenericExpressionToken, double>();
             
             var Parser = builder.BuildParser(p, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
             if (Parser.IsOk)

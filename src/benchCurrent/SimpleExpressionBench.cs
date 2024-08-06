@@ -1,8 +1,4 @@
 using System;
-using System.IO;
-using bench.json;
-using bench.json.model;
-using benchCurrent.backtrack;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
@@ -11,6 +7,7 @@ using expressionparser;
 using simpleExpressionParser;
 using sly.parser;
 using sly.parser.generator;
+using ExpressionToken = simpleExpressionParser.ExpressionToken;
 
 namespace benchCurrent
 {
@@ -48,7 +45,8 @@ namespace benchCurrent
             
             if (result.IsError)
             {
-                result.Errors.ForEach(Console.WriteLine);
+                result.Errors.ForEach(x => Console.WriteLine(x.Message));
+                Environment.Exit(1);
             }
             else
             {
@@ -59,16 +57,17 @@ namespace benchCurrent
             GenericSimpleExpressionParser gp = new GenericSimpleExpressionParser();
             var genericbuilder = new ParserBuilder<GenericExpressionToken, double>();
             
-            var genericresult = builder.BuildParser(p, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var genericresult = genericbuilder.BuildParser(gp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
             
-            if (result.IsError)
+            if (genericresult.IsError)
             {
-                result.Errors.ForEach(Console.WriteLine);
+                genericresult.Errors.ForEach(x => Console.WriteLine(x.Message));
+                Environment.Exit(2);
             }
             else
             {
                 Console.WriteLine("parser ok");
-                BenchedParser = result.Result;
+                BenchedGenericParser = genericresult.Result;
             }
         }
 
@@ -80,7 +79,7 @@ namespace benchCurrent
         {
             if (BenchedParser == null)
             {
-                Console.WriteLine("parser is null");
+                Console.WriteLine("regex parser is null");
             }
             else
             {
@@ -91,13 +90,13 @@ namespace benchCurrent
             }
         }
         
-        [Benchmark]
+        // [Benchmark]
         
         public void TestExpressionGeneric()
         {
             if (BenchedGenericParser == null)
             {
-                Console.WriteLine("parser is null");
+                Console.WriteLine("generic parser is null");
             }
             else
             {
