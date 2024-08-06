@@ -7,7 +7,7 @@ namespace sly.parser.llparser.bnf;
 public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     
-            protected SyntaxNode<IN> ManageExpressionRules(Rule<IN> rule, SyntaxNode<IN> node)
+            protected SyntaxNode<IN> ManageExpressionRules(Rule<IN,OUT> rule, SyntaxNode<IN> node)
             {
                 var operatorIndex = -1;
                 switch (rule.IsExpressionRule)

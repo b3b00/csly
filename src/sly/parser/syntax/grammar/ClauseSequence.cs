@@ -4,15 +4,15 @@ using System.Linq;
 
 namespace sly.parser.syntax.grammar
 {
-    public sealed class ClauseSequence<T> : IClause<T>
+    public sealed class ClauseSequence<IN,OUT> : IClause<IN,OUT> where IN : struct
     {
-        public ClauseSequence(IClause<T> item)
+        public ClauseSequence(IClause<IN,OUT> item)
         {
-            Clauses = new List<IClause<T>>();
+            Clauses = new List<IClause<IN,OUT>>();
             Clauses.Add(item);
         }
 
-        public List<IClause<T>> Clauses { get; set; }
+        public List<IClause<IN,OUT>> Clauses { get; set; }
 
         public bool MayBeEmpty()
         {
@@ -20,12 +20,12 @@ namespace sly.parser.syntax.grammar
         }
 
 
-        public void AddRange(List<IClause<T>> clauses)
+        public void AddRange(List<IClause<IN,OUT>> clauses)
         {
             Clauses.AddRange(clauses);
         }
 
-        public void AddRange(ClauseSequence<T> seq)
+        public void AddRange(ClauseSequence<IN,OUT> seq)
         {
             AddRange(seq.Clauses);
         }
@@ -36,9 +36,9 @@ namespace sly.parser.syntax.grammar
             return Clauses.Select(c => c.Dump()).Aggregate((d1, d2) => d1 + " " + d2);
         }
         
-        public bool Equals(IClause<T> other)
+        public bool Equals(IClause<IN,OUT> other)
         {
-            if (other is ClauseSequence<T> sequence && sequence.Clauses.Count == Clauses.Count)
+            if (other is ClauseSequence<IN,OUT> sequence && sequence.Clauses.Count == Clauses.Count)
             {
                 for (int i = 0; i < Clauses.Count; i++)
                 {

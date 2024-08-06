@@ -10,8 +10,8 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 
-    public SyntaxParseResult<IN> ParseOption(IList<Token<IN>> tokens, OptionClause<IN> clause, Rule<IN> rule,
-        int position, SyntaxParsingContext<IN> parsingContext)
+    public SyntaxParseResult<IN> ParseOption(IList<Token<IN>> tokens, OptionClause<IN,OUT> clause, Rule<IN,OUT> rule,
+        int position, SyntaxParsingContext<IN,OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
         {
@@ -26,13 +26,13 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 
         switch (innerClause)
         {
-            case TerminalClause<IN> term:
+            case TerminalClause<IN,OUT> term:
                 innerResult = ParseTerminal(tokens, term, currentPosition, parsingContext);
                 break;
-            case NonTerminalClause<IN> nonTerm:
+            case NonTerminalClause<IN,OUT> nonTerm:
                 innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition, parsingContext);
                 break;
-            case ChoiceClause<IN> choice:
+            case ChoiceClause<IN,OUT> choice:
                 innerResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
                 break;
             default:
@@ -44,13 +44,13 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         {
             switch (innerClause)
             {
-                case TerminalClause<IN> _:
+                case TerminalClause<IN,OUT> _:
                     result = new SyntaxParseResult<IN>();
                     result.IsError = true;
                     result.Root = new SyntaxLeaf<IN>(Token<IN>.Empty(), false);
                     result.EndingPosition = position;
                     break;
-                case ChoiceClause<IN> choiceClause:
+                case ChoiceClause<IN,OUT> choiceClause:
                 {
                     if (choiceClause.IsTerminalChoice)
                     {

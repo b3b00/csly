@@ -1,10 +1,11 @@
+using System;
+using System.Collections.Generic;
 using sly.buildresult;
 using sly.i18n;
-using sly.lexer;
 
-namespace aot.lexer;
+namespace sly.lexer;
 
-public class Builder<T> :  ILexemeBuilder<T> where T : struct
+public class AotLexerBuilder<T> :  ILexemeBuilder<T> where T : struct
 {
     
     
@@ -14,10 +15,10 @@ public class Builder<T> :  ILexemeBuilder<T> where T : struct
     private T? CurrentLexeme;
     public static ILexemeBuilder<A> NewBuilder<A>() where A : struct
     {
-        return new Builder<A>();
+        return new AotLexerBuilder<A>();
     }
 
-    private Builder()
+    private AotLexerBuilder()
     {
         Lexemes = new Dictionary<T, (List<LexemeAttribute>, List<LexemeLabelAttribute>)>();
     }

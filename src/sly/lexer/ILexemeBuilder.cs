@@ -1,6 +1,4 @@
-using sly.lexer;
-
-namespace aot.lexer;
+namespace sly.lexer;
 
 public interface ILexemeBuilder<T> where T : struct
 {

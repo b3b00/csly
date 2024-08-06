@@ -4,25 +4,25 @@ using System.Linq;
 
 namespace sly.parser.syntax.grammar
 {
-    public sealed class ChoiceClause<T> : IClause<T> where T : struct
+    public sealed class ChoiceClause<IN,OUT> : IClause<IN,OUT> where IN : struct
     {
 
         public bool IsDiscarded { get; set; } = false;
-        public bool IsTerminalChoice => Choices.Select(c => c is TerminalClause<T>).Aggregate((x, y) => x && y);
-        public bool IsNonTerminalChoice => Choices.Select(c => c is NonTerminalClause<T>).Aggregate((x, y) => x && y);
+        public bool IsTerminalChoice => Choices.Select(c => c is TerminalClause<IN,OUT>).Aggregate((x, y) => x && y);
+        public bool IsNonTerminalChoice => Choices.Select(c => c is NonTerminalClause<IN,OUT>).Aggregate((x, y) => x && y);
             
-        public  List<IClause<T>> Choices { get; }
-        public ChoiceClause(IClause<T> clause)
+        public  List<IClause<IN,OUT>> Choices { get; }
+        public ChoiceClause(IClause<IN,OUT> clause)
         {
-            Choices = new List<IClause<T>> {clause};
+            Choices = new List<IClause<IN,OUT>> {clause};
         }
         
-        public ChoiceClause(List<IClause<T>> choices)
+        public ChoiceClause(List<IClause<IN,OUT>> choices)
         {
             Choices = choices;
         }
         
-        public ChoiceClause(IClause<T> choice, List<IClause<T>> choices) : this(choice)
+        public ChoiceClause(IClause<IN,OUT> choice, List<IClause<IN,OUT>> choices) : this(choice)
         {
             Choices.AddRange(choices);
         }
@@ -46,9 +46,9 @@ namespace sly.parser.syntax.grammar
             return ToString();
         }
 
-        public bool Equals(IClause<T> clause)
+        public bool Equals(IClause<IN,OUT> clause)
         {
-            if (clause is ChoiceClause<T> other)
+            if (clause is ChoiceClause<IN,OUT> other)
             {
                 return Equals(other);
             }
@@ -56,7 +56,7 @@ namespace sly.parser.syntax.grammar
             return false;
         }
 
-        private bool Equals(ChoiceClause<T> other)
+        private bool Equals(ChoiceClause<IN,OUT> other)
         {
             if (other.Choices.Count != Choices.Count)
             {
@@ -76,7 +76,7 @@ namespace sly.parser.syntax.grammar
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((ChoiceClause<T>)obj);
+            return Equals((ChoiceClause<IN,OUT>)obj);
         }
 
         public override int GetHashCode()

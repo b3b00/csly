@@ -10,9 +10,9 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
 {
     #region parsing
 
-    public virtual SyntaxParseResult<IN> ParseInfixExpressionRule(IList<Token<IN>> tokens, Rule<IN> rule,
+    public virtual SyntaxParseResult<IN> ParseInfixExpressionRule(IList<Token<IN>> tokens, Rule<IN,OUT> rule,
         int position,
-        string nonTerminalName, SyntaxParsingContext<IN> parsingContext)
+        string nonTerminalName, SyntaxParsingContext<IN,OUT> parsingContext)
     {
         var currentPosition = position;
         var errors = new List<UnexpectedTokenSyntaxError<IN>>();
@@ -23,7 +23,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
         {
             var first = rule.Clauses[0];
             SyntaxParseResult<IN> firstResult = null;
-            if (first is NonTerminalClause<IN> firstNonTerminal)
+            if (first is NonTerminalClause<IN,OUT> firstNonTerminal)
             {
                 firstResult = ParseNonTerminal(tokens, firstNonTerminal, currentPosition, parsingContext);
 
@@ -38,7 +38,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
             SyntaxParseResult<IN> secondResult = null;
             switch (second)
             {
-                case ChoiceClause<IN> secondChoice:
+                case ChoiceClause<IN,OUT> secondChoice:
                 {
                     secondResult = ParseChoice(tokens, secondChoice, currentPosition, parsingContext);
 
@@ -58,7 +58,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
 
                     break;
                 }
-                case TerminalClause<IN> secondTerminal:
+                case TerminalClause<IN,OUT> secondTerminal:
                 {
                     secondResult = ParseTerminal(tokens, secondTerminal, currentPosition, parsingContext);
 
@@ -80,7 +80,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
             currentPosition = secondResult.EndingPosition;
             var third = rule.Clauses[2];
             SyntaxParseResult<IN> thirdResult;
-            if (third is NonTerminalClause<IN> thirdNonTerminal)
+            if (third is NonTerminalClause<IN,OUT> thirdNonTerminal)
             {
                 thirdResult = ParseNonTerminal(tokens, thirdNonTerminal, currentPosition, parsingContext);
                 if (thirdResult.IsError)
@@ -129,13 +129,13 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
         return result;
     }
 
-    private static bool MatchExpressionRuleScheme(Rule<IN> rule)
+    private static bool MatchExpressionRuleScheme(Rule<IN,OUT> rule)
     {
         return rule.Clauses.Count == 3
-               && rule.Clauses[0] is NonTerminalClause<IN>
-               && (rule.Clauses[1] is ChoiceClause<IN> ||
-                   rule.Clauses[1] is TerminalClause<IN>)
-               && rule.Clauses[2] is NonTerminalClause<IN>;
+               && rule.Clauses[0] is NonTerminalClause<IN,OUT>
+               && (rule.Clauses[1] is ChoiceClause<IN,OUT> ||
+                   rule.Clauses[1] is TerminalClause<IN,OUT>)
+               && rule.Clauses[2] is NonTerminalClause<IN,OUT>;
     }
 
     #endregion

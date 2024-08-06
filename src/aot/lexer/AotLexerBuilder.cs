@@ -21,7 +21,7 @@ public class AotLexerBuilder
     /// <returns></returns>
     public ILexer<AotLexer> FluentInitializeCenericLexer()
     {
-        var builder = Builder<AotLexer>.NewBuilder<AotLexer>();
+        var builder = AotLexerBuilder<AotLexer>.NewBuilder<AotLexer>();
         var lexer = builder.Double(AotLexer.DOUBLE)
             .Sugar(AotLexer.PLUS, "+")
             .Keyword(AotLexer.PLUS,"PLUS")

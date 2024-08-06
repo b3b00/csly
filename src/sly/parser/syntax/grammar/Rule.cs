@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -8,11 +9,11 @@ using sly.parser.generator;
 
 namespace sly.parser.syntax.grammar
 {
-    public class Rule<IN> : GrammarNode<IN> where IN : struct
+    public class Rule<IN,OUT> : GrammarNode<IN,OUT> where IN : struct
     {
         public Rule()
         {
-            Clauses = new List<IClause<IN>>();
+            Clauses = new List<IClause<IN,OUT>>();
             VisitorMethodsForOperation = new Dictionary<IN, OperationMetaData<IN>>();
             Visitor = null;
             IsSubRule = false;
@@ -28,6 +29,8 @@ namespace sly.parser.syntax.grammar
 
         // visitor for classical rules
         private MethodInfo Visitor { get; set; }
+        
+        private Func<object[],OUT> VisitorLambda { get; set; }  
 
         public bool IsExpressionRule { get; set; }
         
@@ -37,7 +40,7 @@ namespace sly.parser.syntax.grammar
 
         public string RuleString { get; set;  }
 
-        public List<IClause<IN>> Clauses { get; set; }
+        public List<IClause<IN,OUT>> Clauses { get; set; }
         public List<LeadingToken<IN>> PossibleLeadingTokens { get; set; }
 
         public string NonTerminalName { get; set; }
@@ -53,14 +56,14 @@ namespace sly.parser.syntax.grammar
                     {
                         switch (clause)
                         {
-                            case GroupClause<IN> _:
+                            case GroupClause<IN,OUT> _:
                                 contains = true;
                                 break;
-                            case ManyClause<IN> many:
-                                contains  |=  many.Clause is GroupClause<IN>;
+                            case ManyClause<IN,OUT> many:
+                                contains  |=  many.Clause is GroupClause<IN,OUT>;
                                 break;
-                            case OptionClause<IN> option:
-                                contains  |=  option.Clause is GroupClause<IN>;
+                            case OptionClause<IN,OUT> option:
+                                contains  |=  option.Clause is GroupClause<IN,OUT>;
                                 break;
                         }
 
@@ -138,7 +141,7 @@ namespace sly.parser.syntax.grammar
         public bool Match<OUT>(IList<Token<IN>> tokens, int position, ParserConfiguration<IN,OUT> configuration)
         {
             bool activateBroadWindow = configuration.BroadenTokenWindow;
-            if (activateBroadWindow && Clauses.Count >= 2 && Clauses[0] is TerminalClause<IN> startingTerminalClause && Clauses[1] is NonTerminalClause<IN> nTerm)
+            if (activateBroadWindow && Clauses.Count >= 2 && Clauses[0] is TerminalClause<IN,OUT> startingTerminalClause && Clauses[1] is NonTerminalClause<IN,OUT> nTerm)
             {
                 if (startingTerminalClause.MayBeEmpty())
                 {

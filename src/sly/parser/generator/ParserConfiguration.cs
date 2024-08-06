@@ -8,8 +8,11 @@ namespace sly.parser.generator
 {
     public class ParserConfiguration<IN, OUT> where IN : struct
     {
+        
+        
+        
         public string StartingRule { get; set; }
-        public Dictionary<string, NonTerminal<IN>> NonTerminals { get; set; }
+        public Dictionary<string, NonTerminal<IN,OUT>> NonTerminals { get; set; }
 
         public bool UsesOperations { get; set; }
 
@@ -19,41 +22,41 @@ namespace sly.parser.generator
         
         public bool AutoCloseIndentations { get; set; } 
 
-        public void AddNonTerminalIfNotExists(NonTerminal<IN> nonTerminal)
+        public void AddNonTerminalIfNotExists(NonTerminal<IN,OUT> nonTerminal)
         {
             if (!NonTerminals.ContainsKey(nonTerminal.Name)) NonTerminals[nonTerminal.Name] = nonTerminal;
         }
 
         public bool HasExplicitTokens() => GetAllExplicitTokenClauses().Any();
 
-        public List<TerminalClause<IN>> GetAllExplicitTokenClauses()
+        public List<TerminalClause<IN,OUT>> GetAllExplicitTokenClauses()
         {
-            List<TerminalClause<IN>> clauses = new List<TerminalClause<IN>>();
+            List<TerminalClause<IN,OUT>> clauses = new List<TerminalClause<IN,OUT>>();
             foreach (var nonTerminal in NonTerminals.Values)
             {
                 foreach (var rule in nonTerminal.Rules)
                 {
                     foreach (var clause in rule.Clauses)
                     {
-                        if (clause is TerminalClause<IN> terminalClause && terminalClause.IsExplicitToken)
+                        if (clause is TerminalClause<IN,OUT> terminalClause && terminalClause.IsExplicitToken)
                         {
                             clauses.Add(terminalClause);
                         }
 
-                        if (clause is ChoiceClause<IN> choices)
+                        if (clause is ChoiceClause<IN,OUT> choices)
                         {
                             foreach (var choice in choices.Choices)
                             {
-                                if (choice is TerminalClause<IN> terminal && terminal.IsExplicitToken)
+                                if (choice is TerminalClause<IN,OUT> terminal && terminal.IsExplicitToken)
                                 {
                                     clauses.Add(terminal);
                                 }
                             }
                         }
 
-                        if (clause is not OptionClause<IN> option) continue;
+                        if (clause is not OptionClause<IN,OUT> option) continue;
                         {
-                            if (option.Clause is TerminalClause<IN> { IsExplicitToken: true } terminal)
+                            if (option.Clause is TerminalClause<IN,OUT> { IsExplicitToken: true } terminal)
                                 clauses.Add(terminal);
                         }
                     }
@@ -67,7 +70,7 @@ namespace sly.parser.generator
         public string Dump()
         {
             StringBuilder dump = new StringBuilder();
-            foreach (NonTerminal<IN> nonTerminal in NonTerminals.Values)
+            foreach (NonTerminal<IN,OUT> nonTerminal in NonTerminals.Values)
             {
                 dump.AppendLine(nonTerminal.Dump());
             }

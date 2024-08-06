@@ -26,10 +26,10 @@ namespace sly.parser.llparser.bnf
 
         public SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
         {
-            return SafeParse(tokens, new SyntaxParsingContext<IN>(Configuration.UseMemoization), startingNonTerminal);
+            return SafeParse(tokens, new SyntaxParsingContext<IN,OUT>(Configuration.UseMemoization), startingNonTerminal);
         }
         
-        public SyntaxParseResult<IN> SafeParse(IList<Token<IN>> tokens, SyntaxParsingContext<IN> parsingContext, string startingNonTerminal = null)
+        public SyntaxParseResult<IN> SafeParse(IList<Token<IN>> tokens, SyntaxParsingContext<IN,OUT> parsingContext, string startingNonTerminal = null)
         {
             var start = startingNonTerminal ?? StartingNonTerminal;
             var NonTerminals = Configuration.NonTerminals;
@@ -127,8 +127,8 @@ namespace sly.parser.llparser.bnf
         }
 
 
-        public virtual SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position,
-            string nonTerminalName, SyntaxParsingContext<IN> parsingContext)
+        public virtual SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN,OUT> rule, int position,
+            string nonTerminalName, SyntaxParsingContext<IN,OUT> parsingContext)
         {
             var currentPosition = position;
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
@@ -141,7 +141,7 @@ namespace sly.parser.llparser.bnf
                 {
                     switch (clause)
                     {
-                        case TerminalClause<IN> terminalClause:
+                        case TerminalClause<IN,OUT> terminalClause:
                         {
                             var termRes = ParseTerminal(tokens, terminalClause, currentPosition, parsingContext);
                             if (!termRes.IsError)
@@ -159,7 +159,7 @@ namespace sly.parser.llparser.bnf
                             isError = termRes.IsError;
                             break;
                         }
-                        case NonTerminalClause<IN> terminalClause:
+                        case NonTerminalClause<IN,OUT> terminalClause:
                         {
                             var nonTerminalResult =
                                 ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);

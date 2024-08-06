@@ -417,8 +417,8 @@ return r";
         private static void TestRuleParser()
         {
             Console.WriteLine("hum hum...");
-            var parserInstance = new RuleParser<EbnfToken>();
-            var builder = new ParserBuilder<EbnfToken, IClause<EbnfToken>>();
+            var parserInstance = new RuleParser<EbnfToken,object>();
+            var builder = new ParserBuilder<EbnfToken, IClause<EbnfToken,object>>();
             var r = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "rule");
 
             var parser = r.Result;
@@ -575,8 +575,8 @@ return r";
         private static void TestGrammarParser()
         {
             string productionRule = "clauses : clause (COMMA [D] clause)*";
-            var ruleparser = new RuleParser<TestGrammarToken>();
-            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<TestGrammarToken>>();
+            var ruleparser = new RuleParser<TestGrammarToken,object>();
+            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<TestGrammarToken,object>>();
             var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
             var result = grammarParser.Parse(productionRule);
             //(grammarParser.Lexer as GenericLexer<TestGrammarToken>).ResetLexer();

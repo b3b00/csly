@@ -95,7 +95,7 @@ public class AotParser
 
     [Production("primary_value : LPAREN SimpleExpressionParser_expressions RPAREN")]
     [NodeName("group")]
-    public double OperandParens(Token<AotLexer> lparen, double value, Token<AotLexer> rparen)
+    public double OperandGroup(Token<AotLexer> lparen, double value, Token<AotLexer> rparen)
     {
         return value;
     }

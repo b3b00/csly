@@ -5,7 +5,7 @@ using sly.parser.syntax.grammar;
 namespace sly.parser
 {
     
-    public class SyntaxParsingContext<IN> where IN : struct
+    public class SyntaxParsingContext<IN,OUT> where IN : struct
     {
         private readonly Dictionary<string, SyntaxParseResult<IN>> _memoizedNonTerminalResults = new Dictionary<string, SyntaxParseResult<IN>>();
 
@@ -15,12 +15,12 @@ namespace sly.parser
             _useMemoization = useMemoization;
         }
 
-        private string GetKey(IClause<IN> clause, int position)
+        private string GetKey(IClause<IN,OUT> clause, int position)
         {
             return $"{clause.Dump()} -- @{position}";
         }
         
-        public void Memoize(IClause<IN> clause, int position, SyntaxParseResult<IN> result)
+        public void Memoize(IClause<IN,OUT> clause, int position, SyntaxParseResult<IN> result)
         {
             if (_useMemoization)
             {
@@ -28,7 +28,7 @@ namespace sly.parser
             }
         }
 
-        public bool TryGetParseResult(IClause<IN> clause, int position, out SyntaxParseResult<IN> result)
+        public bool TryGetParseResult(IClause<IN,OUT> clause, int position, out SyntaxParseResult<IN> result)
         {
             if (!_useMemoization)
             {

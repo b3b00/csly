@@ -10,8 +10,8 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 
-    public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position,
-        SyntaxParsingContext<IN> parsingContext)
+    public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN,OUT> clause, int position,
+        SyntaxParsingContext<IN,OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
         {
@@ -35,12 +35,12 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             SyntaxParseResult<IN> innerResult = null;
             switch (innerClause)
             {
-                case TerminalClause<IN> term:
+                case TerminalClause<IN,OUT> term:
                     manyNode.IsManyTokens = true;
                     innerResult = ParseTerminal(tokens, term, currentPosition, parsingContext);
                     hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
                     break;
-                case NonTerminalClause<IN> nonTerm:
+                case NonTerminalClause<IN,OUT> nonTerm:
                 {
                     innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition, parsingContext);
                     hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
@@ -50,7 +50,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                         manyNode.IsManyValues = true;
                     break;
                 }
-                case ChoiceClause<IN> choice:
+                case ChoiceClause<IN,OUT> choice:
                     manyNode.IsManyTokens = choice.IsTerminalChoice;
                     manyNode.IsManyValues = choice.IsNonTerminalChoice;
                     innerResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
@@ -90,8 +90,8 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         return result;
     }
 
-    public SyntaxParseResult<IN> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN> clause, int position,
-        SyntaxParsingContext<IN> parsingContext)
+    public SyntaxParseResult<IN> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN,OUT> clause, int position,
+        SyntaxParsingContext<IN,OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
         {
@@ -112,12 +112,12 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 
         switch (innerClause)
         {
-            case TerminalClause<IN> terminalClause:
+            case TerminalClause<IN,OUT> terminalClause:
                 manyNode.IsManyTokens = true;
                 firstInnerResult = ParseTerminal(tokens, terminalClause, currentPosition, parsingContext);
                 hasByPasNodes = firstInnerResult.HasByPassNodes;
                 break;
-            case NonTerminalClause<IN> nonTerm:
+            case NonTerminalClause<IN,OUT> nonTerm:
             {
                 firstInnerResult = ParseNonTerminal(tokens, nonTerm, currentPosition, parsingContext);
                 hasByPasNodes = firstInnerResult.HasByPassNodes;
@@ -127,7 +127,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                     manyNode.IsManyValues = true;
                 break;
             }
-            case ChoiceClause<IN> choice:
+            case ChoiceClause<IN,OUT> choice:
                 manyNode.IsManyTokens = choice.IsTerminalChoice;
                 manyNode.IsManyValues = choice.IsNonTerminalChoice;
                 firstInnerResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
@@ -142,7 +142,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             manyNode.Add(firstInnerResult.Root);
             lastInnerResult = firstInnerResult;
             currentPosition = firstInnerResult.EndingPosition;
-            var more = new ZeroOrMoreClause<IN>(innerClause);
+            var more = new ZeroOrMoreClause<IN,OUT>(innerClause);
             var nextResult = ParseZeroOrMore(tokens, more, currentPosition, parsingContext);
             if (nextResult != null && !nextResult.IsError)
             {
