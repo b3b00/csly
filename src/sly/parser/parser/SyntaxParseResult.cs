@@ -47,24 +47,24 @@ namespace sly.parser
 
         public void AddExpecting(LeadingToken<IN> expected)
         {
-            if (Expecting == null)
-            {
-                Expecting = new List<LeadingToken<IN>>();
-            }
-            Expecting.Add(expected);
+            // if (Expecting == null)
+            // {
+            //     Expecting = new List<LeadingToken<IN>>();
+            // }
+            // Expecting.Add(expected);
         }
         
         public void AddExpectings(IEnumerable<LeadingToken<IN>> expected)
         {
-            if (expected == null)
-            {
-                return;
-            }
-            if (Expecting == null)
-            {
-                Expecting = new List<LeadingToken<IN>>();
-            }
-            Expecting.AddRange(expected);
+            // if (expected == null)
+            // {
+            //     return;
+            // }
+            // if (Expecting == null)
+            // {
+            //     Expecting = new List<LeadingToken<IN>>();
+            // }
+            // Expecting.AddRange(expected);
         }
 
         public bool HasByPassNodes { get; set; } = false;

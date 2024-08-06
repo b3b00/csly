@@ -31,6 +31,7 @@ namespace benchCurrent
         }
 
         private Parser<ExpressionToken, double> BenchedParser;
+        private Parser<GenericExpressionToken, double> BenchedGenericParser;
 
         private string content = "";
 
@@ -54,17 +55,28 @@ namespace benchCurrent
                 Console.WriteLine("parser ok");
                 BenchedParser = result.Result;
             }
+            
+            GenericSimpleExpressionParser gp = new GenericSimpleExpressionParser();
+            var genericbuilder = new ParserBuilder<GenericExpressionToken, double>();
+            
+            var genericresult = builder.BuildParser(p, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            
+            if (result.IsError)
+            {
+                result.Errors.ForEach(Console.WriteLine);
+            }
+            else
+            {
+                Console.WriteLine("parser ok");
+                BenchedParser = result.Result;
+            }
         }
 
-        [Params(true,false)]
-        public bool Memoize { get; set; }
-        
-        [Params(true,false)]
-        public bool Broaden { get; set; }
+     
         
         [Benchmark]
         
-        public void TestBackTrack()
+        public void TestExpressionRegex()
         {
             if (BenchedParser == null)
             {
@@ -72,9 +84,27 @@ namespace benchCurrent
             }
             else
             {
-                BenchedParser.Configuration.UseMemoization = Memoize;
-                BenchedParser.Configuration.BroadenTokenWindow = Broaden;
-                var ignored = BenchedParser.Parse(content);
+                for (int i = 0; i < 50; i++)
+                {
+                    var ignored = BenchedParser.Parse(content);
+                }
+            }
+        }
+        
+        [Benchmark]
+        
+        public void TestExpressionGeneric()
+        {
+            if (BenchedGenericParser == null)
+            {
+                Console.WriteLine("parser is null");
+            }
+            else
+            {
+                for (int i = 0; i < 50; i++)
+                {
+                    var ignored = BenchedGenericParser.Parse(content);
+                }
             }
         }
 
