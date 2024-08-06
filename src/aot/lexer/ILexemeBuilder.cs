@@ -15,6 +15,8 @@ public interface ILexemeBuilder<T> where T : struct
     public ILexemeBuilder<T> Keyword(T tokenId, string token, int channel = Channels.Main);
 
     public ILexemeBuilder<T> AlphaNumId(T tokenId);
+
+    public ILexemeBuilder<T> Labeled(string lang, string label);
     
     ILexer<T> Build();
 }

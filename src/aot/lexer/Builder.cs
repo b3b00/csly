@@ -10,6 +10,8 @@ public class Builder<T> :  ILexemeBuilder<T> where T : struct
     
     private Dictionary<T, (List<LexemeAttribute>, List<LexemeLabelAttribute>)> Lexemes =
         new Dictionary<T, (List<LexemeAttribute>, List<LexemeLabelAttribute>)>();
+
+    private T? CurrentLexeme;
     public static ILexemeBuilder<A> NewBuilder<A>() where A : struct
     {
         return new Builder<A>();
@@ -22,6 +24,7 @@ public class Builder<T> :  ILexemeBuilder<T> where T : struct
 
     private void Add(T tokenId, LexemeAttribute lexeme, LexemeLabelAttribute label)
     {
+        CurrentLexeme = tokenId;
         (List<LexemeAttribute> tokens, List<LexemeLabelAttribute> labels) lexemes = (null,null);
         if (!Lexemes.TryGetValue(tokenId, out lexemes))
         {
@@ -30,6 +33,23 @@ public class Builder<T> :  ILexemeBuilder<T> where T : struct
         lexemes.tokens.Add(lexeme);
         lexemes.labels.Add(label);
         Lexemes[tokenId] = lexemes;
+    }
+    
+    private void AddLabel(string lang, string label)
+    {
+        (List<LexemeAttribute> tokens, List<LexemeLabelAttribute> labels) lexemes = (null,null);
+        if (Lexemes.TryGetValue(CurrentLexeme.Value, out lexemes))
+        {
+            if (lexemes.labels == null)
+            {
+                lexemes.labels = new List<LexemeLabelAttribute>();
+            }
+            lexemes.labels.Add(new LexemeLabelAttribute(lang, label));
+        }
+        else
+        {
+            throw new InvalidOperationException($"{CurrentLexeme.Value} does not exist !");
+        }
     }
     
     public ILexemeBuilder<T> Double(T tokenId, string decimalDelimiter = ".", int channel = Channels.Main)
@@ -59,6 +79,16 @@ public class Builder<T> :  ILexemeBuilder<T> where T : struct
     public ILexemeBuilder<T> AlphaNumId(T tokenId)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.Identifier,IdentifierType.AlphaNumeric, channel:Channels.Main) , null);
+        return this;
+    }
+
+    public ILexemeBuilder<T> Labeled(string lang, string label)
+    {
+        if (CurrentLexeme == null)
+        {
+            throw new InvalidOperationException("no lexeme is currently defined");
+        }
+        AddLabel(lang, label);
         return this;
     }
 

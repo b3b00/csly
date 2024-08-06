@@ -25,6 +25,8 @@ public class AotLexerBuilder
         var lexer = builder.Double(AotLexer.DOUBLE)
             .Sugar(AotLexer.PLUS, "+")
             .Keyword(AotLexer.PLUS,"PLUS")
+            .Labeled("en","sum")
+            .Labeled("fr","somme")
             .Sugar(AotLexer.MINUS, "-")
             .Sugar(AotLexer.TIMES, "*")
             .Sugar(AotLexer.DIVIDE, "/")
