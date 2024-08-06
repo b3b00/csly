@@ -426,7 +426,7 @@ namespace sly.lexer
         }
 
 
-        private static BuildResult<ILexer<IN>> BuildGenericSubLexers<IN>(
+        public static BuildResult<ILexer<IN>> BuildGenericSubLexers<IN>(
             Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> attributes,
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, BuildResult<ILexer<IN>> result, string lang,
             IList<string> explicitTokens = null) where IN : struct
