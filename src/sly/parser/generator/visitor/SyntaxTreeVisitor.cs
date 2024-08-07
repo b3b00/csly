@@ -225,7 +225,7 @@ namespace sly.parser.generator.visitor
             return result;
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN> leaf)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN, OUT> leaf)
         {
             return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
         }
