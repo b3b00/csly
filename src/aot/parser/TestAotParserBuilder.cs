@@ -10,7 +10,7 @@ public class TestAotParserBuilder
     {
         AotParser parserInstance = new AotParser();
         
-        var builder = AotParserBuilder<AotLexer,double>.NewBuilder<AotLexer,double > (parserInstance,"root");
+        var builder = AotEBNFParserBuilder<AotLexer,double>.NewBuilder<AotLexer,double > (parserInstance,"root");
 
         var testLexerbuilder = new TestAotLexerBuilder();
         var lexerBuilder = testLexerbuilder.FluentInitializeCenericLexerForParserTest();

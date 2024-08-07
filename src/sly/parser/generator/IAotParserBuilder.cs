@@ -17,20 +17,6 @@ public interface IAotParserBuilder<IN,OUT> where IN : struct
     
     IAotParserBuilder<IN,OUT> Production(string ruleString, Func<object[], OUT> visitor);
     
-    IAotParserBuilder<IN,OUT> Operand(string rule, Func<object[], OUT> visitor);
-    
-    IAotParserBuilder<IN,OUT> Right(int precedence, IN operation, Func<object[], OUT> visitor);
-    
-    IAotParserBuilder<IN,OUT> Right(int precedence, string explicitOperation, Func<object[], OUT> visitor);
-    IAotParserBuilder<IN,OUT> Left(int precedence, IN operation, Func<object[], OUT> visitor);
-    
-    IAotParserBuilder<IN,OUT> Left(int precedence, string explicitOperation, Func<object[], OUT> visitor);
-    IAotParserBuilder<IN,OUT> Prefix(int precedence, IN operation, Func<object[], OUT> visitor);
-    
-    IAotParserBuilder<IN,OUT> Prefix(int precedence, string explicitOperation, Func<object[], OUT> visitor);
-    IAotParserBuilder<IN,OUT> Postfix(int precedence, IN operation, Func<object[], OUT> visitor);
-    
-    IAotParserBuilder<IN,OUT> Postfix(int precedence, string explicitOperation, Func<object[], OUT> visitor);
     
     public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result); // TODO AOT this build result is strange
     

@@ -155,7 +155,7 @@ namespace sly.parser.generator
 
         #region CONFIGURATION
 
-        private Tuple<string, string> ExtractNTAndRule(string ruleString)
+        internal Tuple<string, string> ExtractNTAndRule(string ruleString)
         {
             Tuple<string, string> result = null;
             if (ruleString != null)
@@ -224,7 +224,7 @@ namespace sly.parser.generator
             return conf;
         }
 
-        private Rule<IN,OUT> BuildNonTerminal(Tuple<string, string> ntAndRule)
+        internal Rule<IN,OUT> BuildNonTerminal(Tuple<string, string> ntAndRule)
         {
             var rule = new Rule<IN,OUT>();
             rule.RuleString = $"{ntAndRule.Item1} : {ntAndRule.Item2}";

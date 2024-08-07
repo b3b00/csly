@@ -16,17 +16,12 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
 {
     readonly Dictionary<string, NonTerminal<IN,OUT>> _nonTerminals = new Dictionary<string, NonTerminal<IN,OUT>>();
 
-    readonly Dictionary<int, List<OperationMetaData<IN, OUT>>> _operationsByPrecedence = new Dictionary<int, List<OperationMetaData<IN, OUT>>>();
 
     private bool _useMemoization = false;
 
     private bool _useBroadenTokenWindow = false;
 
     private bool _useAutoCloseIndentations = false;
-
-    private readonly List<Rule<IN, OUT>> _operands = new List<Rule<IN, OUT>>();
-
-    private readonly Parser<EbnfTokenGeneric, GrammarNode<IN, OUT>> _grammarParser = null;
 
     private string _i18N;
 
@@ -48,12 +43,9 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
     
     private AotParserBuilder(string i18N, object parserInstance, string rootRule)
     {
-        var ruleparser = new RuleParser<IN,OUT>();
-        var grammarParserBuilder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN,OUT>>(i18N);
         _i18N = i18N;
         _parserInstance = parserInstance;
         _rootRule = rootRule;
-        _grammarParser = grammarParserBuilder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
     }
 
     public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result)
@@ -65,25 +57,12 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
         _configuration.AutoCloseIndentations = _useAutoCloseIndentations;
         _configuration.NonTerminals = _nonTerminals;
         _configuration.StartingRule = _rootRule;
-        _configuration.UsesOperations = _operationsByPrecedence != null && _operationsByPrecedence.Any();
-        _configuration.OperandRules = _operands;
         
         // add operations if needed
-        if (_configuration.UsesOperations)
-        {
-            // TODO AOT : operands !
-            ExpressionRulesGenerator<IN, OUT> expressionRulesGenerator = new ExpressionRulesGenerator<IN, OUT>(_i18N);
-            var ok = expressionRulesGenerator.GenerateExpressionParserRules(_configuration, _parserInstance.GetType(),
-                result,
-                _operationsByPrecedence, out var expressionResult);
-            if (!ok)
-            {
-                return null;
-            }
-        }
+      
 
-        var b = new EBNFParserBuilder<IN,OUT>("en");
-        var syntaxParser = b.BuildSyntaxParser(_configuration, ParserType.EBNF_LL_RECURSIVE_DESCENT, _rootRule);
+        var b = new ParserBuilder<IN,OUT>("en");
+        var syntaxParser = b.BuildSyntaxParser(_configuration, ParserType.LL_RECURSIVE_DESCENT, _rootRule);
         // initialize starting tokens
         syntaxParser.Init(_configuration,_rootRule);
         return syntaxParser;
@@ -102,7 +81,7 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
         }
         var lexer = _lexerBuilder.Build();
         
-        SyntaxTreeVisitor<IN, OUT> visitor = new EBNFSyntaxTreeVisitor<IN, OUT>(_configuration, _parserInstance);
+        SyntaxTreeVisitor<IN, OUT> visitor = new SyntaxTreeVisitor<IN, OUT>(_configuration, _parserInstance);
         
         Parser<IN, OUT> parser = new Parser<IN, OUT>(_i18N, syntaxParser, visitor);
         parser.Configuration = _configuration;
@@ -144,13 +123,17 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
     
     public IAotParserBuilder<IN,OUT> Production(string ruleString, Func<object[], OUT> visitor)
     {
-        var r = _grammarParser.Parse(ruleString);
-        if (r.IsOk)
+        ParserBuilder<IN, OUT> builder = new ParserBuilder<IN, OUT>();
+        var (nonTerminaName, clauses) = builder.ExtractNTAndRule(ruleString);
+        var rule = builder.BuildNonTerminal(new Tuple<string, string>(nonTerminaName,clauses));
+        rule.NonTerminalName =  nonTerminaName;
+        rule.RuleString = $"{nonTerminaName} : {ruleString}";
+        
+        if (rule != null)
         {
-            var rule = r.Result as Rule<IN, OUT>;
             rule.RuleString = ruleString;
             rule.SetLambdaVisitor(visitor);
-            AddRule(rule, false);    
+            AddRule(rule);    
         }
 
         return this;
@@ -159,76 +142,13 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
     #endregion
     
     
-    #region operations
-    public IAotParserBuilder<IN, OUT> Operand(string ruleString, Func<object[], OUT> visitor)
-    {
-        var r = _grammarParser.Parse(ruleString);
-        if (r.IsOk)
-        {
-            var rule = r.Result as Rule<IN, OUT>;
-            rule.SetVisitor(visitor);
-            AddRule(rule, true);    
-        }
-
-        return this;
-    }
-
-    public IAotParserBuilder<IN, OUT> Right(int precedence, IN operation, Func<object[], OUT> visitor)
-    {
-        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation,null);
-        return this;
-    }
-
-    public IAotParserBuilder<IN, OUT> Right(int precedence, string explicitOperation, Func<object[], OUT> visitor)
-    {
-        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,explicitOperation, null);
-        return this;
-    }
-
-    public IAotParserBuilder<IN, OUT> Left(int precedence, IN operation, Func<object[], OUT> visitor)
-    {
-        AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,operation,null);
-        return this;
-    }
-
-    public IAotParserBuilder<IN, OUT> Left(int precedence, string explicitOperation, Func<object[], OUT> visitor)
-    {
-        AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,explicitOperation,null);
-        return this;
-    }
-
-    public IAotParserBuilder<IN, OUT> Prefix(int precedence, IN operation, Func<object[], OUT> visitor)
-    {
-       AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,operation,null);
-       return this;
-    }
-
-    public IAotParserBuilder<IN, OUT> Prefix(int precedence, string explicitOperation, Func<object[], OUT> visitor)
-    {
-        AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,explicitOperation,null);
-        return this;
-    }
-
-    public IAotParserBuilder<IN, OUT> Postfix(int precedence, IN operation, Func<object[], OUT> visitor)
-    {
-        AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,operation,null);
-        return this;
-    }
-
-    public IAotParserBuilder<IN, OUT> Postfix(int precedence, string explicitOperation, Func<object[], OUT> visitor)
-    {
-        AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,explicitOperation,null);
-        return this;
-    }
-
-
-    #endregion
+  
 
    
     
     #region tools
     
-     private void AddRule(Rule<IN, OUT> rule, bool operand = false)
+     private void AddRule(Rule<IN, OUT> rule)
     {
         if (!_nonTerminals.TryGetValue(rule.NonTerminalName, out var nonTerminal))
         {
@@ -236,43 +156,10 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
         }
         nonTerminal.Rules.Add(rule);
         _nonTerminals[rule.NonTerminalName] = nonTerminal;
-        if (operand)
-        {
-            _operands.Add(rule);
-        }
+       
     }
 
-    private void AddOperation(int precedence,Associativity associativity, Func<object[],OUT> visitor, Affix affix, IN operation, string nodeName = null)
-    {
-        Func<object[], OUT> loggedVisitor = visitor;
-        
-        OperationMetaData<IN, OUT> operationMeta =
-            new OperationMetaData<IN, OUT>(precedence, Associativity.None, loggedVisitor, affix, operation, nodeName);
-        
-        List<OperationMetaData<IN,OUT >> operationsForPrecedence;
-        if (!_operationsByPrecedence.TryGetValue(precedence, out operationsForPrecedence))
-        {
-            operationsForPrecedence = new List<OperationMetaData<IN, OUT>>();
-        }
-        operationsForPrecedence.Add(operationMeta);
-        _operationsByPrecedence[precedence] = operationsForPrecedence;
-    }
-    
-    private void AddOperation(int precedence,Associativity associativity, Func<object[],OUT> visitor, Affix affix, string operation, string nodeName = null) 
-    {
-        Func<object[], OUT> loggedVisitor = visitor;
-        
-        OperationMetaData<IN, OUT> operationMeta =
-            new OperationMetaData<IN, OUT>(precedence, Associativity.None, loggedVisitor, Affix.PreFix, operation, nodeName);
-        
-        List<OperationMetaData<IN,OUT >> operationsForPrecedence;
-        if (!_operationsByPrecedence.TryGetValue(precedence, out operationsForPrecedence))
-        {
-            operationsForPrecedence = new List<OperationMetaData<IN, OUT>>();
-        }
-        operationsForPrecedence.Add(operationMeta);
-        _operationsByPrecedence[precedence] = operationsForPrecedence;
-    }
+   
     
     #endregion
 }
