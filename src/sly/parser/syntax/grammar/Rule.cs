@@ -130,6 +130,11 @@ namespace sly.parser.syntax.grammar
         {
             Visitor = visitor;
         }
+        
+        public void SetVisitor(Func<object[],OUT> visitorLambda)
+        {
+            VisitorLambda = visitorLambda;
+        }
 
         public void SetVisitor(OperationMetaData<IN, OUT> operation)
         {

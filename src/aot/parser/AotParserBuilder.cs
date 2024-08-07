@@ -1,70 +1,172 @@
-using aot.lexer;
-using sly.lexer;
+using sly.i18n;
 using sly.parser;
+using sly.parser.generator;
+using sly.parser.syntax.grammar;
 
 namespace aot.parser;
 
-public class AotParserBuilder
+public class ParserBuilder<IN, OUT> : IProductionBuilder<IN,OUT> where IN : struct
 {
-    public ISyntaxParser<AotLexer, double> FluentInitializeCenericLexer()
+ 
+    
+    Dictionary<string, NonTerminal<IN,OUT>> NonTerminals = new Dictionary<string, NonTerminal<IN,OUT>>();
+    
+    Dictionary<int, List<OperationMetaData<IN, OUT>>> OperationsByPrecedence = new Dictionary<int, List<OperationMetaData<IN, OUT>>>();
+
+    private List<Rule<IN, OUT>> Operands = new List<Rule<IN, OUT>>();
+
+    private Parser<EbnfTokenGeneric, GrammarNode<IN, OUT>> GrammarParser = null;
+    
+    public static IProductionBuilder<IN,OUT> NewBuilder<IN,OUT>(string i18n = "en") where IN : struct
     {
-        AotParser parser = new AotParser();
+        return new ParserBuilder<IN,OUT>(i18n);
+    }
+    
+    private ParserBuilder(string i18n)
+    {
+        var ruleparser = new RuleParser<IN,OUT>();
+        var builder = new sly.parser.generator.ParserBuilder<EbnfTokenGeneric, GrammarNode<IN,OUT>>(i18n);
+
+        GrammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
+
+    }
+
+    private void AddRule(Rule<IN, OUT> rule, bool operand = false)
+    {
+        if (!NonTerminals.TryGetValue(rule.NonTerminalName, out var nonTerminal))
+        {
+            nonTerminal = new NonTerminal<IN, OUT>(rule.NonTerminalName);
+        }
+        nonTerminal.Rules.Add(rule);
+        NonTerminals[rule.NonTerminalName] = nonTerminal;
+        if (operand)
+        {
+            Operands.Add(rule);
+        }
+    }
+
+    private void AddOperation(int precedence,Associativity associativity, Func<object[],OUT> visitor, Affix affix, IN operation, string nodeName)
+    {
+        Func<object[], OUT> loggedVisitor = (object[] args) =>
+        {
+            Console.WriteLine($"calling visitor for operation {affix} - {operation}");
+            return visitor(args);
+        };
         
-        var builder = ParserBuilder<AotLexer,double>.NewBuilder<AotLexer,double > ();
+        OperationMetaData<IN, OUT> operationMeta =
+            new OperationMetaData<IN, OUT>(precedence, Associativity.None, loggedVisitor, Affix.PreFix, operation, nodeName);
         
+        List<OperationMetaData<IN,OUT >> operationsForPrecedence;
+        if (!OperationsByPrecedence.TryGetValue(precedence, out operationsForPrecedence))
+        {
+            operationsForPrecedence = new List<OperationMetaData<IN, OUT>>();
+        }
+        operationsForPrecedence.Add(operationMeta);
+        OperationsByPrecedence[precedence] = operationsForPrecedence;
+    }
+    
+    private void AddOperation(int precedence,Associativity associativity, Func<object[],OUT> visitor, Affix affix, string operation, string nodeName) 
+    {
+        Func<object[], OUT> loggedVisitor = (object[] args) =>
+        {
+            Console.WriteLine($"calling visitor for operation {affix} - {operation}");
+            return visitor(args);
+        };
         
+        OperationMetaData<IN, OUT> operationMeta =
+            new OperationMetaData<IN, OUT>(precedence, Associativity.None, loggedVisitor, Affix.PreFix, operation, nodeName);
         
-        
-        var p = builder.Production("root : SimpleExpressionParser_expressions", (args) =>
+        List<OperationMetaData<IN,OUT >> operationsForPrecedence;
+        if (!OperationsByPrecedence.TryGetValue(precedence, out operationsForPrecedence))
+        {
+            operationsForPrecedence = new List<OperationMetaData<IN, OUT>>();
+        }
+        operationsForPrecedence.Add(operationMeta);
+        OperationsByPrecedence[precedence] = operationsForPrecedence;
+    }
+    
+    public IProductionBuilder<IN,OUT> Production(string ruleString, Func<object[], OUT> visitor)
+    {
+        var r = GrammarParser.Parse(ruleString);
+        if (r.IsOk)
+        {
+            var rule = r.Result as Rule<IN, OUT>;
+            AddRule(rule, false);    
+        }
+
+        return this;
+    }
+    
+    public IProductionBuilder<IN, OUT> Operand(string ruleString, Func<object[], OUT> visitor)
+    {
+        // TODO : operand 
+        var r = GrammarParser.Parse(ruleString);
+        if (r.IsOk)
+        {
+            var rule = r.Result as Rule<IN, OUT>;
+            rule.SetVisitor((args =>
             {
-                var result = parser.Root((double)args[0]);
-                return result;
-            })
-            .Right(10,AotLexer.PLUS, (args =>
-            {
-                double result = parser.BinaryTermExpression((double)args[0], (Token<AotLexer>)args[1], (double)args[2]);
-                return result;
-            }))
-            .Right(10,AotLexer.MINUS, (args =>
-            {
-                double result = parser.BinaryTermExpression((double)args[1], (Token<AotLexer>)args[2], (double)args[3]);
-                return result;
-            }))
-            .Right(50,AotLexer.TIMES, (args =>
-            {
-                double result = parser.BinaryFactorExpression((double)args[0], (Token<AotLexer>)args[1], (double)args[2]);
-                return result;
-            }))
-            .Right(50, AotLexer.DIVIDE, (args =>
-            {
-                double result = parser.BinaryFactorExpression((double)args[1], (Token<AotLexer>)args[2], (double)args[3]);
-                return result;
-            }))
-            .Prefix(100,AotLexer.MINUS, (object[] args) =>
-            {
-                return parser.PreFixExpression((Token<AotLexer>)args[0], (double)args[1]);
-            })
-            .Postfix(100,AotLexer.FACTORIAL, (object[] args) =>
-            {
-                return parser.PostFixExpression((double)args[0], (Token<AotLexer>)args[1]);
-            })
-            .Operand("operand : primary_value", args =>
-            {
-                return parser.OperandValue((double)args[0]);
-            })
-            .Production("primary_value : DOUBLE", args =>
-            {
-                return parser.OperandDouble((Token<AotLexer>)args[0]);
-            })
-            .Production("primary_value : INT", args =>
-            {
-                return parser.OperandInt((Token<AotLexer>)args[0]);
-            })
-            .Production("primary_value : LPAREN SimpleExpressionParser_expressions RPAREN", args =>
-            {
-                return parser.OperandGroup((Token<AotLexer>)args[0], (double)args[1], (Token<AotLexer>)args[2]);
-            })
-            .Build();
-        return p;
+                Console.WriteLine($"calling visitor for rule {rule.RuleString}");
+                return visitor(args);
+            } ));
+            AddRule(rule, true);    
+        }
+
+        return this;
+    }
+
+    public IProductionBuilder<IN, OUT> Right(int precedence, IN operation, Func<object[], OUT> visitor)
+    {
+        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation,"");
+        return this;
+    }
+
+    public IProductionBuilder<IN, OUT> Right(int precedence, string explicitOperation, Func<object[], OUT> visitor)
+    {
+        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,explicitOperation,"");
+        return this;
+    }
+
+    public IProductionBuilder<IN, OUT> Left(int precedence, IN operation, Func<object[], OUT> visitor)
+    {
+        AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,operation,"");
+        return this;
+    }
+
+    public IProductionBuilder<IN, OUT> Left(int precedence, string explicitOperation, Func<object[], OUT> visitor)
+    {
+        AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,explicitOperation,"");
+        return this;
+    }
+
+    public IProductionBuilder<IN, OUT> Prefix(int precedence, IN operation, Func<object[], OUT> visitor)
+    {
+       AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,operation,"");
+       return this;
+    }
+
+    public IProductionBuilder<IN, OUT> Prefix(int precedence, string explicitOperation, Func<object[], OUT> visitor)
+    {
+        AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,explicitOperation,"");
+        return this;
+    }
+
+    public IProductionBuilder<IN, OUT> Postfix(int precedence, IN operation, Func<object[], OUT> visitor)
+    {
+        AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,operation,"");
+        return this;
+    }
+
+    public IProductionBuilder<IN, OUT> Postfix(int precedence, string explicitOperation, Func<object[], OUT> visitor)
+    {
+        AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,explicitOperation,"");
+        return this;
+    }
+
+    public ISyntaxParser<IN, OUT> Build()
+    {
+        // TODO
+        var b = new EBNFParserBuilder<IN,OUT>("en");
+        return null;
     }
 }
