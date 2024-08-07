@@ -13,6 +13,8 @@ namespace sly.parser.generator
         
         public string StartingRule { get; set; }
         public Dictionary<string, NonTerminal<IN,OUT>> NonTerminals { get; set; }
+        
+        public List<Rule<IN,OUT>> OperandRules { get; set; } 
 
         public bool UsesOperations { get; set; }
 

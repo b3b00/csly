@@ -139,7 +139,7 @@ namespace sly.parser.generator
         }
 
 
-        protected virtual ISyntaxParser<IN, OUT> BuildSyntaxParser(ParserConfiguration<IN, OUT> conf,
+        internal virtual ISyntaxParser<IN, OUT> BuildSyntaxParser(ParserConfiguration<IN, OUT> conf,
             ParserType parserType, string rootRule)
         {
             ISyntaxParser<IN, OUT> parser = null;

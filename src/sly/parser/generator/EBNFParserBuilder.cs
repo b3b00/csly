@@ -106,7 +106,7 @@ namespace sly.parser.generator
         }
 
 
-        protected override ISyntaxParser<IN, OUT> BuildSyntaxParser(ParserConfiguration<IN, OUT> conf,
+        internal override ISyntaxParser<IN, OUT> BuildSyntaxParser(ParserConfiguration<IN, OUT> conf,
             ParserType parserType,
             string rootRule)
         {

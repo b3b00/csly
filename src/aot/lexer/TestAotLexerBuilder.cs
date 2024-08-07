@@ -4,7 +4,7 @@ using sly.lexer;
 
 namespace aot.lexer;
 
-public class AotLexerBuilder
+public class TestAotLexerBuilder
 {
 
 
@@ -19,24 +19,44 @@ public class AotLexerBuilder
     /// this should be the code to generate
     /// </summary>
     /// <returns></returns>
-    public ILexer<AotLexer> FluentInitializeCenericLexer()
+    public IAotLexerBuilder<AotLexer> FluentInitializeCenericLexerForParserTest()
     {
         var builder = AotLexerBuilder<AotLexer>.NewBuilder<AotLexer>();
-        var lexer = builder.Double(AotLexer.DOUBLE)
+        var lexerBuilder = builder.Double(AotLexer.DOUBLE)
             .Sugar(AotLexer.PLUS, "+")
-            .Keyword(AotLexer.PLUS,"PLUS")
-            .Labeled("en","sum")
-            .Labeled("fr","somme")
+            .Keyword(AotLexer.PLUS, "PLUS")
+            .Labeled("en", "sum")
+            .Labeled("fr", "somme")
             .Sugar(AotLexer.MINUS, "-")
             .Sugar(AotLexer.TIMES, "*")
             .Sugar(AotLexer.DIVIDE, "/")
             .Sugar(AotLexer.LPAREN, "(")
             .Sugar(AotLexer.RPAREN, ")")
-            .Sugar(AotLexer.FACTORIAL, "!")
+            .Sugar(AotLexer.INCREMENT, "++")
+            .AlphaNumId(AotLexer.IDENTIFIER);
+            
+        return lexerBuilder;
+    }
+    
+    public IAotLexerBuilder<AotLexer> FluentInitializeCenericLexerForLexerTest()
+    {
+        var builder = AotLexerBuilder<AotLexer>.NewBuilder<AotLexer>();
+        var lexerBuilder = builder.Double(AotLexer.DOUBLE)
+            .Sugar(AotLexer.PLUS, "+")
+            .Keyword(AotLexer.PLUS, "PLUS")
+            .Labeled("en", "sum")
+            .Labeled("fr", "somme")
+            .Sugar(AotLexer.MINUS, "-")
+            .Sugar(AotLexer.TIMES, "*")
+            .Sugar(AotLexer.DIVIDE, "/")
+            .Sugar(AotLexer.LPAREN, "(")
+            .Sugar(AotLexer.RPAREN, ")")
+            //.Sugar(AotLexer.FACTORIAL, "!")
             .Sugar(AotLexer.INCREMENT, "++")
             .AlphaNumId(AotLexer.IDENTIFIER)
-            .Build();
-        return lexer;
+            .WithExplicitTokens(new List<string>() { "!" });
+            
+        return lexerBuilder;
     }
 
 

@@ -108,7 +108,7 @@ namespace sly.parser
 
                 string value = UnexpectedToken.Value;
                 
-                return I18N.Instance.GetText(_i18N,i18NMessage, $"{value} ({UnexpectedToken.Position.ToString()})", UnexpectedToken.Label.ToString(), expecting.ToString());
+                return I18N.Instance.GetText(_i18N,i18NMessage, $"{value} ({UnexpectedToken.Position.ToString()})", UnexpectedToken?.Label?.ToString(), expecting.ToString());
             }
         }
 

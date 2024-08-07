@@ -101,7 +101,8 @@ namespace sly.parser.generator
             return result;
         }
 
-        private bool GenerateExpressionParserRules(ParserConfiguration<IN, OUT> configuration, Type parserClass, BuildResult<ParserConfiguration<IN, OUT>> result,
+        // TODO AOT : add operands
+        internal bool GenerateExpressionParserRules(ParserConfiguration<IN, OUT> configuration, Type parserClass, BuildResult<ParserConfiguration<IN, OUT>> result,
             Dictionary<int, List<OperationMetaData<IN, OUT>>> operationsByPrecedence, out BuildResult<ParserConfiguration<IN, OUT>> buildResult)
         {
             if (operationsByPrecedence.Count > 0)
@@ -135,6 +136,12 @@ namespace sly.parser.generator
         private string GetOperandNonTerminal(Type parserClass, ParserConfiguration<IN,OUT> configuration,
             BuildResult<ParserConfiguration<IN, OUT>> result) 
         {
+            if (configuration.OperandRules != null && configuration.OperandRules.Any())
+            {
+                string nonTerminalName = string.Join("-",configuration.OperandRules.Select(x => x.NonTerminalName).Distinct());
+                return nonTerminalName;
+            }
+            
             List<MethodInfo> methods;
             methods = parserClass.GetMethods().ToList<MethodInfo>();
             

@@ -5,41 +5,44 @@ using sly.i18n;
 
 namespace sly.lexer;
 
-public class AotLexerBuilder<T> :  ILexemeBuilder<T> where T : struct
+public class AotLexerBuilder<T> :  IAotLexerBuilder<T> where T : struct
 {
     
     
-    private Dictionary<T, (List<LexemeAttribute>, List<LexemeLabelAttribute>)> Lexemes =
-        new Dictionary<T, (List<LexemeAttribute>, List<LexemeLabelAttribute>)>();
+    private Dictionary<T, (List<LexemeAttribute>, List<LexemeLabelAttribute>)> _lexemes;
 
-    private T? CurrentLexeme;
-    public static ILexemeBuilder<A> NewBuilder<A>() where A : struct
+    private IList<CommentAttribute> _comments = new List<CommentAttribute>();
+
+    private T? _currentLexeme;
+    private IList<string> _explicitTokens;
+
+    public static IAotLexerBuilder<A> NewBuilder<A>() where A : struct
     {
         return new AotLexerBuilder<A>();
     }
 
     private AotLexerBuilder()
     {
-        Lexemes = new Dictionary<T, (List<LexemeAttribute>, List<LexemeLabelAttribute>)>();
+        _lexemes = new Dictionary<T, (List<LexemeAttribute>, List<LexemeLabelAttribute>)>();
     }
 
     private void Add(T tokenId, LexemeAttribute lexeme, LexemeLabelAttribute label)
     {
-        CurrentLexeme = tokenId;
+        _currentLexeme = tokenId;
         (List<LexemeAttribute> tokens, List<LexemeLabelAttribute> labels) lexemes = (null,null);
-        if (!Lexemes.TryGetValue(tokenId, out lexemes))
+        if (!_lexemes.TryGetValue(tokenId, out lexemes))
         {
             lexemes = (new List<LexemeAttribute>(), new List<LexemeLabelAttribute>());
         }
         lexemes.tokens.Add(lexeme);
         lexemes.labels.Add(label);
-        Lexemes[tokenId] = lexemes;
+        _lexemes[tokenId] = lexemes;
     }
     
     private void AddLabel(string lang, string label)
     {
         (List<LexemeAttribute> tokens, List<LexemeLabelAttribute> labels) lexemes = (null,null);
-        if (Lexemes.TryGetValue(CurrentLexeme.Value, out lexemes))
+        if (_lexemes.TryGetValue(_currentLexeme.Value, out lexemes))
         {
             if (lexemes.labels == null)
             {
@@ -49,54 +52,72 @@ public class AotLexerBuilder<T> :  ILexemeBuilder<T> where T : struct
         }
         else
         {
-            throw new InvalidOperationException($"{CurrentLexeme.Value} does not exist !");
+            throw new InvalidOperationException($"{_currentLexeme.Value} does not exist !");
         }
     }
     
-    public ILexemeBuilder<T> Double(T tokenId, string decimalDelimiter = ".", int channel = Channels.Main)
+    public IAotLexerBuilder<T> Double(T tokenId, string decimalDelimiter = ".", int channel = Channels.Main)
     {
         Add(tokenId, new LexemeAttribute(GenericToken.Double, channel:Channels.Main, parameters:decimalDelimiter) , null);
         return this;
     }
 
-    public ILexemeBuilder<T> Integer(T tokenId, int channel = Channels.Main)
+    public IAotLexerBuilder<T> Integer(T tokenId, int channel = Channels.Main)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.Int, channel:Channels.Main) , null);
         return this;
     }
 
-    public ILexemeBuilder<T> Sugar(T tokenId, string token, int channel = Channels.Main)
+    public IAotLexerBuilder<T> Sugar(T tokenId, string token, int channel = Channels.Main)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.SugarToken, channel:Channels.Main, parameters:token), null);
         return this;
     }
     
-    public ILexemeBuilder<T> Keyword(T tokenId, string token, int channel = Channels.Main)
+    public IAotLexerBuilder<T> Keyword(T tokenId, string token, int channel = Channels.Main)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.KeyWord, channel:Channels.Main, parameters:token) ,null);
         return this;
     }
 
-    public ILexemeBuilder<T> AlphaNumId(T tokenId)
+    public IAotLexerBuilder<T> AlphaNumId(T tokenId)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.Identifier,IdentifierType.AlphaNumeric, channel:Channels.Main) , null);
         return this;
     }
 
-    public ILexemeBuilder<T> Labeled(string lang, string label)
+    public IAotLexerBuilder<T> Labeled(string lang, string label)
     {
-        if (CurrentLexeme == null)
+        if (_currentLexeme == null)
         {
             throw new InvalidOperationException("no lexeme is currently defined");
         }
         AddLabel(lang, label);
         return this;
     }
+    
+    public IAotLexerBuilder<T> SingleLineComment(T tokenId, string start)
+    {
+        _comments.Add(new SingleLineCommentAttribute(start)); // TODO AOT : how is tokenId used ?
+        return this;
+    }
 
+    public IAotLexerBuilder<T> MultiLineComment(T tokenId, string start, string end)
+    {
+        _comments.Add(new MultiLineCommentAttribute(start,end)); // TODO AOT : how is tokenId used ?
+        return this;
+    }
+
+    public IAotLexerBuilder<T> WithExplicitTokens(IList<string> explicitTokens = null)
+    {
+        _explicitTokens = explicitTokens;
+        return this;
+    }
+    
     public ILexer<T> Build()
     {
         BuildResult<ILexer<T>> result = new BuildResult<ILexer<T>>();
-        var lexerResult = LexerBuilder.BuildGenericSubLexers<T>(Lexemes, null, result, "en");
+        var lexerResult = LexerBuilder.BuildGenericSubLexers<T>(_lexemes, null, result, "en",_explicitTokens);
         if (lexerResult.IsOk)
         {
             return lexerResult.Result;
