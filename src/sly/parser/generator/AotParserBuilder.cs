@@ -148,6 +148,8 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
         if (r.IsOk)
         {
             var rule = r.Result as Rule<IN, OUT>;
+            rule.RuleString = ruleString;
+            rule.SetLambdaVisitor(visitor);
             AddRule(rule, false);    
         }
 
@@ -164,11 +166,7 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
         if (r.IsOk)
         {
             var rule = r.Result as Rule<IN, OUT>;
-            rule.SetVisitor((args =>
-            {
-                Console.WriteLine($"calling visitor for rule {rule.RuleString}");
-                return visitor(args);
-            } ));
+            rule.SetVisitor(visitor);
             AddRule(rule, true);    
         }
 
@@ -246,11 +244,7 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
 
     private void AddOperation(int precedence,Associativity associativity, Func<object[],OUT> visitor, Affix affix, IN operation, string nodeName = null)
     {
-        Func<object[], OUT> loggedVisitor = (object[] args) =>
-        {
-            Console.WriteLine($"calling visitor for operation {affix} - {operation}");
-            return visitor(args);
-        };
+        Func<object[], OUT> loggedVisitor = visitor;
         
         OperationMetaData<IN, OUT> operationMeta =
             new OperationMetaData<IN, OUT>(precedence, Associativity.None, loggedVisitor, affix, operation, nodeName);
@@ -266,11 +260,7 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
     
     private void AddOperation(int precedence,Associativity associativity, Func<object[],OUT> visitor, Affix affix, string operation, string nodeName = null) 
     {
-        Func<object[], OUT> loggedVisitor = (object[] args) =>
-        {
-            Console.WriteLine($"calling visitor for operation {affix} - {operation}");
-            return visitor(args);
-        };
+        Func<object[], OUT> loggedVisitor = visitor;
         
         OperationMetaData<IN, OUT> operationMeta =
             new OperationMetaData<IN, OUT>(precedence, Associativity.None, loggedVisitor, Affix.PreFix, operation, nodeName);

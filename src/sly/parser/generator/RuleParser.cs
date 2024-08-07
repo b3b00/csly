@@ -103,7 +103,7 @@ namespace sly.parser.generator
         }
         
         [Production("choices : STRING OR choices ")]
-        public IClause<IN,OUT> ChoicesManyImplicit(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> discardOr, ChoiceClause<IN,OUT> tail)
+        public IClause<IN,OUT> ChoicesManyExplicit(Token<EbnfTokenGeneric> head, Token<EbnfTokenGeneric> discardOr, ChoiceClause<IN,OUT> tail)
         {
             var headClause = BuildTerminalOrNonTerimal(head.Value,discard:false); 
             return new ChoiceClause<IN,OUT>(headClause,tail.Choices);

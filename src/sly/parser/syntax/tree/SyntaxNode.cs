@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -25,6 +26,9 @@ namespace sly.parser.syntax.tree
 
         [JsonIgnore]
         public MethodInfo Visitor { get; set; }
+        
+        [JsonIgnore]
+        public Func<object[],OUT> LambdaVisitor { get; set; }
 
         public bool IsByPassNode { get; set; } = false;
 

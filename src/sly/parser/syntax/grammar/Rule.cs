@@ -26,11 +26,11 @@ namespace sly.parser.syntax.grammar
 
         // visitors for operation rules
         private Dictionary<IN, OperationMetaData<IN, OUT>> VisitorMethodsForOperation { get; }
-
+        
         // visitor for classical rules
         private MethodInfo Visitor { get; set; }
         
-        private Func<object[],OUT> VisitorLambda { get; set; }  
+        private Func<object[],OUT> LambdaVisitor { get; set; }  
 
         public bool IsExpressionRule { get; set; }
         
@@ -108,6 +108,29 @@ namespace sly.parser.syntax.grammar
             return null;
         }
 
+        public Func<object[], OUT> getLambdaVisitor(IN token = default)
+        {
+            Func<object[], OUT> visitor = null;
+            if (IsExpressionRule)
+            {
+                var operation = VisitorMethodsForOperation.TryGetValue(token, out var value)
+                    ? value
+                    : null;
+                visitor = operation?.VisitorLambda;
+            }
+            else
+            {
+                visitor = LambdaVisitor;
+            }
+
+            return visitor;
+        }
+
+        public void SetLambdaVisitor(Func<object[], OUT> lambdaVisitor)
+        {
+            LambdaVisitor = lambdaVisitor;
+        }
+        
         public MethodInfo GetVisitor(IN token = default)
         {
             MethodInfo visitor = null;
@@ -125,7 +148,7 @@ namespace sly.parser.syntax.grammar
 
             return visitor;
         }
-
+        
         public void SetVisitor(MethodInfo visitor)
         {
             Visitor = visitor;
@@ -133,7 +156,7 @@ namespace sly.parser.syntax.grammar
         
         public void SetVisitor(Func<object[],OUT> visitorLambda)
         {
-            VisitorLambda = visitorLambda;
+            LambdaVisitor = visitorLambda;
         }
 
         public void SetVisitor(OperationMetaData<IN, OUT> operation)

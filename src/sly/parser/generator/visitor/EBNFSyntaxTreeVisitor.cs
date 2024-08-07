@@ -89,7 +89,8 @@ namespace sly.parser.generator.visitor
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN, OUT> node, object context = null)
         {
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
-            if (node.Visitor != null || node.IsByPassNode)
+            
+            if (node.LambdaVisitor != null || node.Visitor != null || node.IsByPassNode)
             {
                 
                 
@@ -151,10 +152,18 @@ namespace sly.parser.generator.visitor
                             args.Add(context);
                         }
 
-                        method = node.Visitor;
-                        var t = method.Invoke(ParserVsisitorInstance, args.ToArray());
-                        var res = (OUT) t;
-                        result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                        OUT value = default;
+                        if (node.LambdaVisitor != null)
+                        {
+                            value = node.LambdaVisitor(args.ToArray());
+                        }
+                        if (node.Visitor != null)
+                        {
+                            method = node.Visitor;
+                            var t = method.Invoke(ParserVsisitorInstance, args.ToArray());
+                            value = (OUT)t;
+                        }
+                        result = SyntaxVisitorResult<IN, OUT>.NewValue(value);
                     }
                     catch (TargetInvocationException tie)
                     {

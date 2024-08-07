@@ -33,8 +33,7 @@ if (lexerBuilder != null)
 // testing parser builder
 var pBuilder = new TestAotParserBuilder();
 var b = pBuilder.FluentInitializeCenericLexer();
-Console.WriteLine(b.Configuration.Dump());
-var r = b.Parse("2 + 2");
+var r = b.Parse("2 + 2 * 2");
 if (r.IsOk)
 {
     Console.WriteLine($"parse OK : {r.Result}");
