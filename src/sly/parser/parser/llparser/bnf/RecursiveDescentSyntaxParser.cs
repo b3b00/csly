@@ -63,7 +63,7 @@ namespace sly.parser.llparser.bnf
                     nt.GetPossibleLeadingTokens().ToArray()));
             }
 
-            SyntaxParseResult<IN> result = null;
+            SyntaxParseResult<IN, OUT> result = null;
 
 
             if (rs.Count > 0)
@@ -73,7 +73,7 @@ namespace sly.parser.llparser.bnf
                 if (result == null)
                 {
                     int lastPosition = -1;
-                    List<SyntaxParseResult<IN>> furtherResults = new List<SyntaxParseResult<IN>>();
+                    List<SyntaxParseResult<IN, OUT>> furtherResults = new List<SyntaxParseResult<IN, OUT>>();
                     //List<UnexpectedTokenSyntaxError<IN>> furtherErrors = new List<UnexpectedTokenSyntaxError<IN>>();
                     foreach (var r in rs)
                     {
@@ -101,7 +101,7 @@ namespace sly.parser.llparser.bnf
 
             if (result == null)
             {
-                result = new SyntaxParseResult<IN>();
+                result = new SyntaxParseResult<IN, OUT>();
                 errors.Sort();
 
                 if (errors.Count > 0)
@@ -184,7 +184,7 @@ namespace sly.parser.llparser.bnf
                 }
             }
 
-            var result = new SyntaxParseResult<IN>();
+            var result = new SyntaxParseResult<IN, OUT>();
             result.IsError = isError;
             result.Errors = errors;
             result.EndingPosition = currentPosition;
@@ -224,7 +224,7 @@ namespace sly.parser.llparser.bnf
                     allAcceptableTokens));
             }
 
-            var error = new SyntaxParseResult<IN>();
+            var error = new SyntaxParseResult<IN, OUT>();
             error.IsError = true;
             error.Root = null;
             error.IsEnded = false;

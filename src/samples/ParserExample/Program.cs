@@ -526,7 +526,7 @@ return r";
             var parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
             var result = parser.Result.Parse("2 + 2 * 3");
             var tree = result.SyntaxTree;
-            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken, int>();
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile();
             // File.Delete("c:\\temp\\tree.dot");
@@ -650,7 +650,7 @@ return r";
                 string ko2 = "|B|plotshape(data, style=shapexcross)|E|";
                 
                 var r = parser.Parse(ko1);
-                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
+                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken,object>();
                 var root = graphviz.VisitTree(r.SyntaxTree);
                 var graph = graphviz.Graph.Compile();
                 r = parser.Parse(ko2);
@@ -983,8 +983,8 @@ else
             Assert.NotNull(parser);
             parser.SyntaxParseCallback = node =>
             {
-                GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer> grapher =
-                    new GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer>();
+                GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer, Ast> grapher =
+                    new GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer, Ast>();
                 var root = grapher.VisitTree(node);
                 var graph = grapher.Graph.Compile();
                 // File.WriteAllText(@"c:\tmp\graph.dot", graph);
@@ -1401,7 +1401,7 @@ while a < 10 do
             else
             {
                 ;
-                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
+                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken,int>();
                 var root = graphviz.VisitTree(r.SyntaxTree);
                 string graph = graphviz.Graph.Compile();
                 File.Delete("c:\\temp\\tree.dot");

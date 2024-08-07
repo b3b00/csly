@@ -34,7 +34,7 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 
         var innerRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
         var greaterIndex = 0;
-        var rulesResults = new List<SyntaxParseResult<IN>>();
+        var rulesResults = new List<SyntaxParseResult<IN, OUT>>();
         while (i < rules.Count)
         {
             var innerrule = rules[i];
@@ -73,12 +73,12 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         }
 
         errors.AddRange(innerRuleErrors);
-        SyntaxParseResult<IN> max = null;
+        SyntaxParseResult<IN, OUT> max = null;
         int okEndingPosition = -1;
         int koEndingPosition = -1;
         bool hasOk = false;
-        SyntaxParseResult<IN> maxOk = null;
-        SyntaxParseResult<IN> maxKo = null;
+        SyntaxParseResult<IN, OUT> maxOk = null;
+        SyntaxParseResult<IN, OUT> maxKo = null;
         foreach (var rulesResult in rulesResults)
         {
             if (rulesResult.IsOk)
@@ -108,7 +108,7 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         }
 
 
-        var result = new SyntaxParseResult<IN>();
+        var result = new SyntaxParseResult<IN, OUT>();
         result.Errors = errors;
         result.Root = max.Root;
         result.EndingPosition = max.EndingPosition;

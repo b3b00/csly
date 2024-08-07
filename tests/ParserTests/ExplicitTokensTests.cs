@@ -129,7 +129,7 @@ namespace ParserTests
             var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
             Check.That(r).IsOkParsing();
             var tree = r.SyntaxTree;
-            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExplicitTokensTokens>();
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExplicitTokensTokens,double>();
             var dump = tree.Dump("\t");
             var json = $@"{{
 {tree.ToJson()}
