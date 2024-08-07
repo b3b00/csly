@@ -10,7 +10,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 
-    public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN,OUT> clause, int position,
+    public SyntaxParseResult<IN, OUT> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN,OUT> clause, int position,
         SyntaxParsingContext<IN,OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
@@ -18,21 +18,21 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             return parseResult;
         }
 
-        var result = new SyntaxParseResult<IN>();
-        var manyNode = new ManySyntaxNode<IN>($"{clause.Clause.ToString()}*");
+        var result = new SyntaxParseResult<IN, OUT>();
+        var manyNode = new ManySyntaxNode<IN, OUT>($"{clause.Clause.ToString()}*");
         var currentPosition = position;
         var innerClause = clause.Clause;
         var stillOk = true;
 
 
-        SyntaxParseResult<IN> lastInnerResult = null;
+        SyntaxParseResult<IN, OUT> lastInnerResult = null;
 
         var innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 
         bool hasByPasNodes = false;
         while (stillOk)
         {
-            SyntaxParseResult<IN> innerResult = null;
+            SyntaxParseResult<IN, OUT> innerResult = null;
             switch (innerClause)
             {
                 case TerminalClause<IN,OUT> term:
@@ -90,7 +90,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         return result;
     }
 
-    public SyntaxParseResult<IN> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN,OUT> clause, int position,
+    public SyntaxParseResult<IN, OUT> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN,OUT> clause, int position,
         SyntaxParsingContext<IN,OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
@@ -98,16 +98,16 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             return parseResult;
         }
 
-        var result = new SyntaxParseResult<IN>();
-        var manyNode = new ManySyntaxNode<IN>($"{clause.Clause.ToString()}+");
+        var result = new SyntaxParseResult<IN, OUT>();
+        var manyNode = new ManySyntaxNode<IN, OUT>($"{clause.Clause.ToString()}+");
         var currentPosition = position;
         var innerClause = clause.Clause;
         bool isError;
 
-        SyntaxParseResult<IN> lastInnerResult = null;
+        SyntaxParseResult<IN, OUT> lastInnerResult = null;
 
         bool hasByPasNodes = false;
-        SyntaxParseResult<IN> firstInnerResult = null;
+        SyntaxParseResult<IN, OUT> firstInnerResult = null;
         var innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 
         switch (innerClause)
@@ -147,7 +147,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             if (nextResult != null && !nextResult.IsError)
             {
                 currentPosition = nextResult.EndingPosition;
-                var moreChildren = (ManySyntaxNode<IN>)nextResult.Root;
+                var moreChildren = (ManySyntaxNode<IN, OUT>)nextResult.Root;
                 manyNode.Children.AddRange(moreChildren.Children);
             }
 

@@ -20,31 +20,31 @@ public class AotParserBuilder
                 var result = parser.Root((double)args[0]);
                 return result;
             })
-            .Right(AotLexer.PLUS, (args =>
+            .Right(10,AotLexer.PLUS, (args =>
             {
                 double result = parser.BinaryTermExpression((double)args[0], (Token<AotLexer>)args[1], (double)args[2]);
                 return result;
             }))
-            .Right(AotLexer.MINUS, (args =>
+            .Right(10,AotLexer.MINUS, (args =>
             {
                 double result = parser.BinaryTermExpression((double)args[1], (Token<AotLexer>)args[2], (double)args[3]);
                 return result;
             }))
-            .Right(AotLexer.TIMES, (args =>
+            .Right(50,AotLexer.TIMES, (args =>
             {
                 double result = parser.BinaryFactorExpression((double)args[0], (Token<AotLexer>)args[1], (double)args[2]);
                 return result;
             }))
-            .Right(AotLexer.DIVIDE, (args =>
+            .Right(50, AotLexer.DIVIDE, (args =>
             {
                 double result = parser.BinaryFactorExpression((double)args[1], (Token<AotLexer>)args[2], (double)args[3]);
                 return result;
             }))
-            .Prefix(AotLexer.MINUS, (object[] args) =>
+            .Prefix(100,AotLexer.MINUS, (object[] args) =>
             {
                 return parser.PreFixExpression((Token<AotLexer>)args[0], (double)args[1]);
             })
-            .Postfix(AotLexer.FACTORIAL, (object[] args) =>
+            .Postfix(100,AotLexer.FACTORIAL, (object[] args) =>
             {
                 return parser.PostFixExpression((double)args[0], (Token<AotLexer>)args[1]);
             })

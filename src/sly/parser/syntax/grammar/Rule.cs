@@ -14,7 +14,7 @@ namespace sly.parser.syntax.grammar
         public Rule()
         {
             Clauses = new List<IClause<IN,OUT>>();
-            VisitorMethodsForOperation = new Dictionary<IN, OperationMetaData<IN>>();
+            VisitorMethodsForOperation = new Dictionary<IN, OperationMetaData<IN, OUT>>();
             Visitor = null;
             IsSubRule = false;
             NodeName = "";
@@ -25,7 +25,7 @@ namespace sly.parser.syntax.grammar
         public bool IsByPassRule { get; set; } = false;
 
         // visitors for operation rules
-        private Dictionary<IN, OperationMetaData<IN>> VisitorMethodsForOperation { get; }
+        private Dictionary<IN, OperationMetaData<IN, OUT>> VisitorMethodsForOperation { get; }
 
         // visitor for classical rules
         private MethodInfo Visitor { get; set; }
@@ -85,7 +85,7 @@ namespace sly.parser.syntax.grammar
                                   || Clauses.Count == 1 && Clauses[0].MayBeEmpty();
 
 
-        public OperationMetaData<IN> GetOperation(IN token = default)
+        public OperationMetaData<IN, OUT> GetOperation(IN token = default)
         {
             if (IsExpressionRule)
             {
@@ -98,7 +98,7 @@ namespace sly.parser.syntax.grammar
             return null;
         }
         
-        public List<OperationMetaData<IN>> GetOperations()
+        public List<OperationMetaData<IN, OUT>> GetOperations()
         {
             if (IsExpressionRule)
             {
@@ -131,7 +131,7 @@ namespace sly.parser.syntax.grammar
             Visitor = visitor;
         }
 
-        public void SetVisitor(OperationMetaData<IN> operation)
+        public void SetVisitor(OperationMetaData<IN, OUT> operation)
         {
             VisitorMethodsForOperation[operation.OperatorToken] = operation;
         }

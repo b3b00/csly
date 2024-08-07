@@ -9,14 +9,14 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 
-    public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, NonTerminalClause<IN,OUT> nonTermClause,
+    public SyntaxParseResult<IN, OUT> ParseNonTerminal(IList<Token<IN>> tokens, NonTerminalClause<IN,OUT> nonTermClause,
         int currentPosition, SyntaxParsingContext<IN,OUT> parsingContext)
     {
         var result = ParseNonTerminal(tokens, nonTermClause.NonTerminalName, currentPosition, parsingContext);
         return result;
     }
 
-    public SyntaxParseResult<IN> ParseNonTerminal(IList<Token<IN>> tokens, string nonTerminalName,
+    public SyntaxParseResult<IN, OUT> ParseNonTerminal(IList<Token<IN>> tokens, string nonTerminalName,
         int currentPosition, SyntaxParsingContext<IN,OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(new NonTerminalClause<IN,OUT>(nonTerminalName), currentPosition,

@@ -12,7 +12,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 
-    public SyntaxParseResult<IN> ParseChoice(IList<Token<IN>> tokens, ChoiceClause<IN,OUT> clause,
+    public SyntaxParseResult<IN, OUT> ParseChoice(IList<Token<IN>> tokens, ChoiceClause<IN,OUT> clause,
         int position, SyntaxParsingContext<IN,OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
@@ -22,7 +22,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 
         var currentPosition = position;
 
-        SyntaxParseResult<IN> result = new SyntaxParseResult<IN>
+        SyntaxParseResult<IN, OUT> result = new SyntaxParseResult<IN, OUT>
         {
             IsError = true,
             IsEnded = false,
@@ -46,9 +46,9 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 
             if (result.IsOk)
             {
-                if (clause.IsTerminalChoice && clause.IsDiscarded && result.Root is SyntaxLeaf<IN> leaf)
+                if (clause.IsTerminalChoice && clause.IsDiscarded && result.Root is SyntaxLeaf<IN, OUT> leaf)
                 {
-                    var discardedToken = new SyntaxLeaf<IN>(leaf.Token, true);
+                    var discardedToken = new SyntaxLeaf<IN, OUT>(leaf.Token, true);
                     result.Root = discardedToken;
                 }
 

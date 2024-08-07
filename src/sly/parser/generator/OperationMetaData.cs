@@ -1,11 +1,12 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace sly.parser.generator
 {
-    public class OperationMetaData<T> where T : struct
+    public class OperationMetaData<IN, OUT> where IN : struct
     {
-        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, T oper, string nodeName)
+        public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, IN oper, string nodeName)
         {
             Precedence = precedence;
             Associativity = assoc;
@@ -24,14 +25,36 @@ namespace sly.parser.generator
             Affix = affix;
             NodeNodeName = nodeNodeName;
         }
+        
+        public OperationMetaData(int precedence, Associativity assoc, Func<object[],OUT> lambda, Affix affix, IN oper, string nodeName)
+        {
+            Precedence = precedence;
+            Associativity = assoc;
+            VisitorLambda = lambda;
+            OperatorToken = oper;
+            Affix = affix;
+            NodeNodeName = nodeName;
+        }
+        
+        public OperationMetaData(int precedence, Associativity assoc, Func<object[],OUT> lambda, Affix affix, string oper, string nodeNodeName)
+        {
+            Precedence = precedence;
+            Associativity = assoc;
+            VisitorLambda = lambda;
+            ExplicitOperatorToken = oper;
+            Affix = affix;
+            NodeNodeName = nodeNodeName;
+        }
 
         public int Precedence { get; set; }
 
         public Associativity Associativity { get; set; }
 
         public MethodInfo VisitorMethod { get; set; }
+        
+        public Func<object[],OUT> VisitorLambda { get; set; }  
 
-        public T OperatorToken { get; set; }
+        public IN OperatorToken { get; set; }
 
         public string Operatorkey => NodeNodeName ?? (IsExplicitOperatorToken ? ExplicitOperatorToken : OperatorToken.ToString());
 
