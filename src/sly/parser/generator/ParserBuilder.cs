@@ -275,7 +275,7 @@ namespace sly.parser.generator
 
         #region parser checking
 
-        private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result)
+        internal BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result)
         {
             var checkers = new List<ParserChecker<IN, OUT>>
             {

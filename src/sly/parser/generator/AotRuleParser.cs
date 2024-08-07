@@ -21,7 +21,7 @@ public class AotRuleParser<IN,OUT> where IN: struct
             .Sugar(EbnfTokenGeneric.OR, "|")
             .Sugar(EbnfTokenGeneric.LCROG, "[")
             .Sugar(EbnfTokenGeneric.RCROG, "]")
-            .String(EbnfTokenGeneric.STRING);
+            .String(EbnfTokenGeneric.STRING,"'","\\");
         return builder;
     }
 
@@ -68,11 +68,16 @@ public class AotRuleParser<IN,OUT> where IN: struct
                 return instance.SimpleDiscardedClause((Token<EbnfTokenGeneric>)args[0],
                     (Token<EbnfTokenGeneric>)args[1]);
             }))
+            .Production("clause : STRING DISCARD", (args =>
+            {
+                return instance.ExplicitTokenClauseDiscarded((Token<EbnfTokenGeneric>)args[0],
+                    (Token<EbnfTokenGeneric>)args[1]);
+            }))
             .Production("clause : choiceclause", (args =>
             {
                 return instance.AlternateClause((ChoiceClause<IN, OUT>)args[0]);
             }))
-            .Production("choiceclause : LCROG choices LCROG", (args =>
+            .Production("choiceclause : LCROG choices RCROG", (args =>
             {
                 return instance.AlternateChoices((Token<EbnfTokenGeneric>)args[0], (IClause<IN, OUT>)args[1],
                     (Token<EbnfTokenGeneric>)args[2]);
@@ -110,6 +115,11 @@ public class AotRuleParser<IN,OUT> where IN: struct
                 return instance.GroupOptional((Token<EbnfTokenGeneric>)args[0], (GroupClause<IN, OUT>)args[1],
                     (Token<EbnfTokenGeneric>)args[2], (Token<EbnfTokenGeneric>)args[3]);
             }))
+            .Production("clause : LPAREN groupclauses RPAREN", (args =>
+            {
+                return instance.Group((Token<EbnfTokenGeneric>)args[0], (GroupClause<IN, OUT>)args[1],
+                    (Token<EbnfTokenGeneric>)args[2]);
+            }))
             .Production("groupclause : IDENTIFIER", (args =>
             {
                 return instance.GroupClause((Token<EbnfTokenGeneric>)args[0]);
@@ -140,6 +150,23 @@ public class AotRuleParser<IN,OUT> where IN: struct
             {
                 return instance.GroupClauses((GroupClause<IN, OUT>)args[0], (GroupClause<IN, OUT>)args[1]);
             }))
+            .Production("clause : choiceclause DISCARD", args =>
+            {
+                return instance.AlternateDiscardedClause((ChoiceClause<IN, OUT>)args[0],
+                    (Token<EbnfTokenGeneric>)args[1]);
+            })
+            .Production("clause : choiceclause ONEORMORE ", args =>
+            {
+                return instance.ChoiceOneOrMore((ChoiceClause<IN, OUT>)args[0], (Token<EbnfTokenGeneric>)args[1]);
+            })
+            .Production("clause : choiceclause ZEROORMORE ", args =>
+            {
+                return instance.ChoiceZeroOrMore((ChoiceClause<IN, OUT>)args[0], (Token<EbnfTokenGeneric>)args[1]);
+            })
+            .Production("clause : choiceclause OPTION ", args =>
+            {
+                return instance.ChoiceOptional((ChoiceClause<IN, OUT>)args[0], (Token<EbnfTokenGeneric>)args[1]);
+            })
             .WithLexerbuilder(GetEbnfLexerBuilder());
         
             var parser = builder.BuildParser();

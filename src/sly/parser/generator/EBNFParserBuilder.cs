@@ -43,12 +43,12 @@ namespace sly.parser.generator
 
             var ruleparser = new RuleParser<IN,OUT>();
 
-            // using AOT
-            // var b = new AotRuleParser<IN, OUT>();
-            // var grammarParser = b.BuildParser(this.I18N);
-            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN,OUT>>(I18N);
-
-            var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
+            //using AOT
+            var b = new AotRuleParser<IN, OUT>();
+            var grammarParser = b.BuildParser(this.I18N);
+            // var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN,OUT>>(I18N);
+            //
+            // var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
 
 
             var result = new BuildResult<Parser<IN, OUT>>();
