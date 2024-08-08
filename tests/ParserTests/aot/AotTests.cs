@@ -307,8 +307,8 @@ public class AotTests
         string program = @"
 a:=0 
 while a < 10 do 
-    print a
-    a := a +1
+	print a
+	a := a +1
 ";
         var programResult = lexer.Result.Tokenize(program);
         Check.That(programResult).IsOkLexing();
