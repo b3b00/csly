@@ -1,11 +1,15 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using aot.parser;
 using csly.indentedWhileLang.parser;
+using csly.whileLang.model;
 using NFluent;
 using ParserTests.aot.expressions;
+using Sigil;
 using sly.buildresult;
 using sly.lexer;
+using sly.parser.parser;
 using Xunit;
 
 namespace ParserTests.aot;
@@ -208,7 +212,85 @@ public class AotTests
             
         return builder;
     }
-    
+
+    private IAotEBNFParserBuilder<IndentedWhileTokenGeneric, WhileAST> BuildAotWhileParser()
+    {
+        IndentedWhileParserGeneric instance = new IndentedWhileParserGeneric();
+        var builder = AotEBNFParserBuilder<IndentedWhileTokenGeneric, WhileAST>
+            .NewBuilder<IndentedWhileTokenGeneric, WhileAST>(instance, "program", "en");
+        Func<object[], WhileAST> comparisons = (object[] args) =>
+        {
+            return instance.binaryComparisonExpression((WhileAST)args[0], (Token<IndentedWhileTokenGeneric>)args[1],
+                (WhileAST)args[2]);
+        };
+
+        Func<object[], WhileAST> numericTerm = args => instance.binaryTermNumericExpression((WhileAST)args[0],
+            (Token<IndentedWhileTokenGeneric>)args[1],
+            (WhileAST)args[2]);
+        Func<object[], WhileAST> numericFactor = args => instance.binaryFactorNumericExpression((WhileAST)args[0],
+            (Token<IndentedWhileTokenGeneric>)args[1],
+            (WhileAST)args[2]);
+
+        builder.Right(50, IndentedWhileTokenGeneric.LESSER, comparisons)
+            .Right(50, IndentedWhileTokenGeneric.GREATER, comparisons)
+            .Right(50, IndentedWhileTokenGeneric.EQUALS, comparisons)
+            .Right(50, IndentedWhileTokenGeneric.DIFFERENT, comparisons)
+            .Right(10, IndentedWhileTokenGeneric.CONCAT, (args) =>
+            {
+                return instance.binaryStringExpression((WhileAST)args[0], (Token<IndentedWhileTokenGeneric>)args[1],
+                    (WhileAST)args[2]);
+            })
+            .Production("program : sequence", args => { return instance.program((WhileAST)args[0]); })
+            .Production("block : INDENT[d] sequence UINDENT[d]",
+                args => { return instance.sequenceStatements((SequenceStatement)args[0]); })
+            .Production("statement : block", args => { return instance.blockStatement((WhileAST)args[0]); })
+            .Production("sequence : statement", args => { return instance.sequence((List<WhileAST>)args[0]); })
+            .Production("statement: IF[d] IndentedWhileParserGeneric_expressions THEN[d] block (ELSE[d] block)?",
+                args =>
+                {
+                    return instance.ifStmt((WhileAST)args[0], (WhileAST)args[1],
+                        (ValueOption<Group<IndentedWhileTokenGeneric, WhileAST>>)args[2]);
+                })
+            .Production("statement: WHILE[d] IndentedWhileParserGeneric_expressions DO[d] block",
+                args => { return instance.whileStmt((WhileAST)args[0], (WhileAST)args[1]); })
+            .Production("statement: IDENTIFIER ASSIGN[d] IndentedWhileParserGeneric_expressions",
+                args => { return instance.assignStmt((Token<IndentedWhileTokenGeneric>)args[0], (Expression)args[1]); })
+            .Production("statement: SKIP[d]", args => { return instance.skipStmt(); })
+            .Production("statement: RETURN[d] IndentedWhileParserGeneric_expressions",
+                args => { return instance.ReturnStmt((Expression)args[0]); })
+            .Production("statement: PRINT[d] IndentedWhileParserGeneric_expressions",
+                args => { return instance.printStmt((Expression)args[0]); })
+            .Production("primary : INT",
+                args => { return instance.PrimaryInt(((Token<IndentedWhileTokenGeneric>)args[0])); })
+            .Production("primary : [TRUE|FALSE]",
+                args => { return instance.PrimaryBool(((Token<IndentedWhileTokenGeneric>)args[0])); })
+            .Production("primary : STRING",
+                args => { return instance.PrimaryString(((Token<IndentedWhileTokenGeneric>)args[0])); })
+            .Production("primary : IDENTIFIER",
+                args => { return instance.PrimaryId(((Token<IndentedWhileTokenGeneric>)args[0])); })
+            .Operand("operand : primary", args => instance.Operand((WhileAST)args[0]))
+            .Right(10, IndentedWhileTokenGeneric.MINUS, numericTerm)
+            .Right(10, IndentedWhileTokenGeneric.PLUS, numericTerm)
+            .Right(50, IndentedWhileTokenGeneric.TIMES, numericFactor)
+            .Right(50, IndentedWhileTokenGeneric.DIVIDE, numericFactor)
+            .Prefix(100, IndentedWhileTokenGeneric.MINUS,
+                args => instance.unaryNumericExpression((Token<IndentedWhileTokenGeneric>)args[0], (WhileAST)args[1]))
+            .Right(10, IndentedWhileTokenGeneric.OR,
+                args => instance.binaryOrExpression((WhileAST)args[0], (Token<IndentedWhileTokenGeneric>)args[1],
+                    (WhileAST)args[2]))
+            .Right(50, IndentedWhileTokenGeneric.AND,
+                args => instance.binaryAndExpression((WhileAST)args[0], (Token<IndentedWhileTokenGeneric>)args[1],
+                    (WhileAST)args[2]))
+            .Prefix(100, IndentedWhileTokenGeneric.NOT,
+                args => instance.unaryNotExpression((Token<IndentedWhileTokenGeneric>)args[0], (WhileAST)args[1]))
+            .UseMemoization()
+            .UseAutoCloseIndentations()
+            .WithLexerbuilder(BuildAotWhileLexer())
+            ;
+        
+        return builder;
+    }
+
     [Fact]
     public void AotWhileLexerTest()
     {
@@ -233,6 +315,36 @@ while a < 10 do
         Check.That(programResult.Tokens.MainTokens().Exists(x => x.IsIndent)).IsTrue();
         Check.That(programResult.Tokens.MainTokens().Exists(x => x.IsUnIndent)).IsTrue();
         // TODO AOT : check has indents
+    }
+
+    [Fact]
+    public void AotWhileParserTest()
+    {
+        var builder = BuildAotWhileParser();
+        var buildResult = builder.BuildParser();
+        Check.That(buildResult).IsOk();
+        var parser = buildResult.Result;
+        Check.That(parser).IsNotNull();
+        string program = @"
+a:=0 
+while a < 10 do 
+    print a
+    a := a +1
+";
+        var result = parser.Parse(program);
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsInstanceOf<SequenceStatement>();
+        var seq = result.Result as SequenceStatement;
+        Check.That(seq.Get(0)).IsInstanceOf<WhileStatement>();
+        var whil = seq.Get(0) as WhileStatement;
+        var cond = whil.Condition;
+        Check.That(cond).IsInstanceOf<BoolConstant>();
+        Check.That((cond as BoolConstant).Value).IsTrue();
+        var s = whil.BlockStmt;
+        Check.That(whil.BlockStmt).IsInstanceOf<SequenceStatement>();
+        var seqBlock = whil.BlockStmt as SequenceStatement;
+        Check.That(seqBlock).CountIs(1);
+        Check.That(seqBlock.Get(0)).IsInstanceOf<SkipStatement>();
     }
     
     
