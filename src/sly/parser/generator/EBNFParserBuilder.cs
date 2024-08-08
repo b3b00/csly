@@ -57,7 +57,8 @@ namespace sly.parser.generator
     
             try
             {
-                configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
+                // TODO AOT : check grammarParser result ! 
+                configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser.Result);
                 configuration.UseMemoization = useMemoization;
                 configuration.BroadenTokenWindow = broadenTokenWindow;
                 configuration.AutoCloseIndentations = autoCloseIndentations;

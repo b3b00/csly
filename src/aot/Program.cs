@@ -1,5 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
-
+﻿
 
 using aot.lexer;
 using aot.parser;
@@ -14,8 +13,16 @@ if (lexerBuilder != null)
     var lexer = lexerBuilder.Build();
     string source = "2 + 2 * ( 3 / 8) PLUS 42.42 100!";
     Console.WriteLine($"tokenize >{source}<");
-    
-    var lexingResult = lexer.Tokenize(source);
+    if (lexer.IsError)
+    {
+        foreach (var error in lexer.Errors)
+        {
+            Console.WriteLine(error);
+        }
+
+        return;
+    }
+    var lexingResult = lexer.Result.Tokenize(source);
     if (lexingResult.IsOk)
     {
         Console.WriteLine("lexing OK");
@@ -33,7 +40,16 @@ if (lexerBuilder != null)
 // testing parser builder
 var pBuilder = new TestAotParserBuilder();
 var b = pBuilder.FluentInitializeCenericLexer();
-var r = b.Parse("2 + 2 * 2");
+if (b.IsError)
+{
+    foreach (var error in b.Errors)
+    {
+        Console.WriteLine(error);
+    }
+
+    return;
+}
+var r = b.Result.Parse("2 + 2 * 2");
 if (r.IsOk)
 {
     Console.WriteLine($"parse OK : {r.Result}");

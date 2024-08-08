@@ -68,7 +68,7 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
         return syntaxParser;
     }
 
-    public Parser<IN, OUT> BuildParser()
+    public BuildResult<Parser<IN, OUT>> BuildParser()
     {
         // TODO : build syntax parser
         var syntaxParser = BuildSyntaxParser(new BuildResult<ParserConfiguration<IN, OUT>>());
@@ -85,10 +85,17 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
         
         Parser<IN, OUT> parser = new Parser<IN, OUT>(_i18N, syntaxParser, visitor);
         parser.Configuration = _configuration;
-        parser.Lexer = lexer;
-        
-        
-        return parser;
+        if (lexer.IsOk)
+        {
+            parser.Lexer = lexer.Result;
+            return new BuildResult<Parser<IN,OUT>>(parser);
+        }
+        else
+        {
+            var result = new BuildResult<Parser<IN, OUT>>();
+            result.AddErrors(lexer.Errors);
+            return result;
+        }
     }
     
     public IAotParserBuilder<IN, OUT> WithLexerbuilder(IAotLexerBuilder<IN> lexerBuilder)

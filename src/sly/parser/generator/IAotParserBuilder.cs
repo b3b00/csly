@@ -20,7 +20,7 @@ public interface IAotParserBuilder<IN,OUT> where IN : struct
     
     public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result); // TODO AOT this build result is strange
     
-    public Parser<IN, OUT> BuildParser();
+    public BuildResult<Parser<IN, OUT>> BuildParser();
 
     public IAotParserBuilder<IN, OUT> WithLexerbuilder(IAotLexerBuilder<IN> lexerBuilder);
 

@@ -1,4 +1,5 @@
 using aot.lexer;
+using sly.buildresult;
 using sly.lexer;
 using sly.parser;
 
@@ -6,7 +7,7 @@ namespace aot.parser;
 
 public class TestAotParserBuilder
 {
-    public Parser<AotLexer, double> FluentInitializeCenericLexer()
+    public BuildResult<Parser<AotLexer, double>> FluentInitializeCenericLexer()
     {
         AotParser parserInstance = new AotParser();
         

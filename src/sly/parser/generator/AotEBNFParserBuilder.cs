@@ -58,7 +58,8 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
 
         var b = new AotRuleParser<IN, OUT>();
         var grammar = b.BuildParser(i18N);
-        _grammarParser = grammar;
+        // TODO AOT : check grammar parser result 
+        _grammarParser = grammar.Result;
     }
 
     public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result)
@@ -94,7 +95,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
         return syntaxParser;
     }
 
-    public Parser<IN, OUT> BuildParser()
+    public BuildResult<Parser<IN, OUT>> BuildParser()
     {
         // TODO : build syntax parser
         var syntaxParser = BuildSyntaxParser(new BuildResult<ParserConfiguration<IN, OUT>>());
@@ -108,13 +109,18 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
         var lexer = _lexerBuilder.Build();
         
         SyntaxTreeVisitor<IN, OUT> visitor = new EBNFSyntaxTreeVisitor<IN, OUT>(_configuration, _parserInstance);
-        
-        Parser<IN, OUT> parser = new Parser<IN, OUT>(_i18N, syntaxParser, visitor);
-        parser.Configuration = _configuration;
-        parser.Lexer = lexer;
-        
-        
-        return parser;
+
+        if (lexer.IsOk)
+        {
+            Parser<IN, OUT> parser = new Parser<IN, OUT>(_i18N, syntaxParser, visitor);
+            parser.Configuration = _configuration;
+            parser.Lexer = lexer.Result;
+            return new BuildResult<Parser<IN, OUT>>(parser);
+        }
+
+        var error = new BuildResult<Parser<IN, OUT>>();
+        error.AddErrors(lexer.Errors);
+        return error;
     }
     
     public IAotEBNFParserBuilder<IN, OUT> WithLexerbuilder(IAotLexerBuilder<IN> lexerBuilder)

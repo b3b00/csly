@@ -38,7 +38,7 @@ public class AotTests
         var lexerBuilder = BuildAotexpressionLexer();
         var lexer = lexerBuilder.Build();
         Check.That(lexer).IsNotNull();
-        var lexed = lexer.Tokenize("1 + 1");
+        var lexed = lexer.Result.Tokenize("2+2");
         Check.That(lexed).IsOkLexing();
         Check.That(lexed.Tokens.MainTokens()).CountIs(4);
         Check.That(lexed.Tokens.MainTokens().Take(3).Extracting(x => x.TokenID)).IsEqualTo(new[]
@@ -60,7 +60,7 @@ public class AotTests
 
         var p = builder.UseMemoization()
             .WithLexerbuilder(lexerBuilder)
-            .Production("root : AotParser_expressions", (args) =>
+            .Production("root : AotExpressionsParser_expressions", (args) =>
             {
                 var result = expressionsParserInstance.Root((double)args[0]);
                 return result;
@@ -113,10 +113,11 @@ public class AotTests
             });
 
         var parser = p.BuildParser();
-        var r = parser.Parse(" 2 + 2");
+        Check.That(parser).IsOk();
+        var r = parser.Result.Parse(" 2 + 2");
         Check.That(r).IsOkParsing();
         Check.That(r.Result).IsEqualTo(4);
-        r = parser.Parse(" 2 + 2 * 2");
+        r = parser.Result.Parse(" 2 + 2 * 2");
         Check.That(r).IsOkParsing();
         Check.That(r.Result).IsEqualTo(6);
     }
@@ -170,7 +171,7 @@ public class AotTests
         var lexerBuilder = BuildAotWhileLexer();
         var lexer = lexerBuilder.Build();
         Check.That(lexer).IsNotNull();
-        var commentResult = lexer.Tokenize("# comment");
+        var commentResult = lexer.Result.Tokenize("# comment");
         Check.That(commentResult).IsOkLexing();
         var commentChannel = commentResult.Tokens.GetChannel(Channels.Comments);
         Check.That(commentChannel.Tokens).CountIs(1);
@@ -183,7 +184,7 @@ while a < 10 do
     print a
     a := a +1
 ";
-        var programResult = lexer.Tokenize(program);
+        var programResult = lexer.Result.Tokenize(program);
         Check.That(programResult).IsOkLexing();
         Check.That(programResult.Tokens.MainTokens().Exists(x => x.IsIndent)).IsTrue();
         Check.That(programResult.Tokens.MainTokens().Exists(x => x.IsUnIndent)).IsTrue();

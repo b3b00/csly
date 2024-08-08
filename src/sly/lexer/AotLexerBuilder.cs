@@ -209,13 +209,19 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         return this;
     }
 
+    public IAotLexerBuilder<IN> Regex(IN tokenId, string regex)
+    {
+        Add(tokenId, new LexemeAttribute(regex),null);
+        return this;
+    }
+
     public IAotLexerBuilder<IN> WithExplicitTokens(IList<string> explicitTokens = null)
     {
         _explicitTokens = explicitTokens;
         return this;
     }
     
-    public ILexer<IN> Build()
+    public BuildResult<ILexer<IN>> Build()
     {
         BuildResult<ILexer<IN>> result = new BuildResult<ILexer<IN>>();
         var lexerConfig = new LexerAttribute()
@@ -228,19 +234,6 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
             KeyWordIgnoreCase = _keyWordIgnoreCase
         };
         var lexerResult = LexerBuilder.BuildGenericSubLexers<IN>(_lexemes, null, result, "en", _explicitTokens, lexerConfig, _comments);
-        if (lexerResult.IsOk)
-        {
-            return lexerResult.Result;
-        }
-        else
-        {
-            Console.WriteLine("lexer build KO");
-            foreach (var error in lexerResult.Errors)
-            {
-                Console.WriteLine($"[{error.Code}] {error.Message}");
-            }
-        }
-
-        return null;
+        return lexerResult;
     }
 }

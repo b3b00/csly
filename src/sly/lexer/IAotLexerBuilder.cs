@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using aot.parser;
+using sly.buildresult;
 
 namespace sly.lexer;
 
@@ -30,6 +31,8 @@ public interface IAotLexerBuilder<IN> where IN : struct
 
     public IAotLexerBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments);
 
+    public IAotLexerBuilder<IN> Regex(IN tokenId, string regex);
+
     public IAotLexerBuilder<IN> WithExplicitTokens(IList<string> explicitTokens = null);
 
     public IAotLexerBuilder<IN> IgnoreEol(bool ignore);
@@ -44,5 +47,5 @@ public interface IAotLexerBuilder<IN> where IN : struct
 
     public IAotLexerBuilder<IN> UseIndentations(string indentation);
     
-    public ILexer<IN> Build();
+    public BuildResult<ILexer<IN>> Build();
 }
