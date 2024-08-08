@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using sly.buildresult;
 using sly.i18n;
 
@@ -209,9 +210,9 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         return this;
     }
 
-    public IAotLexerBuilder<IN> Regex(IN tokenId, string regex)
+    public IAotLexerBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEOL = false)
     {
-        Add(tokenId, new LexemeAttribute(regex),null);
+        Add(tokenId, new LexemeAttribute(regex,isSkippable,isEOL),null);
         return this;
     }
 
@@ -223,7 +224,6 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
     
     public BuildResult<ILexer<IN>> Build()
     {
-        BuildResult<ILexer<IN>> result = new BuildResult<ILexer<IN>>();
         var lexerConfig = new LexerAttribute()
         {
             Indentation = _indentation,
@@ -233,7 +233,9 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
             IgnoreEOL = _ignoreEOL,
             KeyWordIgnoreCase = _keyWordIgnoreCase
         };
-        var lexerResult = LexerBuilder.BuildGenericSubLexers<IN>(_lexemes, null, result, "en", _explicitTokens, lexerConfig, _comments);
+        
+        BuildResult<ILexer<IN>> r = new BuildResult<ILexer<IN>>();
+        var lexerResult = LexerBuilder.BuildLexer(r, null, "en", null, _explicitTokens, _lexemes, lexerConfig, _comments);
         return lexerResult;
     }
 }

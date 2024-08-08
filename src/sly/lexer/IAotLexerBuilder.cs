@@ -31,7 +31,7 @@ public interface IAotLexerBuilder<IN> where IN : struct
 
     public IAotLexerBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments);
 
-    public IAotLexerBuilder<IN> Regex(IN tokenId, string regex);
+    public IAotLexerBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEOL = false);
 
     public IAotLexerBuilder<IN> WithExplicitTokens(IList<string> explicitTokens = null);
 

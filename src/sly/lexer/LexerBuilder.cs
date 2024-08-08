@@ -103,14 +103,14 @@ namespace sly.lexer
 
         public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result,
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
-            string lang = null, LexerPostProcess<IN> lexerPostProcess = null, IList<string> explicitTokens = null)
+            string lang = null, LexerPostProcess<IN> lexerPostProcess = null, IList<string> explicitTokens = null,Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> attributes = null, LexerAttribute lexerAttribute = null,  Dictionary<IN,List<CommentAttribute>> comments = null)
             where IN : struct
         {
-            var attributes = GetLexemes<IN>(result, lang);
-            var lexerAttribute = typeof(IN).GetCustomAttribute<LexerAttribute>();
+            attributes = attributes ?? GetLexemes<IN>(result, lang);
+            lexerAttribute = lexerAttribute ?? typeof(IN).GetCustomAttribute<LexerAttribute>();
             if (!result.IsError)
             {
-                result = Build<IN>(attributes, result, lexerAttribute, extensionBuilder, lang, explicitTokens);
+                result = Build<IN>(attributes, result, lexerAttribute, extensionBuilder, lang, explicitTokens, comments);
                 if (!result.IsError)
                 {
                     var labels = result.Result.LexemeLabels;
@@ -153,7 +153,7 @@ namespace sly.lexer
         private static BuildResult<ILexer<IN>> Build<IN>(Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> attributes,
             BuildResult<ILexer<IN>> result, LexerAttribute lexerAttribute = null, Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
             string lang = null,
-            IList<string> explicitTokens = null) where IN : struct
+            IList<string> explicitTokens = null,  Dictionary<IN,List<CommentAttribute>> comments = null) where IN : struct
         {
             var hasRegexLexemes = IsRegexLexer<IN>(attributes);
             var hasGenericLexemes = IsGenericLexer<IN>(attributes);
@@ -181,7 +181,7 @@ namespace sly.lexer
                 }
                 else if (hasGenericLexemes)
                 {
-                    result = BuildGenericSubLexers<IN>(attributes, extensionBuilder, result, lang, explicitTokens, lexerAttribute);
+                    result = BuildGenericSubLexers<IN>(attributes, extensionBuilder, result, lang, explicitTokens, lexerAttribute, comments);
                 }
 
                 result = SetLabels(attributes, result);
@@ -199,8 +199,11 @@ namespace sly.lexer
                 result.Result.LexemeLabels = new Dictionary<IN, Dictionary<string, string>>();
                 foreach (var kvp in attributes)
                 {
-                    var labels = kvp.Value.labels.ToDictionary(x => x.Language, x => x.Label);
-                    result.Result.LexemeLabels[kvp.Key] = labels;
+                    if (kvp.Value.labels != null)
+                    {
+                        var labels = kvp.Value.labels.Where(x => x!= null).ToDictionary(x => x.Language, x => x.Label);
+                        result.Result.LexemeLabels[kvp.Key] = labels;
+                    }
                 }
 
 

@@ -4,14 +4,58 @@ using aot.parser;
 using csly.indentedWhileLang.parser;
 using NFluent;
 using ParserTests.aot.expressions;
+using sly.buildresult;
 using sly.lexer;
 using Xunit;
 
 namespace ParserTests.aot;
 
+public enum RegexLexer
+{
+    Eos,
+    Value1,
+    Value2,
+    Ws,
+    Eol,
+}
+
 public class AotTests
 {
 
+    [Fact]
+    public void CannotMixRegexAndGGenericTest()
+    {
+        var builder = AotLexerBuilder<RegexLexer>.NewBuilder<RegexLexer>();
+        var mixedLexer = builder.Double(RegexLexer.Value1)
+            .Regex(RegexLexer.Value2, "a*")
+            .Build();
+        Check.That(mixedLexer).Not.IsOk();
+        Check.That(mixedLexer.Errors.Exists(x => x.Code == ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX));
+    }
+    
+    [Fact]
+    public void ValueRegexLexerTest()
+    {
+        var builder = AotLexerBuilder<RegexLexer>.NewBuilder<RegexLexer>();
+        var validLexerResult = builder.Regex(RegexLexer.Value1,"[0-9]+")
+            .Regex(RegexLexer.Value2, "([a-z]|[A-Z])+")
+            .Regex(RegexLexer.Eol,"[\\r|\\n]+",true,true)
+            .Regex(RegexLexer.Ws,"[ |\\t]+",true)
+            .Build();
+        Check.That(validLexerResult).IsOk();
+        var lexer = validLexerResult.Result;
+        var result = lexer.Tokenize("42 abc");
+        Check.That(result).IsOkLexing();
+        var tokens = result.Tokens.MainTokens();
+        Check.That(tokens).CountIs(3);
+        Check.That(tokens[2].IsEOS).IsTrue();
+        Check.That(tokens.Take(2).Extracting(x => x.TokenID))
+            .IsEqualTo(new [] { RegexLexer.Value1, RegexLexer.Value2});
+        Check.That(tokens.Take(2).Extracting(x => x.Value))
+            .IsEqualTo(new [] { "42", "abc" });
+
+    }
+    
     private IAotLexerBuilder<AotExpressionsLexer> BuildAotexpressionLexer()
     {
         var builder = AotLexerBuilder<AotExpressionsLexer>.NewBuilder<AotExpressionsLexer>();
