@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using sly.buildresult;
 using sly.i18n;
+using sly.lexer.fsm;
 
 namespace sly.lexer;
 
@@ -27,8 +27,10 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
     private IN? _currentLexeme;
     private IList<string> _explicitTokens;
 
-    
-    
+    private Action<IN, LexemeAttribute, GenericLexer<IN>> _extensionBuilder;
+    private LexerPostProcess<IN> _lexerPostProcessor;
+
+
     public static IAotLexerBuilder<A> NewBuilder<A>() where A : struct
     {
         return new AotLexerBuilder<A>();
@@ -133,6 +135,12 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         // TODO AOT
         return this;
     }
+
+    public IAotLexerBuilder<IN> Extension(IN tokenId, int channel = Channels.Main)
+    {
+        Add(tokenId,new LexemeAttribute(GenericToken.Extension,channel:channel), null);
+        return this;
+    }
     
     public IAotLexerBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".", int channel = Channels.Main)
     {
@@ -221,6 +229,18 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         _explicitTokens = explicitTokens;
         return this;
     }
+
+    public IAotLexerBuilder<IN> UseExtensionBuilder(Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder)
+    {
+        _extensionBuilder = extensionBuilder;
+        return this;
+    }
+
+    public IAotLexerBuilder<IN> UseLexerPostProcessor(LexerPostProcess<IN> lexerPostProcessor)
+    {
+        _lexerPostProcessor = lexerPostProcessor;
+        return this;
+    }
     
     public BuildResult<ILexer<IN>> Build()
     {
@@ -235,7 +255,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         };
         
         BuildResult<ILexer<IN>> r = new BuildResult<ILexer<IN>>();
-        var lexerResult = LexerBuilder.BuildLexer(r, null, "en", null, _explicitTokens, _lexemes, lexerConfig, _comments);
+        var lexerResult = LexerBuilder.BuildLexer(r, _extensionBuilder, "en", null, _explicitTokens, _lexemes, lexerConfig, _comments);
         return lexerResult;
     }
 }

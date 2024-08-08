@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using aot.parser;
 using sly.buildresult;
+using sly.lexer.fsm;
 
 namespace sly.lexer;
 
@@ -33,6 +35,12 @@ public interface IAotLexerBuilder<IN> where IN : struct
 
     public IAotLexerBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEOL = false);
 
+    public IAotLexerBuilder<IN> Extension(IN tokenId, int channel = Channels.Main);
+
+    public IAotLexerBuilder<IN> UseExtensionBuilder(Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder);
+
+    public IAotLexerBuilder<IN> UseLexerPostProcessor(LexerPostProcess<IN> lexerPostProcessor);
+    
     public IAotLexerBuilder<IN> WithExplicitTokens(IList<string> explicitTokens = null);
 
     public IAotLexerBuilder<IN> IgnoreEol(bool ignore);
