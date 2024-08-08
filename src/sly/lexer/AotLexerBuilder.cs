@@ -7,15 +7,15 @@ namespace sly.lexer;
 
 public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
 {
-    private bool? _ignoreWS;
+    private bool _ignoreWS = true;
 
-    private bool? _ignoreEOL;
+    private bool _ignoreEOL = true;
 
     private char[]_whiteSpaces;
 
-    private bool? _keyWordIgnoreCase;
+    private bool _keyWordIgnoreCase = false;
 
-    private bool? _indentationAware;
+    private bool _indentationAware = false;
 
     private string _indentation;
     
@@ -218,7 +218,16 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
     public ILexer<IN> Build()
     {
         BuildResult<ILexer<IN>> result = new BuildResult<ILexer<IN>>();
-        var lexerResult = LexerBuilder.BuildGenericSubLexers<IN>(_lexemes, null, result, "en", _explicitTokens, _comments);
+        var lexerConfig = new LexerAttribute()
+        {
+            Indentation = _indentation,
+            IndentationAWare = _indentationAware,
+            WhiteSpace = _whiteSpaces,
+            IgnoreWS = _ignoreWS,
+            IgnoreEOL = _ignoreEOL,
+            KeyWordIgnoreCase = _keyWordIgnoreCase
+        };
+        var lexerResult = LexerBuilder.BuildGenericSubLexers<IN>(_lexemes, null, result, "en", _explicitTokens, lexerConfig, _comments);
         if (lexerResult.IsOk)
         {
             return lexerResult.Result;

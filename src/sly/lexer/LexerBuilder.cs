@@ -107,9 +107,10 @@ namespace sly.lexer
             where IN : struct
         {
             var attributes = GetLexemes<IN>(result, lang);
+            var lexerAttribute = typeof(IN).GetCustomAttribute<LexerAttribute>();
             if (!result.IsError)
             {
-                result = Build<IN>(attributes, result, extensionBuilder, lang, explicitTokens);
+                result = Build<IN>(attributes, result, lexerAttribute, extensionBuilder, lang, explicitTokens);
                 if (!result.IsError)
                 {
                     var labels = result.Result.LexemeLabels;
@@ -150,7 +151,7 @@ namespace sly.lexer
 
 
         private static BuildResult<ILexer<IN>> Build<IN>(Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> attributes,
-            BuildResult<ILexer<IN>> result, Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
+            BuildResult<ILexer<IN>> result, LexerAttribute lexerAttribute = null, Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
             string lang = null,
             IList<string> explicitTokens = null) where IN : struct
         {
@@ -180,7 +181,7 @@ namespace sly.lexer
                 }
                 else if (hasGenericLexemes)
                 {
-                    result = BuildGenericSubLexers<IN>(attributes, extensionBuilder, result, lang, explicitTokens);
+                    result = BuildGenericSubLexers<IN>(attributes, extensionBuilder, result, lang, explicitTokens, lexerAttribute);
                 }
 
                 result = SetLabels(attributes, result);
@@ -337,11 +338,10 @@ namespace sly.lexer
         }
 
         private static (GenericLexer<IN>.Config, GenericToken[]) GetConfigAndGenericTokens<IN>(
-            IDictionary<IN, List<LexemeAttribute>> attributes)
+            IDictionary<IN, List<LexemeAttribute>> attributes, LexerAttribute lexerAttribute = null)
             where IN : struct
         {
             var config = new GenericLexer<IN>.Config();
-            var lexerAttribute = typeof(IN).GetCustomAttribute<LexerAttribute>();
             if (lexerAttribute != null)
             {
                 config.IgnoreWS = lexerAttribute.IgnoreWS;
@@ -429,13 +429,13 @@ namespace sly.lexer
         public static BuildResult<ILexer<IN>> BuildGenericSubLexers<IN>(
             Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> attributes,
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, BuildResult<ILexer<IN>> result, string lang,
-            IList<string> explicitTokens = null, Dictionary<IN,List<CommentAttribute>> comments = null) where IN : struct
+            IList<string> explicitTokens = null, LexerAttribute lexerAttribute = null, Dictionary<IN,List<CommentAttribute>> comments = null) where IN : struct
         {
             GenericLexer<IN> genLexer = null;
             var subLexers = GetSubLexers(attributes);
             foreach (var subLexer in subLexers)
             {
-                var x = BuildGenericLexer(subLexer.Value, extensionBuilder, result, lang, comments, explicitTokens);
+                var x = BuildGenericLexer(subLexer.Value, extensionBuilder, result, lang, lexerAttribute, comments, explicitTokens);
                 var currentGenericLexer = x.Result as GenericLexer<IN>;
                 if (genLexer == null)
                 {
@@ -454,11 +454,11 @@ namespace sly.lexer
 
 
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(IDictionary<IN, List<LexemeAttribute>> attributes,
-            Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, BuildResult<ILexer<IN>> result, string lang, Dictionary<IN, List<CommentAttribute>> comments = null,
+            Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, BuildResult<ILexer<IN>> result, string lang, LexerAttribute lexerAttribute = null, Dictionary<IN, List<CommentAttribute>> comments = null,
             IList<string> explicitTokens = null) where IN : struct
         {
             result = CheckStringAndCharTokens<IN>(attributes, result, lang);
-            var (config, tokens) = GetConfigAndGenericTokens<IN>(attributes);
+            var (config, tokens) = GetConfigAndGenericTokens<IN>(attributes, lexerAttribute);
 
 
             config.ExtensionBuilder = extensionBuilder;
