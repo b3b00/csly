@@ -10,6 +10,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\tests\ParserTests\ParserTests.csproj" />
       <ProjectReference Include="..\sly\sly.csproj" />      
     </ItemGroup>
 
