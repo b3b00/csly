@@ -40,6 +40,8 @@ public interface IAotLexerBuilder<IN> where IN : struct
     public IAotLexerBuilder<IN> UseExtensionBuilder(Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder);
 
     public IAotLexerBuilder<IN> UseLexerPostProcessor(LexerPostProcess<IN> lexerPostProcessor);
+
+    public IAotLexerBuilder<IN> UseTokenCallback(IN tokenId, Func<Token<IN>, Token<IN>> callback);
     
     public IAotLexerBuilder<IN> WithExplicitTokens(IList<string> explicitTokens = null);
 

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using aot.parser;
 using csly.indentedWhileLang.parser;
@@ -11,7 +12,7 @@ using Xunit;
 
 namespace ParserTests.aot;
 
-public enum RegexLexer
+public enum TestLexer
 {
     Eos,
     Value1,
@@ -27,9 +28,9 @@ public class AotTests
     [Fact]
     public void CannotMixRegexAndGGenericTest()
     {
-        var builder = AotLexerBuilder<RegexLexer>.NewBuilder<RegexLexer>();
-        var mixedLexer = builder.Double(RegexLexer.Value1)
-            .Regex(RegexLexer.Value2, "a*")
+        var builder = AotLexerBuilder<TestLexer>.NewBuilder<TestLexer>();
+        var mixedLexer = builder.Double(TestLexer.Value1)
+            .Regex(TestLexer.Value2, "a*")
             .Build();
         Check.That(mixedLexer).Not.IsOk();
         Check.That(mixedLexer.Errors.Exists(x => x.Code == ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX));
@@ -38,11 +39,11 @@ public class AotTests
     [Fact]
     public void ValueRegexLexerTest()
     {
-        var builder = AotLexerBuilder<RegexLexer>.NewBuilder<RegexLexer>();
-        var validLexerResult = builder.Regex(RegexLexer.Value1,"[0-9]+")
-            .Regex(RegexLexer.Value2, "([a-z]|[A-Z])+")
-            .Regex(RegexLexer.Eol,"[\\r|\\n]+",true,true)
-            .Regex(RegexLexer.Ws,"[ |\\t]+",true)
+        var builder = AotLexerBuilder<TestLexer>.NewBuilder<TestLexer>();
+        var validLexerResult = builder.Regex(TestLexer.Value1,"[0-9]+")
+            .Regex(TestLexer.Value2, "([a-z]|[A-Z])+")
+            .Regex(TestLexer.Eol,"[\\r|\\n]+",true,true)
+            .Regex(TestLexer.Ws,"[ |\\t]+",true)
             .Build();
         Check.That(validLexerResult).IsOk();
         var lexer = validLexerResult.Result;
@@ -52,7 +53,7 @@ public class AotTests
         Check.That(tokens).CountIs(3);
         Check.That(tokens[2].IsEOS).IsTrue();
         Check.That(tokens.Take(2).Extracting(x => x.TokenID))
-            .IsEqualTo(new [] { RegexLexer.Value1, RegexLexer.Value2});
+            .IsEqualTo(new [] { TestLexer.Value1, TestLexer.Value2});
         Check.That(tokens.Take(2).Extracting(x => x.Value))
             .IsEqualTo(new [] { "42", "abc" });
 
@@ -224,6 +225,78 @@ while true do
         Check.That(seqBlock).CountIs(1);
         Check.That(seqBlock.Get(0)).IsInstanceOf<SkipStatement>();
     }
+
+
+    [Fact]
+    public void AotLexerCallbacksTest()
+    {
+        var builder = AotLexerBuilder<TestLexer>.NewBuilder<TestLexer>();
+        var lexerResult = builder.AlphaId(TestLexer.Value1)
+            .UseTokenCallback(TestLexer.Value1, t =>
+            {
+                if (char.IsUpper(t.Value[0]))
+                {
+                    t.TokenID = TestLexer.Value2;
+                }
+
+                return t;
+            })
+            .Build();
+        Check.That(lexerResult).IsOk();
+        string source = "abc Abc";
+        var result = lexerResult.Result.Tokenize(source);
+        Check.That(result).IsOkLexing();
+        var tokens = result.Tokens.MainTokens();
+        Check.That(tokens).CountIs(3);
+        Check.That(tokens.Take(2).Extracting(x => x.TokenID)).IsEqualTo(new[] { TestLexer.Value1, TestLexer.Value2 });
+    }
     
-    
+    [Fact]
+    public void AotLexerPostProcessTest()
+    {
+        var builder = AotLexerBuilder<TestLexer>.NewBuilder<TestLexer>();
+        var lexerBuilder = builder.AlphaId(TestLexer.Value1)
+            .UseTokenCallback(TestLexer.Value1, t =>
+            {
+                if (char.IsUpper(t.Value[0]))
+                {
+                    t.TokenID = TestLexer.Value2;
+                }
+
+                return t;
+            })
+            .UseLexerPostProcessor((List<Token<TestLexer>> tokens) =>
+            {
+                return tokens.Select(x =>
+                {
+                    if (x.TokenID == TestLexer.Value1)
+                    {
+                        x.TokenID = TestLexer.Value2;
+                    }
+                    else if (x.TokenID == TestLexer.Value2)
+                    {
+                        x.TokenID = TestLexer.Value1;
+                    }
+
+                    return x;
+                }).ToList();
+            });
+
+        var instance = "no instance";
+        var parserResult = AotParserBuilder<TestLexer, string>.NewBuilder<TestLexer, string>(instance, "root")
+            .Production("root : [Value1|Value2]*", args =>
+            {
+                var t = args[0] as List<Token<TestLexer>>;
+                return string.Join(",", t.Select(x => x.TokenID));
+            })
+            .WithLexerbuilder(lexerBuilder)
+            .BuildParser();
+            
+            
+        Check.That(parserResult).IsOk();
+        string source = "abc Abc";
+        var result = parserResult.Result.Parse(source);
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("Value1,Value2");
+    }
 }

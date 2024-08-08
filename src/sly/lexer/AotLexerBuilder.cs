@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using sly.buildresult;
 using sly.i18n;
 using sly.lexer.fsm;
@@ -29,6 +30,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
 
     private Action<IN, LexemeAttribute, GenericLexer<IN>> _extensionBuilder;
     private LexerPostProcess<IN> _lexerPostProcessor;
+    private List<(IN tokenId,Func<Token<IN>, Token<IN>> callback)> _callbacks;
 
 
     public static IAotLexerBuilder<A> NewBuilder<A>() where A : struct
@@ -42,6 +44,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
     {
         _lexemes = new Dictionary<IN, (List<LexemeAttribute>, List<LexemeLabelAttribute>)>();
         _comments = new Dictionary<IN, List<CommentAttribute>>();
+        _callbacks = new List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)>();
     }
 
     private void AddComment(IN tokenId, CommentAttribute comment)
@@ -241,6 +244,12 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         _lexerPostProcessor = lexerPostProcessor;
         return this;
     }
+
+    public IAotLexerBuilder<IN> UseTokenCallback(IN tokenId, Func<Token<IN>, Token<IN>> callback)
+    {
+        _callbacks.Add((tokenId,callback));
+        return this;
+    }
     
     public BuildResult<ILexer<IN>> Build()
     {
@@ -255,7 +264,17 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         };
         
         BuildResult<ILexer<IN>> r = new BuildResult<ILexer<IN>>();
-        var lexerResult = LexerBuilder.BuildLexer(r, _extensionBuilder, "en", null, _explicitTokens, _lexemes, lexerConfig, _comments);
+        var lexerResult = LexerBuilder.BuildLexer(r, _extensionBuilder, "en", _lexerPostProcessor, _explicitTokens, _lexemes, lexerConfig, _comments);
+        if (lexerResult.IsOk && lexerResult.Result is GenericLexer<IN> genericLexer)
+        {
+            if (_callbacks.Any())
+            {
+                foreach (var callback in _callbacks)
+                {
+                    genericLexer.AddCallBack(callback.tokenId, callback.callback);
+                }
+            }
+        }
         return lexerResult;
     }
 }
