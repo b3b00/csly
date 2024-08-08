@@ -172,6 +172,10 @@ public class AotTests
         Check.That(lexer).IsNotNull();
         var commentResult = lexer.Tokenize("# comment");
         Check.That(commentResult).IsOkLexing();
+        var commentChannel = commentResult.Tokens.GetChannel(Channels.Comments);
+        Check.That(commentChannel.Tokens).CountIs(1);
+        Check.That(commentChannel.Tokens[0].TokenID).IsEqualTo(IndentedWhileTokenGeneric.COMMENT);
+        Check.That(commentChannel.Tokens[0].Value).IsEqualTo(" comment");
         // TODO AOT : check has COMMENT
         string program = @"
 a:=0 
@@ -180,7 +184,9 @@ while a < 10 do
     a := a +1
 ";
         var programResult = lexer.Tokenize(program);
-        Check.That(commentResult).IsOkLexing();
+        Check.That(programResult).IsOkLexing();
+        Check.That(programResult.Tokens.MainTokens().Exists(x => x.IsIndent)).IsTrue();
+        Check.That(programResult.Tokens.MainTokens().Exists(x => x.IsUnIndent)).IsTrue();
         // TODO AOT : check has indents
     }
     

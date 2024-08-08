@@ -51,6 +51,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         }
         comments.Add(comment);
         _comments[tokenId] = comments;
+        _lexemes[tokenId] = (new List<LexemeAttribute>(), new List<LexemeLabelAttribute>());
     }
     
     private void Add(IN tokenId, LexemeAttribute lexeme, LexemeLabelAttribute label)
