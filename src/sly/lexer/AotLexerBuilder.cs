@@ -7,25 +7,52 @@ namespace sly.lexer;
 
 public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
 {
-    
+    private bool? _ignoreWS;
+
+    private bool? _ignoreEOL;
+
+    private char[]_whiteSpaces;
+
+    private bool? _keyWordIgnoreCase;
+
+    private bool? _indentationAware;
+
+    private string _indentation;
     
     private Dictionary<IN, (List<LexemeAttribute>, List<LexemeLabelAttribute>)> _lexemes;
 
-    private IList<CommentAttribute> _comments = new List<CommentAttribute>();
+    private Dictionary<IN, List<CommentAttribute>> _comments;
 
     private IN? _currentLexeme;
     private IList<string> _explicitTokens;
 
+    
+    
     public static IAotLexerBuilder<A> NewBuilder<A>() where A : struct
     {
         return new AotLexerBuilder<A>();
     }
 
+    
+    
     private AotLexerBuilder()
     {
         _lexemes = new Dictionary<IN, (List<LexemeAttribute>, List<LexemeLabelAttribute>)>();
+        _comments = new Dictionary<IN, List<CommentAttribute>>();
     }
 
+    private void AddComment(IN tokenId, CommentAttribute comment)
+    {
+        _currentLexeme = tokenId;
+        List<CommentAttribute> comments = null;
+        if (!_comments.TryGetValue(tokenId, out comments))
+        {
+            comments = new List<CommentAttribute>();
+        }
+        comments.Add(comment);
+        _comments[tokenId] = comments;
+    }
+    
     private void Add(IN tokenId, LexemeAttribute lexeme, LexemeLabelAttribute label)
     {
         _currentLexeme = tokenId;
@@ -54,6 +81,55 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         {
             throw new InvalidOperationException($"{_currentLexeme.Value} does not exist !");
         }
+    }
+
+    
+    public IAotLexerBuilder<IN> IgnoreEol(bool ignore)
+    {
+        _ignoreEOL = ignore;
+        return this;
+    }
+    
+    public IAotLexerBuilder<IN> IgnoreWhiteSpace(bool ignore)
+    {
+        _ignoreWS = ignore;
+        return this;
+    }
+
+    public IAotLexerBuilder<IN> UseWhiteSpaces(char[] whiteSpaces)
+    {
+        _whiteSpaces = whiteSpaces;
+        return this;
+    }
+
+    public IAotLexerBuilder<IN> IgnoreKeywordCase(bool ignore = true)
+    {
+        _keyWordIgnoreCase = ignore;
+        return this;
+    }
+
+    public IAotLexerBuilder<IN> IsIndentationAware(bool isAware = true)
+    {
+        _indentationAware = isAware;
+        return this;
+    }
+
+    public IAotLexerBuilder<IN> UseIndentations(string indentation)
+    {
+        _indentation = indentation;
+        return this;
+    }
+
+    public IAotLexerBuilder<IN> SingleLineComment(string start)
+    {
+        // TODO AOT
+        return this;
+    }
+    
+    public IAotLexerBuilder<IN> MultiLineComment(string start)
+    {
+        // TODO AOT
+        return this;
     }
     
     public IAotLexerBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".", int channel = Channels.Main)
@@ -120,15 +196,15 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         return this;
     }
     
-    public IAotLexerBuilder<IN> SingleLineComment(IN tokenId, string start)
+    public IAotLexerBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false, int channel = Channels.Comments)
     {
-        _comments.Add(new SingleLineCommentAttribute(start)); // TODO AOT : how is tokenId used ?
+        AddComment(tokenId, new SingleLineCommentAttribute(start, doNotIgnore, channel));
         return this;
     }
 
-    public IAotLexerBuilder<IN> MultiLineComment(IN tokenId, string start, string end)
+    public IAotLexerBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments)
     {
-        _comments.Add(new MultiLineCommentAttribute(start,end)); // TODO AOT : how is tokenId used ?
+        AddComment(tokenId, new MultiLineCommentAttribute(start, end, doNotIgnore, channel));
         return this;
     }
 
@@ -141,7 +217,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
     public ILexer<IN> Build()
     {
         BuildResult<ILexer<IN>> result = new BuildResult<ILexer<IN>>();
-        var lexerResult = LexerBuilder.BuildGenericSubLexers<IN>(_lexemes, null, result, "en",_explicitTokens);
+        var lexerResult = LexerBuilder.BuildGenericSubLexers<IN>(_lexemes, null, result, "en", _explicitTokens, _comments);
         if (lexerResult.IsOk)
         {
             return lexerResult.Result;

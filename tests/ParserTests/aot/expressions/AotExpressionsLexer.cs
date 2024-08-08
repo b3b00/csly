@@ -1,6 +1,6 @@
-namespace ParserTests.aot;
+namespace ParserTests.aot.expressions;
 
-public enum AotLexer
+public enum AotExpressionsLexer
 {
     DOUBLE,
     IDENTIFIER,

@@ -429,13 +429,13 @@ namespace sly.lexer
         public static BuildResult<ILexer<IN>> BuildGenericSubLexers<IN>(
             Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> attributes,
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, BuildResult<ILexer<IN>> result, string lang,
-            IList<string> explicitTokens = null) where IN : struct
+            IList<string> explicitTokens = null, Dictionary<IN,List<CommentAttribute>> comments = null) where IN : struct
         {
             GenericLexer<IN> genLexer = null;
             var subLexers = GetSubLexers(attributes);
             foreach (var subLexer in subLexers)
             {
-                var x = BuildGenericLexer(subLexer.Value, extensionBuilder, result, lang, explicitTokens);
+                var x = BuildGenericLexer(subLexer.Value, extensionBuilder, result, lang, comments, explicitTokens);
                 var currentGenericLexer = x.Result as GenericLexer<IN>;
                 if (genLexer == null)
                 {
@@ -454,7 +454,7 @@ namespace sly.lexer
 
 
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(IDictionary<IN, List<LexemeAttribute>> attributes,
-            Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, BuildResult<ILexer<IN>> result, string lang,
+            Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, BuildResult<ILexer<IN>> result, string lang, Dictionary<IN, List<CommentAttribute>> comments = null,
             IList<string> explicitTokens = null) where IN : struct
         {
             result = CheckStringAndCharTokens<IN>(attributes, result, lang);
@@ -590,7 +590,7 @@ namespace sly.lexer
             AddExtensions<IN>(Extensions, extensionBuilder, lexer);
 
 
-            var allComments = GetCommentsAttribute<IN>(result, lang);
+            var allComments = comments ?? GetCommentsAttribute<IN>(result, lang);
             var CommentsForSubLexer = allComments.Where(x => attributes.Keys.ToList().Contains(x.Key))
                 .ToDictionary(x => x.Key, x => x.Value);
             if (!result.IsError)

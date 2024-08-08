@@ -26,11 +26,23 @@ public interface IAotLexerBuilder<IN> where IN : struct
 
     public IAotLexerBuilder<IN> Labeled(string lang, string label);
 
-    public IAotLexerBuilder<IN> SingleLineComment(IN tokenId, string start);
+    IAotLexerBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false, int channel = Channels.Comments);
 
-    public IAotLexerBuilder<IN> MultiLineComment(IN tokenId, string start, string end);
+    public IAotLexerBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments);
 
     public IAotLexerBuilder<IN> WithExplicitTokens(IList<string> explicitTokens = null);
+
+    public IAotLexerBuilder<IN> IgnoreEol(bool ignore);
+
+    public IAotLexerBuilder<IN> IgnoreWhiteSpace(bool ignore);
+
+    public IAotLexerBuilder<IN> UseWhiteSpaces(char[] whiteSpaces);
+
+    public IAotLexerBuilder<IN> IgnoreKeywordCase(bool ignore = true);
+
+    public IAotLexerBuilder<IN> IsIndentationAware(bool isAware = true);
+
+    public IAotLexerBuilder<IN> UseIndentations(string indentation);
     
-    ILexer<IN> Build();
+    public ILexer<IN> Build();
 }

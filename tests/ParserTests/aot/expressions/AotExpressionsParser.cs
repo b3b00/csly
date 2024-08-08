@@ -1,26 +1,26 @@
 using sly.lexer;
 using sly.parser.generator;
 
-namespace ParserTests.aot;
+namespace ParserTests.aot.expressions;
 
-public class AotParser
+public class AotExpressionsParser
 {
     [Production("root : SimpleExpressionParser_expressions")]
     public double Root(double value) => value;
         
-    [Operation((int) AotLexer.PLUS, Affix.InFix, Associativity.Right, 10)]
+    [Operation((int) AotExpressionsLexer.PLUS, Affix.InFix, Associativity.Right, 10)]
     [Operation("MINUS", Affix.InFix, Associativity.Left, 10)]
-    public double BinaryTermExpression(double left, Token<AotLexer> operation, double right)
+    public double BinaryTermExpression(double left, Token<AotExpressionsLexer> operation, double right)
     {
         double result = 0;
         switch (operation.TokenID)
         {
-            case AotLexer.PLUS:
+            case AotExpressionsLexer.PLUS:
             {
                 result = left + right;
                 break;
             }
-            case AotLexer.MINUS:
+            case AotExpressionsLexer.MINUS:
             {
                 result = left - right;
                 break;
@@ -31,20 +31,20 @@ public class AotParser
     }
 
 
-    [Operation((int) AotLexer.TIMES, Affix.InFix, Associativity.Right, 50)]
+    [Operation((int) AotExpressionsLexer.TIMES, Affix.InFix, Associativity.Right, 50)]
     [Operation("DIVIDE", Affix.InFix, Associativity.Left, 50)]
     [NodeName("multiplication_or_division")]
-    public double BinaryFactorExpression(double left, Token<AotLexer> operation, double right)
+    public double BinaryFactorExpression(double left, Token<AotExpressionsLexer> operation, double right)
     {
         double result = 0;
         switch (operation.TokenID)
         {
-            case AotLexer.TIMES:
+            case AotExpressionsLexer.TIMES:
             {
                 result = left * right;
                 break;
             }
-            case AotLexer.DIVIDE:
+            case AotExpressionsLexer.DIVIDE:
             {
                 result = left / right;
                 break;
@@ -55,14 +55,14 @@ public class AotParser
     }
 
 
-    [Prefix((int) AotLexer.MINUS,  Associativity.Right, 100)]
-    public double PreFixExpression(Token<AotLexer> operation, double value)
+    [Prefix((int) AotExpressionsLexer.MINUS,  Associativity.Right, 100)]
+    public double PreFixExpression(Token<AotExpressionsLexer> operation, double value)
     {
         return -value;
     }
 
-    [Postfix((int) AotLexer.FACTORIAL, Associativity.Right, 100)]
-    public double PostFixExpression(double value, Token<AotLexer> operation)
+    [Postfix((int) AotExpressionsLexer.FACTORIAL, Associativity.Right, 100)]
+    public double PostFixExpression(double value, Token<AotExpressionsLexer> operation)
     {
         var factorial = 1;
         for (var i = 1; i <= value; i++) factorial = factorial * i;
@@ -80,21 +80,21 @@ public class AotParser
 
     [Production("primary_value : DOUBLE")]
     [NodeName("double")]
-    public double OperandDouble(Token<AotLexer> value)
+    public double OperandDouble(Token<AotExpressionsLexer> value)
     {
         return value.DoubleValue;
     }
         
     [Production("primary_value : INT")]
     [NodeName("integer")]
-    public double OperandInt(Token<AotLexer> value)
+    public double OperandInt(Token<AotExpressionsLexer> value)
     {
         return value.DoubleValue;
     }
 
     [Production("primary_value : LPAREN SimpleExpressionParser_expressions RPAREN")]
     [NodeName("group")]
-    public double OperandGroup(Token<AotLexer> lparen, double value, Token<AotLexer> rparen)
+    public double OperandGroup(Token<AotExpressionsLexer> lparen, double value, Token<AotExpressionsLexer> rparen)
     {
         return value;
     }
