@@ -69,7 +69,7 @@ if a > 145 then
 	skip
 	a := a *478
 	if a > 125874 then
-		a := 7
+		a := 1+2+3+4+5+6+7+8+9+10+20+30
 		b := true
 		print ""bololo""
 	else
