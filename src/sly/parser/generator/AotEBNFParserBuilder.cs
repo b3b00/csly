@@ -42,6 +42,11 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
         return new AotEBNFParserBuilder<IN,OUT>(i18N, parserInstance, rootRule);
     }
     
+    public static IAotEBNFParserBuilder<IN,OUT> NewBuilder(string rootRule, string i18N = "en")
+    {
+        return NewBuilder(null, rootRule, i18N);
+    }
+    
     private AotEBNFParserBuilder(string i18N, object parserInstance, string rootRule)
     {
         var ruleparser = new RuleParser<IN,OUT>();
@@ -73,7 +78,6 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
         // add operations if needed
         if (_configuration.UsesOperations)
         {
-            // TODO AOT : operands !
             ExpressionRulesGenerator<IN, OUT> expressionRulesGenerator = new ExpressionRulesGenerator<IN, OUT>(_i18N);
             var ok = expressionRulesGenerator.GenerateExpressionParserRules(_configuration, _parserInstance.GetType(),
                 result,

@@ -272,8 +272,7 @@ while true do
                 return processed;
             });
 
-        var instance = "no instance";
-        var parserResult = AotEBNFParserBuilder<TestLexer, string>.NewBuilder(instance, "root")
+        var parserResult = AotEBNFParserBuilder<TestLexer, string>.NewBuilder( "root")
             .Production("root : [Value1|Value2]*", args =>
             {
                 var t = args[0] as List<Token<TestLexer>>;
