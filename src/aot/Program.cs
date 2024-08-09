@@ -2,90 +2,82 @@
 
 using aot.lexer;
 using aot.parser;
+using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Environments;
+using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Running;
+using CommandLine;
+using csly.indentedWhileLang.parser;
+using csly.whileLang.model;
 using ParserTests.aot;
+using sly.parser;
 
-
-// testing lexer builder 
-//
-// var builder = new TestAotLexerBuilder();
-// var lexerBuilder = builder.FluentInitializeCenericLexerForLexerTest();
-// if (lexerBuilder != null)
-// {
-//     var lexer = lexerBuilder.Build();
-//     string source = "2 + 2 * ( 3 / 8) PLUS 42.42 100!";
-//     Console.WriteLine($"tokenize >{source}<");
-//     if (lexer.IsError)
-//     {
-//         foreach (var error in lexer.Errors)
-//         {
-//             Console.WriteLine(error);
-//         }
-//
-//         return;
-//     }
-//     var lexingResult = lexer.Result.Tokenize(source);
-//     if (lexingResult.IsOk)
-//     {
-//         Console.WriteLine("lexing OK");
-//         foreach (var token in lexingResult.Tokens)
-//         {
-//             Console.WriteLine(token.ToString());
-//         }
-//     }
-//     else
-//     {
-//         Console.WriteLine($"lexing KO : {lexingResult.Error}");
-//     }
-// }
-//
-// // testing parser builder
-// var pBuilder = new TestAotParserBuilder();
-// var b = pBuilder.FluentInitializeCenericLexer();
-// if (b.IsError)
-// {
-//     foreach (var error in b.Errors)
-//     {
-//         Console.WriteLine(error);
-//     }
-//
-//     return;
-// }
-// var r = b.Result.Parse("2 + 2 * 2");
-// if (r.IsOk)
-// {
-//     Console.WriteLine($"parse OK : {r.Result}");
-// }
-// else
-// {
-//     foreach (var error in r.Errors)
-//     {
-//         Console.WriteLine(error.ErrorMessage);
-//     }
-// }
 
 AotIndentedWhileParserBuilder builder = new AotIndentedWhileParserBuilder();
 
 var b = builder.BuildAotWhileParser();
 var p = b.BuildParser();
-if (p.IsOk)
+if (!p.IsOk)
 {
-    Console.WriteLine(p.Result.Configuration.Dump());
-    string program = @"
+	return;
+}
+
+var config = DefaultConfig.Instance
+	.With(Job.Default.With(NativeAotRuntime.Net80)); // compiles the benchmarks as net8.0 and uses the latest NativeAOT to build a native app
+
+BenchmarkSwitcher
+	.FromAssembly(typeof(Program).Assembly)
+	.Run(args, config);
+
+var summary = BenchmarkRunner.Run<Bencher>();
+
+public class Bencher
+{
+	
+	private Parser<IndentedWhileTokenGeneric, WhileAST> _parser;
+
+	[GlobalSetup]
+	public void Setup()
+	{
+		AotIndentedWhileParserBuilder builder = new AotIndentedWhileParserBuilder();
+
+		var b = builder.BuildAotWhileParser();
+		var p = b.BuildParser();
+		if (!p.IsOk)
+		{
+			Environment.Exit(12);
+		}
+
+		_parser = p.Result;
+	}
+
+	public Bencher()
+	{
+	}
+	
+	[Benchmark]
+	public void ParseWhile()
+	{
+		string program = @"
 a:=0
 while a < 10 do 
 	print a
 	a := a +1
+if a > 145 then
+	print a
+	skip
+	a := a *478
+	if a > 125874 then
+		a := 7
+		b := true
+		print ""bololo""
+	else
+		b := false
+		print ""youpi""
+else
+	print b
 ";
-    var r = p.Result.Parse(program);
-    if (r.IsOk)
-    {
-        Console.WriteLine("OK");
-    }
-    else
-    {
-        foreach (var error in r.Errors)
-        {
-            Console.WriteLine(error.ErrorMessage);
-        }
-    }
-}
+		var r = _parser.Parse(program);
+	}
+}	
