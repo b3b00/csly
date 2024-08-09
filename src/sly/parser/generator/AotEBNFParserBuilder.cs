@@ -41,7 +41,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
     private LexerPostProcess<IN> _lexerPostProcess = null;
 
     private ParserConfiguration<IN, OUT> _configuration = null;
-    public static IAotEBNFParserBuilder<IN,OUT> NewBuilder<IN,OUT>(object parserInstance, string rootRule, string i18N = "en") where IN : struct
+    public static IAotEBNFParserBuilder<IN,OUT> NewBuilder(object parserInstance, string rootRule, string i18N = "en") 
     {
         return new AotEBNFParserBuilder<IN,OUT>(i18N, parserInstance, rootRule);
     }
@@ -54,7 +54,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
         _parserInstance = parserInstance;
         _rootRule = rootRule;
         var gpb = 
-            AotParserBuilder<EbnfTokenGeneric, GrammarNode<IN, OUT>>.NewBuilder<EbnfTokenGeneric, GrammarNode<IN, OUT>>(new RuleParser<IN, OUT>(),"rule");
+            AotParserBuilder<EbnfTokenGeneric, GrammarNode<IN, OUT>>.NewBuilder(new RuleParser<IN, OUT>(),"rule");
 
         var b = new AotRuleParser<IN, OUT>();
         var grammar = b.BuildParser(i18N);
@@ -106,7 +106,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
         {
             _lexerBuilder.WithExplicitTokens(tokens.Select(x => x.ExplicitToken).ToList());
         }
-        var lexer = _lexerBuilder.Build();
+        var lexer = _lexerBuilder.Build(_i18N);
         
         SyntaxTreeVisitor<IN, OUT> visitor = new EBNFSyntaxTreeVisitor<IN, OUT>(_configuration, _parserInstance);
 

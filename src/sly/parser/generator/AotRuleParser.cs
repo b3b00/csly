@@ -9,7 +9,7 @@ public class AotRuleParser<IN, OUT> where IN : struct
 {
     public IAotLexerBuilder<EbnfTokenGeneric> GetEbnfLexerBuilder()
     {
-        var builder = AotLexerBuilder<EbnfTokenGeneric>.NewBuilder<EbnfTokenGeneric>();
+        var builder = AotLexerBuilder<EbnfTokenGeneric>.NewBuilder();
         var lexerBuilder = builder
             .AlphaNumDashId(EbnfTokenGeneric.IDENTIFIER)
             .Sugar(EbnfTokenGeneric.COLON, ":")
@@ -30,7 +30,7 @@ public class AotRuleParser<IN, OUT> where IN : struct
     {
         RuleParser<IN, OUT> instance = new RuleParser<IN, OUT>();
         IAotParserBuilder<EbnfTokenGeneric, GrammarNode<IN, OUT>> builder =
-            AotParserBuilder<EbnfTokenGeneric, GrammarNode<IN, OUT>>.NewBuilder<EbnfTokenGeneric, GrammarNode<IN, OUT>>(
+            AotParserBuilder<EbnfTokenGeneric, GrammarNode<IN, OUT>>.NewBuilder(
                 instance, "rule", i18N);
 
         builder = builder.Production("rule : IDENTIFIER COLON clauses", (args =>

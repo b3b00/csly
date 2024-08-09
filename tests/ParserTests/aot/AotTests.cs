@@ -29,10 +29,10 @@ public class AotTests
     [Fact]
     public void CannotMixRegexAndGGenericTest()
     {
-        var builder = AotLexerBuilder<TestLexer>.NewBuilder<TestLexer>();
+        var builder = AotLexerBuilder<TestLexer>.NewBuilder();
         var mixedLexer = builder.Double(TestLexer.Value1)
             .Regex(TestLexer.Value2, "a*")
-            .Build();
+            .Build("en");
         Check.That(mixedLexer).Not.IsOk();
         Check.That(mixedLexer.Errors.Exists(x => x.Code == ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX));
     }
@@ -40,12 +40,12 @@ public class AotTests
     [Fact]
     public void ValueRegexLexerTest()
     {
-        var builder = AotLexerBuilder<TestLexer>.NewBuilder<TestLexer>();
+        var builder = AotLexerBuilder<TestLexer>.NewBuilder();
         var validLexerResult = builder.Regex(TestLexer.Value1,"[0-9]+")
             .Regex(TestLexer.Value2, "([a-z]|[A-Z])+")
             .Regex(TestLexer.Eol,"[\\r|\\n]+",true,true)
             .Regex(TestLexer.Ws,"[ |\\t]+",true)
-            .Build();
+            .Build("en");
         Check.That(validLexerResult).IsOk();
         var lexer = validLexerResult.Result;
         var result = lexer.Tokenize("42 abc");
@@ -62,7 +62,7 @@ public class AotTests
     
     private IAotLexerBuilder<AotExpressionsLexer> BuildAotexpressionLexer()
     {
-        var builder = AotLexerBuilder<AotExpressionsLexer>.NewBuilder<AotExpressionsLexer>();
+        var builder = AotLexerBuilder<AotExpressionsLexer>.NewBuilder();
         var lexerBuilder = builder.Double(AotExpressionsLexer.DOUBLE)
             .Sugar(AotExpressionsLexer.PLUS, "+")
             .Keyword(AotExpressionsLexer.PLUS, "PLUS")
@@ -84,7 +84,7 @@ public class AotTests
     public void AotExpressionLexerTest()
     {
         var lexerBuilder = BuildAotexpressionLexer();
-        var lexer = lexerBuilder.Build();
+        var lexer = lexerBuilder.Build("en");
         Check.That(lexer).IsNotNull();
         var lexed = lexer.Result.Tokenize("2+2");
         Check.That(lexed).IsOkLexing();
@@ -102,7 +102,7 @@ public class AotTests
     {
          AotExpressionsParser expressionsParserInstance = new AotExpressionsParser();
         
-        var builder = AotEBNFParserBuilder<AotExpressionsLexer,double>.NewBuilder<AotExpressionsLexer,double > (expressionsParserInstance,"root");
+        var builder = AotEBNFParserBuilder<AotExpressionsLexer,double>.NewBuilder(expressionsParserInstance,"root");
 
         var lexerBuilder = BuildAotexpressionLexer();
 
@@ -175,7 +175,7 @@ public class AotTests
     public void AotWhileLexerTest()
     {
         var lexerBuilder = _aotIndentedWhileParserBuilder.BuildAotWhileLexer();
-        var lexer = lexerBuilder.Build();
+        var lexer = lexerBuilder.Build("en");
         Check.That(lexer).IsNotNull();
         var commentResult = lexer.Result.Tokenize("# comment");
         Check.That(commentResult).IsOkLexing();
@@ -231,7 +231,7 @@ while true do
     [Fact]
     public void AotLexerCallbacksTest()
     {
-        var builder = AotLexerBuilder<TestLexer>.NewBuilder<TestLexer>();
+        var builder = AotLexerBuilder<TestLexer>.NewBuilder();
         var lexerResult = builder.AlphaId(TestLexer.Value1)
             .UseTokenCallback(TestLexer.Value1, t =>
             {
@@ -242,7 +242,7 @@ while true do
 
                 return t;
             })
-            .Build();
+            .Build("en");
         Check.That(lexerResult).IsOk();
         string source = "abc Abc";
         var result = lexerResult.Result.Tokenize(source);
@@ -255,8 +255,9 @@ while true do
     [Fact]
     public void AotLexerPostProcessTest()
     {
-        var builder = AotLexerBuilder<TestLexer>.NewBuilder<TestLexer>();
+        var builder = AotLexerBuilder<TestLexer>.NewBuilder();
         var lexerBuilder = builder.AlphaId(TestLexer.Value1)
+                .Label(TestLexer.Value1,"en","this is Value One")
             .UseLexerPostProcessor((List<Token<TestLexer>> tokens) =>
             {
                 var processed = tokens.Select(x =>
@@ -272,7 +273,7 @@ while true do
             });
 
         var instance = "no instance";
-        var parserResult = AotEBNFParserBuilder<TestLexer, string>.NewBuilder<TestLexer, string>(instance, "root")
+        var parserResult = AotEBNFParserBuilder<TestLexer, string>.NewBuilder(instance, "root")
             .Production("root : [Value1|Value2]*", args =>
             {
                 var t = args[0] as List<Token<TestLexer>>;
@@ -288,14 +289,61 @@ while true do
         Check.That(result).IsOkParsing();
         Check.That(result.Result).IsEqualTo("Value1,Value2");
     }
+    
+    [Fact]
+    public void AotLexerLabelsTest()
+    {
+        var builder = AotLexerBuilder<TestLexer>.NewBuilder();
+        var lexerBuilder = builder.AlphaId(TestLexer.Value1)
+            .Label(TestLexer.Value1, "en", "Value One")
+            .Label(TestLexer.Value1, "fr", "Valeur un")
+            .Sugar(TestLexer.Value2, "*-*")
+            .Label(TestLexer.Value2, "en","star-dash-star")
+            .Label(TestLexer.Value2, "fr","étoile-tiret-étoile");
+            
+            
+
+        var instance = "no instance";
+        var englishParserResult = AotEBNFParserBuilder<TestLexer, string>.NewBuilder(instance, "root","en")
+            .Production("root : [Value1|Value2]*", args =>
+            {
+                var t = args[0] as List<Token<TestLexer>>;
+                return string.Join(",", t.Select(x => x.TokenID+"-"+x.Label));
+            })
+            .WithLexerbuilder(lexerBuilder)
+            .BuildParser();
+            
+            
+        Check.That(englishParserResult).IsOk();
+        string source = "abc *-*";
+        var result = englishParserResult.Result.Parse(source);
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("Value1-Value One,Value2-star-dash-star");
+        
+        var frenchParserResult = AotEBNFParserBuilder<TestLexer, string>.NewBuilder(instance, "root","fr")
+            .Production("root : [Value1|Value2]*", args =>
+            {
+                var t = args[0] as List<Token<TestLexer>>;
+                return string.Join(",", t.Select(x => x.TokenID+"-"+x.Label));
+            })
+            .WithLexerbuilder(lexerBuilder)
+            .BuildParser();
+            
+            
+        Check.That(frenchParserResult).IsOk();
+        result = frenchParserResult.Result.Parse(source);
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("Value1-Valeur un,Value2-étoile-tiret-étoile");
+        
+    }
 
     [Fact]
     public void AotLexerModesTest()
     {
-        var builder = AotLexerBuilder<MinimalXmlLexer>.NewBuilder<MinimalXmlLexer>();
+        var builder = AotLexerBuilder<MinimalXmlLexer>.NewBuilder();
         var lexerBuilder = builder.Sugar(MinimalXmlLexer.OPEN, "<")
             .Push(MinimalXmlLexer.OPEN, "tag")
-            .UpTo(MinimalXmlLexer.CONTENT,"<")
+            .UpTo(MinimalXmlLexer.CONTENT, "<")
             .Sugar(MinimalXmlLexer.OPEN_PI, "<?")
             .Push(MinimalXmlLexer.OPEN_PI, "pi")
             .MultiLineComment(MinimalXmlLexer.COMMENT, "<!--", "-->", false, Channels.Main)
@@ -307,7 +355,7 @@ while true do
             .Sugar(MinimalXmlLexer.CLOSE, ">", modes: "tag")
             .Pop(MinimalXmlLexer.CLOSE)
             .Pop(MinimalXmlLexer.CLOSE_PI);
-        var lexerResult = lexerBuilder.Build();
+        var lexerResult = lexerBuilder.Build("en");
         Check.That(lexerResult).IsOk();
         string xml = @"hello
 <tag attr=""value"">inner text</tag>

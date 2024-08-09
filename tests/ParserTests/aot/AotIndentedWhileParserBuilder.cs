@@ -12,7 +12,7 @@ public class AotIndentedWhileParserBuilder
 {
     public IAotLexerBuilder<IndentedWhileTokenGeneric> BuildAotWhileLexer()
     {
-        var builder = AotLexerBuilder<IndentedWhileTokenGeneric>.NewBuilder<IndentedWhileTokenGeneric>();
+        var builder = AotLexerBuilder<IndentedWhileTokenGeneric>.NewBuilder();
         builder.IsIndentationAware()
             .UseIndentations("\t")
             // keywords
@@ -56,7 +56,7 @@ public class AotIndentedWhileParserBuilder
     {
         IndentedWhileParserGeneric instance = new IndentedWhileParserGeneric();
         var builder = AotEBNFParserBuilder<IndentedWhileTokenGeneric, WhileAST>
-            .NewBuilder<IndentedWhileTokenGeneric, WhileAST>(instance, "program", "en");
+            .NewBuilder(instance, "program", "en");
         Func<object[], WhileAST> comparisons = (object[] args) =>
         {
             return instance.binaryComparisonExpression((WhileAST)args[0], (Token<IndentedWhileTokenGeneric>)args[1],

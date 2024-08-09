@@ -36,7 +36,7 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
     private LexerPostProcess<IN> _lexerPostProcess = null;
 
     private ParserConfiguration<IN, OUT> _configuration = null;
-    public static IAotParserBuilder<IN,OUT> NewBuilder<IN,OUT>(object parserInstance, string rootRule, string i18N = "en") where IN : struct
+    public static IAotParserBuilder<IN,OUT> NewBuilder(object parserInstance, string rootRule, string i18N = "en") 
     {
         return new AotParserBuilder<IN,OUT>(i18N, parserInstance, rootRule);
     }
@@ -79,7 +79,7 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
         {
             _lexerBuilder.WithExplicitTokens(tokens.Select(x => x.ExplicitToken).ToList());
         }
-        var lexer = _lexerBuilder.Build();
+        var lexer = _lexerBuilder.Build(_i18N);
         
         SyntaxTreeVisitor<IN, OUT> visitor = new SyntaxTreeVisitor<IN, OUT>(_configuration, _parserInstance);
         

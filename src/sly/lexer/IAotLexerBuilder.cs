@@ -63,5 +63,5 @@ public interface IAotLexerBuilder<IN> where IN : struct
     
     public IAotLexerBuilder<IN> Label(IN tokenId, string lang, string label);
     
-    public BuildResult<ILexer<IN>> Build();
+    public BuildResult<ILexer<IN>> Build(string lang);
 }

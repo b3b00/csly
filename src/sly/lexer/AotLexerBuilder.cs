@@ -39,9 +39,9 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
     private Dictionary<IN, List<string>> _modes;
 
 
-    public static IAotLexerBuilder<A> NewBuilder<A>() where A : struct
+    public static IAotLexerBuilder<IN> NewBuilder() 
     {
-        return new AotLexerBuilder<A>();
+        return new AotLexerBuilder<IN>();
     }
 
     
@@ -275,7 +275,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         return this;
     }
     
-    public BuildResult<ILexer<IN>> Build()
+    public BuildResult<ILexer<IN>> Build(string lang)
     {
         var lexerConfig = new LexerAttribute()
         {
@@ -305,7 +305,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
                 return (modes, isModePopper, pushMode);
             }; 
         
-        var lexerResult = LexerBuilder.BuildLexer(r, _extensionBuilder, "en", _lexerPostProcessor, _explicitTokens, _lexemes, lexerConfig, _comments, modesGetter);
+        var lexerResult = LexerBuilder.BuildLexer(r, _extensionBuilder, lang, _lexerPostProcessor, _explicitTokens, _lexemes, lexerConfig, _comments, modesGetter);
         if (lexerResult.IsOk && lexerResult.Result is GenericLexer<IN> genericLexer)
         {
             if (_callbacks.Any())
