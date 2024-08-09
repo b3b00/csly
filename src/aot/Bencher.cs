@@ -56,7 +56,6 @@ else
 	    chrono.Tick("build");
 	    Run(parser.Result);
 	    chrono.Tick("run");
-	    Console.WriteLine(parser.Result.Configuration.Dump());
     }
 
     private void Run(Parser<IndentedWhileTokenGeneric, WhileAST> parser)
