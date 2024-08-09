@@ -8,6 +8,7 @@ using ParserTests.aot.expressions;
 using Sigil;
 using sly.buildresult;
 using sly.lexer;
+using XML;
 using Xunit;
 
 namespace ParserTests.aot;
@@ -287,4 +288,64 @@ while true do
         Check.That(result).IsOkParsing();
         Check.That(result.Result).IsEqualTo("Value1,Value2");
     }
+
+    [Fact]
+    public void AotLexerModesTest()
+    {
+        var builder = AotLexerBuilder<MinimalXmlLexer>.NewBuilder<MinimalXmlLexer>();
+        var lexerBuilder = builder.Sugar(MinimalXmlLexer.OPEN, "<")
+            .Push(MinimalXmlLexer.OPEN, "tag")
+            .UpTo(MinimalXmlLexer.CONTENT,"<")
+            .Sugar(MinimalXmlLexer.OPEN_PI, "<?")
+            .Push(MinimalXmlLexer.OPEN_PI, "pi")
+            .MultiLineComment(MinimalXmlLexer.COMMENT, "<!--", "-->", false, Channels.Main)
+            .AlphaId(MinimalXmlLexer.ID, "pi", "tag")
+            .Sugar(MinimalXmlLexer.SLASH, "/", modes: "tag")
+            .Sugar(MinimalXmlLexer.EQUALS, "=", modes: "tag")
+            .String(MinimalXmlLexer.VALUE, modes: new[] { "pi", "tag" })
+            .Sugar(MinimalXmlLexer.CLOSE_PI, "?>", modes: "pi")
+            .Sugar(MinimalXmlLexer.CLOSE, ">", modes: "tag")
+            .Pop(MinimalXmlLexer.CLOSE)
+            .Pop(MinimalXmlLexer.CLOSE_PI);
+        var lexerResult = lexerBuilder.Build();
+        Check.That(lexerResult).IsOk();
+        string xml = @"hello
+<tag attr=""value"">inner text</tag>
+<!-- this is a comment -->
+<? PI attr=""test""?>";
+        var result = lexerResult.Result.Tokenize(xml);
+        Check.That(result.IsOk).IsTrue();
+        var expectedTokens = new List<MinimalXmlLexer>()
+        {
+            MinimalXmlLexer.CONTENT,
+            MinimalXmlLexer.OPEN,
+            MinimalXmlLexer.ID,
+            MinimalXmlLexer.ID,
+            MinimalXmlLexer.EQUALS,
+            MinimalXmlLexer.VALUE,
+            MinimalXmlLexer.CLOSE,
+            MinimalXmlLexer.CONTENT,
+            MinimalXmlLexer.OPEN,
+            MinimalXmlLexer.SLASH,
+            MinimalXmlLexer.ID,
+            MinimalXmlLexer.CLOSE,
+            MinimalXmlLexer.COMMENT,
+            MinimalXmlLexer.OPEN_PI,
+            MinimalXmlLexer.ID,
+            MinimalXmlLexer.ID,
+            MinimalXmlLexer.EQUALS,
+            MinimalXmlLexer.VALUE,
+            MinimalXmlLexer.CLOSE_PI
+        };
+        var tokens = result.Tokens.MainTokens();
+        Check.That(expectedTokens).CountIs(tokens.Count-1);
+
+        Check.That(tokens.Extracting("TokenID")).Contains(expectedTokens);
+
+
+
+
+
+    }
+
 }
