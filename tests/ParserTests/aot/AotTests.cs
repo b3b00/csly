@@ -256,34 +256,22 @@ while true do
     {
         var builder = AotLexerBuilder<TestLexer>.NewBuilder<TestLexer>();
         var lexerBuilder = builder.AlphaId(TestLexer.Value1)
-            .UseTokenCallback(TestLexer.Value1, t =>
-            {
-                if (char.IsUpper(t.Value[0]))
-                {
-                    t.TokenID = TestLexer.Value2;
-                }
-
-                return t;
-            })
             .UseLexerPostProcessor((List<Token<TestLexer>> tokens) =>
             {
-                return tokens.Select(x =>
+                var processed = tokens.Select(x =>
                 {
-                    if (x.TokenID == TestLexer.Value1)
+                    if (x.TokenID == TestLexer.Value1 && char.IsUpper(x.Value[0]))
                     {
                         x.TokenID = TestLexer.Value2;
-                    }
-                    else if (x.TokenID == TestLexer.Value2)
-                    {
-                        x.TokenID = TestLexer.Value1;
                     }
 
                     return x;
                 }).ToList();
+                return processed;
             });
 
         var instance = "no instance";
-        var parserResult = AotParserBuilder<TestLexer, string>.NewBuilder<TestLexer, string>(instance, "root")
+        var parserResult = AotEBNFParserBuilder<TestLexer, string>.NewBuilder<TestLexer, string>(instance, "root")
             .Production("root : [Value1|Value2]*", args =>
             {
                 var t = args[0] as List<Token<TestLexer>>;
