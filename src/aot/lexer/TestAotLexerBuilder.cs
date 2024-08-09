@@ -21,7 +21,7 @@ public class TestAotLexerBuilder
     /// <returns></returns>
     public IAotLexerBuilder<AotLexer> FluentInitializeCenericLexerForParserTest()
     {
-        var builder = AotLexerBuilder<AotLexer>.NewBuilder<AotLexer>();
+        var builder = AotLexerBuilder<AotLexer>.NewBuilder();
         var lexerBuilder = builder.Double(AotLexer.DOUBLE)
             .Sugar(AotLexer.PLUS, "+")
             .Keyword(AotLexer.PLUS, "PLUS")
@@ -40,7 +40,7 @@ public class TestAotLexerBuilder
     
     public IAotLexerBuilder<AotLexer> FluentInitializeCenericLexerForLexerTest()
     {
-        var builder = AotLexerBuilder<AotLexer>.NewBuilder<AotLexer>();
+        var builder = AotLexerBuilder<AotLexer>.NewBuilder();
         var lexerBuilder = builder.Double(AotLexer.DOUBLE)
             .Sugar(AotLexer.PLUS, "+")
             .Keyword(AotLexer.PLUS, "PLUS")
