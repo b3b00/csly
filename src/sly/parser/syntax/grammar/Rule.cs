@@ -166,7 +166,7 @@ namespace sly.parser.syntax.grammar
 
         
         
-        public bool Match<OUT>(IList<Token<IN>> tokens, int position, ParserConfiguration<IN,OUT> configuration)
+        public bool Match(IList<Token<IN>> tokens, int position, ParserConfiguration<IN,OUT> configuration)
         {
             bool activateBroadWindow = configuration.BroadenTokenWindow;
             if (activateBroadWindow && Clauses.Count >= 2 && Clauses[0] is TerminalClause<IN,OUT> startingTerminalClause && Clauses[1] is NonTerminalClause<IN,OUT> nTerm)

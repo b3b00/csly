@@ -28,17 +28,13 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
 
     private readonly Parser<EbnfTokenGeneric, GrammarNode<IN, OUT>> _grammarParser = null;
 
-    private string _i18N;
+    private readonly string _i18N;
 
-    private string _rootRule;
+    private readonly string _rootRule;
 
-    private object _parserInstance;
+    private readonly object _parserInstance;
     
     private IAotLexerBuilder<IN> _lexerBuilder;
-
-    private Action<IN, LexemeAttribute, GenericLexer<IN>> _extensionBuilder = null;
-    
-    private LexerPostProcess<IN> _lexerPostProcess = null;
 
     private ParserConfiguration<IN, OUT> _configuration = null;
     public static IAotEBNFParserBuilder<IN,OUT> NewBuilder(object parserInstance, string rootRule, string i18N = "en") 

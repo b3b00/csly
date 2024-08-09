@@ -23,17 +23,13 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
 
     private bool _useAutoCloseIndentations = false;
 
-    private string _i18N;
+    private readonly string _i18N;
 
-    private string _rootRule;
+    private readonly string _rootRule;
 
-    private object _parserInstance;
+    private readonly object _parserInstance;
     
     private IAotLexerBuilder<IN> _lexerBuilder;
-
-    private Action<IN, LexemeAttribute, GenericLexer<IN>> _extensionBuilder = null;
-    
-    private LexerPostProcess<IN> _lexerPostProcess = null;
 
     private ParserConfiguration<IN, OUT> _configuration = null;
     public static IAotParserBuilder<IN,OUT> NewBuilder(object parserInstance, string rootRule, string i18N = "en") 

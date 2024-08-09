@@ -47,9 +47,6 @@ public class AotIndentedWhileParserBuilder
             .Sugar(IndentedWhileTokenGeneric.SEMICOLON, ";")
             .SingleLineComment(IndentedWhileTokenGeneric.COMMENT, "#");
         return builder;
-            
-            
-        return builder;
     }
 
     public IAotEBNFParserBuilder<IndentedWhileTokenGeneric, WhileAST> BuildAotWhileParser()

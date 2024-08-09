@@ -341,7 +341,6 @@ namespace sly.lexer
         private static (List<string> modes,bool isModePopper, string pushTarget) GetModesForLexeme<IN>(KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)> attribute) where IN : struct
         {
             (List<string> modes, bool isModePopper, string pushTarget) result = (new List<string>(), false, null);
-            Dictionary<string, IDictionary<IN, List<LexemeAttribute>>> subLexers;
             if (attribute.Key is Enum enumValue)
             {
                 var modeAtributes = enumValue.GetAttributesOfType<ModeAttribute>();

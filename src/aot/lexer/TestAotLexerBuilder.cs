@@ -7,14 +7,6 @@ namespace aot.lexer;
 public class TestAotLexerBuilder
 {
 
-
-    private LexemeAttribute BuildLexeme(GenericToken generic, int channel = 0, params string[] parameters)
-    {
-        return new LexemeAttribute(generic, channel, parameters);
-        return null;
-    }
-
-
     /// <summary>
     /// this should be the code to generate
     /// </summary>
