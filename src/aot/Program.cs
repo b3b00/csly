@@ -1,5 +1,6 @@
 ﻿
 
+using aot;
 using aot.lexer;
 using aot.parser;
 using BenchmarkDotNet.Attributes;
@@ -7,10 +8,12 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Environments;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+using BenchmarkDotNet.Toolchains.CsProj;
 using CommandLine;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.model;
 using ParserTests.aot;
+using sly.lexer;
 using sly.parser;
 
 
@@ -23,21 +26,34 @@ if (!p.IsOk)
 	return;
 }
 
-var config = DefaultConfig.Instance
-	.With(Job.Default.With(NativeAotRuntime.Net80)); // compiles the benchmarks as net8.0 and uses the latest NativeAOT to build a native app
+// var config = DefaultConfig.Instance
+// 	.With(Job.Default.With(NativeAotRuntime.Net80)); // compiles the benchmarks as net8.0 and uses the latest NativeAOT to build a native app
+//
+// var baseJob = Job.MediumRun.With(CsProjCoreToolchain.Current.Value);
+// Add(baseJob.WithNuGet("sly", "2.2.5.1").WithId("2.2.5.1"));
+// Add(baseJob.WithNuGet("sly", "2.3.0").WithId("2.3.0"));
+// Add(baseJob.WithNuGet("sly", "2.4.0.1").WithId("2.4.0.1"));
+// Add(EnvironmentAnalyser.Default);
 
-BenchmarkSwitcher
-	.FromAssembly(typeof(Program).Assembly)
-	.Run(args, config);
+//var summary = BenchmarkRunner.Run<Bencher>();
 
-var summary = BenchmarkRunner.Run<Bencher>();
+var bencher = new WhileBench();
+Console.WriteLine("AOT");
+bencher.Bench(bencher.BenchAot);
+Console.WriteLine("Legacy");
+bencher.Bench(bencher.BenchLegacy);
 
+[SimpleJob(RuntimeMoniker.Net80, baseline:true)]
+[SimpleJob(RuntimeMoniker.NativeAot80)]
+[MemoryDiagnoser]
+[RPlotExporter]
 public class Bencher
 {
-	
+
 	private Parser<IndentedWhileTokenGeneric, WhileAST> _parser;
 
 	[GlobalSetup]
+	
 	public void Setup()
 	{
 		AotIndentedWhileParserBuilder builder = new AotIndentedWhileParserBuilder();
@@ -69,7 +85,7 @@ if a > 145 then
 	skip
 	a := a *478
 	if a > 125874 then
-		a := 1+2+3+4+5+6+7+8+9+10+20+30
+		a := 1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20
 		b := true
 		print ""bololo""
 	else

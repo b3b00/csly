@@ -98,7 +98,9 @@ public class AotIndentedWhileParserBuilder
                 args => { return instance.printStmt((Expression)args[0]); })
             .Production("primary : INT",
                 args => { return instance.PrimaryInt(((Token<IndentedWhileTokenGeneric>)args[0])); })
-            .Production("primary : [TRUE|FALSE]",
+            .Production("primary : TRUE",
+                args => { return instance.PrimaryBool(((Token<IndentedWhileTokenGeneric>)args[0])); })
+            .Production("primary : FALSE",
                 args => { return instance.PrimaryBool(((Token<IndentedWhileTokenGeneric>)args[0])); })
             .Production("primary : STRING",
                 args => { return instance.PrimaryString(((Token<IndentedWhileTokenGeneric>)args[0])); })
