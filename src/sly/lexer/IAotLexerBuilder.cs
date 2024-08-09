@@ -10,32 +10,30 @@ public interface IAotLexerBuilder<IN> where IN : struct
 {
     
     public IAotLexerBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".",
-        int channel = Channels.Main);
+        int channel = Channels.Main, params string[] modes);
 
-    public IAotLexerBuilder<IN> Integer(IN tokenId, int channel = Channels.Main);
+    public IAotLexerBuilder<IN> Integer(IN tokenId, int channel = Channels.Main, params string[] modes);
 
-    public IAotLexerBuilder<IN> Sugar(IN tokenId, string token, int channel = Channels.Main);
+    public IAotLexerBuilder<IN> Sugar(IN tokenId, string token, int channel = Channels.Main, params string[] modes);
     
-    public IAotLexerBuilder<IN> Keyword(IN tokenId, string token, int channel = Channels.Main);
+    public IAotLexerBuilder<IN> Keyword(IN tokenId, string token, int channel = Channels.Main, params string[] modes);
 
-    public IAotLexerBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main);
-    public IAotLexerBuilder<IN> AlphaNumId(IN tokenId);
+    public IAotLexerBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main, params string[] modes);
+    public IAotLexerBuilder<IN> AlphaNumId(IN tokenId, params string[] modes);
     
-    public IAotLexerBuilder<IN> AlphaId(IN tokenId);
+    public IAotLexerBuilder<IN> AlphaId(IN tokenId, params string[] modes);
     
-    public IAotLexerBuilder<IN> AlphaNumDashId(IN tokenId);
+    public IAotLexerBuilder<IN> AlphaNumDashId(IN tokenId, params string[] modes);
     
-    public IAotLexerBuilder<IN> CustomId(IN tokenId, string start, string end);
+    public IAotLexerBuilder<IN> CustomId(IN tokenId, string start, string end, params string[] modes);
 
-    public IAotLexerBuilder<IN> Labeled(string lang, string label);
+    IAotLexerBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false, int channel = Channels.Comments, params string[] modes);
 
-    IAotLexerBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false, int channel = Channels.Comments);
-
-    public IAotLexerBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments);
+    public IAotLexerBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments, params string[] modes);
 
     public IAotLexerBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEOL = false);
 
-    public IAotLexerBuilder<IN> Extension(IN tokenId, int channel = Channels.Main);
+    public IAotLexerBuilder<IN> Extension(IN tokenId, int channel = Channels.Main, params string[] modes);
 
     public IAotLexerBuilder<IN> UseExtensionBuilder(Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder);
 
@@ -56,6 +54,12 @@ public interface IAotLexerBuilder<IN> where IN : struct
     public IAotLexerBuilder<IN> IsIndentationAware(bool isAware = true);
 
     public IAotLexerBuilder<IN> UseIndentations(string indentation);
+
+    public IAotLexerBuilder<IN> Push(IN tokenId, string targetMode);
+    
+    public IAotLexerBuilder<IN> Pop(IN tokenId);
+    
+    public IAotLexerBuilder<IN> Label(IN tokenId, string lang, string label);
     
     public BuildResult<ILexer<IN>> Build();
 }

@@ -32,6 +32,10 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
     private LexerPostProcess<IN> _lexerPostProcessor;
     private List<(IN tokenId,Func<Token<IN>, Token<IN>> callback)> _callbacks;
 
+    private List<(IN tokenId, string targetMode)> _modePushers;
+    
+    private List<IN> _modePopers;
+
 
     public static IAotLexerBuilder<A> NewBuilder<A>() where A : struct
     {
@@ -47,7 +51,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         _callbacks = new List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)>();
     }
 
-    private void AddComment(IN tokenId, CommentAttribute comment)
+    private void AddComment(IN tokenId, CommentAttribute comment, params string[] modes)
     {
         _currentLexeme = tokenId;
         List<CommentAttribute> comments = null;
@@ -60,7 +64,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         _lexemes[tokenId] = (new List<LexemeAttribute>(), new List<LexemeLabelAttribute>());
     }
     
-    private void Add(IN tokenId, LexemeAttribute lexeme, LexemeLabelAttribute label)
+    private void Add(IN tokenId, LexemeAttribute lexeme, LexemeLabelAttribute label, params string[] modes)
     {
         _currentLexeme = tokenId;
         (List<LexemeAttribute> tokens, List<LexemeLabelAttribute> labels) lexemes = (null,null);
@@ -73,10 +77,10 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         _lexemes[tokenId] = lexemes;
     }
     
-    private void AddLabel(string lang, string label)
+    private void AddLabel(IN tokenId, string lang, string label)
     {
         (List<LexemeAttribute> tokens, List<LexemeLabelAttribute> labels) lexemes = (null,null);
-        if (_lexemes.TryGetValue(_currentLexeme.Value, out lexemes))
+        if (_lexemes.TryGetValue(tokenId, out lexemes))
         {
             if (lexemes.labels == null)
             {
@@ -127,95 +131,103 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         return this;
     }
 
-    public IAotLexerBuilder<IN> SingleLineComment(string start)
+    public IAotLexerBuilder<IN> Push(IN tokenId, string targetMode)
+    {
+        _modePushers.Add((tokenId,targetMode));
+        return this;
+    }
+
+    public IAotLexerBuilder<IN> Pop(IN tokenId)
+    {
+        _modePopers.Add(tokenId);
+        return this;
+    }
+
+    public IAotLexerBuilder<IN> SingleLineComment(string start, params string[] modes)
     {
         // TODO AOT
         return this;
     }
     
-    public IAotLexerBuilder<IN> MultiLineComment(string start)
+    public IAotLexerBuilder<IN> MultiLineComment(string start, params string[] modes)
     {
         // TODO AOT
         return this;
     }
 
-    public IAotLexerBuilder<IN> Extension(IN tokenId, int channel = Channels.Main)
+    public IAotLexerBuilder<IN> Extension(IN tokenId, int channel = Channels.Main, params string[] modes)
     {
         Add(tokenId,new LexemeAttribute(GenericToken.Extension,channel:channel), null);
         return this;
     }
     
-    public IAotLexerBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".", int channel = Channels.Main)
+    public IAotLexerBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".", int channel = Channels.Main, params string[] modes)
     {
         Add(tokenId, new LexemeAttribute(GenericToken.Double, channel:Channels.Main, parameters:decimalDelimiter) , null);
         return this;
     }
 
-    public IAotLexerBuilder<IN> Integer(IN tokenId, int channel = Channels.Main)
+    public IAotLexerBuilder<IN> Integer(IN tokenId, int channel = Channels.Main, params string[] modes)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.Int, channel:Channels.Main) , null);
         return this;
     }
 
-    public IAotLexerBuilder<IN> Sugar(IN tokenId, string token, int channel = Channels.Main)
+    public IAotLexerBuilder<IN> Sugar(IN tokenId, string token, int channel = Channels.Main, params string[] modes)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.SugarToken, channel:Channels.Main, parameters:token), null);
         return this;
     }
     
-    public IAotLexerBuilder<IN> Keyword(IN tokenId, string token, int channel = Channels.Main)
+    public IAotLexerBuilder<IN> Keyword(IN tokenId, string token, int channel = Channels.Main, params string[] modes)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.KeyWord, channel:Channels.Main, parameters:token) ,null);
         return this;
     }
 
-    public IAotLexerBuilder<IN> AlphaNumId(IN tokenId)
+    public IAotLexerBuilder<IN> AlphaNumId(IN tokenId, params string[] modes)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.Identifier,IdentifierType.AlphaNumeric, channel:Channels.Main) , null);
         return this;
     }
     
-    public IAotLexerBuilder<IN> AlphaId(IN tokenId)
+    public IAotLexerBuilder<IN> AlphaId(IN tokenId, params string[] modes)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.Identifier,IdentifierType.Alpha, channel:Channels.Main) , null);
         return this;
     }
     
-    public IAotLexerBuilder<IN> AlphaNumDashId(IN tokenId)
+    public IAotLexerBuilder<IN> AlphaNumDashId(IN tokenId, params string[] modes)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.Identifier,IdentifierType.AlphaNumericDash, channel:Channels.Main) , null);
         return this;
     }
     
-    public IAotLexerBuilder<IN> CustomId(IN tokenId, string start, string end)
+    public IAotLexerBuilder<IN> CustomId(IN tokenId, string start, string end, params string[] modes)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.Identifier,IdentifierType.Custom, start, end, channel:Channels.Main) , null);
         return this;
     }
 
-    public IAotLexerBuilder<IN> Labeled(string lang, string label)
+    public IAotLexerBuilder<IN> Label(IN tokenId, string lang, string label)
     {
-        if (_currentLexeme == null)
-        {
-            throw new InvalidOperationException("no lexeme is currently defined");
-        }
-        AddLabel(lang, label);
+        AddLabel(tokenId, lang, label);
         return this;
     }
 
-    public IAotLexerBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main)
+    public IAotLexerBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main, params string[] modes)
     {
         Add(tokenId,new LexemeAttribute(GenericToken.String,channel, delimiter,escapeChar),null);
         return this;
     }
     
-    public IAotLexerBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false, int channel = Channels.Comments)
+    public IAotLexerBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false, int channel = Channels.Comments, params string[] modes)
     {
         AddComment(tokenId, new SingleLineCommentAttribute(start, doNotIgnore, channel));
         return this;
     }
 
-    public IAotLexerBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments)
+    public IAotLexerBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments, params string[] modes)
     {
         AddComment(tokenId, new MultiLineCommentAttribute(start, end, doNotIgnore, channel));
         return this;
