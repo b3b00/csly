@@ -35,13 +35,13 @@ if (!p.IsOk)
 // Add(baseJob.WithNuGet("sly", "2.4.0.1").WithId("2.4.0.1"));
 // Add(EnvironmentAnalyser.Default);
 
-//var summary = BenchmarkRunner.Run<Bencher>();
+var summary = BenchmarkRunner.Run<Bencher>();
 
-var bencher = new WhileBench();
-Console.WriteLine("AOT");
-bencher.Bench(bencher.BenchAot);
-Console.WriteLine("Legacy");
-bencher.Bench(bencher.BenchLegacy);
+// var bencher = new WhileBench();
+// Console.WriteLine("AOT");
+// bencher.Bench(bencher.BenchAot);
+// Console.WriteLine("Legacy");
+// bencher.Bench(bencher.BenchLegacy);
 
 [SimpleJob(RuntimeMoniker.Net80, baseline:true)]
 [SimpleJob(RuntimeMoniker.NativeAot80)]
@@ -50,7 +50,7 @@ bencher.Bench(bencher.BenchLegacy);
 public class Bencher
 {
 
-	private Parser<IndentedWhileTokenGeneric, WhileAST> _parser;
+	private Parser<IndentedWhileTokenGeneric, WhileAST>? _parser;
 
 	[GlobalSetup]
 	
@@ -70,6 +70,7 @@ public class Bencher
 
 	public Bencher()
 	{
+		_parser = null;
 	}
 	
 	[Benchmark]
@@ -94,6 +95,6 @@ if a > 145 then
 else
 	print b
 ";
-		var r = _parser.Parse(program);
+		var r = _parser?.Parse(program);
 	}
 }	

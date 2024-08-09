@@ -52,7 +52,7 @@ public class TestAotLexerBuilder
     }
 
 
-    public ILexer<AotLexer> InitializeCenericLexer()
+    public ILexer<AotLexer>? InitializeCenericLexer()
     {
 
         

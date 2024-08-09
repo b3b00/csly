@@ -23,7 +23,7 @@ namespace Chrono.Ext
             chrono.Start();
         }
 
-        public void Stop(string label = null)
+        public void Stop(string? label = null)
         {
             chrono.Stop();
             ElapsedMilliseconds.Add(chrono.ElapsedMilliseconds);
@@ -33,7 +33,7 @@ namespace Chrono.Ext
             }
         }
 
-        public void Tick(string label = null)
+        public void Tick(string? label = null)
         {
             chrono.Stop();
             ElapsedMilliseconds.Add(chrono.ElapsedMilliseconds);
