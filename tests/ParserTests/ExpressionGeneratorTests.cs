@@ -8,6 +8,7 @@ using sly.parser;
 using sly.parser.generator;
 using Xunit;
 using ParserTests.Issue184;
+using ExpressionToken = expressionparser.ExpressionToken;
 
 namespace ParserTests
 {
@@ -163,7 +164,7 @@ namespace ParserTests
     
     public class ExpressionGeneratorTests
     {
-        private BuildResult<Parser<ExpressionToken, double>> Parser;
+        private BuildResult<Parser<simpleExpressionParser.ExpressionToken, double>> Parser;
 
         private string StartingRule = "";
 
@@ -172,7 +173,7 @@ namespace ParserTests
         {
             StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
-            var builder = new ParserBuilder<ExpressionToken, double>();
+            var builder = new ParserBuilder<simpleExpressionParser.ExpressionToken, double>();
             Parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
         }
 
@@ -223,7 +224,7 @@ namespace ParserTests
             BuildParser();
             
             Check.That(Parser.Result.Configuration.NonTerminals).CountIs(7);
-            var nonterminals = new List<NonTerminal<ExpressionToken>>();
+            var nonterminals = new List<NonTerminal<simpleExpressionParser.ExpressionToken>>();
             foreach (var pair in Parser.Result.Configuration.NonTerminals) nonterminals.Add(pair.Value);
             var nt = nonterminals[1]; // operand
             Check.That(nt.Rules).IsSingle();
