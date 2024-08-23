@@ -16,6 +16,7 @@ using sly.parser.llparser.ebnf;
 using sly.parser.parser;
 using sly.parser.syntax.grammar;
 using Xunit;
+using ExpressionToken = simpleExpressionParser.ExpressionToken;
 using String = System.String;
 
 namespace ParserTests

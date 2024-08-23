@@ -66,13 +66,16 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 currentPosition = innerResult.EndingPosition;
                 lastInnerResult = innerResult;
                 hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
-                innerErrors.AddRange(lastInnerResult.Errors);
+                if (lastInnerResult.GetErrors() != null)
+                {
+                    innerErrors.AddRange(lastInnerResult.GetErrors());
+                }
             }
             else
             {
                 if (innerResult != null)
                 {
-                    innerErrors.AddRange(innerResult.Errors);
+                    innerErrors.AddRange(innerResult.GetErrors());
                 }
             }
 
@@ -82,7 +85,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 
         result.EndingPosition = currentPosition;
         result.IsError = false;
-        result.Errors = innerErrors;
+        result.AddErrors(innerErrors);
         result.Root = manyNode;
         result.IsEnded = lastInnerResult != null && lastInnerResult.IsEnded;
         result.HasByPassNodes = hasByPasNodes;
@@ -153,20 +156,20 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 
             if (nextResult != null)
             {
-                innerErrors.AddRange(nextResult.Errors);
+                innerErrors.AddRange(nextResult.GetErrors());
             }
 
             isError = false;
         }
         else
         {
-            innerErrors.AddRange(firstInnerResult.Errors);
+            innerErrors.AddRange(firstInnerResult.GetErrors());
             isError = true;
         }
 
         result.EndingPosition = currentPosition;
         result.IsError = isError;
-        result.Errors = innerErrors;
+        result.AddErrors(innerErrors);
         result.Root = manyNode;
         result.IsEnded = lastInnerResult != null && lastInnerResult.IsEnded;
         result.HasByPassNodes = hasByPasNodes;

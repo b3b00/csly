@@ -87,7 +87,7 @@ namespace sly.parser.llparser.bnf
                         if (r.EndingPosition == lastPosition)
                         {
                             furtherResults.Add(r);
-                            errors.AddRange(r.Errors);
+                            errors.AddRange(r.GetErrors());
                         }
                     }
 
@@ -113,11 +113,11 @@ namespace sly.parser.llparser.bnf
                         .Where(e =>
                             e.UnexpectedToken.PositionInTokenFlow == lastErrorPosition)
                         .ToList();
-                    result.Errors = lastErrors;
+                    result.AddErrors(lastErrors);
                 }
                 else
                 {
-                    result.Errors = errors;
+                    result.AddErrors(errors);
                 }
 
                 result.IsError = true;
@@ -167,12 +167,12 @@ namespace sly.parser.llparser.bnf
                             {
                                 children.Add(nonTerminalResult.Root);
                                 currentPosition = nonTerminalResult.EndingPosition;
-                                if (nonTerminalResult.Errors != null && nonTerminalResult.Errors.Count > 0)
-                                    errors.AddRange(nonTerminalResult.Errors);
+                                if (nonTerminalResult.GetErrors() != null && nonTerminalResult.GetErrors().Count > 0)
+                                    errors.AddRange(nonTerminalResult.GetErrors());
                             }
                             else
                             {
-                                errors.AddRange(nonTerminalResult.Errors);
+                                errors.AddRange(nonTerminalResult.GetErrors());
                             }
 
                             isError = nonTerminalResult.IsError;
@@ -186,7 +186,7 @@ namespace sly.parser.llparser.bnf
 
             var result = new SyntaxParseResult<IN>();
             result.IsError = isError;
-            result.Errors = errors;
+            result.AddErrors(errors);
             result.EndingPosition = currentPosition;
             if (!isError)
             {
@@ -228,7 +228,7 @@ namespace sly.parser.llparser.bnf
             error.IsError = true;
             error.Root = null;
             error.IsEnded = false;
-            error.Errors = noRuleErrors;
+            error.AddErrors(noRuleErrors);
             error.EndingPosition = currentPosition;
             error.Expecting = allAcceptableTokens;
 

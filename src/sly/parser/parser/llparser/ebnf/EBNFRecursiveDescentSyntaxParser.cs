@@ -63,13 +63,13 @@ namespace sly.parser.llparser.ebnf
                                 ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
                             if (!nonTerminalResult.IsError)
                             {
-                                errors.AddRange(nonTerminalResult.Errors);
+                                errors.AddRange(nonTerminalResult.GetErrors());
                                 children.Add(nonTerminalResult.Root);
                                 currentPosition = nonTerminalResult.EndingPosition;
                             }
                             else
                             {
-                                errors.AddRange(nonTerminalResult.Errors);
+                                errors.AddRange(nonTerminalResult.GetErrors());
                             }
 
                             isError = isError || nonTerminalResult.IsError;
@@ -91,14 +91,14 @@ namespace sly.parser.llparser.ebnf
 
                             if (!manyResult.IsError)
                             {
-                                errors.AddRange(manyResult.Errors);
+                                errors.AddRange(manyResult.GetErrors());
                                 children.Add(manyResult.Root);
                                 currentPosition = manyResult.EndingPosition;
                             }
                             else
                             {
-                                if (manyResult.Errors != null && manyResult.Errors.Count > 0)
-                                    errors.AddRange(manyResult.Errors);
+                                if (manyResult.GetErrors() != null && manyResult.GetErrors().Count > 0)
+                                    errors.AddRange(manyResult.GetErrors());
                             }
 
                             isError = manyResult.IsError;
@@ -115,9 +115,9 @@ namespace sly.parser.llparser.ebnf
                         {
                             var choiceResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
                             currentPosition = choiceResult.EndingPosition;
-                            if (choiceResult.IsError && choiceResult.Errors != null && choiceResult.Errors.Any())
+                            if (choiceResult.IsError && choiceResult.GetErrors() != null && choiceResult.GetErrors().Any())
                             {
-                                errors.AddRange(choiceResult.Errors);
+                                errors.AddRange(choiceResult.GetErrors());
                             }
 
                             isError = choiceResult.IsError;
@@ -133,7 +133,7 @@ namespace sly.parser.llparser.ebnf
 
             var result = new SyntaxParseResult<IN>();
             result.IsError = isError;
-            result.Errors = errors;
+            result.AddErrors(errors);
             result.EndingPosition = currentPosition;
             if (!isError)
             {

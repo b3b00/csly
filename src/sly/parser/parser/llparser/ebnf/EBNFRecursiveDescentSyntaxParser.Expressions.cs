@@ -15,7 +15,6 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
         string nonTerminalName, SyntaxParsingContext<IN> parsingContext)
     {
         var currentPosition = position;
-        var errors = new List<UnexpectedTokenSyntaxError<IN>>();
         var isError = false;
         var children = new List<ISyntaxNode<IN>>();
         if (!tokens[position].IsEOS && rule.Match(tokens, position, Configuration) && rule.Clauses != null &&
@@ -46,7 +45,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
                     {
                         if (firstResult.Root is SyntaxNode<IN>)
                         {
-                            firstResult.Errors.AddRange(secondResult.Errors);
+                            firstResult.AddErrors(secondResult.GetErrors());
                             firstResult.AddExpectings(secondResult.Expecting);
                             return firstResult;
                         }
@@ -66,7 +65,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
                     {
                         if (firstResult.Root is SyntaxNode<IN>)
                         {
-                            firstResult.Errors.AddRange(secondResult.Errors);
+                            firstResult.AddErrors(secondResult.GetErrors());
                             firstResult.AddExpectings(secondResult.Expecting);
                             return firstResult;
                         }
@@ -111,7 +110,6 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
 
         var result = new SyntaxParseResult<IN>();
         result.IsError = false;
-        result.Errors = errors;
         result.EndingPosition = currentPosition;
 
         SyntaxNode<IN> node = null;

@@ -5,10 +5,12 @@ using sly.parser.generator;
 namespace simpleExpressionParser
 {
     [ParserRoot("root")]
+    //[BroadenTokenWindow]
     public class SimpleExpressionParser
     {
 
         [Production("root : SimpleExpressionParser_expressions")]
+        
         public double Root(double value) => value;
         
         [Operation((int) ExpressionToken.PLUS, Affix.InFix, Associativity.Right, 10)]
@@ -102,4 +104,7 @@ namespace simpleExpressionParser
             return value;
         }
     }
+    
+    
+    //[BroadenTokenWindow]
 }

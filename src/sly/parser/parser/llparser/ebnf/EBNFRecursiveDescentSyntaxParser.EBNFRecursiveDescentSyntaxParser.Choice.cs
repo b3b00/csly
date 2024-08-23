@@ -61,7 +61,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         {
             var terminalAlternates = clause.Choices.Cast<TerminalClause<IN>>();
             var expected = terminalAlternates.Select(x => x.ExpectedToken).ToList();
-            result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition], LexemeLabels, I18n,
+            result.AddError(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition], LexemeLabels, I18n,
                 expected.ToArray()));
         }
 

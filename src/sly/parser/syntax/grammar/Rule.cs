@@ -159,7 +159,20 @@ namespace sly.parser.syntax.grammar
                 return false;
             }
 
-            return PossibleLeadingTokens.Exists(x => x.Match(tokens[position])) || MayBeEmpty;
+            int i = 0;
+            bool match = false;
+            var token = tokens[position];
+            if (MayBeEmpty)
+            {
+                return true;
+            }
+            while (i < PossibleLeadingTokens.Count && !match)
+            {
+                var leader = PossibleLeadingTokens[i];
+                match = leader.Match(token);
+                i++;
+            }
+            return match;
         }
 
         [ExcludeFromCodeCoverage]
