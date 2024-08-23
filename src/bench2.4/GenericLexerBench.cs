@@ -22,7 +22,7 @@ namespace bench
         {
             public Config()
             {
-                var baseJob = Job.MediumRun.With(CsProjCoreToolchain.Current.Value);
+                var baseJob = Job.MediumRun.With(CsProjCoreToolchain.NetCoreApp80);
                 Add(baseJob.WithNuGet("sly", "2.4.0").WithId("2.4.0"));
                 Add(EnvironmentAnalyser.Default);
             }
