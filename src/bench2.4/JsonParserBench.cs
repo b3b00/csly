@@ -31,10 +31,9 @@ namespace bench
         {
             public Config()
             {
-                var baseJob = Job.MediumRun.With(CsProjCoreToolchain.Current.Value);
-                Add(baseJob.WithNuGet("sly", "2.2.5.1").WithId("2.2.5.1"));
-                Add(baseJob.WithNuGet("sly", "2.3.0").WithId("2.3.0"));
-                Add(baseJob.WithNuGet("sly", "2.4.0.1").WithId("2.4.0.1"));
+                var baseJob = Job.MediumRun.With(CsProjCoreToolchain.NetCoreApp80);
+                Add(baseJob.WithNuGet("sly", "3.2.9-alpha1").WithId("3.2.9-alpha1"));
+                Add(baseJob.WithNuGet("sly", "3.2.8").WithId("3.2.8"));
                 Add(EnvironmentAnalyser.Default);
 
             }
@@ -60,6 +59,7 @@ namespace bench
             {
                 Console.WriteLine("ERROR");
                 result.Errors.ForEach(e => Console.WriteLine(e.Message));
+                Environment.Exit(1);
             }
             else
             {
