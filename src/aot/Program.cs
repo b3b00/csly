@@ -17,6 +17,8 @@ using sly.lexer;
 using sly.parser;
 
 
+
+
 AotIndentedWhileParserBuilder builder = new AotIndentedWhileParserBuilder();
 
 var b = builder.BuildAotWhileParser();
@@ -26,16 +28,53 @@ if (!p.IsOk)
 	return;
 }
 
-// var config = DefaultConfig.Instance
-// 	.With(Job.Default.With(NativeAotRuntime.Net80)); // compiles the benchmarks as net8.0 and uses the latest NativeAOT to build a native app
-//
-// var baseJob = Job.MediumRun.With(CsProjCoreToolchain.Current.Value);
-// Add(baseJob.WithNuGet("sly", "2.2.5.1").WithId("2.2.5.1"));
-// Add(baseJob.WithNuGet("sly", "2.3.0").WithId("2.3.0"));
-// Add(baseJob.WithNuGet("sly", "2.4.0.1").WithId("2.4.0.1"));
-// Add(EnvironmentAnalyser.Default);
+bool benchmark = false;
 
-var summary = BenchmarkRunner.Run<Bencher>();
+if (args.Length > 0)
+{
+	benchmark = args.Contains("bench");
+}
+
+
+
+if (benchmark)
+{
+
+
+	var summary = BenchmarkRunner.Run<Bencher>();
+
+}
+else
+{
+	AotIndentedWhileParserBuilder testBuilder = new AotIndentedWhileParserBuilder();
+	TestAotParserBuilder aotBuilder = new TestAotParserBuilder();
+	var pp = aotBuilder.FluentInitializeCenericLexer();
+
+	// var bb = testBuilder.BuildAotWhileParser();
+	// var pp = bb.BuildParser();
+	if (!pp.IsOk)
+	{
+		foreach (var error in pp.Errors)
+		{
+			Console.WriteLine(error);
+		}
+		Environment.Exit(12);
+	}
+
+	var _parser = pp.Result;
+	var r = _parser.Parse(@"10²");
+	if (r.IsOk)
+	{
+		Console.WriteLine($"OK : {r.Result}");
+	}
+	else
+	{
+		foreach (var error in r.Errors)
+		{
+			Console.WriteLine(error);
+		}
+	}
+}
 
 // var bencher = new WhileBench();
 // Console.WriteLine("AOT");

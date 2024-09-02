@@ -45,6 +45,7 @@ public class AotIndentedWhileParserBuilder
             .Sugar(IndentedWhileTokenGeneric.TIMES, "*")
             .Sugar(IndentedWhileTokenGeneric.DIVIDE, "/")
             .Sugar(IndentedWhileTokenGeneric.SEMICOLON, ";")
+            .Sugar(IndentedWhileTokenGeneric.SEMICOLON, ";")
             .SingleLineComment(IndentedWhileTokenGeneric.COMMENT, "#");
         return builder;
     }

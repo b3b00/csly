@@ -24,4 +24,6 @@ public enum AotLexer
     RPAREN,
     [Sugar("!")]
     FACTORIAL,
+    [Sugar("²")]
+    SQUARE
 }

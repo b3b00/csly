@@ -49,6 +49,10 @@ public class TestAotParserBuilder
             {
                 return parserInstance.PreFixExpression((Token<AotLexer>)args[0], (double)args[1]);
             })
+            .Postfix(100,AotLexer.SQUARE, (args) =>
+            {
+                return parserInstance.PostFixExpression((double)args[0], (Token<AotLexer>)args[1]);
+            })
             .Postfix(100, "'!'", (object[] args) =>
             {
                 return parserInstance.PostFixExpression((double)args[0], (Token<AotLexer>)args[1]);

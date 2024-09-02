@@ -25,6 +25,7 @@ public class TestAotLexerBuilder
             .Sugar(AotLexer.LPAREN, "(")
             .Sugar(AotLexer.RPAREN, ")")
             .Sugar(AotLexer.INCREMENT, "++")
+            .Sugar(AotLexer.SQUARE,"²")
             .AlphaNumId(AotLexer.IDENTIFIER);
             
         return lexerBuilder;

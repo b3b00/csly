@@ -65,9 +65,17 @@ public class AotParser
     [Postfix((int) AotLexer.FACTORIAL, Associativity.Right, 100)]
     public double PostFixExpression(double value, Token<AotLexer> operation)
     {
-        var factorial = 1;
-        for (var i = 1; i <= value; i++) factorial = factorial * i;
-        return factorial;
+        if (operation.TokenID == AotLexer.SQUARE)
+        {
+            return value * value;
+        }
+        if(operation.TokenID == AotLexer.FACTORIAL || operation.Value == "!")
+        {
+            var factorial = 1;
+            for (var i = 1; i <= value; i++) factorial *= i;
+            return factorial;
+        }
+        return value;
     }
 
     [Operand]
