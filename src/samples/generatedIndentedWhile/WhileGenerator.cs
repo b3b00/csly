@@ -1,6 +1,6 @@
 using csly.generatedIndentedWhileLang.parser;
 using csly.whileLang.model;
-using cslyGenerator;
+using sly.sourceGenerator;
 
 namespace csly.generatedIndentedWhileLang.compiler;
 

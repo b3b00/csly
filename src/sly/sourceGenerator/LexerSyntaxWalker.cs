@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using sly.lexer;
 
-namespace cslyGenerator;
+namespace sly.sourceGenerator;
 
 public class LexerSyntaxWalker : CSharpSyntaxWalker
 {

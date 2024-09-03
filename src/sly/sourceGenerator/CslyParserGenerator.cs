@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
-namespace cslyGenerator;
+namespace sly.sourceGenerator;
 
 
 public static class SyntaxExtensions
@@ -108,7 +108,7 @@ public class CslyParserGenerator : IIncrementalGenerator
                     string code = $@"
 using System;
 using sly.lexer;
-using cslyGenerator;
+using sly.sourceGenerator;
 using {lexerDecl.GetNameSpace()};
 using {parserDecl.GetNameSpace()};
 

@@ -1,7 +1,6 @@
 using System.IO;
 using System.Linq;
-using cslyGenerator;
-using CslyGenerator.Tests.Utils;
+using sly.sourceGenerator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;

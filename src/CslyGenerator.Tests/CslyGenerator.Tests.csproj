@@ -21,7 +21,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\sly\sly.csproj" />
-        <ProjectReference Include="..\CslyGenerator\CslyGenerator.csproj"/>
     </ItemGroup>
 
 

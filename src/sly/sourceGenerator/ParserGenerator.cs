@@ -1,11 +1,9 @@
+using System;
 using sly.lexer;
 using sly.lexer.fsm;
 
-namespace cslyGenerator
+namespace sly.sourceGenerator
 {
-    using System;
-
-
     public abstract class AbstractParserGenerator<IN> where IN : struct
     {
         public virtual Action<IN, LexemeAttribute, GenericLexer<IN>> UseTokenExtensions()

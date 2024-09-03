@@ -1,6 +1,6 @@
 using aot.lexer;
 using aot.parser;
-using cslyGenerator;
+using sly.sourceGenerator;
 using sly.lexer;
 using sly.lexer.fsm;
 

@@ -1,7 +1,7 @@
 using System.Text;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace cslyGenerator;
+namespace sly.sourceGenerator;
 
 public class BuilderGenerator
 {

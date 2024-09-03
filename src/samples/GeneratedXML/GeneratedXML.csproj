@@ -5,8 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\CslyGenerator\CslyGenerator.csproj" OutputItemType="Analyzer" />
-      <ProjectReference Include="..\..\sly\sly.csproj" />
+      <ProjectReference Include="..\..\sly\sly.csproj" OutputItemType="Analyzer"/>
     </ItemGroup>
 
 </Project>

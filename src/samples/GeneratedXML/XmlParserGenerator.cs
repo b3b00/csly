@@ -1,4 +1,4 @@
-using cslyGenerator;
+using sly.sourceGenerator;
 
 namespace XML;
 
