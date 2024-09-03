@@ -3,7 +3,7 @@
   "profiles": {
     "DebugRoslynSourceGenerator": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "../samples/GeneratedXML/GeneratedXML.csproj"
+      "targetProject": "../aot/aot.csproj"
     }
   }
 }

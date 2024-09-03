@@ -196,6 +196,12 @@ public class LexerSyntaxWalker : CSharpSyntaxWalker
                             $"builder.SingleLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
                         break;
                     }
+                    case "Extension":
+                    {
+                        _builder.AppendLine(
+                            $"builder.Extension({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
+                        break;
+                    }
                     case "Push":
                     {
                         _builder.AppendLine(

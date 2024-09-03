@@ -45,6 +45,34 @@ TestGenerator generator = new TestGenerator();
 	 }
  }
 
+ var extendedLexerGenerator = new ExtendedLexerGenerator();
+ var tt = extendedLexerGenerator.GetLexer();
+ extendedLexerGenerator.GetParser();
+ var lexerbb = tt.Build("en");
+ if (lexerbb.IsOk)
+ {
+	 Console.WriteLine("lexer is ok :)");
+	 var lrr = lexerb.Result.Tokenize("$_$ hello -");
+	 if (lrr.IsOk)
+	 {
+		 foreach (var token in lrr.Tokens.MainTokens())
+		 {
+			 Console.WriteLine(token);
+		 }
+	 }
+	 else
+	 {
+		 Console.WriteLine(lrr.Error);
+	 }
+ }
+ else
+ {
+	 foreach (var error in lexerb.Errors)
+	 {
+		 Console.WriteLine(error.Message);
+	 }
+ }
+
 
 
 

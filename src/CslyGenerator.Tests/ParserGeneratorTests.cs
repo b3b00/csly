@@ -10,7 +10,7 @@ namespace CslyGenerator.Tests;
 
 public class ParserGeneratorTests
 {
-    private const string parserClassTest = @"
+    private const string parserClassTest = $@"
 using aot.lexer;
 using sly.lexer;
 using sly.parser.generator;
@@ -18,7 +18,7 @@ using sly.parser.generator;
 namespace TestNamespace;
 
 public enum AotTestLexer
-{
+{{
     [Double]
     DOUBLE,
     [AlphaId]
@@ -58,118 +58,165 @@ I,
 [MultiLineComment(""<!--"",""-->"",channel:Channels.Main)]
         [Mode]
         COMMENT,
-}
+}}
 
 public class AotTestParser
-{
+{{
     [Production(""root : SimpleExpressionParser_expressions"")]
     public double Root(double value) => value;
         
     [Operation((int) AotTestLexer.PLUS, Affix.InFix, Associativity.Right, 10)]
     [Operation(""MINUS"", Affix.InFix, Associativity.Left, 10)]
     public double BinaryTermExpression(double left, Token<AotTestLexer> operation, double right)
-    {
+    {{
         double result = 0;
         switch (operation.TokenID)
-        {
+        {{
             case AotTestLexer.PLUS:
-            {
+            {{
                 result = left + right;
                 break;
-            }
+            }}
             case AotTestLexer.MINUS:
-            {
+            {{
                 result = left - right;
                 break;
-            }
-        }
+            }}
+        }}
 
         return result;
-    }
+    }}
 
 
     [Operation((int) AotTestLexer.TIMES, Affix.InFix, Associativity.Right, 50)]
     [Operation(""DIVIDE"", Affix.InFix, Associativity.Left, 50)]
     [NodeName(""multiplication_or_division"")]
     public double BinaryFactorExpression(double left, Token<AotTestLexer> operation, double right)
-    {
+    {{
         double result = 0;
         switch (operation.TokenID)
-        {
+        {{
             case AotTestLexer.TIMES:
-            {
+            {{
                 result = left * right;
                 break;
-            }
+            }}
             case AotTestLexer.DIVIDE:
-            {
+            {{
                 result = left / right;
                 break;
-            }
-        }
+            }}
+        }}
 
         return result;
-    }
+    }}
 
 
     [Prefix((int) AotTestLexer.MINUS,  Associativity.Right, 100)]
     public double PreFixExpression(Token<AotTestLexer> operation, double value)
-    {
+    {{
         return -value;
-    }
+    }}
 
     [Postfix((int) AotTestLexer.FACTORIAL, Associativity.Right, 100)]
     public double PostFixExpression(double value, Token<AotTestLexer> operation)
-    {
+    {{
         if (operation.TokenID == AotTestLexer.SQUARE)
-        {
+        {{
             return value * value;
-        }
+        }}
         if(operation.TokenID == AotTestLexer.FACTORIAL || operation.Value == ""!"")
-        {
+        {{
             var factorial = 1;
             for (var i = 1; i <= value; i++) factorial *= i;
             return factorial;
-        }
+        }}
         return value;
-    }
+    }}
 
     [Operand]
     [Production(""operand : primary_value"")]
     [NodeName(""double"")]
     public double OperandValue(double value)
-    {
+    {{
         return value;
-    }
+    }}
 
 
     [Production(""primary_value : DOUBLE"")]
     [NodeName(""double"")]
     public double OperandDouble(Token<AotTestLexer> value)
-    {
+    {{
         return value.DoubleValue;
-    }
+    }}
         
     [Production(""primary_value : INT"")]
     [NodeName(""integer"")]
     public double OperandInt(Token<AotTestLexer> value)
-    {
+    {{
         return value.DoubleValue;
-    }
+    }}
 
     [Production(""primary_value : LPAREN SimpleExpressionParser_expressions RPAREN"")]
     [NodeName(""group"")]
     public double OperandGroup(Token<AotTestLexer> lparen, double value, Token<AotTestLexer> rparen)
-    {
+    {{
         return value;
-    }
-}
+    }}
+}}
 
 [ParserGenerator(typeof(AotTestLexer), typeof(AotTestParser), typeof(double))]
 public partial class TestGenerator
-{
+{{
     
-}
+}}
+
+ public enum ExtendedLexer 
+    {{
+        [Extension]
+        EXT,
+        
+        [Sugar(""-"")]
+        DASH,
+        
+        [AlphaNumId]
+        ID
+        
+    }}
+
+    public class ExtendedLexerParser {{ }}
+
+    [ParserGenerator(typeof(ExtendedLexer),typeof(ExtendedLexerParser),typeof(string))]
+    public partial class ExtendedLexerGenerator : AbstractParserGenerator<ExtendedLexer>
+    {{
+        public override Action<ExtendedLexer, LexemeAttribute, GenericLexer<ExtendedLexer>> UseTokenExtensions()
+        {{
+            var e = (ExtendedLexer token, LexemeAttribute lexem, GenericLexer<ExtendedLexer> lexer) =>
+            {{
+                if (token == ExtendedLexer.EXT)
+                {{
+                    NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
+                    {{
+                        match.Properties[GenericLexer<ExtendedLexer>.DerivedToken] = ExtendedLexer.EXT;
+                        return match;
+                    }};
+
+                    var fsmBuilder = lexer.FSMBuilder;
+
+
+                    fsmBuilder.GoTo(GenericLexer<ExtendedLexer>.start) 
+                        .Transition('$')
+                        .Transition('_')
+                        .Transition('$')
+                        .End(GenericToken.Extension) // mark as ending node 
+                        .CallBack(callback); // set the ending callback
+                }}
+            }};
+            return e;
+        }}
+    }}
+
+
 
 "; 
 
@@ -198,7 +245,8 @@ public partial class TestGenerator
 
         Assert.Equivalent(new[]
         {
-            "TestGenerator.g.cs"
+            "TestGenerator.g.cs",
+            "ExtendedLexerGenerator.g.cs"
         }, generatedFiles);
     }
 }
