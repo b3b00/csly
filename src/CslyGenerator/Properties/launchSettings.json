@@ -3,7 +3,7 @@
   "profiles": {
     "DebugRoslynSourceGenerator": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "../aot/aot.csproj"
+      "targetProject": "../samples/generatedIndentedWhile/GeneratedIndentedWhile.csproj"
     }
   }
 }

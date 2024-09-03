@@ -19,6 +19,8 @@ public interface IAotLexerBuilder<IN> where IN : struct
     public IAotLexerBuilder<IN> Keyword(IN tokenId, string token, int channel = Channels.Main, params string[] modes);
 
     public IAotLexerBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main, params string[] modes);
+    
+    public IAotLexerBuilder<IN> Character(IN tokenId, string delimiter ="'", string escapeChar = "\\", int channel = Channels.Main, params string[] modes);
     public IAotLexerBuilder<IN> AlphaNumId(IN tokenId, params string[] modes);
     
     public IAotLexerBuilder<IN> AlphaId(IN tokenId, params string[] modes);

@@ -9,57 +9,25 @@ namespace aot;
 [ParserGenerator(typeof(AotLexer), typeof(AotParser), typeof(double))]
 public partial class TestGenerator  : AbstractParserGenerator<AotLexer>
 {
-    public virtual Action<AotLexer, LexemeAttribute, GenericLexer<AotLexer>> UseTokenExtensions()
+    public override Action<AotLexer, LexemeAttribute, GenericLexer<AotLexer>> UseTokenExtensions()
     {
         return null;
     }
     
-    public virtual LexerPostProcess<AotLexer> UseTokenPostProcessor()
+    public override LexerPostProcess<AotLexer> UseTokenPostProcessor()
     {
         return (List<Token<AotLexer>> tokens) =>
         {
-            return tokens;
+            return tokens.Select(x =>
+            {
+                if (x.TokenID == AotLexer.IDENTIFIER && x.Value == "add")
+                {
+                    x.TokenID = AotLexer.PLUS;
+                }
+
+                return x;
+            }).ToList();
         };
     }   
 }
 
-
-
-//
-//
-// public partial class TestGenerator {
-//
-//     
-//
-//     public void GetParser() {
-//         Console.WriteLine("get parser for >TestGenerator<");
-//     }
-//     
-//     public IAotLexerBuilder<AotLexer> GetLexer() {
-//         var builder = AotLexerBuilder<AotLexer>.NewBuilder();
-//         builder.IgnoreWhiteSpace(true);
-//         builder.IgnoreKeywordCase(true);
-//         builder.IsIndentationAware(false);
-//         builder.UseWhiteSpaces(new[]{' ','\t'});
-//         builder.IgnoreEol(true);
-//         builder.UseIndentations("\t");
-//         builder.Regex(AotLexer.PATTERN , "$-$");
-//         builder.Double(AotLexer.DOUBLE );
-//         builder.AlphaId(AotLexer.IDENTIFIER );
-//         builder.Sugar(AotLexer.PLUS , "+");
-//         builder.Sugar(AotLexer.INCREMENT , "++");
-//         builder.Sugar(AotLexer.MINUS , "-");
-//         builder.Sugar(AotLexer.TIMES , "*");
-//         builder.Sugar(AotLexer.DIVIDE , "/");
-//         builder.Sugar(AotLexer.LPAREN , "(");
-//         builder.Sugar(AotLexer.RPAREN , ")");
-//         builder.Sugar(AotLexer.FACTORIAL , "!");
-//         builder.Sugar(AotLexer.SQUARE , "²");
-//         builder.SingleLineComment(AotLexer.SINGLELINECOMMENT , "//");
-//         builder.MultiLineComment(AotLexer.MULTILINECOMMENT , "/*", "*/");
-//         ;
-//         builder.UseLexerPostProcessor(UseTokenPostProcessor());
-//         builder.UseExtensionBuilder(UseTokenExtensions());
-//         return builder;
-//     }
-//}

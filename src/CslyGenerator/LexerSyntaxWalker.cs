@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using System.Text;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using sly.lexer;
 
 namespace cslyGenerator;
 
@@ -18,18 +20,68 @@ public class LexerSyntaxWalker : CSharpSyntaxWalker
         _lexerName = lexerName;
     }
 
-    private string GetAttributeArgs(AttributeSyntax attribute)
+    private string GetAttributeArgs(AttributeSyntax attribute, int skip = 0)
     {
+        
         if (attribute.ArgumentList != null && attribute.ArgumentList.Arguments.Count > 0)
         {
-            var args = attribute.ArgumentList.Arguments.Select(x => x.Expression.ToString()).ToList();
-            var strargs = string.Join(", ", args);
-            return ", " + strargs;
+            var args = attribute.ArgumentList.Arguments.Skip(skip).Select(x => x.Expression.ToString()).ToList();
+            if (args.Count > 0)
+            {
+                var strargs = string.Join(", ", args);
+                return ", " + strargs;
+            }
         }
 
         return string.Empty;
     }
 
+    private string GetMethodForIdentifier(MemberAccessExpressionSyntax identifier)
+    {
+        var name = identifier.Name.Identifier.Text;
+        switch (name) 
+        {
+            case nameof(IdentifierType.AlphaNumericDash) : return "AlphaNumDashId";
+            case nameof(IdentifierType.Alpha) : return "AlphaId";
+            case nameof(IdentifierType.AlphaNumeric) : return "AlphaNumId";
+            case nameof(IdentifierType.Custom) : return "CustomId";
+        }
+
+        return null;
+    }
+    
+    private (string methodName, int skip) GetMethodForGenericLexeme(MemberAccessExpressionSyntax member,
+        SeparatedSyntaxList<AttributeArgumentSyntax> argumentListArguments)
+    {
+        var name = member.Name.Identifier.Text;
+        switch (name)
+        {
+            case nameof(GenericToken.KeyWord):return ("Keyword",1); 
+            case nameof(GenericToken.SugarToken) : return ("Sugar",1);
+            case nameof(GenericToken.Identifier):
+            {
+                var identierType = argumentListArguments[1].Expression as MemberAccessExpressionSyntax;
+                if (identierType != null)
+                {
+                    var method = GetMethodForIdentifier(identierType);
+                    return (method,2);
+                }
+
+                return (null, 0);
+            }
+            case nameof(GenericToken.Int): return ("Integer",1);
+            case nameof(GenericToken.Double): return ("Double",1);
+            case nameof(GenericToken.Date): return ("Date",1);
+            case nameof(GenericToken.Char): return ("Character",1);
+            case nameof(GenericToken.Extension): return ("Extension",1);
+            case nameof(GenericToken.Hexa): return ("Hexa",1);
+            case nameof(GenericToken.String): return ("String",1);
+            case nameof(GenericToken.Comment): return ("Comment",1);
+            case nameof(GenericToken.UpTo): return ("UpTo",1);
+        }
+        return (null,0);
+    }
+    
     public override void VisitEnumMemberDeclaration(EnumMemberDeclarationSyntax enumMemberDeclarationSyntax)
     {
         var name = enumMemberDeclarationSyntax.Identifier.ToString();
@@ -45,7 +97,26 @@ public class LexerSyntaxWalker : CSharpSyntaxWalker
                 {
                     case "Lexeme":
                     {
-                        _builder.AppendLine($"builder.Regex({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)});");
+                        var arg0 = attributeSyntax.ArgumentList.Arguments[0].Expression;
+                        if (arg0 is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression )
+                        {
+                            _builder.AppendLine(
+                                $"builder.Regex({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)});");
+                        }
+                        else
+                        {
+                            MemberAccessExpressionSyntax member = arg0 as MemberAccessExpressionSyntax;
+                            if (member != null)
+                            {
+                                var( method, skip) = GetMethodForGenericLexeme(member, attributeSyntax.ArgumentList.Arguments);
+                                if (!string.IsNullOrEmpty(method))
+                                {
+                                    _builder.AppendLine(
+                                        $"builder.{method}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,skip)});");
+                                }
+                            }
+                        }
+
                         break;
                     }
                     case "Double":

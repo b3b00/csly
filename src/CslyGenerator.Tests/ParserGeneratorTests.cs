@@ -40,7 +40,16 @@ public enum AotTestLexer
     [Sugar(""!"")]
     FACTORIAL,
     [Sugar(""²"")]
-    SQUARE
+    SQUARE,
+[Lexeme(""$-$"")]
+REGEX,
+
+[Lexeme(GenericToken.KeyWord,""hello"")]
+HELLO,
+[Lexeme(GenericToken.String)]
+STR,
+[Lexeme(GenericToken.Int)]
+I,
 }
 
 public class AotTestParser

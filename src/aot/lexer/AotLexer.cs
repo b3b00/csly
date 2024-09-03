@@ -5,8 +5,8 @@ namespace aot.lexer;
 [Lexer(IgnoreWS = true, KeyWordIgnoreCase = true, IndentationAWare = false, WhiteSpace = new[]{' ','\t'}, IgnoreEOL = true,  Indentation = "\t")]
 public enum AotLexer
 {
-    [Lexeme("$-$")]
-    PATTERN,
+    // [Lexeme("$-$")]
+    // PATTERN,
     
     [Double]
     DOUBLE,

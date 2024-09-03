@@ -227,6 +227,12 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         return this;
     }
     
+    public IAotLexerBuilder<IN> Character(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main, params string[] modes)
+    {
+        Add(tokenId,new LexemeAttribute(GenericToken.Char,channel, delimiter,escapeChar),null, modes);
+        return this;
+    }
+    
     public IAotLexerBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false, int channel = Channels.Comments, params string[] modes)
     {
         AddComment(tokenId, new SingleLineCommentAttribute(start, doNotIgnore, channel));
