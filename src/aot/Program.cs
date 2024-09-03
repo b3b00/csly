@@ -52,7 +52,7 @@ TestGenerator generator = new TestGenerator();
  if (lexerbb.IsOk)
  {
 	 Console.WriteLine("lexer is ok :)");
-	 var lrr = lexerb.Result.Tokenize("$_$ hello -");
+	 var lrr = lexerbb.Result.Tokenize("$_$ hello -");
 	 if (lrr.IsOk)
 	 {
 		 foreach (var token in lrr.Tokens.MainTokens())
