@@ -26,7 +26,15 @@ public class LexerSyntaxWalker : CSharpSyntaxWalker
         
         if (attribute.ArgumentList != null && attribute.ArgumentList.Arguments.Count > 0)
         {
-            var args = attribute.ArgumentList.Arguments.Skip(skip).Select(x => x.Expression.ToString()).ToList();
+            var args = attribute.ArgumentList.Arguments.Skip(skip).Select(x =>
+            {
+                var value = x.Expression.ToString();
+                if (x.NameColon != null && x.NameColon.Name.Identifier.Text != "")
+                {
+                    return $"{x.NameColon.Name.Identifier.Text} :{value}";
+                }
+                return value;
+            }).ToList();
             if (args.Count > 0)
             {
                 var strargs = string.Join(", ", args);
@@ -176,18 +184,18 @@ public class LexerSyntaxWalker : CSharpSyntaxWalker
                             $"builder.AlphaNumDashId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
                         break;
                     }
-                    // case "MultiLineComment":
-                    // {
-                    //     _builder.AppendLine(
-                    //         $"builder.MultiLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
-                    //     break;
-                    // }
-                    // case "SingleLineComment":
-                    // {
-                    //     _builder.AppendLine(
-                    //         $"builder.SingleLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
-                    //     break;
-                    // }
+                    case "MultiLineComment":
+                    {
+                        _builder.AppendLine(
+                            $"builder.MultiLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
+                        break;
+                    }
+                    case "SingleLineComment":
+                    {
+                        _builder.AppendLine(
+                            $"builder.SingleLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
+                        break;
+                    }
                     case "Push":
                     {
                         _builder.AppendLine(

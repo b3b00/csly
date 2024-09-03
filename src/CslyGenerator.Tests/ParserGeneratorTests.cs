@@ -55,6 +55,9 @@ HELLO,
 STR,
 [Lexeme(GenericToken.Int)]
 I,
+[MultiLineComment(""<!--"",""-->"",channel:Channels.Main)]
+        [Mode]
+        COMMENT,
 }
 
 public class AotTestParser
