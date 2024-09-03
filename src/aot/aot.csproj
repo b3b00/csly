@@ -10,8 +10,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\CslyGenerator\CslyGenerator\CslyGenerator.csproj"  OutputItemType="Analyzer" />
+      <ProjectReference Include="..\CslyGenerator\CslyGenerator.csproj"  OutputItemType="Analyzer" />
       <ProjectReference Include="..\..\tests\ParserTests\ParserTests.csproj" />
+      <ProjectReference Include="..\CslyGenerator\CslyGenerator.csproj" />
       <ProjectReference Include="..\sly\sly.csproj" />
     </ItemGroup>
 

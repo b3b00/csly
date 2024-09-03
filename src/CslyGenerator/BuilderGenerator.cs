@@ -11,12 +11,13 @@ public class BuilderGenerator
         StringBuilder builder = new();
         builder.AppendLine($"public IAotLexerBuilder<{name}> GetLexer() {{");
 
-        builder.AppendLine($"var builder = AotLexerBuilder<{name}>.NewBuilder()");
+        builder.AppendLine($"var builder = AotLexerBuilder<{name}>.NewBuilder();");
         
         LexerSyntaxWalker walker = new(builder, name);
         walker.Visit(enumDeclarationSyntax);
-        builder.AppendLine(";");
-        
+
+        builder.AppendLine("builder.UseLexerPostProcessor(UseTokenPostProcessor());");
+        builder.AppendLine("builder.UseExtensionBuilder(UseTokenExtensions());");
 
         builder.AppendLine("return builder;");
         

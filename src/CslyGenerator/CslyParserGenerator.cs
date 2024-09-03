@@ -112,7 +112,7 @@ using {lexerDecl.GetNameSpace()};
 using {parserDecl.GetNameSpace()};
 
 namespace {ns};
-public partial class {className} {{
+public partial class {className} : AbstractParserGenerator<{(lexerDecl as EnumDeclarationSyntax).Identifier.ToString()}> {{
 
     
 
@@ -133,8 +133,9 @@ public partial class {className} {{
     private static (ClassDeclarationSyntax classDeclarationSyntax, string lexerType, string parserType, bool parserGeneratorAttributeFound) GetClassDeclarationForSourceGen(
         GeneratorSyntaxContext context)
     {
+        
         var classDeclarationSyntax = (ClassDeclarationSyntax)context.Node;
-
+        Console.WriteLine($"**** {classDeclarationSyntax.GetNameSpace()}.{classDeclarationSyntax.Identifier.ToString()} ****");
         // Go through all attributes of the class.
         foreach (AttributeListSyntax attributeListSyntax in classDeclarationSyntax.AttributeLists)
         foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)

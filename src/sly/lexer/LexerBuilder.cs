@@ -49,7 +49,7 @@ namespace sly.lexer
     public static class LexerBuilder
     {
         
-        public static Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> GetLexemes<IN>(BuildResult<ILexer<IN>> result, string lang)
+        public static Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> GetLexemesWithReflection<IN>(BuildResult<ILexer<IN>> result, string lang)
             where IN : struct
         {
             var attributes = new Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)>();
@@ -115,7 +115,7 @@ namespace sly.lexer
             Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>,(List<string> modes, bool isModePopper, string pushTarget)> modesGetter = null)
             where IN : struct
         {
-            attributes = attributes ?? GetLexemes<IN>(result, lang);
+            attributes = attributes ?? GetLexemesWithReflection<IN>(result, lang);
             lexerAttribute = lexerAttribute ?? typeof(IN).GetCustomAttribute<LexerAttribute>();
             if (!result.IsError)
             {

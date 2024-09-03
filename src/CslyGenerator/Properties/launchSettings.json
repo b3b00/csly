@@ -3,7 +3,7 @@
   "profiles": {
     "DebugRoslynSourceGenerator": {
       "commandName": "DebugRoslynComponent",
-      "targetProject": "../../src/aot/aot.csproj"
+      "targetProject": "../aot/aot.csproj"
     }
   }
 }

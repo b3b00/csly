@@ -18,32 +18,32 @@ using sly.parser;
 
 
 TestGenerator generator = new TestGenerator();
- var t = generator.GetLexer();
- generator.GetParser();
- var lexerb = t.Build("en");
- if (lexerb.IsOk)
- {
-	 Console.WriteLine("lexer is ok :)");
-	 var lr = lexerb.Result.Tokenize("2 + 2");
-	 if (lr.IsOk)
-	 {
-		 foreach (var token in lr.Tokens.MainTokens())
-		 {
-			 Console.WriteLine(token);
-		 }
-	 }
-	 else
-	 {
-		 Console.WriteLine(lr.Error);
-	 }
- }
- else
- {
-	 foreach (var error in lexerb.Errors)
-	 {
-		 Console.WriteLine(error.Message);
-	 }
- }
+ // var t = generator.GetLexer();
+ // generator.GetParser();
+ // var lexerb = t.Build("en");
+ // if (lexerb.IsOk)
+ // {
+	//  Console.WriteLine("lexer is ok :)");
+	//  var lr = lexerb.Result.Tokenize("2 + 2");
+	//  if (lr.IsOk)
+	//  {
+	// 	 foreach (var token in lr.Tokens.MainTokens())
+	// 	 {
+	// 		 Console.WriteLine(token);
+	// 	 }
+	//  }
+	//  else
+	//  {
+	// 	 Console.WriteLine(lr.Error);
+	//  }
+ // }
+ // else
+ // {
+	//  foreach (var error in lexerb.Errors)
+	//  {
+	// 	 Console.WriteLine(error.Message);
+	//  }
+ // }
 
 
 
