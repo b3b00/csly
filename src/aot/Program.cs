@@ -18,6 +18,10 @@ using sly.parser;
 
 
 
+TestGenerator generator = new TestGenerator();
+generator.GetParser();
+
+
 
 AotIndentedWhileParserBuilder builder = new AotIndentedWhileParserBuilder();
 

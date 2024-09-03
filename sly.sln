@@ -41,6 +41,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTemplate", "src/sampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aot", "src\aot\aot.csproj", "{C7275027-1D60-48DA-A1BF-A74AF9B783CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CslyGenerator", "CslyGenerator\CslyGenerator\CslyGenerator.csproj", "{42DF6A35-3667-4F73-930A-580B23385D75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CslyGenerator.Tests", "CslyGenerator\CslyGenerator.Tests\CslyGenerator.Tests.csproj", "{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -126,6 +130,14 @@ Global
 		{C7275027-1D60-48DA-A1BF-A74AF9B783CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7275027-1D60-48DA-A1BF-A74AF9B783CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7275027-1D60-48DA-A1BF-A74AF9B783CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42DF6A35-3667-4F73-930A-580B23385D75}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42DF6A35-3667-4F73-930A-580B23385D75}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42DF6A35-3667-4F73-930A-580B23385D75}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42DF6A35-3667-4F73-930A-580B23385D75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
