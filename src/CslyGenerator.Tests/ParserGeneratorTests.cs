@@ -39,8 +39,13 @@ public enum AotTestLexer
     RPAREN,
     [Sugar(""!"")]
     FACTORIAL,
+ 
+    
+
+    [Push(""carré"")]
     [Sugar(""²"")]
     SQUARE,
+[Mode(""carré"")]
 [Lexeme(""$-$"")]
 REGEX,
 

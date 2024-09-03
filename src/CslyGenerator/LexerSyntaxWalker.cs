@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -20,7 +21,7 @@ public class LexerSyntaxWalker : CSharpSyntaxWalker
         _lexerName = lexerName;
     }
 
-    private string GetAttributeArgs(AttributeSyntax attribute, int skip = 0)
+    private string GetAttributeArgs(AttributeSyntax attribute, List<string> modes, int skip = 0)
     {
         
         if (attribute.ArgumentList != null && attribute.ArgumentList.Arguments.Count > 0)
@@ -29,6 +30,10 @@ public class LexerSyntaxWalker : CSharpSyntaxWalker
             if (args.Count > 0)
             {
                 var strargs = string.Join(", ", args);
+                if (modes != null && modes.Count > 0)
+                {
+                    strargs += ", modes:new[]{"+string.Join(", ", modes)+"}";
+                } 
                 return ", " + strargs;
             }
         }
@@ -81,10 +86,31 @@ public class LexerSyntaxWalker : CSharpSyntaxWalker
         }
         return (null,0);
     }
+
+    private List<string> GetModes(EnumMemberDeclarationSyntax enumMemberDeclarationSyntax)
+    {
+        var all = enumMemberDeclarationSyntax.AttributeLists.SelectMany(x => x.Attributes).ToList();
+        var modes = all.Where(x => x.Name.ToString() == "Mode").ToList();
+        
+        return modes.SelectMany(x =>
+        {
+            if (x.ArgumentList != null)
+            {
+                return x.ArgumentList.Arguments.Select(x => x.Expression.ToString()).ToList();
+            }
+            return new List<string>();
+        }).ToList();
+    }
     
     public override void VisitEnumMemberDeclaration(EnumMemberDeclarationSyntax enumMemberDeclarationSyntax)
     {
         var name = enumMemberDeclarationSyntax.Identifier.ToString();
+
+        var modes = GetModes(enumMemberDeclarationSyntax);
+        if (modes.Any())
+        {
+            ;
+        }
         if (enumMemberDeclarationSyntax.AttributeLists.Any())
         {
             foreach (AttributeListSyntax attributeListSyntax in enumMemberDeclarationSyntax.AttributeLists)
@@ -101,7 +127,7 @@ public class LexerSyntaxWalker : CSharpSyntaxWalker
                         if (arg0 is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression )
                         {
                             _builder.AppendLine(
-                                $"builder.Regex({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)});");
+                                $"builder.Regex({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
                         }
                         else
                         {
@@ -112,7 +138,7 @@ public class LexerSyntaxWalker : CSharpSyntaxWalker
                                 if (!string.IsNullOrEmpty(method))
                                 {
                                     _builder.AppendLine(
-                                        $"builder.{method}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,skip)});");
+                                        $"builder.{method}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes,skip)});");
                                 }
                             }
                         }
@@ -121,23 +147,63 @@ public class LexerSyntaxWalker : CSharpSyntaxWalker
                     }
                     case "Double":
                     {
-                        _builder.AppendLine($"builder.Double({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)});");
+                        _builder.AppendLine($"builder.Double({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
                         break;
                     }
                     case "Integer":
                     {
-                        _builder.AppendLine($"builder.Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)});");
+                        _builder.AppendLine($"builder.Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
                         break;
                     }
                     case "Sugar":
                     {
-                        _builder.AppendLine($"builder.Sugar({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)});");
+                        _builder.AppendLine($"builder.Sugar({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
+                        break;
+                    }
+                    case "AlphaId":
+                    {
+                        _builder.AppendLine($"builder.AlphaId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
+                        break;
+                    }
+                    case "AlphaNumId":
+                    {
+                        _builder.AppendLine($"builder.AlphaNumId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
+                        break;
+                    }
+                    case "AlphaNumDashId":
+                    {
+                        _builder.AppendLine(
+                            $"builder.AlphaNumDashId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
+                        break;
+                    }
+                    // case "MultiLineComment":
+                    // {
+                    //     _builder.AppendLine(
+                    //         $"builder.MultiLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
+                    //     break;
+                    // }
+                    // case "SingleLineComment":
+                    // {
+                    //     _builder.AppendLine(
+                    //         $"builder.SingleLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
+                    //     break;
+                    // }
+                    case "Push":
+                    {
+                        _builder.AppendLine(
+                            $"builder.Push({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
+                        break;
+                    }
+                    case "Pop":
+                    {
+                        _builder.AppendLine(
+                            $"builder.Pop({_lexerName}.{name});");
                         break;
                     }
                     default:
                     {
-                        _builder.AppendLine(
-                            $"builder.{attributeName}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)});");
+                        // _builder.AppendLine(
+                        //     $"builder.{attributeName}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)});");
                         break;
                     }
                 }

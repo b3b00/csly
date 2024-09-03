@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\CslyGenerator\CslyGenerator.csproj" OutputItemType="Analyzer" />
+      <ProjectReference Include="..\..\sly\sly.csproj" />
+    </ItemGroup>
+
+</Project>
