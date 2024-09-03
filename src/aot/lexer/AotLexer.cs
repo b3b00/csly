@@ -2,8 +2,12 @@ using sly.lexer;
 
 namespace aot.lexer;
 
+[Lexer(IgnoreWS = true, KeyWordIgnoreCase = true)]
 public enum AotLexer
 {
+    [Lexeme("$-$")]
+    PATTERN,
+    
     [Double]
     DOUBLE,
     [AlphaId]

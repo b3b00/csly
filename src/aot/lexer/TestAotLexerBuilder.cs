@@ -17,16 +17,17 @@ public class TestAotLexerBuilder
         var lexerBuilder = builder.Double(AotLexer.DOUBLE)
             .Sugar(AotLexer.PLUS, "+")
             .Keyword(AotLexer.PLUS, "PLUS")
-            .Label(AotLexer.PLUS,"en", "sum")
-            .Label(AotLexer.PLUS,"fr", "somme")
+            .Label(AotLexer.PLUS, "en", "sum")
+            .Label(AotLexer.PLUS, "fr", "somme")
             .Sugar(AotLexer.MINUS, "-")
             .Sugar(AotLexer.TIMES, "*")
             .Sugar(AotLexer.DIVIDE, "/")
             .Sugar(AotLexer.LPAREN, "(")
             .Sugar(AotLexer.RPAREN, ")")
             .Sugar(AotLexer.INCREMENT, "++")
-            .Sugar(AotLexer.SQUARE,"²")
+            .Sugar(AotLexer.SQUARE, "²")
             .AlphaNumId(AotLexer.IDENTIFIER);
+            
             
         return lexerBuilder;
     }

@@ -160,7 +160,7 @@ public partial class TestGenerator
     public void ParserGeneratorTest()
     {
         // Create an instance of the source generator.
-        var generator = new ParserGenerator();
+        var generator = new CslyParserGenerator();
 
         // Source generators should be tested using 'GeneratorDriver'.
         var driver = CSharpGeneratorDriver.Create(new[] { generator });
@@ -178,13 +178,10 @@ public partial class TestGenerator
         var runResult = driver.RunGenerators(compilation).GetRunResult();
 
         var generatedFiles = runResult.GeneratedTrees.Select(x => new FileInfo(x.FilePath).Name).ToArray();
-        // Retrieve all files in the compilation.
-        
 
-        // In this case, it is enough to check the file name.
         Assert.Equivalent(new[]
         {
-            "TestGenerator.g.cs",
+            "TestGenerator.g.cs"
         }, generatedFiles);
     }
 }
