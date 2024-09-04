@@ -199,49 +199,49 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Right(int precedence, IN operation, Func<object[], OUT> visitor)
+    public IAotEBNFParserBuilder<IN, OUT> Right(IN operation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation,null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Right(int precedence, string explicitOperation, Func<object[], OUT> visitor)
+    public IAotEBNFParserBuilder<IN, OUT> Right(string operation, int precedence, Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,explicitOperation, null);
+        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation, null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Left(int precedence, IN operation, Func<object[], OUT> visitor)
+    public IAotEBNFParserBuilder<IN, OUT> Left(IN operation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,operation,null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Left(int precedence, string explicitOperation, Func<object[], OUT> visitor)
+    public IAotEBNFParserBuilder<IN, OUT> Left(string operation, int precedence, Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,explicitOperation,null);
+        AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,operation,null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Prefix(int precedence, IN operation, Func<object[], OUT> visitor)
+    public IAotEBNFParserBuilder<IN, OUT> Prefix(IN operation, int precedence, Func<object[], OUT> visitor)
     {
        AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,operation,null);
        return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Prefix(int precedence, string explicitOperation, Func<object[], OUT> visitor)
+    public IAotEBNFParserBuilder<IN, OUT> Prefix(string operation, int precedence, Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,explicitOperation,null);
+        AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,operation,null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Postfix(int precedence, IN operation, Func<object[], OUT> visitor)
+    public IAotEBNFParserBuilder<IN, OUT> Postfix(IN operation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,operation,null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Postfix(int precedence, string explicitOperation, Func<object[], OUT> visitor)
+    public IAotEBNFParserBuilder<IN, OUT> Postfix(string explicitOperation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,explicitOperation,null);
         return this;

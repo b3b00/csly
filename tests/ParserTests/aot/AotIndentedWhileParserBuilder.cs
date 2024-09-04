@@ -69,11 +69,11 @@ public class AotIndentedWhileParserBuilder
             (Token<IndentedWhileTokenGeneric>)args[1],
             (WhileAST)args[2]);
 
-        builder.Right(50, IndentedWhileTokenGeneric.LESSER, comparisons)
-            .Right(50, IndentedWhileTokenGeneric.GREATER, comparisons)
-            .Right(50, IndentedWhileTokenGeneric.EQUALS, comparisons)
-            .Right(50, IndentedWhileTokenGeneric.DIFFERENT, comparisons)
-            .Right(10, IndentedWhileTokenGeneric.CONCAT, (args) =>
+        builder.Right(IndentedWhileTokenGeneric.LESSER, 50, comparisons)
+            .Right(IndentedWhileTokenGeneric.GREATER, 50, comparisons)
+            .Right(IndentedWhileTokenGeneric.EQUALS, 50, comparisons)
+            .Right(IndentedWhileTokenGeneric.DIFFERENT, 50, comparisons)
+            .Right(IndentedWhileTokenGeneric.CONCAT, 10, (args) =>
             {
                 return instance.binaryStringExpression((WhileAST)args[0], (Token<IndentedWhileTokenGeneric>)args[1],
                     (WhileAST)args[2]);
@@ -109,19 +109,19 @@ public class AotIndentedWhileParserBuilder
             .Production("primary : IDENTIFIER",
                 args => { return instance.PrimaryId(((Token<IndentedWhileTokenGeneric>)args[0])); })
             .Operand("operand : primary", args => instance.Operand((WhileAST)args[0]))
-            .Right(10, IndentedWhileTokenGeneric.MINUS, numericTerm)
-            .Right(10, IndentedWhileTokenGeneric.PLUS, numericTerm)
-            .Right(50, IndentedWhileTokenGeneric.TIMES, numericFactor)
-            .Right(50, IndentedWhileTokenGeneric.DIVIDE, numericFactor)
-            .Prefix(100, IndentedWhileTokenGeneric.MINUS,
+            .Right(IndentedWhileTokenGeneric.MINUS, 10, numericTerm)
+            .Right(IndentedWhileTokenGeneric.PLUS, 10, numericTerm)
+            .Right(IndentedWhileTokenGeneric.TIMES, 50, numericFactor)
+            .Right(IndentedWhileTokenGeneric.DIVIDE, 50, numericFactor)
+            .Prefix(IndentedWhileTokenGeneric.MINUS, 100, 
                 args => instance.unaryNumericExpression((Token<IndentedWhileTokenGeneric>)args[0], (WhileAST)args[1]))
-            .Right(10, IndentedWhileTokenGeneric.OR,
+            .Right(IndentedWhileTokenGeneric.OR ,10, 
                 args => instance.binaryOrExpression((WhileAST)args[0], (Token<IndentedWhileTokenGeneric>)args[1],
                     (WhileAST)args[2]))
-            .Right(50, IndentedWhileTokenGeneric.AND,
+            .Right(IndentedWhileTokenGeneric.AND, 50,
                 args => instance.binaryAndExpression((WhileAST)args[0], (Token<IndentedWhileTokenGeneric>)args[1],
                     (WhileAST)args[2]))
-            .Prefix(100, IndentedWhileTokenGeneric.NOT,
+            .Prefix(IndentedWhileTokenGeneric.NOT, 100,
                 args => instance.unaryNotExpression((Token<IndentedWhileTokenGeneric>)args[0], (WhileAST)args[1]))
             .UseMemoization()
             .UseAutoCloseIndentations()

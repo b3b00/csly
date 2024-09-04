@@ -23,18 +23,18 @@ public interface IAotEBNFParserBuilder<IN,OUT> where IN : struct
     
     IAotEBNFParserBuilder<IN,OUT> Operation(IN operation, Affix affix, Associativity associativity, int precedence, Func<object[], OUT> visitor);
     
-    IAotEBNFParserBuilder<IN,OUT> Right(int precedence, IN operation, Func<object[], OUT> visitor);
+    IAotEBNFParserBuilder<IN,OUT> Right(IN operation, int precedence, Func<object[], OUT> visitor);
     
-    IAotEBNFParserBuilder<IN,OUT> Right(int precedence, string explicitOperation, Func<object[], OUT> visitor);
-    IAotEBNFParserBuilder<IN,OUT> Left(int precedence, IN operation, Func<object[], OUT> visitor);
+    IAotEBNFParserBuilder<IN,OUT> Right(string operation, int precedence, Func<object[], OUT> visitor);
+    IAotEBNFParserBuilder<IN,OUT> Left(IN operation, int precedence, Func<object[], OUT> visitor);
     
-    IAotEBNFParserBuilder<IN,OUT> Left(int precedence, string explicitOperation, Func<object[], OUT> visitor);
-    IAotEBNFParserBuilder<IN,OUT> Prefix(int precedence, IN operation, Func<object[], OUT> visitor);
+    IAotEBNFParserBuilder<IN,OUT> Left(string operation, int precedence, Func<object[], OUT> visitor);
+    IAotEBNFParserBuilder<IN,OUT> Prefix(IN operation, int precedence, Func<object[], OUT> visitor);
     
-    IAotEBNFParserBuilder<IN,OUT> Prefix(int precedence, string explicitOperation, Func<object[], OUT> visitor);
-    IAotEBNFParserBuilder<IN,OUT> Postfix(int precedence, IN operation, Func<object[], OUT> visitor);
+    IAotEBNFParserBuilder<IN,OUT> Prefix(string operation, int precedence, Func<object[], OUT> visitor);
+    IAotEBNFParserBuilder<IN,OUT> Postfix(IN operation, int precedence, Func<object[], OUT> visitor);
     
-    IAotEBNFParserBuilder<IN,OUT> Postfix(int precedence, string explicitOperation, Func<object[], OUT> visitor);
+    IAotEBNFParserBuilder<IN,OUT> Postfix(string operation, int precedence, Func<object[], OUT> visitor);
     
     public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result); // TODO AOT this build result is strange
     

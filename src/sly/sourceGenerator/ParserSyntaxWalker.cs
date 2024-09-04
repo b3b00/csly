@@ -103,16 +103,47 @@ public class ParserSyntaxWalker : CslySyntaxWalker
                 }
                 case "Prefix":
                 {
-                    _builder.AppendLine($"builder.Prefix({GetAttributeArgs(attribute,withLeadingComma:false)},null);");
+                    var precedence = attribute.ArgumentList.Arguments[2].Expression.ToString();
+                    if (attribute.ArgumentList.Arguments[0].Expression is CastExpressionSyntax cast)
+                    {
+                        var realArg = (attribute.ArgumentList.Arguments[0].Expression as CastExpressionSyntax).Expression.ToString();
+                        _builder.AppendLine(
+                            $"builder.Prefix({realArg}, {precedence}, null);");
+                    }
+                    else
+                    {
+                        _builder.AppendLine(
+                            $"builder.Prefix({attribute.ArgumentList.Arguments[0].Expression.ToString()}, {precedence},null);");
+                    }
+
                     break;
                 }
                 case "Postfix":
                 {
-                    _builder.AppendLine($"builder.PostFix({GetAttributeArgs(attribute,withLeadingComma:false)},null);");
+                    var precedence = attribute.ArgumentList.Arguments[2].Expression.ToString();
+                    
+                    if (attribute.ArgumentList.Arguments[0].Expression is CastExpressionSyntax cast)
+                    {
+                        var realArg = (attribute.ArgumentList.Arguments[0].Expression as CastExpressionSyntax).Expression.ToString();
+                        _builder.AppendLine(
+                            $"builder.Prefix({realArg}, {precedence}, null);");
+                    }
+                    else
+                    {
+                        _builder.AppendLine(
+                            $"builder.Postfix({attribute.ArgumentList.Arguments[0].Expression.ToString()}, {precedence},null);");
+                    }
+
                     break;
                 }
                 case "Infix":
                 {
+                    if (attribute.ArgumentList.Arguments[0].Expression is CastExpressionSyntax cast)
+                    {
+                        var realArg = (attribute.ArgumentList.Arguments[0].Expression as CastExpressionSyntax).Expression.ToString();
+                        _builder.AppendLine(
+                            $"builder.Infix({realArg} {GetAttributeArgs(attribute, skip:1)},null);");
+                    }
                     _builder.AppendLine($"builder.Infix({GetAttributeArgs(attribute,withLeadingComma:false)},null);");
                     break;
                 }
@@ -134,4 +165,5 @@ public class ParserSyntaxWalker : CslySyntaxWalker
         _builder.AppendLine($"var result = instance.{methodName}();");
         _builder.Append("}");
     }
+    
 }

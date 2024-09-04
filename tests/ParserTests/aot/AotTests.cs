@@ -114,33 +114,33 @@ public class AotTests
                 var result = expressionsParserInstance.Root((double)args[0]);
                 return result;
             })
-            .Right(10, AotExpressionsLexer.PLUS, (args =>
+            .Right(AotExpressionsLexer.PLUS, 10, (args =>
             {
                 double result = expressionsParserInstance.BinaryTermExpression((double)args[0], (Token<AotExpressionsLexer>)args[1], (double)args[2]);
                 return result;
             }))
-            .Right(10, AotExpressionsLexer.MINUS, (args =>
+            .Right(AotExpressionsLexer.MINUS, 10, (args =>
             {
                 double result = expressionsParserInstance.BinaryTermExpression((double)args[1], (Token<AotExpressionsLexer>)args[2], (double)args[3]);
                 return result;
             }))
-            .Right(50, AotExpressionsLexer.TIMES, (args =>
+            .Right(AotExpressionsLexer.TIMES, 50, (args =>
             {
                 double result =
                     expressionsParserInstance.BinaryFactorExpression((double)args[0], (Token<AotExpressionsLexer>)args[1], (double)args[2]);
                 return result;
             }))
-            .Right(50, AotExpressionsLexer.DIVIDE, (args =>
+            .Right(AotExpressionsLexer.DIVIDE, 50, (args =>
             {
                 double result =
                     expressionsParserInstance.BinaryFactorExpression((double)args[1], (Token<AotExpressionsLexer>)args[2], (double)args[3]);
                 return result;
             }))
-            .Prefix(100, AotExpressionsLexer.MINUS, (object[] args) =>
+            .Prefix(AotExpressionsLexer.MINUS, 100, (object[] args) =>
             {
                 return expressionsParserInstance.PreFixExpression((Token<AotExpressionsLexer>)args[0], (double)args[1]);
             })
-            .Postfix(100, "'!'", (object[] args) =>
+            .Postfix("'!'", 100, (object[] args) =>
             {
                 return expressionsParserInstance.PostFixExpression((double)args[0], (Token<AotExpressionsLexer>)args[1]);
             })
