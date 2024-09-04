@@ -19,6 +19,10 @@ public interface IAotEBNFParserBuilder<IN,OUT> where IN : struct
     
     IAotEBNFParserBuilder<IN,OUT> Operand(string rule, Func<object[], OUT> visitor);
     
+    IAotEBNFParserBuilder<IN,OUT> Operation(string operation, Affix affix, Associativity associativity, int precedence, Func<object[], OUT> visitor);
+    
+    IAotEBNFParserBuilder<IN,OUT> Operation(IN operation, Affix affix, Associativity associativity, int precedence, Func<object[], OUT> visitor);
+    
     IAotEBNFParserBuilder<IN,OUT> Right(int precedence, IN operation, Func<object[], OUT> visitor);
     
     IAotEBNFParserBuilder<IN,OUT> Right(int precedence, string explicitOperation, Func<object[], OUT> visitor);

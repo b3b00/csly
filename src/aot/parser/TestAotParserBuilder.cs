@@ -2,6 +2,7 @@ using aot.lexer;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser;
+using sly.parser.generator;
 
 namespace aot.parser;
 

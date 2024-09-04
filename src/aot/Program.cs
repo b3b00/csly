@@ -47,7 +47,7 @@ TestGenerator generator = new TestGenerator();
 
  var extendedLexerGenerator = new ExtendedLexerGenerator();
  var tt = extendedLexerGenerator.GetLexer();
- extendedLexerGenerator.GetParser();
+ var zobristol = extendedLexerGenerator.GetParser("root");
  var lexerbb = tt.Build("en");
  if (lexerbb.IsOk)
  {

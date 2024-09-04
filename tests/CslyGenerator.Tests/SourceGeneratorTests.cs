@@ -7,7 +7,7 @@ using Xunit;
 
 namespace CslyGenerator.Tests;
 
-public class ParserGeneratorTests
+public class SourceGeneratorTests
 {
     private const string parserClassTest = $@"
 using aot.lexer;
@@ -59,6 +59,10 @@ I,
         COMMENT,
 }}
 
+[ParserRoot(""root"")]
+[UseMemoization]
+[UseBroadentokenWindow]
+[AutoCloseIndentationsAttribute]
 public class AotTestParser
 {{
     [Production(""root : SimpleExpressionParser_expressions"")]
@@ -241,7 +245,7 @@ public partial class TestGenerator
         var runResult = driver.RunGenerators(compilation).GetRunResult();
 
         var generatedFiles = runResult.GeneratedTrees.Select(x => new FileInfo(x.FilePath).Name).ToArray();
-
+        var contents =runResult.GeneratedTrees.ToDictionary(x => x.FilePath,x => x.ToString());
         Assert.Equivalent(new[]
         {
             "TestGenerator.g.cs",

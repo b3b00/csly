@@ -4,6 +4,7 @@ using sly.parser.generator;
 
 namespace aot.parser;
 
+[ParserRoot("root")]
 public class AotParser
 {
     [Production("root : SimpleExpressionParser_expressions")]

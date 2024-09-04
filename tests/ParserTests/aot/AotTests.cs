@@ -8,6 +8,7 @@ using ParserTests.aot.expressions;
 using Sigil;
 using sly.buildresult;
 using sly.lexer;
+using sly.parser.generator;
 using XML;
 using Xunit;
 

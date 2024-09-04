@@ -1,16 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using aot.parser;
 using sly.buildresult;
-using sly.i18n;
 using sly.lexer;
-using sly.lexer.fsm;
-using sly.parser;
-using sly.parser.generator;
 using sly.parser.generator.visitor;
 using sly.parser.syntax.grammar;
 
-namespace aot.parser;
+namespace sly.parser.generator;
 
 public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where IN : struct
 {
@@ -186,6 +183,19 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
             AddRule(rule, true);    
         }
 
+        return this;
+    }
+
+    public IAotEBNFParserBuilder<IN, OUT> Operation(string operation, Affix affix, Associativity associativity, int precedence,
+        Func<object[], OUT> visitor)
+    {
+        AddOperation(precedence,associativity,visitor,affix,operation, null);
+        return this;
+    }
+
+    public IAotEBNFParserBuilder<IN, OUT> Operation(IN operation, Affix affix, Associativity associativity, int precedence, Func<object[], OUT> visitor)
+    {
+        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation,null);
         return this;
     }
 

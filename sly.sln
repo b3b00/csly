@@ -41,7 +41,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTemplate", "src/sampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aot", "src\aot\aot.csproj", "{C7275027-1D60-48DA-A1BF-A74AF9B783CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CslyGenerator.Tests", "src\CslyGenerator.Tests\CslyGenerator.Tests.csproj", "{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CslyGenerator.Tests", "tests\CslyGenerator.Tests\CslyGenerator.Tests.csproj", "{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "generatedIndentedWhile", "src\samples\generatedIndentedWhile\generatedIndentedWhile.csproj", "{87F1C912-1B97-4BF7-87D1-70E6232BBD57}"
 EndProject

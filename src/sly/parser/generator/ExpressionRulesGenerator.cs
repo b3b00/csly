@@ -70,7 +70,6 @@ namespace sly.parser.generator
                         }
                     }
 
-
                     bool isEnumValue = EnumConverter.IsEnumValue<IN>(attr.StringToken) ||
                                        attr.IntToken >= 0;
                     OperationMetaData<IN, OUT> operation = null;

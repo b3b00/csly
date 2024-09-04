@@ -1,9 +1,10 @@
 using System.Text;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using sly.parser.generator;
 
 namespace sly.sourceGenerator;
 
-public class BuilderGenerator
+public class LexerBuilderGenerator
 {
     public static string GenerateLexer(EnumDeclarationSyntax enumDeclarationSyntax, string outputType)
     {
@@ -24,10 +25,4 @@ public class BuilderGenerator
         builder.AppendLine($"}}");
         return builder.ToString();
     }
-
-    public static string GenerateParser(ClassDeclarationSyntax classDeclarationSyntax)
-    {
-        return "";
-    }
-     
 }
