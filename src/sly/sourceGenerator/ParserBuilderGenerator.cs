@@ -40,7 +40,7 @@ public class ParserBuilderGenerator
         ParserSyntaxWalker walker = new(builder, name,lexerName, outputType);
         if (rootRule != null)
         {
-            builder.AppendLine("string rootRule = \"root\";");
+            builder.AppendLine($"string rootRule = {rootRule};");
         }
         builder.AppendLine($"{name} instance = new {name}();");
         builder.AppendLine($"var builder = AotEBNFParserBuilder<{lexerName}, {outputType}>");

@@ -10,7 +10,9 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Toolchains.CsProj;
 using CommandLine;
+using csly.indentedWhileLang.compiler;
 using csly.indentedWhileLang.parser;
+using csly.whileLang.interpreter;
 using csly.whileLang.model;
 using ParserTests.aot;
 using sly.parser;
@@ -45,3 +47,36 @@ TestGenerator generator = new TestGenerator();
 		 }
 	 }
  
+	 WhileGenerator whiley = new WhileGenerator();
+	 var whileParser = whiley.GetParser();
+	 if (whileParser.IsOk)
+	 {
+		 Console.WriteLine("while parser is ok :)");
+		 var source = @"
+a:=0 
+while a < 10 do 
+    print a
+    a := a +1
+";
+		 var parsedwhile = whileParser.Result.Parse(source);
+		 if (parsedwhile.IsOk)
+		 {
+			 Console.WriteLine($"parse ok : {parsedwhile.Result.Dump("  ")}");
+			 Interpreter interpreter = new Interpreter();
+			 interpreter.Interprete(parsedwhile.Result,false);
+		 }
+		 else
+		 {
+			 foreach (var error in parsedwhile.Errors)
+			 {
+				 Console.WriteLine(error);
+			 }
+		 }
+	 }
+	 else
+	 {
+		 foreach (var error in whileParser.Errors)
+		 {
+			 Console.WriteLine(error.Message);
+		 }
+	 }

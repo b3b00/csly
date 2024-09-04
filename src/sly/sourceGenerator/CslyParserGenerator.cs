@@ -62,6 +62,36 @@ public class CslyParserGenerator : IIncrementalGenerator
              ((ctx, t) => GenerateCode(ctx, t.Left, t.Right)));
     }
 
+    private string GetParserUsings(ClassDeclarationSyntax classDeclarationSyntax)
+    {
+        var unit = (classDeclarationSyntax.Parent.Parent as CompilationUnitSyntax);
+        StringBuilder builder = new();
+        if (unit != null)
+        {
+            foreach (var @using in unit.Usings)
+            {
+                builder.AppendLine(@using.ToString());
+            }
+        }
+
+        return builder.ToString();
+    }
+
+    public string GetLexerUsings(EnumDeclarationSyntax enumDeclarationSyntax)
+    {
+        var unit = (enumDeclarationSyntax.Parent.Parent as CompilationUnitSyntax);
+        StringBuilder builder = new();
+        if (unit != null)
+        {
+            foreach (var @using in unit.Usings)
+            {
+                builder.AppendLine(@using.ToString());
+            }
+        }
+
+        return builder.ToString();
+    }
+    
     private void GenerateCode(SourceProductionContext context, Compilation arg2Left, ImmutableArray<SyntaxNode> declarations)
     {
         Func<SyntaxNode, string> getName = (node) =>
@@ -104,6 +134,7 @@ public class CslyParserGenerator : IIncrementalGenerator
                     var lexerDecl = declarationsByName[lexerType];
                     var parserDecl = declarationsByName[parserType];
                     string parserName = (parserDecl as ClassDeclarationSyntax).Identifier.ToString();
+                    var usings = (parserDecl.Parent.Parent as CompilationUnitSyntax).Usings;
                     string lexerName = (lexerDecl as EnumDeclarationSyntax).Identifier.ToString();
                     // TODO public class  ? get visibility from classDeclaration ??
                     
@@ -117,6 +148,9 @@ using sly.sourceGenerator;
 using sly.parser.generator;
 using {lexerDecl.GetNameSpace()};
 using {parserDecl.GetNameSpace()};
+
+{GetLexerUsings(lexerDecl as EnumDeclarationSyntax)}
+{GetParserUsings(parserDecl as ClassDeclarationSyntax)}
 
 namespace {ns};
 public partial class {className} : AbstractParserGenerator<{lexerName}> {{
