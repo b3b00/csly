@@ -51,7 +51,7 @@ public class AotIndentedWhileParserBuilder
         return builder;
     }
 
-    public IAotEBNFParserBuilder<IndentedWhileTokenGeneric, WhileAST> BuildAotWhileParser()
+    public IAotEbnfParserBuilder<IndentedWhileTokenGeneric, WhileAST> BuildAotWhileParser()
     {
         IndentedWhileParserGeneric instance = new IndentedWhileParserGeneric();
         var builder = AotEBNFParserBuilder<IndentedWhileTokenGeneric, WhileAST>

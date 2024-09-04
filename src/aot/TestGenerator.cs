@@ -3,6 +3,7 @@ using aot.parser;
 using sly.sourceGenerator;
 using sly.lexer;
 using sly.lexer.fsm;
+using sly.parser.generator;
 
 namespace aot;
 
@@ -30,4 +31,5 @@ public partial class TestGenerator  : AbstractParserGenerator<AotLexer>
         };
     }   
 }
+
 

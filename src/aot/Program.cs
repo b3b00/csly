@@ -18,179 +18,30 @@ using sly.parser;
 
 
 TestGenerator generator = new TestGenerator();
-  var t = generator.GetLexer();
- generator.GetParser();
- var lexerb = t.Build("en");
-  if (lexerb.IsOk)
- {
-	 Console.WriteLine("lexer is ok :)");
-	 var lr = lexerb.Result.Tokenize("2 add 2");
-	 if (lr.IsOk)
+  
+
+ var parserBuild = generator.GetParser();
+	 if (parserBuild.IsOk)
 	 {
-		 foreach (var token in lr.Tokens.MainTokens())
+		 Console.WriteLine("parser is ok :)");
+		 var parsed = parserBuild.Result.Parse("2 add 2");
+		 if (parsed.IsOk)
 		 {
-			 Console.WriteLine(token);
+			 Console.WriteLine($"parse ok : {parsed.Result}");
+		 }
+		 else
+		 {
+			 foreach (var error in parsed.Errors)
+			 {
+				 Console.WriteLine(error);
+			 }
 		 }
 	 }
 	 else
 	 {
-		 Console.WriteLine(lr.Error);
-	 }
- }
- else
- {
-	 foreach (var error in lexerb.Errors)
-	 {
-		 Console.WriteLine(error.Message);
-	 }
- }
-
- var extendedLexerGenerator = new ExtendedLexerGenerator();
- var tt = extendedLexerGenerator.GetLexer();
- var zobristol = extendedLexerGenerator.GetParser("root");
- var lexerbb = tt.Build("en");
- if (lexerbb.IsOk)
- {
-	 Console.WriteLine("lexer is ok :)");
-	 var lrr = lexerbb.Result.Tokenize("$_$ hello -");
-	 if (lrr.IsOk)
-	 {
-		 foreach (var token in lrr.Tokens.MainTokens())
+		 foreach (var error in parserBuild.Errors)
 		 {
-			 Console.WriteLine(token);
+			 Console.WriteLine(error.Message);
 		 }
 	 }
-	 else
-	 {
-		 Console.WriteLine(lrr.Error);
-	 }
- }
- else
- {
-	 foreach (var error in lexerb.Errors)
-	 {
-		 Console.WriteLine(error.Message);
-	 }
- }
-
-
-
-
-AotIndentedWhileParserBuilder builder = new AotIndentedWhileParserBuilder();
-
-var b = builder.BuildAotWhileParser();
-var p = b.BuildParser();
-if (!p.IsOk)
-{
-	return;
-}
-
-bool benchmark = false;
-
-if (args.Length > 0)
-{
-	benchmark = args.Contains("bench");
-}
-
-
-
-if (benchmark)
-{
-
-
-	var summary = BenchmarkRunner.Run<Bencher>();
-
-}
-else
-{
-	AotIndentedWhileParserBuilder testBuilder = new AotIndentedWhileParserBuilder();
-	TestAotParserBuilder aotBuilder = new TestAotParserBuilder();
-	var pp = aotBuilder.FluentInitializeCenericLexer();
-
-	// var bb = testBuilder.BuildAotWhileParser();
-	// var pp = bb.BuildParser();
-	if (!pp.IsOk)
-	{
-		foreach (var error in pp.Errors)
-		{
-			Console.WriteLine(error);
-		}
-		Environment.Exit(12);
-	}
-
-	var _parser = pp.Result;
-	var r = _parser.Parse(@"10²");
-	if (r.IsOk)
-	{
-		Console.WriteLine($"OK : {r.Result}");
-	}
-	else
-	{
-		foreach (var error in r.Errors)
-		{
-			Console.WriteLine(error);
-		}
-	}
-}
-
-// var bencher = new WhileBench();
-// Console.WriteLine("AOT");
-// bencher.Bench(bencher.BenchAot);
-// Console.WriteLine("Legacy");
-// bencher.Bench(bencher.BenchLegacy);
-
-[SimpleJob(RuntimeMoniker.Net80, baseline:true)]
-[SimpleJob(RuntimeMoniker.NativeAot80)]
-[MemoryDiagnoser]
-[RPlotExporter]
-public class Bencher
-{
-
-	private Parser<IndentedWhileTokenGeneric, WhileAST>? _parser;
-
-	[GlobalSetup]
-	
-	public void Setup()
-	{
-		AotIndentedWhileParserBuilder builder = new AotIndentedWhileParserBuilder();
-
-		var b = builder.BuildAotWhileParser();
-		var p = b.BuildParser();
-		if (!p.IsOk)
-		{
-			Environment.Exit(12);
-		}
-
-		_parser = p.Result;
-	}
-
-	public Bencher()
-	{
-		_parser = null;
-	}
-	
-	[Benchmark]
-	public void ParseWhile()
-	{
-		string program = @"
-a:=0
-while a < 10 do 
-	print a
-	a := a +1
-if a > 145 then
-	print a
-	skip
-	a := a *478
-	if a > 125874 then
-		a := 1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20
-		b := true
-		print ""bololo""
-	else
-		b := false
-		print ""youpi""
-else
-	print b
-";
-		var r = _parser?.Parse(program);
-	}
-}	
+ 

@@ -7,7 +7,7 @@ namespace aot.parser;
 [ParserRoot("root")]
 public class AotParser
 {
-    [Production("root : SimpleExpressionParser_expressions")]
+    [Production("root : AotParser_expressions")]
     public double Root(double value) => value;
         
     [Operation((int) AotLexer.PLUS, Affix.InFix, Associativity.Right, 10)]
@@ -102,7 +102,7 @@ public class AotParser
         return value.DoubleValue;
     }
 
-    [Production("primary_value : LPAREN SimpleExpressionParser_expressions RPAREN")]
+    [Production("primary_value : LPAREN AotParser_expressions RPAREN")]
     [NodeName("group")]
     public double OperandGroup(Token<AotLexer> lparen, double value, Token<AotLexer> rparen)
     {

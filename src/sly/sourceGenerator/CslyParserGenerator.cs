@@ -111,6 +111,8 @@ public class CslyParserGenerator : IIncrementalGenerator
                     string code = $@"
 using System;
 using sly.lexer;
+using sly.parser;
+using sly.buildresult;
 using sly.sourceGenerator;
 using sly.parser.generator;
 using {lexerDecl.GetNameSpace()};

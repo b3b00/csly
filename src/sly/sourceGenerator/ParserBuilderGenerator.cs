@@ -6,13 +6,37 @@ namespace sly.sourceGenerator;
 
 public class ParserBuilderGenerator
 {
+    
+    
+    
     public static string GenerateParser(ClassDeclarationSyntax classDeclarationSyntax,string lexerName, string outputType)
     {
         string name = classDeclarationSyntax.Identifier.ToString();
         StringBuilder builder = new();
         // TODO : get starting rule if exists
+        
         var rootRule = GetRootRule(classDeclarationSyntax);
-        builder.AppendLine($"public AotEBNFParserBuilder<{lexerName},{outputType}> GetParser({(rootRule == null ? "string rootRule": "")}) {{");
+        if (!string.IsNullOrEmpty(rootRule))
+        {
+            builder.AppendLine($@"public BuildResult<Parser<{lexerName},{outputType}>>GetParser() 
+{{
+    var builder = GetParserBuilder();
+    var parserResult = builder.BuildParser();
+    return parserResult;
+}}");
+        }
+        else
+        {
+            builder.AppendLine($@"public BuildResult<Parser<{lexerName},{outputType}>>GetParser(string rootRule) 
+{{
+    var builder = GetParserBuilder(rootRule);
+    var parserResult = builder.BuildParser();
+    return parserResult;
+}}");
+        }
+
+
+        builder.AppendLine($"private IAotEbnfParserBuilder<{lexerName},{outputType}> GetParserBuilder({(rootRule == null ? "string rootRule": "")}) {{");
         ParserSyntaxWalker walker = new(builder, name,lexerName, outputType);
         if (rootRule != null)
         {
@@ -22,7 +46,7 @@ public class ParserBuilderGenerator
         builder.AppendLine($"var builder = AotEBNFParserBuilder<{lexerName}, {outputType}>");
         builder.AppendLine($@".NewBuilder(instance, rootRule, ""en"");");
         walker.Visit(classDeclarationSyntax);
-        builder.AppendLine("return null;");
+        builder.AppendLine("return builder;");
         builder.AppendLine("}");
         return builder.ToString();
     }

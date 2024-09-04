@@ -9,7 +9,7 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator;
 
-public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where IN : struct
+public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where IN : struct
 {
     readonly Dictionary<string, NonTerminal<IN,OUT>> _nonTerminals = new Dictionary<string, NonTerminal<IN,OUT>>();
 
@@ -34,12 +34,12 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
     private IAotLexerBuilder<IN> _lexerBuilder;
 
     private ParserConfiguration<IN, OUT> _configuration = null;
-    public static IAotEBNFParserBuilder<IN,OUT> NewBuilder(object parserInstance, string rootRule, string i18N = "en") 
+    public static IAotEbnfParserBuilder<IN,OUT> NewBuilder(object parserInstance, string rootRule, string i18N = "en") 
     {
         return new AotEBNFParserBuilder<IN,OUT>(i18N, parserInstance, rootRule);
     }
     
-    public static IAotEBNFParserBuilder<IN,OUT> NewBuilder(string rootRule, string i18N = "en")
+    public static IAotEbnfParserBuilder<IN,OUT> NewBuilder(string rootRule, string i18N = "en")
     {
         return NewBuilder(null, rootRule, i18N);
     }
@@ -120,7 +120,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
         return error;
     }
     
-    public IAotEBNFParserBuilder<IN, OUT> WithLexerbuilder(IAotLexerBuilder<IN> lexerBuilder)
+    public IAotEbnfParserBuilder<IN, OUT> WithLexerbuilder(IAotLexerBuilder<IN> lexerBuilder)
     {
         _lexerBuilder = lexerBuilder;
         return this;
@@ -128,19 +128,19 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
    
     #region optins
 
-    public IAotEBNFParserBuilder<IN, OUT> UseMemoization(bool use = true)
+    public IAotEbnfParserBuilder<IN, OUT> UseMemoization(bool use = true)
     {
         _useMemoization = use;
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> UseBroadenTokenWindow(bool use = true)
+    public IAotEbnfParserBuilder<IN, OUT> UseBroadenTokenWindow(bool use = true)
     {
         _useBroadenTokenWindow = use;
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> UseAutoCloseIndentations(bool use = true)
+    public IAotEbnfParserBuilder<IN, OUT> UseAutoCloseIndentations(bool use = true)
     {
         _useAutoCloseIndentations = use;
         return this;
@@ -150,7 +150,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
     
     #region rules
     
-    public IAotEBNFParserBuilder<IN,OUT> Production(string ruleString, Func<object[], OUT> visitor)
+    public IAotEbnfParserBuilder<IN,OUT> Production(string ruleString, Func<object[], OUT> visitor)
     {
         var r = _grammarParser.Parse(ruleString);
         if (r.IsOk)
@@ -173,7 +173,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
     
     
     #region operations
-    public IAotEBNFParserBuilder<IN, OUT> Operand(string ruleString, Func<object[], OUT> visitor)
+    public IAotEbnfParserBuilder<IN, OUT> Operand(string ruleString, Func<object[], OUT> visitor)
     {
         var r = _grammarParser.Parse(ruleString);
         if (r.IsOk)
@@ -186,62 +186,62 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEBNFParserBuilder<IN,OUT> where
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Operation(string operation, Affix affix, Associativity associativity, int precedence,
+    public IAotEbnfParserBuilder<IN, OUT> Operation(string operation, Affix affix, Associativity associativity, int precedence,
         Func<object[], OUT> visitor)
     {
         AddOperation(precedence,associativity,visitor,affix,operation, null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Operation(IN operation, Affix affix, Associativity associativity, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfParserBuilder<IN, OUT> Operation(IN operation, Affix affix, Associativity associativity, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation,null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Right(IN operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfParserBuilder<IN, OUT> Right(IN operation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation,null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Right(string operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfParserBuilder<IN, OUT> Right(string operation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation, null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Left(IN operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfParserBuilder<IN, OUT> Left(IN operation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,operation,null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Left(string operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfParserBuilder<IN, OUT> Left(string operation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,operation,null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Prefix(IN operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfParserBuilder<IN, OUT> Prefix(IN operation, int precedence, Func<object[], OUT> visitor)
     {
        AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,operation,null);
        return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Prefix(string operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfParserBuilder<IN, OUT> Prefix(string operation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,operation,null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Postfix(IN operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfParserBuilder<IN, OUT> Postfix(IN operation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,operation,null);
         return this;
     }
 
-    public IAotEBNFParserBuilder<IN, OUT> Postfix(string explicitOperation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfParserBuilder<IN, OUT> Postfix(string explicitOperation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,explicitOperation,null);
         return this;

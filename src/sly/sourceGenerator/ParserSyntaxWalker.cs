@@ -40,6 +40,7 @@ public class ParserSyntaxWalker : CslySyntaxWalker
             VisitAttribute(attribute);
         }
 
+        _builder.AppendLine("builder.WithLexerbuilder(GetLexer());");
         var methods = classDeclarationSyntax.Members
             .ToList()
             .Where(x => x is MethodDeclarationSyntax)
@@ -76,11 +77,15 @@ public class ParserSyntaxWalker : CslySyntaxWalker
                     var rule = GetAttributeArgs(attribute,withLeadingComma:false);
                     if (IsOperand(methodDeclarationSyntax))
                     {
-                        _builder.AppendLine($"builder.Operand({rule},null);");
+                        _builder.AppendLine($"builder.Operand({rule},");
+                        AddProductionVisitor(methodDeclarationSyntax);
+                        _builder.AppendLine(");");
                     }
                     else
                     {
-                        _builder.AppendLine($"builder.Production({rule},null);");
+                        _builder.AppendLine($"builder.Production({rule},");
+                        AddProductionVisitor(methodDeclarationSyntax);
+                        _builder.AppendLine(");");
                     }
 
                     break;
@@ -91,12 +96,16 @@ public class ParserSyntaxWalker : CslySyntaxWalker
                     {
                         var realArg = (attribute.ArgumentList.Arguments[0].Expression as CastExpressionSyntax).Expression.ToString();
                         _builder.AppendLine(
-                            $"builder.Operation({realArg} {GetAttributeArgs(attribute, skip:1)},null);");
+                            $"builder.Operation({realArg} {GetAttributeArgs(attribute, skip:1)},");
+                        AddProductionVisitor(methodDeclarationSyntax);
+                        _builder.AppendLine(");");
                     }
                     else
                     {
                         _builder.AppendLine(
-                            $"builder.Operation({GetAttributeArgs(attribute, withLeadingComma: false)},null);");
+                            $"builder.Operation({GetAttributeArgs(attribute, withLeadingComma: false)},");
+                        AddProductionVisitor(methodDeclarationSyntax);
+                        _builder.AppendLine(");");
                     }
 
                     break;
@@ -107,13 +116,16 @@ public class ParserSyntaxWalker : CslySyntaxWalker
                     if (attribute.ArgumentList.Arguments[0].Expression is CastExpressionSyntax cast)
                     {
                         var realArg = (attribute.ArgumentList.Arguments[0].Expression as CastExpressionSyntax).Expression.ToString();
-                        _builder.AppendLine(
-                            $"builder.Prefix({realArg}, {precedence}, null);");
+                        _builder.AppendLine($"builder.Prefix({realArg}, {precedence}, ");
+                        AddProductionVisitor(methodDeclarationSyntax);
+                        _builder.AppendLine(");");
                     }
                     else
                     {
                         _builder.AppendLine(
-                            $"builder.Prefix({attribute.ArgumentList.Arguments[0].Expression.ToString()}, {precedence},null);");
+                            $"builder.Prefix({attribute.ArgumentList.Arguments[0].Expression.ToString()}, {precedence},");
+                        AddProductionVisitor(methodDeclarationSyntax);
+                        _builder.AppendLine(");");
                     }
 
                     break;
@@ -126,12 +138,16 @@ public class ParserSyntaxWalker : CslySyntaxWalker
                     {
                         var realArg = (attribute.ArgumentList.Arguments[0].Expression as CastExpressionSyntax).Expression.ToString();
                         _builder.AppendLine(
-                            $"builder.Prefix({realArg}, {precedence}, null);");
+                            $"builder.Postfix({realArg}, {precedence},");
+                        AddProductionVisitor(methodDeclarationSyntax);
+                        _builder.AppendLine(");");
                     }
                     else
                     {
                         _builder.AppendLine(
-                            $"builder.Postfix({attribute.ArgumentList.Arguments[0].Expression.ToString()}, {precedence},null);");
+                            $"builder.Postfix({attribute.ArgumentList.Arguments[0].Expression.ToString()}, {precedence},");
+                        AddProductionVisitor(methodDeclarationSyntax);
+                        _builder.AppendLine(");");
                     }
 
                     break;
@@ -144,7 +160,10 @@ public class ParserSyntaxWalker : CslySyntaxWalker
                         _builder.AppendLine(
                             $"builder.Infix({realArg} {GetAttributeArgs(attribute, skip:1)},null);");
                     }
-                    _builder.AppendLine($"builder.Infix({GetAttributeArgs(attribute,withLeadingComma:false)},null);");
+
+                    _builder.AppendLine($"builder.Infix({GetAttributeArgs(attribute, withLeadingComma: false)},");
+                    AddProductionVisitor(methodDeclarationSyntax);
+                    _builder.AppendLine(");");
                     break;
                 }
                 default:
@@ -160,9 +179,22 @@ public class ParserSyntaxWalker : CslySyntaxWalker
 
     private void AddProductionVisitor(MethodDeclarationSyntax method)
     {
+        var parameters = method.ParameterList.Parameters.ToList();
+        
         string methodName = method.Identifier.ToString();
-        _builder.AppendLine("(args) => {");
-        _builder.AppendLine($"var result = instance.{methodName}();");
+        _builder.AppendLine("(object[] args) => {");
+        _builder.Append($"var result = instance.{methodName}(");
+        for (int i = 0; i < parameters.Count; i++)
+        {
+            if (i > 0)
+            {
+                _builder.Append(", ");
+            }
+            var type = parameters[i].Type.ToString();
+            _builder.Append($"({type})args[{i}]");
+        }
+        _builder.AppendLine(");");
+        _builder.AppendLine("return result;");
         _builder.Append("}");
     }
     
