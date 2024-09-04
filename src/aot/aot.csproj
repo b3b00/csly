@@ -9,8 +9,10 @@
         <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\..\tests\ParserTests\ParserTests.csproj" />
+    <ItemGroup>      
+      <ProjectReference Include="..\..\tests\ParserTests\ParserTests.csproj" />      
+      <ProjectReference Include="..\samples\GeneratedXML\GeneratedXML.csproj" />      
+      <ProjectReference Include="..\samples\IndentedWhile\indentedWhile.csproj" />      
       <ProjectReference Include="..\sly\sly.csproj" OutputItemType="Analyzer"/>
     </ItemGroup>
 

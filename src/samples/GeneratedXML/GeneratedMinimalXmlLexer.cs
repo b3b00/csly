@@ -1,7 +1,6 @@
-﻿using System;
-using sly.lexer;
+﻿using sly.lexer;
 
-namespace XML
+namespace GeneratedXML
 {
     [Lexer()]
     public enum GeneratedMinimalXmlLexer

@@ -1,22 +1,10 @@
 ﻿
 
 using aot;
-using aot.lexer;
-using aot.parser;
-using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Environments;
-using BenchmarkDotNet.Jobs;
-using BenchmarkDotNet.Running;
-using BenchmarkDotNet.Toolchains.CsProj;
-using CommandLine;
 using csly.indentedWhileLang.compiler;
-using csly.indentedWhileLang.parser;
 using csly.whileLang.interpreter;
-using csly.whileLang.model;
-using ParserTests.aot;
-using sly.parser;
-
+using GeneratedXML;
+using XML;
 
 
 TestGenerator generator = new TestGenerator();
@@ -76,6 +64,40 @@ while a < 10 do
 	 else
 	 {
 		 foreach (var error in whileParser.Errors)
+		 {
+			 Console.WriteLine(error.Message);
+		 }
+	 }
+	 
+
+
+	 GeneratedXmlParserGenerator xmlParserGenerator = new GeneratedXmlParserGenerator();
+	 var xParser = xmlParserGenerator.GetParser();
+	 if (xParser.IsOk)
+	 {
+		 Console.WriteLine("while parser is ok :)");
+		 var source = @"
+<xml>
+<!-- comment -->
+<item attribute=""hello"">world</item>
+</xml>
+";
+		 var parsedX = xParser.Result.Parse(source);
+		 if (parsedX.IsOk)
+		 {
+			 Console.WriteLine($"parse ok : {parsedX.Result}");
+		 }
+		 else
+		 {
+			 foreach (var error in parsedX.Errors)
+			 {
+				 Console.WriteLine(error);
+			 }
+		 }
+	 }
+	 else
+	 {
+		 foreach (var error in xParser.Errors)
 		 {
 			 Console.WriteLine(error.Message);
 		 }

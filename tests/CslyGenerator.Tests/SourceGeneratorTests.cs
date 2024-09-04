@@ -183,7 +183,10 @@ public partial class TestGenerator
         DASH,
         
         [AlphaNumId]
-        ID
+        ID,
+
+[String]
+STR,
         
     }}
 

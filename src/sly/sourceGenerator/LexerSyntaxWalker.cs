@@ -175,6 +175,18 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                             $"builder.Extension({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
                         break;
                     }
+                    case "String":
+                    {
+                        _builder.AppendLine(
+                            $"builder.String({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, modes)});");
+                        break;
+                    }
+                    case "UpTo":
+                    {
+                        _builder.AppendLine(
+                            $"builder.UpTo({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, modes)});");
+                        break;
+                    }
                     case "Push":
                     {
                         _builder.AppendLine(

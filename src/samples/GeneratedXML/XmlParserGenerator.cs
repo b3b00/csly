@@ -1,9 +1,9 @@
 using sly.sourceGenerator;
 
-namespace XML;
+namespace GeneratedXML;
 
 [ParserGenerator(typeof(GeneratedMinimalXmlLexer), typeof(GeneratedMinimalXmlParser), typeof(string))]
-public partial class XmlParserGenerator : AbstractParserGenerator<GeneratedMinimalXmlLexer>
+public partial class GeneratedXmlParserGenerator : AbstractParserGenerator<GeneratedMinimalXmlLexer>
 {
     
 }

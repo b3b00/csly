@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Xml;
 using sly.lexer;
 using sly.parser.generator;
 
-namespace XML
+namespace GeneratedXML
 {
     [ParserRoot("document")]
     public class GeneratedMinimalXmlParser
