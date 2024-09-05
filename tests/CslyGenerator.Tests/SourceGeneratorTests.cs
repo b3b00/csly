@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using sly.sourceGenerator;
@@ -9,7 +10,7 @@ namespace CslyGenerator.Tests;
 
 public class SourceGeneratorTests
 {
-    private const string parserClassTest = $@"
+    private const string aotParserClassTest = $@"
 using aot.lexer;
 using sly.lexer;
 using sly.parser.generator;
@@ -172,7 +173,9 @@ internal class AotTestParser
 internal partial class TestGenerator
 {{
     
-}}
+}}";
+    
+    private const string extendedLexerTest = $@"
 
  internal enum ExtendedLexer 
     {{
@@ -185,12 +188,44 @@ internal partial class TestGenerator
         [AlphaNumId]
         ID,
 
+        [Lexeme(GenericToken.KeyWord,channel:0, ""billy"", ""bob"")]
+        BILLY_BOB,
+
+        [Mode(""foo_mode"", ""bar_mode"")]
+        [Lexeme(GenericToken.KeyWord,sly.lexer.Channels.Main, ExtendedLexerParser.FOO, ExtendedLexerParser.BAR)]
+        FOO_BAR,
+    
+        
+        [Lexeme(GenericToken.KeyWord,""BAZ"")]
+        BAZ,
+
+        [Mode(""qux_mode"")]
+        [Lexeme(GenericToken.KeyWord, 550, ""QUX"")]
+        QUX,
+
+        [Lexeme(GenericToken.KeyWord,channel:0, ""true"", ""false"")]
+        BOOLEAN,
+
 [String]
 STR,
         
     }}
 
-    internal class ExtendedLexerParser {{ }}
+    internal class ExtendedLexerParser {{
+
+    public static string FOO = ""foo"";
+
+        public const string BAR = ""bar"";
+
+        int toto = 0;
+
+        public ExtendedLexerParser() {{
+        }}
+        
+        public void do() {{
+            toto = 42;
+        }}
+     }}
 
     [ParserGenerator(typeof(ExtendedLexer),typeof(ExtendedLexerParser),typeof(string))]
     public partial class ExtendedLexerGenerator : AbstractParserGenerator<ExtendedLexer>
@@ -226,8 +261,7 @@ STR,
 
 "; 
 
-    [Fact]
-    public void ParserGeneratorTest()
+    private ImmutableArray<SyntaxTree> testSource(string source, string className)
     {
         // Create an instance of the source generator.
         var generator = new CslyParserGenerator();
@@ -236,8 +270,8 @@ STR,
         var driver = CSharpGeneratorDriver.Create(new[] { generator });
 
         // To run generators, we can use an empty compilation.
-        var compilation = CSharpCompilation.Create(nameof(ParserGeneratorTest),
-            new[] { CSharpSyntaxTree.ParseText(parserClassTest) },
+        var compilation = CSharpCompilation.Create(className,
+            new[] { CSharpSyntaxTree.ParseText(source) },
             new[]
             {
                 // To support 'System.Attribute' inheritance, add reference to 'System.Private.CoreLib'.
@@ -247,11 +281,32 @@ STR,
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         var runResult = driver.RunGenerators(compilation).GetRunResult();
 
-        var generatedFiles = runResult.GeneratedTrees.Select(x => new FileInfo(x.FilePath).Name).ToArray();
-        var contents =runResult.GeneratedTrees.ToDictionary(x => x.FilePath,x => x.ToString());
+        return runResult.GeneratedTrees;
+    }
+    
+    
+    [Fact]
+    public void AotParserGeneratorTest()
+    {
+        var generatedTrees = testSource(aotParserClassTest, nameof(aotParserClassTest));
+        
+        var contents = generatedTrees.ToDictionary(x => x.FilePath,x => x.ToString());
+        var generatedFiles = generatedTrees.Select(x => new FileInfo(x.FilePath).Name);
         Assert.Equivalent(new[]
         {
-            "TestGenerator.g.cs",
+            "TestGenerator.g.cs"
+        }, generatedFiles);
+    }
+    
+    [Fact]
+    public void ExtendedLexerGeneratorTest()
+    {
+        var generatedTrees = testSource(extendedLexerTest, nameof(extendedLexerTest));
+        
+        var contents = generatedTrees.ToDictionary(x => x.FilePath,x => x.ToString());
+        var generatedFiles = generatedTrees.Select(x => new FileInfo(x.FilePath).Name);
+        Assert.Equivalent(new[]
+        {
             "ExtendedLexerGenerator.g.cs"
         }, generatedFiles);
     }

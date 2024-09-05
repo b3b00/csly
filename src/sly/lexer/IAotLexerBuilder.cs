@@ -17,6 +17,8 @@ public interface IAotLexerBuilder<IN> where IN : struct
     public IAotLexerBuilder<IN> Sugar(IN tokenId, string token, int channel = Channels.Main, params string[] modes);
     
     public IAotLexerBuilder<IN> Keyword(IN tokenId, string token, int channel = Channels.Main, params string[] modes);
+    
+    public IAotLexerBuilder<IN> Keyword(IN tokenId, string[] tokens, int channel = Channels.Main, params string[] modes);
 
     public IAotLexerBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main, params string[] modes);
     

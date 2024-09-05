@@ -1,9 +1,21 @@
 {
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "Generators": {
+    "jsonGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/jsonparser/jsonparser.csproj"
+    },
+    "AOTGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../aot/aot.csproj"
+    },
+    "XmlGenGenerators": {
       "commandName": "DebugRoslynComponent",
       "targetProject": "../samples/GeneratedXML/GeneratedXML.csproj"
+    },
+    "whileGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/indentedWhile/indentedwhile.csproj"
     }
   }
 }

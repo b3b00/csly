@@ -51,10 +51,27 @@ public class ParserSyntaxWalker : CslySyntaxWalker
         }
     }
 
-    public override void VisitAttribute(AttributeSyntax node)
+    public override void VisitAttribute(AttributeSyntax attributeSyntax)
     {
-        // TODO optimizations
-        Console.WriteLine("coucou");
+        var name = attributeSyntax.Name.ToString();
+        switch (name)
+        {
+            case "AutoCloseIndentations":
+            {
+                _builder.AppendLine($"builder.UseAutoCloseIndentations({GetAttributeArgs(attributeSyntax,withLeadingComma:false)});");
+                break;
+            }
+            case "UseMemoization":
+            {
+                _builder.AppendLine($"builder.UseMemoization({GetAttributeArgs(attributeSyntax,withLeadingComma:false)});");
+                break;
+            }
+            case "BroadenTokenWindow":
+            {
+                _builder.AppendLine($"builder.UseBroadenTokenWindow({GetAttributeArgs(attributeSyntax,withLeadingComma:false)});");
+                break;
+            }
+        }
     }
 
     private bool IsOperand(MethodDeclarationSyntax method)

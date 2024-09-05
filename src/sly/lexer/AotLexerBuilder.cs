@@ -191,6 +191,13 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         return this;
     }
 
+    public IAotLexerBuilder<IN> Keyword(IN tokenId, string[] tokens, int channel = Channels.Main,
+        params string[] modes)
+    {
+        Add(tokenId,  new LexemeAttribute(GenericToken.KeyWord, channel:Channels.Main, tokens.ToArray()) ,null, modes);
+        return this;
+    }
+
     public IAotLexerBuilder<IN> AlphaNumId(IN tokenId, params string[] modes)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.Identifier,IdentifierType.AlphaNumeric, channel:Channels.Main) , null, modes);

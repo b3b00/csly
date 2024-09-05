@@ -134,7 +134,18 @@ public class CslyParserGenerator : IIncrementalGenerator
                     var lexerDecl = declarationsByName[lexerType] as EnumDeclarationSyntax;
                     var parserDecl = declarationsByName[parserType] as ClassDeclarationSyntax;
                     string parserName = parserDecl.Identifier.ToString();
-                    var usings = (parserDecl.Parent.Parent as CompilationUnitSyntax).Usings;
+                    SyntaxList<UsingDirectiveSyntax> usings = new SyntaxList<UsingDirectiveSyntax>();
+                    if (parserDecl.Parent is CompilationUnitSyntax unit)
+                    {
+                        usings = (parserDecl.Parent as CompilationUnitSyntax).Usings;
+                    }
+                    else
+                    {
+                        if (parserDecl.Parent.Parent is CompilationUnitSyntax)
+                        {
+                            usings = (parserDecl.Parent.Parent as CompilationUnitSyntax).Usings;
+                        }
+                    }
                     string lexerName = lexerDecl.Identifier.ToString();
                     // TODO public class  ? get visibility from classDeclaration ??
 

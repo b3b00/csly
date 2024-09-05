@@ -21,6 +21,50 @@ public class LexerSyntaxWalker : CslySyntaxWalker
         _lexerName = lexerName;
     }
 
+    protected string GetAttributeArgsForLexemekeyWord(AttributeSyntax attribute, List<string> modes = null,
+        int skip = 0, bool withLeadingComma = true)
+    {
+         
+        if (attribute.ArgumentList != null && attribute.ArgumentList.Arguments.Count > 0)
+        {
+            var arguments = attribute.ArgumentList.Arguments.Skip(skip).ToList();
+            
+            var firstArg = arguments[0];
+            bool isFirstArgChannel = false;
+            string firstArgColonName = firstArg?.NameColon?.Name?.ToString();
+            string channel = null;
+            string tokens = "";
+            var firstArgAsLiteral = firstArg.Expression as LiteralExpressionSyntax;
+            if (firstArgColonName == "channel" || (firstArgAsLiteral == null || firstArgAsLiteral.Kind() != SyntaxKind.StringLiteralExpression))
+            {
+                isFirstArgChannel = true;
+                channel = firstArg.Expression.ToString();
+            }
+            var tokenArgs = arguments.Skip(isFirstArgChannel ? 1 : 0).ToList();
+            if (tokenArgs.Count == 1)
+            {
+                tokens = tokenArgs.ElementAt(0).Expression.ToString();
+            }
+
+            if (tokenArgs.Count > 1)
+            {
+                tokens = "new [] { "+string.Join(",", tokenArgs.Select(t => t.ToString()).ToList())+ " }";
+            }
+
+            string args = $", {tokens} ";
+            if (isFirstArgChannel)
+            {
+                args += $",{channel} ";
+            }
+            if (modes != null && modes.Count > 0)
+            {
+                args += ", modes:new[]{" + string.Join(", ", modes) + "}";
+            }
+            return args;
+        }
+        return string.Empty;
+    }
+    
 
     private string GetMethodForIdentifier(MemberAccessExpressionSyntax identifier)
     {
@@ -100,6 +144,10 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                 
                 string attributeName = attributeSyntax.Name.ToString();
                 Console.WriteLine($"visit {attributeName} for {_lexerName}.{name}");
+                if (attributeName == "Mode")
+                {
+                    continue;
+                }
                 switch (attributeName)
                 {
                     case "Lexeme":
@@ -118,8 +166,16 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                                 var( method, skip) = GetMethodForGenericLexeme(member, attributeSyntax.ArgumentList.Arguments);
                                 if (!string.IsNullOrEmpty(method))
                                 {
-                                    _builder.AppendLine(
-                                        $"builder.{method}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes,skip)});");
+                                    if (method == "Keyword" || method == "Sugar")
+                                    {
+                                        _builder.AppendLine(
+                                            $"builder.{method}({_lexerName}.{name} {GetAttributeArgsForLexemekeyWord(attributeSyntax, modes, skip)});");   
+                                    }
+                                    else
+                                    {
+                                        _builder.AppendLine(
+                                            $"builder.{method}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, modes, skip)});");
+                                    }
                                 }
                             }
                         }
@@ -179,6 +235,12 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     {
                         _builder.AppendLine(
                             $"builder.String({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, modes)});");
+                        break;
+                    }
+                    case "KeyWord":
+                    {
+                        _builder.AppendLine(
+                            $"builder.Keyword({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, modes)});");
                         break;
                     }
                     case "UpTo":
