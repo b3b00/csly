@@ -16,7 +16,7 @@ using sly.parser.generator;
 
 namespace TestNamespace;
 
-public enum AotTestLexer
+internal enum AotTestLexer
 {{
     [Double]
     DOUBLE,
@@ -63,7 +63,7 @@ I,
 [UseMemoization]
 [UseBroadentokenWindow]
 [AutoCloseIndentationsAttribute]
-public class AotTestParser
+internal class AotTestParser
 {{
     [Production(""root : SimpleExpressionParser_expressions"")]
     public double Root(double value) => value;
@@ -169,12 +169,12 @@ public class AotTestParser
 }}
 
 [ParserGenerator(typeof(AotTestLexer), typeof(AotTestParser), typeof(double))]
-public partial class TestGenerator
+internal partial class TestGenerator
 {{
     
 }}
 
- public enum ExtendedLexer 
+ internal enum ExtendedLexer 
     {{
         [Extension]
         EXT,
@@ -190,7 +190,7 @@ STR,
         
     }}
 
-    public class ExtendedLexerParser {{ }}
+    internal class ExtendedLexerParser {{ }}
 
     [ParserGenerator(typeof(ExtendedLexer),typeof(ExtendedLexerParser),typeof(string))]
     public partial class ExtendedLexerGenerator : AbstractParserGenerator<ExtendedLexer>

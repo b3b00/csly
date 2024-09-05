@@ -131,13 +131,14 @@ public class CslyParserGenerator : IIncrementalGenerator
 
                     string ns = declarationSyntax.GetNameSpace();
                 
-                    var lexerDecl = declarationsByName[lexerType];
-                    var parserDecl = declarationsByName[parserType];
-                    string parserName = (parserDecl as ClassDeclarationSyntax).Identifier.ToString();
+                    var lexerDecl = declarationsByName[lexerType] as EnumDeclarationSyntax;
+                    var parserDecl = declarationsByName[parserType] as ClassDeclarationSyntax;
+                    string parserName = parserDecl.Identifier.ToString();
                     var usings = (parserDecl.Parent.Parent as CompilationUnitSyntax).Usings;
-                    string lexerName = (lexerDecl as EnumDeclarationSyntax).Identifier.ToString();
+                    string lexerName = lexerDecl.Identifier.ToString();
                     // TODO public class  ? get visibility from classDeclaration ??
-                    
+
+                    string modifiers = string.Join(" ", classDeclarationSyntax.Modifiers.Select(x => x.ToString()));
                     
                     string code = $@"
 using System;
@@ -149,11 +150,11 @@ using sly.parser.generator;
 using {lexerDecl.GetNameSpace()};
 using {parserDecl.GetNameSpace()};
 
-{GetLexerUsings(lexerDecl as EnumDeclarationSyntax)}
-{GetParserUsings(parserDecl as ClassDeclarationSyntax)}
+{GetLexerUsings(lexerDecl)}
+{GetParserUsings(parserDecl)}
 
 namespace {ns};
-public partial class {className} : AbstractParserGenerator<{lexerName}> {{
+{modifiers} class {className} : AbstractParserGenerator<{lexerName}> {{
     
     {LexerBuilderGenerator.GenerateLexer(lexerDecl as EnumDeclarationSyntax, outputType)}
 

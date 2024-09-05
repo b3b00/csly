@@ -100,7 +100,7 @@ namespace sly.parser.generator
             return result;
         }
 
-        // TODO AOT : add operands
+        
         internal bool GenerateExpressionParserRules(ParserConfiguration<IN, OUT> configuration, Type parserClass, BuildResult<ParserConfiguration<IN, OUT>> result,
             Dictionary<int, List<OperationMetaData<IN, OUT>>> operationsByPrecedence, out BuildResult<ParserConfiguration<IN, OUT>> buildResult)
         {

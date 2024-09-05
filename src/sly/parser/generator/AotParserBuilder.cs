@@ -66,10 +66,8 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
 
     public BuildResult<Parser<IN, OUT>> BuildParser()
     {
-        // TODO : build syntax parser
         var syntaxParser = BuildSyntaxParser(new BuildResult<ParserConfiguration<IN, OUT>>());
         
-        // TODO : build lexer using explicit tokens
         var tokens = _configuration.GetAllExplicitTokenClauses();
         if (tokens != null && tokens.Any())
         {
