@@ -187,6 +187,11 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                         _builder.AppendLine($"builder.Double({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
                         break;
                     }
+                    case "Int":
+                    {
+                        _builder.AppendLine($"builder.Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
+                        break;
+                    }
                     case "Integer":
                     {
                         _builder.AppendLine($"builder.Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax,modes)});");
@@ -237,6 +242,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                             $"builder.String({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, modes)});");
                         break;
                     }
+                    case "Keyword":
                     case "KeyWord":
                     {
                         _builder.AppendLine(
@@ -246,7 +252,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "UpTo":
                     {
                         _builder.AppendLine(
-                            $"builder.UpTo({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, modes)});");
+                            $"builder.UpTo({_lexerName}.{name} {GetAttributeArgsForLexemekeyWord(attributeSyntax, modes)});");
                         break;
                     }
                     case "Push":

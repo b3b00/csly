@@ -198,6 +198,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
         AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation,null);
         return this;
     }
+    
 
     public IAotEbnfParserBuilder<IN, OUT> Right(IN operation, int precedence, Func<object[], OUT> visitor)
     {
@@ -223,6 +224,20 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
         return this;
     }
 
+    public IAotEbnfParserBuilder<IN, OUT> Infix(string operation, Associativity associativity, int precedence,
+        Func<object[], OUT> visitor)
+    {
+        AddOperation(precedence,associativity,visitor,Affix.InFix,operation,null);
+        return this;
+    }
+
+    public IAotEbnfParserBuilder<IN, OUT> Infix(IN operation, Associativity associativity, int precedence,
+        Func<object[], OUT> visitor)
+    {
+        AddOperation(precedence,associativity,visitor,Affix.InFix,operation,null);
+        return this;
+    }
+    
     public IAotEbnfParserBuilder<IN, OUT> Prefix(IN operation, int precedence, Func<object[], OUT> visitor)
     {
        AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,operation,null);

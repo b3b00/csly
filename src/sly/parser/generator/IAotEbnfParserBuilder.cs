@@ -27,6 +27,9 @@ public interface IAotEbnfParserBuilder<IN,OUT> where IN : struct
     IAotEbnfParserBuilder<IN,OUT> Left(IN operation, int precedence, Func<object[], OUT> visitor);
     
     IAotEbnfParserBuilder<IN,OUT> Left(string operation, int precedence, Func<object[], OUT> visitor);
+    
+    IAotEbnfParserBuilder<IN,OUT> Infix(string operation, Associativity associativity, int precedence, Func<object[], OUT> visitor);
+    IAotEbnfParserBuilder<IN,OUT> Infix(IN operation, Associativity associativity, int precedence, Func<object[], OUT> visitor);
     IAotEbnfParserBuilder<IN,OUT> Prefix(IN operation, int precedence, Func<object[], OUT> visitor);
     
     IAotEbnfParserBuilder<IN,OUT> Prefix(string operation, int precedence, Func<object[], OUT> visitor);

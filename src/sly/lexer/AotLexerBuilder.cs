@@ -258,6 +258,12 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         return this;
     }
     
+    public IAotLexerBuilder<IN> UpTo(IN tokenId, string[] patterns, int channel = Channels.Main, params string[] modes)
+    {
+        Add(tokenId,new LexemeAttribute(GenericToken.UpTo,channel, patterns),null, modes);
+        return this;
+    }
+    
     public IAotLexerBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEOL = false)
     {
         Add(tokenId, new LexemeAttribute(regex,isSkippable,isEOL),null);

@@ -37,6 +37,8 @@ public interface IAotLexerBuilder<IN> where IN : struct
 
     public IAotLexerBuilder<IN> UpTo(IN tokenId, string pattern, int channl = Channels.Main, params string[] modes);
     
+    public IAotLexerBuilder<IN> UpTo(IN tokenId, string[] patterns, int channl = Channels.Main, params string[] modes);
+    
     public IAotLexerBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEOL = false);
 
     public IAotLexerBuilder<IN> Extension(IN tokenId, int channel = Channels.Main, params string[] modes);
