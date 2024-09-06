@@ -453,26 +453,7 @@ return r";
             Console.WriteLine($"result : ok:>{res.IsOk}< value:>{res.Result}<");
         }
 
-        public static void TestTokenCallBacks()
-        {
-            var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CallbackTokens>>());
-            if (!res.IsError)
-            {
-                var lexer = res.Result as GenericLexer<CallbackTokens>;
-                CallBacksBuilder.BuildCallbacks(lexer);
-
-                var r = lexer.Tokenize("aaa bbb");
-                if (r.IsOk)
-                {
-                    var tokens = r.Tokens;
-                    foreach (var token in tokens)
-                    {
-                        Console.WriteLine($"{token.TokenID} - {token.Value}");
-                    }
-                }
-            }
-
-        }
+        
 
         public static void test104()
         {

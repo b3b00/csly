@@ -8,15 +8,6 @@ namespace sly.lexer
     public static class CallBacksBuilder
     {
 
-        public static void BuildCallbacks<IN>(GenericLexer<IN> lexer) where IN : struct
-        {
-            var callbacks = GetCallbacks(lexer);
-            foreach (var callback in callbacks)
-            {
-                lexer.AddCallBack(callback.tokenId, callback.callback);
-            }
-        }
-
         public static List<(IN tokenId,Func<Token<IN>, Token<IN>> callback)> GetCallbacks<IN>(GenericLexer<IN> lexer) where IN : struct
         {
             List<(IN,Func<Token<IN>, Token<IN>>)> callbacks = new List<(IN,Func<Token<IN>, Token<IN>>)>();
