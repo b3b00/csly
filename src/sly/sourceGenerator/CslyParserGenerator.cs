@@ -154,22 +154,11 @@ public class CslyParserGenerator : IIncrementalGenerator
                     var parserDecl = declarationsByName[parserType] as ClassDeclarationSyntax;
                     
                     SyntaxList<UsingDirectiveSyntax> usings = new SyntaxList<UsingDirectiveSyntax>();
-                    if (parserDecl.Parent is CompilationUnitSyntax unit)
-                    {
-                        usings = (parserDecl.Parent as CompilationUnitSyntax).Usings;
-                    }
-                    else
-                    {
-                        if (parserDecl.Parent.Parent is CompilationUnitSyntax)
-                        {
-                            usings = (parserDecl.Parent.Parent as CompilationUnitSyntax).Usings;
-                        }
-                    }
+                   
                     string lexerName = lexerDecl.Identifier.ToString();
-                    // TODO public class  ? get visibility from classDeclaration ??
-
+                   
                     string modifiers = string.Join(" ", classDeclarationSyntax.Modifiers.Select(x => x.ToString()));
-                    
+
                     string code = $@"
 using System;
 using sly.lexer;

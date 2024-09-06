@@ -24,6 +24,10 @@
     "callbacksGenerators": {
       "commandName": "DebugRoslynComponent",
       "targetProject": "../samples/GenericLexerWithCallbacks/GenericLexerWithCallbacks.csproj"
+    },
+    "postProcessGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/postProcessedLexerParser/postProcessedLexerParser.csproj"
     }
   }
 }

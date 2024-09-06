@@ -90,14 +90,17 @@ public class LexerSyntaxWalker : CslySyntaxWalker
             case nameof(GenericToken.SugarToken) : return ("Sugar",1);
             case nameof(GenericToken.Identifier):
             {
-                var identierType = argumentListArguments[1].Expression as MemberAccessExpressionSyntax;
-                if (identierType != null)
+                if (argumentListArguments.Count > 1)
                 {
-                    var method = GetMethodForIdentifier(identierType);
-                    return (method,2);
+                    var identierType = argumentListArguments[1].Expression as MemberAccessExpressionSyntax;
+                    if (identierType != null)
+                    {
+                        var method = GetMethodForIdentifier(identierType);
+                        return (method, 2);
+                    }
                 }
 
-                return (null, 0);
+                return ("AlphaId", 1);
             }
             case nameof(GenericToken.Int): return ("Integer",1);
             case nameof(GenericToken.Double): return ("Double",1);
