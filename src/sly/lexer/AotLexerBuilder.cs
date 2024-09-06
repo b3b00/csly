@@ -21,7 +21,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
 
     private string _indentation;
 
-    private List<(IN, Func<Token<IN>, Token<IN>>)> _tokenCallbacks = new List<(IN, Func<Token<IN>, Token<IN>>)>();
+    
     
     private Dictionary<IN, (List<LexemeAttribute>, List<LexemeLabelAttribute>)> _lexemes;
 
@@ -32,7 +32,9 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
 
     private Action<IN, LexemeAttribute, GenericLexer<IN>> _extensionBuilder;
     private LexerPostProcess<IN> _lexerPostProcessor;
-    private List<(IN tokenId,Func<Token<IN>, Token<IN>> callback)> _callbacks;
+
+    private List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)> _callbacks =
+        new List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)>();
 
     private Dictionary<IN , string > _modePushers;
     
@@ -232,7 +234,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
 
     public IAotLexerBuilder<IN> WithCallback(IN tokenId, Func<Token<IN>, Token<IN>> callback)
     {
-        _tokenCallbacks.Add((tokenId, callback));
+        _callbacks.Add((tokenId, callback));
         return this;
     }
 
@@ -335,16 +337,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         
         
         var lexerResult = LexerBuilder.BuildLexer(r, _extensionBuilder, lang, _lexerPostProcessor, _explicitTokens, _lexemes, lexerConfig, _comments, modesGetter, () => _callbacks);
-        if (lexerResult.IsOk && lexerResult.Result is GenericLexer<IN> genericLexer)
-        {
-            if (_callbacks.Any())
-            {
-                foreach (var callback in _callbacks)
-                {
-                    genericLexer.AddCallBack(callback.tokenId, callback.callback);
-                }
-            }
-        }
+       
         return lexerResult;
     }
 }

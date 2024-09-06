@@ -14,11 +14,13 @@ public class LexerSyntaxWalker : CslySyntaxWalker
     StringBuilder _builder = new();
 
     private string? _lexerName = "";
+    private readonly Dictionary<string, SyntaxNode> _declarationsByName;
 
-    public LexerSyntaxWalker(StringBuilder builder, string lexerName)
+    public LexerSyntaxWalker(StringBuilder builder, string lexerName, Dictionary<string, SyntaxNode> declarationsByName)
     {
         _builder = builder;
         _lexerName = lexerName;
+        _declarationsByName = declarationsByName;
     }
 
     protected string GetAttributeArgsForLexemekeyWord(AttributeSyntax attribute, List<string> modes = null,
@@ -330,6 +332,39 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                             }
                         }
                         
+                    }
+                }
+
+                if (attributeSyntax.Name.ToString() == "CallBacks")
+                {
+                    var typeOfExpressionSyntax = attributeSyntax.ArgumentList.Arguments[0].Expression as TypeOfExpressionSyntax;
+                    if (typeOfExpressionSyntax != null)
+                    {
+                        string typeName = typeOfExpressionSyntax.Type.ToString();
+                        if (_declarationsByName.TryGetValue(typeName, out var declaration))
+                        {
+                            if (declaration is ClassDeclarationSyntax classDeclarationSyntax)
+                            {
+                                var methods = classDeclarationSyntax.Members
+                                    .ToList()
+                                    .Where(x => x is MethodDeclarationSyntax)
+                                    .Cast<MethodDeclarationSyntax>().ToList();
+                                foreach (var method in methods)
+                                {
+                                    if (method.AttributeLists.Any())
+
+                                    {
+                                        var callbackAttribute = method.AttributeLists.SelectMany(x => x.Attributes)
+                                            .FirstOrDefault(x => x.Name.ToString() == "TokenCallback");
+                                        if (callbackAttribute != null)
+                                        {
+                                            var tokenid = (callbackAttribute.ArgumentList.Arguments[0].Expression as CastExpressionSyntax).Expression.ToString();
+                                            _builder.AppendLine($"builder.WithCallback({tokenid},( token => {typeName}.{method.Identifier.ToString()}(token))); ");
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

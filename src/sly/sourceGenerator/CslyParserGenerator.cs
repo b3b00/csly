@@ -175,7 +175,7 @@ using {parserDecl.GetNameSpace()};
 namespace {ns};
 {modifiers} class {className} : AbstractParserGenerator<{lexerName}> {{
     
-    {(lexerDecl != null ? LexerBuilderGenerator.GenerateLexer(lexerDecl as EnumDeclarationSyntax, outputType) : "")}
+    {(lexerDecl != null ? LexerBuilderGenerator.GenerateLexer(lexerDecl as EnumDeclarationSyntax, outputType, declarationsByName) : "")}
 
     {(parserDecl != null ? ParserBuilderGenerator.GenerateParser(parserDecl as ClassDeclarationSyntax, lexerName, outputType) : "")}
 

@@ -113,7 +113,7 @@ namespace sly.lexer
             LexerAttribute lexerAttribute = null,
             Dictionary<IN,List<CommentAttribute>> comments = null,
             Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>,(List<string> modes, bool isModePopper, string pushTarget)> modesGetter = null,
-            Func<List<(IN, Func<Token<IN>, Token<IN>>)>> callbacksGetter = null)
+            Func<List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)>> callbacksGetter = null)
             where IN : struct
         {
             attributes = attributes ?? GetLexemesWithReflection<IN>(result, lang);
@@ -167,7 +167,7 @@ namespace sly.lexer
             string lang = null,
             IList<string> explicitTokens = null, Dictionary<IN, List<CommentAttribute>> comments = null,
             Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>, (List<string>
-                modes, bool isModePopper, string pushTarget)> modesGetter = null,  Func<List<(IN, Func<Token<IN>, Token<IN>>)>> callbacksGetter = null) where IN : struct
+                modes, bool isModePopper, string pushTarget)> modesGetter = null,  Func<List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)>> callbacksGetter = null) where IN : struct
         {
             var hasRegexLexemes = IsRegexLexer<IN>(attributes);
             var hasGenericLexemes = IsGenericLexer<IN>(attributes);
@@ -486,7 +486,7 @@ namespace sly.lexer
             IList<string> explicitTokens = null, LexerAttribute lexerAttribute = null,
             Dictionary<IN, List<CommentAttribute>> comments = null,
             Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>, (List<string>
-                modes, bool isModePopper, string pushTarget)> modesGetter = null, Func<List<(IN, Func<Token<IN>, Token<IN>>)>> callbacksGetter = null) where IN : struct
+                modes, bool isModePopper, string pushTarget)> modesGetter = null, Func<List<(IN tokenId, Func<Token<IN>, Token<IN>> callback) >> callbacksGetter = null) where IN : struct
         {
             GenericLexer<IN> genLexer = null;
             var subLexers = GetSubLexers(attributes, modesGetter);
@@ -500,7 +500,10 @@ namespace sly.lexer
                 }
                 // TODO AOT : get callbacks 
                 callbacksGetter = callbacksGetter ?? (() => CallBacksBuilder.GetCallbacks(currentGenericLexer));
-                CallBacksBuilder.BuildCallbacks(currentGenericLexer);
+                foreach (var callback in callbacksGetter())
+                {
+                    currentGenericLexer.AddCallBack(callback.tokenId,callback.callback);
+                }
                 currentGenericLexer.FSMBuilder.Fsm.Mode = subLexer.Key;
 
                 genLexer.SubLexersFsm[subLexer.Key] = currentGenericLexer.FSMBuilder.Fsm;

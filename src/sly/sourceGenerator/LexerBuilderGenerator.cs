@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using System.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using sly.parser.generator;
 
@@ -6,7 +9,11 @@ namespace sly.sourceGenerator;
 
 public class LexerBuilderGenerator
 {
-    public static string GenerateLexer(EnumDeclarationSyntax enumDeclarationSyntax, string outputType)
+
+
+    
+    public static string GenerateLexer(EnumDeclarationSyntax enumDeclarationSyntax, string outputType,
+        Dictionary<string, SyntaxNode> declarationsByName)
     {
         string name = enumDeclarationSyntax.Identifier.ToString();
         StringBuilder builder = new();
@@ -14,7 +21,7 @@ public class LexerBuilderGenerator
 
         builder.AppendLine($"var builder = AotLexerBuilder<{name}>.NewBuilder();");
         
-        LexerSyntaxWalker walker = new(builder, name);
+        LexerSyntaxWalker walker = new(builder, name, declarationsByName);
         walker.Visit(enumDeclarationSyntax);
 
         builder.AppendLine("builder.UseLexerPostProcessor(UseTokenPostProcessor());");
