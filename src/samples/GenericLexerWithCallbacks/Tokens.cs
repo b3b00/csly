@@ -2,7 +2,6 @@ using sly.lexer;
 
 namespace GenericLexerWithCallbacks
 {
-    
     [CallBacks(typeof(TestCallbacks))]
     public enum CallbackTokens
     {
@@ -48,7 +47,7 @@ namespace GenericLexerWithCallbacks
 
         #region literals 20 -> 29
 
-        [Lexeme(GenericToken.Identifier)] IDENTIFIER = 20,
+        [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)] IDENTIFIER = 20,
 
         [Lexeme(GenericToken.String)] STRING = 21,
 

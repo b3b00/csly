@@ -20,6 +20,8 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
     private bool _indentationAware = false;
 
     private string _indentation;
+
+    private List<(IN, Func<Token<IN>, Token<IN>>)> _tokenCallbacks = new List<(IN, Func<Token<IN>, Token<IN>>)>();
     
     private Dictionary<IN, (List<LexemeAttribute>, List<LexemeLabelAttribute>)> _lexemes;
 
@@ -228,6 +230,12 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
         return this;
     }
 
+    public IAotLexerBuilder<IN> WithCallback(IN tokenId, Func<Token<IN>, Token<IN>> callback)
+    {
+        _tokenCallbacks.Add((tokenId, callback));
+        return this;
+    }
+
     public IAotLexerBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main, params string[] modes)
     {
         Add(tokenId,new LexemeAttribute(GenericToken.String,channel, delimiter,escapeChar),null, modes);
@@ -324,7 +332,9 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN> where IN : struct
                 return (modes, isModePopper, pushMode);
             }; 
         
-        var lexerResult = LexerBuilder.BuildLexer(r, _extensionBuilder, lang, _lexerPostProcessor, _explicitTokens, _lexemes, lexerConfig, _comments, modesGetter);
+        
+        
+        var lexerResult = LexerBuilder.BuildLexer(r, _extensionBuilder, lang, _lexerPostProcessor, _explicitTokens, _lexemes, lexerConfig, _comments, modesGetter, () => _callbacks);
         if (lexerResult.IsOk && lexerResult.Result is GenericLexer<IN> genericLexer)
         {
             if (_callbacks.Any())

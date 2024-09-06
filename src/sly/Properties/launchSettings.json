@@ -20,6 +20,10 @@
     "templateGenerators": {
       "commandName": "DebugRoslynComponent",
       "targetProject": "../samples/simpleTemplate/simpleTemplate.csproj"
+    },
+    "callbacksGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/GenericLexerWithCallbacks/GenericLexerWithCallbacks.csproj"
     }
   }
 }

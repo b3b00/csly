@@ -68,6 +68,14 @@ public interface IAotLexerBuilder<IN> where IN : struct
     public IAotLexerBuilder<IN> Pop(IN tokenId);
     
     public IAotLexerBuilder<IN> Label(IN tokenId, string lang, string label);
+
+    public IAotLexerBuilder<IN> WithCallback(IN tokenId, Func<Token<IN>, Token<IN>> callback);
     
     public BuildResult<ILexer<IN>> Build(string lang);
+    
+    
+    
+    
+    
+    
 }

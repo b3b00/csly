@@ -10,6 +10,8 @@ using Microsoft.CodeAnalysis.Text;
 namespace sly.sourceGenerator;
 
 
+
+
 public static class SyntaxExtensions
 {
     public static string GetNameSpace(this SyntaxNode declarationSyntax)
@@ -25,6 +27,23 @@ public static class SyntaxExtensions
 
         return string.Empty;
     }
+    
+    public static CompilationUnitSyntax GetCompilationUnit(this SyntaxNode syntaxNode)
+    {
+        if (syntaxNode is CompilationUnitSyntax compilationUnitSyntax)
+        {
+            return compilationUnitSyntax;
+        }
+
+        if (syntaxNode.Parent != null)
+        {
+            return syntaxNode.Parent.GetCompilationUnit();
+        }
+
+        return null;
+    }
+    
+    
 
 
 }
@@ -64,32 +83,38 @@ public class CslyParserGenerator : IIncrementalGenerator
 
     private string GetParserUsings(ClassDeclarationSyntax classDeclarationSyntax)
     {
-        var unit = (classDeclarationSyntax.Parent.Parent as CompilationUnitSyntax);
-        StringBuilder builder = new();
-        if (unit != null)
+        if (classDeclarationSyntax != null)
         {
-            foreach (var @using in unit.Usings)
+            var unit = classDeclarationSyntax.GetCompilationUnit();
+            StringBuilder builder = new();
+            if (unit != null)
             {
-                builder.AppendLine(@using.ToString());
+                foreach (var @using in unit.Usings)
+                {
+                    builder.AppendLine(@using.ToString());
+                }
             }
+            return builder.ToString();
         }
-
-        return builder.ToString();
+        return "";
     }
 
     public string GetLexerUsings(EnumDeclarationSyntax enumDeclarationSyntax)
     {
-        var unit = (enumDeclarationSyntax.Parent.Parent as CompilationUnitSyntax);
-        StringBuilder builder = new();
-        if (unit != null)
+        if (enumDeclarationSyntax != null)
         {
-            foreach (var @using in unit.Usings)
+            var unit = enumDeclarationSyntax.GetCompilationUnit();
+            StringBuilder builder = new();
+            if (unit != null)
             {
-                builder.AppendLine(@using.ToString());
+                foreach (var @using in unit.Usings)
+                {
+                    builder.AppendLine(@using.ToString());
+                }
             }
+            return builder.ToString();
         }
-
-        return builder.ToString();
+        return "";
     }
     
     private void GenerateCode(SourceProductionContext context, Compilation arg2Left, ImmutableArray<SyntaxNode> declarations)
@@ -123,17 +148,11 @@ public class CslyParserGenerator : IIncrementalGenerator
 
                 if (isParserGenerator)
                 {
-                    Console.WriteLine("###############################################");
-                    Console.WriteLine("###");
-                    Console.WriteLine($"### SOURCE GENERATION FOR >>{className}<<");
-                    Console.WriteLine("####");
-                    Console.WriteLine("###############################################");
-
                     string ns = declarationSyntax.GetNameSpace();
                 
                     var lexerDecl = declarationsByName[lexerType] as EnumDeclarationSyntax;
                     var parserDecl = declarationsByName[parserType] as ClassDeclarationSyntax;
-                    string parserName = parserDecl.Identifier.ToString();
+                    
                     SyntaxList<UsingDirectiveSyntax> usings = new SyntaxList<UsingDirectiveSyntax>();
                     if (parserDecl.Parent is CompilationUnitSyntax unit)
                     {
@@ -167,9 +186,9 @@ using {parserDecl.GetNameSpace()};
 namespace {ns};
 {modifiers} class {className} : AbstractParserGenerator<{lexerName}> {{
     
-    {LexerBuilderGenerator.GenerateLexer(lexerDecl as EnumDeclarationSyntax, outputType)}
+    {(lexerDecl != null ? LexerBuilderGenerator.GenerateLexer(lexerDecl as EnumDeclarationSyntax, outputType) : "")}
 
-    {ParserBuilderGenerator.GenerateParser(parserDecl as ClassDeclarationSyntax, lexerName, outputType)}
+    {(parserDecl != null ? ParserBuilderGenerator.GenerateParser(parserDecl as ClassDeclarationSyntax, lexerName, outputType) : "")}
 
 }}";
 

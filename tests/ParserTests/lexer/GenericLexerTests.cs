@@ -797,9 +797,25 @@ namespace ParserTests.lexer
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CallbackTokens>>());
             Check.That(res.IsError).IsFalse();
-            var lexer = res.Result as GenericLexer<CallbackTokens>;
-            CallBacksBuilder.BuildCallbacks(lexer);
+            var lexer = res.Result;
 
+            var r = lexer.Tokenize("aaa bbb");
+            Check.That(r.IsOk).IsTrue();
+            var tokens = r.Tokens;
+            Check.That(tokens).CountIs(3);
+            Check.That(tokens[0]).IsEqualTo(CallbackTokens.IDENTIFIER, "AAA");
+            Check.That(tokens[1]).IsEqualTo(CallbackTokens.SKIP, "BBB");
+        }
+        
+        [Fact]
+        public void TestGeneratedTokenCallbacks()
+        {
+            ParserCallbacksGenerator generator = new ParserCallbacksGenerator();
+            var lexerBuilder = generator.GetLexer();
+            var res = lexerBuilder.Build("en");
+            
+            Check.That(res.IsError).IsFalse();
+            var lexer = res.Result;
 
             var r = lexer.Tokenize("aaa bbb");
             Check.That(r.IsOk).IsTrue();

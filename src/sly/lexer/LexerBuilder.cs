@@ -112,14 +112,15 @@ namespace sly.lexer
             Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> attributes = null,
             LexerAttribute lexerAttribute = null,
             Dictionary<IN,List<CommentAttribute>> comments = null,
-            Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>,(List<string> modes, bool isModePopper, string pushTarget)> modesGetter = null)
+            Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>,(List<string> modes, bool isModePopper, string pushTarget)> modesGetter = null,
+            Func<List<(IN, Func<Token<IN>, Token<IN>>)>> callbacksGetter = null)
             where IN : struct
         {
             attributes = attributes ?? GetLexemesWithReflection<IN>(result, lang);
             lexerAttribute = lexerAttribute ?? typeof(IN).GetCustomAttribute<LexerAttribute>();
             if (!result.IsError)
             {
-                result = Build<IN>(attributes, result, lexerAttribute, extensionBuilder, lang, explicitTokens, comments, modesGetter);
+                result = Build<IN>(attributes, result, lexerAttribute, extensionBuilder, lang, explicitTokens, comments, modesGetter, callbacksGetter);
                 if (!result.IsError)
                 {
                     var labels = result.Result.LexemeLabels;
@@ -159,11 +160,14 @@ namespace sly.lexer
         }
 
 
-        private static BuildResult<ILexer<IN>> Build<IN>(Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> attributes,
-            BuildResult<ILexer<IN>> result, LexerAttribute lexerAttribute = null, Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
+        private static BuildResult<ILexer<IN>> Build<IN>(
+            Dictionary<IN, (List<LexemeAttribute>, List<LexemeLabelAttribute>)> attributes,
+            BuildResult<ILexer<IN>> result, LexerAttribute lexerAttribute = null,
+            Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
             string lang = null,
-            IList<string> explicitTokens = null,  Dictionary<IN,List<CommentAttribute>> comments = null,
-            Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>,(List<string> modes, bool isModePopper, string pushTarget)> modesGetter = null) where IN : struct
+            IList<string> explicitTokens = null, Dictionary<IN, List<CommentAttribute>> comments = null,
+            Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>, (List<string>
+                modes, bool isModePopper, string pushTarget)> modesGetter = null,  Func<List<(IN, Func<Token<IN>, Token<IN>>)>> callbacksGetter = null) where IN : struct
         {
             var hasRegexLexemes = IsRegexLexer<IN>(attributes);
             var hasGenericLexemes = IsGenericLexer<IN>(attributes);
@@ -191,7 +195,7 @@ namespace sly.lexer
                 }
                 else if (hasGenericLexemes)
                 {
-                    result = BuildGenericSubLexers<IN>(attributes, extensionBuilder, result, lang, explicitTokens, lexerAttribute, comments,modesGetter);
+                    result = BuildGenericSubLexers<IN>(attributes, extensionBuilder, result, lang, explicitTokens, lexerAttribute, comments,modesGetter, callbacksGetter);
                 }
 
                 result = SetLabels(attributes, result);
@@ -477,9 +481,12 @@ namespace sly.lexer
 
 
         public static BuildResult<ILexer<IN>> BuildGenericSubLexers<IN>(
-            Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> attributes,
+            Dictionary<IN, (List<LexemeAttribute>, List<LexemeLabelAttribute>)> attributes,
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, BuildResult<ILexer<IN>> result, string lang,
-            IList<string> explicitTokens = null, LexerAttribute lexerAttribute = null, Dictionary<IN,List<CommentAttribute>> comments = null, Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>,(List<string> modes, bool isModePopper, string pushTarget)> modesGetter = null) where IN : struct
+            IList<string> explicitTokens = null, LexerAttribute lexerAttribute = null,
+            Dictionary<IN, List<CommentAttribute>> comments = null,
+            Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>, (List<string>
+                modes, bool isModePopper, string pushTarget)> modesGetter = null, Func<List<(IN, Func<Token<IN>, Token<IN>>)>> callbacksGetter = null) where IN : struct
         {
             GenericLexer<IN> genLexer = null;
             var subLexers = GetSubLexers(attributes, modesGetter);
@@ -491,7 +498,9 @@ namespace sly.lexer
                 {
                     genLexer = currentGenericLexer;
                 }
-
+                // TODO AOT : get callbacks 
+                callbacksGetter = callbacksGetter ?? (() => CallBacksBuilder.GetCallbacks(currentGenericLexer));
+                CallBacksBuilder.BuildCallbacks(currentGenericLexer);
                 currentGenericLexer.FSMBuilder.Fsm.Mode = subLexer.Key;
 
                 genLexer.SubLexersFsm[subLexer.Key] = currentGenericLexer.FSMBuilder.Fsm;
