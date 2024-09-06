@@ -302,9 +302,30 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
     private void AddOperation(int precedence,Associativity associativity, Func<object[],OUT> visitor, Affix affix, string operation, string nodeName = null) 
     {
         Func<object[], OUT> loggedVisitor = visitor;
+
+        OperationMetaData<IN, OUT> operationMeta = null;
+        bool isEnumValue = EnumConverter.IsEnumValue<IN>(operation);
         
-        OperationMetaData<IN, OUT> operationMeta =
-            new OperationMetaData<IN, OUT>(precedence, Associativity.None, loggedVisitor, Affix.PreFix, operation, nodeName);
+        if (!isEnumValue && !string.IsNullOrEmpty(operation) && operation.StartsWith("'") && operation.EndsWith("'")) 
+        {
+            operationMeta = new OperationMetaData<IN, OUT>(precedence, associativity, loggedVisitor, affix, operation ,nodeName);
+        }
+        else if (isEnumValue)
+        {
+            IN oper = default;
+            if (EnumConverter.IsEnumValue<IN>(operation))
+            {
+                oper = EnumConverter.ConvertStringToEnum<IN>(operation);
+            }
+            operationMeta = new OperationMetaData<IN, OUT>(precedence, associativity, loggedVisitor, affix, oper, nodeName);
+        }
+        else
+        {
+            throw new ParserConfigurationException($"bad enum name {operation} on Operation definition.");   
+        }
+        
+        // OperationMetaData<IN, OUT> operationMeta =
+        //     new OperationMetaData<IN, OUT>(precedence, Associativity.None, loggedVisitor, Affix.PreFix, operation, nodeName);
         
         List<OperationMetaData<IN,OUT >> operationsForPrecedence;
         if (!_operationsByPrecedence.TryGetValue(precedence, out operationsForPrecedence))

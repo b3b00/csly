@@ -16,6 +16,10 @@
     "whileGenerators": {
       "commandName": "DebugRoslynComponent",
       "targetProject": "../samples/indentedWhile/indentedwhile.csproj"
+    },
+    "templateGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/simpleTemplate/simpleTemplate.csproj"
     }
   }
 }

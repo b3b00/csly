@@ -11,7 +11,7 @@ namespace ParserTests.samples
     public class GeneratedTemplateTests
     {
 
-        public Parser<TemplateLexer, ITemplate> GetParser()
+        public Parser<TemplateLexer, ITemplate> GetGeneratedParser()
         {
             var generator = new TemplateParserGenerator();
             var build = generator.GetParser();
@@ -21,9 +21,9 @@ namespace ParserTests.samples
         }
 
         [Fact]
-        public void BasicTemplateTest()
+        public void BasicGeneratedTemplateTest()
         {
-            var parser = GetParser();
+            var parser = GetGeneratedParser();
             var source = @"hello-{=world=}-billy-{% if (a == 1) %}-bob-{%else%}-boubou-{%endif%}this is the end";
             
             var context = new Dictionary<string, object>()
