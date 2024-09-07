@@ -6,42 +6,58 @@ using sly.lexer.fsm;
 
 namespace sly.lexer;
 
+public interface IAotLexemeBuilder<IN> : IAotLexerBuilder<IN> where IN : struct {
+    
+    IAotLexemeBuilder<IN> WithLabel(string lang, string label);
+    
+    IAotLexemeBuilder<IN> WithLabels(params (string lang, string label)[] labels);
+    
+    IAotLexemeBuilder<IN> WithModes(params string[] modes);
+    
+    IAotLexemeBuilder<IN> OnChannel(int channel);
+    
+    IAotLexemeBuilder<IN> PopMode();
+    
+    IAotLexemeBuilder<IN> PushToMode(string targetMode);
+    
+    }
+
 public interface IAotLexerBuilder<IN> where IN : struct
 {
     
-    public IAotLexerBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".",
+    public IAotLexemeBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".",
         int channel = Channels.Main, params string[] modes);
 
-    public IAotLexerBuilder<IN> Integer(IN tokenId, int channel = Channels.Main, params string[] modes);
+    public IAotLexemeBuilder<IN> Integer(IN tokenId, int channel = Channels.Main, params string[] modes);
 
-    public IAotLexerBuilder<IN> Sugar(IN tokenId, string token, int channel = Channels.Main, params string[] modes);
+    public IAotLexemeBuilder<IN> Sugar(IN tokenId, string token, int channel = Channels.Main, params string[] modes);
     
-    public IAotLexerBuilder<IN> Keyword(IN tokenId, string token, int channel = Channels.Main, params string[] modes);
+    public IAotLexemeBuilder<IN> Keyword(IN tokenId, string token, int channel = Channels.Main, params string[] modes);
     
-    public IAotLexerBuilder<IN> Keyword(IN tokenId, string[] tokens, int channel = Channels.Main, params string[] modes);
+    public IAotLexemeBuilder<IN> Keyword(IN tokenId, string[] tokens, int channel = Channels.Main, params string[] modes);
 
-    public IAotLexerBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main, params string[] modes);
+    public IAotLexemeBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main, params string[] modes);
     
-    public IAotLexerBuilder<IN> Character(IN tokenId, string delimiter ="'", string escapeChar = "\\", int channel = Channels.Main, params string[] modes);
-    public IAotLexerBuilder<IN> AlphaNumId(IN tokenId, params string[] modes);
+    public IAotLexemeBuilder<IN> Character(IN tokenId, string delimiter ="'", string escapeChar = "\\", int channel = Channels.Main, params string[] modes);
+    public IAotLexemeBuilder<IN> AlphaNumId(IN tokenId, params string[] modes);
     
-    public IAotLexerBuilder<IN> AlphaId(IN tokenId, params string[] modes);
+    public IAotLexemeBuilder<IN> AlphaId(IN tokenId, params string[] modes);
     
-    public IAotLexerBuilder<IN> AlphaNumDashId(IN tokenId, params string[] modes);
+    public IAotLexemeBuilder<IN> AlphaNumDashId(IN tokenId, params string[] modes);
     
-    public IAotLexerBuilder<IN> CustomId(IN tokenId, string start, string end, params string[] modes);
+    public IAotLexemeBuilder<IN> CustomId(IN tokenId, string start, string end, params string[] modes);
 
-    IAotLexerBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false, int channel = Channels.Comments, params string[] modes);
+    IAotLexemeBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false, int channel = Channels.Comments, params string[] modes);
 
-    public IAotLexerBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments, params string[] modes);
+    public IAotLexemeBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments, params string[] modes);
 
-    public IAotLexerBuilder<IN> UpTo(IN tokenId, string pattern, int channl = Channels.Main, params string[] modes);
+    public IAotLexemeBuilder<IN> UpTo(IN tokenId, string pattern, int channl = Channels.Main, params string[] modes);
     
-    public IAotLexerBuilder<IN> UpTo(IN tokenId, string[] patterns, int channl = Channels.Main, params string[] modes);
+    public IAotLexemeBuilder<IN> UpTo(IN tokenId, string[] patterns, int channl = Channels.Main, params string[] modes);
     
-    public IAotLexerBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEOL = false);
+    public IAotLexemeBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEOL = false);
 
-    public IAotLexerBuilder<IN> Extension(IN tokenId, int channel = Channels.Main, params string[] modes);
+    public IAotLexemeBuilder<IN> Extension(IN tokenId, int channel = Channels.Main, params string[] modes);
 
     public IAotLexerBuilder<IN> UseExtensionBuilder(Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder);
 
