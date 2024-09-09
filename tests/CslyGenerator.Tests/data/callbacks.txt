@@ -31,6 +31,8 @@ public partial class ParserCallbacksGenerator
         {
             [Lexeme(GenericToken.KeyWord, "SKIP")] [Lexeme(GenericToken.KeyWord, "skip")]
             SKIP = 6,
+            [LexemeLabel("en","identifier")]
+            [LexemeLabel("fr","identifiant")]
             [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)] IDENTIFIER = 20,
             EOF = 0
     

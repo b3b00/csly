@@ -1,4 +1,5 @@
-﻿using sly.lexer;
+﻿using sly.i18n;
+using sly.lexer;
 
 namespace GeneratedXML
 {
@@ -39,6 +40,8 @@ namespace GeneratedXML
         #region in tag
         
         [AlphaId]
+        [LexemeLabel("en","attribute name")]
+        [LexemeLabel("fr","nom d'attribut")]
         [Mode("tag")]
         [Mode("pi")]
         ID,

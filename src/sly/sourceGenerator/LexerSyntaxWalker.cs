@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -169,6 +171,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                 {
                     continue;
                 }
+                
                 switch (attributeName)
                 {
                     case "Lexeme":
@@ -367,6 +370,11 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     {
                         _builder.AppendLine(
                             $".PopMode()");
+                        break;
+                    }
+                    case "LexemeLabel":
+                    {
+                        _builder.AppendLine($".WithLabel({GetAttributeArgs(attributeSyntax, withLeadingComma:false)})");
                         break;
                     }
                     default:
