@@ -32,7 +32,7 @@ public class SourceGeneratorTests
 
 ";
 
-    private ImmutableArray<SyntaxTree> testSource(string source, string className)
+    private ImmutableArray<SyntaxTree> generateSource(string source, string className)
     {
         // Create an instance of the source generator.
         var generator = new CslyParserGenerator();
@@ -55,7 +55,6 @@ public class SourceGeneratorTests
         return runResult.GeneratedTrees;
     }
 
-
     [Theory()]
     [InlineData("/data/template.txt","TemplateParserGenerator")]
     [InlineData("/data/aot.txt","TestGenerator")]
@@ -65,10 +64,11 @@ public class SourceGeneratorTests
     public void TestGenerator(string source, string className)
     {
         var code = _embeddedResourceFileSystem.ReadAllText(source);
-        var generatedTrees = testSource(code, className);
-        
+        var generatedTrees = generateSource(code, className);
+
         var contents = generatedTrees.ToDictionary(x => x.FilePath,x => x.ToString());
         var generatedFiles = generatedTrees.Select(x => new FileInfo(x.FilePath).Name);
+
         Assert.Equivalent(new[]
         {
             $"{className}.g.cs"

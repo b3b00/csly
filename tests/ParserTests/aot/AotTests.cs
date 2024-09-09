@@ -67,8 +67,8 @@ public class AotTests
         var lexerBuilder = builder.Double(AotExpressionsLexer.DOUBLE)
             .Sugar(AotExpressionsLexer.PLUS, "+")
             .Keyword(AotExpressionsLexer.PLUS, "PLUS")
-            .Label(AotExpressionsLexer.PLUS,"en", "sum")
-            .Label(AotExpressionsLexer.PLUS,"fr", "somme")
+            .WithLabel("fr","addition")
+            .WithLabel("en","sum")
             .Sugar(AotExpressionsLexer.MINUS, "-")
             .Sugar(AotExpressionsLexer.TIMES, "*")
             .Sugar(AotExpressionsLexer.DIVIDE, "/")
@@ -258,7 +258,7 @@ while true do
     {
         var builder = AotLexerBuilder<TestLexer>.NewBuilder();
         var lexerBuilder = builder.AlphaId(TestLexer.Value1)
-                .Label(TestLexer.Value1,"en","this is Value One")
+                .WithLabel("en","this is Value One")
             .UseLexerPostProcessor((List<Token<TestLexer>> tokens) =>
             {
                 var processed = tokens.Select(x =>
@@ -295,11 +295,11 @@ while true do
     {
         var builder = AotLexerBuilder<TestLexer>.NewBuilder();
         var lexerBuilder = builder.AlphaId(TestLexer.Value1)
-            .Label(TestLexer.Value1, "en", "Value One")
-            .Label(TestLexer.Value1, "fr", "Valeur un")
+            .WithLabel("en", "Value One")
+            .WithLabel("fr", "Valeur un")
             .Sugar(TestLexer.Value2, "*-*")
-            .Label(TestLexer.Value2, "en","star-dash-star")
-            .Label(TestLexer.Value2, "fr","étoile-tiret-étoile");
+            .WithLabel("en","star-dash-star")
+            .WithLabel("fr","étoile-tiret-étoile");
             
             
 
@@ -347,12 +347,12 @@ while true do
             .Sugar(MinimalXmlLexer.OPEN_PI, "<?")
             .Push(MinimalXmlLexer.OPEN_PI, "pi")
             .MultiLineComment(MinimalXmlLexer.COMMENT, "<!--", "-->", false, Channels.Main)
-            .AlphaId(MinimalXmlLexer.ID, "pi", "tag")
-            .Sugar(MinimalXmlLexer.SLASH, "/", modes: "tag")
-            .Sugar(MinimalXmlLexer.EQUALS, "=", modes: "tag")
-            .String(MinimalXmlLexer.VALUE, modes: new[] { "pi", "tag" })
-            .Sugar(MinimalXmlLexer.CLOSE_PI, "?>", modes: "pi")
-            .Sugar(MinimalXmlLexer.CLOSE, ">", modes: "tag")
+            .AlphaId(MinimalXmlLexer.ID).WithModes("pi", "tag")
+            .Sugar(MinimalXmlLexer.SLASH, "/").WithModes( "tag")
+            .Sugar(MinimalXmlLexer.EQUALS, "=").WithModes( "tag")
+            .String(MinimalXmlLexer.VALUE).WithModes(  "pi", "tag" )
+            .Sugar(MinimalXmlLexer.CLOSE_PI, "?>").WithModes( "pi")
+            .Sugar(MinimalXmlLexer.CLOSE, ">").WithModes( "tag")
             .Pop(MinimalXmlLexer.CLOSE)
             .Pop(MinimalXmlLexer.CLOSE_PI);
         var lexerResult = lexerBuilder.Build("en");

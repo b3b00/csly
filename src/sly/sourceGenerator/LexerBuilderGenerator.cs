@@ -19,14 +19,15 @@ public class LexerBuilderGenerator
         StringBuilder builder = new();
         builder.AppendLine($"public IAotLexerBuilder<{name}> GetLexer() {{");
 
-        builder.AppendLine($"var builder = AotLexerBuilder<{name}>.NewBuilder();");
+        builder.AppendLine($"var builder = AotLexerBuilder<{name}>.NewBuilder()");
         
         LexerSyntaxWalker walker = new(builder, name, declarationsByName);
         walker.Visit(enumDeclarationSyntax);
+        
 
-        builder.AppendLine("builder.UseLexerPostProcessor(UseTokenPostProcessor());");
-        builder.AppendLine("builder.UseExtensionBuilder(UseTokenExtensions());");
-
+        builder.AppendLine(".UseLexerPostProcessor(UseTokenPostProcessor())");
+        builder.AppendLine(".UseExtensionBuilder(UseTokenExtensions())");
+        builder.AppendLine(";");
         builder.AppendLine("return builder;");
         
         builder.AppendLine($"}}");
