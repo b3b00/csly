@@ -17,15 +17,3 @@ public enum DuplicateLabels
     RightPar,
         
 }
-
-public class DuplicateLabelsParser
-{
-    
-}
-
-
-[ParserGenerator(typeof(DuplicateLabels),typeof(DuplicateLabelsParser),typeof(object))]
-public partial class DuplicateLabelLexerGenerator : AbstractParserGenerator<DuplicateLabels>
-{
-    
-}

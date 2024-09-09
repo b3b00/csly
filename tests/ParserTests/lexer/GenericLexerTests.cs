@@ -1369,8 +1369,23 @@ else
             Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_MANY_LEXEM_WITH_SAME_LABEL);
             Check.That(error.Message).Contains("attribute name").And.Contains("nom d'attribut");
         }
-        
-        
 
+        [Fact]
+        public void TestLexemeI18N()
+        {
+            ExpressionParserGenerator generator = new ExpressionParserGenerator();
+            var build = generator.GetParser();            
+            Check.That(build).IsOk();
+            Check.That(build.Result).IsNotNull();
+            var parser = build.Result;
+            var parseResult = parser.Parse("1 - + 2","expression");
+            Check.That(parseResult).Not.IsOkParsing();
+
+            Check.That(parseResult.Errors).IsSingle();
+            var error = parseResult.Errors[0];
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+            //unexpected minus sign ('+ (line 1, column 5)'). Expecting INT, closing parenthesis, times sign, .
+            Check.That(error.ErrorMessage).Contains("minus sign").And.Contains("closing parenthesis").And.Contains("times sign");
+        }
     }
 }
