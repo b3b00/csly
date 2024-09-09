@@ -27,6 +27,7 @@
     <ItemGroup>
       <EmbeddedResource Include="data\callbacks.txt" />
       <EmbeddedResource Include="data\extended.txt" />
+      <EmbeddedResource Include="data\labels.txt" />
       <EmbeddedResource Include="data\template.txt" />
       <None Remove="data\aot.txt" />
       <EmbeddedResource Include="data\aot.txt" />

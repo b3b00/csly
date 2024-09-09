@@ -203,7 +203,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                                     else
                                     {
                                         _builder.AppendLine($@".{method}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, skip)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                                         var channel = GetChannelArg(attributeSyntax, skip);
                                         if (channel != null)
                                         {
@@ -219,7 +219,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "Double":
                     {
                         _builder.AppendLine($@".Double({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -230,7 +230,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "Int":
                     {
                         _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -241,7 +241,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "Integer":
                     {
                         _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -252,7 +252,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "Sugar":
                     {
                         _builder.AppendLine($@".Sugar({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -263,7 +263,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "AlphaId":
                     {
                         _builder.AppendLine($@".AlphaId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -274,7 +274,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "AlphaNumId":
                     {
                         _builder.AppendLine($@".AlphaNumId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -285,7 +285,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "AlphaNumDashId":
                     {
                         _builder.AppendLine($@".AlphaNumDashId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -296,7 +296,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "MultiLineComment":
                     {
                         _builder.AppendLine($@".MultiLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -307,7 +307,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "SingleLineComment":
                     {
                         _builder.AppendLine($@".SingleLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -318,7 +318,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "Extension":
                     {
                         _builder.AppendLine($@".Extension({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -329,7 +329,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "String":
                     {
                         _builder.AppendLine($@".String({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -341,7 +341,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "KeyWord":
                     {
                         _builder.AppendLine($@".Keyword({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -352,7 +352,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "UpTo":
                     {
                         _builder.AppendLine($@".UpTo({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-                                                .WithModes({string.Join(", ",modes)})");
+    .WithModes({string.Join(", ",modes)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -374,7 +374,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "LexemeLabel":
                     {
-                        _builder.AppendLine($".WithLabel({GetAttributeArgs(attributeSyntax, withLeadingComma:false)})");
+                        _builder.AppendLine($"    .WithLabel({GetAttributeArgs(attributeSyntax, withLeadingComma:false)})");
                         break;
                     }
                     default:

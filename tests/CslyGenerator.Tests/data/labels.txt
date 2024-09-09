@@ -1,8 +1,8 @@
-using sly.i18n;
+using aot.lexer;
 using sly.lexer;
-using sly.sourceGenerator;
+using sly.parser.generator;
 
-namespace ParserTests.lexer;
+namespace TestNamespace;
 
 public enum DuplicateLabels
 {
@@ -22,7 +22,6 @@ public class DuplicateLabelsParser
 {
     
 }
-
 
 [ParserGenerator(typeof(DuplicateLabels),typeof(DuplicateLabelsParser),typeof(object))]
 public partial class DuplicateLabelLexerGenerator : AbstractParserGenerator<DuplicateLabels>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using expressionparser;
 using expressionparser.model;
+using GeneratedXML;
 using GenericLexerWithCallbacks;
 using indented;
 using NFluent;
@@ -1350,6 +1351,26 @@ else
             Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_MANY_LEXEM_WITH_SAME_LABEL);
             Check.That(error.Message).Contains("left paranthesis").And.Contains("paranthèse ouvrante");
         }
+        
+        [Fact]
+        public void TestGeneratedI18nDuplicateLabel()
+        {
+            GeneratedXmlParserGenerator generator = new GeneratedXmlParserGenerator();
+            var lexerBuilder = generator.GetLexer();
+            var build = lexerBuilder.Build("en");
+            Check.That(build).IsOk();
+            Check.That(build.Result).IsNotNull();
+            // var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DuplicateLabels>>());
+            // Check.That(lexerRes).IsOk(); // not a blocking error, lexer should still be able to lex correctly.
+            Check.That(build.Errors).IsSingle();
+            var error = build.Errors[0];
+            Check.That(error).IsNotNull();
+            Check.That(error.Level).IsEqualTo(ErrorLevel.WARN);
+            Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_MANY_LEXEM_WITH_SAME_LABEL);
+            Check.That(error.Message).Contains("attribute name").And.Contains("nom d'attribut");
+        }
+        
+        
 
     }
 }

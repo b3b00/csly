@@ -47,6 +47,8 @@ namespace GeneratedXML
         ID,
         
         [Sugar("/")]
+        [LexemeLabel("en","attribute name")]
+        [LexemeLabel("fr","nom d'attribut")]
         [Mode("tag")]
         SLASH,
         

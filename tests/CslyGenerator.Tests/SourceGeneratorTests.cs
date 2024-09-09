@@ -61,6 +61,7 @@ public class SourceGeneratorTests
     [InlineData("/data/extended.txt","ExtendedLexerGenerator")]
     [InlineData("/data/expressioncontext.txt", "SimpleExpressionParserWithContextGenerator")]
     [InlineData("/data/callbacks.txt", "ParserCallbacksGenerator")]
+    [InlineData("/data/labels.txt", "DuplicateLabelLexerGenerator")]
     public void TestGenerator(string source, string className)
     {
         var code = _embeddedResourceFileSystem.ReadAllText(source);
