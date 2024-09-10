@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CslyGenerator.Tests", "test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneratedXML", "src\samples\GeneratedXML\GeneratedXML.csproj", "{7FEF0D32-FFC7-4886-A4B7-71314C25627E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExplicitTokens", "src\samples\ExplicitTokens\ExplicitTokens.csproj", "{94B9B654-82CB-4969-8DCA-250916E53724}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -138,6 +140,10 @@ Global
 		{7FEF0D32-FFC7-4886-A4B7-71314C25627E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FEF0D32-FFC7-4886-A4B7-71314C25627E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FEF0D32-FFC7-4886-A4B7-71314C25627E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94B9B654-82CB-4969-8DCA-250916E53724}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94B9B654-82CB-4969-8DCA-250916E53724}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94B9B654-82CB-4969-8DCA-250916E53724}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94B9B654-82CB-4969-8DCA-250916E53724}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -155,6 +161,7 @@ Global
 		{81E72CFA-A6D6-4DB4-B3B5-E167064E7858} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{7FEF0D32-FFC7-4886-A4B7-71314C25627E} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
+		{94B9B654-82CB-4969-8DCA-250916E53724} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43254130-CF3E-480E-952F-E50CA5D2E417}

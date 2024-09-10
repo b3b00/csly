@@ -22,6 +22,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\samples\ExplicitTokens\ExplicitTokens.csproj" />
     <ProjectReference Include="..\..\src\samples\expressionParser\expressionParser.csproj" />
     <ProjectReference Include="..\..\src\samples\GeneratedXML\GeneratedXML.csproj" />
     <ProjectReference Include="..\..\src\samples\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj" />
@@ -33,7 +34,7 @@
     <ProjectReference Include="..\..\src\samples\SimpleTemplate\SimpleTemplate.csproj" />
     <ProjectReference Include="..\..\src\samples\while\while.csproj" />
     <ProjectReference Include="..\..\src\samples\XML\XML.csproj" />
-    <ProjectReference Include="..\..\src\sly\sly.csproj" OutputItemType="Analyser"/>
+    <ProjectReference Include="..\..\src\sly\sly.csproj" OutputItemType="Analyzer"/>
     
   </ItemGroup>
   <ItemGroup>

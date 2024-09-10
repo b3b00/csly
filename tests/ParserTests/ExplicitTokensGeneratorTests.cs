@@ -15,93 +15,21 @@ using Xunit;
 namespace ParserTests
 {
 
-    public enum Lex
-    {
-        Nop = 0,
-        [AlphaId]
-        Id = 1,
-        
-        [Double]
-        Dbl = 2
-    }
-
-    public class Parse
-    {
-        [Production("program : statement*")]
-        public string Program(List<string> statements)
-        {
-            StringBuilder builder = new StringBuilder();
-            bool first = true;
-            builder.Append("(");
-            foreach (var statement in statements)
-            {
-                builder.Append($"{(first?"":",")}({statement})");
-                first = false;
-            }
-            builder.Append(")");
-            return builder.ToString();
-        }
-
-        [Production("statement : Id '='[d] Parse_expressions ")]
-        public string Assignment(Token<Lex> id, string expression)
-        {
-            return $"{id.Value} = {expression}";
-        }
-        
-        [Production("condition : Id '=='[d] Parse_expressions ")]
-        public string Condition(Token<Lex> id, string expression)
-        {
-            return $"{id.Value} == {expression}";
-        }
-
-        [Production("statement : 'if'[d] condition 'then'[d] statement 'else'[d] statement")]
-        public string IfThenElse(string condition, string thenStatement, string elseStatement)
-        {
-            return $"condition:({condition},({thenStatement}),({elseStatement}))";
-        }
-
-        [Operand]
-        [Production("operand : Id")]
-        [Production("operand : Dbl")]
-        public string Operand(Token<Lex> oper)
-        {
-            return oper.Value;
-        }
-
-        [Infix("'+'", Associativity.Left, 10)]
-        public string Plus(string left, Token<Lex> oper, string right)
-        {
-            return $"( {left} + {right} )";
-        }
-        
-        [Infix("'*'", Associativity.Left, 20)]
-        public string Times(string left, Token<Lex> oper, string right)
-        {
-            return $"( {left} * {right} )";
-        }
-        
-        
-        
-    }
+  
     
-    public class ExplicitTokensTests
+    public class ExplicitTokensGeneratorTests
     {
-        private BuildResult<Parser<ExplicitTokensTokens, double>> BuildParser()
+       private BuildResult<Parser<ExplicitTokensTokens, double>> BuildParser()
         {
-            var parserInstance = new ExplicitTokensParser();
-            var builder = new ParserBuilder<ExplicitTokensTokens, double>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression");
-
-            
+            var generator = new ExplicitTokensParserGenerator();
+            var result = generator.GetParser();
             return result;
         }
         
         private BuildResult<Parser<ExplicitTokensTokens, double>> BuildExpressionParser()
         {
-            var parserInstance = new ExplicitTokensExpressionParser();
-            var builder = new ParserBuilder<ExplicitTokensTokens, double>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(ExplicitTokensExpressionParser)+"_expressions");
-            var dump = result.Result.Configuration.Dump();
+            var generator = new ExplicitTokensExpressionParserGenerator();
+            var result = generator.GetParser(); 
             return result;
         }
 
