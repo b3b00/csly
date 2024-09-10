@@ -26,6 +26,7 @@
 
     <ItemGroup>
       <EmbeddedResource Include="data\callbacks.txt" />
+      <EmbeddedResource Include="data\expression.txt" />
       <EmbeddedResource Include="data\extended.txt" />
       <EmbeddedResource Include="data\labels.txt" />
       <EmbeddedResource Include="data\template.txt" />

@@ -53,13 +53,14 @@
             return result;
         }
 
-
+        [NodeName("minus")]
         [Operation((int) ExpressionToken.MINUS, Affix.PreFix, Associativity.Right, 100)]
         public int PreFixExpression(Token<ExpressionToken> operation, int value,Dictionary<string,int> context)
         {
             return -value;
         }
 
+        [NodeName("factorial")]
         [Operation((int) ExpressionToken.FACTORIAL, Affix.PostFix, Associativity.Right, 100)]
         public int PostFixExpression(int value, Token<ExpressionToken> operation,Dictionary<string,int> context)
         {

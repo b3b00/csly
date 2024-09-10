@@ -46,6 +46,7 @@ public class ParserBuilderGenerator
         builder.AppendLine($"var builder = AotEBNFParserBuilder<{lexerName}, {outputType}>");
         builder.AppendLine($@".NewBuilder(instance, rootRule, ""en"");");
         walker.Visit(classDeclarationSyntax);
+        builder.AppendLine(";");
         builder.AppendLine("return builder;");
         builder.AppendLine("}");
         return builder.ToString();

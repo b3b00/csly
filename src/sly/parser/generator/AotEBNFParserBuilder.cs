@@ -9,7 +9,7 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator;
 
-public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where IN : struct
+public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT>, IAotEbnfRuleBuilder<IN, OUT> where IN : struct
 {
     readonly Dictionary<string, NonTerminal<IN,OUT>> _nonTerminals = new Dictionary<string, NonTerminal<IN,OUT>>();
 
@@ -32,6 +32,10 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
     private readonly object _parserInstance;
     
     private IAotLexerBuilder<IN> _lexerBuilder;
+    
+    private OperationMetaData<IN,OUT> _currentOperation;
+    
+    private Rule<IN,OUT> _currentRule;
 
     private ParserConfiguration<IN, OUT> _configuration = null;
     public static IAotEbnfParserBuilder<IN,OUT> NewBuilder(object parserInstance, string rootRule, string i18N = "en") 
@@ -150,7 +154,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
     
     #region rules
     
-    public IAotEbnfParserBuilder<IN,OUT> Production(string ruleString, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN,OUT> Production(string ruleString, Func<object[], OUT> visitor)
     {
         var r = _grammarParser.Parse(ruleString);
         if (r.IsOk)
@@ -173,7 +177,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
     
     
     #region operations
-    public IAotEbnfParserBuilder<IN, OUT> Operand(string ruleString, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Operand(string ruleString, Func<object[], OUT> visitor)
     {
         var r = _grammarParser.Parse(ruleString);
         if (r.IsOk)
@@ -186,79 +190,79 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
         return this;
     }
 
-    public IAotEbnfParserBuilder<IN, OUT> Operation(string operation, Affix affix, Associativity associativity, int precedence,
+    public IAotEbnfRuleBuilder<IN, OUT> Operation(string operation, Affix affix, Associativity associativity, int precedence,
         Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,associativity,visitor,affix,operation, null);
+        AddOperation(precedence,associativity,visitor,affix,operation);
         return this;
     }
 
-    public IAotEbnfParserBuilder<IN, OUT> Operation(IN operation, Affix affix, Associativity associativity, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Operation(IN operation, Affix affix, Associativity associativity, int precedence, Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation,null);
+        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation);
         return this;
     }
     
 
-    public IAotEbnfParserBuilder<IN, OUT> Right(IN operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Right(IN operation, int precedence, Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation,null);
+        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation);
         return this;
     }
 
-    public IAotEbnfParserBuilder<IN, OUT> Right(string operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Right(string operation, int precedence, Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation, null);
+        AddOperation(precedence,Associativity.Right,visitor,Affix.InFix,operation);
         return this;
     }
 
-    public IAotEbnfParserBuilder<IN, OUT> Left(IN operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Left(IN operation, int precedence, Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,operation,null);
+        AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,operation);
         return this;
     }
 
-    public IAotEbnfParserBuilder<IN, OUT> Left(string operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Left(string operation, int precedence, Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,operation,null);
+        AddOperation(precedence,Associativity.Left,visitor,Affix.InFix,operation);
         return this;
     }
 
-    public IAotEbnfParserBuilder<IN, OUT> Infix(string operation, Associativity associativity, int precedence,
+    public IAotEbnfRuleBuilder<IN, OUT> Infix(string operation, Associativity associativity, int precedence,
         Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,associativity,visitor,Affix.InFix,operation,null);
+        AddOperation(precedence,associativity,visitor,Affix.InFix,operation);
         return this;
     }
 
-    public IAotEbnfParserBuilder<IN, OUT> Infix(IN operation, Associativity associativity, int precedence,
+    public IAotEbnfRuleBuilder<IN, OUT> Infix(IN operation, Associativity associativity, int precedence,
         Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,associativity,visitor,Affix.InFix,operation,null);
+        AddOperation(precedence,associativity,visitor,Affix.InFix,operation);
         return this;
     }
     
-    public IAotEbnfParserBuilder<IN, OUT> Prefix(IN operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Prefix(IN operation, int precedence, Func<object[], OUT> visitor)
     {
-       AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,operation,null);
+       AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,operation);
        return this;
     }
 
-    public IAotEbnfParserBuilder<IN, OUT> Prefix(string operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Prefix(string operation, int precedence, Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,operation,null);
+        AddOperation(precedence,Associativity.None,visitor,Affix.PreFix,operation);
         return this;
     }
 
-    public IAotEbnfParserBuilder<IN, OUT> Postfix(IN operation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Postfix(IN operation, int precedence, Func<object[], OUT> visitor)
     {
         AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,operation,null);
         return this;
     }
 
-    public IAotEbnfParserBuilder<IN, OUT> Postfix(string explicitOperation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Postfix(string explicitOperation, int precedence, Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,explicitOperation,null);
+        AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,explicitOperation);
         return this;
     }
 
@@ -277,6 +281,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
         }
         nonTerminal.Rules.Add(rule);
         _nonTerminals[rule.NonTerminalName] = nonTerminal;
+        SetCurrent(rule);
         if (operand)
         {
             _operands.Add(rule);
@@ -295,11 +300,14 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
         {
             operationsForPrecedence = new List<OperationMetaData<IN, OUT>>();
         }
+        
+        SetCurrent(operationMeta);
+        
         operationsForPrecedence.Add(operationMeta);
         _operationsByPrecedence[precedence] = operationsForPrecedence;
     }
     
-    private void AddOperation(int precedence,Associativity associativity, Func<object[],OUT> visitor, Affix affix, string operation, string nodeName = null) 
+    private void AddOperation(int precedence,Associativity associativity, Func<object[],OUT> visitor, Affix affix, string operation) 
     {
         Func<object[], OUT> loggedVisitor = visitor;
 
@@ -308,7 +316,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
         
         if (!isEnumValue && !string.IsNullOrEmpty(operation) && operation.StartsWith("'") && operation.EndsWith("'")) 
         {
-            operationMeta = new OperationMetaData<IN, OUT>(precedence, associativity, loggedVisitor, affix, operation ,nodeName);
+            operationMeta = new OperationMetaData<IN, OUT>(precedence, associativity, loggedVisitor, affix, operation);
         }
         else if (isEnumValue)
         {
@@ -317,15 +325,14 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
             {
                 oper = EnumConverter.ConvertStringToEnum<IN>(operation);
             }
-            operationMeta = new OperationMetaData<IN, OUT>(precedence, associativity, loggedVisitor, affix, oper, nodeName);
+            operationMeta = new OperationMetaData<IN, OUT>(precedence, associativity, loggedVisitor, affix, oper);
         }
         else
         {
             throw new ParserConfigurationException($"bad enum name {operation} on Operation definition.");   
         }
         
-        // OperationMetaData<IN, OUT> operationMeta =
-        //     new OperationMetaData<IN, OUT>(precedence, Associativity.None, loggedVisitor, Affix.PreFix, operation, nodeName);
+        SetCurrent(operationMeta);
         
         List<OperationMetaData<IN,OUT >> operationsForPrecedence;
         if (!_operationsByPrecedence.TryGetValue(precedence, out operationsForPrecedence))
@@ -335,6 +342,31 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT> where
         operationsForPrecedence.Add(operationMeta);
         _operationsByPrecedence[precedence] = operationsForPrecedence;
     }
-    
+
+    private void SetCurrent(OperationMetaData<IN, OUT> operationMeta)
+    {
+        _currentRule = null;
+        _currentOperation = operationMeta;
+    }
+
+    private void SetCurrent(Rule<IN, OUT> rule)
+    {
+        _currentRule = rule;
+        _currentOperation = null;
+    }
+
     #endregion
+
+    public IAotEbnfParserBuilder<IN, OUT> Named(string name)
+    {
+        if (_currentOperation != null)
+        {
+            _currentOperation.NodeName = name;
+        }
+        if (_currentRule != null)
+        {
+            _currentRule.NodeName = name;
+        }
+        return this;
+    }
 }

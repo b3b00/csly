@@ -150,11 +150,25 @@ public class LexerSyntaxWalker : CslySyntaxWalker
         }).ToList();
     }
     
+    private List<(string lang, string label)> GetLabels(EnumMemberDeclarationSyntax enumMemberDeclarationSyntax)
+    {
+        var all = enumMemberDeclarationSyntax.AttributeLists.SelectMany(x => x.Attributes).ToList();
+        var labels = all.Where(x => x.Name.ToString() == "LexemeLabel").ToList();
+        
+         return labels
+             .Where(x => x.ArgumentList != null && x.ArgumentList.Arguments.Count == 2)
+             .Select(x =>
+        {
+                return (x.ArgumentList.Arguments[0].ToString(),x.ArgumentList.Arguments[1].ToString());
+        }).ToList();
+    }
+    
     public override void VisitEnumMemberDeclaration(EnumMemberDeclarationSyntax enumMemberDeclarationSyntax)
     {
         var name = enumMemberDeclarationSyntax.Identifier.ToString();
 
         var modes = GetModes(enumMemberDeclarationSyntax);
+        var labels = GetLabels(enumMemberDeclarationSyntax);
         if (modes.Any())
         {
             ;
@@ -167,7 +181,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                 
                 string attributeName = attributeSyntax.Name.ToString();
                 Console.WriteLine($"visit {attributeName} for {_lexerName}.{name}");
-                if (attributeName == "Mode")
+                if (attributeName == "Mode" || attributeName == "LexemeLabel")
                 {
                     continue;
                 }
@@ -179,8 +193,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                         var arg0 = attributeSyntax.ArgumentList.Arguments[0].Expression;
                         if (arg0 is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression )
                         {
-                            _builder.AppendLine($@".Regex({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                            _builder.AppendLine($@".Regex({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         }
                         else
                         {
@@ -192,8 +205,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                                 {
                                     if (method == "Keyword" || method == "Sugar")
                                     {
-                                        _builder.AppendLine($@".{method}({_lexerName}.{name} {GetAttributeArgsForLexemekeyWord(attributeSyntax, skip)})
-    .WithModes({string.Join(", ",modes)})");
+                                        _builder.AppendLine($@".{method}({_lexerName}.{name} {GetAttributeArgsForLexemekeyWord(attributeSyntax, skip)})");
                                         var channel = GetChannelArg(attributeSyntax, skip);
                                         if (channel != null)
                                         {
@@ -202,8 +214,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                                     }
                                     else
                                     {
-                                        _builder.AppendLine($@".{method}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, skip)})
-    .WithModes({string.Join(", ",modes)})");
+                                        _builder.AppendLine($@".{method}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, skip)})");
                                         var channel = GetChannelArg(attributeSyntax, skip);
                                         if (channel != null)
                                         {
@@ -218,8 +229,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "Double":
                     {
-                        _builder.AppendLine($@".Double({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".Double({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -229,8 +239,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "Int":
                     {
-                        _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -240,8 +249,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "Integer":
                     {
-                        _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -251,8 +259,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "Sugar":
                     {
-                        _builder.AppendLine($@".Sugar({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".Sugar({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -262,8 +269,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "AlphaId":
                     {
-                        _builder.AppendLine($@".AlphaId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".AlphaId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -273,8 +279,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "AlphaNumId":
                     {
-                        _builder.AppendLine($@".AlphaNumId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".AlphaNumId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -284,8 +289,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "AlphaNumDashId":
                     {
-                        _builder.AppendLine($@".AlphaNumDashId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".AlphaNumDashId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -295,8 +299,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "MultiLineComment":
                     {
-                        _builder.AppendLine($@".MultiLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".MultiLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -306,8 +309,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "SingleLineComment":
                     {
-                        _builder.AppendLine($@".SingleLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".SingleLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -317,8 +319,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "Extension":
                     {
-                        _builder.AppendLine($@".Extension({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".Extension({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -328,8 +329,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "String":
                     {
-                        _builder.AppendLine($@".String({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".String({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -340,8 +340,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     case "Keyword":
                     case "KeyWord":
                     {
-                        _builder.AppendLine($@".Keyword({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".Keyword({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -351,8 +350,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                     }
                     case "UpTo":
                     {
-                        _builder.AppendLine($@".UpTo({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})
-    .WithModes({string.Join(", ",modes)})");
+                        _builder.AppendLine($@".UpTo({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
                         var channel = GetChannelArg(attributeSyntax);
                         if (channel != null)
                         {
@@ -372,11 +370,6 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                             $".PopMode()");
                         break;
                     }
-                    case "LexemeLabel":
-                    {
-                        _builder.AppendLine($"    .WithLabel({GetAttributeArgs(attributeSyntax, withLeadingComma:false)})");
-                        break;
-                    }
                     default:
                     {
                         // _builder.AppendLine(
@@ -384,6 +377,18 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                         break;
                     }
                 }
+                if (labels.Any())
+                {
+                    foreach (var label in labels)
+                    {
+                        _builder.AppendLine($"        .WithLabel({label.lang}, {label.label})");
+                    }
+                }
+
+                if (modes.Any())
+                {
+                    _builder.AppendLine($"        .WithModes({string.Join(", ",modes)})");
+                } 
             }
         }
     }
