@@ -5,6 +5,7 @@ using sly.parser.generator;
 using sly.parser.generator.visitor;
 using sly.parser.generator.visitor.dotgraph;
 using Xunit;
+using ExpressionToken = simpleExpressionParser.ExpressionToken;
 
 namespace ParserTests
 {

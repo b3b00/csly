@@ -133,7 +133,7 @@ namespace sly.parser
             else
             {
                 result.Errors = new List<ParseError>();
-                var unexpectedTokens = syntaxResult.Errors.ToList();
+                var unexpectedTokens = syntaxResult.GetErrors();
                 var byEnding = unexpectedTokens.GroupBy(x => x.UnexpectedToken.Position).OrderBy(x => x.Key);
                 var errors = new List<ParseError>();  
                 foreach (var expecting in byEnding)

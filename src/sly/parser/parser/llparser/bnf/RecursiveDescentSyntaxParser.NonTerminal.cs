@@ -45,14 +45,15 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 rulesResults.Add(innerRuleRes);
 
                 var other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
-                if (innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.Errors != null &&
-                    innerRuleRes.Errors.Count == 0 || other)
+                if (innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.GetErrors() != null &&
+                    innerRuleRes.GetErrors().Count == 0 || other)
                 {
                     greaterIndex = innerRuleRes.EndingPosition;
-                    innerRuleErrors.AddRange(innerRuleRes.Errors);
+                    if (innerRuleRes.GetErrors() != null) 
+                        innerRuleErrors.AddRange(innerRuleRes.GetErrors());
                 }
-
-                innerRuleErrors.AddRange(innerRuleRes.Errors);
+                if (innerRuleRes.GetErrors() != null)
+                    innerRuleErrors.AddRange(innerRuleRes.GetErrors());
             }
 
             i++;
@@ -106,10 +107,9 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         {
             max = maxKo;
         }
-
-
+        
         var result = new SyntaxParseResult<IN, OUT>();
-        result.Errors = errors;
+        result.AddErrors(errors);
         result.Root = max.Root;
         result.EndingPosition = max.EndingPosition;
         result.IsError = max.IsError;
@@ -120,8 +120,11 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         List<UnexpectedTokenSyntaxError<IN>> terr = new List<UnexpectedTokenSyntaxError<IN>>();
         foreach (var ruleResult in rulesResults)
         {
-            terr.AddRange(ruleResult.Errors);
-            result.AddExpectings(ruleResult.Errors.SelectMany(x => x.ExpectedTokens));
+            if (ruleResult.GetErrors() != null)
+            {
+                terr.AddRange(ruleResult.GetErrors());
+                result.AddExpectings(ruleResult.GetErrors().SelectMany(x => x.ExpectedTokens));
+            }
         }
 
         parsingContext.Memoize(new NonTerminalClause<IN,OUT>(nonTerminalName), currentPosition, result);

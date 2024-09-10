@@ -14,6 +14,7 @@ using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
+using ExpressionToken = simpleExpressionParser.ExpressionToken;
 
 namespace ParserTests.lexer
 {
