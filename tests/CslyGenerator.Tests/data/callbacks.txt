@@ -29,6 +29,8 @@ public partial class ParserCallbacksGenerator
         [CallBacks(typeof(TestCallbacks))]
         public enum CallbackTokens
         {
+            [LexemeLabel("en","kangaroo")]
+                    [LexemeLabel("fr","lessive")]
             [Lexeme(GenericToken.KeyWord, "SKIP")] [Lexeme(GenericToken.KeyWord, "skip")]
             SKIP = 6,
             [LexemeLabel("en","identifier")]

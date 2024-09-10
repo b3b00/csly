@@ -75,13 +75,22 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
     private void Add(IN tokenId, LexemeAttribute lexeme, LexemeLabelAttribute label)
     {
         _currentLexeme = tokenId;
-        (List<LexemeAttribute> tokens, List<LexemeLabelAttribute> labels) lexemes = (null,null);
+        (List<LexemeAttribute> tokens, List<LexemeLabelAttribute> labels) lexemes;
         if (!_lexemesDefinitionsAndLabels.TryGetValue(tokenId, out lexemes))
         {
             lexemes = (new List<LexemeAttribute>(), new List<LexemeLabelAttribute>());
         }
-        lexemes.tokens.Add(lexeme);
-        lexemes.labels.Add(label);
+
+        if (lexeme != null)
+        {
+            lexemes.tokens.Add(lexeme);
+        }
+
+        if (label != null)
+        {
+            lexemes.labels.Add(label);
+        }
+
         _lexemesDefinitionsAndLabels[tokenId] = lexemes;
     }
 
@@ -354,7 +363,12 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
             // impossible !
             currentLexeme = (new List<LexemeAttribute>(), new List<LexemeLabelAttribute>());
         }
-        currentLexeme.labels.Add(new LexemeLabelAttribute(lang,label));
+
+        if (!currentLexeme.labels.Any(x => x.Language == lang))
+        {
+            currentLexeme.labels.Add(new LexemeLabelAttribute(lang, label));
+        }
+
         _lexemesDefinitionsAndLabels[_currentLexeme.Value] = currentLexeme;
         return this;
     }

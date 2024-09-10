@@ -1,3 +1,4 @@
+
 using sly.sourceGenerator;
 
 namespace GenericLexerWithCallbacks;

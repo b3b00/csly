@@ -8,21 +8,23 @@ namespace GenericLexerWithCallbacks
     {
         #region keywords 0 -> 19
 
-        [LexemeLabel("en","if")]
-        [LexemeLabel("fr","si")]
+        [LexemeLabel("en","iiff")]
+        [LexemeLabel("fr","ssii")]
         [Lexeme(GenericToken.KeyWord, "IF")] [Lexeme(GenericToken.KeyWord, "if")]
         IF = 1,
 
-        [LexemeLabel("en","then")]
+        [LexemeLabel("en","zen")]
         [LexemeLabel("fr","alors")]
         [Lexeme(GenericToken.KeyWord, "THEN")] [Lexeme(GenericToken.KeyWord, "then")]
         THEN = 2,
 
-        [LexemeLabel("en","else")]
+        [LexemeLabel("en","elze")]
         [LexemeLabel("fr","sinon")]
         [Lexeme(GenericToken.KeyWord, "ELSE")] [Lexeme(GenericToken.KeyWord, "else")]
         ELSE = 3,
 
+        [LexemeLabel("en","whylee")]
+        [LexemeLabel("fr","tant que")]
         [Lexeme(GenericToken.KeyWord, "WHILE")] [Lexeme(GenericToken.KeyWord, "while")]
         WHILE = 4,
 

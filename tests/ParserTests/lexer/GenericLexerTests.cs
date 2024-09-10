@@ -1368,7 +1368,30 @@ else
             Check.That(error.Level).IsEqualTo(ErrorLevel.WARN);
             Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_MANY_LEXEM_WITH_SAME_LABEL);
             Check.That(error.Message).Contains("attribute name").And.Contains("nom d'attribut");
+            
+           
+            
+            
         }
+
+        [Fact]
+        public void TestGeneratedI18nLabels()
+        {
+            ParserCallbacksGenerator generator = new ParserCallbacksGenerator();
+
+            // english
+            var parserBuild = generator.GetParser();
+            Check.That(parserBuild).IsOk();
+            Check.That(parserBuild.Result).IsNotNull();
+            var parsed = parserBuild.Result.Parse("while");
+            Check.That(parsed).Not.IsOkParsing();
+            Check.That(parsed.Errors).IsSingle();
+            var parseError = parsed.Errors[0];
+            Check.That(parseError).IsNotNull();
+            Check.That(parseError.ErrorMessage).Contains("whylee").And.Contains("iiff");
+        }
+
+
 
         [Fact]
         public void TestLexemeI18N()
@@ -1385,7 +1408,7 @@ else
             var error = parseResult.Errors[0];
             Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
             //unexpected minus sign ('+ (line 1, column 5)'). Expecting INT, closing parenthesis, times sign, .
-            Check.That(error.ErrorMessage).Contains("minus sign").And.Contains("closing parenthesis").And.Contains("times sign");
+            Check.That(error.ErrorMessage).Contains("minus sign").And.Contains("opening parenthesis").And.Contains("plus sign");
         }
     }
 }
