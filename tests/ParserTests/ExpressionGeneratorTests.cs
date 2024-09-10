@@ -224,7 +224,7 @@ namespace ParserTests
             BuildParser();
             
             Check.That(Parser.Result.Configuration.NonTerminals).CountIs(7);
-            var nonterminals = new List<NonTerminal<simpleExpressionParser.ExpressionToken>>();
+             var nonterminals = new List<NonTerminal<simpleExpressionParser.ExpressionToken,double>>();
             foreach (var pair in Parser.Result.Configuration.NonTerminals) nonterminals.Add(pair.Value);
             var nt = nonterminals[1]; // operand
             Check.That(nt.Rules).IsSingle();

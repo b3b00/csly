@@ -9,7 +9,7 @@ using sly.parser.syntax.tree;
 namespace sly.parser.generator.visitor
 {
     [ExcludeFromCodeCoverage]
-    public class MermaidEBNFSyntaxTreeVisitor<IN>  : IConcreteSyntaxTreeVisitor<IN,MermaidNode> where IN : struct
+    public class MermaidEBNFSyntaxTreeVisitor<IN, OUT>  : IConcreteSyntaxTreeVisitor<IN, OUT,MermaidNode> where IN : struct
     {
         public MermaidGraph Graph { get; private set; }
 
@@ -20,11 +20,11 @@ namespace sly.parser.generator.visitor
 
         private int NodeCounter = 0;
 
-        public MermaidNode VisitTree(ISyntaxNode<IN> root)
+        public MermaidNode VisitTree(ISyntaxNode<IN, OUT> root)
         {
             Graph = new MermaidGraph();
             
-            ConcreteSyntaxTreeWalker<IN,MermaidNode> walker = new ConcreteSyntaxTreeWalker<IN,MermaidNode>(this);
+            ConcreteSyntaxTreeWalker<IN, OUT,MermaidNode> walker = new ConcreteSyntaxTreeWalker<IN, OUT,MermaidNode>(this);
             var dot =  walker.Visit(root);
             return dot;
         }
@@ -56,7 +56,8 @@ namespace sly.parser.generator.visitor
             return child;
         }
 
-        public MermaidNode VisitNode(SyntaxNode<IN> node, IList<MermaidNode> children)
+
+        public MermaidNode VisitNode(SyntaxNode<IN, OUT> node, IList<MermaidNode> children)
         {
             MermaidNode result = null;
 
@@ -78,7 +79,7 @@ namespace sly.parser.generator.visitor
             return result;
         }
 
-        public MermaidNode VisitManyNode(ManySyntaxNode<IN> node, IList<MermaidNode> children)
+        public MermaidNode VisitManyNode(ManySyntaxNode<IN, OUT> node, IList<MermaidNode> children)
         {
             MermaidNode result = null;
 
@@ -173,7 +174,7 @@ namespace sly.parser.generator.visitor
         }
         
         
-        private string GetNodeLabel(SyntaxNode<IN> node)
+        private string GetNodeLabel(SyntaxNode<IN, OUT> node)
         {
             string label = $@"""{node.Name}""";
             return label;

@@ -108,7 +108,7 @@ namespace sly.parser
 
                 string value = UnexpectedToken.Value;
                 
-                return I18N.Instance.GetText(_i18N,i18NMessage, $"{value} ({UnexpectedToken.Position.ToString()})", UnexpectedToken.Label.ToString(), expecting.ToString());
+                return I18N.Instance.GetText(_i18N,i18NMessage, $"{value} ({UnexpectedToken.Position.ToString()})", UnexpectedToken?.Label?.ToString(), expecting.ToString());
             }
         }
 
@@ -122,7 +122,7 @@ namespace sly.parser
             else
             {
                 var lbl = expected.ToString();
-                if (_labels.TryGetValue(expected.TokenId, out var labels) && labels.TryGetValue(_i18N, out var label))
+                if (_labels != null && _labels.TryGetValue(expected.TokenId, out var labels) && labels.TryGetValue(_i18N, out var label))
                 {
                     lbl = label;
                 }
