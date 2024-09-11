@@ -21,8 +21,8 @@ public class NodeNamesTests
         Check.That(r).IsOkParsing();
         Check.That(r.SyntaxTree).IsNotNull();
         Check.That(r.SyntaxTree.Name).IsEqualTo("addOrSubstract");
-        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<ExpressionToken>>();
-        var root = r.SyntaxTree as SyntaxNode<ExpressionToken>;
+        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<ExpressionToken,int>>();
+        var root = r.SyntaxTree as SyntaxNode<ExpressionToken,int>;
         Check.That(r).IsNotNull();
         Check.That(root.Children).CountIs(3);
         Check.That(root.Children[0].Name).IsEqualTo("term");
@@ -39,8 +39,8 @@ public class NodeNamesTests
         Check.That(r).IsOkParsing();
         Check.That(r.SyntaxTree).IsNotNull();
         Check.That(r.SyntaxTree.Name).IsEqualTo("addOrSubstract");
-        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<ExpressionToken>>();
-        var root = r.SyntaxTree as SyntaxNode<ExpressionToken>;
+        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<ExpressionToken, int>>();
+        var root = r.SyntaxTree as SyntaxNode<ExpressionToken, int>;
         Check.That(r).IsNotNull();
         Check.That(root.Children).CountIs(3);
         Check.That(root.Children[0].Name).IsEqualTo("term");

@@ -16,7 +16,7 @@ namespace sly.parser
 {
     public class Parser<IN, OUT> where IN : struct
     {   
-        public Action<ISyntaxNode<IN>> SyntaxParseCallback { get; set; }
+        public Action<ISyntaxNode<IN, OUT>> SyntaxParseCallback { get; set; }
 
         public Dictionary<IN, Dictionary<string, string>> LexemeLabels => Lexer.LexemeLabels;
 
@@ -115,7 +115,7 @@ namespace sly.parser
         {
             var result = new ParseResult<IN, OUT>();
 
-            var cleaner = new SyntaxTreeCleaner<IN>();
+            var cleaner = new SyntaxTreeCleaner<IN, OUT>();
             var syntaxResult = SyntaxParser.Parse(tokens, startingNonTerminal);
             syntaxResult.UsesOperations = Configuration.UsesOperations;
             syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);

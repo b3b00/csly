@@ -8,29 +8,29 @@ namespace ParserTests.Issue225_IndexOutOfRangeException
     public class IndexOutOfRangeParser
     {
         [Production("date_expression: INT DASH[d] INT DASH[d] INT T[d] INT COLON[d] INT COLON[d] INT Z[d] ( [PLUS|DASH] INT [SECOND|SECONDS|MINUTE|MINUTES|HOUR|HOURS|DAY|DAYS|WEEK|WEEKS|MONTH|MONTHS|YEAR|YEARS] )? ( SLASH[d] [HOUR|DAY|MONTH|YEAR] )?")]
-        public DateExpression DateExpression(
-            Token<IndexOutOfRangeToken> yearToken,
-            Token<IndexOutOfRangeToken> monthToken,
-            Token<IndexOutOfRangeToken> dayToken,
-            Token<IndexOutOfRangeToken> hoursToken,
-            Token<IndexOutOfRangeToken> minutesToken,
-            Token<IndexOutOfRangeToken> secondsToken,
-            ValueOption<Group<IndexOutOfRangeToken, Expression>> offsetGroup,
-            ValueOption<Group<IndexOutOfRangeToken, Expression>> roundGroup
+        public Issue223OorDateExpression DateExpression(
+            Token<Issue223OorIndexOutOfRangeToken> yearToken,
+            Token<Issue223OorIndexOutOfRangeToken> monthToken,
+            Token<Issue223OorIndexOutOfRangeToken> dayToken,
+            Token<Issue223OorIndexOutOfRangeToken> hoursToken,
+            Token<Issue223OorIndexOutOfRangeToken> minutesToken,
+            Token<Issue223OorIndexOutOfRangeToken> secondsToken,
+            ValueOption<Group<Issue223OorIndexOutOfRangeToken, Issue223OorExpression>> offsetGroup,
+            ValueOption<Group<Issue223OorIndexOutOfRangeToken, Issue223OorExpression>> roundGroup
             )
         {
             var (dateOffsetMagnitude, dateOffsetKind) = ExtractDateOffset(offsetGroup);
 
-            var dateRoundKind = DateRoundKind.NONE;
+            var dateRoundKind = Issue223OorDateRoundKind.NONE;
             roundGroup.Match(
                 g =>
                 {
-                    dateRoundKind = Enum.Parse<DateRoundKind>(g.Token(0).Value, true);
+                    dateRoundKind = Enum.Parse<Issue223OorDateRoundKind>(g.Token(0).Value, true);
                     return g;
                 }, 
                 () => null);
 
-            return new DateExpression(
+            return new Issue223OorDateExpression(
                 $"{yearToken.IntValue:D4}-{monthToken.IntValue:D2}-{dayToken.IntValue:D2}T{hoursToken.IntValue:D2}:{minutesToken.IntValue:D2}:{secondsToken.IntValue:D2}Z", 
                 dateOffsetMagnitude, 
                 dateOffsetKind,
@@ -39,153 +39,153 @@ namespace ParserTests.Issue225_IndexOutOfRangeException
 
         [Production(
             "date_expression: NOW ( [PLUS|DASH] INT [SECOND|SECONDS|MINUTE|MINUTES|HOUR|HOURS|DAY|DAYS|WEEK|WEEKS|MONTH|MONTHS|YEAR|YEARS] )? ( SLASH[d] [HOUR|DAY|MONTH|YEAR] )?")]
-        public DateExpression DateExpression(
-            Token<IndexOutOfRangeToken> nowToken,
-            ValueOption<Group<IndexOutOfRangeToken, Expression>> offsetGroup,
-            ValueOption<Group<IndexOutOfRangeToken, Expression>> roundGroup
+        public Issue223OorDateExpression DateExpression(
+            Token<Issue223OorIndexOutOfRangeToken> nowToken,
+            ValueOption<Group<Issue223OorIndexOutOfRangeToken, Issue223OorExpression>> offsetGroup,
+            ValueOption<Group<Issue223OorIndexOutOfRangeToken, Issue223OorExpression>> roundGroup
         )
         {
             var (dateOffsetMagnitude, dateOffsetKind) = ExtractDateOffset(offsetGroup);
 
-            var dateRoundKind = DateRoundKind.NONE;
+            var dateRoundKind = Issue223OorDateRoundKind.NONE;
             roundGroup.Match(
                 g =>
                 {
-                    dateRoundKind = Enum.Parse<DateRoundKind>(g.Token(0).Value, true);
+                    dateRoundKind = Enum.Parse<Issue223OorDateRoundKind>(g.Token(0).Value, true);
                     return g;
                 }, 
                 () => null);
 
-            return new DateExpression(nowToken.Value, dateOffsetMagnitude, dateOffsetKind, dateRoundKind);
+            return new Issue223OorDateExpression(nowToken.Value, dateOffsetMagnitude, dateOffsetKind, dateRoundKind);
         }
 
         [Production("numeric_expression: INT")]
         [Production("numeric_expression: DOUBLE")]
-        public ValueExpression NumericExpression(Token<IndexOutOfRangeToken> valueToken)
+        public Issue223OorValueExpression NumericExpression(Token<Issue223OorIndexOutOfRangeToken> valueToken)
         {
-            return new ValueExpression(valueToken.Value);
+            return new Issue223OorValueExpression(valueToken.Value);
         }
 
         [Production("numeric_expression: DASH numeric_expression")]
         [Production("numeric_expression: DASH numeric_expression")]
-        public ValueExpression NumericExpression(
-            Token<IndexOutOfRangeToken> DASHToken,
-            ValueExpression numericExpression)
+        public Issue223OorValueExpression NumericExpression(
+            Token<Issue223OorIndexOutOfRangeToken> DASHToken,
+            Issue223OorValueExpression numericExpression)
         {
-            return new ValueExpression("-" + numericExpression.Value);
+            return new Issue223OorValueExpression("-" + numericExpression.Value);
         }
 
         [Production("value_expression: VALUE")]
         // [Production("value_expression: STRING")]
-        public ValueExpression ValueExpression(Token<IndexOutOfRangeToken> valueToken)
+        public Issue223OorValueExpression ValueExpression(Token<Issue223OorIndexOutOfRangeToken> valueToken)
         {
             return valueToken.TokenID switch
             {
-                IndexOutOfRangeToken.STRING => new ValueExpression(valueToken.StringWithoutQuotes),
-                _ => new ValueExpression(valueToken.Value)
+                Issue223OorIndexOutOfRangeToken.STRING => new Issue223OorValueExpression(valueToken.StringWithoutQuotes),
+                _ => new Issue223OorValueExpression(valueToken.Value)
             };
         }
 
         [Production("value_expression: numeric_expression")]
         [Production("value_expression: date_expression")]
-        public Expression ValueExpression(ValueExpression valueExpression) => valueExpression;
+        public Issue223OorExpression ValueExpression(Issue223OorValueExpression issue223OorValueExpression) => issue223OorValueExpression;
 
         [Production("primary_expression: value_expression")]
-        public Expression PrimaryExpression(ValueExpression valueExpression) => valueExpression;
+        public Issue223OorExpression PrimaryExpression(Issue223OorValueExpression issue223OorValueExpression) => issue223OorValueExpression;
 
         [Production("primary_expression: VALUE COLON primary_expression")]
-        public FieldValueExpression PrimaryExpression(
-            Token<IndexOutOfRangeToken> fieldNameToken,
-            Token<IndexOutOfRangeToken> colonToken,
-            Expression expression)
+        public Issue223OorFieldValueExpression PrimaryExpression(
+            Token<Issue223OorIndexOutOfRangeToken> fieldNameToken,
+            Token<Issue223OorIndexOutOfRangeToken> colonToken,
+            Issue223OorExpression issue223OorExpression)
         {
-            if (Enum.TryParse<Fields>(fieldNameToken.Value, true, out var fieldName))
+            if (Enum.TryParse<Issue223OorFields>(fieldNameToken.Value, true, out var fieldName))
             {
-                return new FieldValueExpression(
+                return new Issue223OorFieldValueExpression(
                     fieldName,
-                    expression
+                    issue223OorExpression
                 );
             }
 
-            return new FieldValueExpression(
+            return new Issue223OorFieldValueExpression(
                 null,
-                new ValueExpression($"{fieldNameToken.Value}:{expression}")
+                new Issue223OorValueExpression($"{fieldNameToken.Value}:{issue223OorExpression}")
             );
         }
 
         [Production("primary_expression: LPAREN expression RPAREN")]
-        public Expression PrimaryExpression(
-            Token<IndexOutOfRangeToken> lParenToken,
-            Expression expression,
-            Token<IndexOutOfRangeToken> rParenToken
+        public Issue223OorExpression PrimaryExpression(
+            Token<Issue223OorIndexOutOfRangeToken> lParenToken,
+            Issue223OorExpression issue223OorExpression,
+            Token<Issue223OorIndexOutOfRangeToken> rParenToken
         )
         {
-            return new GroupExpression(expression);
+            return new Issue223OorGroupExpression(issue223OorExpression);
         }
 
         [Production("primary_expression: LBRACKET value_expression TO[d] value_expression RBRACKET")]
-        public Expression PrimaryExpression(
-            Token<IndexOutOfRangeToken> lBracketToken,
-            ValueExpression from,
-            ValueExpression to,
-            Token<IndexOutOfRangeToken> rParenToken
+        public Issue223OorExpression PrimaryExpression(
+            Token<Issue223OorIndexOutOfRangeToken> lBracketToken,
+            Issue223OorValueExpression from,
+            Issue223OorValueExpression to,
+            Token<Issue223OorIndexOutOfRangeToken> rParenToken
         )
         {
-            return new RangeExpression(from, to);
+            return new Issue223OorRangeExpression(from, to);
         }
 
         [Production("secondary_expression: primary_expression")]
-        public Expression SecondaryExpression(Expression valueExpression) => valueExpression;
+        public Issue223OorExpression SecondaryExpression(Issue223OorExpression valueIssue223OorExpression) => valueIssue223OorExpression;
 
         [Production("secondary_expression: NOT secondary_expression")]
         [Production("secondary_expression: PLUS secondary_expression")]
         [Production("secondary_expression: DASH secondary_expression")]
-        public Expression SecondaryExpression(
-            Token<IndexOutOfRangeToken> unaryOperatorToken,
-            Expression primaryExpression)
+        public Issue223OorExpression SecondaryExpression(
+            Token<Issue223OorIndexOutOfRangeToken> unaryOperatorToken,
+            Issue223OorExpression primaryIssue223OorExpression)
         {
-            var unaryOperator = Enum.Parse<UnaryOperator>(unaryOperatorToken.TokenID.ToString(), true);
-            return new UnaryExpression(unaryOperator, primaryExpression);
+            var unaryOperator = Enum.Parse<Issue223OorUnaryOperator>(unaryOperatorToken.TokenID.ToString(), true);
+            return new Issue223OorUnaryExpression(unaryOperator, primaryIssue223OorExpression);
         }
 
         [Production("secondary_expression: primary_expression CARET INT")]
-        public Expression SecondaryExpression(
-            Expression primaryExpression,
-            Token<IndexOutOfRangeToken> caretToken,
-            Token<IndexOutOfRangeToken> intBoostToken)
+        public Issue223OorExpression SecondaryExpression(
+            Issue223OorExpression primaryIssue223OorExpression,
+            Token<Issue223OorIndexOutOfRangeToken> caretToken,
+            Token<Issue223OorIndexOutOfRangeToken> intBoostToken)
         {
-            return new BoostExpression(primaryExpression, intBoostToken.IntValue);
+            return new Issue223OorBoostExpression(primaryIssue223OorExpression, intBoostToken.IntValue);
         }
 
         [Production("tertiary_expression: secondary_expression")]
-        public Expression TertiaryExpression(Expression valueExpression) => valueExpression;
+        public Issue223OorExpression TertiaryExpression(Issue223OorExpression valueIssue223OorExpression) => valueIssue223OorExpression;
 
         [Production("tertiary_expression: secondary_expression tertiary_expression")]
-        public BinaryExpression TertiaryExpression(
-            Expression leftExpression,
-            Expression rightExpression)
+        public BinaryIssue223OorExpression TertiaryExpression(
+            Issue223OorExpression leftIssue223OorExpression,
+            Issue223OorExpression rightIssue223OorExpression)
         {
-            return new BinaryExpression(leftExpression, BinaryOperator.AND, rightExpression);
+            return new BinaryIssue223OorExpression(leftIssue223OorExpression, Issue223OorBinaryOperator.AND, rightIssue223OorExpression);
         }
 
         [Production("tertiary_expression: secondary_expression AND tertiary_expression")]
         [Production("tertiary_expression: secondary_expression OR tertiary_expression")]
-        public BinaryExpression BinaryExpression(
-            Expression leftExpression,
-            Token<IndexOutOfRangeToken> binaryOperatorToken,
-            Expression rightExpression)
+        public BinaryIssue223OorExpression BinaryExpression(
+            Issue223OorExpression leftIssue223OorExpression,
+            Token<Issue223OorIndexOutOfRangeToken> binaryOperatorToken,
+            Issue223OorExpression rightIssue223OorExpression)
         {
-            var binaryOperator = Enum.Parse<BinaryOperator>(binaryOperatorToken.Value, true);
-            return new BinaryExpression(leftExpression, binaryOperator, rightExpression);
+            var binaryOperator = Enum.Parse<Issue223OorBinaryOperator>(binaryOperatorToken.Value, true);
+            return new BinaryIssue223OorExpression(leftIssue223OorExpression, binaryOperator, rightIssue223OorExpression);
         }
 
         [Production("expression: tertiary_expression")]
-        public Expression Expression(Expression valueExpression) => valueExpression;
+        public Issue223OorExpression Expression(Issue223OorExpression valueIssue223OorExpression) => valueIssue223OorExpression;
         
-        private static (int, DateOffsetKind dateOffsetKind) ExtractDateOffset(ValueOption<Group<IndexOutOfRangeToken, Expression>> offsetGroup)
+        private static (int, Issue223OorDateOffsetKind dateOffsetKind) ExtractDateOffset(ValueOption<Group<Issue223OorIndexOutOfRangeToken, Issue223OorExpression>> offsetGroup)
         {
             var dateOffsetMagnitude = 0;
-            var dateOffsetKind = DateOffsetKind.SECOND;
+            var dateOffsetKind = Issue223OorDateOffsetKind.SECOND;
 
             if (offsetGroup.IsSome)
             {
@@ -194,38 +194,38 @@ namespace ParserTests.Issue225_IndexOutOfRangeException
                     {
                         dateOffsetMagnitude = g.Token(1).IntValue;
 
-                        if (g.Token(0).TokenID == IndexOutOfRangeToken.DASH)
+                        if (g.Token(0).TokenID == Issue223OorIndexOutOfRangeToken.DASH)
                             dateOffsetMagnitude *= -1;
 
                         switch (g.Token(2).TokenID)
                         {
-                            case IndexOutOfRangeToken.SECOND:
-                            case IndexOutOfRangeToken.SECONDS:
-                                dateOffsetKind = DateOffsetKind.SECOND;
+                            case Issue223OorIndexOutOfRangeToken.SECOND:
+                            case Issue223OorIndexOutOfRangeToken.SECONDS:
+                                dateOffsetKind = Issue223OorDateOffsetKind.SECOND;
                                 break;
-                            case IndexOutOfRangeToken.MINUTE:
-                            case IndexOutOfRangeToken.MINUTES:
-                                dateOffsetKind = DateOffsetKind.MINUTE;
+                            case Issue223OorIndexOutOfRangeToken.MINUTE:
+                            case Issue223OorIndexOutOfRangeToken.MINUTES:
+                                dateOffsetKind = Issue223OorDateOffsetKind.MINUTE;
                                 break;
-                            case IndexOutOfRangeToken.HOUR:
-                            case IndexOutOfRangeToken.HOURS:
-                                dateOffsetKind = DateOffsetKind.HOUR;
+                            case Issue223OorIndexOutOfRangeToken.HOUR:
+                            case Issue223OorIndexOutOfRangeToken.HOURS:
+                                dateOffsetKind = Issue223OorDateOffsetKind.HOUR;
                                 break;
-                            case IndexOutOfRangeToken.DAY:
-                            case IndexOutOfRangeToken.DAYS:
-                                dateOffsetKind = DateOffsetKind.DAY;
+                            case Issue223OorIndexOutOfRangeToken.DAY:
+                            case Issue223OorIndexOutOfRangeToken.DAYS:
+                                dateOffsetKind = Issue223OorDateOffsetKind.DAY;
                                 break;
-                            case IndexOutOfRangeToken.WEEK:
-                            case IndexOutOfRangeToken.WEEKS:
-                                dateOffsetKind = DateOffsetKind.WEEK;
+                            case Issue223OorIndexOutOfRangeToken.WEEK:
+                            case Issue223OorIndexOutOfRangeToken.WEEKS:
+                                dateOffsetKind = Issue223OorDateOffsetKind.WEEK;
                                 break;
-                            case IndexOutOfRangeToken.MONTH:
-                            case IndexOutOfRangeToken.MONTHS:
-                                dateOffsetKind = DateOffsetKind.MONTH;
+                            case Issue223OorIndexOutOfRangeToken.MONTH:
+                            case Issue223OorIndexOutOfRangeToken.MONTHS:
+                                dateOffsetKind = Issue223OorDateOffsetKind.MONTH;
                                 break;
-                            case IndexOutOfRangeToken.YEAR:
-                            case IndexOutOfRangeToken.YEARS:
-                                dateOffsetKind = DateOffsetKind.YEAR;
+                            case Issue223OorIndexOutOfRangeToken.YEAR:
+                            case Issue223OorIndexOutOfRangeToken.YEARS:
+                                dateOffsetKind = Issue223OorDateOffsetKind.YEAR;
                                 break;
                         }
 

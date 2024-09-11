@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -8,12 +9,12 @@ using sly.parser.generator;
 
 namespace sly.parser.syntax.grammar
 {
-    public class Rule<IN> : GrammarNode<IN> where IN : struct
+    public class Rule<IN,OUT> : GrammarNode<IN,OUT> where IN : struct
     {
         public Rule()
         {
-            Clauses = new List<IClause<IN>>();
-            VisitorMethodsForOperation = new Dictionary<IN, OperationMetaData<IN>>();
+            Clauses = new List<IClause<IN,OUT>>();
+            VisitorMethodsForOperation = new Dictionary<IN, OperationMetaData<IN, OUT>>();
             Visitor = null;
             IsSubRule = false;
             NodeName = "";
@@ -24,10 +25,12 @@ namespace sly.parser.syntax.grammar
         public bool IsByPassRule { get; set; } = false;
 
         // visitors for operation rules
-        private Dictionary<IN, OperationMetaData<IN>> VisitorMethodsForOperation { get; }
-
+        private Dictionary<IN, OperationMetaData<IN, OUT>> VisitorMethodsForOperation { get; }
+        
         // visitor for classical rules
         private MethodInfo Visitor { get; set; }
+        
+        private Func<object[],OUT> LambdaVisitor { get; set; }  
 
         public bool IsExpressionRule { get; set; }
         
@@ -37,7 +40,7 @@ namespace sly.parser.syntax.grammar
 
         public string RuleString { get; set;  }
 
-        public List<IClause<IN>> Clauses { get; set; }
+        public List<IClause<IN,OUT>> Clauses { get; set; }
         public List<LeadingToken<IN>> PossibleLeadingTokens { get; set; }
 
         public string NonTerminalName { get; set; }
@@ -53,14 +56,14 @@ namespace sly.parser.syntax.grammar
                     {
                         switch (clause)
                         {
-                            case GroupClause<IN> _:
+                            case GroupClause<IN,OUT> _:
                                 contains = true;
                                 break;
-                            case ManyClause<IN> many:
-                                contains  |=  many.Clause is GroupClause<IN>;
+                            case ManyClause<IN,OUT> many:
+                                contains  |=  many.Clause is GroupClause<IN,OUT>;
                                 break;
-                            case OptionClause<IN> option:
-                                contains  |=  option.Clause is GroupClause<IN>;
+                            case OptionClause<IN,OUT> option:
+                                contains  |=  option.Clause is GroupClause<IN,OUT>;
                                 break;
                         }
 
@@ -82,7 +85,7 @@ namespace sly.parser.syntax.grammar
                                   || Clauses.Count == 1 && Clauses[0].MayBeEmpty();
 
 
-        public OperationMetaData<IN> GetOperation(IN token = default)
+        public OperationMetaData<IN, OUT> GetOperation(IN token = default)
         {
             if (IsExpressionRule)
             {
@@ -95,7 +98,7 @@ namespace sly.parser.syntax.grammar
             return null;
         }
         
-        public List<OperationMetaData<IN>> GetOperations()
+        public List<OperationMetaData<IN, OUT>> GetOperations()
         {
             if (IsExpressionRule)
             {
@@ -105,6 +108,29 @@ namespace sly.parser.syntax.grammar
             return null;
         }
 
+        public Func<object[], OUT> getLambdaVisitor(IN token = default)
+        {
+            Func<object[], OUT> visitor = null;
+            if (IsExpressionRule)
+            {
+                var operation = VisitorMethodsForOperation.TryGetValue(token, out var value)
+                    ? value
+                    : null;
+                visitor = operation?.VisitorLambda;
+            }
+            else
+            {
+                visitor = LambdaVisitor;
+            }
+
+            return visitor;
+        }
+
+        public void SetLambdaVisitor(Func<object[], OUT> lambdaVisitor)
+        {
+            LambdaVisitor = lambdaVisitor;
+        }
+        
         public MethodInfo GetVisitor(IN token = default)
         {
             MethodInfo visitor = null;
@@ -122,23 +148,28 @@ namespace sly.parser.syntax.grammar
 
             return visitor;
         }
-
+        
         public void SetVisitor(MethodInfo visitor)
         {
             Visitor = visitor;
         }
+        
+        public void SetVisitor(Func<object[],OUT> visitorLambda)
+        {
+            LambdaVisitor = visitorLambda;
+        }
 
-        public void SetVisitor(OperationMetaData<IN> operation)
+        public void SetVisitor(OperationMetaData<IN, OUT> operation)
         {
             VisitorMethodsForOperation[operation.OperatorToken] = operation;
         }
 
         
         
-        public bool Match<OUT>(IList<Token<IN>> tokens, int position, ParserConfiguration<IN,OUT> configuration)
+        public bool Match(IList<Token<IN>> tokens, int position, ParserConfiguration<IN,OUT> configuration)
         {
             bool activateBroadWindow = configuration.BroadenTokenWindow;
-            if (activateBroadWindow && Clauses.Count >= 2 && Clauses[0] is TerminalClause<IN> startingTerminalClause && Clauses[1] is NonTerminalClause<IN> nTerm)
+            if (activateBroadWindow && Clauses.Count >= 2 && Clauses[0] is TerminalClause<IN,OUT> startingTerminalClause && Clauses[1] is NonTerminalClause<IN,OUT> nTerm)
             {
                 if (startingTerminalClause.MayBeEmpty())
                 {

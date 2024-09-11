@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using expressionparser;
 using expressionparser.model;
+using GeneratedXML;
 using GenericLexerWithCallbacks;
 using indented;
 using NFluent;
@@ -798,9 +799,25 @@ namespace ParserTests.lexer
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<CallbackTokens>>());
             Check.That(res.IsError).IsFalse();
-            var lexer = res.Result as GenericLexer<CallbackTokens>;
-            CallBacksBuilder.BuildCallbacks(lexer);
+            var lexer = res.Result;
 
+            var r = lexer.Tokenize("aaa bbb");
+            Check.That(r.IsOk).IsTrue();
+            var tokens = r.Tokens;
+            Check.That(tokens).CountIs(3);
+            Check.That(tokens[0]).IsEqualTo(CallbackTokens.IDENTIFIER, "AAA");
+            Check.That(tokens[1]).IsEqualTo(CallbackTokens.SKIP, "BBB");
+        }
+        
+        [Fact]
+        public void TestGeneratedTokenCallbacks()
+        {
+            ParserCallbacksGenerator generator = new ParserCallbacksGenerator();
+            var lexerBuilder = generator.GetLexer();
+            var res = lexerBuilder.Build("en");
+            
+            Check.That(res.IsError).IsFalse();
+            var lexer = res.Result;
 
             var r = lexer.Tokenize("aaa bbb");
             Check.That(r.IsOk).IsTrue();
@@ -1335,6 +1352,64 @@ else
             Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_MANY_LEXEM_WITH_SAME_LABEL);
             Check.That(error.Message).Contains("left paranthesis").And.Contains("paranthèse ouvrante");
         }
+        
+        [Fact]
+        public void TestGeneratedI18nDuplicateLabel()
+        {
+            GeneratedXmlParserGenerator generator = new GeneratedXmlParserGenerator();
+            var lexerBuilder = generator.GetLexer();
+            var build = lexerBuilder.Build("en");
+            Check.That(build).IsOk();
+            Check.That(build.Result).IsNotNull();
+            // var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<DuplicateLabels>>());
+            // Check.That(lexerRes).IsOk(); // not a blocking error, lexer should still be able to lex correctly.
+            Check.That(build.Errors).IsSingle();
+            var error = build.Errors[0];
+            Check.That(error).IsNotNull();
+            Check.That(error.Level).IsEqualTo(ErrorLevel.WARN);
+            Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_MANY_LEXEM_WITH_SAME_LABEL);
+            Check.That(error.Message).Contains("attribute name").And.Contains("nom d'attribut");
+            
+           
+            
+            
+        }
 
+        [Fact]
+        public void TestGeneratedI18nLabels()
+        {
+            ParserCallbacksGenerator generator = new ParserCallbacksGenerator();
+
+            // english
+            var parserBuild = generator.GetParser();
+            Check.That(parserBuild).IsOk();
+            Check.That(parserBuild.Result).IsNotNull();
+            var parsed = parserBuild.Result.Parse("while");
+            Check.That(parsed).Not.IsOkParsing();
+            Check.That(parsed.Errors).IsSingle();
+            var parseError = parsed.Errors[0];
+            Check.That(parseError).IsNotNull();
+            Check.That(parseError.ErrorMessage).Contains("whylee").And.Contains("iiff");
+        }
+
+
+
+        [Fact]
+        public void TestLexemeI18N()
+        {
+            ExpressionParserGenerator generator = new ExpressionParserGenerator();
+            var build = generator.GetParser();            
+            Check.That(build).IsOk();
+            Check.That(build.Result).IsNotNull();
+            var parser = build.Result;
+            var parseResult = parser.Parse("1 - + 2","expression");
+            Check.That(parseResult).Not.IsOkParsing();
+
+            Check.That(parseResult.Errors).IsSingle();
+            var error = parseResult.Errors[0];
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+            //unexpected minus sign ('+ (line 1, column 5)'). Expecting INT, closing parenthesis, times sign, .
+            Check.That(error.ErrorMessage).Contains("minus sign").And.Contains("opening parenthesis").And.Contains("plus sign");
+        }
     }
 }
