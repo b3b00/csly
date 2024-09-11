@@ -81,40 +81,16 @@ public class CslyParserGenerator : IIncrementalGenerator
              ((ctx, t) => GenerateCode(ctx, t.Left, t.Right)));
     }
 
-    private string GetParserUsings(ClassDeclarationSyntax classDeclarationSyntax)
-    {
-        if (classDeclarationSyntax != null)
-        {
-            var unit = classDeclarationSyntax.GetCompilationUnit();
-            StringBuilder builder = new();
-            if (unit != null)
-            {
-                foreach (var @using in unit.Usings)
-                {
-                    builder.AppendLine(@using.ToString());
-                }
-            }
-            return builder.ToString();
-        }
-        return "";
-    }
+   
 
-    public string GetLexerUsings(EnumDeclarationSyntax enumDeclarationSyntax)
+    public List<string> GetUsings(SyntaxNode syntaxNode)
     {
-        if (enumDeclarationSyntax != null)
+        if (syntaxNode != null)
         {
-            var unit = enumDeclarationSyntax.GetCompilationUnit();
-            StringBuilder builder = new();
-            if (unit != null)
-            {
-                foreach (var @using in unit.Usings)
-                {
-                    builder.AppendLine(@using.ToString());
-                }
-            }
-            return builder.ToString();
+            var unit = syntaxNode.GetCompilationUnit();
+            return unit.Usings.Select(x => x.ToString()).ToList();
         }
-        return "";
+        return new List<string>();
     }
     
     private void GenerateCode(SourceProductionContext context, Compilation arg2Left, ImmutableArray<SyntaxNode> declarations)
@@ -153,12 +129,17 @@ public class CslyParserGenerator : IIncrementalGenerator
                     var lexerDecl = declarationsByName[lexerType] as EnumDeclarationSyntax;
                     var parserDecl = declarationsByName[parserType] as ClassDeclarationSyntax;
                     
-                    SyntaxList<UsingDirectiveSyntax> usings = new SyntaxList<UsingDirectiveSyntax>();
-                   
                     string lexerName = lexerDecl.Identifier.ToString();
                    
                     string modifiers = string.Join(" ", classDeclarationSyntax.Modifiers.Select(x => x.ToString()));
 
+                    var usings = GetUsings(lexerDecl);
+                    usings.AddRange(GetUsings(parserDecl));
+                    usings.Add($"using {lexerDecl.GetNameSpace()};");
+                    usings.Add($"using {parserDecl.GetNameSpace()};");
+                    
+                    usings = usings.Distinct().ToList();
+                    
                     string code = $@"
 using System;
 using sly.lexer;
@@ -166,11 +147,9 @@ using sly.parser;
 using sly.buildresult;
 using sly.sourceGenerator;
 using sly.parser.generator;
-using {lexerDecl.GetNameSpace()};
-using {parserDecl.GetNameSpace()};
+{string.Join(Environment.NewLine, usings)}
 
-{GetLexerUsings(lexerDecl)}
-{GetParserUsings(parserDecl)}
+
 
 namespace {ns};
 {modifiers} class {className} : AbstractParserGenerator<{lexerName}> {{

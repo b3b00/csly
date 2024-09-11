@@ -17,7 +17,6 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
         var currentPosition = position;
         var errors = new List<UnexpectedTokenSyntaxError<IN>>();
         var children = new List<ISyntaxNode<IN, OUT>>();
-        var isError = false;
         
         if (!tokens[position].IsEOS && rule.Match(tokens, position, Configuration) && rule.Clauses != null &&
             rule.Clauses.Count > 0 && MatchExpressionRuleScheme(rule))

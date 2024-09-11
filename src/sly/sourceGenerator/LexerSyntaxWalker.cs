@@ -15,7 +15,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
 {
     StringBuilder _builder = new();
 
-    private string? _lexerName = "";
+    private string _lexerName = "";
     private readonly Dictionary<string, SyntaxNode> _declarationsByName;
 
     public LexerSyntaxWalker(StringBuilder builder, string lexerName, Dictionary<string, SyntaxNode> declarationsByName)
@@ -31,10 +31,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
         {
             var arguments = attribute.ArgumentList.Arguments.Skip(skip).ToList();
             var firstArg = arguments[0];
-            bool isFirstArgChannel = false;
             string firstArgColonName = firstArg?.NameColon?.Name?.ToString();
-            string channel = null;
-            string tokens = "";
             var firstArgAsLiteral = firstArg.Expression as LiteralExpressionSyntax;
             if (firstArgColonName == "channel" || (firstArgAsLiteral == null ||
                                                    firstArgAsLiteral.Kind() != SyntaxKind.StringLiteralExpression))

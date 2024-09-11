@@ -53,5 +53,6 @@
     <EmbeddedResource Include="i18n\translations\en.txt"/>
     <EmbeddedResource Include="i18n\translations\zh-Hans.txt"/>
   </ItemGroup>
+    
   
 </Project>
