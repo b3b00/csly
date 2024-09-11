@@ -4,13 +4,11 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace sly.sourceGenerator;
-
-
-
 
 public static class SyntaxExtensions
 {
@@ -93,7 +91,7 @@ public class CslyParserGenerator : IIncrementalGenerator
         return new List<string>();
     }
     
-    private void GenerateCode(SourceProductionContext context, Compilation arg2Left, ImmutableArray<SyntaxNode> declarations)
+    private void GenerateCode(SourceProductionContext context, Compilation compilation, ImmutableArray<SyntaxNode> declarations)
     {
         Func<SyntaxNode, string> getName = (node) =>
         {
@@ -109,6 +107,8 @@ public class CslyParserGenerator : IIncrementalGenerator
 
             return "";
         };
+        
+
 
         Dictionary<string, SyntaxNode> declarationsByName = declarations.ToDictionary(x => getName(x));
         
@@ -124,9 +124,54 @@ public class CslyParserGenerator : IIncrementalGenerator
 
                 if (isParserGenerator)
                 {
+                    var isPartial =
+                        classDeclarationSyntax.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword));
+                    if (!isPartial)
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                CslyGeneratorErrors.NOT_PARTIAL,
+                                "Parser generator is not partial",
+                                "Parser generator {0} is not partial",
+                                "csly",
+                                DiagnosticSeverity.Error,
+                                true), classDeclarationSyntax.GetLocation(), classDeclarationSyntax.Identifier.Text));
+                    }
+                    
                     string ns = declarationSyntax.GetNameSpace();
                 
-                    var lexerDecl = declarationsByName[lexerType] as EnumDeclarationSyntax;
+                    
+
+                    if (!declarationsByName.ContainsKey(lexerType))
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                CslyGeneratorErrors.LEXER_NOT_FOUND,
+                                "missing lexer enum declaration",
+                                "Lexer Enum {0} not found.",
+                                "csly",
+                                DiagnosticSeverity.Error,
+                                true), classDeclarationSyntax.GetLocation(), lexerType));
+                                return;
+                    }
+                    
+                    EnumDeclarationSyntax lexerDecl = declarationsByName[lexerType] as EnumDeclarationSyntax;
+                    
+                   
+                    
+                    if (!declarationsByName.ContainsKey(parserType))
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                CslyGeneratorErrors.PARSER_NOT_FOUND,
+                                "missing parser class declaration",
+                                "Parser class {0} not found.",
+                                "csly",
+                                DiagnosticSeverity.Error,
+                                true), classDeclarationSyntax.GetLocation(), parserType));
+                        return;
+                    }
+                    
                     var parserDecl = declarationsByName[parserType] as ClassDeclarationSyntax;
                     
                     string lexerName = lexerDecl.Identifier.ToString();

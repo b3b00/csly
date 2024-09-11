@@ -32,7 +32,7 @@ public class SourceGeneratorTests
 
 ";
 
-    private ImmutableArray<SyntaxTree> generateSource(string source, string className)
+    private GeneratorDriverRunResult generateSource(string source, string className)
     {
         // Create an instance of the source generator.
         var generator = new CslyParserGenerator();
@@ -52,7 +52,7 @@ public class SourceGeneratorTests
         // Run generators. Don't forget to use the new compilation rather than the previous one.
         var runResult = driver.RunGenerators(compilation).GetRunResult();
 
-        return runResult.GeneratedTrees;
+        return runResult;
     }
 
     [Theory()]
@@ -67,8 +67,8 @@ public class SourceGeneratorTests
     public void TestGenerator(string source, string className)
     {
         var code = _embeddedResourceFileSystem.ReadAllText(source);
-        var generatedTrees = generateSource(code, className);
-
+        var generatedTrees = generateSource(code, className).GeneratedTrees;
+    
         var contents = generatedTrees.ToDictionary(x => x.FilePath,x => x.ToString());
         var generatedFiles = generatedTrees.Select(x => new FileInfo(x.FilePath).Name);
 
@@ -76,5 +76,21 @@ public class SourceGeneratorTests
         {
             $"{className}.g.cs"
         }, generatedFiles);
+    }
+    
+    [Theory]
+    [InlineData("/sourceGenerators/data/errors/not_partial.txt", CslyGeneratorErrors.NOT_PARTIAL)]
+    [InlineData("/sourceGenerators/data/errors/missing_lexer.txt", CslyGeneratorErrors.LEXER_NOT_FOUND)]
+    [InlineData("/sourceGenerators/data/errors/missing_parser.txt", CslyGeneratorErrors.PARSER_NOT_FOUND)]
+    public void TestGeneratorError(string source, string expectedError)
+    {
+        string className = "ErrorGenerator";
+        var code = _embeddedResourceFileSystem.ReadAllText(source);
+        var result = generateSource(code, className);
+
+        Assert.False(result.Diagnostics.IsEmpty);
+        var diagnostic = result.Diagnostics.Single();
+        Assert.Equal(expectedError,diagnostic.Id);
+        
     }
 }

@@ -2,27 +2,32 @@ using aot.lexer;
 using sly.lexer;
 using sly.parser.generator;
 
-namespace aot.parser;
+namespace TestNamespace;
+
+
 
 [ParserRoot("root")]
-public class AotParser
+[UseMemoization]
+[UseBroadentokenWindow]
+[AutoCloseIndentationsAttribute]
+internal class AotTestParser
 {
-    [Production("root : AotParser_expressions")]
+    [Production("root : SimpleExpressionParser_expressions")]
     public double Root(double value) => value;
-
-    [Operation((int)AotLexer.PLUS, Affix.InFix, Associativity.Right, 10)]
+        
+    [Operation((int) AotTestLexer.PLUS, Affix.InFix, Associativity.Right, 10)]
     [Operation("MINUS", Affix.InFix, Associativity.Left, 10)]
-    public double BinaryTermExpression(double left, Token<AotLexer> operation, double right)
+    public double BinaryTermExpression(double left, Token<AotTestLexer> operation, double right)
     {
         double result = 0;
         switch (operation.TokenID)
         {
-            case AotLexer.PLUS:
+            case AotTestLexer.PLUS:
             {
                 result = left + right;
                 break;
             }
-            case AotLexer.MINUS:
+            case AotTestLexer.MINUS:
             {
                 result = left - right;
                 break;
@@ -33,20 +38,20 @@ public class AotParser
     }
 
 
-    [Operation((int)AotLexer.TIMES, Affix.InFix, Associativity.Right, 50)]
+    [Operation((int) AotTestLexer.TIMES, Affix.InFix, Associativity.Right, 50)]
     [Operation("DIVIDE", Affix.InFix, Associativity.Left, 50)]
     [NodeName("multiplication_or_division")]
-    public double BinaryFactorExpression(double left, Token<AotLexer> operation, double right)
+    public double BinaryFactorExpression(double left, Token<AotTestLexer> operation, double right)
     {
         double result = 0;
         switch (operation.TokenID)
         {
-            case AotLexer.TIMES:
+            case AotTestLexer.TIMES:
             {
                 result = left * right;
                 break;
             }
-            case AotLexer.DIVIDE:
+            case AotTestLexer.DIVIDE:
             {
                 result = left / right;
                 break;
@@ -57,27 +62,25 @@ public class AotParser
     }
 
 
-    [Prefix((int)AotLexer.MINUS, Associativity.Right, 100)]
-    public double PreFixExpression(Token<AotLexer> operation, double value)
+    [Prefix((int) AotTestLexer.MINUS,  Associativity.Right, 100)]
+    public double PreFixExpression(Token<AotTestLexer> operation, double value)
     {
         return -value;
     }
 
-    [Postfix((int)AotLexer.FACTORIAL, Associativity.Right, 100)]
-    public double PostFixExpression(double value, Token<AotLexer> operation)
+    [Postfix((int) AotTestLexer.FACTORIAL, Associativity.Right, 100)]
+    public double PostFixExpression(double value, Token<AotTestLexer> operation)
     {
-        if (operation.TokenID == AotLexer.SQUARE)
+        if (operation.TokenID == AotTestLexer.SQUARE)
         {
             return value * value;
         }
-
-        if (operation.TokenID == AotLexer.FACTORIAL || operation.Value == "!")
+        if(operation.TokenID == AotTestLexer.FACTORIAL || operation.Value == "!")
         {
             var factorial = 1;
             for (var i = 1; i <= value; i++) factorial *= i;
             return factorial;
         }
-
         return value;
     }
 
@@ -92,22 +95,28 @@ public class AotParser
 
     [Production("primary_value : DOUBLE")]
     [NodeName("double")]
-    public double OperandDouble(Token<AotLexer> value)
+    public double OperandDouble(Token<AotTestLexer> value)
     {
         return value.DoubleValue;
     }
-
+        
     [Production("primary_value : INT")]
     [NodeName("integer")]
-    public double OperandInt(Token<AotLexer> value)
+    public double OperandInt(Token<AotTestLexer> value)
     {
         return value.DoubleValue;
     }
 
-    [Production("primary_value : LPAREN AotParser_expressions RPAREN")]
+    [Production("primary_value : LPAREN SimpleExpressionParser_expressions RPAREN")]
     [NodeName("group")]
-    public double OperandGroup(Token<AotLexer> lparen, double value, Token<AotLexer> rparen)
+    public double OperandGroup(Token<AotTestLexer> lparen, double value, Token<AotTestLexer> rparen)
     {
         return value;
     }
+}
+
+[ParserGenerator(typeof(AotTestLexer), typeof(AotTestParser), typeof(double))]
+internal partial class TestGenerator
+{
+    
 }
