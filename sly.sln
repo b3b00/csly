@@ -41,8 +41,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTemplate", "src/sampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aot", "src\aot\aot.csproj", "{C7275027-1D60-48DA-A1BF-A74AF9B783CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CslyGenerator.Tests", "tests\CslyGenerator.Tests\CslyGenerator.Tests.csproj", "{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneratedXML", "src\samples\GeneratedXML\GeneratedXML.csproj", "{7FEF0D32-FFC7-4886-A4B7-71314C25627E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExplicitTokens", "src\samples\ExplicitTokens\ExplicitTokens.csproj", "{94B9B654-82CB-4969-8DCA-250916E53724}"
@@ -132,10 +130,6 @@ Global
 		{C7275027-1D60-48DA-A1BF-A74AF9B783CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C7275027-1D60-48DA-A1BF-A74AF9B783CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C7275027-1D60-48DA-A1BF-A74AF9B783CF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6556937D-CDD5-4A18-BAB6-2E37DFDEBC0C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7FEF0D32-FFC7-4886-A4B7-71314C25627E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7FEF0D32-FFC7-4886-A4B7-71314C25627E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FEF0D32-FFC7-4886-A4B7-71314C25627E}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -10,6 +10,7 @@
     <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="NFluent" Version="3.0.4" />
+    <PackageReference Include="SharpCoreFileSystem" Version="1.1.2" />
     <PackageReference Include="xunit" Version="2.9.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -34,11 +35,21 @@
     <ProjectReference Include="..\..\src\samples\SimpleTemplate\SimpleTemplate.csproj" />
     <ProjectReference Include="..\..\src\samples\while\while.csproj" />
     <ProjectReference Include="..\..\src\samples\XML\XML.csproj" />
-    <ProjectReference Include="..\..\src\sly\sly.csproj" OutputItemType="Analyzer"/>
+    <ProjectReference Include="..\..\src\sly\sly.csproj" OutputItemType="Analyzer" />
     
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="sourceGenerators\data\aot.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\callbacks.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\explicits.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\expression.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\expressioncontext.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\extended.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\labels.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\template.txt" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
      <NoWarn>1701;1702;1705;1591</NoWarn>

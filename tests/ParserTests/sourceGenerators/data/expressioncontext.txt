@@ -1,0 +1,157 @@
+
+    [ParserGenerator(typeof(ExpressionToken), typeof(SimpleExpressionParserWithContext), typeof(int))]
+    public class SimpleExpressionParserWithContextGenerator
+    {
+        
+    }
+    
+    public class SimpleExpressionParserWithContext
+    
+    {
+        [Operation((int) ExpressionToken.PLUS, Affix.InFix, Associativity.Right, 10)]
+        [Operation((int) ExpressionToken.MINUS, Affix.InFix, Associativity.Left, 10)]
+        public int BinaryTermExpression(int left, Token<ExpressionToken> operation, int right,Dictionary<string,int> context)
+        {
+            var result = 0;
+            switch (operation.TokenID)
+            {
+                case ExpressionToken.PLUS:
+                {
+                    result = left + right;
+                    break;
+                }
+                case ExpressionToken.MINUS:
+                {
+                    result = left - right;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+
+        [Operation((int) ExpressionToken.TIMES, Affix.InFix, Associativity.Right, 50)]
+        [Operation((int) ExpressionToken.DIVIDE, Affix.InFix, Associativity.Left, 50)]
+        public int BinaryFactorExpression(int left, Token<ExpressionToken> operation, int right,Dictionary<string,int> context)
+        {
+            var result = 0;
+            switch (operation.TokenID)
+            {
+                case ExpressionToken.TIMES:
+                {
+                    result = left * right;
+                    break;
+                }
+                case ExpressionToken.DIVIDE:
+                {
+                    result = left / right;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        [NodeName("minus")]
+        [Operation((int) ExpressionToken.MINUS, Affix.PreFix, Associativity.Right, 100)]
+        public int PreFixExpression(Token<ExpressionToken> operation, int value,Dictionary<string,int> context)
+        {
+            return -value;
+        }
+
+        [NodeName("factorial")]
+        [Operation((int) ExpressionToken.FACTORIAL, Affix.PostFix, Associativity.Right, 100)]
+        public int PostFixExpression(int value, Token<ExpressionToken> operation,Dictionary<string,int> context)
+        {
+            var factorial = 1;
+            for (var i = 1; i <= value; i++) factorial = factorial * i;
+            return factorial;
+        }
+
+        [Operand]
+        [Production("operand : primary_value")]
+        public int OperandValue(int value,Dictionary<string,int> context)
+        {
+            return value;
+        }
+
+        
+        [Production("primary_value : IDENTIFIER")]
+        public int OperandVariable(Token<ExpressionToken> identifier,Dictionary<string,int> context)
+        {
+            if (context.ContainsKey(identifier.Value))
+            {
+                return context[identifier.Value];
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        [Production("primary_value : INT")]
+        public int OperandInt(Token<ExpressionToken> value,Dictionary<string,int> context)
+        {
+            return value.IntValue;
+        }
+
+        [Production("primary_value : LPAREN SimpleExpressionParserWithContext_expressions RPAREN")]
+        public int OperandParens(Token<ExpressionToken> lparen, int value, Token<ExpressionToken> rparen,Dictionary<string,int> context)
+        {
+            return value;
+        }
+    }
+    
+    public enum ExpressionToken
+        {
+            // float number 
+            [Lexeme("[0-9]+\\.[0-9]+")] DOUBLE = 1,
+    
+            // integer        
+            [Lexeme("[0-9]+")] INT = 3,
+    
+            [Lexeme("[a-zA-Z]+")] IDENTIFIER = 4,
+    
+            // the + operator
+            [LexemeLabel("en","plus sign")]
+            [LexemeLabel("fr","plus")]
+            [Lexeme("\\+")] PLUS = 5,
+    
+            // the - operator
+            [LexemeLabel("en","minus sign")]
+            [LexemeLabel("fr","moins")]
+            [Lexeme("\\-")] MINUS = 6,
+    
+            // the * operator
+            [LexemeLabel("en","times sign")]
+            [LexemeLabel("fr","multiplication")]
+            [Lexeme("\\*")] TIMES = 7,
+    
+            //  the  / operator
+            [LexemeLabel("en","divide sign")]
+            [LexemeLabel("fr","division")]
+            [Lexeme("\\/")] DIVIDE = 8,
+    
+            // a left paranthesis (
+            [LexemeLabel("en","opening parenthesis")]
+            [LexemeLabel("fr","parenthèse ouvrante")]
+            [Lexeme("\\(")] LPAREN = 9,
+    
+            // a right paranthesis )
+            [LexemeLabel("en","closing parenthesis")]
+            [LexemeLabel("fr","parenthèse fermante")]
+            [Lexeme("\\)")] RPAREN = 10,
+    
+            [LexemeLabel("fr","point d'exclamation")]
+            [LexemeLabel("en","exclamation point")]
+            [Lexeme("!")] FACTORIAL = 13,
+    
+    
+            // a whitespace
+            [Lexeme("[ \\t]+", true)] WS = 11,
+    
+            [Lexeme("[\\n\\r]+", true, true)] EOL = 12
+    
+    
+        }
