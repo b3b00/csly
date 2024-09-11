@@ -15,28 +15,28 @@ namespace sly.parser.generator.visitor
         }
 
 
-        protected override SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN> n, object context = null)
+        protected override SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN, OUT> n, object context = null)
         {
             switch (n)
             {
-                case SyntaxLeaf<IN> leaf:
+                case SyntaxLeaf<IN, OUT> leaf:
                     return Visit(leaf);
-                case GroupSyntaxNode<IN> node:
+                case GroupSyntaxNode<IN, OUT> node:
                     return Visit(node, context);
-                case ManySyntaxNode<IN> node:
+                case ManySyntaxNode<IN, OUT> node:
                     return Visit(node, context);
-                case OptionSyntaxNode<IN> node:
+                case OptionSyntaxNode<IN, OUT> node:
                     return Visit(node, context);
-                case SyntaxNode<IN> node:
+                case SyntaxNode<IN, OUT> node:
                     return Visit(node, context);
-                case SyntaxEpsilon<IN> epsilon:
+                case SyntaxEpsilon<IN, OUT> epsilon:
                     return SyntaxVisitorResult<IN, OUT>.Epsilon();
                 default:
                     return null;
             }
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(GroupSyntaxNode<IN> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> Visit(GroupSyntaxNode<IN, OUT> node, object context = null)
         {
             var group = new Group<IN, OUT>();
             var values = new List<SyntaxVisitorResult<IN, OUT>>();
@@ -56,9 +56,9 @@ namespace sly.parser.generator.visitor
             return res;
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(OptionSyntaxNode<IN> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> Visit(OptionSyntaxNode<IN, OUT> node, object context = null)
         {
-            var child = node.Children != null && node.Children.Any<ISyntaxNode<IN>>() ? node.Children[0] : null;
+            var child = node.Children != null && node.Children.Any<ISyntaxNode<IN, OUT>>() ? node.Children[0] : null;
             if (child == null || node.IsEmpty)
             {
                 if (node.IsGroupOption)
@@ -74,11 +74,11 @@ namespace sly.parser.generator.visitor
             var innerResult = Visit(child, context);
             switch (child)
             {
-                case SyntaxEpsilon<IN> epsilon: 
+                case SyntaxEpsilon<IN, OUT> epsilon: 
                     return SyntaxVisitorResult<IN, OUT>.NewOptionNone();
-                case SyntaxLeaf<IN> leaf:
+                case SyntaxLeaf<IN, OUT> leaf:
                     return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
-                case GroupSyntaxNode<IN> group:
+                case GroupSyntaxNode<IN, OUT> group:
                     return SyntaxVisitorResult<IN, OUT>.NewOptionGroupSome(innerResult.GroupResult);
                 default:
                     return SyntaxVisitorResult<IN, OUT>.NewOptionSome(innerResult.ValueResult);
@@ -86,10 +86,11 @@ namespace sly.parser.generator.visitor
         }
 
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN, OUT> node, object context = null)
         {
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
-            if (node.Visitor != null || node.IsByPassNode)
+            
+            if (node.LambdaVisitor != null || node.Visitor != null || node.IsByPassNode)
             {
                 
                 
@@ -151,10 +152,18 @@ namespace sly.parser.generator.visitor
                             args.Add(context);
                         }
 
-                        method = node.Visitor;
-                        var t = method.Invoke(ParserVsisitorInstance, args.ToArray());
-                        var res = (OUT) t;
-                        result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                        OUT value = default;
+                        if (node.LambdaVisitor != null)
+                        {
+                            value = node.LambdaVisitor(args.ToArray());
+                        }
+                        if (node.Visitor != null)
+                        {
+                            method = node.Visitor;
+                            var t = method.Invoke(ParserVsisitorInstance, args.ToArray());
+                            value = (OUT)t;
+                        }
+                        result = SyntaxVisitorResult<IN, OUT>.NewValue(value);
                     }
                     catch (TargetInvocationException tie)
                     {
@@ -169,7 +178,7 @@ namespace sly.parser.generator.visitor
             return result;
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(ManySyntaxNode<IN> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> Visit(ManySyntaxNode<IN, OUT> node, object context = null)
         {
             SyntaxVisitorResult<IN, OUT> result = null;
 
@@ -204,7 +213,7 @@ namespace sly.parser.generator.visitor
         }
 
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN> leaf)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN, OUT> leaf)
         {
             return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
         }

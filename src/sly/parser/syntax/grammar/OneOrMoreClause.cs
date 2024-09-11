@@ -2,9 +2,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
-    public sealed class OneOrMoreClause<T> : ManyClause<T>
+    public sealed class OneOrMoreClause<IN,OUT> : ManyClause<IN,OUT> where IN : struct
     {
-        public OneOrMoreClause(IClause<T> clause)
+        public OneOrMoreClause(IClause<IN,OUT> clause)
         {
             Clause = clause;
         }
@@ -27,9 +27,9 @@ namespace sly.parser.syntax.grammar
             return Clause.Dump()+"+";
         }
 
-        public override bool Equals(IClause<T> other)
+        public override bool Equals(IClause<IN,OUT> other)
         {
-            if (other is OneOrMoreClause<T> otherOneOrMore)
+            if (other is OneOrMoreClause<IN,OUT> otherOneOrMore)
             {
                 return Clause.Equals(otherOneOrMore.Clause);
             }

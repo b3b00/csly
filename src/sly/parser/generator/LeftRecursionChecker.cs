@@ -24,31 +24,31 @@ namespace sly.parser.generator
             return args.ToList<string>();
         }
 
-        public static List<string> GetLeftClausesName(IClause<IN> clause)
+        public static List<string> GetLeftClausesName(IClause<IN,OUT> clause)
         {
             switch (clause)
             {
-                case NonTerminalClause<IN> nonTerminal:
+                case NonTerminalClause<IN,OUT> nonTerminal:
                     return Lst(nonTerminal.NonTerminalName);
-                case ManyClause<IN> many:
+                case ManyClause<IN,OUT> many:
                     return GetLeftClausesName(many.Clause);
-                case OptionClause<IN> option:
+                case OptionClause<IN,OUT> option:
                     return GetLeftClausesName(option.Clause);
-                case ChoiceClause<IN> choice when choice.IsNonTerminalChoice:
-                    return choice.Choices.SelectMany<IClause<IN>, string>(x => GetLeftClausesName(x)).ToList<string>();
-                case GroupClause<IN> group:
-                    return GetLeftClausesName(group.Clauses.First<IClause<IN>>());
+                case ChoiceClause<IN,OUT> choice when choice.IsNonTerminalChoice:
+                    return choice.Choices.SelectMany<IClause<IN,OUT>, string>(x => GetLeftClausesName(x)).ToList<string>();
+                case GroupClause<IN,OUT> group:
+                    return GetLeftClausesName(group.Clauses.First<IClause<IN,OUT>>());
                 default:
                     return new List<string>();
             }
         }
 
-        public static List<string> GetLeftClausesName(Rule<IN> rule, ParserConfiguration<IN, OUT> configuration)
+        public static List<string> GetLeftClausesName(Rule<IN,OUT> rule, ParserConfiguration<IN, OUT> configuration)
         {
             List<string> lefts = new List<string>();
 
             int i = 0;
-            IClause<IN> current = rule.Clauses[0] as IClause<IN>;
+            IClause<IN,OUT> current = rule.Clauses[0] as IClause<IN,OUT>;
             var currentLefts = GetLeftClausesName(current);
             bool stopped = false;
             while (i < rule.Clauses.Count && ! stopped && currentLefts != null && currentLefts.Any<string>())
@@ -57,7 +57,7 @@ namespace sly.parser.generator
                 lefts.AddRange(currentLefts);
                 stopped = !current.MayBeEmpty();
                 i++;
-                if (i < rule.Clauses.Count<IClause<IN>>())
+                if (i < rule.Clauses.Count<IClause<IN,OUT>>())
                 {
                     current = rule.Clauses[i];
                     currentLefts = GetLeftClausesName(current);
@@ -94,7 +94,7 @@ namespace sly.parser.generator
         }
         
         public static (bool recursionFound,List<List<string>> recursion) CheckLeftRecursion(ParserConfiguration<IN,OUT> configuration,
-            NonTerminal<IN> nonTerminal, List<string> currentPath)
+            NonTerminal<IN,OUT> nonTerminal, List<string> currentPath)
         {
             var foundRecursion = false;
             List<List<string>> recursions = new List<List<string>>();
@@ -105,7 +105,7 @@ namespace sly.parser.generator
                 return (true,new List<List<string>> {currentPath});
             }
             
-            var leftClauses = nonTerminal.Rules.SelectMany<Rule<IN>, string>(x => GetLeftClausesName(x, configuration)).ToList<string>();
+            var leftClauses = nonTerminal.Rules.SelectMany<Rule<IN,OUT>, string>(x => GetLeftClausesName(x, configuration)).ToList<string>();
             
             foreach (var leftClause in leftClauses)
             {

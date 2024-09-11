@@ -19,8 +19,8 @@ namespace sly.parser.llparser.ebnf
 
         #region parsing
 
-        public override SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position,
-            string nonTerminalName, SyntaxParsingContext<IN> parsingContext)
+        public override SyntaxParseResult<IN, OUT> Parse(IList<Token<IN>> tokens, Rule<IN,OUT> rule, int position,
+            string nonTerminalName, SyntaxParsingContext<IN,OUT> parsingContext)
         {
             if (rule.IsInfixExpressionRule && rule.IsExpressionRule)
             {
@@ -30,15 +30,15 @@ namespace sly.parser.llparser.ebnf
             var currentPosition = position;
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
-            var children = new List<ISyntaxNode<IN>>();
+            var children = new List<ISyntaxNode<IN, OUT>>();
             if (rule.Match(tokens, position, Configuration) && rule.Clauses != null && rule.Clauses.Count > 0)
             {
-                children = new List<ISyntaxNode<IN>>();
+                children = new List<ISyntaxNode<IN, OUT>>();
                 foreach (var clause in rule.Clauses)
                 {
                     switch (clause)
                     {
-                        case TerminalClause<IN> termClause:
+                        case TerminalClause<IN,OUT> termClause:
                         {
                             var termRes =
                                 ParseTerminal(tokens, termClause, currentPosition, parsingContext);
@@ -57,7 +57,7 @@ namespace sly.parser.llparser.ebnf
                             isError = isError || termRes.IsError;
                             break;
                         }
-                        case NonTerminalClause<IN> terminalClause:
+                        case NonTerminalClause<IN,OUT> terminalClause:
                         {
                             var nonTerminalResult =
                                 ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
@@ -75,16 +75,16 @@ namespace sly.parser.llparser.ebnf
                             isError = isError || nonTerminalResult.IsError;
                             break;
                         }
-                        case OneOrMoreClause<IN> _:
-                        case ZeroOrMoreClause<IN> _:
+                        case OneOrMoreClause<IN,OUT> _:
+                        case ZeroOrMoreClause<IN,OUT> _:
                         {
-                            SyntaxParseResult<IN> manyResult = null;
+                            SyntaxParseResult<IN, OUT> manyResult = null;
                             switch (clause)
                             {
-                                case OneOrMoreClause<IN> oneOrMore:
+                                case OneOrMoreClause<IN,OUT> oneOrMore:
                                     manyResult = ParseOneOrMore(tokens, oneOrMore, currentPosition, parsingContext);
                                     break;
-                                case ZeroOrMoreClause<IN> zeroOrMore:
+                                case ZeroOrMoreClause<IN,OUT> zeroOrMore:
                                     manyResult = ParseZeroOrMore(tokens, zeroOrMore, currentPosition, parsingContext);
                                     break;
                             }
@@ -104,14 +104,14 @@ namespace sly.parser.llparser.ebnf
                             isError = manyResult.IsError;
                             break;
                         }
-                        case OptionClause<IN> option:
+                        case OptionClause<IN,OUT> option:
                         {
                             var optionResult = ParseOption(tokens, option, rule, currentPosition, parsingContext);
                             currentPosition = optionResult.EndingPosition;
                             children.Add(optionResult.Root);
                             break;
                         }
-                        case ChoiceClause<IN> choice:
+                        case ChoiceClause<IN,OUT> choice:
                         {
                             var choiceResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
                             currentPosition = choiceResult.EndingPosition;
@@ -131,16 +131,16 @@ namespace sly.parser.llparser.ebnf
                 }
             }
 
-            var result = new SyntaxParseResult<IN>();
+            var result = new SyntaxParseResult<IN, OUT>();
             result.IsError = isError;
             result.AddErrors(errors);
             result.EndingPosition = currentPosition;
             if (!isError)
             {
-                SyntaxNode<IN> node = null;
+                SyntaxNode<IN, OUT> node = null;
                 if (rule.IsSubRule)
                 {
-                    node = new GroupSyntaxNode<IN>(nonTerminalName, children);
+                    node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, children);
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
                     result.IsEnded = currentPosition >= tokens.Count - 1
@@ -149,7 +149,7 @@ namespace sly.parser.llparser.ebnf
                 }
                 else
                 {
-                    node = new SyntaxNode<IN>( nonTerminalName,  children);
+                    node = new SyntaxNode<IN, OUT>( nonTerminalName,  children);
                     node.Name = string.IsNullOrEmpty(rule.NodeName) ? nonTerminalName : rule.NodeName;
                     node.ExpressionAffix = rule.ExpressionAffix;
                     node = ManageExpressionRules(rule, node);

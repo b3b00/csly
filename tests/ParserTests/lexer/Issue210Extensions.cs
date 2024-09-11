@@ -26,7 +26,6 @@ namespace ParserTests.lexer
                             match.Properties[GenericLexer<Issue210Token>.DerivedToken] = Issue210Token.SPECIAL;
                             return match;
                         }
-                        Console.WriteLine($"bad lexing {match.Result.Value}");
                         match.Result.SpanValue = null;
                         match.Properties[GenericLexer<Issue210Token>.DerivedToken] = default(Issue210Token);
                         return match;

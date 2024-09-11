@@ -48,11 +48,11 @@ namespace sly.buildresult
         {
             if (IsOk)
             {
-                return $"parser is ok {typeof(R)}";
+                return $"{typeof(R).Name} is ok";
             }
 
             var error = new StringBuilder();
-            error.AppendLine("parser is KO");
+            error.AppendLine($"{typeof(R).Name} is KO");
             foreach (var initializationError in Errors)
             {
                 error.AppendLine(

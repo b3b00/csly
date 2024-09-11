@@ -2,16 +2,16 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
-    public sealed class OptionClause<T> : IClause<T>
+    public sealed class OptionClause<IN,OUT> : IClause<IN,OUT> where IN : struct
     {
-        public OptionClause(IClause<T> clause)
+        public OptionClause(IClause<IN,OUT> clause)
         {
             Clause = clause;
         }
 
-        public IClause<T> Clause { get; set; }
+        public IClause<IN,OUT> Clause { get; set; }
 
-        public bool IsGroupOption => Clause is NonTerminalClause<T> clause && clause.IsGroup;
+        public bool IsGroupOption => Clause is NonTerminalClause<IN,OUT> clause && clause.IsGroup;
 
         public bool MayBeEmpty()
         {
@@ -31,16 +31,16 @@ namespace sly.parser.syntax.grammar
             return $"{Clause}?";
         }
 
-        public bool Equals(IClause<T> clause)
+        public bool Equals(IClause<IN,OUT> clause)
         {
-            if (clause is OptionClause<T> other)
+            if (clause is OptionClause<IN,OUT> other)
             {
                 return Equals(other);
             }
             return false;
         }
 
-        private bool Equals(OptionClause<T> other)
+        private bool Equals(OptionClause<IN,OUT> other)
         {
             return Equals(Clause, other.Clause);
         }
@@ -50,7 +50,7 @@ namespace sly.parser.syntax.grammar
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((OptionClause<T>)obj);
+            return Equals((OptionClause<IN,OUT>)obj);
         }
 
         public override int GetHashCode()

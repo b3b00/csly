@@ -4,6 +4,7 @@ using sly.parser.generator;
 
 namespace expressionparser
 {
+    
     public class VariableExpressionParser
     {
         [Production("primary: INT")]
