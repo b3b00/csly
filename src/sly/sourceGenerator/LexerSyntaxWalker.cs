@@ -177,7 +177,6 @@ public class LexerSyntaxWalker : CslySyntaxWalker
             {
                 
                 string attributeName = attributeSyntax.Name.ToString();
-                Console.WriteLine($"visit {attributeName} for {_lexerName}.{name}");
                 if (attributeName == "Mode" || attributeName == "LexemeLabel")
                 {
                     continue;

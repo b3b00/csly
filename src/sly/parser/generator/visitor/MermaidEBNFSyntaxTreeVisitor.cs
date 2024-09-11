@@ -127,10 +127,6 @@ namespace sly.parser.generator.visitor
 
         private MermaidNode Leaf(IN type, string value)
         {
-            if (value.Contains("pi"))
-            {
-                Console.WriteLine("3.14");
-            }
             string label = "\""+type.ToString();
             if (label == "0")
             {

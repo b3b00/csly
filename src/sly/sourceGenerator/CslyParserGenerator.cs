@@ -216,7 +216,6 @@ namespace {ns};
     {
         
         var classDeclarationSyntax = (ClassDeclarationSyntax)context.Node;
-        Console.WriteLine($"**** {classDeclarationSyntax.GetNameSpace()}.{classDeclarationSyntax.Identifier.ToString()} ****");
         // Go through all attributes of the class.
         foreach (AttributeListSyntax attributeListSyntax in classDeclarationSyntax.AttributeLists)
         foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
