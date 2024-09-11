@@ -15,16 +15,9 @@ public class ParserSyntaxWalker : CslySyntaxWalker
 {
     StringBuilder _builder = new();
 
-    private string _parserName = "";
-    private readonly string _lexerName;
-    private readonly string _outputType;
-
     public ParserSyntaxWalker(StringBuilder builder, string parserName, string lexerName, string outputType)
     {
         _builder = builder;
-        _parserName = parserName;
-        _lexerName = lexerName;
-        _outputType = outputType;
     }
 
 
