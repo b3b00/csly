@@ -4,7 +4,7 @@ public class ParserCallbacks
 }
 
 [ParserGenerator(typeof(CallbackTokens),typeof(ParserCallbacks), typeof(object))]
-public partial class ParserCallbacksGenerator
+public partial class ParserCallbacksGenerator : AbstractParserGenerator<AotTestLexer>
 {
         
 }

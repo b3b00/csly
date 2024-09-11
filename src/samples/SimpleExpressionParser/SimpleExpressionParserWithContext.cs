@@ -8,7 +8,7 @@ namespace simpleExpressionParser
 {
 
     [ParserGenerator(typeof(ExpressionToken), typeof(SimpleExpressionParserWithContext), typeof(int))]
-    public partial class SimpleExpressionParserWithContextGenerator
+    public partial class SimpleExpressionParserWithContextGenerator : AbstractParserGenerator<ExpressionToken>
     {
         
     }

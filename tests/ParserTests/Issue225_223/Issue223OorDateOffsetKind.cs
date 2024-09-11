@@ -1,7 +1,7 @@
 // ReSharper disable InconsistentNaming
 namespace ParserTests.Issue225_IndexOutOfRangeException
 {
-    public enum DateOffsetKind
+    public enum Issue223OorDateOffsetKind
     {
         SECOND = 1,
         MINUTE = SECOND * 60,

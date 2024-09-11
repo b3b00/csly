@@ -2,22 +2,22 @@ using System;
 
 namespace ParserTests.Issue225_IndexOutOfRangeException
 {
-    public class DateExpression : ValueExpression
+    public class Issue223OorDateExpression : Issue223OorValueExpression
     {
         public int OffsetMagnitude { get; }
-        public DateOffsetKind OffsetKindKind { get; }
-        public DateRoundKind DateRoundKind { get; }
+        public Issue223OorDateOffsetKind OffsetKindKind { get; }
+        public Issue223OorDateRoundKind Issue223OorDateRoundKind { get; }
         public TimeSpan Offset => TimeSpan.FromSeconds(OffsetMagnitude * (int)OffsetKindKind);
 
-        public DateExpression(string value,
+        public Issue223OorDateExpression(string value,
             int offsetMagnitude,
-            DateOffsetKind offsetKindKind, 
-            DateRoundKind dateRoundKind)
-            : base($"{value}{(offsetMagnitude != 0? offsetMagnitude.ToString() : "")}{(offsetMagnitude != 0? offsetKindKind + (Math.Abs(offsetMagnitude) > 1? "S" : "") : "")}{(dateRoundKind != DateRoundKind.NONE? "/" + dateRoundKind : "")}")
+            Issue223OorDateOffsetKind offsetKindKind, 
+            Issue223OorDateRoundKind issue223OorDateRoundKind)
+            : base($"{value}{(offsetMagnitude != 0? offsetMagnitude.ToString() : "")}{(offsetMagnitude != 0? offsetKindKind + (Math.Abs(offsetMagnitude) > 1? "S" : "") : "")}{(issue223OorDateRoundKind != Issue223OorDateRoundKind.NONE? "/" + issue223OorDateRoundKind : "")}")
         {
             OffsetMagnitude = offsetMagnitude;
             OffsetKindKind = offsetKindKind;
-            DateRoundKind = dateRoundKind;
+            Issue223OorDateRoundKind = issue223OorDateRoundKind;
         }
 
         public override string ToQuery()

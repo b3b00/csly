@@ -67,10 +67,11 @@ public class SourceGeneratorTests
     public void TestGenerator(string source, string className)
     {
         var code = _embeddedResourceFileSystem.ReadAllText(source);
-        var generatedTrees = generateSource(code, className).GeneratedTrees;
-    
-        var contents = generatedTrees.ToDictionary(x => x.FilePath,x => x.ToString());
-        var generatedFiles = generatedTrees.Select(x => new FileInfo(x.FilePath).Name);
+        var result = generateSource(code, className);
+        Assert.True(result.Diagnostics.IsEmpty);
+        
+        var contents = result.GeneratedTrees.ToDictionary(x => x.FilePath,x => x.ToString());
+        var generatedFiles = result.GeneratedTrees.Select(x => new FileInfo(x.FilePath).Name);
 
         Assert.Equivalent(new[]
         {
@@ -80,6 +81,8 @@ public class SourceGeneratorTests
     
     [Theory]
     [InlineData("/sourceGenerators/data/errors/not_partial.txt", CslyGeneratorErrors.NOT_PARTIAL)]
+    [InlineData("/sourceGenerators/data/errors/missing_inheritance.txt", CslyGeneratorErrors.MISSING_INHERITANCE)]
+    [InlineData("/sourceGenerators/data/errors/missing_inheritance_2.txt", CslyGeneratorErrors.MISSING_INHERITANCE)]
     [InlineData("/sourceGenerators/data/errors/missing_lexer.txt", CslyGeneratorErrors.LEXER_NOT_FOUND)]
     [InlineData("/sourceGenerators/data/errors/missing_parser.txt", CslyGeneratorErrors.PARSER_NOT_FOUND)]
     public void TestGeneratorError(string source, string expectedError)

@@ -156,8 +156,15 @@ internal class AotTestParser
     }
 }
 
+internal class Parent {
+
+    public void ParentDo() {
+    
+    }
+}
+
 [ParserGenerator(typeof(AotTestLexer), typeof(AotTestParser), typeof(double))]
-internal class TestGenerator : AbstractParserGenerator<AotTestLexer>
+internal partial class TestGenerator : Parent
 {
     
 }

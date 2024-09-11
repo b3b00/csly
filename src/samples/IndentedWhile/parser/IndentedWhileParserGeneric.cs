@@ -127,9 +127,9 @@ namespace csly.indentedWhileLang.parser
         }
         
         [Production("statement: RETURN[d] IndentedWhileParserGeneric_expressions")]
-        public WhileAST ReturnStmt(Expression expression)
+        public WhileAST ReturnStmt(Expression ssue223Expression)
         {
-            return new ReturnStatement(expression);
+            return new ReturnStatement(ssue223Expression);
         }
 
         [Production("statement: PRINT[d] IndentedWhileParserGeneric_expressions")]

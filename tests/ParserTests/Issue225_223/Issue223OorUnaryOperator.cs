@@ -1,6 +1,6 @@
 namespace ParserTests.Issue225_IndexOutOfRangeException
 {
-    public enum UnaryOperator
+    public enum Issue223OorUnaryOperator
     {
         NONE,
         NOT,

@@ -2,15 +2,15 @@ using System.Collections.Generic;
 
 namespace ParserTests.Issue225_IndexOutOfRangeException
 {
-    public class RangeExpression : Expression
+    public class Issue223OorRangeExpression : Issue223OorExpression
     {
-        public ValueExpression From { get; }
-        public ValueExpression To { get; }
+        public Issue223OorValueExpression From { get; }
+        public Issue223OorValueExpression To { get; }
         
         public override bool IsRange => true;
-        public override IEnumerable<Expression> Children => new List<Expression> {From, To};
+        public override IEnumerable<Issue223OorExpression> Children => new List<Issue223OorExpression> {From, To};
 
-        public RangeExpression(ValueExpression from, ValueExpression to)
+        public Issue223OorRangeExpression(Issue223OorValueExpression from, Issue223OorValueExpression to)
         {
             From = @from;
             To = to;

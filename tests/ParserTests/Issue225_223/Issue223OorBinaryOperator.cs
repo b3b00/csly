@@ -1,6 +1,6 @@
 namespace ParserTests.Issue225_IndexOutOfRangeException
 {
-    public enum BinaryOperator
+    public enum Issue223OorBinaryOperator
     {
         AND,
         OR

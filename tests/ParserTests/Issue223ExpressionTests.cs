@@ -6,9 +6,9 @@ using Xunit;
 
 namespace ParserTests
 {
-    public class ExpressionTests
+    public class Issue223ExpressionTests
     {
-        public ExpressionTests()
+        public Issue223ExpressionTests()
         {
             var parserInstance = new ExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, int>();

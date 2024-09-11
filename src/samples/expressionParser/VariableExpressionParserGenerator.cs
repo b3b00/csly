@@ -4,7 +4,7 @@ using sly.sourceGenerator;
 namespace expressionparser;
 
 [ParserGenerator(typeof(ExpressionToken), typeof(VariableExpressionParser), typeof(Expression))]
-public partial class VariableExpressionParserGenerator
+public partial class VariableExpressionParserGenerator : AbstractParserGenerator<ExpressionToken>
 {
     
 }

@@ -12,7 +12,7 @@ namespace csly.indentedWhileLang.compiler
 {
     
     [ParserGenerator(typeof(IndentedWhileTokenGeneric),typeof(IndentedWhileParserGeneric), typeof(WhileAST))]
-    public partial class WhileGenerator
+    public partial class WhileGenerator : AbstractParserGenerator<IndentedWhileTokenGeneric>
     {
     
     }

@@ -137,6 +137,34 @@ public class CslyParserGenerator : IIncrementalGenerator
                                 DiagnosticSeverity.Error,
                                 true), classDeclarationSyntax.GetLocation(), classDeclarationSyntax.Identifier.Text));
                     }
+
+                    if (classDeclarationSyntax.BaseList == null || classDeclarationSyntax.BaseList.Types == null || !classDeclarationSyntax.BaseList.Types.Any())
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                CslyGeneratorErrors.MISSING_INHERITANCE,
+                                "Parser generator does not inherit from AbstractParserGenerator [1]",
+                                "Parser generator {0} does not inherit from AbstractParserGenerator [1]",
+                                "csly",
+                                DiagnosticSeverity.Error,
+                                true), classDeclarationSyntax.GetLocation(), classDeclarationSyntax.Identifier.Text));
+                        return;
+                    }
+                    
+                    if (!classDeclarationSyntax.BaseList.Types.Any(x => x.Type.ToString().StartsWith("AbstractParserGenerator<")))
+                    {
+                        string inheriance = string.Join(", ",classDeclarationSyntax.BaseList.Types.Select(x => $"[{x.Type.ToString()}]"));
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            new DiagnosticDescriptor(
+                                CslyGeneratorErrors.MISSING_INHERITANCE,
+                                "Parser generator does not inherit from AbstractParserGenerator [2]",
+                                "Parser generator {0} does not inherit from AbstractParserGenerator [2] : {1}",
+                                "csly",
+                                DiagnosticSeverity.Error,
+                                true), classDeclarationSyntax.GetLocation(), classDeclarationSyntax.Identifier.Text, inheriance));
+                    }
+                    
+                    
                     
                     string ns = declarationSyntax.GetNameSpace();
                 
@@ -182,16 +210,15 @@ public class CslyParserGenerator : IIncrementalGenerator
                     usings.AddRange(GetUsings(parserDecl));
                     usings.Add($"using {lexerDecl.GetNameSpace()};");
                     usings.Add($"using {parserDecl.GetNameSpace()};");
-                    
+                    usings.AddRange(new[]
+                    {
+                        "using System;", "using sly.lexer;", "using sly.parser;",
+                        "using sly.buildresult;", "using sly.sourceGenerator;", "using sly.parser.generator;"
+                    }); 
                     usings = usings.Distinct().ToList();
                     
                     string code = $@"
-using System;
-using sly.lexer;
-using sly.parser;
-using sly.buildresult;
-using sly.sourceGenerator;
-using sly.parser.generator;
+
 {string.Join(Environment.NewLine, usings)}
 
 

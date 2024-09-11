@@ -1,6 +1,6 @@
 
     [ParserGenerator(typeof(ExpressionToken), typeof(SimpleExpressionParserWithContext), typeof(int))]
-    public class SimpleExpressionParserWithContextGenerator
+    public partial class SimpleExpressionParserWithContextGenerator : AbstractParserGenerator<AotTestLexer>
     {
         
     }

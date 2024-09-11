@@ -3,7 +3,7 @@ using sly.lexer;
 namespace ParserTests.Issue225_IndexOutOfRangeException
 {
     [Lexer(IgnoreWS = true, IgnoreEOL = true, KeyWordIgnoreCase = true)]
-    public enum IndexOutOfRangeToken
+    public enum Issue223OorIndexOutOfRangeToken
     {
         [Lexeme(GenericToken.KeyWord, "or")]
         OR,

@@ -1,6 +1,6 @@
 namespace ParserTests.Issue225_IndexOutOfRangeException
 {
-    public enum Fields
+    public enum Issue223OorFields
     {
         Field1,
         Field2,

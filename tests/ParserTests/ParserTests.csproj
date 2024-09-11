@@ -44,6 +44,8 @@
   <ItemGroup>
     <EmbeddedResource Include="sourceGenerators\data\aot.txt" />
     <EmbeddedResource Include="sourceGenerators\data\callbacks.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\errors\missing_inheritance.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\errors\missing_inheritance_2.txt" />
     <EmbeddedResource Include="sourceGenerators\data\errors\missing_lexer.txt" />
     <EmbeddedResource Include="sourceGenerators\data\errors\missing_parser.txt" />
     <EmbeddedResource Include="sourceGenerators\data\errors\not_partial.txt" />

@@ -1,5 +1,5 @@
 [ParserGenerator(typeof(ExplicitTokensTokens), typeof(ExplicitTokensExpressionParser),typeof(double))]
-public class ExplicitTokensExpressionParserGenerator : AbstractParserGenerator<ExplicitTokensTokens>
+public partial class ExplicitTokensExpressionParserGenerator : AbstractParserGenerator<ExplicitTokensTokens>
 {
         
 }

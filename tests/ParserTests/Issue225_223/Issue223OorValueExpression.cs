@@ -2,12 +2,12 @@ using System.Collections.Generic;
 
 namespace ParserTests.Issue225_IndexOutOfRangeException
 {
-    public class ValueExpression : Expression
+    public class Issue223OorValueExpression : Issue223OorExpression
     {
         public string Value { get; }
-        public override IEnumerable<Expression> Children => new Expression[0];
+        public override IEnumerable<Issue223OorExpression> Children => new Issue223OorExpression[0];
 
-        public ValueExpression(string value)
+        public Issue223OorValueExpression(string value)
         {
             Value = value;
         }
