@@ -70,7 +70,7 @@ public class CslyParserGenerator : IIncrementalGenerator
                 return t.classDeclarationSyntax;
             });
 
-        var provider2 = context.SyntaxProvider.CreateSyntaxProvider((s, _) => s is ClassDeclarationSyntax | s is EnumDeclarationSyntax,
+        var provider2 = context.SyntaxProvider.CreateSyntaxProvider((s, _) => s is ClassDeclarationSyntax || s is EnumDeclarationSyntax,
             ((ctx,_) =>  ctx.Node ));
 
         
