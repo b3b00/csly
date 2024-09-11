@@ -6,10 +6,10 @@
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <Description>#LY is a parser generator halfway between parser combinators and parser generator like ANTLR</Description>
     <Authors>b3b00</Authors>
-    <version>3.5.0-alpha1</version>
+    <version>3.5.0-alpha2</version>
     <PackageProjectUrl>https://github.com/b3b00/sly</PackageProjectUrl>
     <RepositoryUrl>https://github.com/b3b00/sly</RepositoryUrl>    
-    <PackageVersion>3.5.0-alpha1</PackageVersion>
+    <PackageVersion>3.5.0-alpha2</PackageVersion>
     <ApplicationIcon/>
     <OutputType>Library</OutputType>
     <StartupObject/>
