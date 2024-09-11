@@ -41,7 +41,7 @@ jobs:
       with:
         testProject: ${{env.TESTS_PROJECT}}
         output: 'lcov.net7.0.info'
-        threshold: 70
+        threshold: 80
         outputFormat: 'lcov'
         excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*,[postProcessedLexerParser]*,[XML]*,[SimpleTemplate]*'
 
