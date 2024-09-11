@@ -8,7 +8,7 @@ using sly.parser.syntax.tree;
 namespace sly.parser.generator.visitor
 {
     [ExcludeFromCodeCoverage]
-    public class GraphVizEBNFSyntaxTreeVisitor<IN>  : IConcreteSyntaxTreeVisitor<IN,DotNode> where IN : struct
+    public class GraphVizEBNFSyntaxTreeVisitor<IN, OUT>  : IConcreteSyntaxTreeVisitor<IN, OUT,DotNode> where IN : struct
     {
         public DotGraph Graph { get; private set; }
 
@@ -19,11 +19,11 @@ namespace sly.parser.generator.visitor
 
         private int NodeCounter = 0;
 
-        public DotNode VisitTree(ISyntaxNode<IN> root)
+        public DotNode VisitTree(ISyntaxNode<IN, OUT> root)
         {
             Graph = new DotGraph("syntaxtree", true);
             
-            ConcreteSyntaxTreeWalker<IN,DotNode> walker = new ConcreteSyntaxTreeWalker<IN,DotNode>(this);
+            ConcreteSyntaxTreeWalker<IN, OUT,DotNode> walker = new ConcreteSyntaxTreeWalker<IN, OUT,DotNode>(this);
             var dot =  walker.Visit(root);
             return dot;
         }
@@ -55,7 +55,7 @@ namespace sly.parser.generator.visitor
             return child;
         }
 
-        public DotNode VisitNode(SyntaxNode<IN> node, IList<DotNode> children)
+        public DotNode VisitNode(SyntaxNode<IN, OUT> node, IList<DotNode> children)
         {
             DotNode result = null;
 
@@ -77,7 +77,7 @@ namespace sly.parser.generator.visitor
             return result;
         }
 
-        public DotNode VisitManyNode(ManySyntaxNode<IN> node, IList<DotNode> children)
+        public DotNode VisitManyNode(ManySyntaxNode<IN, OUT> node, IList<DotNode> children)
         {
             DotNode result = null;
 
@@ -170,7 +170,7 @@ namespace sly.parser.generator.visitor
         }
         
         
-        private string GetNodeLabel(SyntaxNode<IN> node)
+        private string GetNodeLabel(SyntaxNode<IN, OUT> node)
         {
             string label = node.Name;
             return label;

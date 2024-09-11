@@ -1,22 +1,30 @@
+using sly.i18n;
 using sly.lexer;
 
 namespace GenericLexerWithCallbacks
 {
-    
     [CallBacks(typeof(TestCallbacks))]
     public enum CallbackTokens
     {
         #region keywords 0 -> 19
 
+        [LexemeLabel("en","iiff")]
+        [LexemeLabel("fr","ssii")]
         [Lexeme(GenericToken.KeyWord, "IF")] [Lexeme(GenericToken.KeyWord, "if")]
         IF = 1,
 
+        [LexemeLabel("en","zen")]
+        [LexemeLabel("fr","alors")]
         [Lexeme(GenericToken.KeyWord, "THEN")] [Lexeme(GenericToken.KeyWord, "then")]
         THEN = 2,
 
+        [LexemeLabel("en","elze")]
+        [LexemeLabel("fr","sinon")]
         [Lexeme(GenericToken.KeyWord, "ELSE")] [Lexeme(GenericToken.KeyWord, "else")]
         ELSE = 3,
 
+        [LexemeLabel("en","whylee")]
+        [LexemeLabel("fr","tant que")]
         [Lexeme(GenericToken.KeyWord, "WHILE")] [Lexeme(GenericToken.KeyWord, "while")]
         WHILE = 4,
 
@@ -48,7 +56,7 @@ namespace GenericLexerWithCallbacks
 
         #region literals 20 -> 29
 
-        [Lexeme(GenericToken.Identifier)] IDENTIFIER = 20,
+        [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)] IDENTIFIER = 20,
 
         [Lexeme(GenericToken.String)] STRING = 21,
 

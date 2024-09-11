@@ -9,21 +9,21 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 
-    public SyntaxParseResult<IN> ParseTerminal(IList<Token<IN>> tokens, TerminalClause<IN> terminal, int position,
-        SyntaxParsingContext<IN> parsingContext)
+    public SyntaxParseResult<IN, OUT> ParseTerminal(IList<Token<IN>> tokens, TerminalClause<IN,OUT> terminal, int position,
+        SyntaxParsingContext<IN,OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(terminal, position, out var parseResult))
         {
             return parseResult;
         }
 
-        var result = new SyntaxParseResult<IN>();
+        var result = new SyntaxParseResult<IN, OUT>();
         result.IsError = !terminal.Check(tokens[position]);
         result.EndingPosition = !result.IsError ? position + 1 : position;
         var token = tokens[position];
         token.Discarded = terminal.Discarded;
         token.IsExplicit = terminal.IsExplicitToken;
-        result.Root = new SyntaxLeaf<IN>(token, terminal.Discarded);
+        result.Root = new SyntaxLeaf<IN, OUT>(token, terminal.Discarded);
         result.HasByPassNodes = false;
         if (result.IsError)
         {

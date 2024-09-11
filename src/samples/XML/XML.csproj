@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\sly\sly.csproj" />
+      <ProjectReference Include="..\..\sly\sly.csproj" OutputItemType="Analyzer"/>
     </ItemGroup>
 
 </Project>

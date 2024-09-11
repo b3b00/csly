@@ -7,19 +7,19 @@ using sly.lexer;
 namespace sly.parser.syntax.grammar
 {
     [DebuggerDisplay("Terminal {(ExpectedToken.ToString())}{Discarded ? \"[d]\" : \"\"}")]
-    public class TerminalClause<T> : IClause<T> where T : struct
+    public class TerminalClause<IN,OUT> : IClause<IN,OUT> where IN : struct
     {
-        public TerminalClause(LeadingToken<T> token)
+        public TerminalClause(LeadingToken<IN> token)
         {
             ExpectedToken = token;
         }
 
-        public TerminalClause(LeadingToken<T> token, bool discard) : this(token)
+        public TerminalClause(LeadingToken<IN> token, bool discard) : this(token)
         {
             Discarded = discard;
         }
         
-        public TerminalClause(string explicitToken, bool discard) : this(new LeadingToken<T>(default(T),explicitToken))
+        public TerminalClause(string explicitToken, bool discard) : this(new LeadingToken<IN>(default(IN),explicitToken))
         {
             ExplicitToken = explicitToken;
             Discarded = discard;
@@ -29,7 +29,7 @@ namespace sly.parser.syntax.grammar
         {
         }
 
-        public LeadingToken<T> ExpectedToken { get; set; }
+        public LeadingToken<IN> ExpectedToken { get; set; }
 
         public string ExplicitToken { get; set; }
 
@@ -42,7 +42,7 @@ namespace sly.parser.syntax.grammar
             return false;
         }
 
-        public virtual bool Check(Token<T> nextToken)
+        public virtual bool Check(Token<IN> nextToken)
         {
             return ExpectedToken.Match(nextToken);
         }
@@ -73,16 +73,16 @@ namespace sly.parser.syntax.grammar
         }
 
 
-        public bool Equals(IClause<T> clause)
+        public bool Equals(IClause<IN,OUT> clause)
         {
-            if (clause is TerminalClause<T> other)
+            if (clause is TerminalClause<IN,OUT> other)
             {
                 return Equals(other);
             }
 
             return false;
         }
-        protected bool Equals(TerminalClause<T> other)
+        protected bool Equals(TerminalClause<IN,OUT> other)
         {
             if (IsExplicitToken)
             {
@@ -101,7 +101,7 @@ namespace sly.parser.syntax.grammar
         UnIndent
     }
     
-    public sealed class IndentTerminalClause<T> : TerminalClause<T> where T : struct
+    public sealed class IndentTerminalClause<T,OUT> : TerminalClause<T,OUT> where T : struct
     {
         private IndentationType ExpectedIndentation;
         

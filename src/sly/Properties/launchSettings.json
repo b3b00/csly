@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "jsonGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/jsonparser/jsonparser.csproj"
+    },
+    "AOTGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../aot/aot.csproj"
+    },
+    "XmlGenGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/GeneratedXML/GeneratedXML.csproj"
+    },
+    "whileGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/indentedWhile/indentedwhile.csproj"
+    },
+    "templateGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/simpleTemplate/simpleTemplate.csproj"
+    },
+    "callbacksGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/GenericLexerWithCallbacks/GenericLexerWithCallbacks.csproj"
+    },
+    "postProcessGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/postProcessedLexerParser/postProcessedLexerParser.csproj"
+    }
+  }
+}
