@@ -232,7 +232,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
         return this;
     }
     
-    public IAotLexemeBuilder<IN> Character(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main)
+    public IAotLexemeBuilder<IN> Character(IN tokenId, string delimiter ="\'", string escapeChar = "\\", int channel = Channels.Main)
     {
         Add(tokenId,new LexemeAttribute(GenericToken.Char,channel, delimiter,escapeChar),null);
         return this;
