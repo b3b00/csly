@@ -33,8 +33,8 @@ public class LexerSyntaxWalker : CslySyntaxWalker
             var firstArg = arguments[0];
             string firstArgColonName = firstArg?.NameColon?.Name?.ToString();
             var firstArgAsLiteral = firstArg?.Expression as LiteralExpressionSyntax;
-            if (firstArgColonName == "channel" || (firstArgAsLiteral == null ||
-                                                   firstArgAsLiteral.Kind() != SyntaxKind.StringLiteralExpression))
+            if (firstArg != null && (firstArgColonName == "channel" || (firstArgAsLiteral == null ||
+                                                   firstArgAsLiteral.Kind() != SyntaxKind.StringLiteralExpression)))
             {
                 return firstArg.Expression.ToString();
             }
@@ -56,7 +56,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
             string channel = null;
             string tokens = "";
             var firstArgAsLiteral = firstArg?.Expression as LiteralExpressionSyntax;
-            if (firstArgColonName == "channel" || (firstArgAsLiteral == null || firstArgAsLiteral.Kind() != SyntaxKind.StringLiteralExpression))
+            if (firstArg != null && (firstArgColonName == "channel" || (firstArgAsLiteral == null || firstArgAsLiteral.Kind() != SyntaxKind.StringLiteralExpression)))
             {
                 isFirstArgChannel = true;
                 channel = firstArg.Expression.ToString();
