@@ -172,6 +172,8 @@ public class AotLexerBuilder<IN> :  IAotLexemeBuilder<IN> where IN : struct
         return this;
     }
 
+    public IAotLexemeBuilder<IN> Int(IN tokenId, int channel = Channels.Main) => Integer(tokenId, channel); 
+
     public IAotLexemeBuilder<IN> Integer(IN tokenId, int channel = Channels.Main)
     {
         Add(tokenId,  new LexemeAttribute(GenericToken.Int, channel:Channels.Main) , null);

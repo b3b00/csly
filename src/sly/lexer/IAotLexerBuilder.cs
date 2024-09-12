@@ -28,6 +28,8 @@ public interface IAotLexerBuilder<IN> where IN : struct
     public IAotLexemeBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".",
         int channel = Channels.Main);
 
+    public IAotLexemeBuilder<IN> Int(IN tokenId, int channel = Channels.Main);
+    
     public IAotLexemeBuilder<IN> Integer(IN tokenId, int channel = Channels.Main);
 
     public IAotLexemeBuilder<IN> Sugar(IN tokenId, string token, int channel = Channels.Main);
