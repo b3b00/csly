@@ -159,7 +159,7 @@ public class ParserSyntaxWalker : CslySyntaxWalker
         else
         {
             _builder.AppendLine(
-                $".{{attribute.Name.ToString()}}({attribute.ArgumentList.Arguments[0].Expression.ToString()}, {precedence},");
+                $".{attribute.Name.ToString()}({attribute.ArgumentList.Arguments[0].Expression.ToString()}, {precedence},");
             AddProductionVisitor(node);
             _builder.AppendLine(")");
         }
