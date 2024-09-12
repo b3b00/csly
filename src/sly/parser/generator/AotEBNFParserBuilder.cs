@@ -177,14 +177,14 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT>, IAot
     
     
     #region operations
-    public IAotEbnfRuleBuilder<IN, OUT> Operand(string ruleString, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Operand(string rule, Func<object[], OUT> visitor)
     {
-        var r = _grammarParser.Parse(ruleString);
+        var r = _grammarParser.Parse(rule);
         if (r.IsOk)
         {
-            var rule = r.Result as Rule<IN, OUT>;
-            rule.SetVisitor(visitor);
-            AddRule(rule, true);    
+            var newRule = r.Result as Rule<IN, OUT>;
+            newRule.SetVisitor(visitor);
+            AddRule(newRule, true);    
         }
 
         return this;
@@ -260,9 +260,9 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT>, IAot
         return this;
     }
 
-    public IAotEbnfRuleBuilder<IN, OUT> Postfix(string explicitOperation, int precedence, Func<object[], OUT> visitor)
+    public IAotEbnfRuleBuilder<IN, OUT> Postfix(string operation, int precedence, Func<object[], OUT> visitor)
     {
-        AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,explicitOperation);
+        AddOperation(precedence,Associativity.None,visitor,Affix.PostFix,operation);
         return this;
     }
 

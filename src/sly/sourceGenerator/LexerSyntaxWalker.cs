@@ -32,7 +32,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
             var arguments = attribute.ArgumentList.Arguments.Skip(skip).ToList();
             var firstArg = arguments[0];
             string firstArgColonName = firstArg?.NameColon?.Name?.ToString();
-            var firstArgAsLiteral = firstArg.Expression as LiteralExpressionSyntax;
+            var firstArgAsLiteral = firstArg?.Expression as LiteralExpressionSyntax;
             if (firstArgColonName == "channel" || (firstArgAsLiteral == null ||
                                                    firstArgAsLiteral.Kind() != SyntaxKind.StringLiteralExpression))
             {
@@ -55,7 +55,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
             string firstArgColonName = firstArg?.NameColon?.Name?.ToString();
             string channel = null;
             string tokens = "";
-            var firstArgAsLiteral = firstArg.Expression as LiteralExpressionSyntax;
+            var firstArgAsLiteral = firstArg?.Expression as LiteralExpressionSyntax;
             if (firstArgColonName == "channel" || (firstArgAsLiteral == null || firstArgAsLiteral.Kind() != SyntaxKind.StringLiteralExpression))
             {
                 isFirstArgChannel = true;
@@ -160,312 +160,344 @@ public class LexerSyntaxWalker : CslySyntaxWalker
         }).ToList();
     }
     
-    public override void VisitEnumMemberDeclaration(EnumMemberDeclarationSyntax enumMemberDeclarationSyntax)
+    public override void VisitEnumMemberDeclaration(EnumMemberDeclarationSyntax node)
     {
-        var name = enumMemberDeclarationSyntax.Identifier.ToString();
+        var name = node.Identifier.ToString();
 
-        var modes = GetModes(enumMemberDeclarationSyntax);
-        var labels = GetLabels(enumMemberDeclarationSyntax);
+        var modes = GetModes(node);
+        var labels = GetLabels(node);
         if (modes.Any())
         {
             ;
         }
-        if (enumMemberDeclarationSyntax.AttributeLists.Any())
+        if (node.AttributeLists.Any())
         {
-            foreach (AttributeListSyntax attributeListSyntax in enumMemberDeclarationSyntax.AttributeLists)
-            foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
+            foreach (AttributeListSyntax attributeListSyntax in node.AttributeLists)
             {
-                
-                string attributeName = attributeSyntax.Name.ToString();
-                if (attributeName == "Mode" || attributeName == "LexemeLabel")
+                foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
                 {
-                    continue;
-                }
-                
-                switch (attributeName)
-                {
-                    case "Lexeme":
+
+                    string attributeName = attributeSyntax.Name.ToString();
+                    if (attributeName == "Mode" || attributeName == "LexemeLabel")
                     {
-                        var arg0 = attributeSyntax.ArgumentList.Arguments[0].Expression;
-                        if (arg0 is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression )
+                        continue;
+                    }
+
+                    switch (attributeName)
+                    {
+                        case "Lexeme":
                         {
-                            _builder.AppendLine($@".Regex({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        }
-                        else
-                        {
-                            MemberAccessExpressionSyntax member = arg0 as MemberAccessExpressionSyntax;
-                            if (member != null)
+                            var arg0 = attributeSyntax.ArgumentList.Arguments[0].Expression;
+                            if (arg0 is LiteralExpressionSyntax literal &&
+                                literal.Kind() == SyntaxKind.StringLiteralExpression)
                             {
-                                var( method, skip) = GetMethodForGenericLexeme(member, attributeSyntax.ArgumentList.Arguments);
-                                if (!string.IsNullOrEmpty(method))
+                                _builder.AppendLine(
+                                    $@".Regex({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            }
+                            else
+                            {
+                                MemberAccessExpressionSyntax member = arg0 as MemberAccessExpressionSyntax;
+                                if (member != null)
                                 {
-                                    if (method == "Keyword" || method == "Sugar")
+                                    var (method, skip) = GetMethodForGenericLexeme(member,
+                                        attributeSyntax.ArgumentList.Arguments);
+                                    if (!string.IsNullOrEmpty(method))
                                     {
-                                        _builder.AppendLine($@".{method}({_lexerName}.{name} {GetAttributeArgsForLexemekeyWord(attributeSyntax, skip)})");
-                                        var channel = GetChannelArg(attributeSyntax, skip);
-                                        if (channel != null)
+                                        if (method == "Keyword" || method == "Sugar")
                                         {
-                                            _builder.AppendLine($"     .OnChannel({channel})");
-                                        } 
-                                    }
-                                    else
-                                    {
-                                        _builder.AppendLine($@".{method}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, skip)})");
-                                        var channel = GetChannelArg(attributeSyntax, skip);
-                                        if (channel != null)
+                                            _builder.AppendLine(
+                                                $@".{method}({_lexerName}.{name} {GetAttributeArgsForLexemekeyWord(attributeSyntax, skip)})");
+                                            var channel = GetChannelArg(attributeSyntax, skip);
+                                            if (channel != null)
+                                            {
+                                                _builder.AppendLine($"     .OnChannel({channel})");
+                                            }
+                                        }
+                                        else
                                         {
-                                            _builder.AppendLine($"     .OnChannel({channel})");
+                                            _builder.AppendLine(
+                                                $@".{method}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax, skip)})");
+                                            var channel = GetChannelArg(attributeSyntax, skip);
+                                            if (channel != null)
+                                            {
+                                                _builder.AppendLine($"     .OnChannel({channel})");
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        break;
-                    }
-                    case "Double":
-                    {
-                        _builder.AppendLine($@".Double({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
-                        {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            break;
                         }
-                        break;
-                    }
-                    case "Int":
-                    {
-                        _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "Double":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine($@".Double({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                    case "Integer":
-                    {
-                        _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "Int":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                    case "Sugar":
-                    {
-                        _builder.AppendLine($@".Sugar({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "Integer":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                    case "AlphaId":
-                    {
-                        _builder.AppendLine($@".AlphaId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "Sugar":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine($@".Sugar({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                    case "AlphaNumId":
-                    {
-                        _builder.AppendLine($@".AlphaNumId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "AlphaId":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine($@".AlphaId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                    case "AlphaNumDashId":
-                    {
-                        _builder.AppendLine($@".AlphaNumDashId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "AlphaNumId":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine(
+                                $@".AlphaNumId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                    case "MultiLineComment":
-                    {
-                        _builder.AppendLine($@".MultiLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "AlphaNumDashId":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine(
+                                $@".AlphaNumDashId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                    case "SingleLineComment":
-                    {
-                        _builder.AppendLine($@".SingleLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "MultiLineComment":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine(
+                                $@".MultiLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                    case "Extension":
-                    {
-                        _builder.AppendLine($@".Extension({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "SingleLineComment":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine(
+                                $@".SingleLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                    case "String":
-                    {
-                        _builder.AppendLine($@".String({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "Extension":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine(
+                                $@".Extension({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                    case "Keyword":
-                    case "KeyWord":
-                    {
-                        _builder.AppendLine($@".Keyword({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "String":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine($@".String({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                    case "UpTo":
-                    {
-                        _builder.AppendLine($@".UpTo({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                        var channel = GetChannelArg(attributeSyntax);
-                        if (channel != null)
+                        case "Keyword":
+                        case "KeyWord":
                         {
-                            _builder.AppendLine($"     .OnChannel({channel})");
+                            _builder.AppendLine($@".Keyword({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
                         }
-                        break;
+                        case "UpTo":
+                        {
+                            _builder.AppendLine($@".UpTo({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                            var channel = GetChannelArg(attributeSyntax);
+                            if (channel != null)
+                            {
+                                _builder.AppendLine($"     .OnChannel({channel})");
+                            }
+
+                            break;
+                        }
+                        case "Push":
+                        {
+                            _builder.AppendLine(
+                                $".PushToMode({GetAttributeArgs(attributeSyntax, withLeadingComma: false)})");
+                            break;
+                        }
+                        case "Pop":
+                        {
+                            _builder.AppendLine(
+                                $".PopMode()");
+                            break;
+                        }
+                        default:
+                        {
+                            // _builder.AppendLine(
+                            //     $"builder.{attributeName}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)});");
+                            break;
+                        }
                     }
-                    case "Push":
+
+                    if (labels.Any())
                     {
-                        _builder.AppendLine(
-                            $".PushToMode({GetAttributeArgs(attributeSyntax,withLeadingComma:false)})");
-                        break;
+                        foreach (var label in labels)
+                        {
+                            _builder.AppendLine($"        .WithLabel({label.lang}, {label.label})");
+                        }
                     }
-                    case "Pop":
+
+                    if (modes.Any())
                     {
-                        _builder.AppendLine(
-                            $".PopMode()");
-                        break;
-                    }
-                    default:
-                    {
-                        // _builder.AppendLine(
-                        //     $"builder.{attributeName}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)});");
-                        break;
+                        _builder.AppendLine($"        .WithModes({string.Join(", ", modes)})");
                     }
                 }
-                if (labels.Any())
-                {
-                    foreach (var label in labels)
-                    {
-                        _builder.AppendLine($"        .WithLabel({label.lang}, {label.label})");
-                    }
-                }
-
-                if (modes.Any())
-                {
-                    _builder.AppendLine($"        .WithModes({string.Join(", ",modes)})");
-                } 
             }
         }
     }
 
-    public override void VisitEnumDeclaration(EnumDeclarationSyntax enumDeclarationSyntax)
+    public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
     {
-        var name = enumDeclarationSyntax.Identifier.ToString();
-        if (enumDeclarationSyntax.AttributeLists.Any())
+        var name = node.Identifier.ToString();
+        if (node.AttributeLists.Any())
         {
-            foreach (AttributeListSyntax attributeListSyntax in enumDeclarationSyntax.AttributeLists)
-            foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
+            foreach (AttributeListSyntax attributeListSyntax in node.AttributeLists)
             {
-                if (attributeSyntax.Name.ToString() == "Lexer")
+                foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
                 {
-                    foreach (var argument in attributeSyntax.ArgumentList.Arguments)
+                    if (attributeSyntax.Name.ToString() == "Lexer")
                     {
-                        
-                        string argumentName = argument.NameEquals.Name.ToString();
-                        
-                        switch (argumentName)
+                        foreach (var argument in attributeSyntax.ArgumentList.Arguments)
                         {
-                            case "IgnoreWS":
-                            {
-                                _builder.AppendLine($".IgnoreWhiteSpace({argument.Expression.ToString()})");
-                                break;
-                            }
-                            case "IgnoreEOL":
-                            {
-                                _builder.AppendLine($".IgnoreEol({argument.Expression.ToString()})");
-                                break;
-                            }
-                            case "WhiteSpace":
-                            {
-                                _builder.AppendLine($".UseWhiteSpaces({argument.Expression.ToString()})");
-                                break;
-                            }
-                            case "KeyWordIgnoreCase":
-                            {
-                                _builder.AppendLine($".IgnoreKeywordCase({argument.Expression.ToString()})");
-                                break;
-                            }
-                            case "IndentationAWare":
-                            {
-                                _builder.AppendLine($".IsIndentationAware({argument.Expression.ToString()})");
-                                break;
-                            }
-                            case "Indentation":
-                            {
-                                _builder.AppendLine($".UseIndentations({argument.Expression.ToString()})");
-                                break;
-                            }
-                        }
-                        
-                    }
-                }
 
-                if (attributeSyntax.Name.ToString() == "CallBacks")
-                {
-                    var typeOfExpressionSyntax = attributeSyntax.ArgumentList.Arguments[0].Expression as TypeOfExpressionSyntax;
-                    if (typeOfExpressionSyntax != null)
-                    {
-                        string typeName = typeOfExpressionSyntax.Type.ToString();
-                        if (_declarationsByName.TryGetValue(typeName, out var declaration))
-                        {
-                            if (declaration is ClassDeclarationSyntax classDeclarationSyntax)
+                            string argumentName = argument.NameEquals.Name.ToString();
+
+                            switch (argumentName)
                             {
-                                var methods = classDeclarationSyntax.Members
-                                    .ToList()
-                                    .Where(x => x is MethodDeclarationSyntax)
-                                    .Cast<MethodDeclarationSyntax>().ToList();
-                                foreach (var method in methods)
+                                case "IgnoreWS":
                                 {
-                                    if (method.AttributeLists.Any())
+                                    _builder.AppendLine($".IgnoreWhiteSpace({argument.Expression.ToString()})");
+                                    break;
+                                }
+                                case "IgnoreEOL":
+                                {
+                                    _builder.AppendLine($".IgnoreEol({argument.Expression.ToString()})");
+                                    break;
+                                }
+                                case "WhiteSpace":
+                                {
+                                    _builder.AppendLine($".UseWhiteSpaces({argument.Expression.ToString()})");
+                                    break;
+                                }
+                                case "KeyWordIgnoreCase":
+                                {
+                                    _builder.AppendLine($".IgnoreKeywordCase({argument.Expression.ToString()})");
+                                    break;
+                                }
+                                case "IndentationAWare":
+                                {
+                                    _builder.AppendLine($".IsIndentationAware({argument.Expression.ToString()})");
+                                    break;
+                                }
+                                case "Indentation":
+                                {
+                                    _builder.AppendLine($".UseIndentations({argument.Expression.ToString()})");
+                                    break;
+                                }
+                            }
 
+                        }
+                    }
+
+                    if (attributeSyntax.Name.ToString() == "CallBacks")
+                    {
+                        var typeOfExpressionSyntax =
+                            attributeSyntax.ArgumentList.Arguments[0].Expression as TypeOfExpressionSyntax;
+                        if (typeOfExpressionSyntax != null)
+                        {
+                            string typeName = typeOfExpressionSyntax.Type.ToString();
+                            if (_declarationsByName.TryGetValue(typeName, out var declaration))
+                            {
+                                if (declaration is ClassDeclarationSyntax classDeclarationSyntax)
+                                {
+                                    var methods = classDeclarationSyntax.Members
+                                        .ToList()
+                                        .Where(x => x is MethodDeclarationSyntax)
+                                        .Cast<MethodDeclarationSyntax>().ToList();
+                                    foreach (var method in methods)
                                     {
-                                        var callbackAttribute = method.AttributeLists.SelectMany(x => x.Attributes)
-                                            .FirstOrDefault(x => x.Name.ToString() == "TokenCallback");
-                                        if (callbackAttribute != null)
+                                        if (method.AttributeLists.Any())
+
                                         {
-                                            var tokenid = (callbackAttribute.ArgumentList.Arguments[0].Expression as CastExpressionSyntax).Expression.ToString();
-                                            _builder.AppendLine($".WithCallback({tokenid},( token => {typeName}.{method.Identifier.ToString()}(token)))");
+                                            var callbackAttribute = method.AttributeLists.SelectMany(x => x.Attributes)
+                                                .FirstOrDefault(x => x.Name.ToString() == "TokenCallback");
+                                            if (callbackAttribute != null)
+                                            {
+                                                var tokenid =
+                                                    (callbackAttribute.ArgumentList.Arguments[0].Expression as
+                                                        CastExpressionSyntax).Expression.ToString();
+                                                _builder.AppendLine(
+                                                    $".WithCallback({tokenid},( token => {typeName}.{method.Identifier.ToString()}(token)))");
+                                            }
                                         }
                                     }
                                 }
@@ -475,7 +507,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                 }
             }
         }
-        foreach (var enumMemberDeclarationSyntax in enumDeclarationSyntax.Members)
+        foreach (var enumMemberDeclarationSyntax in node.Members)
         {
             VisitEnumMemberDeclaration(enumMemberDeclarationSyntax);
         }

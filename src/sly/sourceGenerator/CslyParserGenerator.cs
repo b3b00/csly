@@ -226,9 +226,9 @@ public class CslyParserGenerator : IIncrementalGenerator
 namespace {ns};
 {modifiers} class {className} : AbstractParserGenerator<{lexerName}> {{
     
-    {(lexerDecl != null ? LexerBuilderGenerator.GenerateLexer(lexerDecl as EnumDeclarationSyntax, outputType, declarationsByName) : "")}
+    {LexerBuilderGenerator.GenerateLexer(lexerDecl as EnumDeclarationSyntax, outputType, declarationsByName)}
 
-    {(parserDecl != null ? ParserBuilderGenerator.GenerateParser(parserDecl as ClassDeclarationSyntax, lexerName, outputType) : "")}
+    {ParserBuilderGenerator.GenerateParser(parserDecl as ClassDeclarationSyntax, lexerName, outputType)}
 
 }}";
 
@@ -238,30 +238,34 @@ namespace {ns};
         }
     }
 
-    private static (ClassDeclarationSyntax classDeclarationSyntax, string lexerType, string parserType, bool parserGeneratorAttributeFound) GetClassDeclarationForSourceGen(
-        GeneratorSyntaxContext context)
+    private static (ClassDeclarationSyntax classDeclarationSyntax, string lexerType, string parserType, bool
+        parserGeneratorAttributeFound) GetClassDeclarationForSourceGen(
+            GeneratorSyntaxContext context)
     {
-        
+
         var classDeclarationSyntax = (ClassDeclarationSyntax)context.Node;
         // Go through all attributes of the class.
         foreach (AttributeListSyntax attributeListSyntax in classDeclarationSyntax.AttributeLists)
-        foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
         {
-            string name = attributeSyntax.Name.ToString();
-            if (name == "ParserGenerator")
+            foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
             {
-                if (attributeSyntax.ArgumentList != null && attributeSyntax.ArgumentList.Arguments.Count == 2)
+                string name = attributeSyntax.Name.ToString();
+                if (name == "ParserGenerator")
                 {
-                    var arg1 = attributeSyntax.ArgumentList.Arguments[0];
-                    var arg2 = attributeSyntax.ArgumentList.Arguments[1];
-                    if (arg1.Expression is TypeOfExpressionSyntax typeOfLexer &&
-                        arg2.Expression is TypeOfExpressionSyntax typeOfParser)
+                    if (attributeSyntax.ArgumentList != null && attributeSyntax.ArgumentList.Arguments.Count == 2)
                     {
-                        return (classDeclarationSyntax,typeOfLexer.Type.ToString(),typeOfParser.Type.ToString(),true);
-                    }
-                    else
-                    {
-                        continue;
+                        var arg1 = attributeSyntax.ArgumentList.Arguments[0];
+                        var arg2 = attributeSyntax.ArgumentList.Arguments[1];
+                        if (arg1.Expression is TypeOfExpressionSyntax typeOfLexer &&
+                            arg2.Expression is TypeOfExpressionSyntax typeOfParser)
+                        {
+                            return (classDeclarationSyntax, typeOfLexer.Type.ToString(), typeOfParser.Type.ToString(),
+                                true);
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                 }
             }
@@ -269,32 +273,37 @@ namespace {ns};
 
         return (classDeclarationSyntax, null, null, false);
     }
-    
-    private static (string lexerType, string parserType, string outputType, bool parserGeneratorAttributeFound) GetClassDeclaration(
-        ClassDeclarationSyntax classDeclarationSyntax)
+
+    private static (string lexerType, string parserType, string outputType, bool parserGeneratorAttributeFound)
+        GetClassDeclaration(
+            ClassDeclarationSyntax classDeclarationSyntax)
     {
 
         // Go through all attributes of the class.
         foreach (AttributeListSyntax attributeListSyntax in classDeclarationSyntax.AttributeLists)
-        foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
         {
-            string name = attributeSyntax.Name.ToString();
-            if (name == "ParserGenerator")
+            foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
             {
-                if (attributeSyntax.ArgumentList != null && attributeSyntax.ArgumentList.Arguments.Count == 3)
+                string name = attributeSyntax.Name.ToString();
+                if (name == "ParserGenerator")
                 {
-                    var arg1 = attributeSyntax.ArgumentList.Arguments[0];
-                    var arg2 = attributeSyntax.ArgumentList.Arguments[1];
-                    var arg3 = attributeSyntax.ArgumentList.Arguments[2];
-                    if (arg1.Expression is TypeOfExpressionSyntax typeOfLexer &&
-                        arg2.Expression is TypeOfExpressionSyntax typeOfParser &&
-                        arg3.Expression is TypeOfExpressionSyntax typeOfOutput )
+                    if (attributeSyntax.ArgumentList != null && attributeSyntax.ArgumentList.Arguments.Count == 3)
                     {
-                        return (typeOfLexer.Type.ToString(),typeOfParser.Type.ToString(), typeOfOutput.Type.ToString(), true);
-                    }
-                    else
-                    {
-                        continue;
+                        var arg1 = attributeSyntax.ArgumentList.Arguments[0];
+                        var arg2 = attributeSyntax.ArgumentList.Arguments[1];
+                        var arg3 = attributeSyntax.ArgumentList.Arguments[2];
+                        if (arg1.Expression is TypeOfExpressionSyntax typeOfLexer &&
+                            arg2.Expression is TypeOfExpressionSyntax typeOfParser &&
+                            arg3.Expression is TypeOfExpressionSyntax typeOfOutput)
+                        {
+                            return (typeOfLexer.Type.ToString(), typeOfParser.Type.ToString(),
+                                typeOfOutput.Type.ToString(),
+                                true);
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                 }
             }
