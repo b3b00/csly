@@ -184,7 +184,6 @@ public class AotTests
         Check.That(commentChannel.Tokens).CountIs(1);
         Check.That(commentChannel.Tokens[0].TokenID).IsEqualTo(IndentedWhileTokenGeneric.COMMENT);
         Check.That(commentChannel.Tokens[0].Value).IsEqualTo(" comment");
-        // TODO AOT : check has COMMENT
         string program = @"
 a:=0 
 while a < 10 do 
@@ -195,7 +194,7 @@ while a < 10 do
         Check.That(programResult).IsOkLexing();
         Check.That(programResult.Tokens.MainTokens().Exists(x => x.IsIndent)).IsTrue();
         Check.That(programResult.Tokens.MainTokens().Exists(x => x.IsUnIndent)).IsTrue();
-        // TODO AOT : check has indents
+        
     }
 
     [Fact]

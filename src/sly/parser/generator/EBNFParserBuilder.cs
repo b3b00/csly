@@ -46,10 +46,6 @@ namespace sly.parser.generator
             //using AOT
             var b = new AotRuleParser<IN, OUT>();
             var grammarParser = b.BuildParser(this.I18N);
-            // var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN,OUT>>(I18N);
-            //
-            // var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
-
 
             var result = new BuildResult<Parser<IN, OUT>>();
 
@@ -57,7 +53,6 @@ namespace sly.parser.generator
     
             try
             {
-                // TODO AOT : check grammarParser result ! 
                 configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser.Result);
                 configuration.UseMemoization = useMemoization;
                 configuration.BroadenTokenWindow = broadenTokenWindow;

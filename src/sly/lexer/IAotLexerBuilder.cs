@@ -55,7 +55,7 @@ public interface IAotLexerBuilder<IN> where IN : struct
     
     public IAotLexemeBuilder<IN> UpTo(IN tokenId, params string[] patterns);
     
-    public IAotLexemeBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEOL = false);
+    public IAotLexemeBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEol = false);
 
     public IAotLexemeBuilder<IN> Extension(IN tokenId, int channel = Channels.Main);
 

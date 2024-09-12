@@ -13,8 +13,7 @@ public class ParserBuilderGenerator
     {
         string name = classDeclarationSyntax.Identifier.ToString();
         StringBuilder builder = new();
-        // TODO : get starting rule if exists
-        
+
         var rootRule = GetRootRule(classDeclarationSyntax);
         if (!string.IsNullOrEmpty(rootRule))
         {

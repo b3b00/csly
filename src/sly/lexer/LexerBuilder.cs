@@ -374,9 +374,9 @@ namespace sly.lexer
                 {
                     attribute.Value.lexemes.ForEach(x =>
                     {
-                        result.pushTarget = push.First().TargetMode; 
+                        result.pushTarget = push[0].TargetMode; 
                         x.IsPush = true;
-                        x.Pushtarget = push.First().TargetMode;
+                        x.Pushtarget = push[0].TargetMode;
                     });
                 }
 
@@ -498,7 +498,6 @@ namespace sly.lexer
                 {
                     genLexer = currentGenericLexer;
                 }
-                // TODO AOT : get callbacks 
                 callbacksGetter = callbacksGetter ?? (() => CallBacksBuilder.GetCallbacks(currentGenericLexer));
                 foreach (var callback in callbacksGetter())
                 {

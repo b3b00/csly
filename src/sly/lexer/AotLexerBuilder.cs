@@ -9,9 +9,9 @@ namespace sly.lexer;
 
 public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> where IN : struct
 {
-    private bool _ignoreWS = true;
+    private bool _ignoreWs = true;
 
-    private bool _ignoreEOL = true;
+    private bool _ignoreEol = true;
 
     private char[]_whiteSpaces;
 
@@ -33,7 +33,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
     private Action<IN, LexemeAttribute, GenericLexer<IN>> _extensionBuilder;
     private LexerPostProcess<IN> _lexerPostProcessor;
 
-    private List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)> _callbacks = new();
+    private List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)> _callbacks;
 
     private Dictionary<IN , string > _modePushers;
     
@@ -114,13 +114,13 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
     
     public IAotLexerBuilder<IN> IgnoreEol(bool ignore)
     {
-        _ignoreEOL = ignore;
+        _ignoreEol = ignore;
         return this;
     }
     
     public IAotLexerBuilder<IN> IgnoreWhiteSpace(bool ignore)
     {
-        _ignoreWS = ignore;
+        _ignoreWs = ignore;
         return this;
     }
 
@@ -157,20 +157,6 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
     public IAotLexerBuilder<IN> Pop(IN tokenId)
     {
         _modePopers.Add(tokenId);
-        return this;
-    }
-
- 
-
-    public IAotLexemeBuilder<IN> SingleLineComment(string start)
-    {
-        // TODO AOT ??? 
-        return this;
-    }
-    
-    public IAotLexemeBuilder<IN> MultiLineComment(string start)
-    {
-        // TODO AOT ???
         return this;
     }
 
@@ -276,9 +262,9 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
         return this;
     }
     
-    public IAotLexemeBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEOL = false)
+    public IAotLexemeBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEol = false)
     {
-        Add(tokenId, new LexemeAttribute(regex,isSkippable,isEOL),null);
+        Add(tokenId, new LexemeAttribute(regex,isSkippable,isEol),null);
         return this;
     }
 
@@ -316,8 +302,8 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
             Indentation = _indentation,
             IndentationAWare = _indentationAware,
             WhiteSpace = _whiteSpaces,
-            IgnoreWS = _ignoreWS,
-            IgnoreEOL = _ignoreEOL,
+            IgnoreWS = _ignoreWs,
+            IgnoreEOL = _ignoreEol,
             KeyWordIgnoreCase = _keyWordIgnoreCase
         };
         
@@ -358,7 +344,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
             currentLexeme = (new List<LexemeAttribute>(), new List<LexemeLabelAttribute>());
         }
 
-        if (!currentLexeme.labels.Any(x => x.Language == lang))
+        if (!currentLexeme.labels.Exists(x => x.Language == lang))
         {
             currentLexeme.labels.Add(new LexemeLabelAttribute(lang, label));
         }
@@ -391,7 +377,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
         if (!_modes.TryGetValue(_currentLexeme.Value, out currentModes))
         {
             currentModes = new List<string>();
-        };
+        }
         currentModes.AddRange(modes);
         _modes[_currentLexeme.Value] = currentModes;
         return this;

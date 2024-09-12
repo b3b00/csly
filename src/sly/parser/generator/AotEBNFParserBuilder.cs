@@ -9,11 +9,11 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator;
 
-public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT>, IAotEbnfRuleBuilder<IN, OUT> where IN : struct
+public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfRuleBuilder<IN, OUT> where IN : struct
 {
-    readonly Dictionary<string, NonTerminal<IN,OUT>> _nonTerminals = new Dictionary<string, NonTerminal<IN,OUT>>();
+    readonly Dictionary<string, NonTerminal<IN,OUT>> _nonTerminals = new ();
 
-    readonly Dictionary<int, List<OperationMetaData<IN, OUT>>> _operationsByPrecedence = new Dictionary<int, List<OperationMetaData<IN, OUT>>>();
+    readonly Dictionary<int, List<OperationMetaData<IN, OUT>>> _operationsByPrecedence = new ();
 
     private bool _useMemoization = false;
 
@@ -21,7 +21,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT>, IAot
 
     private bool _useAutoCloseIndentations = false;
 
-    private readonly List<Rule<IN, OUT>> _operands = new List<Rule<IN, OUT>>();
+    private readonly List<Rule<IN, OUT>> _operands = new ();
 
     private readonly Parser<EbnfTokenGeneric, GrammarNode<IN, OUT>> _grammarParser = null;
 
@@ -50,17 +50,11 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT>, IAot
     
     private AotEBNFParserBuilder(string i18N, object parserInstance, string rootRule)
     {
-        var ruleparser = new RuleParser<IN,OUT>();
-        var grammarParserBuilder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN,OUT>>(i18N);
         _i18N = i18N;
         _parserInstance = parserInstance;
         _rootRule = rootRule;
-        var gpb = 
-            AotParserBuilder<EbnfTokenGeneric, GrammarNode<IN, OUT>>.NewBuilder(new RuleParser<IN, OUT>(),"rule");
-
         var b = new AotRuleParser<IN, OUT>();
         var grammar = b.BuildParser(i18N);
-        // TODO AOT : check grammar parser result 
         _grammarParser = grammar.Result;
     }
 
@@ -98,10 +92,15 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfParserBuilder<IN,OUT>, IAot
 
     public BuildResult<Parser<IN, OUT>> BuildParser()
     {
-        // TODO : build syntax parser
-        var syntaxParser = BuildSyntaxParser(new BuildResult<ParserConfiguration<IN, OUT>>());
-        
-        // TODO : build lexer using explicit tokens
+        var buildResult = new BuildResult<ParserConfiguration<IN, OUT>>();
+        var syntaxParser = BuildSyntaxParser(buildResult);
+        if (buildResult.IsError)
+        {
+            var result = new BuildResult<Parser<IN, OUT>>();
+            result.AddErrors(buildResult.Errors);
+            return result;
+        }
+
         var tokens = _configuration.GetAllExplicitTokenClauses();
         if (tokens != null && tokens.Any())
         {
