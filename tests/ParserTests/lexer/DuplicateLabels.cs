@@ -1,5 +1,6 @@
 using sly.i18n;
 using sly.lexer;
+using sly.sourceGenerator;
 
 namespace ParserTests.lexer;
 

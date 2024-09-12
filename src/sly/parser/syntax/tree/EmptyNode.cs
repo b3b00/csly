@@ -1,6 +1,6 @@
 namespace sly.parser.syntax.tree;
 
-public class EmptyNode<IN> : ISyntaxNode<IN> where IN : struct
+public class EmptyNode<IN, OUT> : ISyntaxNode<IN, OUT> where IN : struct
 {
     public bool IsEpsilon => true;
     public bool Discarded => false;

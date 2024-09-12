@@ -77,7 +77,7 @@ namespace ParserTests
             Check.That(result.IsError).IsFalse();
             Check.That(result.SyntaxTree).IsNotNull();
             var tree = result.SyntaxTree;
-            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken,double>();
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile();
             var dump = graphviz.Graph.Dump();

@@ -10,37 +10,37 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 
-    public SyntaxParseResult<IN> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN> clause, int position,
-        SyntaxParsingContext<IN> parsingContext)
+    public SyntaxParseResult<IN, OUT> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN,OUT> clause, int position,
+        SyntaxParsingContext<IN,OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
         {
             return parseResult;
         }
 
-        var result = new SyntaxParseResult<IN>();
-        var manyNode = new ManySyntaxNode<IN>($"{clause.Clause.ToString()}*");
+        var result = new SyntaxParseResult<IN, OUT>();
+        var manyNode = new ManySyntaxNode<IN, OUT>($"{clause.Clause.ToString()}*");
         var currentPosition = position;
         var innerClause = clause.Clause;
         var stillOk = true;
 
 
-        SyntaxParseResult<IN> lastInnerResult = null;
+        SyntaxParseResult<IN, OUT> lastInnerResult = null;
 
         var innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 
         bool hasByPasNodes = false;
         while (stillOk)
         {
-            SyntaxParseResult<IN> innerResult = null;
+            SyntaxParseResult<IN, OUT> innerResult = null;
             switch (innerClause)
             {
-                case TerminalClause<IN> term:
+                case TerminalClause<IN,OUT> term:
                     manyNode.IsManyTokens = true;
                     innerResult = ParseTerminal(tokens, term, currentPosition, parsingContext);
                     hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
                     break;
-                case NonTerminalClause<IN> nonTerm:
+                case NonTerminalClause<IN,OUT> nonTerm:
                 {
                     innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition, parsingContext);
                     hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
@@ -50,7 +50,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                         manyNode.IsManyValues = true;
                     break;
                 }
-                case ChoiceClause<IN> choice:
+                case ChoiceClause<IN,OUT> choice:
                     manyNode.IsManyTokens = choice.IsTerminalChoice;
                     manyNode.IsManyValues = choice.IsNonTerminalChoice;
                     innerResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
@@ -93,34 +93,34 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         return result;
     }
 
-    public SyntaxParseResult<IN> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN> clause, int position,
-        SyntaxParsingContext<IN> parsingContext)
+    public SyntaxParseResult<IN, OUT> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN,OUT> clause, int position,
+        SyntaxParsingContext<IN,OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
         {
             return parseResult;
         }
 
-        var result = new SyntaxParseResult<IN>();
-        var manyNode = new ManySyntaxNode<IN>($"{clause.Clause.ToString()}+");
+        var result = new SyntaxParseResult<IN, OUT>();
+        var manyNode = new ManySyntaxNode<IN, OUT>($"{clause.Clause.ToString()}+");
         var currentPosition = position;
         var innerClause = clause.Clause;
         bool isError;
 
-        SyntaxParseResult<IN> lastInnerResult = null;
+        SyntaxParseResult<IN, OUT> lastInnerResult = null;
 
         bool hasByPasNodes = false;
-        SyntaxParseResult<IN> firstInnerResult = null;
+        SyntaxParseResult<IN, OUT> firstInnerResult = null;
         var innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 
         switch (innerClause)
         {
-            case TerminalClause<IN> terminalClause:
+            case TerminalClause<IN,OUT> terminalClause:
                 manyNode.IsManyTokens = true;
                 firstInnerResult = ParseTerminal(tokens, terminalClause, currentPosition, parsingContext);
                 hasByPasNodes = firstInnerResult.HasByPassNodes;
                 break;
-            case NonTerminalClause<IN> nonTerm:
+            case NonTerminalClause<IN,OUT> nonTerm:
             {
                 firstInnerResult = ParseNonTerminal(tokens, nonTerm, currentPosition, parsingContext);
                 hasByPasNodes = firstInnerResult.HasByPassNodes;
@@ -130,7 +130,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                     manyNode.IsManyValues = true;
                 break;
             }
-            case ChoiceClause<IN> choice:
+            case ChoiceClause<IN,OUT> choice:
                 manyNode.IsManyTokens = choice.IsTerminalChoice;
                 manyNode.IsManyValues = choice.IsNonTerminalChoice;
                 firstInnerResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
@@ -145,12 +145,12 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             manyNode.Add(firstInnerResult.Root);
             lastInnerResult = firstInnerResult;
             currentPosition = firstInnerResult.EndingPosition;
-            var more = new ZeroOrMoreClause<IN>(innerClause);
+            var more = new ZeroOrMoreClause<IN,OUT>(innerClause);
             var nextResult = ParseZeroOrMore(tokens, more, currentPosition, parsingContext);
             if (nextResult != null && !nextResult.IsError)
             {
                 currentPosition = nextResult.EndingPosition;
-                var moreChildren = (ManySyntaxNode<IN>)nextResult.Root;
+                var moreChildren = (ManySyntaxNode<IN, OUT>)nextResult.Root;
                 manyNode.Children.AddRange(moreChildren.Children);
             }
 

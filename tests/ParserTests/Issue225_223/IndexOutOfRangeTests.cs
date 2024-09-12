@@ -13,14 +13,14 @@ namespace ParserTests.Issue225_IndexOutOfRangeException
         public void Should_Not_IndexOutOfRange()
         {
             var queryExpression = Parse("(java AND dotnet)");
-            Check.That(queryExpression).IsInstanceOf<GroupExpression>();
+            Check.That(queryExpression).IsInstanceOf<Issue223OorGroupExpression>();
             Check.That(queryExpression.ToString()).IsEqualTo("(java AND dotnet)");
         }
 
-        private static Expression Parse(string query)
+        private static Issue223OorExpression Parse(string query)
         {
             var parserInstance = new IndexOutOfRangeParser();
-            var builder = new ParserBuilder<IndexOutOfRangeToken, Expression>();
+            var builder = new ParserBuilder<Issue223OorIndexOutOfRangeToken, Issue223OorExpression>();
 
             var buildResult =
                 builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression");

@@ -139,7 +139,7 @@ public class Issue427Tests
         Check.That(r).IsOk();
         var parser = r.Result;
         var result = parser.Parse("2 + 3");
-        Console.WriteLine(result.IsOk);
+        Check.That(result).IsOkParsing();
 
     }
 

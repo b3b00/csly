@@ -2,9 +2,17 @@
 using expressionparser;
 using sly.lexer;
 using sly.parser.generator;
+using sly.sourceGenerator;
 
 namespace simpleExpressionParser
 {
+
+    [ParserGenerator(typeof(ExpressionToken), typeof(SimpleExpressionParserWithContext), typeof(int))]
+    public partial class SimpleExpressionParserWithContextGenerator : AbstractParserGenerator<ExpressionToken>
+    {
+        
+    }
+    
     public class SimpleExpressionParserWithContext
     
     {

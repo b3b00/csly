@@ -127,13 +127,13 @@ namespace csly.indentedWhileLang.parser
         }
         
         [Production("statement: RETURN[d] IndentedWhileParserGeneric_expressions")]
-        public WhileAST ReturnStmt(Expression expression)
+        public WhileAST ReturnStmt(Expression ssue223Expression)
         {
-            return new ReturnStatement(expression);
+            return new ReturnStatement(ssue223Expression);
         }
 
         [Production("statement: PRINT[d] IndentedWhileParserGeneric_expressions")]
-        public WhileAST skipStmt(WhileAST expression)
+        public WhileAST printStmt(WhileAST expression)
         {
             return new PrintStatement(expression as Expression);
         }
@@ -261,7 +261,7 @@ namespace csly.indentedWhileLang.parser
         }
 
         [Operation((int) IndentedWhileTokenGeneric.NOT, Affix.PreFix, Associativity.Right, 100)]
-        public WhileAST binaryOrExpression(Token<IndentedWhileTokenGeneric> operatorToken, WhileAST value)
+        public WhileAST unaryNotExpression(Token<IndentedWhileTokenGeneric> operatorToken, WhileAST value)
         {
             return new Not(value as Expression);
         }

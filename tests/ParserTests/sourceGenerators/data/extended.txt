@@ -1,0 +1,81 @@
+
+ internal enum ExtendedLexer 
+    {
+        [Extension]
+        EXT,
+        
+        [Sugar("-")]
+        DASH,
+        
+        [AlphaNumId]
+        ID,
+
+        [Lexeme(GenericToken.KeyWord,channel:0, "billy", "bob")]
+        BILLY_BOB,
+
+        [Mode("foo_mode", "bar_mode")]
+        [Lexeme(GenericToken.KeyWord,sly.lexer.Channels.Main, ExtendedLexerParser.FOO, ExtendedLexerParser.BAR)]
+        FOO_BAR,
+    
+        
+        [Lexeme(GenericToken.KeyWord,"BAZ")]
+        BAZ,
+
+        [Mode("qux_mode")]
+        [Lexeme(GenericToken.KeyWord, 550, "QUX")]
+        QUX,
+
+        [Lexeme(GenericToken.KeyWord,channel:0, "true", "false")]
+        BOOLEAN,
+
+[String]
+STR,
+        
+    }
+
+    internal class ExtendedLexerParser {
+
+    public static string FOO = "foo";
+
+        public const string BAR = "bar";
+
+        int toto = 0;
+
+        public ExtendedLexerParser() {
+        }
+        
+        public void do() {
+            toto = 42;
+        }
+     }
+
+    [ParserGenerator(typeof(ExtendedLexer),typeof(ExtendedLexerParser),typeof(string))]
+    public partial class ExtendedLexerGenerator : AbstractParserGenerator<ExtendedLexer>
+    {
+        public override Action<ExtendedLexer, LexemeAttribute, GenericLexer<ExtendedLexer>> UseTokenExtensions()
+        {
+            var e = (ExtendedLexer token, LexemeAttribute lexem, GenericLexer<ExtendedLexer> lexer) =>
+            {
+                if (token == ExtendedLexer.EXT)
+                {
+                    NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) =>
+                    {
+                        match.Properties[GenericLexer<ExtendedLexer>.DerivedToken] = ExtendedLexer.EXT;
+                        return match;
+                    };
+
+                    var fsmBuilder = lexer.FSMBuilder;
+
+
+                    fsmBuilder.GoTo(GenericLexer<ExtendedLexer>.start) 
+                        .Transition('$')
+                        .Transition('_')
+                        .Transition('$')
+                        .End(GenericToken.Extension) // mark as ending node 
+                        .CallBack(callback); // set the ending callback
+                }
+            };
+            return e;
+        }
+    }
+

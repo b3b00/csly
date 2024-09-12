@@ -966,12 +966,12 @@ namespace ParserTests
             Check.That(nt.Rules).CountIs(1);
             var rule = nt.Rules[0];
             Check.That(rule.Clauses).CountIs(1);
-            Check.That(rule.Clauses[0]).IsInstanceOf<OneOrMoreClause<TokenType>>();
+            Check.That(rule.Clauses[0]).IsInstanceOf<OneOrMoreClause<TokenType,string>>();
             nt = Parser.Configuration.NonTerminals["B"];
             Check.That((nt.Rules)).CountIs(1);
             rule = nt.Rules[0];
             Check.That((rule.Clauses)).CountIs(1);
-            Check.That(rule.Clauses[0]).IsInstanceOf<ZeroOrMoreClause<TokenType>>();
+            Check.That(rule.Clauses[0]).IsInstanceOf<ZeroOrMoreClause<TokenType,string>>();
             
         }
 

@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
-    public sealed class NonTerminalClause<T> : IClause<T>
+    public sealed class NonTerminalClause<IN,OUT> : IClause<IN,OUT> where IN : struct
     {
         public NonTerminalClause(string name)
         {
@@ -32,9 +32,9 @@ namespace sly.parser.syntax.grammar
             return $"{NonTerminalName}(NT)";
         }
 
-        public bool Equals(IClause<T> clause)
+        public bool Equals(IClause<IN,OUT> clause)
         {
-            if (clause is NonTerminalClause<T> other)
+            if (clause is NonTerminalClause<IN,OUT> other)
             {
                 return Equals(other);
             }
@@ -42,7 +42,7 @@ namespace sly.parser.syntax.grammar
             return false;
         }
 
-        private bool Equals(NonTerminalClause<T> other)
+        private bool Equals(NonTerminalClause<IN,OUT> other)
         {
             return NonTerminalName == other.NonTerminalName && IsGroup == other.IsGroup;
         }
@@ -52,7 +52,7 @@ namespace sly.parser.syntax.grammar
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((NonTerminalClause<T>)obj);
+            return Equals((NonTerminalClause<IN,OUT>)obj);
         }
 
         public override int GetHashCode()

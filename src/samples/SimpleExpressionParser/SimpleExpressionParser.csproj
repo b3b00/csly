@@ -4,7 +4,7 @@
     <Authors>b3b00</Authors>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\sly\sly.csproj" />
+    <ProjectReference Include="..\..\sly\sly.csproj"  OutputItemType="Analyzer"/>
     <ProjectReference Include="..\expressionParser\expressionParser.csproj" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

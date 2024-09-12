@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using csly.whileLang.model;
+using ExplicitTokens;
 using NFluent;
 using sly.buildresult;
 using sly.lexer;
@@ -129,7 +130,7 @@ namespace ParserTests
             var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
             Check.That(r).IsOkParsing();
             var tree = r.SyntaxTree;
-            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExplicitTokensTokens>();
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExplicitTokensTokens,double>();
             var dump = tree.Dump("\t");
             var json = $@"{{
 {tree.ToJson()}
