@@ -159,6 +159,12 @@ public class LexerSyntaxWalker : CslySyntaxWalker
                 return (x.ArgumentList.Arguments[0].ToString(),x.ArgumentList.Arguments[1].ToString());
         }).ToList();
     }
+
+    private static string[] ShortLexemes = new[]
+    {
+        "Double", "Int", "Integer", "Sugar", "AlphaId", "AlphaNumId", "AlphaNumDashId",
+        "MultiLineComment", "SingleLineComment", "Extension", "String", "Keyword", "KeyWord", "UpTo"
+    };
     
     public override void VisitEnumMemberDeclaration(EnumMemberDeclarationSyntax node)
     {
@@ -166,147 +172,60 @@ public class LexerSyntaxWalker : CslySyntaxWalker
 
         var modes = GetModes(node);
         var labels = GetLabels(node);
-        if (modes.Any())
-        {
-            ;
-        }
+        
         if (node.AttributeLists.Any())
         {
             foreach (AttributeListSyntax attributeListSyntax in node.AttributeLists)
             {
-                foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes)
+                foreach (AttributeSyntax attributeSyntax in attributeListSyntax.Attributes.Where(x => x.Name.ToString() != "mode" && x.Name.ToString() != "LexemeLabel" ))
                 {
 
                     string attributeName = attributeSyntax.Name.ToString();
-                    if (attributeName == "Mode" || attributeName == "LexemeLabel")
+
+                    if (ShortLexemes.Contains(attributeName))
                     {
-                        continue;
+                        _builder.AppendLine($@".{attributeName}({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
+                        var channel = GetChannelArg(attributeSyntax);
+                        AddChannel(attributeSyntax);
+                    }
+                    else if (attributeName == "Lexeme")
+                    {
+                        VisitLexemeAttribute(attributeSyntax, name);
+                    }
+                    else if (attributeName == "Push")
+                    {
+                        _builder.AppendLine(
+                            $".PushToMode({GetAttributeArgs(attributeSyntax, withLeadingComma: false)})");
+                    }
+                    else if (attributeName == "Pop")
+                    {
+                        _builder.AppendLine(
+                            $".PopMode()");
                     }
 
-                    switch (attributeName)
-                    {
-                        case "Lexeme":
-                        {
-                            VisitLexemeAttribute(attributeSyntax, name);
+                    AddLabels(labels);
 
-                            break;
-                        }
-                        case "Double":
-                        {
-                            _builder.AppendLine($@".Double({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "Int":
-                        {
-                            _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "Integer":
-                        {
-                            _builder.AppendLine($@".Integer({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "Sugar":
-                        {
-                            _builder.AppendLine($@".Sugar({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "AlphaId":
-                        {
-                            _builder.AppendLine($@".AlphaId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            var channel = GetChannelArg(attributeSyntax);
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "AlphaNumId":
-                        {
-                            _builder.AppendLine(
-                                $@".AlphaNumId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "AlphaNumDashId":
-                        {
-                            _builder.AppendLine(
-                                $@".AlphaNumDashId({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "MultiLineComment":
-                        {
-                            _builder.AppendLine(
-                                $@".MultiLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "SingleLineComment":
-                        {
-                            _builder.AppendLine(
-                                $@".SingleLineComment({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "Extension":
-                        {
-                            _builder.AppendLine(
-                                $@".Extension({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "String":
-                        {
-                            _builder.AppendLine($@".String({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "Keyword":
-                        case "KeyWord":
-                        {
-                            _builder.AppendLine($@".Keyword({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "UpTo":
-                        {
-                            _builder.AppendLine($@".UpTo({_lexerName}.{name} {GetAttributeArgs(attributeSyntax)})");
-                            AddChannel(attributeSyntax);
-                            break;
-                        }
-                        case "Push":
-                        {
-                            _builder.AppendLine(
-                                $".PushToMode({GetAttributeArgs(attributeSyntax, withLeadingComma: false)})");
-                            break;
-                        }
-                        case "Pop":
-                        {
-                            _builder.AppendLine(
-                                $".PopMode()");
-                            break;
-                        }
-                        default:
-                        {
-                            break;
-                        }
-                    }
-
-                    if (labels.Any())
-                    {
-                        foreach (var label in labels)
-                        {
-                            _builder.AppendLine($"        .WithLabel({label.lang}, {label.label})");
-                        }
-                    }
-
-                    if (modes.Any())
-                    {
-                        _builder.AppendLine($"        .WithModes({string.Join(", ", modes)})");
-                    }
+                    AddModes(modes);
                 }
+            }
+        }
+    }
+
+    private void AddModes(List<string> modes)
+    {
+        if (modes.Any())
+        {
+            _builder.AppendLine($"        .WithModes({string.Join(", ", modes)})");
+        }
+    }
+
+    private void AddLabels(List<(string lang, string label)> labels)
+    {
+        if (labels.Any())
+        {
+            foreach (var label in labels)
+            {
+                _builder.AppendLine($"        .WithLabel({label.lang}, {label.label})");
             }
         }
     }
