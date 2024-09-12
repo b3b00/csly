@@ -39,8 +39,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XML", "src/samples/XML/XML.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTemplate", "src/samples/SimpleTemplate/SimpleTemplate.csproj", "{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aot", "src\aot\aot.csproj", "{C7275027-1D60-48DA-A1BF-A74AF9B783CF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneratedXML", "src\samples\GeneratedXML\GeneratedXML.csproj", "{7FEF0D32-FFC7-4886-A4B7-71314C25627E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExplicitTokens", "src\samples\ExplicitTokens\ExplicitTokens.csproj", "{94B9B654-82CB-4969-8DCA-250916E53724}"
@@ -126,10 +124,6 @@ Global
 		{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C7275027-1D60-48DA-A1BF-A74AF9B783CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C7275027-1D60-48DA-A1BF-A74AF9B783CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C7275027-1D60-48DA-A1BF-A74AF9B783CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C7275027-1D60-48DA-A1BF-A74AF9B783CF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7FEF0D32-FFC7-4886-A4B7-71314C25627E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7FEF0D32-FFC7-4886-A4B7-71314C25627E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FEF0D32-FFC7-4886-A4B7-71314C25627E}.Release|Any CPU.ActiveCfg = Release|Any CPU
