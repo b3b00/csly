@@ -234,12 +234,6 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
         return this;
     }
 
-    // public IAotLexerBuilder<IN> Label(IN tokenId, string lang, string label)
-    // {
-    //     AddLabel(tokenId, lang, label);
-    //     return this;
-    // }
-
     public IAotLexerBuilder<IN> WithCallback(IN tokenId, Func<Token<IN>, Token<IN>> callback)
     {
         _callbacks.Add((tokenId, callback));
