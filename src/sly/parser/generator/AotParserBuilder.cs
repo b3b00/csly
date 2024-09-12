@@ -121,25 +121,20 @@ public class AotParserBuilder<IN, OUT> : IAotParserBuilder<IN,OUT> where IN : st
     #endregion
     
     #region rules
-    
-    public IAotParserBuilder<IN,OUT> Production(string ruleString, Func<object[], OUT> visitor)
+
+    public IAotParserBuilder<IN, OUT> Production(string ruleString, Func<object[], OUT> visitor)
     {
         ParserBuilder<IN, OUT> builder = new ParserBuilder<IN, OUT>();
         var (nonTerminaName, clauses) = builder.ExtractNTAndRule(ruleString);
-        var rule = builder.BuildNonTerminal(new Tuple<string, string>(nonTerminaName,clauses));
-        rule.NonTerminalName =  nonTerminaName;
+        var rule = builder.BuildNonTerminal(new Tuple<string, string>(nonTerminaName, clauses));
+        rule.NonTerminalName = nonTerminaName;
         rule.RuleString = $"{nonTerminaName} : {ruleString}";
-        
-        if (rule != null)
-        {
-            rule.RuleString = ruleString;
-            rule.SetLambdaVisitor(visitor);
-            AddRule(rule);    
-        }
-
+        rule.RuleString = ruleString;
+        rule.SetLambdaVisitor(visitor);
+        AddRule(rule);
         return this;
     }
-    
+
     #endregion
     
     

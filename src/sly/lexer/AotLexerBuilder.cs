@@ -7,7 +7,7 @@ using sly.lexer.fsm;
 
 namespace sly.lexer;
 
-public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> where IN : struct
+public class AotLexerBuilder<IN> :  IAotLexemeBuilder<IN> where IN : struct
 {
     private bool _ignoreWs = true;
 
@@ -23,9 +23,9 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
 
     
     
-    private Dictionary<IN, (List<LexemeAttribute> definitions, List<LexemeLabelAttribute> labels) > _lexemesDefinitionsAndLabels;
+    private readonly Dictionary<IN, (List<LexemeAttribute> definitions, List<LexemeLabelAttribute> labels) > _lexemesDefinitionsAndLabels;
 
-    private Dictionary<IN, List<CommentAttribute>> _comments;
+    private readonly Dictionary<IN, List<CommentAttribute>> _comments;
 
     private IN? _currentLexeme;
     private IList<string> _explicitTokens;
@@ -33,13 +33,13 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
     private Action<IN, LexemeAttribute, GenericLexer<IN>> _extensionBuilder;
     private LexerPostProcess<IN> _lexerPostProcessor;
 
-    private List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)> _callbacks;
+    private readonly List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)> _callbacks;
 
-    private Dictionary<IN , string > _modePushers;
+    private readonly Dictionary<IN , string > _modePushers;
     
-    private List<IN> _modePopers;
+    private readonly List<IN> _modePopers;
 
-    private Dictionary<IN, List<string>> _modes;
+    private readonly Dictionary<IN, List<string>> _modes;
 
 
     public static IAotLexerBuilder<IN> NewBuilder() 
@@ -96,7 +96,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
 
     private void AddLabel(IN tokenId, string lang, string label)
     {
-        (List<LexemeAttribute> tokens, List<LexemeLabelAttribute> labels) lexemes = (null,null);
+        (List<LexemeAttribute> tokens, List<LexemeLabelAttribute> labels) lexemes;
         if (_lexemesDefinitionsAndLabels.TryGetValue(tokenId, out lexemes))
         {
             if (lexemes.labels == null)
@@ -373,7 +373,7 @@ public class AotLexerBuilder<IN> :  IAotLexerBuilder<IN>, IAotLexemeBuilder<IN> 
 
     public IAotLexemeBuilder<IN> WithModes(params string[] modes)
     {
-        List<string> currentModes = new List<string>();
+        List<string> currentModes;
         if (!_modes.TryGetValue(_currentLexeme.Value, out currentModes))
         {
             currentModes = new List<string>();

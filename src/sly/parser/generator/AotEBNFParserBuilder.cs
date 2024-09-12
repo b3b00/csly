@@ -292,7 +292,7 @@ public class AotEBNFParserBuilder<IN, OUT> : IAotEbnfRuleBuilder<IN, OUT> where 
         Func<object[], OUT> loggedVisitor = visitor;
         
         OperationMetaData<IN, OUT> operationMeta =
-            new OperationMetaData<IN, OUT>(precedence, Associativity.None, loggedVisitor, affix, operation, nodeName);
+            new OperationMetaData<IN, OUT>(precedence, associativity, loggedVisitor, affix, operation, nodeName);
         
         List<OperationMetaData<IN,OUT >> operationsForPrecedence;
         if (!_operationsByPrecedence.TryGetValue(precedence, out operationsForPrecedence))

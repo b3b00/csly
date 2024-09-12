@@ -10,7 +10,7 @@ public class AotRuleParser<IN, OUT> where IN : struct
     public IAotLexerBuilder<EbnfTokenGeneric> GetEbnfLexerBuilder()
     {
         var builder = AotLexerBuilder<EbnfTokenGeneric>.NewBuilder();
-        var lexerBuilder = builder
+        builder
             .AlphaNumDashId(EbnfTokenGeneric.IDENTIFIER)
             .Sugar(EbnfTokenGeneric.COLON, ":")
             .Sugar(EbnfTokenGeneric.ZEROORMORE, "*")

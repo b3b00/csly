@@ -42,7 +42,7 @@ public interface IAotEbnfParserBuilder<IN,OUT> where IN : struct
     
     IAotEbnfRuleBuilder<IN,OUT> Postfix(string operation, int precedence, Func<object[], OUT> visitor);
     
-    public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result); // TODO AOT this build result is strange
+    public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result); 
     
     public BuildResult<Parser<IN, OUT>> BuildParser();
 
