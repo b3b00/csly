@@ -87,47 +87,42 @@ public class ParserSyntaxWalker : CslySyntaxWalker
 
         foreach (var attribute in attributes)
         {
-            switch (attribute.Name.ToString())
+            if (attribute.Name.ToString() == "Production")
             {
-                case "Production" when IsOperand(node):
+                if (IsOperand(node))
                 {
                     var rule = GetAttributeArgs(attribute, withLeadingComma: false);
                     _builder.AppendLine($".Operand({rule},");
                     AddProductionVisitor(node);
                     _builder.AppendLine(")");
-                    break;
                 }
-                case "Prduction" when !IsOperand(node):
+                else
                 {
                     var rule = GetAttributeArgs(attribute, withLeadingComma: false);
                     _builder.AppendLine($".Production({rule},");
                     AddProductionVisitor(node);
                     _builder.AppendLine(")");
-                    break;
-                }
-                case "Operation":
-                {
-                    AddOperation(node, attribute);
-                    break;
-                }
-                case "Prefix":
-                case "Postfix":
-                {
-                    AddPrePostFix(node, attribute);
-                    break;
-                }
-                case "Infix":
-                {
-                    AddInfix(node, attribute);
-                    break;
                 }
             }
-
+            else if (attribute.Name.ToString() == "Operation")
+            {
+                AddOperation(node, attribute);
+            }
+            else if (attribute.Name.ToString() is "Prefix" or "Postfix")
+            {
+                AddPrePostFix(node, attribute);
+            }
+            else if (attribute.Name.ToString() == "Infix")
+            {
+                AddInfix(node, attribute);
+            }
+            
             if (!string.IsNullOrEmpty(nodeName))
             {
                 _builder.AppendLine($"    .Named({nodeName})");
             }
         }
+       
 
 
     }

@@ -26,6 +26,7 @@ namespace expressionparser
         }
 
 
+        [NodeName("term")]
         [Production("expression : term PLUS expression")]
         [Production("expression : term MINUS expression")]
         public Expression Expression(Expression left, Token<ExpressionToken> operatorToken, Expression right)
@@ -39,6 +40,7 @@ namespace expressionparser
             return termValue;
         }
 
+        [NodeName("factor")]
         [Production("term : factor TIMES term")]
         [Production("term : factor DIVIDE term")]
         public Expression Term(Expression left, Token<ExpressionToken> operatorToken, Expression right)
