@@ -287,6 +287,15 @@ namespace {ns};
                 string name = attributeSyntax.Name.ToString();
                 if (name == "ParserGenerator")
                 {
+                    if (classDeclarationSyntax.TypeParameterList.Parameters.Count == 3)
+                    {
+                        var arg1 = classDeclarationSyntax.TypeParameterList.Parameters[0];
+                        var arg2 = classDeclarationSyntax.TypeParameterList.Parameters[1];
+                        var arg3 = classDeclarationSyntax.TypeParameterList.Parameters[2];
+                        return (arg1.Identifier.Text,arg2.Identifier.Text,arg3.Identifier.Text,true);
+                        ;
+                    }
+                    
                     if (attributeSyntax.ArgumentList != null && attributeSyntax.ArgumentList.Arguments.Count == 3)
                     {
                         var arg1 = attributeSyntax.ArgumentList.Arguments[0];
