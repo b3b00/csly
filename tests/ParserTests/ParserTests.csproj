@@ -54,7 +54,8 @@
     <EmbeddedResource Include="sourceGenerators\data\expressioncontext.txt" />
     <EmbeddedResource Include="sourceGenerators\data\extended.txt" />
     <EmbeddedResource Include="sourceGenerators\data\labels.txt" />
-    <EmbeddedResource Include="sourceGenerators\data\template.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\template.txt" />    
+    <EmbeddedResource Include="sourceGenerators\data\variableexpression.txt" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
      <NoWarn>1701;1702;1705;1591</NoWarn>
