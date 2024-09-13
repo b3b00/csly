@@ -116,7 +116,7 @@ internal class AotTestParser
 }
 
 [ParserGenerator(typeof(AotTestLexer), typeof(AotTestParser), typeof(double))]
-internal partial class TestGenerator : AbstractParserGenerator<AotTestLexer>
+internal partial class TestGenerator : AbstractParserGenerator<AotTestLexer, AotTestParser, double>
 {
     
 }

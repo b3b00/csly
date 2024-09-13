@@ -224,7 +224,7 @@ public class CslyParserGenerator : IIncrementalGenerator
 
 
 namespace {ns};
-{modifiers} class {className} : AbstractParserGenerator<{lexerName}> {{
+{modifiers} class {className} : AbstractParserGenerator<{lexerName},{parserType}, {outputType}> {{
     
     {LexerBuilderGenerator.GenerateLexer(lexerDecl as EnumDeclarationSyntax, outputType, declarationsByName)}
 
@@ -287,6 +287,25 @@ namespace {ns};
                 string name = attributeSyntax.Name.ToString();
                 if (name == "ParserGenerator")
                 {
+                    if (classDeclarationSyntax?.BaseList?.Types != null)
+                    {
+                        var abstractParser = classDeclarationSyntax.BaseList.Types.FirstOrDefault(x => x.Type.ToString().Contains("AbstractParserGenerator"));
+                        if (abstractParser != null)
+                        {
+                            var args = (abstractParser.Type as GenericNameSyntax)?.TypeArgumentList?.Arguments;
+                            if (args != null && args.HasValue && args.Value.Count == 3)
+                            {
+                                var l = args.Value[0];
+                                var p = args.Value[1];
+                                var o = args.Value[2];
+                                return (l.ToString(), p.ToString(),
+                                    o.ToString(),
+                                    true);
+                                
+                            }
+                        }
+                    }
+                    
                     if (attributeSyntax.ArgumentList != null && attributeSyntax.ArgumentList.Arguments.Count == 3)
                     {
                         var arg1 = attributeSyntax.ArgumentList.Arguments[0];

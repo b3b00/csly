@@ -1,6 +1,6 @@
 
 [ParserGenerator(typeof(TemplateLexer), typeof(TemplateParser), typeof(object))]
-public partial class TemplateParserGenerator : AbstractParserGenerator<AotTestLexer>
+public partial class TemplateParserGenerator : AbstractParserGenerator<TemplateLexer, TemplateParser, object>
 {
         
 }

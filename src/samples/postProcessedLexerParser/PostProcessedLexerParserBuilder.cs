@@ -10,7 +10,7 @@ using sly.sourceGenerator;
 namespace postProcessedLexerParser
 {
     [ParserGenerator(typeof(FormulaToken),typeof(FormulaParser),typeof(Expression))]
-    public partial class PostProcessedLexerGenerator : AbstractParserGenerator<FormulaToken>
+    public partial class PostProcessedLexerGenerator : AbstractParserGenerator<FormulaToken, FormulaParser, Expression>
     {
         public override LexerPostProcess<FormulaToken> UseTokenPostProcessor() =>  PostProcessedLexerParserBuilder.postProcessFormula;
     }
