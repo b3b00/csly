@@ -1,0 +1,54 @@
+using aot.lexer;
+using sly.lexer;
+using sly.parser.generator;
+
+namespace TestNamespace;
+
+internal enum AotTestLexer
+{
+    [Double]
+    DOUBLE,
+    [AlphaId]
+    IDENTIFIER,
+    [Sugar("+")]
+    PLUS,
+    [Sugar("++")]
+    INCREMENT,
+    [Sugar("-")]
+    MINUS,
+    [Sugar("*")]
+    TIMES,
+    [Sugar("/")]
+    DIVIDE,
+    [Sugar("(")]
+    LPAREN,
+    [Sugar(")")]
+    RPAREN,
+    [Sugar("!")]
+    FACTORIAL,
+ 
+    
+
+    [Push("carré")]
+    [Sugar("²")]
+    SQUARE,
+[Mode("carré")]
+[Lexeme("$-$")]
+REGEX,
+
+[Lexeme(GenericToken.KeyWord,"hello")]
+HELLO,
+[Lexeme(GenericToken.String)]
+STR,
+[Lexeme(GenericToken.Int)]
+I,
+[MultiLineComment("<!--","-->",channel:Channels.Main)]
+        [Mode]
+        COMMENT,
+}
+
+[ParserGenerator]
+internal partial class TestGenerator : AbstractParserGenerator<AotTestLexer, AotTestParser, double>
+{
+    
+}

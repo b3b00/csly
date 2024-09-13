@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.tree
 {
-    public class SyntaxEpsilon<IN> : ISyntaxNode<IN> where IN : struct
+    public class SyntaxEpsilon<IN, OUT> : ISyntaxNode<IN, OUT> where IN : struct
     {
         public bool IsEpsilon => true;
         public bool Discarded { get; } = false;

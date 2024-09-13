@@ -35,7 +35,7 @@ namespace sly.parser.generator
                 return attributes.Any<object>();
             }).ToList<MethodInfo>();
 
-            var operationsByPrecedence = new Dictionary<int, List<OperationMetaData<IN>>>();
+            var operationsByPrecedence = new Dictionary<int, List<OperationMetaData<IN,OUT>>>();
             methods.ForEach(m =>
             {
                 var attributes =
@@ -70,24 +70,23 @@ namespace sly.parser.generator
                         }
                     }
 
-
                     bool isEnumValue = EnumConverter.IsEnumValue<IN>(attr.StringToken) ||
                                        attr.IntToken >= 0;
-                    OperationMetaData<IN> operation = null;
+                    OperationMetaData<IN, OUT> operation = null;
                     if (!isEnumValue && !string.IsNullOrEmpty(explicitToken) && explicitToken.StartsWith("'") && explicitToken.EndsWith("'")) 
                     {
-                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, explicitToken ,nodeName);
+                        operation = new OperationMetaData<IN, OUT>(attr.Precedence, attr.Assoc, m, attr.Affix, explicitToken ,nodeName);
                     }
                     else if (isEnumValue)
                     {
-                        operation = new OperationMetaData<IN>(attr.Precedence, attr.Assoc, m, attr.Affix, oper, nodeName);
+                        operation = new OperationMetaData<IN, OUT>(attr.Precedence, attr.Assoc, m, attr.Affix, oper, nodeName);
                     }
                     else
                     {
                         throw new ParserConfigurationException($"bad enum name {attr.StringToken} on Operation definition.");   
                     }
 
-                    var operations = new List<OperationMetaData<IN>>();
+                    var operations = new List<OperationMetaData<IN, OUT>>();
                     if (operationsByPrecedence.TryGetValue(operation.Precedence, out var value))
                         operations = value;
                     operations.Add(operation);
@@ -96,6 +95,15 @@ namespace sly.parser.generator
             });
 
             
+            if (GenerateExpressionParserRules(configuration, parserClass, result, operationsByPrecedence, out var buildResult)) return buildResult;
+
+            return result;
+        }
+
+        
+        internal bool GenerateExpressionParserRules(ParserConfiguration<IN, OUT> configuration, Type parserClass, BuildResult<ParserConfiguration<IN, OUT>> result,
+            Dictionary<int, List<OperationMetaData<IN, OUT>>> operationsByPrecedence, out BuildResult<ParserConfiguration<IN, OUT>> buildResult)
+        {
             if (operationsByPrecedence.Count > 0)
             {
                 var operandNonTerminal = GetOperandNonTerminal(parserClass,configuration, result);
@@ -106,7 +114,7 @@ namespace sly.parser.generator
                         parserClass.Name);
             }
 
-            configuration.UsesOperations = operationsByPrecedence.Any<KeyValuePair<int, List<OperationMetaData<IN>>>>(); 
+            configuration.UsesOperations = operationsByPrecedence.Any<KeyValuePair<int, List<OperationMetaData<IN, OUT>>>>(); 
             result.Result = configuration;
             var rec = LeftRecursionChecker<IN, OUT>.CheckLeftRecursion(configuration);
             if (rec.foundRecursion)
@@ -115,15 +123,24 @@ namespace sly.parser.generator
                 result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
                     I18N.Instance.GetText(I18n,I18NMessage.LeftRecursion,recs),
                     ErrorCodes.PARSER_LEFT_RECURSIVE));
-                return result;
+                {
+                    buildResult = result;
+                    return false;
+                }
             }
-            
-            return result;
+            buildResult = result;
+            return true;
         }
 
         private string GetOperandNonTerminal(Type parserClass, ParserConfiguration<IN,OUT> configuration,
             BuildResult<ParserConfiguration<IN, OUT>> result) 
         {
+            if (configuration.OperandRules != null && configuration.OperandRules.Any())
+            {
+                string nonTerminalName = string.Join("-",configuration.OperandRules.Select(x => x.NonTerminalName).Distinct());
+                return nonTerminalName;
+            }
+            
             List<MethodInfo> methods;
             methods = parserClass.GetMethods().ToList<MethodInfo>();
             
@@ -152,18 +169,18 @@ namespace sly.parser.generator
             {
                 operandNonTerminalName = $"{parserClass.Name}_operand";
                 var operandNonTerminals = operandMethods.Select<MethodInfo, string>(GetNonTerminalNameFromProductionMethod);
-                var operandNonTerminal = new NonTerminal<IN>(operandNonTerminalName);
+                var operandNonTerminal = new NonTerminal<IN,OUT>(operandNonTerminalName);
                 
                 
                 foreach (var operand in operandNonTerminals)
                 {
                     if (!string.IsNullOrEmpty(operand))
                     {
-                        var rule = new Rule<IN>
+                        var rule = new Rule<IN,OUT>
                         {
                             IsByPassRule = true,
                             IsExpressionRule = true,
-                            Clauses = new List<IClause<IN>> {new NonTerminalClause<IN>(operand)}
+                            Clauses = new List<IClause<IN,OUT>> {new NonTerminalClause<IN,OUT>(operand)}
                         };
                         operandNonTerminal.Rules.Add(rule);
                     }
@@ -190,7 +207,7 @@ namespace sly.parser.generator
 
 
         private void GenerateExpressionParser(ParserConfiguration<IN, OUT> configuration,
-            string operandNonTerminal, Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence,
+            string operandNonTerminal, Dictionary<int, List<OperationMetaData<IN, OUT>>> operationsByPrecedence,
             string parserClassName) 
         {
             var precedences = operationsByPrecedence.Keys.ToList<int>();
@@ -210,11 +227,11 @@ namespace sly.parser.generator
             }
 
             // entry point non terminal
-            var entrypoint = new NonTerminal<IN>($"{parserClassName}_expressions", new List<Rule<IN>>());
+            var entrypoint = new NonTerminal<IN,OUT>($"{parserClassName}_expressions", new List<Rule<IN,OUT>>());
             var prec = precedences[0];
             var lowestname = GetNonTerminalNameForPrecedence(prec, operationsByPrecedence, operandNonTerminal);
-            var rule = new Rule<IN>();
-            rule.Clauses.Add(new NonTerminalClause<IN>(lowestname));
+            var rule = new Rule<IN,OUT>();
+            rule.Clauses.Add(new NonTerminalClause<IN,OUT>(lowestname));
             rule.IsByPassRule = true;
             rule.IsExpressionRule = true;
             rule.ExpressionAffix = Affix.NotOperator;
@@ -222,35 +239,35 @@ namespace sly.parser.generator
             entrypoint.Rules.Add(rule);
         }
 
-        private NonTerminal<IN> BuildPrecedenceNonTerminal(string name, string nextName, List<OperationMetaData<IN>> operations, bool isLastLevel = false)
+        private NonTerminal<IN,OUT> BuildPrecedenceNonTerminal(string name, string nextName, List<OperationMetaData<IN, OUT>> operations, bool isLastLevel = false)
         {
-            var nonTerminal = new NonTerminal<IN>(name, new List<Rule<IN>>());
+            var nonTerminal = new NonTerminal<IN,OUT>(name, new List<Rule<IN,OUT>>());
 
-            var InFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.InFix).ToList<OperationMetaData<IN>>();
+            var InFixOps = operations.Where<OperationMetaData<IN, OUT>>(x => x.Affix == Affix.InFix).ToList<OperationMetaData<IN, OUT>>();
             if (InFixOps.Count > 0)
             {
-                var InFixClauses = InFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
+                var InFixClauses = InFixOps.Select<OperationMetaData<IN, OUT>, TerminalClause<IN,OUT>>(x =>
                 {
                     if (x.IsExplicitOperatorToken)
                     {
-                        return new TerminalClause<IN>(x.ExplicitOperatorToken.Substring(1,x.ExplicitOperatorToken.Length-2));
+                        return new TerminalClause<IN,OUT>(x.ExplicitOperatorToken.Substring(1,x.ExplicitOperatorToken.Length-2));
                     }
                     else
                     {
-                        return new TerminalClause<IN>(new LeadingToken<IN>(x.OperatorToken));
+                        return new TerminalClause<IN,OUT>(new LeadingToken<IN>(x.OperatorToken));
                     }
-                }).ToList<IClause<IN>>();
+                }).ToList<IClause<IN,OUT>>();
 
-                var rule = new Rule<IN>
+                var rule = new Rule<IN,OUT>
                 {
                     ExpressionAffix = Affix.InFix,
                     IsExpressionRule = true,
                     NonTerminalName = name
                 };
 
-                rule.Clauses.Add(new NonTerminalClause<IN>(nextName));
-                rule.Clauses.Add(InFixClauses.Count == 1 ? InFixClauses[0] : new ChoiceClause<IN>(InFixClauses));
-                rule.Clauses.Add(new NonTerminalClause<IN>(name));
+                rule.Clauses.Add(new NonTerminalClause<IN,OUT>(nextName));
+                rule.Clauses.Add(InFixClauses.Count == 1 ? InFixClauses[0] : new ChoiceClause<IN,OUT>(InFixClauses));
+                rule.Clauses.Add(new NonTerminalClause<IN,OUT>(name));
                      
                 InFixOps.ForEach(x =>
                 {
@@ -263,7 +280,7 @@ namespace sly.parser.generator
                 if (isLastLevel)
                 {
                     // if next = operand => add rule (name : operand)
-                    var rule2 = new Rule<IN>
+                    var rule2 = new Rule<IN,OUT>
                     {
                         ExpressionAffix = Affix.NotOperator,
                         IsExpressionRule = true,
@@ -271,67 +288,67 @@ namespace sly.parser.generator
                         IsByPassRule = true
                     };
 
-                    rule2.Clauses.Add(new NonTerminalClause<IN>(nextName));
+                    rule2.Clauses.Add(new NonTerminalClause<IN,OUT>(nextName));
                     nonTerminal.Rules.Add(rule2);
                 }
             }
 
 
-            var PreFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.PreFix).ToList<OperationMetaData<IN>>();
+            var PreFixOps = operations.Where<OperationMetaData<IN, OUT>>(x => x.Affix == Affix.PreFix).ToList<OperationMetaData<IN, OUT>>();
             if (PreFixOps.Count > 0)
             {
-                var PreFixClauses = PreFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
+                var PreFixClauses = PreFixOps.Select<OperationMetaData<IN, OUT>, TerminalClause<IN,OUT>>(x =>
                 {
                     if (x.IsExplicitOperatorToken)
                     {
-                        return new TerminalClause<IN>(
+                        return new TerminalClause<IN,OUT>(
                             x.ExplicitOperatorToken.Substring(1, x.ExplicitOperatorToken.Length - 2));
                     }
                     else
                     {
-                        return new TerminalClause<IN>(new LeadingToken<IN>(x.OperatorToken));
+                        return new TerminalClause<IN,OUT>(new LeadingToken<IN>(x.OperatorToken));
                     }
-                }).ToList<IClause<IN>>();
+                }).ToList<IClause<IN,OUT>>();
                 
                     
 
-                var rule = new Rule<IN>
+                var rule = new Rule<IN,OUT>
                 {
                     ExpressionAffix = Affix.PreFix,
                     IsExpressionRule = true
                 };
 
-                rule.Clauses.Add(PreFixClauses.Count == 1 ? PreFixClauses[0] : new ChoiceClause<IN>(PreFixClauses));
-                rule.Clauses.Add(new NonTerminalClause<IN>(nextName));
+                rule.Clauses.Add(PreFixClauses.Count == 1 ? PreFixClauses[0] : new ChoiceClause<IN,OUT>(PreFixClauses));
+                rule.Clauses.Add(new NonTerminalClause<IN,OUT>(nextName));
 
                 PreFixOps.ForEach(x => rule.SetVisitor(x));
                 nonTerminal.Rules.Add(rule);
             }
 
-            var PostFixOps = operations.Where<OperationMetaData<IN>>(x => x.Affix == Affix.PostFix).ToList<OperationMetaData<IN>>();
+            var PostFixOps = operations.Where<OperationMetaData<IN, OUT>>(x => x.Affix == Affix.PostFix).ToList<OperationMetaData<IN, OUT>>();
             if (PostFixOps.Count > 0)
             {
-                var PostFixClauses = PostFixOps.Select<OperationMetaData<IN>, TerminalClause<IN>>(x =>
+                var PostFixClauses = PostFixOps.Select<OperationMetaData<IN, OUT>, TerminalClause<IN,OUT>>(x =>
                 {
                     if (x.IsExplicitOperatorToken)
                     {
-                        return new TerminalClause<IN>(
+                        return new TerminalClause<IN,OUT>(
                             x.ExplicitOperatorToken.Substring(1, x.ExplicitOperatorToken.Length - 2));
                     }
                     else
                     {
-                        return new TerminalClause<IN>(new LeadingToken<IN>(x.OperatorToken));
+                        return new TerminalClause<IN,OUT>(new LeadingToken<IN>(x.OperatorToken));
                     }
-                }).ToList<IClause<IN>>();
+                }).ToList<IClause<IN,OUT>>();
 
-                var rule = new Rule<IN>
+                var rule = new Rule<IN,OUT>
                 {
                     ExpressionAffix = Affix.PostFix,
                     IsExpressionRule = true
                 };
 
-                rule.Clauses.Add(new NonTerminalClause<IN>(nextName));
-                rule.Clauses.Add(PostFixClauses.Count == 1 ? PostFixClauses[0] : new ChoiceClause<IN>(PostFixClauses));
+                rule.Clauses.Add(new NonTerminalClause<IN,OUT>(nextName));
+                rule.Clauses.Add(PostFixClauses.Count == 1 ? PostFixClauses[0] : new ChoiceClause<IN,OUT>(PostFixClauses));
 
                 PostFixOps.ForEach(x => rule.SetVisitor(x));
                 nonTerminal.Rules.Add(rule);
@@ -339,8 +356,8 @@ namespace sly.parser.generator
 
             if (InFixOps.Count == 0)
             {
-                var rule0 = new Rule<IN>();
-                rule0.Clauses.Add(new NonTerminalClause<IN>(nextName));
+                var rule0 = new Rule<IN,OUT>();
+                rule0.Clauses.Add(new NonTerminalClause<IN,OUT>(nextName));
                 rule0.IsExpressionRule = true;
                 rule0.ExpressionAffix = Affix.NotOperator;
                 rule0.IsByPassRule = true;
@@ -351,11 +368,11 @@ namespace sly.parser.generator
         }
 
         private string GetNonTerminalNameForPrecedence(int precedence,
-            Dictionary<int, List<OperationMetaData<IN>>> operationsByPrecedence, string operandName) 
+            Dictionary<int, List<OperationMetaData<IN, OUT>>> operationsByPrecedence, string operandName) 
         {
             if (precedence > 0)
             {
-                var tokens = operationsByPrecedence[precedence].Select<OperationMetaData<IN>, string>(o => o.Operatorkey).Distinct().ToList<string>();
+                var tokens = operationsByPrecedence[precedence].Select<OperationMetaData<IN, OUT>, string>(o => o.Operatorkey).Distinct().ToList<string>();
                 return GetNonTerminalNameForPrecedence(precedence, tokens);
             }
 

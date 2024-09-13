@@ -9,6 +9,26 @@ namespace sly.lexer
 {
     public class LexerPosition : IComparable
     {
+        protected bool Equals(LexerPosition other)
+        {
+            return Index == other.Index;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((LexerPosition)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return Index;
+            }
+        }
 
         public LexerPosition() : this (0,0,0)
         {
@@ -73,12 +93,12 @@ namespace sly.lexer
 
         public static bool operator ==(LexerPosition p1, LexerPosition p2)
         {
-            return p1.Index == p2.Index;
+            return p1?.Index == p2?.Index;
         }
         
         public static bool operator !=(LexerPosition p1, LexerPosition p2)
         {
-            return p1.Index != p2.Index;
+            return p1?.Index != p2?.Index;
         }
     }
     

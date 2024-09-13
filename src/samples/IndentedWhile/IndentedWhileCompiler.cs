@@ -6,9 +6,16 @@ using csly.whileLang.model;
 using sly.parser;
 using sly.parser.generator;
 using Sigil;
+using sly.sourceGenerator;
 
 namespace csly.indentedWhileLang.compiler
 {
+    
+    [ParserGenerator]
+    public partial class WhileGenerator : AbstractParserGenerator<IndentedWhileTokenGeneric, IndentedWhileParserGeneric, WhileAST>
+    {
+    
+    }
     public class IndentedWhileCompiler
     {
         private readonly Parser<IndentedWhileTokenGeneric, WhileAST> whileParser;
@@ -88,18 +95,7 @@ namespace csly.indentedWhileLang.compiler
                 var result = whileParser.Parse(whileCode);
                 if (result.IsOk)
                 {
-                    var ast = result.Result;
-
-                    var checker = new SemanticChecker();
-
-                    var context = checker.SemanticCheck(ast,isQuiet);
-
-                    var emiter = Emit<Func<int>>.NewDynamicMethod("Method" + Guid.NewGuid());
-
-                    emiter = ast.EmitByteCode(context, emiter);
-                    //emiter.LoadConstant(42);                    
-                    //emiter.Return();
-                    function = emiter.CreateDelegate();
+                    function = CompileAST(isQuiet, result);
                 }
             }
             catch
@@ -108,6 +104,24 @@ namespace csly.indentedWhileLang.compiler
             }
 
 
+            return function;
+        }
+
+        public static Func<int> CompileAST(bool isQuiet, ParseResult<IndentedWhileTokenGeneric, WhileAST> result)
+        {
+            Func<int> function;
+            var ast = result.Result;
+
+            var checker = new SemanticChecker();
+
+            var context = checker.SemanticCheck(ast,isQuiet);
+
+            var emiter = Emit<Func<int>>.NewDynamicMethod("Method" + Guid.NewGuid());
+
+            emiter = ast.EmitByteCode(context, emiter);
+            //emiter.LoadConstant(42);                    
+            //emiter.Return();
+            function = emiter.CreateDelegate();
             return function;
         }
     }

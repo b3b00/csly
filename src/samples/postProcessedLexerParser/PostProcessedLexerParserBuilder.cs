@@ -2,15 +2,23 @@
 using System.Collections.Generic;
 using postProcessedLexerParser.expressionModel;
 using sly.lexer;
+using sly.lexer.fsm;
 using sly.parser;
 using sly.parser.generator;
+using sly.sourceGenerator;
 
 namespace postProcessedLexerParser
 {
+    [ParserGenerator]
+    public partial class PostProcessedLexerGenerator : AbstractParserGenerator<FormulaToken, FormulaParser, Expression>
+    {
+        public override LexerPostProcess<FormulaToken> UseTokenPostProcessor() =>  PostProcessedLexerParserBuilder.postProcessFormula;
+    }
+    
     public class PostProcessedLexerParserBuilder
     {
         
-        private static List<Token<FormulaToken>> postProcessFormula(List<Token<FormulaToken>> tokens)
+        public static List<Token<FormulaToken>> postProcessFormula(List<Token<FormulaToken>> tokens)
         {
             var mayLeft = new List<FormulaToken>()
             {

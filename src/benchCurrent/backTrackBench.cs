@@ -24,7 +24,7 @@ namespace benchCurrent
         {
             public Config()
             {
-                var baseJob = Job.MediumRun.With(CsProjCoreToolchain.NetCoreApp70);
+                var baseJob = Job.MediumRun.WithToolchain(CsProjCoreToolchain.NetCoreApp70);
             }
         }
 

@@ -2,9 +2,17 @@ using System.Collections.Generic;
 using sly.lexer;
 using sly.parser.generator;
 using sly.parser.parser;
+using sly.sourceGenerator;
 
 namespace indented
 {
+
+    [ParserGenerator]
+    public class IndentedParserGenerator
+    {
+        
+    }
+    
     public class IndentedParser
     {
         

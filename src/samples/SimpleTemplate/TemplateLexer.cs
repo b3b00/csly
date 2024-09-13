@@ -74,10 +74,6 @@ namespace SimpleTemplate
     [Mode("code")]
     STRING,
     
-    // [Int()]
-    // [Mode("code")]
-    // INT,
-    
     [Int()]
     [Mode("code")]
     INT,

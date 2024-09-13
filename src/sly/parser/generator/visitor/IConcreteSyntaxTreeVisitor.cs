@@ -4,13 +4,13 @@ using sly.parser.syntax.tree;
 
 namespace sly.parser.generator.visitor
 {
-    public interface IConcreteSyntaxTreeVisitor<IN,OUT> where IN : struct
+    public interface IConcreteSyntaxTreeVisitor<IN,OUT, OUTPUT> where IN : struct
     {
-        OUT VisitOptionNode(bool exists, OUT child);
-        OUT VisitNode(SyntaxNode<IN> node, IList<OUT> children);
-        OUT VisitManyNode(ManySyntaxNode<IN> node, IList<OUT> children);
+        OUTPUT VisitOptionNode(bool exists, OUTPUT child);
+        OUTPUT VisitNode(SyntaxNode<IN, OUT> node, IList<OUTPUT> children);
+        OUTPUT VisitManyNode(ManySyntaxNode<IN, OUT> node, IList<OUTPUT> children);
 
-        OUT VisitEpsilon();
-        OUT VisitLeaf(Token<IN> token);
+        OUTPUT VisitEpsilon();
+        OUTPUT VisitLeaf(Token<IN> token);
     }
 }
