@@ -7,7 +7,7 @@ using sly.sourceGenerator;
 namespace simpleExpressionParser
 {
 
-    [ParserGenerator(typeof(ExpressionToken), typeof(SimpleExpressionParserWithContext), typeof(int))]
+    [ParserGenerator]
     public partial class SimpleExpressionParserWithContextGenerator : AbstractParserGenerator<ExpressionToken, SimpleExpressionParserWithContext, int>
     {
         

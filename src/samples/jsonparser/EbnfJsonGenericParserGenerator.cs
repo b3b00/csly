@@ -3,7 +3,7 @@ using sly.sourceGenerator;
 
 namespace jsonparser;
 
-[ParserGenerator(typeof(JsonTokenGeneric), typeof(EbnfJsonGenericParser), typeof(JSon))]
+[ParserGenerator]
 public partial class EbnfJsonGenericParserGenerator: AbstractParserGenerator<JsonTokenGeneric, EbnfJsonGenericParser, JSon>
 {
         

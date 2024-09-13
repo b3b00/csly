@@ -83,8 +83,6 @@ public class SourceGeneratorTests
     
     [Theory]
     [InlineData("/sourceGenerators/data/errors/not_partial.txt", CslyGeneratorErrors.NOT_PARTIAL)]
-    [InlineData("/sourceGenerators/data/errors/missing_inheritance.txt", CslyGeneratorErrors.MISSING_INHERITANCE)]
-    [InlineData("/sourceGenerators/data/errors/missing_inheritance_2.txt", CslyGeneratorErrors.MISSING_INHERITANCE)]
     [InlineData("/sourceGenerators/data/errors/missing_lexer.txt", CslyGeneratorErrors.LEXER_NOT_FOUND)]
     [InlineData("/sourceGenerators/data/errors/missing_parser.txt", CslyGeneratorErrors.PARSER_NOT_FOUND)]
     public void TestGeneratorError(string source, string expectedError)
@@ -96,6 +94,21 @@ public class SourceGeneratorTests
         Assert.False(result.Diagnostics.IsEmpty);
         var diagnostic = result.Diagnostics.Single();
         Assert.Equal(expectedError,diagnostic.Id);
+        
+    }
+    
+    [Theory]
+    [InlineData("/sourceGenerators/data/errors/missing_inheritance.txt")]
+    [InlineData("/sourceGenerators/data/errors/missing_inheritance_2.txt")]
+    public void TestNoGenerator(string source)
+    {
+        string className = "ErrorGenerator";
+        var code = _embeddedResourceFileSystem.ReadAllText(source);
+        var result = generateSource(code, className);
+
+        Assert.True(result.Diagnostics.IsEmpty);
+        Assert.Empty(result.GeneratedTrees);
+        
         
     }
 }

@@ -49,7 +49,7 @@ STR,
         }
      }
 
-    [ParserGenerator(typeof(ExtendedLexer),typeof(ExtendedLexerParser),typeof(string))]
+    [ParserGenerator]
     public partial class ExtendedLexerGenerator : AbstractParserGenerator<ExtendedLexer, ExtendedLexerParser, string>
     {
         public override Action<ExtendedLexer, LexemeAttribute, GenericLexer<ExtendedLexer>> UseTokenExtensions()

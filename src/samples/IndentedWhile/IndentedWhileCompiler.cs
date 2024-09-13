@@ -11,7 +11,7 @@ using sly.sourceGenerator;
 namespace csly.indentedWhileLang.compiler
 {
     
-    [ParserGenerator(typeof(IndentedWhileTokenGeneric),typeof(IndentedWhileParserGeneric), typeof(WhileAST))]
+    [ParserGenerator]
     public partial class WhileGenerator : AbstractParserGenerator<IndentedWhileTokenGeneric, IndentedWhileParserGeneric, WhileAST>
     {
     

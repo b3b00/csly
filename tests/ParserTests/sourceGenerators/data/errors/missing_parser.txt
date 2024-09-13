@@ -47,7 +47,7 @@ I,
         COMMENT,
 }
 
-[ParserGenerator(typeof(AotTestLexer), typeof(AotTestParser), typeof(double))]
+[ParserGenerator]
 internal partial class TestGenerator : AbstractParserGenerator<AotTestLexer, AotTestParser, double>
 {
     

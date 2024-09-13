@@ -2,7 +2,7 @@ using sly.sourceGenerator;
 
 namespace indented;
 
-[ParserGenerator(typeof(IndentedLangLexer2),typeof(IndentedParser2),typeof(Ast) )]
+[ParserGenerator]
 public partial class IndentedParser2Generator
 {
         

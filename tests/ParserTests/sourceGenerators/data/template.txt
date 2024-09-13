@@ -1,5 +1,5 @@
 
-[ParserGenerator(typeof(TemplateLexer), typeof(TemplateParser), typeof(object))]
+[ParserGenerator]
 public partial class TemplateParserGenerator : AbstractParserGenerator<TemplateLexer, TemplateParser, object>
 {
         

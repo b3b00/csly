@@ -1,6 +1,6 @@
 
 
-[ParserGenerator(typeof(SimpleLexer),typeof(SimpleParser), typeof(string))]
+[ParserGenerator]
 public partial class SimpleParserGenerator : AbstractParserGenerator<SimpleLexer, SimpleParser, string>
 {
 

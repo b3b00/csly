@@ -2,7 +2,7 @@ using sly.sourceGenerator;
 
 namespace XML;
 
-[ParserGenerator(typeof(MinimalXmlLexer), typeof(MinimalXmlParser), typeof(string))]
+[ParserGenerator]
 public partial class XmlParserGenerator : AbstractParserGenerator<MinimalXmlLexer, MinimalXmlParser, string>
 {
     

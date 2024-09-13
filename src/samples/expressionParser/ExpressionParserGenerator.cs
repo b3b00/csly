@@ -3,7 +3,7 @@ using sly.sourceGenerator;
 
 namespace expressionparser;
 
-[ParserGenerator(typeof(ExpressionToken), typeof(ExpressionParser), typeof(int))]
+[ParserGenerator]
 public partial class ExpressionParserGenerator : AbstractParserGenerator<ExpressionToken,ExpressionParser,int>
 {
     

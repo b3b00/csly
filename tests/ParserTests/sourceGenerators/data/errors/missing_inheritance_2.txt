@@ -163,7 +163,7 @@ internal class Parent {
     }
 }
 
-[ParserGenerator(typeof(AotTestLexer), typeof(AotTestParser), typeof(double))]
+[ParserGenerator]
 internal partial class TestGenerator : Parent
 {
     

@@ -1,5 +1,5 @@
 
-[ParserGenerator(typeof(ExpressionToken), typeof(VariableExpressionParser), typeof(object))]
+[ParserGenerator]
 public partial class VariableExpressionParserGenerator : AbstractParserGenerator<ExpressionToken, VariableExpressionParser, object>
 {
     

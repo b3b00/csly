@@ -3,7 +3,7 @@ using sly.sourceGenerator;
 namespace ExplicitTokens;
 
 
-[ParserGenerator(typeof(ExplicitTokensTokens), typeof(ExplicitTokensExpressionParser),typeof(double))]
+[ParserGenerator]
 public partial class ExplicitTokensExpressionParserGenerator : AbstractParserGenerator<ExplicitTokensTokens,ExplicitTokensExpressionParser, double>
 {
         
