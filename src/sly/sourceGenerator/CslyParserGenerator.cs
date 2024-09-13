@@ -138,19 +138,6 @@ public class CslyParserGenerator : IIncrementalGenerator
                                 true), classDeclarationSyntax.GetLocation(), classDeclarationSyntax.Identifier.Text));
                     }
 
-                    if (classDeclarationSyntax.BaseList == null || classDeclarationSyntax.BaseList.Types == null || !classDeclarationSyntax.BaseList.Types.Any())
-                    {
-                        context.ReportDiagnostic(Diagnostic.Create(
-                            new DiagnosticDescriptor(
-                                CslyGeneratorErrors.MISSING_INHERITANCE,
-                                "Parser generator does not inherit from AbstractParserGenerator [1]",
-                                "Parser generator {0} does not inherit from AbstractParserGenerator [1]",
-                                "csly",
-                                DiagnosticSeverity.Error,
-                                true), classDeclarationSyntax.GetLocation(), classDeclarationSyntax.Identifier.Text));
-                        return;
-                    }
-                    
                     if (!classDeclarationSyntax.BaseList.Types.Any(x => x.Type.ToString().StartsWith("AbstractParserGenerator<")))
                     {
                         string inheriance = string.Join(", ",classDeclarationSyntax.BaseList.Types.Select(x => $"[{x.Type.ToString()}]"));
