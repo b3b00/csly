@@ -1,0 +1,17 @@
+grammar : root : GenericSimpleExpressionParser_expressions(NT) 
+
+# operand : primary_value(NT)
+
+# primary_value : DOUBLE(T)
+# primary_value : INT(T)
+# primary_value : LPAREN(T) GenericSimpleExpressionParser_expressions(NT) RPAREN(T)
+
+PLUS_MINUS (R)  : multiplication_or_division(NT) [ PLUS(T) | MINUS(T) ] PLUS_MINUS(NT)
+
+multiplication_or_division (R)  : MINUS_FACTORIAL(NT) [ TIMES(T) | DIVIDE(T) ] multiplication_or_division(NT)
+
+# MINUS_FACTORIAL (R)  : MINUS(T) operand(NT)
+# MINUS_FACTORIAL (R)  : operand(NT) FACTORIAL(T)
+# MINUS_FACTORIAL (R)  : operand(NT)
+
+GenericSimpleExpressionParser_expressions (R)  : PLUS_MINUS(NT)
