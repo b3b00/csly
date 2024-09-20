@@ -13,6 +13,13 @@ public enum GenericExpressionToken
 
     [AlphaNumId] IDENTIFIER = 4,
 
+    [Keyword("true")]
+    TRUE = 58,
+    
+    [Keyword("false")]
+    FALSE = 59,
+    
+    
     // the + operator
     [LexemeLabel("en", "plus sign")] [LexemeLabel("fr", "plus")] 
     [Sugar("+")]
@@ -40,5 +47,11 @@ public enum GenericExpressionToken
 
     [LexemeLabel("fr", "point d'exclamation")] [LexemeLabel("en", "exclamation point")] [Sugar("!")]
     FACTORIAL = 13,
+    
+    [LexemeLabel("fr", "question")] [LexemeLabel("en", "question")] [Sugar("?")]
+    QUESTION = 113,
+    
+    [LexemeLabel("fr", "deux points")] [LexemeLabel("en", "colon")] [Sugar(":")]
+    COLON = 213,
 
 }

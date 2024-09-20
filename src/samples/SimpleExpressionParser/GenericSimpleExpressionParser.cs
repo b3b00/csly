@@ -1,8 +1,19 @@
 using expressionparser;
 using sly.lexer;
 using sly.parser.generator;
+using sly.sourceGenerator;
 
 namespace simpleExpressionParser;
+
+
+    
+    [ParserGenerator]
+public partial class GenericSimpleExpressionParserGenerator : AbstractParserGenerator<GenericExpressionToken,
+    GenericSimpleExpressionParser, double>
+{
+    
+}
+
 
 [ParserRoot("root")]
 //[BroadenTokenWindow]
@@ -102,5 +113,15 @@ public class GenericSimpleExpressionParser
     public double OperandParens(Token<GenericExpressionToken> lparen, double value, Token<GenericExpressionToken> rparen)
     {
         return value;
+    }
+    
+    [Production("primary_value : ternary")]
+    public double PrimaryTernary(double value) => value;
+    
+    [Production("ternary : [TRUE | FALSE] QUESTION[d] GenericSimpleExpressionParser_expressions COLON[d] GenericSimpleExpressionParser_expressions")]
+    [NodeName("group")]
+    public double Ternary(Token<GenericExpressionToken> condition, double iftrue, double iffalse) 
+    {
+        return condition.TokenID == GenericExpressionToken.TRUE ? iftrue : iffalse;
     }
 }

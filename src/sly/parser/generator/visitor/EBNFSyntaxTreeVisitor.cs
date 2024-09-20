@@ -40,6 +40,8 @@ namespace sly.parser.generator.visitor
         {
             var group = new Group<IN, OUT>();
             var values = new List<SyntaxVisitorResult<IN, OUT>>();
+            
+            
             foreach (var n in node.Children)
             {
                 var v = Visit(n, context);
@@ -96,10 +98,11 @@ namespace sly.parser.generator.visitor
                 
                 var args = new List<object>();
 
-                foreach (var n in node.Children)
+                for (var index = 0; index < node.Children.Count; index++)
                 {
+                    var n = node.Children[index];
                     var v = Visit(n, context);
-                    
+
                     if (v.IsToken)
                     {
                         if (!n.Discarded) args.Add(v.TokenResult);
@@ -183,28 +186,26 @@ namespace sly.parser.generator.visitor
             SyntaxVisitorResult<IN, OUT> result = null;
 
             var values = new List<SyntaxVisitorResult<IN, OUT>>();
-            foreach (var n in node.Children)
+            for (var index = 0; index < node.Children.Count; index++)
             {
+                var n = node.Children[index];
                 var v = Visit(n, context);
                 values.Add(v);
             }
 
             if (node.IsManyTokens)
             {
-                var tokens = new List<Token<IN>>();
-                values.ForEach(v => tokens.Add(v.TokenResult));
+                var tokens = values.Select(x => x.TokenResult).ToList();
                 result = SyntaxVisitorResult<IN, OUT>.NewTokenList(tokens);
             }
             else if (node.IsManyValues)
             {
-                var vals = new List<OUT>();
-                values.ForEach(v => vals.Add(v.ValueResult));
+                var vals = values.Select(x => x.ValueResult).ToList();
                 result = SyntaxVisitorResult<IN, OUT>.NewValueList(vals);
             }
             else if (node.IsManyGroups)
             {
-                var vals = new List<Group<IN, OUT>>();
-                values.ForEach(v => vals.Add(v.GroupResult));
+                var vals = values.Select(x => x.GroupResult).ToList();
                 result = SyntaxVisitorResult<IN, OUT>.NewGroupList(vals);
             }
 
