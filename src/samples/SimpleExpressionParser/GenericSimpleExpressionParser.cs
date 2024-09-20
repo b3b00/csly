@@ -28,6 +28,8 @@ public class GenericSimpleExpressionParser
     [Operation("MINUS", Affix.InFix, Associativity.Left, 10)]
     public double BinaryTermExpression(double left, Token<GenericExpressionToken> operation, double right)
     {
+        
+        
         double result = 0;
         switch (operation.TokenID)
         {

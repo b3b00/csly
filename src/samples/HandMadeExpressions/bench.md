@@ -36,3 +36,20 @@ Memory : / 10 => no Gen1
 
 # basic expressions + ternary : start using combinators
 
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.19045.4780/22H2/2022Update)
+Intel Core i7-10610U CPU 1.80GHz, 1 CPU, 8 logical and 4 physical cores
+.NET SDK 8.0.400
+[Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+
+
+ Method | Mean      | Error    | StdDev    | Gen0       | Gen1      | Allocated |
+------- |----------:|---------:|----------:|-----------:|----------:|----------:|
+ Csly   | 192.62 ms | 9.027 ms | 26.188 ms | 46000.0000 | 3000.0000 | 222.27 MB |
+ Hand   |  11.72 ms | 0.922 ms |  2.554 ms |  5562.5000 |         - |  22.24 MB |
+
+CPU : / 17 !
+Memory : / 10
+
+# basic expressions + ternary : infix combinator
+

@@ -46,24 +46,45 @@ public class ExpressionParser
     }
 
 
-    private SimpleParser TerminalParser(params GenericExpressionToken[] expectedTokens)
+    private SimpleParser TerminalParser(string nodeName = null, Func<object[], double> visitor = null,params GenericExpressionToken[] expectedTokens)
     {
         return (tokens, position) =>
         {
             if (expectedTokens.Contains(tokens[position].TokenID))
             {
+                if (!string.IsNullOrEmpty(nodeName) && visitor != null)
+                {
+                    var node = new SyntaxNode<GenericExpressionToken, double>("primary",
+                        new List<ISyntaxNode<GenericExpressionToken, double>>()
+                        {
+                            new SyntaxLeaf<GenericExpressionToken, double>(tokens[position], false)
+                        });
+                    node.LambdaVisitor = visitor;
+                    return new Match<GenericExpressionToken, double>(node, position + 1);
+                }
                 var leaf = new SyntaxLeaf<GenericExpressionToken, double>(tokens[position], false);
-                return new Match<GenericExpressionToken,double>(leaf, position+1);
+                return new Match<GenericExpressionToken, double>(leaf, position + 1);
             }
 
             return new Match<GenericExpressionToken, double>();
         };
     }
-    
+
+
     private Match<GenericExpressionToken, double> MatchNonTerminal(IList<Token<GenericExpressionToken>> tokens,
-        int position, SimpleParser parser)
+        int position, params SimpleParser[] parsers)
     {
-        return parser(tokens, position);
+
+        for (int i = 0; i < parsers.Length; i++)
+        {
+            var parser = parsers[i];
+            var match = parser(tokens, position);
+            if (match.Matched)
+            {
+                return match;
+            }
+        }
+        return new Match<GenericExpressionToken, double>();
     }
 
     private Match<GenericExpressionToken, double> MatchSequence(string? nodeName,  Func<object[],double> visitor, IList<Token<GenericExpressionToken>> tokens,
@@ -90,6 +111,44 @@ public class ExpressionParser
         }
         return new Match<GenericExpressionToken, double>();
     }
+
+    private Match<GenericExpressionToken, double> MatchInfix(string nodeName, Func<object[], double> visitor,
+        IList<Token<GenericExpressionToken>> tokens,
+        int position, GenericExpressionToken[] operators, SimpleParser left, SimpleParser right)
+    {
+        var node = new SyntaxNode<GenericExpressionToken, double>(nodeName);
+        node.LambdaVisitor = visitor;
+        
+        
+        var leftMatch = left(tokens, position);
+        if (!leftMatch.Matched)
+        {
+            return new Match<GenericExpressionToken, double>();
+        }
+        node.Children.Add(leftMatch.Node);
+
+        var operatorpParser = TerminalParser(expectedTokens: operators);
+        var operatorMatch = operatorpParser(tokens, leftMatch.Position);
+        if (!operatorMatch.Matched)
+        {
+            var x = new SyntaxNode<GenericExpressionToken, double>(nodeName);
+            x.Children.Add(leftMatch.Node);
+            x.IsByPassNode = true;
+            return new Match<GenericExpressionToken, double>(x, leftMatch.Position);
+            //return new Match<GenericExpressionToken, double>();
+        }
+        node.Children.Add(operatorMatch.Node);
+        
+        var rightMatch = right(tokens, leftMatch.Position + 1);
+        if (!rightMatch.Matched)
+        {
+            return new Match<GenericExpressionToken, double>();
+        }
+        node.Children.Add(rightMatch.Node);
+
+        return new Match<GenericExpressionToken, double>(node, rightMatch.Position);
+
+    }
     
     public ExpressionParser(GenericSimpleExpressionParser instance)
     {
@@ -114,75 +173,22 @@ public class ExpressionParser
 
 public Match<GenericExpressionToken, double> TimesDiv(IList<Token<GenericExpressionToken>> tokens, int position)
 {
-    var match = MinusFact(tokens, position);
-    if (!match.Matched)
-    {
-        return new Match<GenericExpressionToken, double>();
-    }
-
-    var node1 = match.Node;
-    var token = tokens[match.Position];
-    if (token.TokenID != GenericExpressionToken.TIMES && token.TokenID != GenericExpressionToken.DIVIDE)
-    {
-        return match;
-    }
-
-    match = TimesDiv(tokens, match.Position + 1);
-    if (!match.Matched)
-    {
-        return new Match<GenericExpressionToken, double>();
-    }
-
-    var node = new SyntaxNode<GenericExpressionToken, double>("timesDiv",
-        new List<ISyntaxNode<GenericExpressionToken, double>>()
-        {
-            node1,
-            new SyntaxLeaf<GenericExpressionToken, double>(token, false),
-            match.Node
-        });
-
-    node.LambdaVisitor = args =>
+    var m = MatchInfix("timesdiv",args =>
     {
         return Instance.BinaryFactorExpression((double)args[0], (Token<GenericExpressionToken>)args[1], (double)args[2]);
-    };
-    return new Match<GenericExpressionToken, double>(node, match.Position);
+    }, tokens, position,new[] { GenericExpressionToken.TIMES , GenericExpressionToken.DIVIDE},MinusFact,TimesDiv);
+    return m;
+    
 }
 
 
 public Match<GenericExpressionToken, double> PlusMinus(IList<Token<GenericExpressionToken>> tokens, int position)
 {
-    var match = TimesDiv(tokens, position);
-    if (!match.Matched)
-    {
-        return new Match<GenericExpressionToken, double>();
-    }
-
-    var node1 = match.Node;
-    var token = tokens[match.Position];
-    if (token.TokenID != GenericExpressionToken.MINUS && token.TokenID != GenericExpressionToken.PLUS)
-    {
-        return match;
-    }
-
-    match = PlusMinus(tokens, match.Position + 1);
-    if (!match.Matched)
-    {
-        return new Match<GenericExpressionToken, double>();
-    }
-
-    var node = new SyntaxNode<GenericExpressionToken, double>("plusMinus",
-        new List<ISyntaxNode<GenericExpressionToken, double>>()
-        {
-            node1,
-            new SyntaxLeaf<GenericExpressionToken, double>(token, false),
-            match.Node
-        });
-    
-    node.LambdaVisitor = args =>
+    var m = MatchInfix("timesdiv",args =>
     {
         return Instance.BinaryTermExpression((double)args[0], (Token<GenericExpressionToken>)args[1], (double)args[2]);
-    };
-    return new Match<GenericExpressionToken, double>(node, match.Position);
+    }, tokens, position,new[] { GenericExpressionToken.PLUS , GenericExpressionToken.MINUS},TimesDiv,PlusMinus);
+    return m;
 }
 
 #endregion
@@ -213,68 +219,57 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
 
     public Match<GenericExpressionToken,double> PrimaryValue(IList<Token<GenericExpressionToken>> tokens, int position)
     {
-        var match = DoubleValue(tokens, position);
-        if (match.Matched)
-        {
-            return match;
-        }
-        match = IntegerValue(tokens, position);
-        if (match.Matched)
-        {
-            return match;
-        }
-
-        //match = GroupValue(tokens, position);
-        match = GroupExpression(tokens, position);
-        if (match.Matched)
-        {
-            return match;
-        }
-
-        match = PrimaryTernary(tokens, position);
-        if (match.Matched)
-        {
-            return match;
-        }
-        
-        return new Match<GenericExpressionToken, double>();
+        return MatchNonTerminal(tokens, position, DoubleValue, IntegerValue, GroupExpression, PrimaryTernary);
     }
 
     public Match<GenericExpressionToken,double> DoubleValue(IList<Token<GenericExpressionToken>> tokens, int position)
     {
-        if (tokens[position].TokenID == GenericExpressionToken.DOUBLE)
+        var parser = TerminalParser("primary", args =>
         {
-            var node = new SyntaxNode<GenericExpressionToken, double>("primary",
-                new List<ISyntaxNode<GenericExpressionToken, double>>()
-                {
-                    new SyntaxLeaf<GenericExpressionToken, double>(tokens[position], false)
-                });
-            node.LambdaVisitor = args =>
-            {
-                return Instance.OperandDouble((Token<GenericExpressionToken>)args[0]);
-            };
-            return new Match<GenericExpressionToken, double>(node, position + 1);
-        }
-
-        return new Match<GenericExpressionToken, double>();
+            return Instance.OperandDouble((Token<GenericExpressionToken>)args[0]);
+        } , GenericExpressionToken.DOUBLE);
+        return parser(tokens, position);
+        //
+        // if (tokens[position].TokenID == GenericExpressionToken.DOUBLE)
+        // {
+        //     var node = new SyntaxNode<GenericExpressionToken, double>("primary",
+        //         new List<ISyntaxNode<GenericExpressionToken, double>>()
+        //         {
+        //             new SyntaxLeaf<GenericExpressionToken, double>(tokens[position], false)
+        //         });
+        //     node.LambdaVisitor = args =>
+        //     {
+        //         return Instance.OperandDouble((Token<GenericExpressionToken>)args[0]);
+        //     };
+        //     return new Match<GenericExpressionToken, double>(node, position + 1);
+        // }
+        //
+        // return new Match<GenericExpressionToken, double>();
     }
     public Match<GenericExpressionToken,double> IntegerValue(IList<Token<GenericExpressionToken>> tokens, int position)
     {
-        if (tokens[position].TokenID == GenericExpressionToken.INT)
+        
+        var parser = TerminalParser("primary", args =>
         {
-            var node = new SyntaxNode<GenericExpressionToken, double>("primary",
-                new List<ISyntaxNode<GenericExpressionToken, double>>()
-                {
-                    new SyntaxLeaf<GenericExpressionToken, double>(tokens[position], false)
-                });
-            node.LambdaVisitor = args =>
-            {
-                return Instance.OperandInt((Token<GenericExpressionToken>)args[0]);
-            };
-            return new Match<GenericExpressionToken, double>(node, position + 1);
-        }
-
-        return new Match<GenericExpressionToken, double>();
+            return Instance.OperandDouble((Token<GenericExpressionToken>)args[0]);
+        } , GenericExpressionToken.INT);
+        return parser(tokens, position);
+        
+        // if (tokens[position].TokenID == GenericExpressionToken.INT)
+        // {
+        //     var node = new SyntaxNode<GenericExpressionToken, double>("primary",
+        //         new List<ISyntaxNode<GenericExpressionToken, double>>()
+        //         {
+        //             new SyntaxLeaf<GenericExpressionToken, double>(tokens[position], false)
+        //         });
+        //     node.LambdaVisitor = args =>
+        //     {
+        //         return Instance.OperandInt((Token<GenericExpressionToken>)args[0]);
+        //     };
+        //     return new Match<GenericExpressionToken, double>(node, position + 1);
+        // }
+        //
+        // return new Match<GenericExpressionToken, double>();
     }
 
 
@@ -286,44 +281,11 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
             return Instance.OperandParens((Token<GenericExpressionToken>)args[0], (double)args[1],
                 (Token<GenericExpressionToken>)args[2]);
         };
-        var openParen = TerminalParser(GenericExpressionToken.LPAREN);
-        var closeParen = TerminalParser(GenericExpressionToken.RPAREN);
+        var openParen = TerminalParser(expectedTokens:GenericExpressionToken.LPAREN);
+        var closeParen = TerminalParser(expectedTokens:GenericExpressionToken.RPAREN);
         return MatchSequence("group",visitor, tokens, position, openParen, Expression, closeParen);
     }   
-    
-    public Match<GenericExpressionToken,double> GroupValue(IList<Token<GenericExpressionToken>> tokens, int position)
-    {
-        var node = new SyntaxNode<GenericExpressionToken, double>("group",
-            new List<ISyntaxNode<GenericExpressionToken, double>>() );
-        node.LambdaVisitor = args =>
-        {
-            return Instance.OperandParens((Token<GenericExpressionToken>)args[0], (double)args[1],
-                (Token<GenericExpressionToken>)args[2]);
-        };
 
-        var match = MatchToken(tokens, position, GenericExpressionToken.LPAREN);
-        if (!match.Matched)
-        {
-            return new Match<GenericExpressionToken,double>();
-        } 
-        node.Children.Add(match.Node);
-        match = Expression(tokens, match.Position);
-        if (!match.Matched)
-        {
-            return new Match<GenericExpressionToken,double>();
-        }
-        node.Children.Add(match.Node);
-        match = MatchToken(tokens,match.Position, GenericExpressionToken.RPAREN);
-        if (!match.Matched)
-        {
-            return new Match<GenericExpressionToken,double>();
-        }
-        node.Children.Add(match.Node);
-
-        
-        return new Match<GenericExpressionToken, double>(node, match.Position);
-    }
-    
     public Match<GenericExpressionToken, double> PrimaryTernary(IList<Token<GenericExpressionToken>> tokens,
         int position)
     {
@@ -333,50 +295,17 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
             return Instance.Ternary((Token<GenericExpressionToken>)args[0], (double)args[2], (double)args[4]);
         };
 
-        var condition = TerminalParser(GenericExpressionToken.TRUE, GenericExpressionToken.FALSE);
-        var question = TerminalParser(GenericExpressionToken.QUESTION);
-        var colon = TerminalParser(GenericExpressionToken.COLON);
+        var condition = TerminalParser(expectedTokens:new[]{
+            GenericExpressionToken.TRUE, GenericExpressionToken.FALSE
+        })
+        ;
+        var question = TerminalParser(expectedTokens:GenericExpressionToken.QUESTION);
+        var colon = TerminalParser(expectedTokens:GenericExpressionToken.COLON);
         return MatchSequence("ternary",args =>
         {
             return Instance.Ternary((Token<GenericExpressionToken>)args[0], (double)args[2], (double)args[4]);
         },
             tokens, position, condition, question, Expression, colon, Expression);
-        
-        // var match = MatchToken(tokens, position, GenericExpressionToken.TRUE, GenericExpressionToken.FALSE);
-        // if (!match.Matched)
-        // {
-        //     return new Match<GenericExpressionToken, double>();
-        // }
-        // node.Children.Add(match.Node);
-        //
-        // match = MatchToken(tokens, match.Position, GenericExpressionToken.QUESTION);
-        // if (!match.Matched)
-        // {
-        //     return new Match<GenericExpressionToken, double>();
-        // }
-        // node.Children.Add(match.Node);
-        //
-        // match = Expression(tokens, match.Position);
-        // if (!match.Matched)
-        // {
-        //     return new Match<GenericExpressionToken, double>();
-        // }
-        // node.Children.Add(match.Node);
-        //
-        // match = MatchToken(tokens, match.Position, GenericExpressionToken.COLON);
-        // if (!match.Matched)
-        // {
-        //     return new Match<GenericExpressionToken, double>();
-        // }
-        // node.Children.Add(match.Node);
-        //
-        // match = Expression(tokens, match.Position);
-        // if (!match.Matched)
-        // {
-        //     return new Match<GenericExpressionToken, double>();
-        // }
-        // node.Children.Add(match.Node);
-        // return new Match<GenericExpressionToken, double>(node, match.Position);
     }
 
     #endregion

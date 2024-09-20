@@ -16,8 +16,8 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        // TestHandParser();
-        var summary = BenchmarkRunner.Run<BenchCslyVsHand>();
+        TestHandParser();
+        // var summary = BenchmarkRunner.Run<BenchCslyVsHand>();
     }
 
     private static void TestHandParser()
