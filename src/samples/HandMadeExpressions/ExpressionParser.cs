@@ -5,151 +5,16 @@ using sly.parser.syntax.tree;
 
 namespace handExpressions;
 
-public class Match<I, O> where I : struct
-{
 
-    public int Position = 0;
-    
-    public bool Matched = false;
 
-    public ISyntaxNode<I, O> Node;
-    public Match(ISyntaxNode<I, O> node, int position)
-    {
-        Position = position;
-        Node = node;
-        Matched = true;
-    }
 
-    public Match()
-    {
-        Matched = false;
-    }
-}
-
-public delegate Match<GenericExpressionToken,double> SimpleParser(IList<Token<GenericExpressionToken>> tokens, int position);
-
-public class ExpressionParser
+public class ExpressionParser : BaseParser<GenericExpressionToken, double>
 {
 
     GenericSimpleExpressionParser Instance = null;
-
-
-    private Match<GenericExpressionToken,double> MatchToken(IList<Token<GenericExpressionToken>> tokens, int position, params GenericExpressionToken[] expectedTokens)
-    {
-        if (expectedTokens.Contains(tokens[position].TokenID))
-        {
-            var leaf = new SyntaxLeaf<GenericExpressionToken, double>(tokens[position], false);
-            return new Match<GenericExpressionToken,double>(leaf, position+1);
-        }
-
-        return new Match<GenericExpressionToken, double>();
-    }
-
-
-    private SimpleParser TerminalParser(string nodeName = null, Func<object[], double> visitor = null,params GenericExpressionToken[] expectedTokens)
-    {
-        return (tokens, position) =>
-        {
-            if (expectedTokens.Contains(tokens[position].TokenID))
-            {
-                if (!string.IsNullOrEmpty(nodeName) && visitor != null)
-                {
-                    var node = new SyntaxNode<GenericExpressionToken, double>("primary",
-                        new List<ISyntaxNode<GenericExpressionToken, double>>()
-                        {
-                            new SyntaxLeaf<GenericExpressionToken, double>(tokens[position], false)
-                        });
-                    node.LambdaVisitor = visitor;
-                    return new Match<GenericExpressionToken, double>(node, position + 1);
-                }
-                var leaf = new SyntaxLeaf<GenericExpressionToken, double>(tokens[position], false);
-                return new Match<GenericExpressionToken, double>(leaf, position + 1);
-            }
-
-            return new Match<GenericExpressionToken, double>();
-        };
-    }
-
-
-    private Match<GenericExpressionToken, double> MatchNonTerminal(IList<Token<GenericExpressionToken>> tokens,
-        int position, params SimpleParser[] parsers)
-    {
-
-        for (int i = 0; i < parsers.Length; i++)
-        {
-            var parser = parsers[i];
-            var match = parser(tokens, position);
-            if (match.Matched)
-            {
-                return match;
-            }
-        }
-        return new Match<GenericExpressionToken, double>();
-    }
-
-    private Match<GenericExpressionToken, double> MatchSequence(string? nodeName,  Func<object[],double> visitor, IList<Token<GenericExpressionToken>> tokens,
-        int position, params SimpleParser[] clauses)
-    {
-        var node = new SyntaxNode<GenericExpressionToken,double>(nodeName);
-        node.LambdaVisitor = visitor;
-        bool ok = true; 
-        int i = 0;
-        int currentPosition = position;
-        while (i < clauses.Length && ok)
-        {
-            var currentClause = clauses[i] as SimpleParser;
-            var match = currentClause(tokens, currentPosition);
-            ok = match.Matched;
-            node.Children.Add(match.Node);
-            currentPosition = match.Position;
-            i++;
-        }
-
-        if (ok)
-        {
-            return new Match<GenericExpressionToken, double>(node,currentPosition);
-        }
-        return new Match<GenericExpressionToken, double>();
-    }
-
-    private Match<GenericExpressionToken, double> MatchInfix(string nodeName, Func<object[], double> visitor,
-        IList<Token<GenericExpressionToken>> tokens,
-        int position, GenericExpressionToken[] operators, SimpleParser left, SimpleParser right)
-    {
-        var node = new SyntaxNode<GenericExpressionToken, double>(nodeName);
-        node.LambdaVisitor = visitor;
-        
-        
-        var leftMatch = left(tokens, position);
-        if (!leftMatch.Matched)
-        {
-            return new Match<GenericExpressionToken, double>();
-        }
-        node.Children.Add(leftMatch.Node);
-
-        var operatorpParser = TerminalParser(expectedTokens: operators);
-        var operatorMatch = operatorpParser(tokens, leftMatch.Position);
-        if (!operatorMatch.Matched)
-        {
-            var x = new SyntaxNode<GenericExpressionToken, double>(nodeName);
-            x.Children.Add(leftMatch.Node);
-            x.IsByPassNode = true;
-            return new Match<GenericExpressionToken, double>(x, leftMatch.Position);
-            //return new Match<GenericExpressionToken, double>();
-        }
-        node.Children.Add(operatorMatch.Node);
-        
-        var rightMatch = right(tokens, leftMatch.Position + 1);
-        if (!rightMatch.Matched)
-        {
-            return new Match<GenericExpressionToken, double>();
-        }
-        node.Children.Add(rightMatch.Node);
-
-        return new Match<GenericExpressionToken, double>(node, rightMatch.Position);
-
-    }
     
+
+
     public ExpressionParser(GenericSimpleExpressionParser instance)
     {
         Instance = instance;

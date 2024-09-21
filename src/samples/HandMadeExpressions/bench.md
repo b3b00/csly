@@ -53,3 +53,36 @@ Memory : / 10
 
 # basic expressions + ternary : infix combinator
 
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.19045.4780/22H2/2022Update)
+Intel Core i7-10610U CPU 1.80GHz, 1 CPU, 8 logical and 4 physical cores
+.NET SDK 8.0.400
+[Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+
+
+ Method | Mean      | Error    | StdDev   | Gen0       | Allocated |
+------- |----------:|---------:|---------:|-----------:|----------:|
+ Csly   | 116.84 ms | 2.358 ms | 6.652 ms | 53000.0000 |  212.5 MB |
+ Hand   |  11.27 ms | 0.225 ms | 0.406 ms |  7093.7500 |  28.41 MB |
+
+
+CPU : /10
+Memory : /7.5
+
+
+# extract basicparser for micro runtime
+
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.19045.4894/22H2/2022Update)
+Intel Core i7-10610U CPU 1.80GHz, 1 CPU, 8 logical and 4 physical cores
+.NET SDK 8.0.400
+[Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+
+
+ Method | Mean      | Error    | StdDev    | Gen0       | Allocated |
+------- |----------:|---------:|----------:|-----------:|----------:|
+ Csly   | 128.70 ms | 6.358 ms | 18.243 ms | 53000.0000 |  212.5 MB |
+ Hand   |  13.77 ms | 0.646 ms |  1.853 ms |  7109.3750 |  28.41 MB |
+
+
+
