@@ -53,5 +53,13 @@ public enum GenericExpressionToken
     
     [LexemeLabel("fr", "deux points")] [LexemeLabel("en", "colon")] [Sugar(":")]
     COLON = 213,
+    
+    [AlphaId]
+    ID = 214,
+    
+    [Sugar(",")]
+    COMMA
+    
+    
 
 }

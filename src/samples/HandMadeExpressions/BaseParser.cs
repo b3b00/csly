@@ -152,10 +152,10 @@ public class BaseParser<TIn,TOut> where TIn : struct
 
     }
     
-    protected SimpleParser<TIn,TOut> ZeroOrMore(string name, SimpleParser<TIn, TOut> repeatedParser) {
+    protected SimpleParser<TIn,TOut> ZeroOrMore(SimpleParser<TIn, TOut> repeatedParser) {
         // TODO x*
         SimpleParser<TIn,TOut> zeroOrMore =  (IList<Token<TIn>> tokens, int position) => {
-            ManySyntaxNode<TIn,TOut> node = new ManySyntaxNode<TIn,TOut>(name);
+            ManySyntaxNode<TIn,TOut> node = new ManySyntaxNode<TIn,TOut>(null); 
             int currentPosition = position;
             var match = repeatedParser(tokens,currentPosition);
             while(currentPosition < tokens.Count && match.Matched) {
@@ -204,7 +204,7 @@ public class BaseParser<TIn,TOut> where TIn : struct
             return option;
         }
     
-    protected SimpleParser<TIn,TOut> Group(IList<Token<TIn>> tokens, int position, SimpleParser<TIn, TOut>[] groupedParser) {
+    protected SimpleParser<TIn,TOut> SubGroup(params SimpleParser<TIn, TOut>[] groupedParser) {
             // TODO ( x Y z)
             return null;
             }

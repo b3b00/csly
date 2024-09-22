@@ -84,7 +84,7 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
 
     public Match<GenericExpressionToken,double> PrimaryValue(IList<Token<GenericExpressionToken>> tokens, int position)
     {
-        return MatchNonTerminal(tokens, position, DoubleValue, IntegerValue, GroupExpression, PrimaryTernary);
+        return MatchNonTerminal(tokens, position, DoubleValue, IntegerValue, GroupExpression, PrimaryTernary, PrimaryCall);
     }
 
     public Match<GenericExpressionToken,double> DoubleValue(IList<Token<GenericExpressionToken>> tokens, int position)
@@ -104,22 +104,6 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
             return Instance.OperandDouble((Token<GenericExpressionToken>)args[0]);
         } , expectedTokens : new []{GenericExpressionToken.INT});
         return parser(tokens, position);
-        
-        // if (tokens[position].TokenID == GenericExpressionToken.INT)
-        // {
-        //     var node = new SyntaxNode<GenericExpressionToken, double>("primary",
-        //         new List<ISyntaxNode<GenericExpressionToken, double>>()
-        //         {
-        //             new SyntaxLeaf<GenericExpressionToken, double>(tokens[position], false)
-        //         });
-        //     node.LambdaVisitor = args =>
-        //     {
-        //         return Instance.OperandInt((Token<GenericExpressionToken>)args[0]);
-        //     };
-        //     return new Match<GenericExpressionToken, double>(node, position + 1);
-        // }
-        //
-        // return new Match<GenericExpressionToken, double>();
     }
 
 
@@ -133,7 +117,29 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
         var openParen = DiscardedTerminalParser(expectedTokens:GenericExpressionToken.LPAREN);
         var closeParen = DiscardedTerminalParser(expectedTokens:GenericExpressionToken.RPAREN);
         return MatchSequence("group",visitor, tokens, position, openParen, Expression, closeParen);
-    }   
+    }
+
+     public Match<GenericExpressionToken, double> PrimaryCall(IList<Token<GenericExpressionToken>> tokens,
+       int position)
+          {
+        SyntaxNode<GenericExpressionToken, double> node = new SyntaxNode<GenericExpressionToken, double>("call");
+        var id = TerminalParser(expectedTokens: new GenericExpressionToken[] { GenericExpressionToken.ID });
+        var open = DiscardedTerminalParser(expectedTokens:new []{GenericExpressionToken.LPAREN});
+        var parameters = ZeroOrMore(SubGroup(DiscardedTerminalParser(expectedTokens:new GenericExpressionToken[]
+            {
+                GenericExpressionToken.COMMA
+            }),Expression));
+        
+        var close = DiscardedTerminalParser(expectedTokens:new []{GenericExpressionToken.RPAREN});        
+         
+            return new Match<GenericExpressionToken, double>();
+            
+        return MatchSequence("call", args =>
+        {
+            return 0.0d; // TODO 
+        },
+            tokens, position,id,open,parameters,close);    
+    }
 
     public Match<GenericExpressionToken, double> PrimaryTernary(IList<Token<GenericExpressionToken>> tokens,
         int position)

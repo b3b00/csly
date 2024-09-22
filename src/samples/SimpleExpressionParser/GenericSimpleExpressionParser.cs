@@ -1,7 +1,10 @@
 using expressionparser;
 using sly.lexer;
 using sly.parser.generator;
+using sly.parser.parser;
 using sly.sourceGenerator;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace simpleExpressionParser;
 
@@ -120,10 +123,29 @@ public class GenericSimpleExpressionParser
     [Production("primary_value : ternary")]
     public double PrimaryTernary(double value) => value;
     
+    [Production("primary_value : call")]
+        public double CallTernary(double value) => value;
+    
     [Production("ternary : [TRUE | FALSE] QUESTION[d] GenericSimpleExpressionParser_expressions COLON[d] GenericSimpleExpressionParser_expressions")]
     [NodeName("group")]
     public double Ternary(Token<GenericExpressionToken> condition, double iftrue, double iffalse) 
     {
         return condition.TokenID == GenericExpressionToken.TRUE ? iftrue : iffalse;
     }
+    
+    [Production("call : ID LPAREN[d] GenericSimpleExpressionParser_expressions ( COMMA[d] GenericSimpleExpressionParser_expressions)* RPAREN[d]")]
+        [NodeName("group")]
+        public double Ternary(Token<GenericExpressionToken> name, double head, List<Group<GenericExpressionToken, double>> tail) 
+        {
+            if (name.Value == "sum") {
+                var tailSum = tail.Select(x => x.Value(0)).Sum();
+                return head+tailSum;
+                }
+            return 0.0d;
+        }
+        
+    [Production("params :")]
+    public double Call(double first) {
+        return first;
+        }
 }
