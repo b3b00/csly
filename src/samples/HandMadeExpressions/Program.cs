@@ -23,16 +23,21 @@ public class Program
     private static void TestHandParser()
     {
         var lexer = LexerBuilder.BuildLexer<GenericExpressionToken>();
-        var t = lexer.Result.Tokenize("-1 + 1! + (true ? 42 : -42)");
+        var t = lexer.Result.Tokenize("-1 + 1! + (true ? 42 : -42)+sum(1,2,3,4)");
         var tokens = t.Tokens.MainTokens();
         var instance = new GenericSimpleExpressionParser();
         ExpressionParser parser = new ExpressionParser(instance);
         var r = parser.Root(tokens, 0);
+        if (r.Matched) {
         Console.WriteLine(r.Node.Dump("  "));
         EBNFSyntaxTreeVisitor<GenericExpressionToken, double> visitor =
             new EBNFSyntaxTreeVisitor<GenericExpressionToken, double>(null, instance);
         var result = visitor.VisitSyntaxTree(r.Node);
         Console.WriteLine(result.ToString());
+        }
+        else {
+            Console.WriteLine("parse error!");
+            }
     }
 }
 

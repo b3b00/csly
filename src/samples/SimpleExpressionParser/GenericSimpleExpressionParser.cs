@@ -135,17 +135,14 @@ public class GenericSimpleExpressionParser
     
     [Production("call : ID LPAREN[d] GenericSimpleExpressionParser_expressions ( COMMA[d] GenericSimpleExpressionParser_expressions)* RPAREN[d]")]
         [NodeName("group")]
-        public double Ternary(Token<GenericExpressionToken> name, double head, List<Group<GenericExpressionToken, double>> tail) 
+        public double Call(Token<GenericExpressionToken> name, double head, List<Group<GenericExpressionToken, double>> tail) 
         {
             if (name.Value == "sum") {
-                var tailSum = tail.Select(x => x.Value(0)).Sum();
+                var tailSum = tail.Select(x => x.Value(1)).Sum();
                 return head+tailSum;
                 }
             return 0.0d;
         }
-        
-    [Production("params :")]
-    public double Call(double first) {
-        return first;
-        }
+
+
 }

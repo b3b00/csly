@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis.Differencing;
 using simpleExpressionParser;
 using sly.lexer;
+using sly.parser.parser;
 using sly.parser.syntax.tree;
 
 namespace handExpressions;
@@ -23,13 +24,16 @@ public class ExpressionParser : BaseParser<GenericExpressionToken, double>
     public Match<GenericExpressionToken,double> Root(IList<Token<GenericExpressionToken>> tokens,  int position )
     {
         var match = Expression(tokens,position);
-        var node = new SyntaxNode<GenericExpressionToken, double>("expression",
-            new List<ISyntaxNode<GenericExpressionToken, double>>() { match.Node });
-        node.LambdaVisitor = args =>
-        {
-            return Instance.Root((double)args[0]);
-        };
-        return new Match<GenericExpressionToken, double>(node, match.Position);
+        if (match.Matched){
+            var node = new SyntaxNode<GenericExpressionToken, double>("expression",
+                new List<ISyntaxNode<GenericExpressionToken, double>>() { match.Node });
+            node.LambdaVisitor = args =>
+            {
+                return Instance.Root((double)args[0]);
+            };
+            return new Match<GenericExpressionToken, double>(node, match.Position);
+        }
+        return match;
     }
     
 #region binaries
@@ -67,19 +71,19 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
 #region operands 
     public Match<GenericExpressionToken, double> Operand(IList<Token<GenericExpressionToken>> tokens, int position)
     {
-        if (position == 7)
-        {
-            ;
-        }
         var match = PrimaryValue(tokens, position);
-        var node = new SyntaxNode<GenericExpressionToken, double>("operand",
-            new List<ISyntaxNode<GenericExpressionToken, double>>() { match.Node });
-        node.LambdaVisitor = args =>
-        {
-            return (double)args[0];
-            return Instance.OperandValue((double)args[0]);
-        };
-        return new Match<GenericExpressionToken, double>(node, match.Position);
+        if(match.Matched) {
+            var node = new SyntaxNode<GenericExpressionToken, double>("operand",
+                new List<ISyntaxNode<GenericExpressionToken, double>>() { match.Node });
+            node.LambdaVisitor = args =>
+            {
+                return (double)args[0];
+                return Instance.OperandValue((double)args[0]);
+            };
+            
+            return new Match<GenericExpressionToken, double>(node, match.Position);
+        }
+        return match;
     }
 
     public Match<GenericExpressionToken,double> PrimaryValue(IList<Token<GenericExpressionToken>> tokens, int position)
@@ -131,14 +135,14 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
             }),Expression));
         
         var close = DiscardedTerminalParser(expectedTokens:new []{GenericExpressionToken.RPAREN});        
-         
-            return new Match<GenericExpressionToken, double>();
-            
+
         return MatchSequence("call", args =>
-        {
-            return 0.0d; // TODO 
-        },
-            tokens, position,id,open,parameters,close);    
+            {
+                var result = Instance.Call((Token<GenericExpressionToken>)args[0], (double)args[1],
+                    (List<Group<GenericExpressionToken, double>>)args[2]);
+                return result;
+            },
+            tokens, position,id,open,Expression,parameters,close);
     }
 
     public Match<GenericExpressionToken, double> PrimaryTernary(IList<Token<GenericExpressionToken>> tokens,
