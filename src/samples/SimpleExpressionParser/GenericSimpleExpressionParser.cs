@@ -110,9 +110,9 @@ public class GenericSimpleExpressionParser
         return value.DoubleValue;
     }
 
-    [Production("primary_value : LPAREN GenericSimpleExpressionParser_expressions RPAREN")]
+    [Production("primary_value : LPAREN[d] GenericSimpleExpressionParser_expressions RPAREN[d]")]
     [NodeName("group")]
-    public double OperandParens(Token<GenericExpressionToken> lparen, double value, Token<GenericExpressionToken> rparen)
+    public double OperandParens(double value)
     {
         return value;
     }

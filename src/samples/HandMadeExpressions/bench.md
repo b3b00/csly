@@ -85,4 +85,16 @@ DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
  Hand   |  13.77 ms | 0.646 ms |  1.853 ms |  7109.3750 |  28.41 MB |
 
 
+# discarded tokens
 
+BenchmarkDotNet v0.14.0, Windows 10 (10.0.19045.4894/22H2/2022Update)
+Intel Core i7-10610U CPU 1.80GHz, 1 CPU, 8 logical and 4 physical cores
+.NET SDK 8.0.400
+[Host]     : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+DefaultJob : .NET 8.0.8 (8.0.824.36612), X64 RyuJIT AVX2
+
+
+ Method | Mean      | Error    | StdDev    | Gen0       | Allocated |
+------- |----------:|---------:|----------:|-----------:|----------:|
+ Csly   | 129.75 ms | 8.391 ms | 24.074 ms | 53000.0000 |  212.5 MB |
+ Hand   |  16.92 ms | 0.814 ms |  2.361 ms |  7093.7500 |  28.41 MB |

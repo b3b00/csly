@@ -14,18 +14,18 @@ public class BaseParser<TIn,TOut> where TIn : struct
     {
     }
 
-    protected Match<TIn,TOut> MatchToken(IList<Token<TIn>> tokens, int position, params TIn[] expectedTokens)
+    protected Match<TIn,TOut> MatchToken(IList<Token<TIn>> tokens, int position, bool discarded = false, params TIn[] expectedTokens)
     {
         if (expectedTokens.Contains(tokens[position].TokenID))
         {
-            var leaf = new SyntaxLeaf<TIn, TOut>(tokens[position], false);
+            var leaf = new SyntaxLeaf<TIn, TOut>(tokens[position], discarded);
             return new Match<TIn,TOut>(leaf, position+1);
         }
 
         return new Match<TIn, TOut>();
     }
 
-    protected SimpleParser<TIn,TOut> TerminalParser(string nodeName = null, Func<object[], TOut> visitor = null,params TIn[] expectedTokens)
+    protected SimpleParser<TIn,TOut> TerminalParser(string nodeName = null, bool discarded = false, Func<object[],  TOut> visitor = null,params TIn[] expectedTokens)
     {
         return (tokens, position) =>
         {
@@ -128,20 +128,57 @@ public class BaseParser<TIn,TOut> where TIn : struct
 
     }
     
-    protected SimpleParser<TIn,TOut> ZeroOrMore(IList<Token<TIn>> tokens, int position, SimpleParser<TIn, TOut> repeatedParser) {
+    protected SimpleParser<TIn,TOut> ZeroOrMore(string name, SimpleParser<TIn, TOut> repeatedParser) {
         // TODO x*
-        return null;
+        SimpleParser<TIn,TOut> zeroOrMore =  (IList<Token<TIn>> tokens, int position) => {
+            ManySyntaxNode<TIn,TOut> node = new ManySyntaxNode<TIn,TOut>(name);
+            int currentPosition = position;
+            var match = repeatedParser(tokens,currentPosition);
+            while(currentPosition < tokens.Count && match.Matched) {
+                node.Children.Add(match.Node);
+                currentPosition = match.Position;
+                match = repeatedParser(tokens,currentPosition);
+            }
+            return new Match<TIn, TOut>(node, currentPosition);
+        };
+        return  zeroOrMore;
         }
     
-    protected SimpleParser<TIn,TOut> OneOrMore(IList<Token<TIn>> tokens, int position, SimpleParser<TIn, TOut> repeatedParser) {
+    protected SimpleParser<TIn,TOut> OneOrMore(string name, IList<Token<TIn>> tokens, int position, SimpleParser<TIn, TOut> repeatedParser) {
             // TODO x+
-            return null;
+            SimpleParser<TIn,TOut> oneOrMore =  (IList<Token<TIn>> tokens, int position) => {
+                
+                        int currentPosition = position;
+                        var match = repeatedParser(tokens,currentPosition);
+                        if (!match.Matched) {
+                            return new Match<TIn, TOut>();
+                        }                
+                        ManySyntaxNode<TIn,TOut> node = new ManySyntaxNode<TIn,TOut>(name);
+
+                        while(currentPosition < tokens.Count && match.Matched) {
+                            node.Children.Add(match.Node);
+                            currentPosition = match.Position;
+                            match = repeatedParser(tokens,currentPosition);
+                        }
+                        return new Match<TIn, TOut>(node, currentPosition);
+                    };
+                    return  oneOrMore;
             }
     
-    protected SimpleParser<TIn,TOut> Option(IList<Token<TIn>> tokens, int position, SimpleParser<TIn, TOut> optionalParser) {
+    protected SimpleParser<TIn,TOut> Option(string name, IList<Token<TIn>> tokens, int position, SimpleParser<TIn, TOut> optionalParser) {
             // TODO x?
-            return null;
-            }
+            SimpleParser<TIn,TOut> option =  (IList<Token<TIn>> tokens, int position) => {
+            OptionSyntaxNode<TIn, TOut> node = new OptionSyntaxNode<TIn, TOut>(name);
+                var match = optionalParser(tokens,position);
+                int newPosition = position;
+                if (match.Matched) {
+                    node.Children.Add(match.Node);
+                    newPosition = match.Position;
+                    }
+                return new Match<TIn, TOut>(node, newPosition);
+            };
+            return option;
+        }
     
     protected SimpleParser<TIn,TOut> Group(IList<Token<TIn>> tokens, int position, SimpleParser<TIn, TOut>[] groupedParser) {
             // TODO ( x Y z)

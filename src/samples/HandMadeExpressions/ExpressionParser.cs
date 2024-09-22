@@ -89,10 +89,10 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
 
     public Match<GenericExpressionToken,double> DoubleValue(IList<Token<GenericExpressionToken>> tokens, int position)
     {
-        var parser = TerminalParser("primary", args =>
+        var parser = TerminalParser("primary", visitor:args =>
         {
             return Instance.OperandDouble((Token<GenericExpressionToken>)args[0]);
-        } , GenericExpressionToken.DOUBLE);
+        } , expectedTokens: new []{GenericExpressionToken.DOUBLE});
         return parser(tokens, position);
         //
         // if (tokens[position].TokenID == GenericExpressionToken.DOUBLE)
@@ -114,10 +114,10 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
     public Match<GenericExpressionToken,double> IntegerValue(IList<Token<GenericExpressionToken>> tokens, int position)
     {
         
-        var parser = TerminalParser("primary", args =>
+        var parser = TerminalParser("primary", visitor:args =>
         {
             return Instance.OperandDouble((Token<GenericExpressionToken>)args[0]);
-        } , GenericExpressionToken.INT);
+        } , expectedTokens : new []{GenericExpressionToken.INT});
         return parser(tokens, position);
         
         // if (tokens[position].TokenID == GenericExpressionToken.INT)
@@ -143,11 +143,10 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
     {
         Func<object[],double> visitor = (object[] args) =>
         {
-            return Instance.OperandParens((Token<GenericExpressionToken>)args[0], (double)args[1],
-                (Token<GenericExpressionToken>)args[2]);
+            return Instance.OperandParens((double)args[1]);
         };
-        var openParen = TerminalParser(expectedTokens:GenericExpressionToken.LPAREN);
-        var closeParen = TerminalParser(expectedTokens:GenericExpressionToken.RPAREN);
+        var openParen = TerminalParser(discarded:true,expectedTokens:GenericExpressionToken.LPAREN);
+        var closeParen = TerminalParser(discarded:true,expectedTokens:GenericExpressionToken.RPAREN);
         return MatchSequence("group",visitor, tokens, position, openParen, Expression, closeParen);
     }   
 
@@ -164,8 +163,8 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
             GenericExpressionToken.TRUE, GenericExpressionToken.FALSE
         })
         ;
-        var question = TerminalParser(expectedTokens:GenericExpressionToken.QUESTION);
-        var colon = TerminalParser(expectedTokens:GenericExpressionToken.COLON);
+        var question = TerminalParser(discarded:true, expectedTokens:GenericExpressionToken.QUESTION);
+        var colon = TerminalParser(discarded:true, expectedTokens:GenericExpressionToken.COLON);
         return MatchSequence("ternary",args =>
         {
             return Instance.Ternary((Token<GenericExpressionToken>)args[0], (double)args[2], (double)args[4]);
