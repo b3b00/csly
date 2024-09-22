@@ -128,7 +128,7 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
     {
         Func<object[],double> visitor = (object[] args) =>
         {
-            return Instance.OperandParens((double)args[1]);
+            return Instance.OperandParens((double)args[0]);
         };
         var openParen = DiscardedTerminalParser(expectedTokens:GenericExpressionToken.LPAREN);
         var closeParen = DiscardedTerminalParser(expectedTokens:GenericExpressionToken.RPAREN);
@@ -152,7 +152,7 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
         var colon = DiscardedTerminalParser(expectedTokens:GenericExpressionToken.COLON);
         return MatchSequence("ternary",args =>
         {
-            return Instance.Ternary((Token<GenericExpressionToken>)args[0], (double)args[2], (double)args[4]);
+            return Instance.Ternary((Token<GenericExpressionToken>)args[0], (double)args[1], (double)args[2]);
         },
             tokens, position, condition, question, Expression, colon, Expression);
     }
