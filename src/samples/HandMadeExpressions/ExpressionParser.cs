@@ -129,7 +129,7 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
         SyntaxNode<GenericExpressionToken, double> node = new SyntaxNode<GenericExpressionToken, double>("call");
         var id = TerminalParser(expectedTokens: new GenericExpressionToken[] { GenericExpressionToken.ID });
         var open = DiscardedTerminalParser(expectedTokens:new []{GenericExpressionToken.LPAREN});
-        var parameters = ZeroOrMore(SubGroup(DiscardedTerminalParser(expectedTokens:new GenericExpressionToken[]
+        var parameters = ZeroOrMoreGroup(SubGroup(DiscardedTerminalParser(expectedTokens:new GenericExpressionToken[]
             {
                 GenericExpressionToken.COMMA
             }),Expression));
