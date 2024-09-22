@@ -14,18 +14,42 @@ public class BaseParser<TIn,TOut> where TIn : struct
     {
     }
 
-    protected Match<TIn,TOut> MatchToken(IList<Token<TIn>> tokens, int position, bool discarded = false, params TIn[] expectedTokens)
+    // protected Match<TIn,TOut> MatchToken(IList<Token<TIn>> tokens, int position, bool discarded = false, params TIn[] expectedTokens)
+    // {
+    //     if (expectedTokens.Contains(tokens[position].TokenID))
+    //     {
+    //         var leaf = new SyntaxLeaf<TIn, TOut>(tokens[position], discarded);
+    //         return new Match<TIn,TOut>(leaf, position+1);
+    //     }
+    //
+    //     return new Match<TIn, TOut>();
+    // }
+
+    protected SimpleParser<TIn,TOut> DiscardedTerminalParser(string nodeName = null, Func<object[],  TOut> visitor = null,params TIn[] expectedTokens)
     {
-        if (expectedTokens.Contains(tokens[position].TokenID))
+        return (tokens, position) =>
         {
-            var leaf = new SyntaxLeaf<TIn, TOut>(tokens[position], discarded);
-            return new Match<TIn,TOut>(leaf, position+1);
-        }
+            if (expectedTokens.Contains(tokens[position].TokenID))
+            {
+                if (!string.IsNullOrEmpty(nodeName) && visitor != null)
+                {
+                    var node = new SyntaxNode<TIn, TOut>("primary",
+                        new List<ISyntaxNode<TIn, TOut>>()
+                        {
+                            new SyntaxLeaf<TIn, TOut>(tokens[position], true)
+                        });
+                    node.LambdaVisitor = visitor;
+                    return new Match<TIn, TOut>(node, position + 1);
+                }
+                var leaf = new SyntaxLeaf<TIn, TOut>(tokens[position], true);
+                return new Match<TIn, TOut>(leaf, position + 1);
+            }
 
-        return new Match<TIn, TOut>();
+            return new Match<TIn, TOut>();
+        };
     }
-
-    protected SimpleParser<TIn,TOut> TerminalParser(string nodeName = null, bool discarded = false, Func<object[],  TOut> visitor = null,params TIn[] expectedTokens)
+    
+    protected SimpleParser<TIn,TOut> TerminalParser(string nodeName = null,  Func<object[],  TOut> visitor = null,params TIn[] expectedTokens)
     {
         return (tokens, position) =>
         {

@@ -94,22 +94,7 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
             return Instance.OperandDouble((Token<GenericExpressionToken>)args[0]);
         } , expectedTokens: new []{GenericExpressionToken.DOUBLE});
         return parser(tokens, position);
-        //
-        // if (tokens[position].TokenID == GenericExpressionToken.DOUBLE)
-        // {
-        //     var node = new SyntaxNode<GenericExpressionToken, double>("primary",
-        //         new List<ISyntaxNode<GenericExpressionToken, double>>()
-        //         {
-        //             new SyntaxLeaf<GenericExpressionToken, double>(tokens[position], false)
-        //         });
-        //     node.LambdaVisitor = args =>
-        //     {
-        //         return Instance.OperandDouble((Token<GenericExpressionToken>)args[0]);
-        //     };
-        //     return new Match<GenericExpressionToken, double>(node, position + 1);
-        // }
-        //
-        // return new Match<GenericExpressionToken, double>();
+       
     }
     public Match<GenericExpressionToken,double> IntegerValue(IList<Token<GenericExpressionToken>> tokens, int position)
     {
@@ -145,8 +130,8 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
         {
             return Instance.OperandParens((double)args[1]);
         };
-        var openParen = TerminalParser(discarded:true,expectedTokens:GenericExpressionToken.LPAREN);
-        var closeParen = TerminalParser(discarded:true,expectedTokens:GenericExpressionToken.RPAREN);
+        var openParen = DiscardedTerminalParser(expectedTokens:GenericExpressionToken.LPAREN);
+        var closeParen = DiscardedTerminalParser(expectedTokens:GenericExpressionToken.RPAREN);
         return MatchSequence("group",visitor, tokens, position, openParen, Expression, closeParen);
     }   
 
@@ -163,8 +148,8 @@ public Match<GenericExpressionToken, double> Expression(IList<Token<GenericExpre
             GenericExpressionToken.TRUE, GenericExpressionToken.FALSE
         })
         ;
-        var question = TerminalParser(discarded:true, expectedTokens:GenericExpressionToken.QUESTION);
-        var colon = TerminalParser(discarded:true, expectedTokens:GenericExpressionToken.COLON);
+        var question = DiscardedTerminalParser(expectedTokens:GenericExpressionToken.QUESTION);
+        var colon = DiscardedTerminalParser(expectedTokens:GenericExpressionToken.COLON);
         return MatchSequence("ternary",args =>
         {
             return Instance.Ternary((Token<GenericExpressionToken>)args[0], (double)args[2], (double)args[4]);
