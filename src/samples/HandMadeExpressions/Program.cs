@@ -4,6 +4,9 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
 using handExpressions.ebnfparser;
+using handExpressions.extractor;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using simpleExpressionParser;
 using sly.buildresult;
 using sly.lexer;
@@ -19,7 +22,8 @@ public class Program
     {
 //        TestHandParser();
          //var summary = BenchmarkRunner.Run<BenchCslyVsHand>();
-         PP();
+         //PP();
+         Extract();
     }
 
     private static void PP()
@@ -27,6 +31,29 @@ public class Program
         var p = new EbnfParser(new List<string>(){"hello","bonjour"});
         var r = p.ParseRule("rule : hello[d] world is? (bonjour)*");
         Console.WriteLine(r);
+    }
+
+    private static List<string> ExtractTokens(string path)
+    {
+         var lex = File.ReadAllText(path);
+         var tree = CSharpSyntaxTree.ParseText(lex);
+         var ns = tree.GetCompilationUnitRoot().Members[0] as NamespaceDeclarationSyntax;
+         var e = ns.Members[0] as EnumDeclarationSyntax;
+         var tokens = e.Members.Cast<EnumMemberDeclarationSyntax>().Select(x => x.Identifier.Text).ToList();
+         return tokens;
+    }
+    
+    private static void Extract()
+    {
+        var tokens = ExtractTokens("C:/Users/olduh/dev/csly/src/samples/jsonparser/JsonTokenGeneric.cs");
+        var source = File.ReadAllText("C:/Users/olduh/dev/csly/src/samples/jsonparser/EbnfJsonGenericParser.cs");
+        var tree = CSharpSyntaxTree.ParseText(source);
+        var root = tree.GetCompilationUnitRoot();
+        var ns = root.Members[0]as NamespaceDeclarationSyntax;
+        var cls = ns.Members[0] as ClassDeclarationSyntax;
+        var extractor = new ParserConfigurationExtractor(tokens);
+        var rules = extractor.ExtractRules(cls);
+        ;
     }
     
     private static void TestHandParser()

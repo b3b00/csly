@@ -10,17 +10,19 @@ public class Rule : IGrammarNode
 
     public string RuleDefinition { get; set; }
     
-    public Rule(string rule, MethodDeclarationSyntax method, IList<IClause> clauses)
+    public string NonTerminalName { get; set; }
+    
+    public Rule(string nonTerminalName, MethodDeclarationSyntax method, IList<IClause> clauses)
     {
         Clauses = clauses;
-        RuleDefinition = rule;
+        NonTerminalName = nonTerminalName;
         Method = method;
     }
     
-    public Rule(string rule, IList<IClause> clauses)
+    public Rule(string nonTerminalName, IList<IClause> clauses)
         {
             Clauses = clauses;
-            RuleDefinition = rule;
+            NonTerminalName = nonTerminalName;
             Method = null;
         }
 }

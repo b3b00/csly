@@ -118,9 +118,10 @@ public EbnfParser(List<string> tokens) {
         }
     
     
-    public object ParseRule(string definition) 
+    public Rule ParseRule(string definition) 
     {
         var rule = _rule.Parse(definition);
+        rule.RuleDefinition = definition;
         return rule;
     } 
 }
