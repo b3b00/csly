@@ -24,8 +24,8 @@ public class Program
 
     private static void PP()
     {
-        var p = new EbnfParser();
-        var r = p.ParseRule("rule : hello world is? (beatufiul)*");
+        var p = new EbnfParser(new List<string>(){"hello","bonjour"});
+        var r = p.ParseRule("rule : hello[d] world is? (bonjour)*");
         Console.WriteLine(r);
     }
     
