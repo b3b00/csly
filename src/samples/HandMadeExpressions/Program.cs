@@ -3,6 +3,7 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
+using handExpressions.ebnfparser;
 using simpleExpressionParser;
 using sly.buildresult;
 using sly.lexer;
@@ -16,10 +17,18 @@ public class Program
 {
     public static void Main(string[] args)
     {
-        TestHandParser();
-        // var summary = BenchmarkRunner.Run<BenchCslyVsHand>();
+//        TestHandParser();
+         //var summary = BenchmarkRunner.Run<BenchCslyVsHand>();
+         PP();
     }
 
+    private static void PP()
+    {
+        var p = new EbnfParser();
+        var r = p.ParseRule("rule : hello world is? (beatufiul)*");
+        Console.WriteLine(r);
+    }
+    
     private static void TestHandParser()
     {
         var lexer = LexerBuilder.BuildLexer<GenericExpressionToken>();

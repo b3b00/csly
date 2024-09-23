@@ -16,4 +16,11 @@ public class Rule : IGrammarNode
         RuleDefinition = rule;
         Method = method;
     }
+    
+    public Rule(string rule, IList<IClause> clauses)
+        {
+            Clauses = clauses;
+            RuleDefinition = rule;
+            Method = null;
+        }
 }
