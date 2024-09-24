@@ -5,6 +5,8 @@ namespace handExpressions.ebnfparser.model;
 public class Rule : IGrammarNode
 {
     public IList<IClause> Clauses { get; set; }
+
+    public int Number { get; set; } = -1;
     
     public MethodDeclarationSyntax Method { get; set; }
 

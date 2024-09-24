@@ -45,15 +45,25 @@ public class Program
     
     private static void Extract()
     {
-        var tokens = ExtractTokens("C:/Users/olduh/dev/csly/src/samples/jsonparser/JsonTokenGeneric.cs");
-        var source = File.ReadAllText("C:/Users/olduh/dev/csly/src/samples/jsonparser/EbnfJsonGenericParser.cs");
-        var tree = CSharpSyntaxTree.ParseText(source);
+        string rootDir = "C:/Users/olduh/dev/csly/src/samples/HandMadeExpressions/json";
+        var lex = File.ReadAllText(Path.Combine(rootDir,"JsonTokenGeneric.cs"));
+        var tree = CSharpSyntaxTree.ParseText(lex);
+        var ns = tree.GetCompilationUnitRoot().Members[0] as NamespaceDeclarationSyntax;
+        var e = ns.Members[0] as EnumDeclarationSyntax;
+        
+        
+        
+        var source = File.ReadAllText(Path.Combine(rootDir,"EbnfJsonGenericParser.cs"));
+        tree = CSharpSyntaxTree.ParseText(source);
         var root = tree.GetCompilationUnitRoot();
-        var ns = root.Members[0]as NamespaceDeclarationSyntax;
+        ns = root.Members[0]as NamespaceDeclarationSyntax;
         var cls = ns.Members[0] as ClassDeclarationSyntax;
-        var extractor = new ParserConfigurationExtractor(tokens);
-        var rules = extractor.ExtractRules(cls);
-        ;
+
+
+        ParserGenerator generator = new ParserGenerator(e, cls, "JSon");
+        var generated = generator.Generate();
+        Console.WriteLine(generated);
+        File.WriteAllText(Path.Combine(rootDir,"Generated.cs"), generated);
     }
     
     private static void TestHandParser()

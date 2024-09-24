@@ -5,6 +5,9 @@ using Sprache;
 
 namespace handExpressions.extractor;
 
+
+
+
 public class ParserConfigurationExtractor
 {
     List<string> _tokens = new List<string>();
