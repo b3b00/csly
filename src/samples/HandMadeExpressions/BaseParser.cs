@@ -206,7 +206,7 @@ node.IsManyGroups = true;
             int i = 0;
             while (i < choices.Length)
             {
-                Match<TIn, TOut> match = choices[0](tokens, position);
+                Match<TIn, TOut> match = choices[i](tokens, position);
                 if (match.Matched)
                 {
                     return match;
