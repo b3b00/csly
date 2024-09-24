@@ -22,7 +22,7 @@ public class RuleGenerator : IParserModelVisitor<string>
 
     public string VisitNonTerminal(NonTerminalClause nonTerminal)
     {
-        return "_"+nonTerminal.NonTerminal;
+        return nonTerminal.NonTerminal.Capitalize();
     }
 
     public string VisitOption(OptionalClause option, string clause)
@@ -76,11 +76,13 @@ public class RuleGenerator : IParserModelVisitor<string>
     {
         StringBuilder builder = new StringBuilder();
         
-        var methodName = rule.Number >= 0 ? $"_{rule.NonTerminalName}_{rule.Number}" : $"_{rule.NonTerminalName}";
+        var methodName = rule.Number >= 0 ? $"{rule.NonTerminalName}_{rule.Number}" : $"{rule.NonTerminalName}";
+        methodName = methodName.Capitalize();
         
+        string visibility = rule.Number >= 0 ? "private" : "public";
         
         builder.AppendLine(
-            $"    public Match<{_lexerType},{_outputType}> {methodName}(IList<Token<{_lexerType}>> tokens, int position) {{");
+            $"    {visibility} Match<{_lexerType},{_outputType}> {methodName}(IList<Token<{_lexerType}>> tokens, int position) {{");
         builder.AppendLine($"        var parser = Sequence({string.Join(", ", clauses)});");
         builder.AppendLine($"        var result = parser(tokens,position);");
         builder.AppendLine("        return result;");

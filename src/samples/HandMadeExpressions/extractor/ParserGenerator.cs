@@ -85,11 +85,11 @@ public class ParserGenerator
             List<string> clauses = new List<string>();
             for (int i = 0; i < nt.Value.Count; i++)
             {
-                clauses.Add($"_{nt.Key}_{i}");
+                clauses.Add($"{nt.Key.Capitalize()}_{i}");
             }
             
             builder.AppendLine("");
-            builder.AppendLine($"    public Match<{_lexerType},{_outputType}> _{nt.Key}(IList<Token<{_lexerType}>> tokens, int position) {{");
+            builder.AppendLine($"    public Match<{_lexerType},{_outputType}> {nt.Key.Capitalize()}(IList<Token<{_lexerType}>> tokens, int position) {{");
             builder.AppendLine($"        var parser = Alternate({string.Join(", ", clauses)});");
             builder.AppendLine($"        var result = parser(tokens,position);");
             builder.AppendLine("        return result;");
