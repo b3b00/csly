@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExplicitTokens", "src\sampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HandMadeExpressions", "src\samples\HandMadeExpressions\HandMadeExpressions.csproj", "{C6B340B9-8925-428F-B929-DCFAB7811578}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestGen", "src\samples\TestGen\TestGen.csproj", "{5AB6C159-51BF-43A5-960D-976DB071C53D}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -138,6 +140,10 @@ Global
 		{C6B340B9-8925-428F-B929-DCFAB7811578}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6B340B9-8925-428F-B929-DCFAB7811578}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6B340B9-8925-428F-B929-DCFAB7811578}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AB6C159-51BF-43A5-960D-976DB071C53D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AB6C159-51BF-43A5-960D-976DB071C53D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AB6C159-51BF-43A5-960D-976DB071C53D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AB6C159-51BF-43A5-960D-976DB071C53D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -157,6 +163,7 @@ Global
 		{7FEF0D32-FFC7-4886-A4B7-71314C25627E} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{94B9B654-82CB-4969-8DCA-250916E53724} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{C6B340B9-8925-428F-B929-DCFAB7811578} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
+		{5AB6C159-51BF-43A5-960D-976DB071C53D} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43254130-CF3E-480E-952F-E50CA5D2E417}

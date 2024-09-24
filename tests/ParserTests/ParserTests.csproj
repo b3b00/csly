@@ -27,6 +27,7 @@
     <ProjectReference Include="..\..\src\samples\expressionParser\expressionParser.csproj" />
     <ProjectReference Include="..\..\src\samples\GeneratedXML\GeneratedXML.csproj" />
     <ProjectReference Include="..\..\src\samples\GenericLexerWithCallbacks\GenericLexerWithCallbacks.csproj" />
+    <ProjectReference Include="..\..\src\samples\HandMadeExpressions\HandMadeExpressions.csproj" OutputItemType="Analyzer" />
     <ProjectReference Include="..\..\src\samples\IndentedWhile\indentedWhile.csproj" />
     <ProjectReference Include="..\..\src\samples\indented\indented.csproj" />
     <ProjectReference Include="..\..\src\samples\jsonparser\jsonparser.csproj" />
@@ -36,6 +37,7 @@
     <ProjectReference Include="..\..\src\samples\while\while.csproj" />
     <ProjectReference Include="..\..\src\samples\XML\XML.csproj" />
     <ProjectReference Include="..\..\src\sly\sly.csproj" OutputItemType="Analyzer" />
+    
     
   </ItemGroup>
   <ItemGroup>
@@ -52,6 +54,7 @@
     <EmbeddedResource Include="sourceGenerators\data\explicits.txt" />
     <EmbeddedResource Include="sourceGenerators\data\expression.txt" />
     <EmbeddedResource Include="sourceGenerators\data\expressioncontext.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\expression_hand.txt" />
     <EmbeddedResource Include="sourceGenerators\data\extended.txt" />
     <EmbeddedResource Include="sourceGenerators\data\labels.txt" />
     <EmbeddedResource Include="sourceGenerators\data\simple.txt" />

@@ -1,5 +1,6 @@
 using System.Text;
 using handExpressions.ebnfparser.model;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace handExpressions.extractor;
 
@@ -80,13 +81,38 @@ public class RuleGenerator : IParserModelVisitor<string>
         methodName = methodName.Capitalize();
         
         string visibility = rule.Number >= 0 ? "private" : "public";
+        var visitor = GenerateVisitor(rule.Method);
         
         builder.AppendLine(
             $"    {visibility} Match<{_lexerType},{_outputType}> {methodName}(IList<Token<{_lexerType}>> tokens, int position) {{");
+        builder.AppendLine(visitor);
         builder.AppendLine($"        var parser = Sequence({string.Join(", ", clauses)});");
         builder.AppendLine($"        var result = parser(tokens,position);");
         builder.AppendLine("        return result;");
         builder.AppendLine("    }");
+        return builder.ToString();
+    }
+
+    private string GenerateVisitor(MethodDeclarationSyntax method)
+    {
+        var parameters = method.ParameterList.Parameters.ToList();
+        
+        StringBuilder builder = new StringBuilder(); 
+        string methodName = method.Identifier.ToString();
+        builder.AppendLine($"        Func<object[],{_outputType}> visitor = (object[] args) => {{");
+        builder.Append($"            var result = _instance.{methodName}(");
+        for (int i = 0; i < parameters.Count; i++)
+        {
+            if (i > 0)
+            {
+                builder.Append(", ");
+            }
+            var type = parameters[i].Type.ToString();
+            builder.Append($"({type})args[{i}]");
+        }
+        builder.AppendLine(");");
+        builder.AppendLine("            return result;");
+        builder.Append("        };");
         return builder.ToString();
     }
 }

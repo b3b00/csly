@@ -29,5 +29,10 @@
       "commandName": "DebugRoslynComponent",
       "targetProject": "../samples/postProcessedLexerParser/postProcessedLexerParser.csproj"
     }
+  ,
+    "handGenerators": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "../samples/testgen/testgen.csproj"
+    }
   }
 }
