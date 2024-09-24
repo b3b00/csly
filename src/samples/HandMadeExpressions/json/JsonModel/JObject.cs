@@ -23,6 +23,11 @@ namespace handExpressions.jsonparser.JsonModel
         public override bool IsObject => true;
 
         public override bool IsList => true;
+        public override string ToJson()
+        {
+            Func<KeyValuePair<string,JSon>, string> tojson = x => x.Key.ToString()+":"+x.Value.ToJson(); 
+            return $"{{{string.Join(",", Values.Select(i => tojson(i)))}}}";
+        }
 
         private Dictionary<string, JSon> Values { get; }
 

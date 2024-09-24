@@ -21,11 +21,11 @@ public class Program
 
         var instance = new TestEbnfJsonGenericParser();
 
-        var generated = new GeneratedEbnfJsonGenericParser(new EbnfJsonGenericParser());//GeneratedTestEbnfJsonGenericParser(instance);
+        // var generated = new GeneratedTestEbnfJsonGenericParser(instance);
         
-         var j = generated.Parse("root", "{\"hello\":\"world\"}");
+         // var j = generated.Parse("root", "{\"hello\":\"world\"}");
         
-        Console.WriteLine(j.ToString());
+        // Console.WriteLine(j.ToString());
         
         
     }

@@ -23,6 +23,10 @@ namespace handExpressions.jsonparser.JsonModel
         }
 
         public override bool IsList => true;
+        public override string ToJson()
+        {
+            return $"[{string.Join(",", Items.Select(i => i.ToJson()))}]";
+        }
 
         public List<JSon> Items { get; }
 

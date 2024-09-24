@@ -10,6 +10,14 @@
         }
 
         public override bool IsValue => true;
+        public override string ToJson()
+        {
+            if (IsString)
+            {
+                return $"\"{value.ToString()}\"";
+            }
+            return value.ToString();
+        }
 
         public bool IsString => value is string;
 

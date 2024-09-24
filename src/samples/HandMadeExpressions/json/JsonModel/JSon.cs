@@ -9,5 +9,7 @@ namespace handExpressions.jsonparser.JsonModel
         public virtual bool IsValue { get; set; }
         public virtual bool IsNull { get; set; }
         
+        public abstract string ToJson();
+        
     }
 }
