@@ -3,6 +3,7 @@
 using BenchmarkDotNet.Running;
 using handExpressions.ebnfparser;
 using handExpressions.extractor;
+using handExpressions.jsonparser;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using simpleExpressionParser;
@@ -15,18 +16,23 @@ public class Program
 {
     public static void Main(string[] args)
     {
-//        TestHandParser();
+        //TestHandParser();
          //var summary = BenchmarkRunner.Run<BenchExpressionCslyVsHand>();
          var summary = BenchmarkRunner.Run<BenchJsonCslyVsHand>();
          //PP();
-         //Extract();
+         // Extract();
     }
 
     private static void PP()
     {
-        var p = new EbnfParser(new List<string>(){"hello","bonjour"});
-        var r = p.ParseRule("rule : hello[d] world is? (bonjour)*");
-        Console.WriteLine(r);
+    
+        var gen = new GeneratedEbnfJsonGenericParser(new EbnfJsonGenericParser());
+        var source = "{\"hello\":\"world\"}";
+        source = File.ReadAllText("C:/Users/olduh/dev/csly/src/bench2.4/test.json");
+        var j = gen.ParseRoot(source);
+        
+        
+        Console.WriteLine(j.ToString());
     }
 
     private static List<string> ExtractTokens(string path)

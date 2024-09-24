@@ -1,7 +1,8 @@
 using System;
 using sly.lexer;
 using handExpressions;
-using handExpressions.jsonparser;
+using sly.parser.generator.visitor;
+using sly.parser.syntax.tree;using handExpressions.jsonparser;
 using System;
 using System.Collections.Generic;
 using handExpressions.jsonparser.JsonModel;
@@ -13,8 +14,11 @@ namespace handExpressions.jsonparser;
 public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> {
 
     EbnfJsonGenericParser _instance;
+    ILexer<JsonTokenGeneric> _lexer;
 
     public GeneratedEbnfJsonGenericParser(EbnfJsonGenericParser instance) {
+       var build = LexerBuilder.BuildLexer<JsonTokenGeneric>();
+       _lexer = build.Result;
         _instance = instance;
     }
 
@@ -25,6 +29,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(Value);
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -36,6 +43,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(TerminalParser(expectedTokens:JsonTokenGeneric.STRING));
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -47,6 +57,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(TerminalParser(expectedTokens:JsonTokenGeneric.INT));
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -58,6 +71,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(TerminalParser(expectedTokens:JsonTokenGeneric.DOUBLE));
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -69,6 +85,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(TerminalParser(expectedTokens:JsonTokenGeneric.BOOLEAN));
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -80,6 +99,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(DiscardedTerminalParser(expectedTokens:JsonTokenGeneric.NULL));
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -91,6 +113,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(Object);
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -102,6 +127,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(List);
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -113,6 +141,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(DiscardedTerminalParser(expectedTokens:JsonTokenGeneric.ACCG), DiscardedTerminalParser(expectedTokens:JsonTokenGeneric.ACCD));
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -124,6 +155,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(DiscardedTerminalParser(expectedTokens:JsonTokenGeneric.ACCG), Members, DiscardedTerminalParser(expectedTokens:JsonTokenGeneric.ACCD));
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -135,6 +169,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(DiscardedTerminalParser(expectedTokens:JsonTokenGeneric.CROG), DiscardedTerminalParser(expectedTokens:JsonTokenGeneric.CROD));
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -146,6 +183,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(DiscardedTerminalParser(expectedTokens:JsonTokenGeneric.CROG), ListElements, DiscardedTerminalParser(expectedTokens:JsonTokenGeneric.CROD));
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -157,6 +197,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(Value, ZeroOrMoreValue(AdditionalValue));
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -168,6 +211,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(TerminalParser(expectedTokens:JsonTokenGeneric.COMMA), Value);
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -179,6 +225,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(Property, ZeroOrMoreValue(AdditionalProperty));
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -190,6 +239,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(TerminalParser(expectedTokens:JsonTokenGeneric.COMMA), Property);
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -201,6 +253,9 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         };
         var parser = Sequence(TerminalParser(expectedTokens:JsonTokenGeneric.STRING), DiscardedTerminalParser(expectedTokens:JsonTokenGeneric.COLON), Value);
         var result = parser(tokens,position);
+        if (result.Matched &&  result.Node is SyntaxNode<JsonTokenGeneric,JSon> node) {
+            node.LambdaVisitor = visitor;
+         }
         return result;
     }
 
@@ -222,4 +277,76 @@ public class GeneratedEbnfJsonGenericParser : BaseParser<JsonTokenGeneric,JSon> 
         var result = parser(tokens,position);
         return result;
     }
+    public JSon ParseRoot(string source) => Parse("root", source);
+
+    public JSon ParseValue(string source) => Parse("value", source);
+
+    public JSon ParseObject(string source) => Parse("object", source);
+
+    public JSon ParseList(string source) => Parse("list", source);
+
+    public JSon ParseListElements(string source) => Parse("listElements", source);
+
+    public JSon ParseAdditionalValue(string source) => Parse("additionalValue", source);
+
+    public JSon ParseMembers(string source) => Parse("members", source);
+
+    public JSon ParseAdditionalProperty(string source) => Parse("additionalProperty", source);
+
+    public JSon ParseProperty(string source) => Parse("property", source);
+
+    public JSon Parse(string rule, string input) {
+        var tokens = _lexer.Tokenize(input).Tokens.MainTokens();
+        Match<JsonTokenGeneric,JSon> result;
+        switch(rule) {
+            case "root" : { 
+                 result = Root(tokens, 0);
+                 break;
+              }
+            case "value" : { 
+                 result = Value(tokens, 0);
+                 break;
+              }
+            case "object" : { 
+                 result = Object(tokens, 0);
+                 break;
+              }
+            case "list" : { 
+                 result = List(tokens, 0);
+                 break;
+              }
+            case "listElements" : { 
+                 result = ListElements(tokens, 0);
+                 break;
+              }
+            case "additionalValue" : { 
+                 result = AdditionalValue(tokens, 0);
+                 break;
+              }
+            case "members" : { 
+                 result = Members(tokens, 0);
+                 break;
+              }
+            case "additionalProperty" : { 
+                 result = AdditionalProperty(tokens, 0);
+                 break;
+              }
+            case "property" : { 
+                 result = Property(tokens, 0);
+                 break;
+              }
+            default : { 
+                  result = null;
+                  break;
+              } 
+        }
+
+        if (result != null && result.Matched) {
+            EBNFSyntaxTreeVisitor<JsonTokenGeneric, JSon> visitor =new EBNFSyntaxTreeVisitor<JsonTokenGeneric, JSon>(null, _instance);
+            var r = visitor.VisitSyntaxTree(result.Node);
+            return r;
+        }
+        return default(JSon);
+    }
+
 }

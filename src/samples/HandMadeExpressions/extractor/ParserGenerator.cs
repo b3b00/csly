@@ -65,6 +65,7 @@ public class ParserGenerator
         builder.AppendLine("using sly.lexer;");
         builder.AppendLine("using handExpressions;");
         builder.AppendLine("using sly.parser.generator.visitor;");
+        builder.Append("using sly.parser.syntax.tree;");
         builder.AppendLine($"using {_parserClass.GetNameSpace()};");
         foreach (var usingStatement in usings)
         {

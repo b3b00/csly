@@ -88,6 +88,9 @@ public class RuleGenerator : IParserModelVisitor<string>
         builder.AppendLine(visitor);
         builder.AppendLine($"        var parser = Sequence({string.Join(", ", clauses)});");
         builder.AppendLine($"        var result = parser(tokens,position);");
+        builder.AppendLine($"        if (result.Matched &&  result.Node is SyntaxNode<{_lexerType},{_outputType}> node) {{");
+        builder.AppendLine($"            node.LambdaVisitor = visitor;");
+        builder.AppendLine("         }");
         builder.AppendLine("        return result;");
         builder.AppendLine("    }");
         return builder.ToString();

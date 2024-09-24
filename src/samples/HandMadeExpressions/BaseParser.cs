@@ -107,7 +107,7 @@ public class BaseParser<TIn,TOut> where TIn : struct
     protected SimpleParser<TIn, TOut> Sequence(params SimpleParser<TIn, TOut>[] clauses)
     {
         SimpleParser<TIn,TOut> group =  (IList<Token<TIn>> tokens, int position) => {
-            GroupSyntaxNode<TIn, TOut> node = new GroupSyntaxNode<TIn, TOut>(null);
+            SyntaxNode<TIn, TOut> node = new SyntaxNode<TIn, TOut>(null);
             var match = MatchSequence(nodeName: null, visitor: null, tokens,position,clauses);
             int newPosition = position;
             if (match.Matched) {
