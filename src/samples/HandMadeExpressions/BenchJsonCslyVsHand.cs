@@ -22,7 +22,7 @@ public class BenchJsonCslyVsHand
 
     private string _source = null;
     private BuildResult<ILexer<JsonTokenGeneric>> _lexer;
-    private int _loops = 1000;
+    private int _loops = 1;
 
     [GlobalSetup]
     public void Setup()
@@ -39,7 +39,10 @@ public class BenchJsonCslyVsHand
     {
         for (int i = 0; i < _loops; i++)
         {
-            _cslyParser.Parse(_source);
+            var tokens = _cslyParser.Lexer.Tokenize(_source);
+            //_cslyParser.SyntaxParser.Parse(tokens.Tokens.MainTokens());
+            var x = _cslyParser.Parse(_source);
+            //File.WriteAllText("c:/tmp/csly_json.txt",x?.Result?.ToJson());
         }
     }
     
@@ -56,6 +59,7 @@ public class BenchJsonCslyVsHand
             EBNFSyntaxTreeVisitor<JsonTokenGeneric, JSon> visitor =
                 new EBNFSyntaxTreeVisitor<JsonTokenGeneric, JSon>(null, instance);
             var result = visitor.VisitSyntaxTree(r.Node);
+            // File.WriteAllText("c:/tmp/hand_json.txt",result?.ToJson());
         }
     }
 }
