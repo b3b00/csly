@@ -1,6 +1,13 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+
+using handExpressions.jsonparser;
 using testgen;
+
+
+namespace testgen;
+
+    
 
 public class Program
 {
@@ -9,13 +16,17 @@ public class Program
     {
         Console.WriteLine("Hello, World!");
 
-        //EbnfJsonGenericParserGenerator generator = new EbnfJsonGenericParserGenerator(new EbnfJsonGenericParser());
+        TestEbnfJsonGenericParserGenerator generator = new TestEbnfJsonGenericParserGenerator(new TestEbnfJsonGenericParser());
         //var j = generator.Parse("root", "{\"hello\":\"world\"}");
 
-        var generated = new GeneratedEbnfJsonGenericParser(new EbnfJsonGenericParser());
-        var j = generated.Parse("root", "{\"hello\":\"world\"}");
+        var instance = new TestEbnfJsonGenericParser();
         
-        Console.WriteLine(j.ToString());
+         var generated = new GeneratedTestEbnfJsonGenericParser(instance);
+        // var j = generated.Parse("root", "{\"hello\":\"world\"}");
+        //
+        //Console.WriteLine(j.ToString());
+        
+        
     }
 
 }

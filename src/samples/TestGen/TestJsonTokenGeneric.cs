@@ -2,7 +2,7 @@
 
 namespace testgen
 {
-    public enum JsonTokenGeneric
+    public enum TestJsonTokenGeneric
     {
         [Lexeme(GenericToken.String,channel:0)] STRING = 1,
         [Lexeme(GenericToken.Double,channel:0)] DOUBLE = 2,

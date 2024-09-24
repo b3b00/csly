@@ -75,7 +75,7 @@ public class ParserGenerator
         builder.AppendLine($"namespace {_parserClass.GetNameSpace()};");
         builder.AppendLine("");
         builder.AppendLine(
-            $"public partial class Generated{_parserClass.Identifier.Text} : BaseParser<{_lexerEnumDeclarationSyntax.Identifier.Text},{_outputType}> {{");
+            $"public class Generated{_parserClass.Identifier.Text} : BaseParser<{_lexerEnumDeclarationSyntax.Identifier.Text},{_outputType}> {{");
 
         builder.AppendLine("");
         builder.AppendLine($"    {_parserClass.Identifier.Text} _instance;");

@@ -8,7 +8,7 @@ namespace testgen
 {
     [BroadenTokenWindow]
     [ParserRoot("root")]
-    public class EbnfJsonGenericParser
+    public class TestEbnfJsonGenericParser
     {
         #region root
 
@@ -23,19 +23,19 @@ namespace testgen
         #region VALUE
 
         [Production("value : STRING")]
-        public JSon StringValue(Token<JsonTokenGeneric> stringToken)
+        public JSon StringValue(Token<TestJsonTokenGeneric> stringToken)
         {
             return new JValue(stringToken.StringWithoutQuotes);
         }
 
         [Production("value : INT")]
-        public JSon IntValue(Token<JsonTokenGeneric> intToken)
+        public JSon IntValue(Token<TestJsonTokenGeneric> intToken)
         {
             return new JValue(intToken.IntValue);
         }
 
         [Production("value : DOUBLE")]
-        public JSon DoubleValue(Token<JsonTokenGeneric> doubleToken)
+        public JSon DoubleValue(Token<TestJsonTokenGeneric> doubleToken)
         {
             double dbl;
             try
@@ -58,7 +58,7 @@ namespace testgen
         }
 
         [Production("value : BOOLEAN")]
-        public JSon BooleanValue(Token<JsonTokenGeneric> boolToken)
+        public JSon BooleanValue(Token<TestJsonTokenGeneric> boolToken)
         {
             return new JValue(bool.Parse(boolToken.Value));
         }
@@ -123,7 +123,7 @@ namespace testgen
         }
 
         [Production("additionalValue: COMMA value")]
-        public JSon ListElementsOne(Token<JsonTokenGeneric> discardedComma, JSon value)
+        public JSon ListElementsOne(Token<TestJsonTokenGeneric> discardedComma, JSon value)
         {
             return value;
         }
@@ -142,13 +142,13 @@ namespace testgen
         }
 
         [Production("additionalProperty : COMMA property")]
-        public JSon property(Token<JsonTokenGeneric> comma, JObject property)
+        public JSon property(Token<TestJsonTokenGeneric> comma, JObject property)
         {
             return property;
         }
 
         [Production("property: STRING COLON[d] value")]
-        public JSon property(Token<JsonTokenGeneric> key, JSon value)
+        public JSon property(Token<TestJsonTokenGeneric> key, JSon value)
         {
             return new JObject(key.StringWithoutQuotes, value);
         }

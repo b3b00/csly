@@ -56,6 +56,7 @@
     <EmbeddedResource Include="sourceGenerators\data\expressioncontext.txt" />
     <EmbeddedResource Include="sourceGenerators\data\expression_hand.txt" />
     <EmbeddedResource Include="sourceGenerators\data\extended.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\json_hand.txt" />
     <EmbeddedResource Include="sourceGenerators\data\labels.txt" />
     <EmbeddedResource Include="sourceGenerators\data\simple.txt" />
     <EmbeddedResource Include="sourceGenerators\data\template.txt" />    
