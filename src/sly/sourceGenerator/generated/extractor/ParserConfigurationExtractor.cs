@@ -3,8 +3,6 @@ using System.Linq;
 using sly.sourceGenerator.generated.ebnfparser;
 using sly.sourceGenerator.generated.ebnfparser.model;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using sly.sourceGenerator.generated.ebnfparser;
-using Sprache;
 
 namespace sly.sourceGenerator.generated.extractor;
 

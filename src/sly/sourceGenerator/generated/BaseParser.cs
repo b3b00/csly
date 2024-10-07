@@ -82,7 +82,7 @@ public class BaseParser<TIn,TOut> where TIn : struct
         return new Match<TIn, TOut>();
     }
 
-    protected Match<TIn, TOut> MatchSequence(string? nodeName,  Func<object[],TOut> visitor, IList<Token<TIn>> tokens,
+    protected Match<TIn, TOut> MatchSequence(string nodeName,  Func<object[],TOut> visitor, IList<Token<TIn>> tokens,
         int position, params SimpleParser<TIn,TOut>[] clauses)
     {
         var node = new SyntaxNode<TIn,TOut>(nodeName);
