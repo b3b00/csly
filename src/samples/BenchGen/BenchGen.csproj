@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="Sprache" Version="2.3.1" />
+        <PackageReference Include="System.Linq" Version="4.3.0" />
       <ProjectReference Include="..\..\sly\sly.csproj" OutputItemType="Analyzer"/>
     </ItemGroup>
 
