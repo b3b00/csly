@@ -167,7 +167,7 @@ public class EbnfRuleTokenizer
         if (char.IsLetter(_text[_position]) || _text[_position] == '_' )
         {
             int position = this._position;
-            while (position < _text.Length && char.IsLetterOrDigit(_text[position]) || _text[position] == '_' || _text[position] == '-')
+            while (position < _text.Length && (char.IsLetterOrDigit(_text[position]) || _text[position] == '_' || _text[position] == '-'))
             {
                 position++;
             }
