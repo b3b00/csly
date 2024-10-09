@@ -8,4 +8,9 @@ public class NonTerminalClause : IClause
     {
         NonTerminal = nonTerminal;
     }
+
+    public string Dump()
+    {
+        return NonTerminal;
+    }
 }

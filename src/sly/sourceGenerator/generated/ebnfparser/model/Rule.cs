@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace sly.sourceGenerator.generated.ebnfparser.model;
@@ -28,4 +29,9 @@ public class Rule : IGrammarNode
             NonTerminalName = nonTerminalName;
             Method = null;
         }
+
+    public string Dump()
+    {
+        return $"{NonTerminalName} : {string.Join(" ", Clauses.Select(x => x.Dump()))}";
+    }
 }

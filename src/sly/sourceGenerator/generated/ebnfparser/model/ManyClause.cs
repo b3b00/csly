@@ -8,4 +8,9 @@ public class ManyClause : IClause
     {
         Clause = clause;
     }
+
+    public string Dump()
+    {
+        return Clause.Dump() + " +*";
+    }
 }

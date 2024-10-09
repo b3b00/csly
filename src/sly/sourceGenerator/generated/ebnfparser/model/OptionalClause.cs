@@ -9,4 +9,8 @@ public class OptionalClause : IClause
         Clause = clause;
     }
 
+    public string Dump()
+    {
+        return Clause.Dump() + " ?";
+    }
 }
