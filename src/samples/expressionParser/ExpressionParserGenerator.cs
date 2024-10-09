@@ -1,10 +1,14 @@
 
 using sly.sourceGenerator;
+using sly.sourceGenerator.generated;
 
 namespace expressionparser;
 
 [ParserGenerator]
-public partial class ExpressionParserGenerator : AbstractParserGenerator<ExpressionToken,ExpressionParser,int>
+[CslyParser]
+public partial class ExpressionParserGenerator : AbstractCslyParser<ExpressionToken,ExpressionParser,int>
 {
-    
+    public ExpressionParserGenerator(ExpressionParser instance) : base(instance)
+    {
+    }
 }

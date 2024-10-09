@@ -28,10 +28,21 @@ static void TestGen()
 
 }
 
-static void Bench()
+static void BenchJson()
 {
     BenchmarkRunner.Run<BenchJsonCslyVsHand>();
 }
 
-TestGen();
-//Bench();
+static void BenchExpression()
+{
+    BenchmarkRunner.Run<BenchExpressionCslyVsHand>();
+}
+
+//TestGen();
+//BenchJson();
+BenchExpression();
+
+// BenchExpressionCslyVsHand benchExpressionCslyVsHand = new BenchExpressionCslyVsHand();
+// benchExpressionCslyVsHand.Setup();
+// benchExpressionCslyVsHand.Csly();
+// benchExpressionCslyVsHand.Hand();

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -67,6 +68,7 @@ public class ParserGenerator
         builder.AppendLine("using sly.lexer;");
         builder.AppendLine("using sly.sourceGenerator.generated;");
         builder.AppendLine("using sly.parser.generator.visitor;");
+        builder.AppendLine("using System.Collections.Generic;");
         builder.Append("using sly.parser.syntax.tree;");
         builder.AppendLine($"using {_parserClass.GetNameSpace()};");
         foreach (var usingStatement in usings)
@@ -76,6 +78,8 @@ public class ParserGenerator
 
         builder.AppendLine("");
         builder.AppendLine($"namespace {_parserClass.GetNameSpace()};");
+        builder.AppendLine("");
+        builder.AppendLine($"// {DateTime.Now.ToString("h:mm:ss")}");
         builder.AppendLine("");
         builder.AppendLine(
             $"public class Generated{_parserClass.Identifier.Text} : BaseParser<{_lexerEnumDeclarationSyntax.Identifier.Text},{_outputType}> {{");
