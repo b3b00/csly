@@ -13,12 +13,12 @@ public class ParserConfigurationExtractor
 {
     List<string> _tokens = new List<string>();
     
-    EbnfParser _parser;
+    EbnfRuleParser _parser;
     
     public ParserConfigurationExtractor(List<string> tokens)
     {
         _tokens = tokens;
-        _parser = new EbnfParser(tokens);
+        _parser = new EbnfRuleParser(tokens);
     }
 
     public List<Rule> ExtractRules(ClassDeclarationSyntax classDeclarationSyntax)
@@ -43,14 +43,13 @@ public class ParserConfigurationExtractor
                 if (argument.Expression is LiteralExpressionSyntax expression)
                 {
                     var def = expression.ToString();
-                    var r = _parser.ParseRule(def.Substring(1,def.Length-2));
-                    if (r != null)
+                    var rule = _parser.ParseRule(def.Substring(1,def.Length-2));
+                    if (rule != null)
                     {
-                        r.RuleDefinition = def;
-                        r.Method = methodDeclarationSyntax;
+                        rule.RuleDefinition = def;
+                        rule.Method = methodDeclarationSyntax;
                     }
-
-                    return r;
+                    return rule;
                 }
             }    
         }

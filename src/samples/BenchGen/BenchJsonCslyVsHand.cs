@@ -40,10 +40,7 @@ public class BenchJsonCslyVsHand
     {
         for (int i = 0; i < _loops; i++)
         {
-            var tokens = _cslyParser.Lexer.Tokenize(_source);
-            //_cslyParser.SyntaxParser.Parse(tokens.Tokens.MainTokens());
             var x = _cslyParser.Parse(_source);
-            //File.WriteAllText("c:/tmp/csly_json.txt",x?.Result?.ToJson());
         }
     }
     
@@ -55,12 +52,8 @@ public class BenchJsonCslyVsHand
             var t = _lexer.Result.Tokenize(_source);
             var tokens = t.Tokens.MainTokens();
             var instance = new EbnfJsonGenericParser();
-            // GeneratedEbnfJsonGenericParser parser = new GeneratedEbnfJsonGenericParser(instance);
-            // var r = parser.Root(tokens, 0);
-            // EBNFSyntaxTreeVisitor<JsonTokenGeneric, JSon> visitor =
-            //     new EBNFSyntaxTreeVisitor<JsonTokenGeneric, JSon>(null, instance);
-            // var result = visitor.VisitSyntaxTree(r.Node);
-            // File.WriteAllText("c:/tmp/hand_json.txt",result?.ToJson());
+            EbnfJsonGenericParserGenerator generator = new EbnfJsonGenericParserGenerator(instance);
+            var json = generator.ParseRoot(_source);
         }
     }
 }

@@ -159,8 +159,9 @@ public class CslyParserGen : IIncrementalGenerator
                     
 
                     ParserGenerator generator = new ParserGenerator(lexerDecl, parserDecl, outputType);
-                    var generated = generator.Generate();
+                    var generatedParser = generator.Generate();
                     
+                    // generator
                     var usings = GetUsings(lexerDecl);
                     usings.AddRange(GetUsings(parserDecl));
                     usings.Add($"using {lexerDecl.GetNameSpace()};");
@@ -173,11 +174,11 @@ public class CslyParserGen : IIncrementalGenerator
                     usings = usings.Distinct().ToList();
                     
                     // TODO generate Parse method on Generator class
-                    string code = $@"
+                    string generatedGenerator = $@"
 
 {string.Join(Environment.NewLine, usings)}
 
-
+// {DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")}
 
 namespace {ns};
 
@@ -193,12 +194,21 @@ namespace {ns};
 return o;
 
 
-}}
-
 }}";
+                    foreach (var nonTerm in generatedParser.nonTerminals)
+                    {
+                        generatedGenerator += @$"
+ 
+                      public {outputType} Parse{nonTerm.Capitalize()}(string source) => Parse(""{nonTerm}"", source);
 
-                    context.AddSource($"Generated{parserDecl.Identifier.Text}.g.cs", SourceText.From(generated, Encoding.UTF8));
-                    context.AddSource($"{className}.g.cs", SourceText.From(code, Encoding.UTF8));
+";
+                    }
+
+                    generatedGenerator += "}";
+                
+
+                    context.AddSource($"Generated{parserDecl.Identifier.Text}.g.cs", SourceText.From(generatedParser.sourceCode, Encoding.UTF8));
+                    context.AddSource($"{className}.g.cs", SourceText.From(generatedGenerator, Encoding.UTF8));
                 }
             }
         }

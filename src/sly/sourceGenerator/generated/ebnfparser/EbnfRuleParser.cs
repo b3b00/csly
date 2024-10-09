@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
+using sly.parser.generator;
+using sly.parser.generator.visitor;
 using sly.parser.parser;
 using sly.parser.syntax.tree;
 using sly.sourceGenerator.generated.ebnfparser.model;
@@ -36,6 +38,18 @@ public class EbnfRuleParser : BaseParser<EbnfRuleToken, IGrammarNode>
         return new NonTerminalClause(id);
     }
 
+    public Rule ParseRule(string ruleText)
+    {
+        var syntax = Parse(ruleText);
+        if (syntax != null && syntax.Matched)
+        {
+            EBNFSyntaxTreeVisitor<EbnfRuleToken, IGrammarNode> visitor =new EBNFSyntaxTreeVisitor<EbnfRuleToken, IGrammarNode>(null, null);
+            var re = visitor.VisitSyntaxTree(syntax.Node, new NoContext()) as Rule;
+            return re;
+        }
+        return null;
+    }
+    
     public Match<EbnfRuleToken,IGrammarNode> Parse(string rule)
     {   
         var tokenized = _tokenizer.Tokenize(rule);

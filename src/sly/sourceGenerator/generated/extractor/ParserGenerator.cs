@@ -48,7 +48,7 @@ public class ParserGenerator
         }
     }
 
-    public string Generate()
+    public (string sourceCode, IList<string> nonTerminals) Generate()
     {
         var tokens = ExtractTokens();
         var extractor = new ParserConfigurationExtractor(tokens);
@@ -167,6 +167,6 @@ public class ParserGenerator
         
         
 
-        return builder.ToString();
+        return (builder.ToString(), nonTerminals.Keys.ToList());
     }
 }
