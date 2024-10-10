@@ -591,8 +591,9 @@ namespace ParserTests.lexer
             Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
             Check.That(tok.TokenID).IsEqualTo(Issue348.STriNG);
-            Check.That(tok.Value).IsEqualTo("\"\"te\\\\st\"\"");
-            Check.That(tok.StringWithoutQuotes).IsEqualTo("\"te\\\\st\"");
+            Check.That(tok.StringWithoutQuotes).IsEqualTo("\"te\\\\\\\\st\"");
+            Check.That(tok.Value).IsEqualTo("\"\"te\\\\\\\\st\"\"");
+            
         }
 
         [Fact]
@@ -809,6 +810,7 @@ namespace ParserTests.lexer
             Check.That(tokens[0]).IsEqualTo(CallbackTokens.IDENTIFIER, "AAA");
             Check.That(tokens[1]).IsEqualTo(CallbackTokens.SKIP, "BBB");
         }
+        
 
         [Fact]
         public void TestCharTokens()
@@ -1335,6 +1337,7 @@ else
             Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_MANY_LEXEM_WITH_SAME_LABEL);
             Check.That(error.Message).Contains("left paranthesis").And.Contains("paranthèse ouvrante");
         }
+
 
     }
 }

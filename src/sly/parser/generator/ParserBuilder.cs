@@ -178,7 +178,10 @@ namespace sly.parser.generator
         {
             var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18N,
                 lexerPostProcess, explicitTokens);
-
+            if (lexer.IsOk && lexer.Result != null && lexer.Result is GenericLexer<IN> genericLexer)
+            {
+                CallBacksBuilder.BuildCallbacks(genericLexer);
+            }
             return lexer;
         }
 
