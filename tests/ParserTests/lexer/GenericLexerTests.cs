@@ -592,8 +592,9 @@ namespace ParserTests.lexer
             Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
             Check.That(tok.TokenID).IsEqualTo(Issue348.STriNG);
-            Check.That(tok.Value).IsEqualTo("\"\"te\\\\st\"\"");
-            Check.That(tok.StringWithoutQuotes).IsEqualTo("\"te\\\\st\"");
+            Check.That(tok.StringWithoutQuotes).IsEqualTo("\"te\\\\\\\\st\"");
+            Check.That(tok.Value).IsEqualTo("\"\"te\\\\\\\\st\"\"");
+            
         }
 
         [Fact]

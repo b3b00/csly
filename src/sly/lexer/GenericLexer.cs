@@ -794,15 +794,31 @@ namespace sly.lexer
             var value = stringValue;
             string newValue = "";
             int i = 0;
+            bool escaping = false;
             while (i < value.Length)
             {
                 char current = value.At(i);
-                if (current == escapeStringDelimiterChar)
+                if (current == escapeStringDelimiterChar && !escaping)
                 {
-                    i++;
+                    escaping = true;
+                }
+                else if (escaping)
+                {
+                    if (escaping)
+                    {
+                        if (current != stringDelimiterChar)
+                        {
+                            newValue += escapeStringDelimiterChar;
+                        }
+                    }
+                    escaping = false;
                 }
 
-                newValue += value.At(i);
+                if (!escaping)
+                {
+                    newValue += value.At(i);
+                }
+
                 i++;
 
             }
