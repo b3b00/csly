@@ -1398,7 +1398,7 @@ else
         public void TestLexemeI18N()
         {
             ExpressionParserGenerator generator = new ExpressionParserGenerator();
-            var build = generator.GetParser();            
+            var build = generator.GetParser();
             Check.That(build).IsOk();
             Check.That(build.Result).IsNotNull();
             var parser = build.Result;
