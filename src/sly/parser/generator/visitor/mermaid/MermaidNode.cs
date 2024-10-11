@@ -1,6 +1,7 @@
 using System.Text;
+using sly.parser.generator.visitor.dotgraph;
 
-namespace sly.parser.generator.visitor.dotgraph {
+namespace sly.parser.generator.visitor.mermaid {
     
     public enum MermaidNodeShape
     {

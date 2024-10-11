@@ -111,25 +111,10 @@ namespace sly.parser.generator
             string rootRule)
         {
             ISyntaxParser<IN, OUT> parser = null;
-            switch (parserType)
+            if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
             {
-                case ParserType.LL_RECURSIVE_DESCENT:
-                {
-                    parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
-                    break;
-                }
-                case ParserType.EBNF_LL_RECURSIVE_DESCENT:
-                {
-                    parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
-                    break;
-                }
-                default:
-                {
-                    parser = null;
-                    break;
-                }
+                parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
             }
-
             return parser;
         }
 

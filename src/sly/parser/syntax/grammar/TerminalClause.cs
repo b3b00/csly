@@ -73,6 +73,7 @@ namespace sly.parser.syntax.grammar
         }
 
 
+        [ExcludeFromCodeCoverage]
         public bool Equals(IClause<T> clause)
         {
             if (clause is TerminalClause<T> other)
@@ -82,6 +83,8 @@ namespace sly.parser.syntax.grammar
 
             return false;
         }
+        
+        [ExcludeFromCodeCoverage]
         protected bool Equals(TerminalClause<T> other)
         {
             if (IsExplicitToken)
@@ -110,11 +113,8 @@ namespace sly.parser.syntax.grammar
             ExpectedIndentation = expectedIndentation;
             Discarded = discard;
         }
-    
-        public override  bool MayBeEmpty()
-        {
-            return false;
-        }
+
+        public override bool MayBeEmpty() => false;
     
         public override bool Check(Token<T> nextToken)
         {

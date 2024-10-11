@@ -14,9 +14,6 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {
-    public delegate BuildResult<Parser<IN, OUT>> ParserChecker<IN, OUT>(BuildResult<Parser<IN, OUT>> result,
-        NonTerminal<IN> nonterminal) where IN : struct;
-
     /// <summary>
     ///     this class provides API to build parser
     /// </summary>
@@ -280,7 +277,7 @@ namespace sly.parser.generator
 
         private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result)
         {
-            var checkers = new List<ParserChecker<IN, OUT>>
+            var checkers = new List<Func<BuildResult<Parser<IN, OUT>>,NonTerminal<IN>,BuildResult<Parser<IN, OUT>>>>
             {
                 CheckUnreachable,
                 CheckNotFound,
