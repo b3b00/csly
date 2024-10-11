@@ -46,10 +46,6 @@ namespace sly.parser.generator.visitor
                     return Visit(node);
                 case SyntaxNode<IN> node:
                     return Visit(node);
-                case SyntaxEpsilon<IN> epsilon:
-                {
-                    return Visitor.VisitEpsilon();
-                }
                 default:
                     return Visitor.VisitLeaf(new Token<IN>() {TokenID = default(IN),SpanValue="NULL".ToCharArray()});
             }

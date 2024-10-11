@@ -30,7 +30,7 @@ namespace indented
         [Production("statement: [set|ifthenelse]? EOL[d]")]
         public Ast Statement(ValueOption<Ast> stat)
         {
-            return stat.Match(
+            return stat.Match<Ast>(
                 x => x as Statement,
                 () => new EmptyLine()
             );

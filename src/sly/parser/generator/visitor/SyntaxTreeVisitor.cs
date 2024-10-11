@@ -128,12 +128,6 @@ namespace sly.parser.generator.visitor
             return res;
         }
 
-        public static SyntaxVisitorResult<IN, OUT> Epsilon()
-        {
-            var res = new SyntaxVisitorResult<IN, OUT>();
-            res.IsEpsilon = true;
-            return res;
-        }
     }
 
     public class SyntaxTreeVisitor<IN, OUT> where IN : struct

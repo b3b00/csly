@@ -32,6 +32,7 @@ namespace sly.parser.syntax.grammar
             return $"{NonTerminalName}(NT)";
         }
 
+        [ExcludeFromCodeCoverage]
         public bool Equals(IClause<T> clause)
         {
             if (clause is NonTerminalClause<T> other)
@@ -42,11 +43,13 @@ namespace sly.parser.syntax.grammar
             return false;
         }
 
+        [ExcludeFromCodeCoverage]
         private bool Equals(NonTerminalClause<T> other)
         {
             return NonTerminalName == other.NonTerminalName && IsGroup == other.IsGroup;
         }
 
+        [ExcludeFromCodeCoverage]
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
@@ -55,6 +58,7 @@ namespace sly.parser.syntax.grammar
             return Equals((NonTerminalClause<T>)obj);
         }
 
+        [ExcludeFromCodeCoverage]
         public override int GetHashCode()
         {
             return Dump().GetHashCode();

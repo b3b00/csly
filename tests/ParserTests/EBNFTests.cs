@@ -313,12 +313,12 @@ namespace ParserTests
                 {
                     var aToken = group.Token("A").Value;
                     builder.Append($";{aToken}");
-                    return null;
+                    return builder.ToString();
                 },
                 () =>
                 {
                     builder.Append($";<none>");
-                    return null;
+                    return builder.ToString();
                 });
             builder.Append(")");
             return builder.ToString();
@@ -410,6 +410,51 @@ namespace ParserTests
             }
             
             return builder.ToString();
+        }
+    }
+    
+    
+    public class AlternateChoiceTestOptionNonTerminal
+    {
+        [Production("choice : [ A | B | C] [ B | C]? F?")]
+        public string Choice(string first, ValueOption<string> next, ValueOption<string> final)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append(first);
+
+            
+            var v = next.Match(x => x,
+                () => "<none>");
+            builder.Append($",{v}");
+            v = final.Match(x => x,
+                () => "<none>");
+            builder.Append($",{v}");
+
+            return builder.ToString();
+        }
+
+        [Production("A : a")]
+        public string A(Token<OptionTestToken> a)
+        {
+            return a.Value;
+        }
+        
+        [Production("B : b")]
+        public string B(Token<OptionTestToken> b)
+        {
+            return b.Value;
+        }
+        
+        [Production("C : c")]
+        public string C(Token<OptionTestToken> c)
+        {
+            return c.Value;
+        }
+        
+        [Production("F : f")]
+        public string F(Token<OptionTestToken> f)
+        {
+            return f.Value;
         }
     }
     
@@ -1207,6 +1252,30 @@ namespace ParserTests
             parseResult = builtParser.Result.Parse("a", "choice");
             Check.That(parseResult.IsOk).IsTrue();
             Check.That(parseResult.Result).IsEqualTo("a,<none>");
+        }
+        
+        [Fact]
+        public void TestAlternateChoiceOptionNonTerminal()
+        {
+            var startingRule = $"choice";
+            var parserInstance = new AlternateChoiceTestOptionNonTerminal();
+            var builder = new ParserBuilder<OptionTestToken, string>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser.Errors).IsEmpty();
+            var parseResult = builtParser.Result.Parse("a b f", "choice");
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsEqualTo("a,b,f");
+            parseResult = builtParser.Result.Parse("a", "choice");
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsEqualTo("a,<none>,<none>");
+            parseResult = builtParser.Result.Parse("a b ", "choice");
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsEqualTo("a,b,<none>");
+            parseResult = builtParser.Result.Parse("a f", "choice");
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsEqualTo("a,<none>,f");
+            
         }
         
         [Fact]

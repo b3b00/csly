@@ -61,10 +61,13 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                     }
                     else if (choiceClause.IsNonTerminalChoice)
                     {
-                        result = new SyntaxParseResult<IN>();
-                        result.IsError = false;
-                        result.Root = new SyntaxEpsilon<IN>();
-                        result.EndingPosition = position;
+                        result = new SyntaxParseResult<IN>
+                        {
+                            IsError = false,
+                            Root = new OptionSyntaxNode<IN>(rule.NonTerminalName, new List<ISyntaxNode<IN>>(),
+                                rule.GetVisitor()),
+                            EndingPosition = position
+                        };
                     }
 
                     break;
