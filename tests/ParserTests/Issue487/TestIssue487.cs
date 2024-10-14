@@ -13,13 +13,14 @@ public class Issue487Tests
             [Fact]
             public void TestIssue487()
             {
-                string source = "@dmode1 >> convert: @dmode2";
+                string source = "@dmode1>> convert: @dmode2";
                 var lexBuild = LexerBuilder.BuildLexer<Issue487Token>();
                 Check.That(lexBuild).IsOk();
                 var lexer = lexBuild.Result;
                 var lexed = lexer.Tokenize(source);
                 Check.That(lexed).IsOkLexing();
-                Check.That(lexed.Tokens.Take(lexed.Tokens.Count-1).Extracting(x => (x.TokenID, x.Value)).Equals(new List<(Issue487Token, string)>()
+                Check.That(lexed.Tokens.Take(lexed.Tokens.Count-1).Extracting(x => (x.TokenID, x.Value)).ToList())
+                    .IsEqualTo(new List<(Issue487Token, string)>()
                 {
                     (Issue487Token.START_D, "@"),
                     (Issue487Token.OPS, "dmode1"),
@@ -28,6 +29,6 @@ public class Issue487Tests
                     (Issue487Token.COLON, ":"),
                     (Issue487Token.START_D, "@"),
                     (Issue487Token.OPS, "dmode2")
-                }));
+                });
             }
 }

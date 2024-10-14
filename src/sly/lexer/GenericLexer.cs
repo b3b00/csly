@@ -1223,17 +1223,13 @@ namespace sly.lexer
             var tok = new Token<IN>();
             var inTok = match.Result;
             var newMode = match.NewPosition.Mode;
-            if (inTok != null)
+            if (inTok != null
+                && derivedTokens.TryGetValue(inTok.TokenID, out var derivations)
+                && derivations.TryGetValue(inTok.Value, out var derivation))
             {
-                if (derivedTokens.TryGetValue(inTok.TokenID, out var derivations))
-                {
-                    if (derivations.TryGetValue(inTok.Value, out var derivation))
-                    {
-                        newMode = derivation.mode;
-                    }
-                }
+                newMode = derivation.mode;
             }
-
+            
             tok.IsComment = inTok.IsComment;
             tok.IsEmpty = inTok.IsEmpty;
             tok.SpanValue = inTok.SpanValue;

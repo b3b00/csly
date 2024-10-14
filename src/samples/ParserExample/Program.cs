@@ -1204,7 +1204,8 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            BenchSimpleExpression();
+            TestIssue487();
+            //BenchSimpleExpression();
             // IndentRefactoring();
             //NodeNames();
             // BroadWindow();
@@ -1625,6 +1626,26 @@ else
             Console.WriteLine("x x = "+(res.HasValue ? res.Value.ToString() : "?"));
             
         }
+          
+          private static void TestIssue487() 
+          {
+              string source = "@calc1 >> toconvert: @calc2";
+              var lexBuild = LexerBuilder.BuildLexer<Issue487Token>();
+              Check.That(lexBuild).IsOk();
+              var lexer = lexBuild.Result;
+              var lexed = lexer.Tokenize(source);
+              if (lexed.IsOk)
+              {
+                  foreach (var token in lexed.Tokens)
+                  {
+                      Console.WriteLine(token);
+                  }
+              }
+              else
+              {
+                  Console.Write(lexed.Error);
+              }
+          }
     }
 
     public enum TestGrammarToken

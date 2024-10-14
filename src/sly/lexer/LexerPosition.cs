@@ -48,10 +48,6 @@ namespace sly.lexer
             }
             set
             {
-                if (!string.IsNullOrEmpty(value) && value != ModeAttribute.DefaultLexerMode)
-                {
-                    ;
-                }
                 _mode = value;
             }
         }
