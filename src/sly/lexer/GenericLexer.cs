@@ -1223,10 +1223,14 @@ namespace sly.lexer
             var tok = new Token<IN>();
             var inTok = match.Result;
             var newMode = match.NewPosition.Mode;
+            var newPush = match.NewPosition.IsPush;
+            var newPop = match.NewPosition.IsPop;
             if (inTok != null
                 && derivedTokens.TryGetValue(inTok.TokenID, out var derivations)
                 && derivations.TryGetValue(inTok.Value, out var derivation))
             {
+                newPop = derivation.isPop;
+                newPush = derivation.isPush;
                 newMode = derivation.mode;
             }
             
@@ -1235,8 +1239,8 @@ namespace sly.lexer
             tok.SpanValue = inTok.SpanValue;
             tok.CommentType = inTok.CommentType;
             tok.Position = inTok.Position;
-            tok.Position.IsPop = match.NewPosition.IsPop;
-            tok.Position.IsPush = match.NewPosition.IsPush;
+            tok.Position.IsPop = newPop;
+            tok.Position.IsPush = newPush;
             tok.Position.Mode = newMode;
             tok.Discarded = inTok.Discarded;
             tok.StringDelimiter = match.StringDelimiterChar;

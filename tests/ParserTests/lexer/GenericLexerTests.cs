@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using expressionparser;
-using expressionparser.model;
 using GenericLexerWithCallbacks;
 using indented;
 using NFluent;
 using simpleExpressionParser;
 using sly.buildresult;
-using sly.i18n;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
@@ -285,6 +282,33 @@ namespace ParserTests.lexer
         [Lexeme("\\d+")] INT = 2,
 
         EOS = 0
+
+    }
+
+
+    [Lexer]
+    public enum ManyKeywordModes
+    {
+        [Mode("M1","M2","default")]
+        [AlphaNumId] ID,
+
+        [Push("M1")]
+        [Mode("M1","M2","default")]
+        [Keyword("M1")] M1,
+
+        [Push("M2")]
+        [Mode("M1","M2","default")]
+        [Keyword("M2")] M2,
+        
+        [Pop]
+        [Mode("M1","M2","default")]
+        [Keyword("POP")] POP,
+
+        [Mode("M1")] [Sugar("$")] DOLLAR,
+        [Mode("M1")] [Sugar("€")] EURO,
+
+        [Mode("M2")] [Sugar("-")] DASH,
+        [Mode("M2")] [Sugar("_")] UNDERSCORE
 
     }
 
@@ -1338,6 +1362,66 @@ else
             Check.That(error.Message).Contains("left paranthesis").And.Contains("paranthèse ouvrante");
         }
 
+        [Fact]
+        public void TestManyKeywordModes()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManyKeywordModes>>());
+            Check.That(lexerRes).IsOk();
+            string source = "M1$$€€M2_-_-_";
+            var lexer = lexerRes.Result;
+            var lexed = lexer.Tokenize(source);
+            Check.That(lexed).IsOkLexing();
+            var tokens = lexed.Tokens;
+            Check.That(tokens.MainTokens()).CountIs(12);
+            Check.That(tokens.SkipLast(1).Extracting(x => x.TokenID).ToList()).IsEqualTo(
+                new List<ManyKeywordModes>()
+                {
+                    ManyKeywordModes.M1,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.EURO,
+                    ManyKeywordModes.EURO,
+                    ManyKeywordModes.M2,
+                    ManyKeywordModes.UNDERSCORE,
+                    ManyKeywordModes.DASH,
+                    ManyKeywordModes.UNDERSCORE,
+                    ManyKeywordModes.DASH,
+                    ManyKeywordModes.UNDERSCORE
+                });
+        }
+        [Fact]
+        public void TestManyKeywordModesNested()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManyKeywordModes>>());
+            Check.That(lexerRes).IsOk();
+            string source = "M1$$€€M2_-_-_POP$$$M2_";
+            var lexer = lexerRes.Result;
+            var lexed = lexer.Tokenize(source);
+            Check.That(lexed).IsOkLexing();
+            var tokens = lexed.Tokens.MainTokens();
+            Check.That(tokens).CountIs(18);
+            Check.That(tokens.SkipLast(1).Extracting(x => x.TokenID).ToList()).IsEqualTo(
+                new List<ManyKeywordModes>()
+                {
+                    ManyKeywordModes.M1,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.EURO,
+                    ManyKeywordModes.EURO,
+                    ManyKeywordModes.M2,
+                    ManyKeywordModes.UNDERSCORE,
+                    ManyKeywordModes.DASH,
+                    ManyKeywordModes.UNDERSCORE,
+                    ManyKeywordModes.DASH,
+                    ManyKeywordModes.UNDERSCORE,
+                    ManyKeywordModes.POP,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.M2,
+                    ManyKeywordModes.UNDERSCORE
+                });
+        }
 
     }
 }
