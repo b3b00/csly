@@ -1,7 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using sly.parser.generator.visitor.dotgraph;
 
+
 namespace sly.parser.generator.visitor.mermaid {
+    
     
     public enum MermaidNodeShape
     {
@@ -16,6 +19,7 @@ namespace sly.parser.generator.visitor.mermaid {
         Dotted
     }
     
+    [ExcludeFromCodeCoverage]
     public class MermaidNode : IMermaid
     {
         public MermaidNode(string name)

@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using sly.parser.generator.visitor.dotgraph;
 
 namespace sly.parser.generator.visitor.mermaid
 {
+    [ExcludeFromCodeCoverage]
     public class MermaidGraph
     {
         private readonly List<MermaidNode> _nodes;
