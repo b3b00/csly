@@ -38,8 +38,9 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         while (i < rules.Count)
         {
             var innerrule = rules[i];
-            if (startPosition < tokens.Count && !tokens[startPosition].IsEOS &&
-                innerrule.Match(tokens, startPosition, Configuration))
+            if (startPosition < tokens.Count 
+                && (!tokens[startPosition].IsEOS || (tokens[startPosition].IsEOS && innerrule.MayBeEmpty)) 
+                && innerrule.Match(tokens, startPosition, Configuration))
             {
                 var innerRuleRes = Parse(tokens, innerrule, startPosition, nonTerminalName, parsingContext);
                 rulesResults.Add(innerRuleRes);
@@ -49,9 +50,10 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                     innerRuleRes.GetErrors().Count == 0 || other)
                 {
                     greaterIndex = innerRuleRes.EndingPosition;
-                    if (innerRuleRes.GetErrors() != null) 
+                    if (innerRuleRes.GetErrors() != null)
                         innerRuleErrors.AddRange(innerRuleRes.GetErrors());
                 }
+
                 if (innerRuleRes.GetErrors() != null)
                     innerRuleErrors.AddRange(innerRuleRes.GetErrors());
             }

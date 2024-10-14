@@ -9,6 +9,7 @@ using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
+using sly.parser.parser;
 using Xunit;
 
 namespace ParserTests
@@ -22,6 +23,31 @@ namespace ParserTests
         
         [Double]
         Dbl = 2
+    }
+
+    public class ExplicitTokenGroupParser
+    {
+        [Production("root : ('a' 'b')* discard")]
+        public string Root(List<Group<Lex, string>> groups, string discard)
+        {
+            
+           return string.Join(" ",groups.Select(group =>
+           {
+               var r = group.Token(0).Value + "-" + group.Token(1).Value;
+               return r;
+           }).ToList())+"_"+discard; 
+        }
+
+        [Production("discard : ('c' 'd'[d])?")]
+        public string Discard(ValueOption<Group<Lex, string>> option)
+        {
+            return option.Match<string>(group =>  group.Token(0).Value + (group.Count == 1),
+                    () => "empty");
+        }
+    }
+
+    public class list<T>
+    {
     }
 
     public class Parse
@@ -184,6 +210,38 @@ c = 3.0
             Check.That(r).IsOkParsing();
             //"(condition:(a == 1.0,(b = ( 1.0 + ( 2.0 * 3.0 ) )),(b = ( 2.0 + a ))))(c = 3.0)"
             Check.That(r.Result).IsEqualTo("((condition:(a == 1.0,(b = ( 1.0 + ( 2.0 * 3.0 ) )),(b = ( 2.0 + a )))),(c = 3.0))");
+        }
+
+        [Fact]
+        public void TestExplicitGroups()
+        {
+            var instance = new ExplicitTokenGroupParser();
+            var builder = new ParserBuilder<Lex, string>();
+            var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Check.That(build).IsOk();
+            var parser = build.Result;
+            Check.That(parser).IsNotNull();
+            var parsed = parser.Parse("a b a b c d");
+            Check.That(parsed).IsOkParsing();
+            var result = parsed.Result;
+            Check.That(result).IsNotNull();
+            Check.That(result).IsEqualTo("a-b a-b_cTrue");
+        }
+        
+        [Fact]
+        public void TestExplicitGroups2()
+        {
+            var instance = new ExplicitTokenGroupParser();
+            var builder = new ParserBuilder<Lex, string>();
+            var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Check.That(build).IsOk();
+            var parser = build.Result;
+            Check.That(parser).IsNotNull();
+            var parsed = parser.Parse("a b a b");
+            Check.That(parsed).IsOkParsing();
+            var result = parsed.Result;
+            Check.That(result).IsNotNull();
+            Check.That(result).IsEqualTo("a-b a-b_empty");
         }
         
     }
