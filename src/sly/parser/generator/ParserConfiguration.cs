@@ -24,8 +24,6 @@ namespace sly.parser.generator
             if (!NonTerminals.ContainsKey(nonTerminal.Name)) NonTerminals[nonTerminal.Name] = nonTerminal;
         }
 
-        public bool HasExplicitTokens() => GetAllExplicitTokenClauses().Any();
-
         public List<TerminalClause<IN>> GetAllExplicitTokenClauses()
         {
             List<TerminalClause<IN>> clauses = new List<TerminalClause<IN>>();

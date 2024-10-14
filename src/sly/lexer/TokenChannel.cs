@@ -11,8 +11,6 @@ namespace sly.lexer
 
         private List<Token<IN>> _notNullTokens;
 
-        public List<Token<IN>> NotNullTokens => _notNullTokens;
-        
         private List<Token<IN>> _notNullOrEosTokens;
         public List<Token<IN>> NotNullOrEosTokens => _notNullOrEosTokens; 
         

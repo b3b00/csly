@@ -8,8 +8,6 @@ namespace sly.parser
     {
         public ISyntaxNode<IN> Root { get; set; }
 
-        public bool IsEpsilon => Root.IsEpsilon;
-
         public bool IsError { get; set; }
 
         public bool IsOk => !IsError;
