@@ -87,7 +87,7 @@ namespace sly.parser.generator.visitor
         
         private OUT Visit(ManySyntaxNode<IN> manyNode)
         {
-            
+
             var children = new List<OUT>();
 
             foreach (var n in manyNode.Children)
@@ -97,8 +97,6 @@ namespace sly.parser.generator.visitor
                 children.Add(v);
             }
 
-           
-            //return callback(node, children);
             return Visitor.VisitManyNode(manyNode,children);
         }
 
