@@ -37,21 +37,9 @@ namespace sly.lexer
         public int Column { get; set; }
         public int Index { get; set; }
         public int Line { get; set; }
-        
-        private string _mode;
 
-        public string Mode
-        {
-            get
-            {
-                return _mode;
-            }
-            set
-            {
-                _mode = value;
-            }
-        }
-        
+        public string Mode { get; set; }
+
         public bool IsPop { get; set; }
         
         public bool IsPush { get; set; }
