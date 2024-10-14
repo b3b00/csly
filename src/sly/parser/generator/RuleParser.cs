@@ -203,7 +203,7 @@ namespace sly.parser.generator
         [Production("groupclause : STRING ")]
         public GroupClause<IN> GroupClauseExplicit(Token<EbnfTokenGeneric> explicitToken)
         {
-            var clause = BuildTerminalOrNonTerimal(explicitToken.Value,discard:true);
+            var clause = BuildTerminalOrNonTerimal(explicitToken.Value,discard:false);
             return new GroupClause<IN>(clause);
         }
 
