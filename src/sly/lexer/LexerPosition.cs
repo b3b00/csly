@@ -37,8 +37,12 @@ namespace sly.lexer
         public int Column { get; set; }
         public int Index { get; set; }
         public int Line { get; set; }
-        
+
         public string Mode { get; set; }
+
+        public bool IsPop { get; set; }
+        
+        public bool IsPush { get; set; }
 
         public override string ToString()
         {
@@ -67,7 +71,9 @@ namespace sly.lexer
             return new LexerPosition(Index, Line, Column, CurrentIndentation)
             {
                 Indentation = this.Indentation.Clone(),
-                Mode = Mode
+                Mode = Mode,
+                IsPop = IsPop,
+                IsPush = IsPush,
             };
         }
 

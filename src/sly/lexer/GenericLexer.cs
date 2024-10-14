@@ -166,7 +166,6 @@ namespace sly.lexer
             string src = source.ToString();
 
             var r = LexerFsm.Run(source, new LexerPosition());
-            LexerFsm = SetLexerMode(r, lexersStack);
 
             var ignored = r.IgnoredTokens.Select(x =>
                 new Token<IN>(default(IN), x.SpanValue, x.Position, x.CommentType, x.Channel)).ToList();
@@ -199,6 +198,7 @@ namespace sly.lexer
             {
                 ComputePositionWhenIgnoringEOL(r, tokens, LexerFsm);
                 var transcoded = Transcode(r);
+                LexerFsm = SetLexerMode(transcoded, lexersStack);    
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
                 {
                     transcoded = callback(transcoded);
@@ -228,7 +228,6 @@ namespace sly.lexer
                 {
                     position = r.NewPosition;
                 }
-                LexerFsm = SetLexerMode(r, lexersStack);
 
                 ignored = r.IgnoredTokens.Select(x =>
                     new Token<IN>(default(IN), x.SpanValue, x.Position, 
@@ -284,28 +283,28 @@ namespace sly.lexer
             return new LexerResult<IN>(tokens);
         }
 
-        private FSMLexer<GenericToken> SetLexerMode(FSMMatch<GenericToken> r, Stack<FSMLexer<GenericToken>> lexersStack)
+        private FSMLexer<GenericToken> SetLexerMode(Token<IN> token, Stack<FSMLexer<GenericToken>> lexersStack)
         {
             FSMLexer<GenericToken> LexerFsm = lexersStack.Peek();
 
-            if (!r.IsEOS)
+            if (!token.IsEOS)
             {
-                if (r.IsPop)
+                if (token.Position.IsPop)
                 {
                     lexersStack.Pop();
                     LexerFsm = lexersStack.Peek();
-                    r.NewPosition.Mode = LexerFsm.Mode;
                     return LexerFsm;
                 }
+                
 
-                if (r.IsPush)
+                if (token.Position.IsPush && !string.IsNullOrEmpty(token.Position.Mode))
                 {
-                    LexerFsm = SubLexersFsm[r.NewPosition.Mode];
+                    LexerFsm = SubLexersFsm[token.Position.Mode ?? ModeAttribute.DefaultLexerMode];
                     lexersStack.Push(LexerFsm);
                 }
                 else
                 {
-                    LexerFsm = SubLexersFsm[r.NewPosition.Mode];
+                    LexerFsm = SubLexersFsm[token.Position.Mode ?? ModeAttribute.DefaultLexerMode];
                 }
             }
 
@@ -1223,11 +1222,22 @@ namespace sly.lexer
         {
             var tok = new Token<IN>();
             var inTok = match.Result;
+            var newMode = match.NewPosition.Mode;
+            if (inTok != null
+                && derivedTokens.TryGetValue(inTok.TokenID, out var derivations)
+                && derivations.TryGetValue(inTok.Value, out var derivation))
+            {
+                newMode = derivation.mode;
+            }
+            
             tok.IsComment = inTok.IsComment;
             tok.IsEmpty = inTok.IsEmpty;
             tok.SpanValue = inTok.SpanValue;
             tok.CommentType = inTok.CommentType;
             tok.Position = inTok.Position;
+            tok.Position.IsPop = match.NewPosition.IsPop;
+            tok.Position.IsPush = match.NewPosition.IsPush;
+            tok.Position.Mode = newMode;
             tok.Discarded = inTok.Discarded;
             tok.StringDelimiter = match.StringDelimiterChar;
             tok.HexaPrefix = match.HexaPrefix;

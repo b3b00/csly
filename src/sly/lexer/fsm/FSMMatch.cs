@@ -103,7 +103,9 @@ namespace sly.lexer.fsm
             }
             IsLineEnding = isLineEnding;
             IsPop = isPop;
+            NewPosition.IsPop = isPop;
             IsPush = isPush;
+            NewPosition.IsPush = isPush;
             IgnoredTokens = new List<Token<N>>();
         }
         
