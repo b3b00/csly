@@ -1,13 +1,22 @@
 using sly.lexer;
 
-namespace ParserTests.Issue487;
+namespace ParserExample;
 
 public enum Issue487Token
 {
-
-    //[Sugar("[ \\t]+")] // the lexeme is marked isSkippable : it will not be sent to the parser and simply discarded.
-    //WS = 3,
-
+    [Lexeme(GenericToken.UpTo, ">>", "??")]
+    [Mode("xlmode", "dmode", "calcmode", "lvar")]
+    [Pop]
+    OPS = 103,
+    
+#region default
+    
+    [Sugar(">>")]
+    [Mode("default")]
+    INSTALL = 15,
+    
+    // PUSHERS
+    
     [Keyword("CC")]
     [Push("calcmode")]
     [Mode("default")]
@@ -27,27 +36,20 @@ public enum Issue487Token
     [Push("lvar")]
     [Mode("default")]
     VARSTART = 60,
-
-    //[Lexeme(GenericToken.Identifier, IdentifierType.Custom, "a-zA-Z0-9\\?", "-_0-9A-Za-z/\\.,=\\(){} \\+\\*[]\"")]
-    //[Mode("dmode", "xlmode")]
-    //OPS = 103,
-
-    //[Sugar("\0")]
-    //[Sugar("<<")]
-    //[Mode("dmode", "xlmode")]
-    //[Pop]
-    //CLOSE_M = 104,
-
-
-    [Lexeme(GenericToken.UpTo, ">>", "??")]
-    [Mode("xlmode", "dmode", "calcmode", "lvar")]
-    [Pop]
-    OPS = 103,
-
-    [Sugar(">>")]
+    
+    [Keyword("Int")]
+    [Keyword("String")]
+    [Keyword("Optset")]
+    [Keyword("Money")]
+    [Keyword("Decimal")]
+    [Keyword("EtnRef")]
+    [Keyword("toconvert")]
+    [Push("convert")]
     [Mode("default")]
-    INSTALL = 15,
-
+    CONVERT = 62,
+    
+    // END PUSHERS
+    
     [Sugar("??")]
     [Mode("default")]
     IFNULLTHEN = 49,
@@ -67,35 +69,50 @@ public enum Issue487Token
     [Sugar(")")]
     [Mode("default")]
     RPAREN = 41,
+    
+
+    
+    
+    
+
+    [String("\"", "\\")]
+    CONST_BLOCK = 31,
+    
+    [AlphaId]
+    LOCALVAR = 61,
+
+    EOF = 0,
+
+#endregion
+    
+#region dmode
+
+    
+#endregion    
+
+
+
+#region convert
+
+
 
     [Sugar(":")]
     [Mode("convert")]
     [Pop]
     COLON = 43,
+    
+    
 
     [Sugar("?")]
     [Mode("convert")]
     ISNULLABLE = 105,
-
-    [Keyword("Int")]
-    [Keyword("String")]
-    [Keyword("Optset")]
-    [Keyword("Money")]
-    [Keyword("Decimal")]
-    [Keyword("EtnRef")]
-    [Keyword("convert")]
-    [Push("convert")]
-    CONVERT = 62,
-
-    [Lexeme(GenericToken.String, "\"", "\\")]
-    CONST_BLOCK = 31,
+    
+    
+#endregion
+ 
 
 
-    [AlphaId]
-    LOCALVAR = 61,
+    
 
-    EOF = 0
 
-    //[String]
-    //STRING = 4
 }

@@ -296,9 +296,7 @@ namespace sly.lexer.fsm
                 // Failed on last character, so need to backtrack
                 lexerPosition.Index -= 1;
                 lexerPosition.Column -= 1;
-                
             }
-
             var errorChar = source.Slice(lexerPosition.Index, 1);
             var ko = new FSMMatch<N>(false, default(N), errorChar, lexerPosition, -1, lexerPosition, false);
             return ko;
