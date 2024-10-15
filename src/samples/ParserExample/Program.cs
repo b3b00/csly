@@ -1629,10 +1629,14 @@ else
           
           private static void TestIssue487() 
           {
-              string source = "@calc1 >> toconvert: @calc2";
+              string source = "@g_capcalc >> EtnRef: @appcapcalc.bankcapconfigid";
               var lexBuild = LexerBuilder.BuildLexer<Issue487Token>();
+              
               Check.That(lexBuild).IsOk();
+              
               var lexer = lexBuild.Result;
+              var lexer487 = lexer as GenericLexer<Issue487Token>;
+              var gviz = lexer487.FSMBuilder.Fsm.ToGraphViz();
               var lexed = lexer.Tokenize(source);
               if (lexed.IsOk)
               {

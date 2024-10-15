@@ -780,9 +780,10 @@ namespace sly.lexer
 
             AddLexeme(GenericToken.Identifier, result, token, isPop, isPush, mode, keyword);
             var node = FSMBuilder.GetNode(in_identifier);
+            FSMBuilder.GoTo(in_identifier);
             if (!FSMBuilder.Fsm.HasCallback(node.Id))
             {
-                FSMBuilder.GoTo(in_identifier).CallBack(callback);
+                FSMBuilder.CallBack(callback);
             }
         }
 

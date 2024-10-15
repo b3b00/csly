@@ -19,16 +19,16 @@ public class Issue487Tests
                 var lexer = lexBuild.Result;
                 var lexed = lexer.Tokenize(source);
                 Check.That(lexed).IsOkLexing();
-                Check.That(lexed.Tokens.Take(lexed.Tokens.Count-1).Extracting(x => (x.TokenID, x.Value)).ToList())
-                    .IsEqualTo(new List<(Issue487Token, string)>()
+                Check.That(lexed.Tokens.Take(lexed.Tokens.Count-1).Extracting(x => (x.TokenID, x.Value, x.Position.Mode)).ToList())
+                    .IsEqualTo(new List<(Issue487Token, string, string)>()
                 {
-                    (Issue487Token.START_D, "@"),
-                    (Issue487Token.OPS, "dmode1"),
-                    (Issue487Token.INSTALL, ">>"),
-                    (Issue487Token.CONVERT, "convert"),
-                    (Issue487Token.COLON, ":"),
-                    (Issue487Token.START_D, "@"),
-                    (Issue487Token.OPS, "dmode2")
+                    (Issue487Token.START_D, "@","dmode"),
+                    (Issue487Token.OPS, "dmode1","dmode"),
+                    (Issue487Token.INSTALL, ">>","default"),
+                    (Issue487Token.CONVERT, "convert","convert"),
+                    (Issue487Token.COLON, ":","convert"),
+                    (Issue487Token.START_D, "@","dmode"),
+                    (Issue487Token.OPS, "dmode2","dmode")
                 });
             }
 }
