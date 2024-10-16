@@ -2,7 +2,7 @@ using System;
 using sly.lexer;
 using sly.lexer.fsm;
 
-namespace ParserTests.lexer
+namespace ParserTests.lexer.genericlexers
 {
     public static class ExtendedGenericLexer
     {

@@ -20,10 +20,7 @@ namespace sly
         public static IN ConvertStringToEnum<IN>(string name)  where IN : struct
         {
             IN token = default(IN);
-            if (!Enum.TryParse(name, out token))
-            {
-                throw new ParserConfigurationException($"bad enum name {name} on Operation definition.");
-            }
+            Enum.TryParse(name, out token);
             return token;
         }
         

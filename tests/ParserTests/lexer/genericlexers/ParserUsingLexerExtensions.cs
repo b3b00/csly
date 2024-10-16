@@ -2,7 +2,7 @@ using System;
 using sly.lexer;
 using sly.parser.generator;
 
-namespace ParserTests.lexer
+namespace ParserTests.lexer.genericlexers
 {
     public class ParserUsingLexerExtensions
     {

@@ -3,7 +3,7 @@ using System.Linq;
 using sly.lexer;
 using sly.lexer.fsm;
 
-namespace ParserTests.lexer
+namespace ParserTests.lexer.genericlexers
 {
     public static class Issue210Extensions
     {
