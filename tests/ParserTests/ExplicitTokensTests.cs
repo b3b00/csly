@@ -244,6 +244,34 @@ c = 3.0
             Check.That(result).IsEqualTo("a-b a-b_empty");
         }
         
+        [Fact]
+        public void TestExplicitGroupsUnexpectedToken()
+        {
+            var instance = new ExplicitTokenGroupParser();
+            var builder = new ParserBuilder<Lex, string>("en");
+            var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Check.That(build).IsOk();
+            var parser = build.Result;
+            Check.That(parser).IsNotNull();
+            var parsed = parser.Parse("a b a b c d a");
+            Check.That(parsed).Not.IsOkParsing();
+            var errors = parsed.Errors;
+            Check.That(errors).CountIs(1);
+            var error = errors[0];
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+            Check.That(error).IsInstanceOf<UnexpectedTokenSyntaxError<Lex>>();
+            var unexpected = error as UnexpectedTokenSyntaxError<Lex>;
+            var message = unexpected.ErrorMessage;
+            Check.That(message).IsEqualTo("unexpected c ('c (line 0, column 8)'). Expecting 'a', .");
+            Check.That(unexpected.ExpectedTokens).CountIs(1);
+            var expected = unexpected.ExpectedTokens[0];
+            Check.That(expected.IsExplicitToken).IsTrue();
+            Check.That(expected.ExplicitToken).IsEqualTo("a");
+            Check.That(unexpected.UnexpectedToken.Value).IsEqualTo("c");
+                
+                ;
+        }
+        
     }
     
 }
