@@ -175,7 +175,7 @@ namespace sly.lexer
                     }
                     else
                     {
-                        result = BuildRegexLexer<IN>(attributes, result);
+                        result = BuildRegexLexer<IN>(attributes, lang, result);
                     }
                 }
                 else if (hasGenericLexemes)
@@ -240,10 +240,15 @@ namespace sly.lexer
         }
 
 
-        private static BuildResult<ILexer<IN>> BuildRegexLexer<IN>(Dictionary<IN, (List<LexemeAttribute> lexemes,List<LexemeLabelAttribute> labels)> attributes,
+        private static BuildResult<ILexer<IN>> BuildRegexLexer<IN>(
+            Dictionary<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)> attributes,
+            string lang,
             BuildResult<ILexer<IN>> result) where IN : struct
         {
-            var lexer = new Lexer<IN>();
+            var lexer = new Lexer<IN>()
+            {
+                I18n = lang
+            };
             foreach (var pair in attributes)
             {
                 var tokenID = pair.Key;
