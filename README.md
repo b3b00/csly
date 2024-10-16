@@ -124,7 +124,11 @@ or with dotnet core
 
 ```dotnet add package sly```
 
+# Buy me a coffee
 
+If you found CSLY usefull consider supporting with : 
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/b3b00)
 
 # Special thanks to
 
