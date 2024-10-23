@@ -20,11 +20,13 @@ namespace sly.lexer
             Line = line;
             Column = column;
             Mode = mode;
+            Indentation = null;
         }
         
         private LexerPosition(int index, int line, int column, int currentIndentation, string mode = ModeAttribute.DefaultLexerMode) : this(index, line, column, mode)
         {
             CurrentIndentation = currentIndentation;
+            Indentation = new LexerIndentation();
         }
 
         public bool IsStartOfLine => Column == 0;
@@ -32,7 +34,7 @@ namespace sly.lexer
         public int CurrentIndentation { get; set; }
 
         [JsonIgnore]
-        public LexerIndentation Indentation { get; set; } = new LexerIndentation();
+        public LexerIndentation Indentation { get; set; } 
 
         public int Column { get; set; }
         public int Index { get; set; }
@@ -70,7 +72,7 @@ namespace sly.lexer
         {
             return new LexerPosition(Index, Line, Column, CurrentIndentation)
             {
-                Indentation = this.Indentation.Clone(),
+                Indentation = this.Indentation?.Clone(),
                 Mode = Mode,
                 IsPop = IsPop,
                 IsPush = IsPush,

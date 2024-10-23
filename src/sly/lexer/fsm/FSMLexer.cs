@@ -308,6 +308,7 @@ namespace sly.lexer.fsm
             {
                 var shifts = GetIndentations(source, lexerPosition.Index);
                 string currentShift = string.Join("", shifts);
+                lexerPosition.Indentation = lexerPosition.Indentation ?? new LexerIndentation();
                 var indentation = lexerPosition.Indentation.Indent(currentShift);
                 switch (indentation.type)
                 {
