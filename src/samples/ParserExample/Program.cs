@@ -548,6 +548,33 @@ return r";
             }
 
         }
+
+
+        public static void testProfilIndentedWhile()
+        {
+            var content = File.ReadAllText("test.indent");
+            var instance = new IndentedWhileParserGeneric();
+            var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
+            var buildResult = builder.BuildParser(instance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"program");
+            if (buildResult.IsOk)
+            {
+                var parsed = buildResult.Result.Parse(content);
+                if (parsed.IsOk)
+                {
+                    Console.WriteLine("ok");
+                }
+                else
+                {
+                    parsed.Errors.ForEach(Console.WriteLine);
+                }
+            }
+            else
+            {
+                buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
+            }
+            ;
+
+        }
         
         public static void testProfileJSONEscaping(string content = null, bool escape = true)
         {
@@ -1372,7 +1399,8 @@ while a < 10 do
             //testJSONEscaped();
             //testJSONNotEscaped();
             // testProfileJSONEscaping(escape:true);
-            testProfileJSONEscaping(escape:false);
+            //testProfileJSONEscaping(escape:false);
+            testProfilIndentedWhile();
             //TestGrammarParser();
             // TestGraphViz();
             // TestGraphViz();

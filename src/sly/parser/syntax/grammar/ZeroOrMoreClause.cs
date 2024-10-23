@@ -21,12 +21,19 @@ namespace sly.parser.syntax.grammar
             return true;
         }
         
+        private string _dump = null;
+        
         [ExcludeFromCodeCoverage]
         public override string Dump()
         {
-            var t = Clause.Dump() + "*";
-            return t;
+            if (_dump == null)
+            {
+                _dump = Clause.Dump()+"*";
+            }
+
+            return _dump;
         }
+
 
         [ExcludeFromCodeCoverage]
         public override bool Equals(IClause<T> other)

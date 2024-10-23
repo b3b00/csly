@@ -39,12 +39,21 @@ namespace sly.parser.syntax.grammar
         {
             return true;
         }
+
+        private string _dump = null;
         
         [ExcludeFromCodeCoverage]
         public string Dump()
         {
-            return ToString();
+            if (_dump == null)
+            {
+                _dump = ToString();
+            }
+
+            return _dump;
         }
+        
+        
 
         [ExcludeFromCodeCoverage]
         public bool Equals(IClause<T> clause)

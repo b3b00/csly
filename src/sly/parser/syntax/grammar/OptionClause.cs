@@ -25,11 +25,19 @@ namespace sly.parser.syntax.grammar
             return $"{Clause}?";
         }
         
+        private string _dump = null;
+        
         [ExcludeFromCodeCoverage]
         public string Dump()
         {
-            return $"{Clause}?";
+            if (_dump == null)
+            {
+                _dump = Clause.Dump()+"?";
+            }
+
+            return _dump;
         }
+
 
         [ExcludeFromCodeCoverage]
         public bool Equals(IClause<T> clause)

@@ -175,17 +175,28 @@ namespace sly.parser.syntax.grammar
             return match;
         }
 
+        private string _dump = null;
+        
         [ExcludeFromCodeCoverage]
         public string Dump()
         {
-            StringBuilder builder = new StringBuilder();
-            builder.Append(NonTerminalName).Append(" : ");
-            foreach (var clause in Clauses)
+            if (_dump == null)
             {
-                builder.Append(clause.Dump()).Append(" ");
+                StringBuilder builder = new StringBuilder();
+                builder.Append(NonTerminalName).Append(" : ");
+                foreach (var clause in Clauses)
+                {
+                    builder.Append(clause.Dump()).Append(" ");
+                }
+
+                _dump = builder.ToString();
             }
 
-            return builder.ToString();
+            return _dump;
         }
+
+        
+        
+      
     }
 }

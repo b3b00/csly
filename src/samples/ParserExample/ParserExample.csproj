@@ -14,6 +14,10 @@
     <Content Include="test.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Remove="test.indent" />
+    <Content Include="test.indent">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 

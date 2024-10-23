@@ -32,14 +32,23 @@ namespace sly.parser.syntax.grammar
             Clauses.AddRange(clauses.Clauses);
         }
         
+       
+
+        private string _dump = null;
+        
         [ExcludeFromCodeCoverage]
         public string Dump()
         {
-            StringBuilder dump = new StringBuilder();
-            dump.Append("( ");
-            dump.Append(Clauses.Select(c => c.Dump()).Aggregate((d1, d2) => d1 + " " + d2));
-            dump.Append(" )");
-            return dump.ToString();
+            if (_dump == null)
+            {
+                StringBuilder dump = new StringBuilder();
+                dump.Append("( ");
+                dump.Append(Clauses.Select(c => c.Dump()).Aggregate((d1, d2) => d1 + " " + d2));
+                dump.Append(" )");
+                _dump = dump.ToString();
+            }
+
+            return _dump;
         }
 
 

@@ -26,11 +26,21 @@ namespace sly.parser.syntax.grammar
             return NonTerminalName;
         }
         
+        
+
+        private string _dump = null;
+        
         [ExcludeFromCodeCoverage]
         public string Dump()
         {
-            return $"{NonTerminalName}(NT)";
+            if (_dump == null)
+            {
+                _dump = $"{NonTerminalName}(NT)";
+            }
+
+            return _dump;
         }
+        
 
         [ExcludeFromCodeCoverage]
         public bool Equals(IClause<T> clause)

@@ -30,10 +30,17 @@ namespace sly.parser.syntax.grammar
             AddRange(seq.Clauses);
         }
 
+        private string _dump = null;
+        
         [ExcludeFromCodeCoverage]
         public string Dump()
         {
-            return Clauses.Select(c => c.Dump()).Aggregate((d1, d2) => d1 + " " + d2);
+            if (_dump == null)
+            {
+                _dump = Clauses.Select(c => c.Dump()).Aggregate((d1, d2) => d1 + " " + d2);
+            }
+
+            return _dump;
         }
         
         [ExcludeFromCodeCoverage]
