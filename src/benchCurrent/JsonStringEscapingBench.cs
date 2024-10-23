@@ -26,8 +26,8 @@ public class JsonStringEscapingBench
         }
     }
     
-    private Parser<JsonTokenGeneric, JSon> escapedJsonParser;
-    private Parser<JsonTokenGenericStringNotEscaped, JSon> unescapedJsonParser;
+    private Parser<JsonTokenGenericNotEscaped, JSon> notEscapedJsonParser;
+    private Parser<JsonTokenGenericEscaped, JSon> escapedJsonParser;
     
     private string content = "";
     
@@ -38,7 +38,7 @@ public class JsonStringEscapingBench
         content = File.ReadAllText("test.json");
         Console.WriteLine("json read.");
         var jsonParser = new EbnfJsonGenericParser();
-        var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
+        var builder = new ParserBuilder<JsonTokenGenericNotEscaped, JSon>();
             
         var result = builder.BuildParser(jsonParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
         Console.WriteLine("parser built.");
@@ -50,11 +50,11 @@ public class JsonStringEscapingBench
         else
         {
             Console.WriteLine("parser ok");
-            escapedJsonParser = result.Result;
+            notEscapedJsonParser = result.Result;
         }
             
         var notJsonParser = new EbnfJsonGenericParserStringNotEscaped();
-        var builderNot = new ParserBuilder<JsonTokenGenericStringNotEscaped, JSon>();
+        var builderNot = new ParserBuilder<JsonTokenGenericEscaped, JSon>();
             
         var resultNot = builderNot.BuildParser(notJsonParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
         Console.WriteLine("parser built.");
@@ -66,7 +66,23 @@ public class JsonStringEscapingBench
         else
         {
             Console.WriteLine("parser ok");
-            unescapedJsonParser = resultNot.Result;
+            escapedJsonParser = resultNot.Result;
+        }
+    }
+    
+    [Benchmark]
+        
+    public void TestNotEscapedJson()
+    {
+            
+            
+        if (notEscapedJsonParser == null)
+        {
+            Console.WriteLine("parser is null");
+        }
+        else
+        {
+            var ignored = notEscapedJsonParser.Parse(content);    
         }
     }
     
@@ -83,22 +99,6 @@ public class JsonStringEscapingBench
         else
         {
             var ignored = escapedJsonParser.Parse(content);    
-        }
-    }
-    
-    [Benchmark]
-        
-    public void TestUnescapedJson()
-    {
-            
-            
-        if (unescapedJsonParser == null)
-        {
-            Console.WriteLine("parser is null");
-        }
-        else
-        {
-            var ignored = unescapedJsonParser.Parse(content);    
         }
     }
     

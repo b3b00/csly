@@ -21,19 +21,19 @@ namespace bench.json
         #region VALUE
 
         [Production("value : STRING")]
-        public JSon StringValue(Token<JsonTokenGeneric> stringToken)
+        public JSon StringValue(Token<JsonTokenGenericNotEscaped> stringToken)
         {
             return new JValue(stringToken.StringWithoutQuotes);
         }
 
         [Production("value : INT")]
-        public JSon IntValue(Token<JsonTokenGeneric> intToken)
+        public JSon IntValue(Token<JsonTokenGenericNotEscaped> intToken)
         {
             return new JValue(intToken.IntValue);
         }
 
         [Production("value : DOUBLE")]
-        public JSon DoubleValue(Token<JsonTokenGeneric> doubleToken)
+        public JSon DoubleValue(Token<JsonTokenGenericNotEscaped> doubleToken)
         {
             double dbl;
             try
@@ -56,7 +56,7 @@ namespace bench.json
         }
 
         [Production("value : BOOLEAN")]
-        public JSon BooleanValue(Token<JsonTokenGeneric> boolToken)
+        public JSon BooleanValue(Token<JsonTokenGenericNotEscaped> boolToken)
         {
             return new JValue(bool.Parse(boolToken.Value));
         }
@@ -146,7 +146,7 @@ namespace bench.json
         }
 
         [Production("property: STRING COLON[d] value")]
-        public JSon property(Token<JsonTokenGeneric> key, JSon value)
+        public JSon property(Token<JsonTokenGenericNotEscaped> key, JSon value)
         {
             return new JObject(key.StringWithoutQuotes, value);
         }
@@ -171,19 +171,19 @@ namespace bench.json
         #region VALUE
 
         [Production("value : STRING")]
-        public JSon StringValue(Token<JsonTokenGenericStringNotEscaped> stringToken)
+        public JSon StringValue(Token<JsonTokenGenericEscaped> stringToken)
         {
             return new JValue(stringToken.StringWithoutQuotes);
         }
 
         [Production("value : INT")]
-        public JSon IntValue(Token<JsonTokenGenericStringNotEscaped> intToken)
+        public JSon IntValue(Token<JsonTokenGenericEscaped> intToken)
         {
             return new JValue(intToken.IntValue);
         }
 
         [Production("value : DOUBLE")]
-        public JSon DoubleValue(Token<JsonTokenGenericStringNotEscaped> doubleToken)
+        public JSon DoubleValue(Token<JsonTokenGenericEscaped> doubleToken)
         {
             double dbl;
             try
@@ -206,7 +206,7 @@ namespace bench.json
         }
 
         [Production("value : BOOLEAN")]
-        public JSon BooleanValue(Token<JsonTokenGenericStringNotEscaped> boolToken)
+        public JSon BooleanValue(Token<JsonTokenGenericEscaped> boolToken)
         {
             return new JValue(bool.Parse(boolToken.Value));
         }
@@ -271,7 +271,7 @@ namespace bench.json
         }
 
         [Production("additionalValue: COMMA value")]
-        public JSon ListElementsOne(Token<JsonTokenGenericStringNotEscaped> discardedComma, JSon value)
+        public JSon ListElementsOne(Token<JsonTokenGenericEscaped> discardedComma, JSon value)
         {
             return value;
         }
@@ -290,13 +290,13 @@ namespace bench.json
         }
 
         [Production("additionalProperty : COMMA property")]
-        public JSon property(Token<JsonTokenGenericStringNotEscaped> comma, JObject property)
+        public JSon property(Token<JsonTokenGenericEscaped> comma, JObject property)
         {
             return property;
         }
 
         [Production("property: STRING COLON[d] value")]
-        public JSon property(Token<JsonTokenGenericStringNotEscaped> key, JSon value)
+        public JSon property(Token<JsonTokenGenericEscaped> key, JSon value)
         {
             return new JObject(key.StringWithoutQuotes, value);
         }

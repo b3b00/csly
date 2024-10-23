@@ -2,7 +2,7 @@
 
 namespace bench.json
 {
-    public enum JsonTokenGeneric
+    public enum JsonTokenGenericNotEscaped
     {
         [String(doEscape:false, channel:0)] STRING = 1,
         [Lexeme(GenericToken.Double)] DOUBLE = 2,
@@ -19,7 +19,7 @@ namespace bench.json
         [Lexeme(GenericToken.KeyWord, "null")] NULL = 14
     }
     
-    public enum JsonTokenGenericStringNotEscaped
+    public enum JsonTokenGenericEscaped
     {
         [String(doEscape:true, channel:0)] STRING = 1,
         [Double(channel:0)] DOUBLE = 2,
