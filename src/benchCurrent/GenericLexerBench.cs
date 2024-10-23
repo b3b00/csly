@@ -25,7 +25,7 @@ namespace benchCurrent
             }
         }
 
-        private ILexer<JsonTokenGeneric> BenchedLexer;
+        private ILexer<JsonTokenGenericEscaped> BenchedLexer;
 
         private string content = "";
 
@@ -34,7 +34,7 @@ namespace benchCurrent
         {
             content = File.ReadAllText("test.json");
 
-            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<JsonTokenGeneric>>());
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<JsonTokenGenericEscaped>>());
             if (lexerRes != null)
             {
                 BenchedLexer = lexerRes.Result;

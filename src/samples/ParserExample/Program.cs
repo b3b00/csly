@@ -502,41 +502,188 @@ return r";
 
         }
 
-        public static void testJSON()
+        public static void testJSONEscaped(string content = null)
         {
+            if (content == null)
+            {
+                content = File.ReadAllText("test.json");
+            }
             try {
 
                 var instance = new EbnfJsonGenericParser();
             var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
             var buildResult = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            // if (buildResult.IsOk)
-            // {
-            //     Console.WriteLine("parser built.");
-            //     var parser = buildResult.Result;
-            //     var content = File.ReadAllText("test.json");
-            //     Console.WriteLine("test.json read.");
-            //     var jsonResult = parser.Parse(content);
-            //     Console.WriteLine("json parse done.");
-            //     if (jsonResult.IsOk)
-            //     {
-            //         Console.WriteLine("YES !");
-            //     }
-            //     else
-            //     {
-            //         Console.WriteLine("Ooh no !");
-            //     }
-            //     Console.WriteLine("Done.");
-            //
-            // }
-            // else
-            // {
-            //     buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
-            // }
+            if (buildResult.IsOk)
+            {
+                Console.WriteLine("parser built.");
+                var parser = buildResult.Result;
+                
+                Console.WriteLine("test.json read.");
+                for (int i = 0; i < 10; i++)
+                {
+
+
+                    var jsonResult = parser.Parse(content);
+                    Console.WriteLine("json parse done.");
+                    if (jsonResult.IsOk)
+                    {
+                        Console.WriteLine("YES !");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ooh no !");
+                    }
+                }
+
+                Console.WriteLine("Done.");
+            
+            }
+            else
+            {
+                buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
+            }
             }
             catch(Exception e) {
                 Console.WriteLine($"ERROR {e.Message} : \n {e.StackTrace}");
             }
 
+        }
+        
+        public static void testProfileJSONEscaping(string content = null, bool escape = true)
+        {
+            if (escape)
+            {
+                if (content == null)
+                {
+                    content = File.ReadAllText("test.json");
+                }
+
+                try
+                {
+
+                    var instance = new EbnfJsonGenericParser();
+                    var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
+                    var buildResult = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+                    if (buildResult.IsOk)
+                    {
+                        Console.WriteLine("parser built.");
+                        var parser = buildResult.Result;
+
+                        Console.WriteLine("test.json read.");
+                        for (int i = 0; i < 10; i++)
+                        {
+
+
+                            var jsonResult = parser.Parse(content);
+                            Console.WriteLine("json parse done.");
+                            if (jsonResult.IsOk)
+                            {
+                                Console.WriteLine("YES !");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Ooh no !");
+                            }
+                        }
+
+                        Console.WriteLine("Done.");
+
+                    }
+                    else
+                    {
+                        buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"ERROR {e.Message} : \n {e.StackTrace}");
+                }
+            }
+            else
+            {
+                if (content == null)
+                {
+                    content = File.ReadAllText("test.json");
+                }
+            
+                var instanceNot = new EbnfJsonGenericParserStringNotEscaped();
+                var builderNot = new ParserBuilder<JsonTokenGenericStringNotEscaped, JSon>();
+                var buildResultNot = builderNot.BuildParser(instanceNot, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+                if (buildResultNot.IsOk)
+                {
+                    Console.WriteLine("parser built.");
+                    var parser = buildResultNot.Result;
+                
+                    Console.WriteLine("test.json read.");
+
+
+                    var jsonResult = parser.Parse(content);
+                    Console.WriteLine("json parse done.");
+                    if (jsonResult.IsOk)
+                    {
+                        Console.WriteLine("YES !");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ooh no !");
+                    }
+
+                    Console.WriteLine("Done. Unescaped.");
+            
+                }
+                else
+                {
+                    buildResultNot.Errors.ForEach(e => Console.WriteLine(e.Message));
+                }
+            }
+
+        }
+        
+        public static void testJSONNotEscaped(string content = null)
+        {
+            if (content == null)
+            {
+                content = File.ReadAllText("test.json");
+            }
+            
+            var instanceNot = new EbnfJsonGenericParserStringNotEscaped();
+            var builderNot = new ParserBuilder<JsonTokenGenericStringNotEscaped, JSon>();
+            var buildResultNot = builderNot.BuildParser(instanceNot, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            if (buildResultNot.IsOk)
+            {
+                Console.WriteLine("parser built.");
+                var parser = buildResultNot.Result;
+                
+                Console.WriteLine("test.json read.");
+
+
+                var jsonResult = parser.Parse(content);
+                Console.WriteLine("json parse done.");
+                if (jsonResult.IsOk)
+                {
+                    Console.WriteLine("YES !");
+                }
+                else
+                {
+                    Console.WriteLine("Ooh no !");
+                }
+
+                Console.WriteLine("Done. Unescaped.");
+            
+            }
+            else
+            {
+                buildResultNot.Errors.ForEach(e => Console.WriteLine(e.Message));
+            }
+        }
+        
+        public static void testJSONEscapedVsNotEscaped()
+        {
+            var content = File.ReadAllText("test.json");
+            
+            testJSONEscaped(content);
+
+            testJSONNotEscaped(content);
         }
 
         private static void TestGraphViz()
@@ -1204,7 +1351,8 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            TestIssue487();
+            //testGenericLexerJson();
+            // TestIssue487();
             //BenchSimpleExpression();
             // IndentRefactoring();
             //NodeNames();
@@ -1219,7 +1367,12 @@ while a < 10 do
             //TestContextualParser();
             //TestTokenCallBacks();
             //test104();
-            // testJSON();
+            //testJSON();
+            //testJSONEscapedVsNotEscaped();
+            //testJSONEscaped();
+            //testJSONNotEscaped();
+            // testProfileJSONEscaping(escape:true);
+            testProfileJSONEscaping(escape:false);
             //TestGrammarParser();
             // TestGraphViz();
             // TestGraphViz();

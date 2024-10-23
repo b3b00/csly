@@ -872,7 +872,7 @@ namespace sly.lexer
         }
 
         public void AddStringLexem(IN token, BuildResult<ILexer<IN>> result, string stringDelimiter,
-            string escapeDelimiterChar = "\\")
+            string escapeDelimiterChar = "\\", bool doEscape = true)
         {
             if (string.IsNullOrEmpty(stringDelimiter) || stringDelimiter.Length > 1) {
                 result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
@@ -933,15 +933,19 @@ namespace sly.lexer
                 match.Result.SpanValue = value;
 
                 match.StringDelimiterChar = stringDelimiterChar;
-                if (stringDelimiterChar != escapeStringDelimiterChar)
+
+                if (doEscape)
                 {
-                    match.Result.SpanValue = diffCharEscaper(escapeStringDelimiterChar, stringDelimiterChar,
-                        match.Result.SpanValue);
-                }
-                else
-                {
-                    match.Result.SpanValue = sameCharEscaper(escapeStringDelimiterChar, stringDelimiterChar,
-                        match.Result.SpanValue);
+                    if (stringDelimiterChar != escapeStringDelimiterChar)
+                    {
+                        match.Result.SpanValue = diffCharEscaper(escapeStringDelimiterChar, stringDelimiterChar,
+                            match.Result.SpanValue);
+                    }
+                    else
+                    {
+                        match.Result.SpanValue = sameCharEscaper(escapeStringDelimiterChar, stringDelimiterChar,
+                            match.Result.SpanValue);
+                    }
                 }
 
                 return match;

@@ -115,25 +115,31 @@ namespace sly.lexer
                     var labels = result.Result.LexemeLabels;
                     LexerPostProcess<IN> post = tokens =>
                     {
-
-                        var labeledTokens = tokens.Select(token =>
+                        var labeledTokens = tokens;
+                        var count = labels.Select(x => x.Value.Count).Sum(); 
+                        if (count > 0)
                         {
-                            token.Label = token.TokenID.ToString();
-                            if (labels.TryGetValue(token.TokenID, out var tokenLabels) 
-                                && tokenLabels.TryGetValue(lang, out string label))
+                            labeledTokens = tokens.Select(token =>
                             {
-                                token.Label = label;
-                            }
-                            else if (token.IsUnIndent)
-                            {
-                                token.Label = "<<UINDENT>>";
-                            }
-                            else if (token.IsIndent)
-                            {
-                                token.Label = "<<INDENT>>";
-                            }
-                            return token;
-                        }).ToList();
+                                token.Label = token.TokenID.ToString();
+                                if (labels.TryGetValue(token.TokenID, out var tokenLabels)
+                                    && tokenLabels.TryGetValue(lang, out string label))
+                                {
+                                    token.Label = label;
+                                }
+                                else if (token.IsUnIndent)
+                                {
+                                    token.Label = "<<UINDENT>>";
+                                }
+                                else if (token.IsIndent)
+                                {
+                                    token.Label = "<<INDENT>>";
+                                }
+
+                                return token;
+                            }).ToList();
+                        }
+
                         if (lexerPostProcess != null)
                         {
                             return lexerPostProcess(labeledTokens);
@@ -546,13 +552,13 @@ namespace sly.lexer
 
                         if (lexeme.IsString)
                         {
-                            var (delimiter, escape) = GetDelimiters(lexeme, "\"", "\\");
-                            lexer.AddStringLexem(tokenID, result, delimiter, escape);
+                            var (delimiter, escape, doEscape) = GetDelimiters(lexeme, "\"", "\\", true);
+                            lexer.AddStringLexem(tokenID, result, delimiter, escape, doEscape);
                         }
 
                         if (lexeme.IsChar)
                         {
-                            var (delimiter, escape) = GetDelimiters(lexeme, "'", "\\");
+                            var (delimiter, escape, doEscape) = GetDelimiters(lexeme, "'", "\\", true);
                             lexer.AddCharLexem(tokenID, result, delimiter, escape);
                         }
 
@@ -689,8 +695,8 @@ namespace sly.lexer
         }
 
 
-        private static (string delimiter, string escape) GetDelimiters(LexemeAttribute lexeme, string delimiter,
-            string escape)
+        private static (string delimiter, string escape, bool doEscape) GetDelimiters(LexemeAttribute lexeme, string delimiter,
+            string escape, bool doEscape)
         {
             if (lexeme.HasGenericTokenParameters)
             {
@@ -699,9 +705,13 @@ namespace sly.lexer
                 {
                     escape = lexeme.GenericTokenParameters[1];
                 }
+                if (lexeme.GenericTokenParameters.Length > 2)
+                {
+                    Boolean.TryParse(lexeme.GenericTokenParameters[2], out doEscape);
+                }
             }
 
-            return (delimiter, escape);
+            return (delimiter, escape, doEscape);
         }
 
         private static BuildResult<ILexer<IN>> CheckStringAndCharTokens<IN>(
