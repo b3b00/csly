@@ -4,7 +4,7 @@ namespace bench.json
 {
     public enum JsonTokenGeneric
     {
-        [Lexeme(GenericToken.String)] STRING = 1,
+        [String(doEscape:false, channel:0)] STRING = 1,
         [Lexeme(GenericToken.Double)] DOUBLE = 2,
         [Lexeme(GenericToken.Int)] INT = 3,
 
