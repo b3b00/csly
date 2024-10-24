@@ -35,7 +35,7 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         var innerRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
         var greaterIndex = 0;
         var rulesResults = new List<SyntaxParseResult<IN>>();
-        while (i < rules.Count)
+        while (i < rules.Count && startPosition < tokens.Count)
         {
             var innerrule = rules[i];
             if (startPosition < tokens.Count 
