@@ -113,16 +113,17 @@ namespace csly.indentedWhileLang.parser
         CLOSE_FSTRING_EXPPRESSION = 101,
 
         [Sugar("$\"")]
+        [Mode(ModeAttribute.DefaultLexerMode, "fstringExpression")]
         [Push("fstring")] 
         OPEN_FSTRING,
 
         [Sugar("\"")] 
-        [Mode("fstring")]
+        [Mode("fstring", "fstringExpression")]
         [Pop]  
         CLOSE_FSTRING,
 
         
-        [Mode("fstring")]
+        [Mode("fstring", "fstringExpression")]
         [UpTo("{","\"")]
         FSTRING_CONTENT
         

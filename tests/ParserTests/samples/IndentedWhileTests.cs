@@ -220,7 +220,7 @@ return a
 # fstring
 v1 := 1
 v2 := 2
-fstring := $""v1 :> {v1} < v2 :> {v2} < v3 :> {v1+v2} < - end""
+fstring := $""v1 :> {v1} < v2 :> {v2} < v3 :> {v1+v2} <  v4 :>{$""hello,"".$"" world""}<- end""
 ";
             Console.WriteLine("==================================");
             Console.WriteLine("=== parse fstring");
@@ -243,7 +243,7 @@ fstring := $""v1 :> {v1} < v2 :> {v2} < v3 :> {v1+v2} < - end""
             Check.That(context.variables).CountIs(3);
             Check.That(context).HasVariableWithIntValue("v1", 1);
             Check.That(context).HasVariableWithIntValue("v2", 2);
-            Check.That(context).HasVariableWithStringValue("fstring", "v1 :> 1 < v2 :> 2 < v3 :> 3 < - end");
+            Check.That(context).HasVariableWithStringValue("fstring", "v1 :> 1 < v2 :> 2 < v3 :> 3 <  v4 :>hello, world<- end");
             
         }
 
