@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using csly.whileLang.compiler;
 using sly.lexer;
@@ -6,6 +7,21 @@ using Sigil;
 
 namespace csly.whileLang.model
 {
+    public class Printer
+    {
+        public static List<string> lines = new List<string>();
+
+        public static void WriteLine(string line)
+        {
+            lines.Add(line);
+        }
+
+        public static void Clear()
+        {
+            lines.Clear();
+        }
+    }
+    
     public class PrintStatement : Statement
     {
         public PrintStatement(Expression value)
@@ -41,8 +57,19 @@ namespace csly.whileLang.model
                 emiter = Value.EmitByteCode(context, emiter);
                 emiter.Call(mi);
             }
+            else
+            {
+                var mi = typeof(Printer).GetMethod("WriteLine", new[] { typeof(string) });
+                emiter = Value.EmitByteCode(context, emiter);
+                emiter.Call(mi);
+            }
 
             return emiter;
+        }
+
+        public void AppendTernaries(List<TernaryExpression> ternaries)
+        {
+            Value.AppendTernaries(ternaries);
         }
     }
 }

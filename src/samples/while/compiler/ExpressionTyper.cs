@@ -20,6 +20,7 @@ namespace csly.whileLang.compiler
             if (expr is BinaryOperation binary) return TypeExpression(binary, context);
             if (expr is Neg neg) return TypeExpression(neg, context);
             if (expr is Not not) return TypeExpression(not, context);
+            if (expr is TernaryExpression ternary) return TypeExpression(ternary, context);
             if (expr is Variable variable)
             {
                 var varType = context.GetVariableType(variable.Name);
@@ -78,6 +79,17 @@ namespace csly.whileLang.compiler
             if (positiveVal != WhileType.BOOL)
                 throw new SignatureException($"invalid operation type({positiveVal}) : {not.Dump("")}");
             return WhileType.BOOL;
+        }
+        
+        public WhileType TypeExpression(TernaryExpression ternary, CompilerContext context)
+        {
+            var conditionType = TypeExpression(ternary.Condition, context);
+            var trueType = TypeExpression(ternary.TrueExpression, context);
+            var falseType = TypeExpression(ternary.FalseExpression, context);
+            ternary.CompilerScope = context.CurrentScope;
+            if (conditionType != WhileType.BOOL)
+                throw new SignatureException($"invalid operation type({conditionType}) : {ternary.Condition.Dump("")}");
+            return trueType;
         }
     }
 }

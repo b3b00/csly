@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using csly.whileLang.compiler;
 using sly.lexer;
 using Sigil;
@@ -20,6 +21,10 @@ namespace csly.whileLang.model
         {
             emiter.Nop();
             return emiter;
+        }
+
+        public void AppendTernaries(List<TernaryExpression> ternaries)
+        {
         }
 
         public string Transpile(CompilerContext context)

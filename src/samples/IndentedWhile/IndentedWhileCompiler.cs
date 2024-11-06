@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.compiler;
@@ -79,9 +80,10 @@ namespace csly.indentedWhileLang.compiler
         }
 
 
-        public Func<int> CompileToFunction(string whileCode, bool isQuiet = false)
+        public Func<int>  CompileToFunction(string whileCode, bool isQuiet = false)
         {
             Func<int> function = null;
+            CompilerContext context = null;
 
             try
             {
@@ -92,10 +94,15 @@ namespace csly.indentedWhileLang.compiler
 
                     var checker = new SemanticChecker();
 
-                    var context = checker.SemanticCheck(ast,isQuiet);
-
+                    context = checker.SemanticCheck(ast,isQuiet);
+                    var ternaries = new List<TernaryExpression>();
+                    ast.AppendTernaries(ternaries);
+                    for (int i = 0; i < ternaries.Count; i++)
+                    {
+                        ternaries[i].Number = i ;
+                    }
+                    
                     var emiter = Emit<Func<int>>.NewDynamicMethod("Method" + Guid.NewGuid());
-
                     emiter = ast.EmitByteCode(context, emiter);
                     //emiter.LoadConstant(42);                    
                     //emiter.Return();
@@ -106,7 +113,6 @@ namespace csly.indentedWhileLang.compiler
             {
                 function = null;
             }
-
 
             return function;
         }

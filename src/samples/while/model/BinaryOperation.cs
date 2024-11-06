@@ -42,6 +42,11 @@ namespace csly.whileLang.model
 
         public LexerPosition Position { get; set; }
         public WhileType Whiletype { get; set; }
+        public void AppendTernaries(List<TernaryExpression> ternaries)
+        {
+            Left.AppendTernaries(ternaries);
+            Right.AppendTernaries(ternaries);
+        }
 
         [ExcludeFromCodeCoverage]
         public string Dump(string tab)

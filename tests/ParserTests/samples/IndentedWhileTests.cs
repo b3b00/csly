@@ -218,10 +218,12 @@ return a
             var parser = buildResult.Result;
             var program = @"
 # fstring
-v1 := 1
-v2 := 2
+v1 := 48
+v2 := 152
 b := true
 fstring := $""v1 :> {v1} < v2 :> {v2} < v3 :> {v1+v2} <  v4 :>{$""hello,"".$"" world""}< v5 :>{(? b -> $""true"" | $""false"")}< - end""
+print fstring
+return 100
 ";
             
             Console.WriteLine("==================================");
@@ -233,7 +235,7 @@ fstring := $""v1 :> {v1} < v2 :> {v2} < v3 :> {v1+v2} <  v4 :>{$""hello,"".$"" w
             Check.That(result.Result).IsNotNull();
             Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             SequenceStatement seq = result.Result as SequenceStatement;
-            Check.That(seq.Count).IsEqualTo(4);
+            Check.That(seq.Count).IsEqualTo(6);
             var fstringAssign = seq.Get(3) as AssignStatement;
             Check.That(fstringAssign).IsNotNull();
             Check.That(fstringAssign.VariableName).IsEqualTo("fstring");
@@ -243,10 +245,19 @@ fstring := $""v1 :> {v1} < v2 :> {v2} < v3 :> {v1+v2} <  v4 :>{$""hello,"".$"" w
             var interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result, true);
             Check.That(context.variables).CountIs(4);
-            Check.That(context).HasVariableWithIntValue("v1", 1);
-            Check.That(context).HasVariableWithIntValue("v2", 2);
+            Check.That(context).HasVariableWithIntValue("v1", 48);
+            Check.That(context).HasVariableWithIntValue("v2", 152);
             Check.That(context).HasVariableWithBoolValue("b", true);
-            Check.That(context).HasVariableWithStringValue("fstring", "v1 :> 1 < v2 :> 2 < v3 :> 3 <  v4 :>hello, world< v5 :>true< - end");
+            string expected = "v1 :> 48 < v2 :> 152 < v3 :> 200 <  v4 :>hello, world< v5 :>true< - end";
+            Check.That(context).HasVariableWithStringValue("fstring", expected);
+            
+            var compiler = new IndentedWhileCompiler();
+            var func = compiler.CompileToFunction(program,true);
+            Check.That(func).IsNotNull();
+            Printer.Clear();
+            var f = func();
+            Check.That(Printer.lines).CountIs(1);
+            Check.That(Printer.lines[0]).IsEqualTo(expected);
             
         }
 

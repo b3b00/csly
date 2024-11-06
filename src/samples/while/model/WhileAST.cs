@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using csly.whileLang.compiler;
 using sly.lexer;
 using Sigil;
@@ -14,5 +15,7 @@ namespace csly.whileLang.model
 
         string Transpile(CompilerContext context);
         Emit<Func<int>> EmitByteCode(CompilerContext context, Emit<Func<int>> emiter);
+        
+        void AppendTernaries(List<TernaryExpression> ternaries);
     }
 }
