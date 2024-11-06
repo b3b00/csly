@@ -91,7 +91,27 @@ namespace csly.indentedWhileLang.parser
 
         [Mode(ModeAttribute.DefaultLexerMode, "fstringExpression")]
         [Lexeme(GenericToken.SugarToken, "/")] DIVIDE = 39,
-
+        
+        [Mode("default","fstringExpression")]
+        [Sugar("?")]
+        QUESTION,
+        
+        [Mode("default","fstringExpression")]
+        [Sugar("->")]
+        ARROW,
+        
+        [Mode("default","fstringExpression")]
+        [Sugar("(")]
+        OPEN_PAREN,
+        
+        [Mode("default","fstringExpression")]
+        [Sugar(")")]
+        CLOSE_PAREN,
+        
+        [Mode("default","fstringExpression")]
+        [Sugar("|")]
+        COLON,
+        
         #endregion
 
         #region sugar 50 ->
@@ -106,10 +126,14 @@ namespace csly.indentedWhileLang.parser
 
         #region fstring 100 ->
 
-        [Push("fstringExpression")] [Mode("fstring")] [Sugar("{")]
+        [Push("fstringExpression")] 
+        [Mode("fstring")]
+        [Sugar("{")]
         OPEN_FSTRING_EXPPRESSION = 100,
 
-        [Pop] [Mode("fstringExpression")] [Sugar("}")]
+        [Pop] 
+        [Mode("fstringExpression")] 
+        [Sugar("}")]
         CLOSE_FSTRING_EXPPRESSION = 101,
 
         [Sugar("$\"")]
@@ -123,9 +147,14 @@ namespace csly.indentedWhileLang.parser
         CLOSE_FSTRING,
 
         
-        [Mode("fstring", "fstringExpression")]
+        [Mode("fstring")]
         [UpTo("{","\"")]
-        FSTRING_CONTENT
+        FSTRING_CONTENT,
+        
+        
+        
+        
+        
         
         
         #endregion

@@ -29,6 +29,17 @@ namespace ParserTests.samples
             return ExtensibilityHelper.BuildCheckLink(context);
         }
         
+        public static ICheckLink<ICheck<InterpreterContext>> HasVariableWithBoolValue(this ICheck<InterpreterContext> context, string variableName, bool expectedValue) 
+        {
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => sut.GetVariable(variableName) == null, "expecting {expected} but variable not found.")
+                .FailWhen(sut => sut.GetVariable(variableName).BoolValue != expectedValue, "expecting {expected} found {checked}.")
+                .OnNegate("variable is ok")
+                .DefineExpectedValue($"{variableName}={expectedValue}")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
+        
         public static ICheckLink<ICheck<SequenceStatement>> CountIs(this ICheck<SequenceStatement> context, int expectedCount) 
         {
             ExtensibilityHelper.BeginCheck(context)

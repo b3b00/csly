@@ -164,6 +164,16 @@ namespace csly.indentedWhileLang.parser
 
             return null;
         }
+
+        [Production(
+            "primary : QUESTION[d] IndentedWhileParserGeneric_expressions ARROW[d] IndentedWhileParserGeneric_expressions COLON[d] IndentedWhileParserGeneric_expressions")]
+        public WhileAST TernaryQuestion(WhileAST condition, WhileAST ifTrue, WhileAST ifFalse)
+        {
+            return new TernaryExpression(condition as Expression, ifTrue as Expression, ifFalse as Expression);
+        }
+
+        [Production("primary : OPEN_PAREN[d] IndentedWhileParserGeneric_expressions CLOSE_PAREN[d]")]
+        public WhileAST Group(WhileAST expression) => expression;
         
         // fstrings 
         [Production("primary : OPEN_FSTRING[d] fstring_element* CLOSE_FSTRING[d]")]

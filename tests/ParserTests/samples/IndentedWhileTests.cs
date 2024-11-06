@@ -220,8 +220,10 @@ return a
 # fstring
 v1 := 1
 v2 := 2
-fstring := $""v1 :> {v1} < v2 :> {v2} < v3 :> {v1+v2} <  v4 :>{$""hello,"".$"" world""}<- end""
+b := true
+fstring := $""v1 :> {v1} < v2 :> {v2} < v3 :> {v1+v2} <  v4 :>{$""hello,"".$"" world""}< v5 :>{(? b -> $""true"" | $""false"")}< - end""
 ";
+            
             Console.WriteLine("==================================");
             Console.WriteLine("=== parse fstring");
             Console.WriteLine("==================================");
@@ -231,8 +233,8 @@ fstring := $""v1 :> {v1} < v2 :> {v2} < v3 :> {v1+v2} <  v4 :>{$""hello,"".$"" w
             Check.That(result.Result).IsNotNull();
             Check.That(result.Result).IsInstanceOf<SequenceStatement>();
             SequenceStatement seq = result.Result as SequenceStatement;
-            Check.That(seq.Count).IsEqualTo(3);
-            var fstringAssign = seq.Get(2) as AssignStatement;
+            Check.That(seq.Count).IsEqualTo(4);
+            var fstringAssign = seq.Get(3) as AssignStatement;
             Check.That(fstringAssign).IsNotNull();
             Check.That(fstringAssign.VariableName).IsEqualTo("fstring");
             Check.That(fstringAssign.Value).IsInstanceOf<BinaryOperation>();
@@ -240,10 +242,11 @@ fstring := $""v1 :> {v1} < v2 :> {v2} < v3 :> {v1+v2} <  v4 :>{$""hello,"".$"" w
             Check.That(fString.Operator).IsEqualTo(BinaryOperator.CONCAT);
             var interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result, true);
-            Check.That(context.variables).CountIs(3);
+            Check.That(context.variables).CountIs(4);
             Check.That(context).HasVariableWithIntValue("v1", 1);
             Check.That(context).HasVariableWithIntValue("v2", 2);
-            Check.That(context).HasVariableWithStringValue("fstring", "v1 :> 1 < v2 :> 2 < v3 :> 3 <  v4 :>hello, world<- end");
+            Check.That(context).HasVariableWithBoolValue("b", true);
+            Check.That(context).HasVariableWithStringValue("fstring", "v1 :> 1 < v2 :> 2 < v3 :> 3 <  v4 :>hello, world< v5 :>true< - end");
             
         }
 

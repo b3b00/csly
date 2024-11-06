@@ -324,6 +324,7 @@ namespace csly.whileLang.interpreter
             if (expr is Neg neg) return Evaluate(neg, context);
             if (expr is Not not) return Evaluate(not, context);
             if (expr is Variable variable) return context.GetVariable(variable.Name);
+            if (expr is TernaryExpression ternary) return Evaluate(ternary, context);
             throw new InterpreterException($"unknow expression type ({expr.GetType().Name})");
         }
 
@@ -523,6 +524,21 @@ namespace csly.whileLang.interpreter
             if (positiveVal.ValueType != WhileType.BOOL)
                 throw new InterpreterException($"invalid operation NOT {positiveVal.StringValue}");
             return new TypedValue(!positiveVal.BoolValue);
+        }
+        
+        public TypedValue Evaluate(TernaryExpression ternary, InterpreterContext context)
+        {
+            var condition = Evaluate(ternary.Condition, context);
+            if (condition.BoolValue)
+            {
+                var trueValue = Evaluate(ternary.TrueExpression, context);
+                return trueValue;
+            }
+            else
+            {
+                var falseValue = Evaluate(ternary.FalseExpression, context);
+                return falseValue;
+            }
         }
     }
 

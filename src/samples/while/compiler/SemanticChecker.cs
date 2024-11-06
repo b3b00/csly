@@ -87,6 +87,26 @@ namespace csly.whileLang.compiler
             SemanticCheck(ast.ElseStmt,context);
             context.CloseScope();
         }
+        
+        private void SemanticCheck(TernaryExpression ast, CompilerContext context)
+        {
+            var val = expressionTyper.TypeExpression(ast.Condition, context);
+            if (val != WhileType.BOOL)
+                throw new SignatureException($"invalid condition type {ast.Condition.Dump("")} at {ast.Position}");
+            ast.CompilerScope = context.CurrentScope;
+
+            context.OpenNewScope();
+            var trueType = expressionTyper.TypeExpression(ast.TrueExpression, context);
+            context.CloseScope();
+
+            context.OpenNewScope();
+            var falseType = expressionTyper.TypeExpression(ast.TrueExpression, context);
+            context.CloseScope();
+            if (trueType != falseType)
+            {
+                throw new TypingException($"ternary expression  at {ast.Position} has different branch types . {trueType} vis different from {falseType}");
+            }
+        }
 
         private void SemanticCheck(WhileStatement ast, CompilerContext context)
         {
