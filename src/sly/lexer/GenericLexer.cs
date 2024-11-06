@@ -1087,11 +1087,12 @@ namespace sly.lexer
         }
 
         public void AddUpTo(IN token, BuildResult<ILexer<IN>> buildResult, string[] exceptions,
-            bool isLineEnding = false)
+            bool isLineEnding = false, int? channel = null)
         {
             NodeCallback<GenericToken> callback = match =>
             {
                 match.Properties[DerivedToken] = token;
+                match.Result.Channel = channel ?? Channels.Main;
                 return match;
             };
 

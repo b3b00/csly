@@ -19,6 +19,8 @@ public class Issue499Test
         var lexResult = lexer.Tokenize("test\"");
         Check.That(lexResult).IsOkLexing();
         var tokenChannels = lexResult.Tokens;
-        Check.That(tokenChannels.GetChannel(1).Count).IsGreaterOrEqualThan(1);
+        Check.That(tokenChannels).CountIs(2);
+        Check.That(tokenChannels.GetChannel(1).Tokens).CountIs(1);
+        Check.That(tokenChannels.GetChannel(1).Tokens[0].TokenID).IsEqualTo(Issue499Token.Test);
     }
 }

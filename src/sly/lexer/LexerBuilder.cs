@@ -555,7 +555,7 @@ namespace sly.lexer
 
                         if (lexeme.IsUpTo)
                         {
-                            lexer.AddUpTo(tokenID, result, lexeme.GenericTokenParameters);
+                            lexer.AddUpTo(tokenID, result, lexeme.GenericTokenParameters, channel:lexeme.Channel);
                         }
 
                         if (lexeme.IsString)
