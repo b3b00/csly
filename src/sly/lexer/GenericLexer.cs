@@ -300,10 +300,6 @@ namespace sly.lexer
                     LexerFsm = SubLexersFsm[token.Position.Mode ?? ModeAttribute.DefaultLexerMode];
                     lexersStack.Push(LexerFsm);
                 }
-                else
-                {
-                    LexerFsm = SubLexersFsm[token.Position.Mode ?? ModeAttribute.DefaultLexerMode];
-                }
             }
 
             return LexerFsm;
@@ -1230,14 +1226,22 @@ namespace sly.lexer
             var newPush = match.NewPosition.IsPush;
             var newPop = match.NewPosition.IsPop;
             if (inTok != null
-                && derivedTokens.TryGetValue(inTok.TokenID, out var derivations)
-                && derivations.TryGetValue(inTok.Value, out var derivation))
+                && derivedTokens.TryGetValue(inTok.TokenID, out var derivations))
             {
-                newPop = derivation.isPop;
-                newPush = derivation.isPush;
-                newMode = derivation.mode;
+                if (derivations.TryGetValue(inTok.Value, out var derivation))
+                {
+                    newPop = derivation.isPop;
+                    newPush = derivation.isPush;
+                    newMode = derivation.mode;
+                }
+                else
+                {
+                    newPop = false;
+                    newPush = false;
+                    newMode = null;
+                }
             }
-            
+
             tok.IsComment = inTok.IsComment;
             tok.IsEmpty = inTok.IsEmpty;
             tok.SpanValue = inTok.SpanValue;
@@ -1272,5 +1276,22 @@ namespace sly.lexer
         {
             return TempLexerFsm.ToGraphViz();
         }
+
+        public IList<string> GetSubLexers()
+        {
+            return SubLexersFsm.Keys.ToList();
+        }
+
+        public string ToGraphViz(string subLexerName)
+        {
+            if (SubLexersFsm.TryGetValue(subLexerName, out var subLexer))
+            {
+                return subLexer.ToGraphViz();
+            }
+
+            return null;
+        }
+        
+        
     }
 }
