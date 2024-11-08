@@ -19,16 +19,9 @@ public class Issue501Tests
         Check.That(build.Result).IsNotNull();
         Check.That(build.Result).IsInstanceOf<GenericLexer<Issue501Token>>();
         var lexer = build.Result as GenericLexer<Issue501Token>;
-        foreach (var subLexer in lexer.GetSubLexers())
-        {
-            var graph = lexer.ToGraphViz(subLexer);
-            File.WriteAllText(Path.Combine("c:/tmp",$"{subLexer}.txt"),graph);
-        }
         var source = @"test = 3";
         var lexed = lexer.Tokenize(source);
         Check.That(lexed).IsOkLexing();
-        // Check.That(lexed.Error.ErrorType).IsEqualTo(ErrorType.UnexpectedChar);
-        // Check.That(lexed.Error.UnexpectedChar).IsEqualTo('=');
         var tokens = lexed.Tokens;
         Check.That(tokens).IsNotNull();
         var mainTokens = tokens.MainTokens();
