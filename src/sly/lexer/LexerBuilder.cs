@@ -579,7 +579,7 @@ namespace sly.lexer
                         {
                             lexer.FSMBuilder.Push(lexeme.Pushtarget);
                         }
-
+                        
                         if (lexeme.IsPop)
                         {
                             lexer.FSMBuilder.Pop();
