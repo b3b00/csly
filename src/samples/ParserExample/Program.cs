@@ -134,6 +134,12 @@ namespace ParserExample
         }
 
 
+        private static void TestIssue507()
+        {
+            var tests = new EBNFTests();
+            tests.TestIssue507TransitiveEmptyStarter();
+        }
+        
         private static void BenchSimpleExpression()
         {
             GenericSimpleExpressionParser p = new GenericSimpleExpressionParser();
@@ -1353,7 +1359,8 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            TestFStrings();
+            TestIssue507();
+            //TestFStrings();
             //TestIssue495();
             //testGenericLexerJson();
             // TestIssue487();

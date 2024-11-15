@@ -16,6 +16,7 @@ namespace sly.parser.syntax.grammar
 
         public bool MayBeEmpty()
         {
+            // TODO : issue #507 non terminal may be empty if at least 1 rule may be empty 
             return false;
         }
 
