@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using expressionparser;
 using indented;
 using jsonparser;
 using jsonparser.JsonModel;
@@ -578,6 +577,64 @@ namespace ParserTests
             return $"A({t.Value})";
         }
 
+    }
+
+    public class Issue507TransitiveEmptyStarterParser
+    {
+        [Production("x : y")]
+        public string X(string y)
+        {
+            return y;
+        }
+
+        [Production("y : z*")]
+        public string Y(List<string> zs)
+        {
+            if (zs.Any())
+            {
+                return string.Join(",", zs);
+            }
+
+            return "empty";
+        }
+
+        [Production("z : a")]
+        public string Z(Token<OptionTestToken> a)
+        {
+            return a.Value;
+        }
+    }
+    
+    public class Issue507MoreTransitiveEmptyStarterParser
+    {
+        [Production("x : w")]
+        public string X(string w)
+        {
+            return w;
+        }
+        
+        [Production("w : y")]
+        public string W(string y)
+        {
+            return y;
+        }
+
+        [Production("y : z*")]
+        public string Y(List<string> zs)
+        {
+            if (zs.Any())
+            {
+                return string.Join(",", zs);
+            }
+
+            return "empty";
+        }
+
+        [Production("z : a")]
+        public string Z(Token<OptionTestToken> a)
+        {
+            return a.Value;
+        }
     }
 
     public class Bugfix104Test
@@ -1323,6 +1380,42 @@ namespace ParserTests
             Check.That(builtParser.Errors.First().Code).IsEqualTo(ErrorCodes.PARSER_LEFT_RECURSIVE);
         }
 
+
+        [Fact]
+        public void TestIssue507TransitiveEmptyStarter()
+        {
+            var startingRule = $"x";
+            var parserInstance = new Issue507TransitiveEmptyStarterParser();
+            var builder = new ParserBuilder<OptionTestToken, string>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Check.That(builtParser).IsOk();
+            var parser = builtParser.Result;
+            var parserResultNotEmpty = parser.Parse("a a a");
+            Check.That(parserResultNotEmpty).IsOkParsing();
+            Check.That(parserResultNotEmpty.Result).IsEqualTo("a,a,a");
+            
+            var parserResultEmpty = parser.Parse("");
+            Check.That(parserResultEmpty).IsOkParsing();
+            Check.That(parserResultEmpty.Result).IsEqualTo("empty");
+        }
+        
+        [Fact]
+        public void TestIssue507MoreTransitiveEmptyStarter()
+        {
+            var startingRule = $"x";
+            var parserInstance = new Issue507MoreTransitiveEmptyStarterParser();
+            var builder = new ParserBuilder<OptionTestToken, string>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Check.That(builtParser).IsOk();
+            var parser = builtParser.Result;
+            var parserResultNotEmpty = parser.Parse("a a a");
+            Check.That(parserResultNotEmpty).IsOkParsing();
+            Check.That(parserResultNotEmpty.Result).IsEqualTo("a,a,a");
+            
+            var parserResultEmpty = parser.Parse("");
+            Check.That(parserResultEmpty).IsOkParsing();
+            Check.That(parserResultEmpty.Result).IsEqualTo("empty");
+        }
 
         [Fact]
         public void TestIssue190()

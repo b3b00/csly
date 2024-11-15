@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
@@ -14,9 +13,18 @@ namespace sly.parser.syntax.grammar
 
         public bool IsGroup { get; set; } = false;
 
+        private bool _mayBeEmpty = false;
+        
         public bool MayBeEmpty()
         {
-            return false;
+            return _mayBeEmpty;
+        }
+
+        public bool SetMayBeEmpty(bool mayBeEmpty)
+        {
+            bool setted = mayBeEmpty && !_mayBeEmpty;
+            _mayBeEmpty = mayBeEmpty;
+            return setted;
         }
 
         
