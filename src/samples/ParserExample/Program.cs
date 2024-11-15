@@ -137,7 +137,8 @@ namespace ParserExample
         private static void TestIssue507()
         {
             var tests = new EBNFTests();
-            tests.TestIssue507TransitiveEmptyStarter();
+            //tests.TestIssue507TransitiveEmptyStarter();
+            tests.TestIssue507MoreTransitiveEmptyStarter();
         }
         
         private static void BenchSimpleExpression()

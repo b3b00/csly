@@ -61,6 +61,15 @@ namespace sly.parser.generator
             return clauses;
         }
 
+        public List<Rule<IN>> GetRulesForNonTerminal(string nonTerminal)
+        {
+            if (NonTerminals.TryGetValue(nonTerminal, out NonTerminal<IN> nonTerminalConfig))
+            {
+                return nonTerminalConfig.Rules.ToList();
+            }
+            return new List<Rule<IN>>();
+        }
+        
         [ExcludeFromCodeCoverage]
         public string Dump()
         {

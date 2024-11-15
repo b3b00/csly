@@ -59,6 +59,7 @@ namespace sly.parser.generator
                 configuration.AutoCloseIndentations = autoCloseIndentations;
                 LeftRecursionChecker<IN, OUT> recursionChecker = new LeftRecursionChecker<IN, OUT>();
 
+                SetEmptyNonTerminals(configuration);
                 // check left recursion.
                 var (foundRecursion, recursions) = LeftRecursionChecker<IN, OUT>.CheckLeftRecursion(configuration);
                 if (foundRecursion)
@@ -117,6 +118,31 @@ namespace sly.parser.generator
             }
             return parser;
         }
+
+        private void SetEmptyNonTerminals(ParserConfiguration<IN, OUT> conf)
+        {
+            bool stillSetting = true;
+            while (stillSetting)
+            {
+                stillSetting = false;
+                foreach (var nt in conf.NonTerminals)
+                {
+                    foreach (var rule in nt.Value.Rules)
+                    {
+                        foreach (var clause in rule.Clauses)
+                        {
+                            if (clause is NonTerminalClause<IN> nonTerminalClause)
+                            {
+                                var rules = conf.GetRulesForNonTerminal(nonTerminalClause.NonTerminalName);
+                                stillSetting |= nonTerminalClause.SetMayBeEmpty(rules.Exists(x => x.MayBeEmpty));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        
 
 
         #region configuration

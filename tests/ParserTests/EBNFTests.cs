@@ -604,6 +604,38 @@ namespace ParserTests
             return a.Value;
         }
     }
+    
+    public class Issue507MoreTransitiveEmptyStarterParser
+    {
+        [Production("x : w")]
+        public string X(string w)
+        {
+            return w;
+        }
+        
+        [Production("w : y")]
+        public string W(string y)
+        {
+            return y;
+        }
+
+        [Production("y : z*")]
+        public string Y(List<string> zs)
+        {
+            if (zs.Any())
+            {
+                return string.Join(",", zs);
+            }
+
+            return "empty";
+        }
+
+        [Production("z : a")]
+        public string Z(Token<OptionTestToken> a)
+        {
+            return a.Value;
+        }
+    }
 
     public class Bugfix104Test
     {
@@ -1362,9 +1394,27 @@ namespace ParserTests
             Check.That(parserResultNotEmpty).IsOkParsing();
             Check.That(parserResultNotEmpty.Result).IsEqualTo("a,a,a");
             
-            var parserResulttEmpty = parser.Parse("");
-            Check.That(parserResulttEmpty).IsOkParsing();
-            Check.That(parserResulttEmpty.Result).IsEqualTo("empty");
+            var parserResultEmpty = parser.Parse("");
+            Check.That(parserResultEmpty).IsOkParsing();
+            Check.That(parserResultEmpty.Result).IsEqualTo("empty");
+        }
+        
+        [Fact]
+        public void TestIssue507MoreTransitiveEmptyStarter()
+        {
+            var startingRule = $"x";
+            var parserInstance = new Issue507MoreTransitiveEmptyStarterParser();
+            var builder = new ParserBuilder<OptionTestToken, string>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Check.That(builtParser).IsOk();
+            var parser = builtParser.Result;
+            var parserResultNotEmpty = parser.Parse("a a a");
+            Check.That(parserResultNotEmpty).IsOkParsing();
+            Check.That(parserResultNotEmpty.Result).IsEqualTo("a,a,a");
+            
+            var parserResultEmpty = parser.Parse("");
+            Check.That(parserResultEmpty).IsOkParsing();
+            Check.That(parserResultEmpty.Result).IsEqualTo("empty");
         }
 
         [Fact]
