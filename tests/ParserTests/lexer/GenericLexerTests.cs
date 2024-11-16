@@ -672,14 +672,16 @@ namespace ParserTests.lexer
         public void TestIssue177()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Generic>>());
-            Check.That(res.IsError).IsFalse();
+            Check.That(res).IsOk();
             var lexer = res.Result;
 
             var result = lexer.Tokenize(@"1 2 
 2 3
 4 5");
-            Check.That(result.IsOk).IsTrue();
-            Check.That(result.Tokens).CountIs(7);
+            Check.That(result).IsOkLexing();
+            Check.That(result.Tokens).CountIs(9); // 6 integers, 2 EOL and 1 EOS
+            var meaningFullTokens = result.Tokens.Where(x => x.TokenID == Issue177Generic.INT);
+            Check.That(meaningFullTokens).CountIs(6);
 
             var expectations = new (int value, int line, int column)[]
             {
@@ -691,7 +693,7 @@ namespace ParserTests.lexer
                 (2, 2, 5)
             };
 
-            Check.That(result.Tokens.Take(6).Extracting(x => (x.Position.Line, x.Position.Column, x.IntValue)))
+            Check.That(meaningFullTokens.Extracting(x => (x.Position.Line, x.Position.Column, x.IntValue)))
                 .ContainsExactly(expectations);
         }
 
