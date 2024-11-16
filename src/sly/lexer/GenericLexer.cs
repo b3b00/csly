@@ -196,7 +196,7 @@ namespace sly.lexer
 
             while (r.IsSuccess)
             {
-                ComputePositionWhenIgnoringEOL(r, tokens, LexerFsm);
+                ComputePositionWhenNotIgnoringEOL(r, tokens, LexerFsm);
                 var transcoded = Transcode(r);
                 LexerFsm = SetLexerMode(transcoded, lexersStack);    
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
@@ -206,7 +206,7 @@ namespace sly.lexer
 
                 if (transcoded.IsLineEnding)
                 {
-                    ComputePositionWhenIgnoringEOL(r, tokens, LexerFsm);
+                    ComputePositionWhenNotIgnoringEOL(r, tokens, LexerFsm);
                 }
 
                 if (r.IsUnIndent && r.UnIndentCount > 1)
@@ -305,7 +305,7 @@ namespace sly.lexer
             return LexerFsm;
         }
 
-        private void ComputePositionWhenIgnoringEOL(FSMMatch<GenericToken> r, List<Token<IN>> tokens,
+        private void ComputePositionWhenNotIgnoringEOL(FSMMatch<GenericToken> r, List<Token<IN>> tokens,
             FSMLexer<GenericToken> LexerFsm)
         {
             if (!LexerFsm.IgnoreEOL)
