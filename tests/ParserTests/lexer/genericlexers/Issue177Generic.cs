@@ -6,7 +6,7 @@ namespace ParserTests.lexer.genericlexers;
 public enum Issue177Generic
 {
 
-    [Sugar("\r\n")]
+    [Sugar("\r\n",IsLineEnding = true)]
     EOL = 1,
     
     [Int] INT = 2,
