@@ -696,6 +696,9 @@ namespace ParserTests.lexer
             Check.That(meaningFullTokens.Extracting(x => (x.Position.Line, x.Position.Column, x.IntValue)))
                 .ContainsExactly(expectations);
             
+            // -- leading new line
+            
+            
             var resultForLeadingEOL = lexer.Tokenize(@"
 1 2 
 2 3
@@ -714,6 +717,10 @@ namespace ParserTests.lexer
                 (3, 0, 4),
                 (3, 2, 5)
             };
+
+            Check.That(resultForLeadingEOL.Tokens[0].Position.Line).IsEqualTo(0);
+            Check.That(resultForLeadingEOL.Tokens[0].Position.Column).IsEqualTo(0);
+            Check.That(resultForLeadingEOL.Tokens[0].Position.Index).IsEqualTo(0);
 
             Check.That(meaningFullTokensForLeadingEOL.Extracting(x => (x.Position.Line, x.Position.Column, x.IntValue)))
                 .ContainsExactly(expectationsForLeadingEOL);
