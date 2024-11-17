@@ -193,10 +193,10 @@ namespace sly.lexer
                     position = r.NewPosition;
                     break;
             }
-
+            ComputePositionWhenNotIgnoringEOL(r, tokens, LexerFsm);
             while (r.IsSuccess)
             {
-                ComputePositionWhenNotIgnoringEOL(r, tokens, LexerFsm);
+                
                 var transcoded = Transcode(r);
                 LexerFsm = SetLexerMode(transcoded, lexersStack);    
                 if (CallBacks.TryGetValue(transcoded.TokenID, out var callback))
