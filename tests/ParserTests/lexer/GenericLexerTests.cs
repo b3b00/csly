@@ -672,14 +672,16 @@ namespace ParserTests.lexer
         public void TestIssue177()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Generic>>());
-            Check.That(res.IsError).IsFalse();
+            Check.That(res).IsOk();
             var lexer = res.Result;
 
             var result = lexer.Tokenize(@"1 2 
 2 3
 4 5");
-            Check.That(result.IsOk).IsTrue();
-            Check.That(result.Tokens).CountIs(7);
+            Check.That(result).IsOkLexing();
+            Check.That(result.Tokens).CountIs(9); // 6 integers, 2 EOL and 1 EOS
+            var meaningFullTokens = result.Tokens.Where(x => x.TokenID == Issue177Generic.INT);
+            Check.That(meaningFullTokens).CountIs(6);
 
             var expectations = new (int value, int line, int column)[]
             {
@@ -691,8 +693,37 @@ namespace ParserTests.lexer
                 (2, 2, 5)
             };
 
-            Check.That(result.Tokens.Take(6).Extracting(x => (x.Position.Line, x.Position.Column, x.IntValue)))
+            Check.That(meaningFullTokens.Extracting(x => (x.Position.Line, x.Position.Column, x.IntValue)))
                 .ContainsExactly(expectations);
+            
+            // -- leading new line
+            
+            
+            var resultForLeadingEOL = lexer.Tokenize(@"
+1 2 
+2 3
+4 5");
+            Check.That(resultForLeadingEOL).IsOkLexing();
+            Check.That(resultForLeadingEOL.Tokens).CountIs(10); 
+            
+            var meaningFullTokensForLeadingEOL = resultForLeadingEOL.Tokens.Where(x => x.TokenID == Issue177Generic.INT);
+            Check.That(meaningFullTokensForLeadingEOL).CountIs(6);
+            var expectationsForLeadingEOL = new (int value, int line, int column)[]
+            {
+                (1, 0, 1),
+                (1, 2, 2),
+                (2, 0, 2),
+                (2, 2, 3),
+                (3, 0, 4),
+                (3, 2, 5)
+            };
+
+            Check.That(resultForLeadingEOL.Tokens[0].Position.Line).IsEqualTo(0);
+            Check.That(resultForLeadingEOL.Tokens[0].Position.Column).IsEqualTo(0);
+            Check.That(resultForLeadingEOL.Tokens[0].Position.Index).IsEqualTo(0);
+
+            Check.That(meaningFullTokensForLeadingEOL.Extracting(x => (x.Position.Line, x.Position.Column, x.IntValue)))
+                .ContainsExactly(expectationsForLeadingEOL);
         }
 
         [Fact]

@@ -2,11 +2,16 @@ using sly.lexer;
 
 namespace ParserTests.lexer.genericlexers;
 
-[Lexer(IgnoreEOL = true)]
+[Lexer(IgnoreEOL = false)]
 public enum Issue177Generic
 {
 
-    [Lexeme(GenericToken.Int)] INT = 2,
+    [Sugar("\r\n",IsLineEnding = true)]
+    [Sugar("\n",IsLineEnding = true)]
+    EOL = 1,
+    
+    [Int] INT = 2,
+        
 
     EOS = 0
 
