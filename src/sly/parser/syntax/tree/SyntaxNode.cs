@@ -70,13 +70,9 @@ namespace sly.parser.syntax.tree
             }
             set
             {
-                if (IsExpressionNode)
+                if (IsExpressionNode && IsBinaryOperationNode)
                 {
-                    if (IsBinaryOperationNode)
-                    {
-                        Children[0] = value;
-                    }
-                         
+                    Children[0] = value;
                 }
             }
         }

@@ -27,6 +27,7 @@ namespace sly.parser.syntax.grammar
             return Clause.Dump()+"+";
         }
 
+        [ExcludeFromCodeCoverage]
         public override bool Equals(IClause<T> other)
         {
             if (other is OneOrMoreClause<T> otherOneOrMore)

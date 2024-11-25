@@ -9,7 +9,7 @@ namespace sly.parser
     {
         private readonly Dictionary<string, SyntaxParseResult<IN>> _memoizedNonTerminalResults = new Dictionary<string, SyntaxParseResult<IN>>();
 
-        private bool _useMemoization = false;
+        private readonly bool _useMemoization = false;
         public SyntaxParsingContext(bool useMemoization)
         {
             _useMemoization = useMemoization;

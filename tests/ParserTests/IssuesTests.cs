@@ -4,6 +4,7 @@ using System.Linq;
 using NFluent;
 using ParserTests.Issue251;
 using ParserTests.Issue260;
+using SlowEOS;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser;
@@ -271,6 +272,24 @@ namespace ParserTests
             var resAsString = res.Result;
             
             Check.That(resAsString).IsEqualTo("foo | bar | baz");
-        } 
+        }
+        
+        [Fact]
+        public static void Issue493Test()
+        { 
+            ParserBuilder<SlowOnBadParseEosToken, object> builder = new ParserBuilder<SlowOnBadParseEosToken, object>();
+            var buildParser = builder.BuildParser(new SlowOnBadParseEos(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Check.That(buildParser).IsOk();
+            var parser = buildParser.Result; 
+            string source = "FUNCTIONCALL([Identifier]";
+            Check.ThatCode(() =>
+            {
+                var result = parser.Parse(source);
+                Check.That(result).IsOkParsing();
+            }).LastsLessThan(10_000, TimeUnit.Milliseconds);
+
+        }
     }
+
+   
 }

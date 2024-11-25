@@ -147,7 +147,7 @@ namespace sly.parser.syntax.grammar
                 if (!startingTerminalClause.MayBeEmpty() && startingTerminalClause.Check(tokens[position]))
                 {
                     var secondPossibleLeadings =
-                        configuration.NonTerminals[nTerm.NonTerminalName].PossibleLeadingTokens;
+                        configuration.NonTerminals[nTerm.NonTerminalName].GetPossibleLeadingTokens();
                     if (secondPossibleLeadings.Exists(x => x.Match(tokens[position+1])) || nTerm.MayBeEmpty())
                     {
                         return true;
@@ -159,7 +159,20 @@ namespace sly.parser.syntax.grammar
                 return false;
             }
 
-            return PossibleLeadingTokens.Exists(x => x.Match(tokens[position])) || MayBeEmpty;
+            int i = 0;
+            bool match = false;
+            var token = tokens[position];
+            if (MayBeEmpty)
+            {
+                return true;
+            }
+            while (i < PossibleLeadingTokens.Count && !match)
+            {
+                var leader = PossibleLeadingTokens[i];
+                match = leader.Match(token);
+                i++;
+            }
+            return match;
         }
 
         [ExcludeFromCodeCoverage]

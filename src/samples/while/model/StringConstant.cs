@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using csly.whileLang.compiler;
 using sly.lexer;
 using Sigil;
@@ -7,9 +8,10 @@ namespace csly.whileLang.model
 {
     public class StringConstant : Expression
     {
-        public StringConstant(string value)
+        public StringConstant(string value, LexerPosition position)
         {
             Value = value;
+            Position = position;
         }
 
         public string Value { get; set; }
@@ -22,6 +24,10 @@ namespace csly.whileLang.model
         {
             get => WhileType.STRING;
             set { }
+        }
+
+        public void AppendTernaries(List<TernaryExpression> ternaries)
+        {
         }
 
         public string Dump(string tab)

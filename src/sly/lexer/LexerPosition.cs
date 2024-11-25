@@ -20,11 +20,13 @@ namespace sly.lexer
             Line = line;
             Column = column;
             Mode = mode;
+            Indentation = null;
         }
         
-        public LexerPosition(int index, int line, int column, int currentIndentation, string mode = ModeAttribute.DefaultLexerMode) : this(index, line, column, mode)
+        private LexerPosition(int index, int line, int column, int currentIndentation, string mode = ModeAttribute.DefaultLexerMode) : this(index, line, column, mode)
         {
             CurrentIndentation = currentIndentation;
+            Indentation = new LexerIndentation();
         }
 
         public bool IsStartOfLine => Column == 0;
@@ -32,13 +34,17 @@ namespace sly.lexer
         public int CurrentIndentation { get; set; }
 
         [JsonIgnore]
-        public LexerIndentation Indentation { get; set; } = new LexerIndentation();
+        public LexerIndentation Indentation { get; set; } 
 
         public int Column { get; set; }
         public int Index { get; set; }
         public int Line { get; set; }
-        
+
         public string Mode { get; set; }
+
+        public bool IsPop { get; set; }
+        
+        public bool IsPush { get; set; }
 
         public override string ToString()
         {
@@ -48,19 +54,15 @@ namespace sly.lexer
         [ExcludeFromCodeCoverage]
         public int CompareTo(object obj)
         {
-            if (obj != null)
+            if (obj is not LexerPosition position) return 1;
+            
+            if (Line < position.Line)
             {
-                if (obj is LexerPosition position)
-                {
-                    if (Line < position.Line)
-                    {
-                        return -1;
-                    }
-                    if (Line == position.Line)
-                    {
-                        return Column.CompareTo(position.Column);
-                    }
-                }
+                return -1;
+            }
+            if (Line == position.Line)
+            {
+                return Column.CompareTo(position.Column);
             }
 
             return 1;
@@ -70,8 +72,10 @@ namespace sly.lexer
         {
             return new LexerPosition(Index, Line, Column, CurrentIndentation)
             {
-                Indentation = this.Indentation.Clone(),
-                Mode = Mode
+                Indentation = this.Indentation?.Clone(),
+                Mode = Mode,
+                IsPop = IsPop,
+                IsPush = IsPush,
             };
         }
 

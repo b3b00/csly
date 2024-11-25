@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using sly.parser.generator.visitor.dotgraph;
 
 namespace sly.parser.generator.visitor.mermaid
 {
+    [ExcludeFromCodeCoverage]
     public class MermaidArrow : IMermaid
     {
         public MermaidNode Source { get; private set; }

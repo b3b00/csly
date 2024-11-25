@@ -31,6 +31,7 @@ namespace sly.parser.syntax.grammar
             return $"{Clause}?";
         }
 
+        [ExcludeFromCodeCoverage]
         public bool Equals(IClause<T> clause)
         {
             if (clause is OptionClause<T> other)
@@ -39,12 +40,14 @@ namespace sly.parser.syntax.grammar
             }
             return false;
         }
-
+        
+        [ExcludeFromCodeCoverage]
         private bool Equals(OptionClause<T> other)
         {
             return Equals(Clause, other.Clause);
         }
 
+        [ExcludeFromCodeCoverage]
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
@@ -53,6 +56,7 @@ namespace sly.parser.syntax.grammar
             return Equals((OptionClause<T>)obj);
         }
 
+        [ExcludeFromCodeCoverage]
         public override int GetHashCode()
         {
             return (Clause != null ? Clause.GetHashCode() : 0);

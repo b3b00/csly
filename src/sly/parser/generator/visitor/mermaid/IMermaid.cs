@@ -1,4 +1,4 @@
-namespace sly.parser.generator.visitor.dotgraph
+namespace sly.parser.generator.visitor.mermaid
 {
     public interface IMermaid
     {

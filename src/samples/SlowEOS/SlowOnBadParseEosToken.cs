@@ -1,0 +1,71 @@
+using sly.lexer;
+
+namespace SlowEOS;
+
+public enum SlowOnBadParseEosToken
+{
+    [AlphaNumId]
+    IDENTIFIER,
+    [Int]
+    INT,
+    [Double]
+    NUMBER,
+    [String("\"", "\\")]
+    STRING,
+    [Keyword("NOT")]
+    NOT,
+    [Keyword("AND")]
+    AND,
+    [Keyword("OR")]
+    OR,
+    [Keyword("XOR")]
+    XOR,
+    [Keyword("IS")]
+    IS,
+    [Keyword("NULL")]
+    NULL,
+    [Keyword("IN")]
+    IN,
+    [Keyword("LIKE")]
+    LIKE,
+    [Keyword("TRUE")]
+    TRUE,
+    [Keyword("FALSE")]
+    FALSE,
+    [Sugar("!")]
+    EXCLAMATION_POINT,
+    [Sugar("^")]
+    CARET,
+    [Sugar("+")]
+    ARITH_PLUS,
+    [Sugar("-")]
+    ARITH_MINUS,
+    [Sugar("*")]
+    ARITH_TIMES,
+    [Sugar("/")]
+    ARITH_DIVIDE,
+    [Sugar("%")]
+    ARITH_MODULO,
+    [Sugar("=")]
+    COMP_EQUALS,
+    [Sugar("<>")]
+    COMP_NOTEQUALS,
+    [Sugar("<")]
+    COMP_LT,
+    [Sugar(">")]
+    COMP_GT,
+    [Sugar("<=")]
+    COMP_LTE,
+    [Sugar(">=")]
+    COMP_GTE,
+    [Sugar(",")]
+    COMMA,
+    [Sugar("(")]
+    PARENS_LEFT,
+    [Sugar(")")]
+    PARENS_RIGHT,
+    [Sugar("[")]
+    BRACKET_LEFT,
+    [Sugar("]")]
+    BRACKET_RIGHT,
+}

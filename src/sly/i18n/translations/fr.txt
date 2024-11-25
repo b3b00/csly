@@ -2,7 +2,7 @@
 #   Unexpected tokens
 #
 UnexpectedTokenExpecting=Erreur de syntaxe : {1} inattendu ('{0}'). attendu : {2}.
-UnexpectedEosExpecting=Erreur de syntaxe : fin de fichier inatendue. attendu : {0}.
+UnexpectedEosExpecting=Erreur de syntaxe : fin de fichier inatendue. attendu : {2}.
 UnexpectedToken=Erreur de syntaxe : '{0}' {1} inattendu.
 UnexpectedEos=Erreur de syntaxe : fin de fichier inattendue..
 

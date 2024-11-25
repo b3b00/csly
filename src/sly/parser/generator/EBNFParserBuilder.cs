@@ -7,7 +7,8 @@ using sly.i18n;
 using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser.generator.visitor;
-using sly.parser.llparser;
+using sly.parser.llparser.bnf;
+using sly.parser.llparser.ebnf;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
@@ -22,7 +23,7 @@ namespace sly.parser.generator
         }
 
         public override BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType,
-            string rootRule, Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
+            string rootRule = null, Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
             LexerPostProcess<IN> lexerPostProcess = null)
         {
             if (string.IsNullOrEmpty(rootRule))
@@ -58,6 +59,7 @@ namespace sly.parser.generator
                 configuration.AutoCloseIndentations = autoCloseIndentations;
                 LeftRecursionChecker<IN, OUT> recursionChecker = new LeftRecursionChecker<IN, OUT>();
 
+                SetEmptyNonTerminals(configuration);
                 // check left recursion.
                 var (foundRecursion, recursions) = LeftRecursionChecker<IN, OUT>.CheckLeftRecursion(configuration);
                 if (foundRecursion)
@@ -110,27 +112,37 @@ namespace sly.parser.generator
             string rootRule)
         {
             ISyntaxParser<IN, OUT> parser = null;
-            switch (parserType)
+            if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
             {
-                case ParserType.LL_RECURSIVE_DESCENT:
-                {
-                    parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
-                    break;
-                }
-                case ParserType.EBNF_LL_RECURSIVE_DESCENT:
-                {
-                    parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
-                    break;
-                }
-                default:
-                {
-                    parser = null;
-                    break;
-                }
+                parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
             }
-
             return parser;
         }
+
+        private void SetEmptyNonTerminals(ParserConfiguration<IN, OUT> conf)
+        {
+            bool stillSetting = true;
+            while (stillSetting)
+            {
+                stillSetting = false;
+                foreach (var nt in conf.NonTerminals)
+                {
+                    foreach (var rule in nt.Value.Rules)
+                    {
+                        foreach (var clause in rule.Clauses)
+                        {
+                            if (clause is NonTerminalClause<IN> nonTerminalClause)
+                            {
+                                var rules = conf.GetRulesForNonTerminal(nonTerminalClause.NonTerminalName);
+                                stillSetting |= nonTerminalClause.SetMayBeEmpty(rules.Exists(x => x.MayBeEmpty));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        
 
 
         #region configuration

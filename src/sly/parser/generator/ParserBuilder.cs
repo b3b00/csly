@@ -8,15 +8,12 @@ using sly.i18n;
 using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser.generator.visitor;
-using sly.parser.llparser;
+using sly.parser.llparser.bnf;
 using sly.parser.parser;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {
-    public delegate BuildResult<Parser<IN, OUT>> ParserChecker<IN, OUT>(BuildResult<Parser<IN, OUT>> result,
-        NonTerminal<IN> nonterminal) where IN : struct;
-
     /// <summary>
     ///     this class provides API to build parser
     /// </summary>
@@ -178,7 +175,10 @@ namespace sly.parser.generator
         {
             var lexer = LexerBuilder.BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, I18N,
                 lexerPostProcess, explicitTokens);
-
+            if (lexer.IsOk && lexer.Result != null && lexer.Result is GenericLexer<IN> genericLexer)
+            {
+                CallBacksBuilder.BuildCallbacks(genericLexer);
+            }
             return lexer;
         }
 
@@ -277,7 +277,7 @@ namespace sly.parser.generator
 
         private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result)
         {
-            var checkers = new List<ParserChecker<IN, OUT>>
+            var checkers = new List<Func<BuildResult<Parser<IN, OUT>>,NonTerminal<IN>,BuildResult<Parser<IN, OUT>>>>
             {
                 CheckUnreachable,
                 CheckNotFound,
@@ -312,7 +312,7 @@ namespace sly.parser.generator
             foreach (var nt in result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN>>())
                 if (nt.Name != nonTerminal.Name)
                 {
-                    found = NonTerminalReferences(nt, nonTerminal.Name);
+                    found = IsNonTerminalReferencing(nt, nonTerminal.Name);
                     if (found) break;
                 }
 
@@ -325,7 +325,7 @@ namespace sly.parser.generator
         }
 
 
-        private static bool NonTerminalReferences(NonTerminal<IN> nonTerminal, string referenceName)
+        private static bool IsNonTerminalReferencing(NonTerminal<IN> nonTerminal, string referenceName)
         {
             var found = false;
             var iRule = 0;
@@ -400,13 +400,23 @@ namespace sly.parser.generator
         {
             var conf = result.Result.Configuration;
             foreach (var rule in nonTerminal.Rules)
-            foreach (var clause in rule.Clauses)
-                if (clause is NonTerminalClause<IN> ntClause)
-                    if (!conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
-                        result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
-                            i18n.I18N.Instance.GetText(I18N, I18NMessage.ReferenceNotFound, ntClause.NonTerminalName,
-                                rule.RuleString),
-                            ErrorCodes.PARSER_REFERENCE_NOT_FOUND));
+            {
+                foreach (var clause in rule.Clauses)
+                {
+                    {
+                        if (clause is NonTerminalClause<IN> ntClause &&
+                            !conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
+                        {
+                            result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
+                                i18n.I18N.Instance.GetText(I18N, I18NMessage.ReferenceNotFound,
+                                    ntClause.NonTerminalName,
+                                    rule.RuleString),
+                                ErrorCodes.PARSER_REFERENCE_NOT_FOUND));
+                        }
+                    }
+                }
+            }
+
             return result;
         }
 
@@ -637,7 +647,7 @@ namespace sly.parser.generator
                     {
                         result.AddInitializationError(ErrorLevel.FATAL,
                             i18n.I18N.Instance.GetText(I18N, I18NMessage.IncorrectVisitorReturnType, visitor.Name,
-                                rule.RuleString, typeof(OUT).FullName, returnInfo.ParameterType.Name),
+                                rule.RuleString, typeof(OUT).FullName, returnInfo!.ParameterType.Name),
                             ErrorCodes.PARSER_INCORRECT_VISITOR_RETURN_TYPE);
                     }
 

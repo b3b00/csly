@@ -98,7 +98,6 @@ namespace sly.lexer.fsm
         public FSMLexerBuilder<N> Indentation(bool indentAware, string indentation)
         {
             Fsm.IndentationAware = indentAware;
-            Fsm.Indentation = indentation;
             return this;
         }
 

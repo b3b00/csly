@@ -77,7 +77,7 @@ namespace ParserTests.samples
             var interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result, true);
             Check.That(context.variables).IsSingle();
-            Check.That(context).HasVariableWithValue("a", 10);
+            Check.That(context).HasVariableWithIntValue("a", 10);
             
         }
 
@@ -102,8 +102,8 @@ namespace ParserTests.samples
             var interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result, true);
             Check.That(context.variables).CountIs(2);
-            Check.That(context).HasVariableWithValue("i", 11);
-            Check.That(context).HasVariableWithValue("r", 3628800);
+            Check.That(context).HasVariableWithIntValue("i", 11);
+            Check.That(context).HasVariableWithIntValue("r", 3628800);
             
         }
 

@@ -4,6 +4,7 @@ using expressionparser;
 using jsonparser;
 using jsonparser.JsonModel;
 using NFluent;
+using ParserTests.lexer.genericlexers;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser.generator;

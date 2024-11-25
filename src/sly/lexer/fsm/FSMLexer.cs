@@ -38,7 +38,6 @@ namespace sly.lexer.fsm
             Callbacks = new Dictionary<int, NodeCallback<N>>();
             IgnoreWhiteSpace = false;
             IgnoreEOL = false;
-            AggregateEOL = false;
             WhiteSpaces = new List<char>();
         }
 
@@ -48,11 +47,7 @@ namespace sly.lexer.fsm
 
         public bool IgnoreEOL { get; set; }
 
-        public bool AggregateEOL { get; set; }
-
         public bool IndentationAware { get; set; }
-
-        public string Indentation { get; set; }
 
 
         private Dictionary<int, NodeCallback<N>> Callbacks { get; }
@@ -110,15 +105,14 @@ namespace sly.lexer.fsm
         public FSMTransition GetTransition(int nodeId, char token)
         {
             FSMTransition transition = null;
-            if (HasState(nodeId))
-                if (Transitions.TryGetValue(nodeId, out var leavingTransitions))
-                {
-                    transition = leavingTransitions.Find(t => t.Match(token));
-                }
+            if (!HasState(nodeId)) return null;
+            if (Transitions.TryGetValue(nodeId, out var leavingTransitions))
+            {
+                transition = leavingTransitions.Find(t => t.Match(token));
+            }
 
             return transition;
         }
-
 
         public void AddTransition(FSMTransition transition)
         {
@@ -152,26 +146,6 @@ namespace sly.lexer.fsm
         public FSMMatch<N> Run(string source, LexerPosition position)
         {
             return Run(new ReadOnlyMemory<char>(source.ToCharArray()), position);
-        }
-
-
-        public int ComputeIndentationSize(ReadOnlyMemory<char> source, int index)
-        {
-            int count = 0;
-            if (index + Indentation.Length > source.Length)
-            {
-                return 0;
-            }
-
-            string id = source.Slice(index, Indentation.Length).ToString();
-            while (id == Indentation)
-            {
-                count++;
-                index += Indentation.Length;
-                id = source.Slice(index, Indentation.Length).ToString();
-            }
-
-            return count;
         }
 
         public List<char> GetIndentations(ReadOnlyMemory<char> source, int index)
@@ -214,7 +188,6 @@ namespace sly.lexer.fsm
                 {
                     if (lexerPosition != ind.NewPosition)
                     {
-                        lexerPosition = ind.NewPosition;
                         return ind;
                     }
                     lexerPosition = ind.NewPosition;
@@ -235,7 +208,6 @@ namespace sly.lexer.fsm
                 {
                     if (lexerPosition != ind.NewPosition)
                     {
-                        lexerPosition = ind.NewPosition;
                         return ind;
                     }
                     lexerPosition = ind.NewPosition;
@@ -279,17 +251,29 @@ namespace sly.lexer.fsm
 
             if (result != null)
             {
+                if ((result.Result as Token<GenericToken>).TokenID == GenericToken.UpTo)
+                {
+                    if (ignoredTokens.Count > 0)
+                    {
+                        int ignoredLength = ignoredTokens.Select(x => x.SpanValue.Length).Sum();
+                        int start = result.Result.Position.Index - ignoredLength; 
+                        result.Result.Position.Index  -= ignoredLength;
+                        var value = source.Slice(start, ignoredLength+result.Result.SpanValue.Length);
+                        result.Result.SpanValue = value;
+                    }
+                }
                 // Backtrack
                 var length = result.Result.Value.Length;
                 lexerPosition.Index = result.Result.Position.Index + length;
                 lexerPosition.Column = result.Result.Position.Column + length;
+                result.IgnoredTokens = ignoredTokens;
 
                 if (HasCallback(result.NodeId))
                 {
                     result = Callbacks[result.NodeId](result);
                 }
 
-                result.IgnoredTokens = ignoredTokens;
+                
                 return result;
             }
 
@@ -298,9 +282,7 @@ namespace sly.lexer.fsm
                 // Failed on last character, so need to backtrack
                 lexerPosition.Index -= 1;
                 lexerPosition.Column -= 1;
-                
             }
-
             var errorChar = source.Slice(lexerPosition.Index, 1);
             var ko = new FSMMatch<N>(false, default(N), errorChar, lexerPosition, -1, lexerPosition, false);
             return ko;
@@ -312,23 +294,28 @@ namespace sly.lexer.fsm
             {
                 var shifts = GetIndentations(source, lexerPosition.Index);
                 string currentShift = string.Join("", shifts);
+                lexerPosition.Indentation = lexerPosition.Indentation ?? new LexerIndentation();
                 var indentation = lexerPosition.Indentation.Indent(currentShift);
                 switch (indentation.type)
                 {
                     case LexerIndentationType.Indent:
                     {
+                        var position = lexerPosition.Clone();
+                        position.IsPush = false;
+                        position.IsPop = false;
+                        position.Mode = null;
                         var indent = FSMMatch<N>.Indent(lexerPosition.Indentation.CurrentLevel);
                         indent.Result = new Token<N>
                         {
                             IsIndent = true,
                             IsUnIndent = false,
                             IsNoIndent = false,
-                            Position = lexerPosition.Clone()
+                            Position = position
                         };
                         indent.IsNoIndent = false;
                         indent.IsIndent = true;
                         indent.IsUnIndent = false;
-                        indent.NewPosition = lexerPosition.Clone();
+                        indent.NewPosition = position;
                         indent.NewPosition.Index += currentShift.Length;
                         indent.NewPosition.Column += currentShift.Length;
                         return indent;
@@ -336,17 +323,21 @@ namespace sly.lexer.fsm
                     case LexerIndentationType.UIndent:
                     {
                         var uIndent = FSMMatch<N>.UIndent(lexerPosition.Indentation.CurrentLevel);
+                        var position = lexerPosition.Clone();
+                        position.IsPush = false;
+                        position.IsPop = false;
+                        position.Mode = null;
                         uIndent.Result = new Token<N>
                         {
                             IsIndent = false,
                             IsUnIndent = true,
                             IsNoIndent = false,
-                            Position = lexerPosition.Clone()
+                            Position = position
                         };
                         uIndent.IsNoIndent = false;
                         uIndent.IsIndent = false;
                         uIndent.IsUnIndent = true;
-                        uIndent.NewPosition = lexerPosition.Clone();
+                        uIndent.NewPosition = position;
                         uIndent.NewPosition.Index += currentShift.Length;
                         uIndent.NewPosition.Column += currentShift.Length;
                         return uIndent;

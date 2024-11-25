@@ -11,11 +11,6 @@ public class LexerIndentation
 
     public int CurrentLevel => _currentLevel;
 
-
-    public IList<string> Indentations => _indentations;
-
-    public IList<int> IndentationsLength => _indentations.Select(x => x.Length).ToList();
-
     public string Current => _indentations.Any() && _currentLevel < _indentations.Count && _currentLevel >= 0 ? _indentations[_currentLevel] : "";
 
     private void DoIndent(string shift)
@@ -35,7 +30,6 @@ public class LexerIndentation
     }
     public (bool isIndent, LexerIndentationType type) Indent(string shift)
     {
-        // TODO : indent or unindent
         if (!_indentations.Any())
         {
             if (shift.Length > 0)
@@ -56,13 +50,11 @@ public class LexerIndentation
             {
                 DoIndent(shift);
                 return (true, LexerIndentationType.Indent);
-                // TODO 
             }
             if (shift.Length < Current.Length)
             {
                 DoUindent();
                 return (true, LexerIndentationType.UIndent);
-                // TODO 
             }
 
             if (shift.Length == Current.Length)
@@ -78,7 +70,7 @@ public class LexerIndentation
     private bool IsError(string shift)
     {
         // indent case : shift must match all previous indentations
-        if (shift.Length > _indentations.Last().Length)
+        if (shift.Length > _indentations[_indentations.Count-1].Length)
         {
             return !_indentations.All(x => shift.StartsWith(x));
         }

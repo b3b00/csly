@@ -46,6 +46,7 @@ namespace sly.parser.syntax.grammar
             return ToString();
         }
 
+        [ExcludeFromCodeCoverage]
         public bool Equals(IClause<T> clause)
         {
             if (clause is ChoiceClause<T> other)
@@ -55,7 +56,8 @@ namespace sly.parser.syntax.grammar
 
             return false;
         }
-
+        
+        [ExcludeFromCodeCoverage]
         private bool Equals(ChoiceClause<T> other)
         {
             if (other.Choices.Count != Choices.Count)
@@ -71,6 +73,7 @@ namespace sly.parser.syntax.grammar
             return other.Choices.TrueForAll(x => Choices.Exists(y => y.Equals(x)));
         }
 
+        [ExcludeFromCodeCoverage]
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
@@ -79,6 +82,7 @@ namespace sly.parser.syntax.grammar
             return Equals((ChoiceClause<T>)obj);
         }
 
+        [ExcludeFromCodeCoverage]
         public override int GetHashCode()
         {
             return Dump().GetHashCode();

@@ -27,7 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\samples\expressionParser\expressionParser.csproj" />
     <ProjectReference Include="..\samples\IndentedWhile\indentedWhile.csproj" />
+    <ProjectReference Include="..\samples\SimpleExpressionParser\SimpleExpressionParser.csproj" />
     <ProjectReference Include="..\sly\sly.csproj" />
   </ItemGroup>
 

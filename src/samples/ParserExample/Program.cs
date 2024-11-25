@@ -23,7 +23,9 @@ using ParserTests;
 using ParserTests.Issue239;
 using ParserTests.Issue332;
 using ParserTests.Issue414;
+using ParserTests.Issue495;
 using ParserTests.lexer;
+using ParserTests.samples;
 using simpleExpressionParser;
 using SimpleTemplate;
 using SimpleTemplate.model;
@@ -39,6 +41,7 @@ using sly.parser.parser;
 using XML;
 using Xunit;
 using ExpressionContext = postProcessedLexerParser.expressionModel.ExpressionContext;
+using ExpressionToken = simpleExpressionParser.ExpressionToken;
 using IfThenElse = indented.IfThenElse;
 
 namespace ParserExample
@@ -131,6 +134,33 @@ namespace ParserExample
             return "_";
         }
 
+
+        private static void TestIssue507()
+        {
+            var tests = new EBNFTests();
+            //tests.TestIssue507TransitiveEmptyStarter();
+            tests.TestIssue507MoreTransitiveEmptyStarter();
+        }
+        
+        private static void BenchSimpleExpression()
+        {
+            GenericSimpleExpressionParser p = new GenericSimpleExpressionParser();
+            var builder = new ParserBuilder<GenericExpressionToken, double>();
+            
+            var Parser = builder.BuildParser(p, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            if (Parser.IsOk)
+            {
+                for (int i = 0; i < 50; i++)
+                {
+                    var r = Parser.Result.Parse("1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20");
+                    if (r.IsOk)
+                    {
+                        Console.WriteLine(r.Result);
+                    }    
+                }
+                
+            }
+        }
 
         private static void TestFactorial()
         {
@@ -482,41 +512,188 @@ return r";
 
         }
 
-        public static void testJSON()
+        public static void testJSONEscaped(string content = null)
         {
+            if (content == null)
+            {
+                content = File.ReadAllText("test.json");
+            }
             try {
 
                 var instance = new EbnfJsonGenericParser();
             var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
             var buildResult = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-            // if (buildResult.IsOk)
-            // {
-            //     Console.WriteLine("parser built.");
-            //     var parser = buildResult.Result;
-            //     var content = File.ReadAllText("test.json");
-            //     Console.WriteLine("test.json read.");
-            //     var jsonResult = parser.Parse(content);
-            //     Console.WriteLine("json parse done.");
-            //     if (jsonResult.IsOk)
-            //     {
-            //         Console.WriteLine("YES !");
-            //     }
-            //     else
-            //     {
-            //         Console.WriteLine("Ooh no !");
-            //     }
-            //     Console.WriteLine("Done.");
-            //
-            // }
-            // else
-            // {
-            //     buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
-            // }
+            if (buildResult.IsOk)
+            {
+                Console.WriteLine("parser built.");
+                var parser = buildResult.Result;
+                
+                Console.WriteLine("test.json read.");
+                for (int i = 0; i < 10; i++)
+                {
+
+
+                    var jsonResult = parser.Parse(content);
+                    Console.WriteLine("json parse done.");
+                    if (jsonResult.IsOk)
+                    {
+                        Console.WriteLine("YES !");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ooh no !");
+                    }
+                }
+
+                Console.WriteLine("Done.");
+            
+            }
+            else
+            {
+                buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
+            }
             }
             catch(Exception e) {
                 Console.WriteLine($"ERROR {e.Message} : \n {e.StackTrace}");
             }
 
+        }
+        
+        public static void testProfileJSONEscaping(string content = null, bool escape = true)
+        {
+            if (escape)
+            {
+                if (content == null)
+                {
+                    content = File.ReadAllText("test.json");
+                }
+
+                try
+                {
+
+                    var instance = new EbnfJsonGenericParser();
+                    var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
+                    var buildResult = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+                    if (buildResult.IsOk)
+                    {
+                        Console.WriteLine("parser built.");
+                        var parser = buildResult.Result;
+
+                        Console.WriteLine("test.json read.");
+                        for (int i = 0; i < 10; i++)
+                        {
+
+
+                            var jsonResult = parser.Parse(content);
+                            Console.WriteLine("json parse done.");
+                            if (jsonResult.IsOk)
+                            {
+                                Console.WriteLine("YES !");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Ooh no !");
+                            }
+                        }
+
+                        Console.WriteLine("Done.");
+
+                    }
+                    else
+                    {
+                        buildResult.Errors.ForEach(e => Console.WriteLine(e.Message));
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"ERROR {e.Message} : \n {e.StackTrace}");
+                }
+            }
+            else
+            {
+                if (content == null)
+                {
+                    content = File.ReadAllText("test.json");
+                }
+            
+                var instanceNot = new EbnfJsonGenericParserStringNotEscaped();
+                var builderNot = new ParserBuilder<JsonTokenGenericStringNotEscaped, JSon>();
+                var buildResultNot = builderNot.BuildParser(instanceNot, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+                if (buildResultNot.IsOk)
+                {
+                    Console.WriteLine("parser built.");
+                    var parser = buildResultNot.Result;
+                
+                    Console.WriteLine("test.json read.");
+
+
+                    var jsonResult = parser.Parse(content);
+                    Console.WriteLine("json parse done.");
+                    if (jsonResult.IsOk)
+                    {
+                        Console.WriteLine("YES !");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Ooh no !");
+                    }
+
+                    Console.WriteLine("Done. Unescaped.");
+            
+                }
+                else
+                {
+                    buildResultNot.Errors.ForEach(e => Console.WriteLine(e.Message));
+                }
+            }
+
+        }
+        
+        public static void testJSONNotEscaped(string content = null)
+        {
+            if (content == null)
+            {
+                content = File.ReadAllText("test.json");
+            }
+            
+            var instanceNot = new EbnfJsonGenericParserStringNotEscaped();
+            var builderNot = new ParserBuilder<JsonTokenGenericStringNotEscaped, JSon>();
+            var buildResultNot = builderNot.BuildParser(instanceNot, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            if (buildResultNot.IsOk)
+            {
+                Console.WriteLine("parser built.");
+                var parser = buildResultNot.Result;
+                
+                Console.WriteLine("test.json read.");
+
+
+                var jsonResult = parser.Parse(content);
+                Console.WriteLine("json parse done.");
+                if (jsonResult.IsOk)
+                {
+                    Console.WriteLine("YES !");
+                }
+                else
+                {
+                    Console.WriteLine("Ooh no !");
+                }
+
+                Console.WriteLine("Done. Unescaped.");
+            
+            }
+            else
+            {
+                buildResultNot.Errors.ForEach(e => Console.WriteLine(e.Message));
+            }
+        }
+        
+        public static void testJSONEscapedVsNotEscaped()
+        {
+            var content = File.ReadAllText("test.json");
+            
+            testJSONEscaped(content);
+
+            testJSONNotEscaped(content);
         }
 
         private static void TestGraphViz()
@@ -1018,7 +1195,7 @@ else
             var source = @"hello - {= world =} - billy - {% if (a == 1) %} - bob - {%else%} - boubou - {%endif%}";
             
             var tokens = genericLexer.Tokenize(source);
-            foreach (var token in tokens.Tokens.Tokens)
+            foreach (var token in tokens.Tokens.MainTokens())
             {
                 Console.WriteLine(token);
             }
@@ -1101,7 +1278,7 @@ billy
             // File.WriteAllText(@"c:\temp\tokens.txt",b.ToString());
             
             
-            foreach (var token in tokens.Tokens.Tokens)
+            foreach (var token in tokens.Tokens.MainTokens())
             {
                 
                 Console.WriteLine(token);
@@ -1184,8 +1361,18 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
+
             TestAot();
             // IndentRefactoring();
+            IndentRefactoring();
+            TestIssue507();
+            //TestFStrings();
+            //TestIssue495();
+            //testGenericLexerJson();
+            // TestIssue487();
+            //BenchSimpleExpression();
+            // IndentRefactoring();
+
             //NodeNames();
             // BroadWindow();
             // return;
@@ -1198,7 +1385,12 @@ while a < 10 do
             //TestContextualParser();
             //TestTokenCallBacks();
             //test104();
-            // testJSON();
+            //testJSON();
+            //testJSONEscapedVsNotEscaped();
+            //testJSONEscaped();
+            //testJSONNotEscaped();
+            // testProfileJSONEscaping(escape:true);
+            //testProfileJSONEscaping(escape:false);
             //TestGrammarParser();
             // TestGraphViz();
             // TestGraphViz();
@@ -1322,7 +1514,7 @@ while a < 10 do
                     var lexResult = lexer.Tokenize(@"1 + 2 + a + b * 8.3 hello / 'b\'jour'");
                     if (lexResult.IsOk)
                     {
-                        lexResult.Tokens.Tokens.ForEach(x => Console.WriteLine(x));
+                        lexResult.Tokens.MainTokens().ForEach(x => Console.WriteLine(x));
                     }
                     else
                     {
@@ -1429,7 +1621,7 @@ else
                 var r = l.Result.Tokenize(source);
                 if (r.IsOk)
                 {
-                    foreach (var t in r.Tokens.Tokens)
+                    foreach (var t in r.Tokens.MainTokens())
                     {
                         Console.WriteLine(t);
                     }
@@ -1607,11 +1799,72 @@ else
         }
 
 
+
         private static void TestAot()
         {
             var aot = new AotParserAndlexer();
             aot.InitializeCenericLexer();
         }
+
+          
+          private static void TestIssue487() 
+          {
+              string source = "@g_capcalc >> EtnRef: @appcapcalc.bankcapconfigid";
+              var lexBuild = LexerBuilder.BuildLexer<Issue487Token>();
+              
+              Check.That(lexBuild).IsOk();
+              
+              var lexer = lexBuild.Result;
+              var lexer487 = lexer as GenericLexer<Issue487Token>;
+              var gviz = lexer487.FSMBuilder.Fsm.ToGraphViz();
+              var lexed = lexer.Tokenize(source);
+              if (lexed.IsOk)
+              {
+                  foreach (var token in lexed.Tokens)
+                  {
+                      Console.WriteLine(token);
+                  }
+              }
+              else
+              {
+                  Console.Write(lexed.Error);
+              }
+          }
+
+          private static void TestIssue495()
+          {
+              Parser<Issue495Token, string> parser;
+
+              ParserBuilder<Issue495Token, string> builder = new ParserBuilder<Issue495Token, string>("en");
+              var build = builder.BuildParser(new Issue495Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+              Check.That(build).IsOk();
+              parser = build.Result;
+
+              Check.That(parser).IsNotNull();
+              Check.That(parser.Lexer).IsNotNull();
+              Check.That(parser.Lexer).IsInstanceOf<GenericLexer<Issue495Token>>();
+              var lexer = parser.Lexer as GenericLexer<Issue495Token>;
+              string source = "test = \"3 3\";";
+              var tokenized = lexer.Tokenize(source);
+              Check.That(tokenized).IsOkLexing();
+              var tokens = tokenized.Tokens.MainTokens();
+              Check.That(tokens).CountIs(7);
+              var stringValue = tokens[3];
+              Check.That(stringValue).IsNotNull();
+              Check.That(stringValue.TokenID).IsEqualTo(Issue495Token.StringValue);
+                
+
+              var parsed = parser.Parse(source);
+              Check.That(parsed).IsOkParsing();
+              Check.That(parsed.Result).IsEqualTo("test=3 3");
+
+          }
+
+          private static void TestFStrings()
+          {
+              IndentedWhileTests tests = new IndentedWhileTests();
+              tests.TestFString();
+          }
     }
 
     public enum TestGrammarToken

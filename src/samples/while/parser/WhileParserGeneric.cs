@@ -148,7 +148,7 @@ namespace csly.whileLang.parser
         [Production("primary: STRING")]
         public WhileAST PrimaryString(Token<WhileTokenGeneric> stringToken)
         {
-            return new StringConstant(stringToken.StringWithoutQuotes);
+            return new StringConstant(stringToken.StringWithoutQuotes,stringToken.Position);
         }
 
         [Production("primary: IDENTIFIER")]

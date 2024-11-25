@@ -27,7 +27,7 @@ namespace benchCurrent
             }
         }
 
-        private Parser<JsonTokenGeneric,JSon> BenchedParser;
+        private Parser<JsonTokenGenericNotEscaped,JSon> BenchedParser;
 
         private string content = "";
 
@@ -38,7 +38,7 @@ namespace benchCurrent
             content = File.ReadAllText("test.json");
             Console.WriteLine("json read.");
             var jsonParser = new EbnfJsonGenericParser();
-            var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
+            var builder = new ParserBuilder<JsonTokenGenericNotEscaped, JSon>();
             
             var result = builder.BuildParser(jsonParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
             Console.WriteLine("parser built.");

@@ -44,7 +44,7 @@ namespace sly.parser.parser
         public bool IsNone { get; }
         public bool IsSome => !IsNone;
 
-        public T Match(Func<T, T> some, Func<T> none)
+        public X Match<X>(Func<T, X> some, Func<X> none)
         {
             if (IsSome)
                 return some(Value);

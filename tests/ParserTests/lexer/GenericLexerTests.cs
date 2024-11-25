@@ -1,292 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using expressionparser;
-using expressionparser.model;
 using GenericLexerWithCallbacks;
 using indented;
 using NFluent;
+using ParserTests.lexer.genericlexers;
 using simpleExpressionParser;
 using sly.buildresult;
-using sly.i18n;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
+using ExpressionToken = simpleExpressionParser.ExpressionToken;
 
 namespace ParserTests.lexer
 {
-
-    public enum HexaTokenDefault
-    {
-        [Hexa]HEXA,
-    }
-    
-      public enum HexaToken6x
-        {
-            [Hexa("6x")]HEXA,
-            
-            [Int] INT
-        }
-    
-    public enum HexaTokenConflictId
-    {
-        EOS= 0,
-        
-        
-        [Hexa("hexa")]HEXA,
-        
-        [AlphaId] ID
-    }
-    
-    public enum HexaTokenConflictIdAndInt
-    {
-        [Hexa("0x")]HEXA,
-        
-        [AlphaId] ID,
-        
-        [Int] INT,
-    }
-    
-    
-    public enum DateTokenEnglishDashed
-    {
-        [Date(DateFormat.YYYYMMDD, '-')] DATE,
-    }
-
-    public enum DateTokenWithFrenchSlashed
-    {
-        [Date(DateFormat.DDMMYYYY, '/')] DATE,
-
-        [Int] INT
-    }
-
-    public enum DateAndDoubleToken
-    {
-        [Double(".")] DOUBLE,
-
-        [Date(DateFormat.DDMMYYYY, '.')] FRENCH_DATE,
-
-        [Date(DateFormat.YYYYMMDD, '.')] ENGLISH_DATE,
-
-    }
-
-    public enum ManyDateToken
-    {
-        [Date(DateFormat.DDMMYYYY, '/')] FRENCH_DATE,
-
-        [Date(DateFormat.YYYYMMDD, '-')] ENGLISH_DATE,
-    }
-
-    public enum DateAndExpressions
-    {
-
-        [Int] INT,
-
-        [Sugar("-")] MINUS,
-
-        [Date(DateFormat.YYYYMMDD, '-')] DATE,
-    }
-
-    public enum DoubleQuotedString
-    {
-        [Lexeme(GenericToken.String, "\"")] DoubleString
-    }
-
-    public enum SingleQuotedString
-    {
-        [Lexeme(GenericToken.String, "'")] SingleString
-    }
-
-    public enum DefaultQuotedString
-    {
-        [Lexeme(GenericToken.String)] DefaultString
-    }
-
-    public enum SelfEscapedString
-    {
-        [Lexeme(GenericToken.String, "'", "'")]
-        STRING
-    }
-
-    public enum ManyString
-    {
-        [Lexeme(GenericToken.String, "'", "'")] [Lexeme(GenericToken.String)]
-        STRING
-    }
-
-    public enum AlphaId
-    {
-        [Lexeme(GenericToken.Identifier, IdentifierType.Alpha)]
-        ID
-    }
-
-    public enum AlphaNumId
-    {
-        [AlphaNumId] ID
-    }
-
-    public enum AlphaNumDashId
-    {
-        [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumericDash)]
-        ID
-    }
-
-    public enum CustomId
-    {
-        EOS,
-
-        [CustomId("A-Za-z", "-_0-9A-Za-z")]
-        // [Lexeme(GenericToken.Identifier, IdentifierType.Custom, "A-Za-z", "-_0-9A-Za-z")]
-        ID,
-
-        [Lexeme(GenericToken.SugarToken, "-", "_")]
-        OTHER
-    }
-
-    public enum CustomIdReverseRange
-    {
-        EOS,
-
-        [CustomId("Z-Az-a", "-_9-0A-Za-z")] ID,
-
-        [Lexeme(GenericToken.SugarToken, "-", "_")]
-        OTHER
-    }
-
-    [Lexer(IgnoreWS = false)]
-    public enum IgnoreWS
-    {
-        [Lexeme(GenericToken.SugarToken, " ")] WS
-    }
-
-    [Lexer(IgnoreEOL = false)]
-    public enum IgnoreEOL
-    {
-        [Lexeme(GenericToken.SugarToken, "\n")]
-        EOL
-    }
-
-    [Lexer(WhiteSpace = new[] { ' ' })]
-    public enum WhiteSpace
-    {
-        [Lexeme(GenericToken.SugarToken, "\t")]
-        TAB
-    }
-
-    public enum Empty
-    {
-        EOS,
-
-        [Lexeme(GenericToken.Identifier)] ID
-    }
-
-    public enum KeyWord
-    {
-        [Lexeme(GenericToken.KeyWord, "keyword")]
-        KEYWORD = 1
-    }
-
-    [Lexer(KeyWordIgnoreCase = true)]
-    public enum KeyWordIgnoreCase
-    {
-        [Lexeme(GenericToken.KeyWord, "keyword")]
-        KEYWORD = 1
-    }
-
-    public enum Issue106
-    {
-        [Lexeme(GenericToken.Int)] Integer = 5,
-
-        [Lexeme(GenericToken.Double)] Double = 6,
-
-        [Lexeme(GenericToken.SugarToken, ".")] Period
-    }
-
-    public enum Issue114
-    {
-        [Lexeme(GenericToken.SugarToken, "//")]
-        First = 1,
-
-        [Lexeme(GenericToken.SugarToken, "/*")]
-        Second = 2
-    }
-
     // Test that the FSMLexer properly backtracks.
-    public enum Issue137
-    {
-        [Lexeme(GenericToken.SugarToken, ".")] A = 1,
-        [Lexeme(GenericToken.SugarToken, "-")] B,
-
-        [Lexeme(GenericToken.SugarToken, "-+")]
-        C,
-
-        [Lexeme(GenericToken.SugarToken, "---")]
-        E
-    }
 
     // Test that the FSMLexer properly terminates, without skipping tokens.
-    public enum Issue138
-    {
-        [Lexeme(GenericToken.SugarToken, "..")]
-        A = 1,
-        [Lexeme(GenericToken.SugarToken, "-")] B,
-
-        [Lexeme(GenericToken.SugarToken, "---")]
-        C
-    }
-
-    [Lexer(IgnoreEOL = true)]
-    public enum Issue177Generic
-    {
-
-        [Lexeme(GenericToken.Int)] INT = 2,
-
-        EOS = 0
-
-    }
-
-    public enum Issue348
-    {
-        [Lexeme(GenericToken.String, "\"", "\\")]
-        STriNG
-    }
-
-    public enum Issue348Bis
-    {
-        [Lexeme(GenericToken.String, "\"", "^")]
-        STriNG
-    }
-
-    [Lexer]
-    public enum Issue186MixedGenericAndRegexLexer
-    {
-        [Lexeme(GenericToken.Identifier, IdentifierType.Alpha)]
-        ID = 1,
-
-        [Lexeme("[0-9]+")] INT = 2
-    }
-
-    public class Issue186MixedGenericAndRegexParser
-    {
-        [Production("root : INT")]
-        public object root(Token<Issue186MixedGenericAndRegexLexer> integer)
-        {
-            return null;
-        }
-    }
-
-    [Lexer(IgnoreEOL = false)]
-    public enum Issue177Regex
-    {
-        [Lexeme("\r\n", IsLineEnding = true)] EOL = 1,
-
-        [Lexeme("\\d+")] INT = 2,
-
-        EOS = 0
-
-    }
-
 
 
     public class GenericLexerTests
@@ -590,8 +321,9 @@ namespace ParserTests.lexer
             Check.That(r.Tokens).CountIs(2);
             var tok = r.Tokens[0];
             Check.That(tok.TokenID).IsEqualTo(Issue348.STriNG);
-            Check.That(tok.Value).IsEqualTo("\"\"te\\\\st\"\"");
-            Check.That(tok.StringWithoutQuotes).IsEqualTo("\"te\\\\st\"");
+            Check.That(tok.StringWithoutQuotes).IsEqualTo("\"te\\\\\\\\st\"");
+            Check.That(tok.Value).IsEqualTo("\"\"te\\\\\\\\st\"\"");
+            
         }
 
         [Fact]
@@ -808,6 +540,7 @@ namespace ParserTests.lexer
             Check.That(tokens[0]).IsEqualTo(CallbackTokens.IDENTIFIER, "AAA");
             Check.That(tokens[1]).IsEqualTo(CallbackTokens.SKIP, "BBB");
         }
+        
 
         [Fact]
         public void TestCharTokens()
@@ -840,6 +573,14 @@ namespace ParserTests.lexer
             Check.That(res3.Tokens).CountIs(2);
             token = res3.Tokens[0];
             Check.That(token).IsEqualTo(CharTokens.MyChar, sourceU);
+
+            var sourceShort = "|s|";
+            var res4 = lexer.Tokenize(sourceShort);
+            Check.That(res4.IsError).IsFalse();
+            Check.That(res4.Tokens).CountIs(2);
+            token = res4.Tokens[0];
+            Check.That(token).IsEqualTo(CharTokens.MyChar, sourceShort);
+            
         }
 
         [Fact]
@@ -931,14 +672,16 @@ namespace ParserTests.lexer
         public void TestIssue177()
         {
             var res = LexerBuilder.BuildLexer(new BuildResult<ILexer<Issue177Generic>>());
-            Check.That(res.IsError).IsFalse();
+            Check.That(res).IsOk();
             var lexer = res.Result;
 
             var result = lexer.Tokenize(@"1 2 
 2 3
 4 5");
-            Check.That(result.IsOk).IsTrue();
-            Check.That(result.Tokens).CountIs(7);
+            Check.That(result).IsOkLexing();
+            Check.That(result.Tokens).CountIs(9); // 6 integers, 2 EOL and 1 EOS
+            var meaningFullTokens = result.Tokens.Where(x => x.TokenID == Issue177Generic.INT);
+            Check.That(meaningFullTokens).CountIs(6);
 
             var expectations = new (int value, int line, int column)[]
             {
@@ -950,8 +693,37 @@ namespace ParserTests.lexer
                 (2, 2, 5)
             };
 
-            Check.That(result.Tokens.Take(6).Extracting(x => (x.Position.Line, x.Position.Column, x.IntValue)))
+            Check.That(meaningFullTokens.Extracting(x => (x.Position.Line, x.Position.Column, x.IntValue)))
                 .ContainsExactly(expectations);
+            
+            // -- leading new line
+            
+            
+            var resultForLeadingEOL = lexer.Tokenize(@"
+1 2 
+2 3
+4 5");
+            Check.That(resultForLeadingEOL).IsOkLexing();
+            Check.That(resultForLeadingEOL.Tokens).CountIs(10); 
+            
+            var meaningFullTokensForLeadingEOL = resultForLeadingEOL.Tokens.Where(x => x.TokenID == Issue177Generic.INT);
+            Check.That(meaningFullTokensForLeadingEOL).CountIs(6);
+            var expectationsForLeadingEOL = new (int value, int line, int column)[]
+            {
+                (1, 0, 1),
+                (1, 2, 2),
+                (2, 0, 2),
+                (2, 2, 3),
+                (3, 0, 4),
+                (3, 2, 5)
+            };
+
+            Check.That(resultForLeadingEOL.Tokens[0].Position.Line).IsEqualTo(0);
+            Check.That(resultForLeadingEOL.Tokens[0].Position.Column).IsEqualTo(0);
+            Check.That(resultForLeadingEOL.Tokens[0].Position.Index).IsEqualTo(0);
+
+            Check.That(meaningFullTokensForLeadingEOL.Extracting(x => (x.Position.Line, x.Position.Column, x.IntValue)))
+                .ContainsExactly(expectationsForLeadingEOL);
         }
 
         [Fact]
@@ -1333,6 +1105,98 @@ else
             Check.That(error.Level).IsEqualTo(ErrorLevel.WARN);
             Check.That(error.Code).IsEqualTo(ErrorCodes.LEXER_MANY_LEXEM_WITH_SAME_LABEL);
             Check.That(error.Message).Contains("left paranthesis").And.Contains("paranthèse ouvrante");
+        }
+
+        [Fact]
+        public void TestManyKeywordModes()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManyKeywordModes>>());
+            Check.That(lexerRes).IsOk();
+            string source = "M1$$€€M2_-_-_";
+            var lexer = lexerRes.Result;
+            var lexed = lexer.Tokenize(source);
+            Check.That(lexed).IsOkLexing();
+            var tokens = lexed.Tokens;
+            Check.That(tokens.MainTokens()).CountIs(12);
+            Check.That(tokens.SkipLast(1).Extracting(x => x.TokenID).ToList()).IsEqualTo(
+                new List<ManyKeywordModes>()
+                {
+                    ManyKeywordModes.M1,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.EURO,
+                    ManyKeywordModes.EURO,
+                    ManyKeywordModes.M2,
+                    ManyKeywordModes.UNDERSCORE,
+                    ManyKeywordModes.DASH,
+                    ManyKeywordModes.UNDERSCORE,
+                    ManyKeywordModes.DASH,
+                    ManyKeywordModes.UNDERSCORE
+                });
+        }
+        [Fact]
+        public void TestManyKeywordModesNested()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<ManyKeywordModes>>());
+            Check.That(lexerRes).IsOk();
+            string source = "M1$$€€M2_-_-_POP$$$M2_";
+            var lexer = lexerRes.Result;
+            var lexed = lexer.Tokenize(source);
+            Check.That(lexed).IsOkLexing();
+            var tokens = lexed.Tokens.MainTokens();
+            Check.That(tokens).CountIs(18);
+            Check.That(tokens.SkipLast(1).Extracting(x => x.TokenID).ToList()).IsEqualTo(
+                new List<ManyKeywordModes>()
+                {
+                    ManyKeywordModes.M1,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.EURO,
+                    ManyKeywordModes.EURO,
+                    ManyKeywordModes.M2,
+                    ManyKeywordModes.UNDERSCORE,
+                    ManyKeywordModes.DASH,
+                    ManyKeywordModes.UNDERSCORE,
+                    ManyKeywordModes.DASH,
+                    ManyKeywordModes.UNDERSCORE,
+                    ManyKeywordModes.POP,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.DOLLAR,
+                    ManyKeywordModes.M2,
+                    ManyKeywordModes.UNDERSCORE
+                });
+        }
+
+        [Fact]
+        public void TestSugarChannels()
+        {
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<SugarChannelsToken>>());
+            Check.That(lexerRes).IsOk();
+            string source = "$€$€€";
+            var lexer = lexerRes.Result;
+            var lexed = lexer.Tokenize(source);
+            Check.That(lexed).IsOkLexing();
+            
+            var channels = lexed.Tokens.GetChannels();
+            Check.That(channels).IsNotNull();
+            Check.That(channels).CountIs(3);
+            var dollarChannel = channels.ElementAt(1);
+            Check.That(dollarChannel).IsNotNull();
+            Check.That(dollarChannel.ChannelId).IsEqualTo(42);
+            var dollars = dollarChannel.Tokens.Where(x => x != null).ToList();
+            Check.That(dollars).CountIs(2);
+            Check.That(dollars[0].PositionInTokenFlow).IsEqualTo(0);
+            Check.That(dollars[1].PositionInTokenFlow).IsEqualTo(2);
+            var euroChannel = channels.ElementAt(2);
+            Check.That(euroChannel).IsNotNull();
+            Check.That(euroChannel.ChannelId).IsEqualTo(84);
+            var euros = euroChannel.Tokens.Where(x => x != null).ToList();
+            Check.That(euros).CountIs(3);
+            Check.That(euros[0].PositionInTokenFlow).IsEqualTo(1);
+            Check.That(euros[1].PositionInTokenFlow).IsEqualTo(3);
+            Check.That(euros[2].PositionInTokenFlow).IsEqualTo(4);
+            
         }
 
     }

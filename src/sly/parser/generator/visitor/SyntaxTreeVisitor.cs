@@ -40,10 +40,6 @@ namespace sly.parser.generator.visitor
         public bool IsTokenList { get; private set; }
 
         public bool IsGroup { get; private set; }
-        
-        public bool IsEpsilon { get; private set; }
-
-        public bool IsNone => !IsToken && !IsValue && !IsTokenList && !IsValueList && !IsGroup && !IsGroupList;
 
         public static SyntaxVisitorResult<IN, OUT> NewToken(Token<IN> tok)
         {
@@ -128,12 +124,6 @@ namespace sly.parser.generator.visitor
             return res;
         }
 
-        public static SyntaxVisitorResult<IN, OUT> Epsilon()
-        {
-            var res = new SyntaxVisitorResult<IN, OUT>();
-            res.IsEpsilon = true;
-            return res;
-        }
     }
 
     public class SyntaxTreeVisitor<IN, OUT> where IN : struct

@@ -60,6 +60,14 @@ namespace csly.whileLang.model
             return emiter;
         }
 
+        public void AppendTernaries(List<TernaryExpression> ternaries)
+        {
+            foreach (var statement in Statements)
+            {
+                statement.AppendTernaries(ternaries);
+            }
+        }
+
         public Statement Get(int i)
         {
             return Statements[i];

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using expressionparser;
 using indented;
 using jsonparser;
 using jsonparser.JsonModel;
@@ -12,10 +11,11 @@ using sly.buildresult;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
-using sly.parser.llparser;
+using sly.parser.llparser.ebnf;
 using sly.parser.parser;
 using sly.parser.syntax.grammar;
 using Xunit;
+using ExpressionToken = simpleExpressionParser.ExpressionToken;
 using String = System.String;
 
 namespace ParserTests
@@ -312,12 +312,12 @@ namespace ParserTests
                 {
                     var aToken = group.Token("A").Value;
                     builder.Append($";{aToken}");
-                    return null;
+                    return builder.ToString();
                 },
                 () =>
                 {
                     builder.Append($";<none>");
-                    return null;
+                    return builder.ToString();
                 });
             builder.Append(")");
             return builder.ToString();
@@ -409,6 +409,51 @@ namespace ParserTests
             }
             
             return builder.ToString();
+        }
+    }
+    
+    
+    public class AlternateChoiceTestOptionNonTerminal
+    {
+        [Production("choice : [ A | B | C] [ B | C]? F?")]
+        public string Choice(string first, ValueOption<string> next, ValueOption<string> final)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append(first);
+
+            
+            var v = next.Match(x => x,
+                () => "<none>");
+            builder.Append($",{v}");
+            v = final.Match(x => x,
+                () => "<none>");
+            builder.Append($",{v}");
+
+            return builder.ToString();
+        }
+
+        [Production("A : a")]
+        public string A(Token<OptionTestToken> a)
+        {
+            return a.Value;
+        }
+        
+        [Production("B : b")]
+        public string B(Token<OptionTestToken> b)
+        {
+            return b.Value;
+        }
+        
+        [Production("C : c")]
+        public string C(Token<OptionTestToken> c)
+        {
+            return c.Value;
+        }
+        
+        [Production("F : f")]
+        public string F(Token<OptionTestToken> f)
+        {
+            return f.Value;
         }
     }
     
@@ -532,6 +577,64 @@ namespace ParserTests
             return $"A({t.Value})";
         }
 
+    }
+
+    public class Issue507TransitiveEmptyStarterParser
+    {
+        [Production("x : y")]
+        public string X(string y)
+        {
+            return y;
+        }
+
+        [Production("y : z*")]
+        public string Y(List<string> zs)
+        {
+            if (zs.Any())
+            {
+                return string.Join(",", zs);
+            }
+
+            return "empty";
+        }
+
+        [Production("z : a")]
+        public string Z(Token<OptionTestToken> a)
+        {
+            return a.Value;
+        }
+    }
+    
+    public class Issue507MoreTransitiveEmptyStarterParser
+    {
+        [Production("x : w")]
+        public string X(string w)
+        {
+            return w;
+        }
+        
+        [Production("w : y")]
+        public string W(string y)
+        {
+            return y;
+        }
+
+        [Production("y : z*")]
+        public string Y(List<string> zs)
+        {
+            if (zs.Any())
+            {
+                return string.Join(",", zs);
+            }
+
+            return "empty";
+        }
+
+        [Production("z : a")]
+        public string Z(Token<OptionTestToken> a)
+        {
+            return a.Value;
+        }
     }
 
     public class Bugfix104Test
@@ -1070,13 +1173,13 @@ namespace ParserTests
 
             var nonTerm = conf.NonTerminals["testNonTerm"];
             Check.That(nonTerm).IsNotNull();
-            Check.That(nonTerm.PossibleLeadingTokens).CountIs(2);
-            Check.That(nonTerm.PossibleLeadingTokens.Select(x => x.TokenId)).Contains(expected);
+            Check.That(nonTerm.GetPossibleLeadingTokens()).CountIs(2);
+            Check.That(nonTerm.GetPossibleLeadingTokens().Select(x => x.TokenId)).Contains(expected);
             
             var term = conf.NonTerminals["testTerm"];
             Check.That(term).IsNotNull();
-            Check.That(term.PossibleLeadingTokens).CountIs(2);
-            Check.That(term.PossibleLeadingTokens.Select(x => x.TokenId)).Contains(expected);
+            Check.That(term.GetPossibleLeadingTokens()).CountIs(2);
+            Check.That(term.GetPossibleLeadingTokens().Select(x => x.TokenId)).Contains(expected);
         }
 
         #endregion
@@ -1209,6 +1312,30 @@ namespace ParserTests
         }
         
         [Fact]
+        public void TestAlternateChoiceOptionNonTerminal()
+        {
+            var startingRule = $"choice";
+            var parserInstance = new AlternateChoiceTestOptionNonTerminal();
+            var builder = new ParserBuilder<OptionTestToken, string>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser.Errors).IsEmpty();
+            var parseResult = builtParser.Result.Parse("a b f", "choice");
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsEqualTo("a,b,f");
+            parseResult = builtParser.Result.Parse("a", "choice");
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsEqualTo("a,<none>,<none>");
+            parseResult = builtParser.Result.Parse("a b ", "choice");
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsEqualTo("a,b,<none>");
+            parseResult = builtParser.Result.Parse("a f", "choice");
+            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult.Result).IsEqualTo("a,<none>,f");
+            
+        }
+        
+        [Fact]
         public void TestAlternateChoiceOptionDiscardedTerminal()
         {
             var startingRule = $"choice";
@@ -1253,6 +1380,42 @@ namespace ParserTests
             Check.That(builtParser.Errors.First().Code).IsEqualTo(ErrorCodes.PARSER_LEFT_RECURSIVE);
         }
 
+
+        [Fact]
+        public void TestIssue507TransitiveEmptyStarter()
+        {
+            var startingRule = $"x";
+            var parserInstance = new Issue507TransitiveEmptyStarterParser();
+            var builder = new ParserBuilder<OptionTestToken, string>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Check.That(builtParser).IsOk();
+            var parser = builtParser.Result;
+            var parserResultNotEmpty = parser.Parse("a a a");
+            Check.That(parserResultNotEmpty).IsOkParsing();
+            Check.That(parserResultNotEmpty.Result).IsEqualTo("a,a,a");
+            
+            var parserResultEmpty = parser.Parse("");
+            Check.That(parserResultEmpty).IsOkParsing();
+            Check.That(parserResultEmpty.Result).IsEqualTo("empty");
+        }
+        
+        [Fact]
+        public void TestIssue507MoreTransitiveEmptyStarter()
+        {
+            var startingRule = $"x";
+            var parserInstance = new Issue507MoreTransitiveEmptyStarterParser();
+            var builder = new ParserBuilder<OptionTestToken, string>();
+            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            Check.That(builtParser).IsOk();
+            var parser = builtParser.Result;
+            var parserResultNotEmpty = parser.Parse("a a a");
+            Check.That(parserResultNotEmpty).IsOkParsing();
+            Check.That(parserResultNotEmpty.Result).IsEqualTo("a,a,a");
+            
+            var parserResultEmpty = parser.Parse("");
+            Check.That(parserResultEmpty).IsOkParsing();
+            Check.That(parserResultEmpty.Result).IsEqualTo("empty");
+        }
 
         [Fact]
         public void TestIssue190()

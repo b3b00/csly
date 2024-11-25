@@ -9,8 +9,6 @@ namespace sly.parser.generator.visitor
         OUT VisitOptionNode(bool exists, OUT child);
         OUT VisitNode(SyntaxNode<IN> node, IList<OUT> children);
         OUT VisitManyNode(ManySyntaxNode<IN> node, IList<OUT> children);
-
-        OUT VisitEpsilon();
         OUT VisitLeaf(Token<IN> token);
     }
 }

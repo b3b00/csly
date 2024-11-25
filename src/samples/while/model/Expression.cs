@@ -1,9 +1,11 @@
-﻿using csly.whileLang.compiler;
+﻿using System.Collections.Generic;
+using csly.whileLang.compiler;
 
 namespace csly.whileLang.model
 {
     public interface Expression : WhileAST
     {
         WhileType Whiletype { get; set; }
+        
     }
 }

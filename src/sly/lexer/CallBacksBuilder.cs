@@ -11,8 +11,11 @@ namespace sly.lexer
         {
             var attributes =
                 (CallBacksAttribute[]) typeof(IN).GetCustomAttributes(typeof(CallBacksAttribute), true);
-            Type callbackClass = attributes[0].CallBacksClass;
-            ExtractCallBacks<IN>(callbackClass,lexer);
+            if (attributes.Length > 0)
+            {
+                Type callbackClass = attributes[0].CallBacksClass;
+                ExtractCallBacks<IN>(callbackClass, lexer);
+            }
 
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using csly.whileLang.compiler;
 using sly.lexer;
@@ -44,6 +45,13 @@ namespace csly.whileLang.model
 
         public Emit<Func<int>> EmitByteCode(CompilerContext context, Emit<Func<int>> emiter)
         {
+            var ternaries = new List<TernaryExpression>();
+            Value.AppendTernaries(ternaries);
+            foreach (var ternary in ternaries)
+            {
+                ternary.EmitByteCodeForVariable(context, emiter);
+            }
+            
             Local local = null;
             if (IsVariableCreation)
                 local = emiter.DeclareLocal(TypeConverter.WhileToType(CompilerScope.GetVariableType(VariableName)),
@@ -53,6 +61,11 @@ namespace csly.whileLang.model
             Value.EmitByteCode(context, emiter);
             emiter.StoreLocal(local);
             return emiter;
+        }
+
+        public void AppendTernaries(List<TernaryExpression> ternaries)
+        {
+            Value.AppendTernaries(ternaries);
         }
     }
 }

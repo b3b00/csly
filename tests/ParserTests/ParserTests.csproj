@@ -8,9 +8,9 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="NFluent" Version="3.0.4" />
-    <PackageReference Include="xunit" Version="2.9.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -30,8 +30,10 @@
     <ProjectReference Include="..\..\src\samples\postProcessedLexerParser\postProcessedLexerParser.csproj" />
     <ProjectReference Include="..\..\src\samples\SimpleExpressionParser\SimpleExpressionParser.csproj" />
     <ProjectReference Include="..\..\src\samples\SimpleTemplate\SimpleTemplate.csproj" />
+    <ProjectReference Include="..\..\src\samples\SlowEOS\SlowEOS.csproj" />
     <ProjectReference Include="..\..\src\samples\while\while.csproj" />
     <ProjectReference Include="..\..\src\samples\XML\XML.csproj" />
+    <ProjectReference Include="..\..\src\sly\sly.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />

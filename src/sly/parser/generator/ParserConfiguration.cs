@@ -24,8 +24,6 @@ namespace sly.parser.generator
             if (!NonTerminals.ContainsKey(nonTerminal.Name)) NonTerminals[nonTerminal.Name] = nonTerminal;
         }
 
-        public bool HasExplicitTokens() => GetAllExplicitTokenClauses().Any();
-
         public List<TerminalClause<IN>> GetAllExplicitTokenClauses()
         {
             List<TerminalClause<IN>> clauses = new List<TerminalClause<IN>>();
@@ -51,9 +49,9 @@ namespace sly.parser.generator
                             }
                         }
 
-                        if (clause is OptionClause<IN> option)
+                        if (clause is not OptionClause<IN> option) continue;
                         {
-                            if (option.Clause is TerminalClause<IN> terminal && terminal.IsExplicitToken)
+                            if (option.Clause is TerminalClause<IN> { IsExplicitToken: true } terminal)
                                 clauses.Add(terminal);
                         }
                     }
@@ -63,6 +61,15 @@ namespace sly.parser.generator
             return clauses;
         }
 
+        public List<Rule<IN>> GetRulesForNonTerminal(string nonTerminal)
+        {
+            if (NonTerminals.TryGetValue(nonTerminal, out NonTerminal<IN> nonTerminalConfig))
+            {
+                return nonTerminalConfig.Rules.ToList();
+            }
+            return new List<Rule<IN>>();
+        }
+        
         [ExcludeFromCodeCoverage]
         public string Dump()
         {

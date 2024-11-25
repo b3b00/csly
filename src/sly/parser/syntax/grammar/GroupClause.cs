@@ -43,6 +43,7 @@ namespace sly.parser.syntax.grammar
         }
 
 
+        [ExcludeFromCodeCoverage]
         public bool Equals(IClause<T> other)
         {
             if (other is GroupClause<T> group && group.Clauses.Count == Clauses.Count)

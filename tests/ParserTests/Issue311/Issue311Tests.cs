@@ -55,12 +55,12 @@ public class Issue311Tests
         var lexed = lexer.Tokenize("'str1' eq 'str2'");
         Check.That(lexed).IsOkLexing();
         var tokens = lexed.Tokens;
-        Check.That(tokens.Tokens).Not.IsNullOrEmpty();
-        Check.That(tokens.Tokens).CountIs(4);
+        Check.That(tokens.MainTokens()).Not.IsNullOrEmpty();
+        Check.That(tokens.MainTokens()).CountIs(4);
 
-        var z = tokens.Tokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes)).ToList();
+        var z = tokens.MainTokens().Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes)).ToList();
         
-        Check.That(tokens.Tokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes))).ContainsExactly(expectations);
+        Check.That(tokens.MainTokens().Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes))).ContainsExactly(expectations);
         
         expectations = new List<(Token311, string)>()
         {
@@ -71,9 +71,10 @@ public class Issue311Tests
         lexed = lexer.Tokenize("'str''1' eq 'str2'");
         Check.That(lexed).IsOkLexing();
         tokens = lexed.Tokens;
-        Check.That(tokens.Tokens).Not.IsNullOrEmpty();
-        Check.That(tokens.Tokens).CountIs(4);
-        Check.That(tokens.Tokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes))).ContainsExactly(expectations);
+        var mainTokens = tokens.MainTokens();
+        Check.That(mainTokens).Not.IsNullOrEmpty();
+        Check.That(mainTokens).CountIs(4);
+        Check.That(mainTokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes))).ContainsExactly(expectations);
     }
     
     [Fact]
@@ -93,14 +94,15 @@ public class Issue311Tests
         var lexed = lexer.Tokenize("'str1' eq 42.42");
         Check.That(lexed).IsOkLexing();
         var tokens = lexed.Tokens;
-        Check.That(tokens.Tokens).Not.IsNullOrEmpty();
-        Check.That(tokens.Tokens).CountIs(4);
+        var mainTokens = tokens.MainTokens();
+        Check.That(mainTokens).Not.IsNullOrEmpty();
+        Check.That(mainTokens).CountIs(4);
 
-        var z = tokens.Tokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes)).ToList();
+        var z = mainTokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes)).ToList();
         
-        Check.That(tokens.Tokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes))).ContainsExactly(expectations);
+        Check.That(mainTokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes))).ContainsExactly(expectations);
 
-        Check.That(tokens.Tokens[2].DoubleValue).IsEqualTo(42.42);
+        Check.That(mainTokens[2].DoubleValue).IsEqualTo(42.42);
     }
 
     [Fact] 
@@ -120,13 +122,14 @@ public class Issue311Tests
         var lexed = lexer.Tokenize("'str1' eq 42,42");
         Check.That(lexed).IsOkLexing();
         var tokens = lexed.Tokens;
-        Check.That(tokens.Tokens).Not.IsNullOrEmpty();
-        Check.That(tokens.Tokens).CountIs(4);
+        var mainTokens = tokens.MainTokens();
+        Check.That(mainTokens).Not.IsNullOrEmpty();
+        Check.That(mainTokens).CountIs(4);
 
-        List<(Token311ComaDecimal,string)> z = tokens.Tokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes)).ToList();
+        List<(Token311ComaDecimal,string)> z = mainTokens.Take(3).Extracting(x => (x.TokenID, x.StringWithoutQuotes)).ToList();
         
         Check.That(z).ContainsExactly(expectations);
 
-        Check.That(tokens.Tokens[2].DoubleValue).IsEqualTo(42.42);
+        Check.That(mainTokens[2].DoubleValue).IsEqualTo(42.42);
     }
 }

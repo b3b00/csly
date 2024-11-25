@@ -42,3 +42,10 @@ coverage.json
 ruleset1.ruleset
 opencov.bat
 BenchmarkDotNet.Artifacts
+
+*.nupkg
+*.snupkg
+*.swp
+AotTester/*
+*.dtp
+*.dtp.state

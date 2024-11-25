@@ -110,7 +110,7 @@ namespace ParserTests
         {
             var exprParser = new ExpressionParser();
 
-            var builder = new ParserBuilder<ExpressionToken, int>();
+            var builder = new ParserBuilder<ExpressionToken, int>("en");
             var Parser = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
             var r = Parser.Parse("2 @ 2");
             Check.That(r.IsError).IsTrue();
@@ -120,6 +120,7 @@ namespace ParserTests
             Check.That(error.Line).IsEqualTo(1);
             Check.That(error.Column).IsEqualTo(3);
             Check.That(error.UnexpectedChar).IsEqualTo('@');
+            Check.That(error.ErrorMessage).IsEqualTo("Lexical Error, line 1, column 3 : Unrecognized symbol '@' (64)");
         }
     }
 }

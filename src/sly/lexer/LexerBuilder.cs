@@ -80,7 +80,7 @@ namespace sly.lexer
                     if (enumAttributes.Length == 0 && singleCommentAttributes.Length == 0 &&
                         multiCommentAttributes.Length == 0 && commentAttributes.Length == 0)
                     {
-                        result?.AddError(new LexerInitializationError(ErrorLevel.WARN,
+                        result.AddError(new LexerInitializationError(ErrorLevel.WARN,
                             $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme",
                             ErrorCodes.NOT_AN_ERROR));
                     }
@@ -115,25 +115,31 @@ namespace sly.lexer
                     var labels = result.Result.LexemeLabels;
                     LexerPostProcess<IN> post = tokens =>
                     {
-
-                        var labeledTokens = tokens.Select(token =>
+                        var labeledTokens = tokens;
+                        var count = labels.Select(x => x.Value.Count).Sum(); 
+                        if (count > 0)
                         {
-                            token.Label = token.TokenID.ToString();
-                            if (labels.TryGetValue(token.TokenID, out var tokenLabels) 
-                                && tokenLabels.TryGetValue(lang, out string label))
+                            labeledTokens = tokens.Select(token =>
                             {
-                                token.Label = label;
-                            }
-                            else if (token.IsUnIndent)
-                            {
-                                token.Label = "<<UINDENT>>";
-                            }
-                            else if (token.IsIndent)
-                            {
-                                token.Label = "<<INDENT>>";
-                            }
-                            return token;
-                        }).ToList();
+                                token.Label = token.TokenID.ToString();
+                                if (labels.TryGetValue(token.TokenID, out var tokenLabels)
+                                    && tokenLabels.TryGetValue(lang, out string label))
+                                {
+                                    token.Label = label;
+                                }
+                                else if (token.IsUnIndent)
+                                {
+                                    token.Label = "<<UINDENT>>";
+                                }
+                                else if (token.IsIndent)
+                                {
+                                    token.Label = "<<INDENT>>";
+                                }
+
+                                return token;
+                            }).ToList();
+                        }
+
                         if (lexerPostProcess != null)
                         {
                             return lexerPostProcess(labeledTokens);
@@ -175,7 +181,7 @@ namespace sly.lexer
                     }
                     else
                     {
-                        result = BuildRegexLexer<IN>(attributes, result);
+                        result = BuildRegexLexer<IN>(attributes, lang, result);
                     }
                 }
                 else if (hasGenericLexemes)
@@ -240,10 +246,15 @@ namespace sly.lexer
         }
 
 
-        private static BuildResult<ILexer<IN>> BuildRegexLexer<IN>(Dictionary<IN, (List<LexemeAttribute> lexemes,List<LexemeLabelAttribute> labels)> attributes,
+        private static BuildResult<ILexer<IN>> BuildRegexLexer<IN>(
+            Dictionary<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)> attributes,
+            string lang,
             BuildResult<ILexer<IN>> result) where IN : struct
         {
-            var lexer = new Lexer<IN>();
+            var lexer = new Lexer<IN>()
+            {
+                I18n = lang
+            };
             foreach (var pair in attributes)
             {
                 var tokenID = pair.Key;
@@ -256,8 +267,7 @@ namespace sly.lexer
                     {
                         foreach (var lexeme in lexemes.lexemes)
                         {
-                            var channel = lexeme.Channel.HasValue ? lexeme.Channel.Value : 0;
-                            lexer.AddDefinition(new TokenDefinition<IN>(tokenID, lexeme.Pattern, channel,
+                            lexer.AddDefinition(new TokenDefinition<IN>(tokenID, lexeme.Pattern, lexeme.Channel,
                                 lexeme.IsSkippable,
                                 lexeme.IsLineEnding));
                         }
@@ -435,8 +445,17 @@ namespace sly.lexer
             var subLexers = GetSubLexers(attributes);
             foreach (var subLexer in subLexers)
             {
-                var x = BuildGenericLexer(subLexer.Value, extensionBuilder, result, lang, explicitTokens);
-                var currentGenericLexer = x.Result as GenericLexer<IN>;
+                BuildResult<ILexer<IN>> b = null;
+                if (subLexer.Key == ModeAttribute.DefaultLexerMode)
+                {
+                    b = BuildGenericLexer(subLexer.Value, extensionBuilder, result, lang, explicitTokens);
+                }
+                else
+                {
+                    b = BuildGenericLexer(subLexer.Value, extensionBuilder, result, lang, null);
+                }
+
+                var currentGenericLexer = b.Result as GenericLexer<IN>;
                 if (genLexer == null)
                 {
                     genLexer = currentGenericLexer;
@@ -536,18 +555,18 @@ namespace sly.lexer
 
                         if (lexeme.IsUpTo)
                         {
-                            lexer.AddUpTo(tokenID, result, lexeme.GenericTokenParameters);
+                            lexer.AddUpTo(tokenID, result, lexeme.GenericTokenParameters, channel:lexeme.Channel);
                         }
 
                         if (lexeme.IsString)
                         {
-                            var (delimiter, escape) = GetDelimiters(lexeme, "\"", "\\");
-                            lexer.AddStringLexem(tokenID, result, delimiter, escape);
+                            var (delimiter, escape, doEscape) = GetDelimiters(lexeme, "\"", "\\", true);
+                            lexer.AddStringLexem(tokenID, result, delimiter, escape, doEscape);
                         }
 
                         if (lexeme.IsChar)
                         {
-                            var (delimiter, escape) = GetDelimiters(lexeme, "'", "\\");
+                            var (delimiter, escape, doEscape) = GetDelimiters(lexeme, "'", "\\", true);
                             lexer.AddCharLexem(tokenID, result, delimiter, escape);
                         }
 
@@ -560,7 +579,7 @@ namespace sly.lexer
                         {
                             lexer.FSMBuilder.Push(lexeme.Pushtarget);
                         }
-
+                        
                         if (lexeme.IsPop)
                         {
                             lexer.FSMBuilder.Pop();
@@ -684,8 +703,8 @@ namespace sly.lexer
         }
 
 
-        private static (string delimiter, string escape) GetDelimiters(LexemeAttribute lexeme, string delimiter,
-            string escape)
+        private static (string delimiter, string escape, bool doEscape) GetDelimiters(LexemeAttribute lexeme, string delimiter,
+            string escape, bool doEscape)
         {
             if (lexeme.HasGenericTokenParameters)
             {
@@ -694,9 +713,13 @@ namespace sly.lexer
                 {
                     escape = lexeme.GenericTokenParameters[1];
                 }
+                if (lexeme.GenericTokenParameters.Length > 2)
+                {
+                    Boolean.TryParse(lexeme.GenericTokenParameters[2], out doEscape);
+                }
             }
 
-            return (delimiter, escape);
+            return (delimiter, escape, doEscape);
         }
 
         private static BuildResult<ILexer<IN>> CheckStringAndCharTokens<IN>(

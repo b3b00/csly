@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using csly.whileLang.compiler;
 using sly.lexer;
@@ -38,6 +39,11 @@ namespace csly.whileLang.model
             emiter = Value.EmitByteCode(context, emiter);
             emiter.Return();
             return emiter;
+        }
+
+        public void AppendTernaries(List<TernaryExpression> ternaries)
+        {
+            Value.AppendTernaries(ternaries);
         }
     }
 }

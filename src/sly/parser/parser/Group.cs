@@ -9,12 +9,12 @@ namespace sly.parser.parser
     {
         public readonly List<GroupItem<IN, OUT>> Items;
 
-        private Dictionary<string, GroupItem<IN, OUT>> ItemsByName;
+        private readonly Dictionary<string, GroupItem<IN, OUT>> _itemsByName;
 
         public Group()
         {
             Items = new List<GroupItem<IN, OUT>>();
-            ItemsByName = new Dictionary<string, GroupItem<IN, OUT>>();
+            _itemsByName = new Dictionary<string, GroupItem<IN, OUT>>();
         }
 
         public int Count => Items.Count;
@@ -33,26 +33,26 @@ namespace sly.parser.parser
 
         public OUT Value(string name)
         {
-            return ItemsByName.TryGetValue(name, out var value) ? value.Value : default(OUT);
+            return _itemsByName.TryGetValue(name, out var value) ? value.Value : default(OUT);
         }
 
         public Token<IN> Token(string name)
         {
-            return ItemsByName.TryGetValue(name, out var value) ? value.Token : null;
+            return _itemsByName.TryGetValue(name, out var value) ? value.Token : null;
         }
 
         public void Add(string name, Token<IN> token)
         {
             var groupItem = new GroupItem<IN, OUT>(name, token);
             Items.Add(groupItem);
-            ItemsByName[name] = groupItem;
+            _itemsByName[name] = groupItem;
         }
 
         public void Add(string name, OUT value)
         {
             var groupItem = new GroupItem<IN, OUT>(name, value);
             Items.Add(groupItem);
-            ItemsByName[name] = groupItem;
+            _itemsByName[name] = groupItem;
         }
 
 

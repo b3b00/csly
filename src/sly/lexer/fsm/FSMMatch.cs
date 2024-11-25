@@ -66,6 +66,8 @@ namespace sly.lexer.fsm
                 IsIndent = true,
                 IsSuccess = true,
                 IndentationLevel = level,
+                IsPop = false,
+                IsPush = false,
                 Result = new Token<N> {IsIndent = true, IsEOS = false}
             };
         }
@@ -76,6 +78,8 @@ namespace sly.lexer.fsm
             {
                 IsUnIndent = true,
                 IsSuccess = true,
+                IsPop = false,
+                IsPush = false,
                 IndentationLevel = level,
                 Result = new Token<N> {IsUnIndent = true, IsEOS = false},
                 UnIndentCount = count
@@ -103,7 +107,9 @@ namespace sly.lexer.fsm
             }
             IsLineEnding = isLineEnding;
             IsPop = isPop;
+            NewPosition.IsPop = isPop;
             IsPush = isPush;
+            NewPosition.IsPush = isPush;
             IgnoredTokens = new List<Token<N>>();
         }
         

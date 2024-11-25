@@ -1,0 +1,7 @@
+{
+  "stryker-config": {
+    "reporters": ["progress", "html"],
+    "project":"C:/Users/olduh/dev/csly/src/sly/sly.csproj"
+    
+  }
+}

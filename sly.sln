@@ -39,6 +39,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XML", "src/samples/XML/XML.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTemplate", "src/samples/SimpleTemplate/SimpleTemplate.csproj", "{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlowEOS", "src\samples\SlowEOS\SlowEOS.csproj", "{F85C43C2-28EA-4486-9223-5EA3FC42D417}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -120,6 +122,10 @@ Global
 		{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F85C43C2-28EA-4486-9223-5EA3FC42D417}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F85C43C2-28EA-4486-9223-5EA3FC42D417}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F85C43C2-28EA-4486-9223-5EA3FC42D417}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F85C43C2-28EA-4486-9223-5EA3FC42D417}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -136,6 +142,7 @@ Global
 		{8F703C3C-0D10-4F43-AC2E-14843D59E460} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{81E72CFA-A6D6-4DB4-B3B5-E167064E7858} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
+		{F85C43C2-28EA-4486-9223-5EA3FC42D417} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43254130-CF3E-480E-952F-E50CA5D2E417}

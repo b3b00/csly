@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using csly.whileLang.compiler;
 using sly.lexer;
@@ -52,7 +53,12 @@ namespace csly.whileLang.model
         {
             var loopLabel = emiter.DefineLabel();
             var outLabel = emiter.DefineLabel();
-
+            var ternaries = new List<TernaryExpression>();
+            Condition.AppendTernaries(ternaries);
+            foreach (var ternary in ternaries)
+            {
+                ternary.EmitByteCodeForVariable(context, emiter);
+            }
             emiter.MarkLabel(loopLabel);
             Condition.EmitByteCode(context, emiter);
             emiter.BranchIfFalse(outLabel);
@@ -60,6 +66,12 @@ namespace csly.whileLang.model
             emiter.Branch(loopLabel);
             emiter.MarkLabel(outLabel);
             return emiter;
+        }
+
+        public void AppendTernaries(List<TernaryExpression> ternaries)
+        {
+            Condition.AppendTernaries(ternaries);
+            BlockStmt.AppendTernaries(ternaries);
         }
     }
 }

@@ -13,7 +13,10 @@ namespace ParserTests.samples
         {
             var jsonParser = new EbnfJsonGenericParser();
             var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
-            Parser = builder.BuildParser(jsonParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root").Result;
+            
+            var build  = builder.BuildParser(jsonParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Check.That(build).IsOk();
+            Parser = build.Result;
         }
 
         private static Parser<JsonTokenGeneric, JSon> Parser;

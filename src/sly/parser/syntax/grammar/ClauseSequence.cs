@@ -36,6 +36,7 @@ namespace sly.parser.syntax.grammar
             return Clauses.Select(c => c.Dump()).Aggregate((d1, d2) => d1 + " " + d2);
         }
         
+        [ExcludeFromCodeCoverage]
         public bool Equals(IClause<T> other)
         {
             if (other is ClauseSequence<T> sequence && sequence.Clauses.Count == Clauses.Count)

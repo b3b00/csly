@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using csly.indentedWhileLang.compiler;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.interpreter;
@@ -90,7 +91,7 @@ while a < 10 do
             var interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result, true);
             Check.That(context.variables).IsSingle();
-            Check.That(context).HasVariableWithValue("a", 10);
+            Check.That(context).HasVariableWithIntValue("a", 10);
             
         }
 
@@ -114,8 +115,8 @@ while i < 11 do
             var interpreter = new Interpreter();
             var context = interpreter.Interprete(result.Result, true);
             Check.That(context.variables).CountIs(2);
-            Check.That(context).HasVariableWithValue("i", 11);
-            Check.That(context).HasVariableWithValue("r", 3628800);
+            Check.That(context).HasVariableWithIntValue("i", 11);
+            Check.That(context).HasVariableWithIntValue("r", 3628800);
         }
 
 
@@ -128,8 +129,8 @@ r:=1
 i:=1
 while i < 11 do 
     r := r * i
-    print ""r="".r
-    print ""i="".i
+    print $""r="".r
+    print $""i="".i
     i := i + 1
 return r";
             var compiler = new IndentedWhileCompiler();
@@ -147,9 +148,9 @@ return r";
             var program = @"
 # TestIfThenElse
 if true then
-    a := ""hello""
+    a := $""hello""
 else
-    b := ""world""
+    b := $""world""
 ";
             var result = parser.Parse(program);
             Check.That(result).IsOkParsing();
@@ -170,7 +171,9 @@ else
             var thenAssign = thenBlock.Get(0) as AssignStatement;
             Check.That(thenAssign.VariableName).IsEqualTo("a");
             Check.That(thenAssign.Value).IsInstanceOf<StringConstant>();
-            Check.That((thenAssign.Value as StringConstant).Value).IsEqualTo("hello");
+            var fstring = thenAssign.Value as StringConstant;
+            Check.That(fstring).IsNotNull();
+            Check.That(fstring.Value).IsEqualTo("hello");
 
             Check.That(si.ElseStmt).IsInstanceOf<SequenceStatement>();
             var elseBlock = si.ElseStmt as SequenceStatement;
@@ -179,7 +182,9 @@ else
             var elseAssign = elseBlock.Get(0) as AssignStatement;
             Check.That(elseAssign.VariableName).IsEqualTo("b");
             Check.That(elseAssign.Value).IsInstanceOf<StringConstant>();
-            Check.That((elseAssign.Value as StringConstant).Value).IsEqualTo("world");
+            fstring = elseAssign.Value as StringConstant;
+            Check.That(fstring).IsNotNull();
+            Check.That(fstring.Value).IsEqualTo("world");
         }
 
         [Fact]
@@ -195,7 +200,7 @@ if true then
         a := 2
 else
     a := 3
-    b := ""world""
+    b := $""world""
 return a
 ";
             var compiler = new IndentedWhileCompiler();
@@ -205,6 +210,56 @@ return a
             Check.That(f).IsEqualTo(1);
         }
 
+
+        [Fact]
+        public void TestFString()
+        {
+            var buildResult = buildParser();
+            var parser = buildResult.Result;
+            var program = @"
+# fstring
+v1 := 48
+v2 := 152
+b := true
+fstring := $""v1 :> {v1} < v2 :> {v2} < v3 :> {v1+v2} <  v4 :>{$""hello,"".$"" world""}< v5 :>{(? b -> $""true"" | $""false"")}< - end""
+print fstring
+return 100
+";
+            
+            Console.WriteLine("==================================");
+            Console.WriteLine("=== parse fstring");
+            Console.WriteLine("==================================");
+            Console.WriteLine();
+            var result = parser.Parse(program);
+            Check.That(result).IsOkParsing();
+            Check.That(result.Result).IsNotNull();
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
+            SequenceStatement seq = result.Result as SequenceStatement;
+            Check.That(seq.Count).IsEqualTo(6);
+            var fstringAssign = seq.Get(3) as AssignStatement;
+            Check.That(fstringAssign).IsNotNull();
+            Check.That(fstringAssign.VariableName).IsEqualTo("fstring");
+            Check.That(fstringAssign.Value).IsInstanceOf<BinaryOperation>();
+            var fString = fstringAssign.Value as BinaryOperation;
+            Check.That(fString.Operator).IsEqualTo(BinaryOperator.CONCAT);
+            var interpreter = new Interpreter();
+            var context = interpreter.Interprete(result.Result, true);
+            Check.That(context.variables).CountIs(4);
+            Check.That(context).HasVariableWithIntValue("v1", 48);
+            Check.That(context).HasVariableWithIntValue("v2", 152);
+            Check.That(context).HasVariableWithBoolValue("b", true);
+            string expected = "v1 :> 48 < v2 :> 152 < v3 :> 200 <  v4 :>hello, world< v5 :>true< - end";
+            Check.That(context).HasVariableWithStringValue("fstring", expected);
+            
+            var compiler = new IndentedWhileCompiler();
+            var func = compiler.CompileToFunction(program,true);
+            Check.That(func).IsNotNull();
+            Printer.Clear();
+            var f = func();
+            Check.That(Printer.lines).CountIs(1);
+            Check.That(Printer.lines[0]).IsEqualTo(expected);
+            
+        }
 
         [Fact]
         public void TestInfiniteWhile()
@@ -380,9 +435,10 @@ if true then
             x := 28";
             var lexed = _lexer.Result.Tokenize(program);
             Check.That(lexed).IsOkLexing();
-            Check.That(lexed.Tokens.Tokens).Not.IsEmpty();
-            Check.That(lexed.Tokens.Tokens.Last().IsEOS).IsTrue();
-            var lastToken = lexed.Tokens.Tokens[lexed.Tokens.Tokens.Count - 2];
+            var mainTokens = lexed.Tokens.MainTokens();
+            Check.That(mainTokens).Not.IsEmpty();
+            Check.That(mainTokens.Last().IsEOS).IsTrue();
+            var lastToken = mainTokens[mainTokens.Count - 2];
             Check.That(lastToken).IsNotNull();
             Check.That(lastToken.TokenID)
                 .IsEqualTo(IndentedWhileTokenGeneric.INT);

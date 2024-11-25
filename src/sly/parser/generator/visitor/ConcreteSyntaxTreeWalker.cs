@@ -46,10 +46,6 @@ namespace sly.parser.generator.visitor
                     return Visit(node);
                 case SyntaxNode<IN> node:
                     return Visit(node);
-                case SyntaxEpsilon<IN> epsilon:
-                {
-                    return Visitor.VisitEpsilon();
-                }
                 default:
                     return Visitor.VisitLeaf(new Token<IN>() {TokenID = default(IN),SpanValue="NULL".ToCharArray()});
             }
@@ -91,7 +87,7 @@ namespace sly.parser.generator.visitor
         
         private OUT Visit(ManySyntaxNode<IN> manyNode)
         {
-            
+
             var children = new List<OUT>();
 
             foreach (var n in manyNode.Children)
@@ -101,8 +97,6 @@ namespace sly.parser.generator.visitor
                 children.Add(v);
             }
 
-           
-            //return callback(node, children);
             return Visitor.VisitManyNode(manyNode,children);
         }
 

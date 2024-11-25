@@ -5,6 +5,7 @@ using simpleExpressionParser;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
+using ExpressionToken = simpleExpressionParser.ExpressionToken;
 
 namespace ParserTests.Issue164
 {
