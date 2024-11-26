@@ -68,11 +68,9 @@ namespace sly.parser.generator.visitor
                 {
                     var edge = new MermaidArrow(result, child)
                     {
-                        // Set all available properties
                         ArrowHeadShape = "none"
                     };
                     Graph.Add(edge);
-                    //Graph.Add(child);
                 }
             }
             return result;

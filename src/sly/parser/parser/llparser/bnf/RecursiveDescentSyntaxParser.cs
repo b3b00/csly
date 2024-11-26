@@ -43,13 +43,8 @@ namespace sly.parser.llparser.bnf
 
             foreach (var rule in nt.Rules)
             {
-                if (!tokens[0].IsEOS && rule.Match(tokens,0,Configuration))
-                {
-                    matchingRuleCount++;
-                    var r = Parse(tokens, rule, 0, start, parsingContext);
-                    rs.Add(r);
-                }
-                else if (tokens[0].IsEOS && rule.MayBeEmpty)
+                if (!tokens[0].IsEOS && rule.Match(tokens,0,Configuration) 
+                    || tokens[0].IsEOS && rule.MayBeEmpty)
                 {
                     matchingRuleCount++;
                     var r = Parse(tokens, rule, 0, start, parsingContext);
@@ -74,7 +69,6 @@ namespace sly.parser.llparser.bnf
                 {
                     int lastPosition = -1;
                     List<SyntaxParseResult<IN>> furtherResults = new List<SyntaxParseResult<IN>>();
-                    //List<UnexpectedTokenSyntaxError<IN>> furtherErrors = new List<UnexpectedTokenSyntaxError<IN>>();
                     foreach (var r in rs)
                     {
                         if (r.EndingPosition > lastPosition)

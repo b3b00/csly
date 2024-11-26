@@ -251,16 +251,14 @@ namespace sly.lexer.fsm
 
             if (result != null)
             {
-                if ((result.Result as Token<GenericToken>).TokenID == GenericToken.UpTo)
+                if ((result.Result as Token<GenericToken>).TokenID == GenericToken.UpTo
+                    && ignoredTokens.Count > 0)
                 {
-                    if (ignoredTokens.Count > 0)
-                    {
-                        int ignoredLength = ignoredTokens.Select(x => x.SpanValue.Length).Sum();
-                        int start = result.Result.Position.Index - ignoredLength; 
-                        result.Result.Position.Index  -= ignoredLength;
-                        var value = source.Slice(start, ignoredLength+result.Result.SpanValue.Length);
-                        result.Result.SpanValue = value;
-                    }
+                    int ignoredLength = ignoredTokens.Select(x => x.SpanValue.Length).Sum();
+                    int start = result.Result.Position.Index - ignoredLength;
+                    result.Result.Position.Index -= ignoredLength;
+                    var value = source.Slice(start, ignoredLength + result.Result.SpanValue.Length);
+                    result.Result.SpanValue = value;
                 }
                 // Backtrack
                 var length = result.Result.Value.Length;
