@@ -15,7 +15,6 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
         string nonTerminalName, SyntaxParsingContext<IN> parsingContext)
     {
         var currentPosition = position;
-        var isError = false;
         var children = new List<ISyntaxNode<IN>>();
         if (!tokens[position].IsEOS && rule.Match(tokens, position, Configuration) && rule.Clauses != null &&
             rule.Clauses.Count > 0 && MatchExpressionRuleScheme(rule))
@@ -46,7 +45,6 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
                         if (firstResult.Root is SyntaxNode<IN>)
                         {
                             firstResult.AddErrors(secondResult.GetErrors());
-                            firstResult.AddExpectings(secondResult.Expecting);
                             return firstResult;
                         }
                     }
@@ -66,7 +64,6 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
                         if (firstResult.Root is SyntaxNode<IN>)
                         {
                             firstResult.AddErrors(secondResult.GetErrors());
-                            firstResult.AddExpectings(secondResult.Expecting);
                             return firstResult;
                         }
                     }

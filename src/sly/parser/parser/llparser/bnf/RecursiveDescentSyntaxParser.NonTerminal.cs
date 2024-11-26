@@ -126,7 +126,6 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             if (ruleResult.GetErrors() != null)
             {
                 terr.AddRange(ruleResult.GetErrors());
-                result.AddExpectings(ruleResult.GetErrors().SelectMany(x => x.ExpectedTokens));
             }
         }
 

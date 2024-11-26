@@ -28,8 +28,6 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         if (result.IsError)
         {
             result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
-            
-            result.AddExpecting(terminal.ExpectedToken);
         }
 
         parsingContext.Memoize(terminal, position, result);

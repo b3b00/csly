@@ -50,16 +50,6 @@ namespace sly.parser
         
         public List<LeadingToken<IN>> Expecting {get; set;}
 
-        public void AddExpecting(LeadingToken<IN> expected)
-        {
-           
-        }
-        
-        public void AddExpectings(IEnumerable<LeadingToken<IN>> expected)
-        {
-            
-        }
-
         public bool HasByPassNodes { get; set; } = false;
         public bool UsesOperations { get; set; }
     }
