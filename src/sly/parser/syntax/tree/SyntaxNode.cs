@@ -18,7 +18,7 @@ namespace sly.parser.syntax.tree
             Visitor = visitor;
         }
 
-        private bool _isEpsilon = false;
+        private readonly bool _isEpsilon;
         public bool IsEpsilon => _isEpsilon;
     
         public List<ISyntaxNode<IN>> Children { get; }

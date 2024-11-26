@@ -309,8 +309,6 @@ namespace sly.lexer
         {
             if (!LexerFsm.IgnoreEOL)
             {
-                var newPosition = r.Result.Position.Clone();
-
                 if (r.IsLineEnding) // only compute if token is eol
                 {
                     var eols = tokens.Where(t => t.IsLineEnding).ToList();
@@ -797,12 +795,9 @@ namespace sly.lexer
                 }
                 else if (escaping)
                 {
-                    if (escaping)
+                    if (current != stringDelimiterChar)
                     {
-                        if (current != stringDelimiterChar)
-                        {
-                            newValue += escapeStringDelimiterChar;
-                        }
+                        newValue += escapeStringDelimiterChar;
                     }
                     escaping = false;
                 }

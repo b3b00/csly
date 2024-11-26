@@ -226,10 +226,6 @@ print fstring
 return 100
 ";
             
-            Console.WriteLine("==================================");
-            Console.WriteLine("=== parse fstring");
-            Console.WriteLine("==================================");
-            Console.WriteLine();
             var result = parser.Parse(program);
             Check.That(result).IsOkParsing();
             Check.That(result.Result).IsNotNull();
