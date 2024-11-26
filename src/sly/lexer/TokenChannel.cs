@@ -9,8 +9,6 @@ namespace sly.lexer
     {
         public readonly List<Token<IN>> Tokens;
 
-        private List<Token<IN>> _notNullTokens;
-
         private List<Token<IN>> _notNullOrEosTokens;
         public List<Token<IN>> NotNullOrEosTokens => _notNullOrEosTokens; 
         
@@ -20,7 +18,6 @@ namespace sly.lexer
         public TokenChannel(List<Token<IN>> tokens, int channelId)
         {
             Tokens = tokens;
-            _notNullTokens = tokens.Where(x => x != null).ToList();
             _notNullOrEosTokens = tokens.Where(x => x != null && !x.IsEOS).ToList();
             ChannelId = channelId;
         }
@@ -74,7 +71,6 @@ namespace sly.lexer
 
         public void PreCompute()
         {
-            _notNullTokens = Tokens.Where(x => x != null).ToList();
             _notNullOrEosTokens = Tokens.Where(x => x != null && !x.IsEOS).ToList();
         }
     }
