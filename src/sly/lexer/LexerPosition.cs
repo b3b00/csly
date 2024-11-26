@@ -88,6 +88,25 @@ namespace sly.lexer
         {
             return p1.Index != p2.Index;
         }
+
+        public bool Equals(LexerPosition p)
+        {
+            return Index == p.Index;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is LexerPosition position)
+            {
+                return Equals(position);
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return Index.GetHashCode();
+        }
     }
     
 

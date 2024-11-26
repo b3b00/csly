@@ -356,13 +356,13 @@ namespace sly.parser.generator
             if (precedence > 0)
             {
                 var tokens = operationsByPrecedence[precedence].Select<OperationMetaData<IN>, string>(o => o.Operatorkey).Distinct().ToList<string>();
-                return GetNonTerminalNameForPrecedence(precedence, tokens);
+                return GetNonTerminalNameForPrecedence(tokens);
             }
 
             return operandName;
         }
 
-        private string GetNonTerminalNameForPrecedence(int precedence, List<string> operators) 
+        private string GetNonTerminalNameForPrecedence( List<string> operators) 
         {
             var operatorsPart = operators
                 //.Select<IN, string>(oper => oper.ToString())
