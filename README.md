@@ -1,7 +1,7 @@
 # C# lex and yacc #      
 
  [![Coverage Status](https://coveralls.io/repos/github/b3b00/csly/badge.svg?branch=dev&kill_cache=1)](https://coveralls.io/github/b3b00/csly?branch=dev)
-![.NET Core](https://github.com/b3b00/csly/workflows/.NET%20Core/badge.svg)
+[![Build](https://github.com/b3b00/csly/actions/workflows/dotnetcore.yml/badge.svg)](https://github.com/b3b00/csly/actions/workflows/dotnetcore.yml)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fb3b00%2Fcsly.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fb3b00%2Fcsly?ref=badge_shield)
 [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=b3b00_csly)](https://sonarcloud.io/summary/new_code?id=b3b00_csly)
 
