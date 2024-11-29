@@ -19,8 +19,7 @@ namespace sly
         
         public static IN ConvertStringToEnum<IN>(string name)  where IN : struct
         {
-            IN token = default(IN);
-            Enum.TryParse(name, out token);
+            Enum.TryParse(name, out IN token);
             return token;
         }
         

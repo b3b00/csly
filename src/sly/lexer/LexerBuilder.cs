@@ -106,10 +106,10 @@ namespace sly.lexer
             string lang = null, LexerPostProcess<IN> lexerPostProcess = null, IList<string> explicitTokens = null)
             where IN : struct
         {
-            var attributes = GetLexemes<IN>(result, lang);
+            var attributes = GetLexemes(result, lang);
             if (!result.IsError)
             {
-                result = Build<IN>(attributes, result, extensionBuilder, lang, explicitTokens);
+                result = Build(attributes, result, extensionBuilder, lang, explicitTokens);
                 if (!result.IsError)
                 {
                     var labels = result.Result.LexemeLabels;
@@ -119,25 +119,7 @@ namespace sly.lexer
                         var count = labels.Select(x => x.Value.Count).Sum(); 
                         if (count > 0)
                         {
-                            labeledTokens = tokens.Select(token =>
-                            {
-                                token.Label = token.TokenID.ToString();
-                                if (labels.TryGetValue(token.TokenID, out var tokenLabels)
-                                    && tokenLabels.TryGetValue(lang, out string label))
-                                {
-                                    token.Label = label;
-                                }
-                                else if (token.IsUnIndent)
-                                {
-                                    token.Label = "<<UINDENT>>";
-                                }
-                                else if (token.IsIndent)
-                                {
-                                    token.Label = "<<INDENT>>";
-                                }
-
-                                return token;
-                            }).ToList();
+                            labeledTokens = LabelTokens(lang, tokens, labels);
                         }
 
                         if (lexerPostProcess != null)
@@ -152,6 +134,31 @@ namespace sly.lexer
             }
 
             return result;
+        }
+
+        private static List<Token<IN>> LabelTokens<IN>(string lang, List<Token<IN>> tokens, Dictionary<IN, Dictionary<string, string>> labels) where IN : struct
+        {
+            List<Token<IN>> labeledTokens;
+            labeledTokens = tokens.Select(token =>
+            {
+                token.Label = token.TokenID.ToString();
+                if (labels.TryGetValue(token.TokenID, out var tokenLabels)
+                    && tokenLabels.TryGetValue(lang, out string label))
+                {
+                    token.Label = label;
+                }
+                else if (token.IsUnIndent)
+                {
+                    token.Label = "<<UINDENT>>";
+                }
+                else if (token.IsIndent)
+                {
+                    token.Label = "<<INDENT>>";
+                }
+
+                return token;
+            }).ToList();
+            return labeledTokens;
         }
 
 
