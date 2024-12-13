@@ -932,7 +932,7 @@ return r";
                 var fsmBuilder = lexer.FSMBuilder;
 
    	
-                fsmBuilder.GoTo(GenericLexer<DoubleExponent>.in_double) // start a in_double node
+                fsmBuilder.GoTo(GenericLexer<DoubleExponent>.in_double) // start an in_double node
                     .Transition(new char[] {'E','e'}) // add a transition on '.' with precondition
                     .Transition(new char[]{'+','-'})
                     .Mark("start_exponent_val")
@@ -1158,15 +1158,15 @@ else
             Assert.True(parserRes.IsOk);
             var parser = parserRes.Result;
             Assert.NotNull(parser);
-            parser.SyntaxParseCallback = node =>
-            {
-                GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer> grapher =
-                    new GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer>();
-                var root = grapher.VisitTree(node);
-                var graph = grapher.Graph.Compile();
-                // File.WriteAllText(@"c:\tmp\graph.dot", graph);
-            };
+           
             var parseResult = parser.Parse(source);
+            
+            GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer> grapher =
+                new GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer>();
+            grapher.VisitTree(parseResult.SyntaxTree);
+            var graph = grapher.Graph.Compile();
+            //File.WriteAllText(@"c:\tmp\graph.dot", graph);
+            
             Assert.True(parseResult.IsOk);
             var ast = parseResult.Result;
             indented.Block root = ast as indented.Block;
