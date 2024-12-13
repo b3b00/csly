@@ -424,7 +424,7 @@ if true then
         }
         
         [Fact]
-        public void TestWhat()
+        public void TestIssue413_incompleteProgram()
         {
             var buildResult = buildParser();
             var parser = buildResult.Result;
