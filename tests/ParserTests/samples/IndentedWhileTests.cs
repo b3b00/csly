@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using csly.indentedWhileLang.compiler;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.interpreter;
@@ -9,6 +8,7 @@ using sly.buildresult;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
+using sly.parser.generator.visitor;
 using Xunit;
 
 namespace ParserTests.samples
@@ -414,7 +414,34 @@ if true then
         if false then
             x := 28";
             var result = parser.Parse(program);
+            var root = result.Result;
+            Check.That(root).IsInstanceOf<SequenceStatement>();
+            var seq = result.Result as SequenceStatement;
+            var dump = seq.Dump("  ");
+            Check.That(seq.Statements).CountIs(1);
+            Check.That(seq.Statements[0]).IsInstanceOf<IfStatement>();
             Check.That(result).IsOkParsing();
+        }
+        
+        [Fact]
+        public void TestIssue413_incompleteProgram()
+        {
+            var buildResult = buildParser();
+            var parser = buildResult.Result;
+            var program = @"
+if 
+";
+            var result = parser.Parse(program);
+            Check.That(result).Not.IsOkParsing();
+            Check.That(result.Errors).CountIs(1);
+            var error = result.Errors.First();
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+            var unexpectedEosError = error as UnexpectedTokenSyntaxError<IndentedWhileTokenGeneric>;
+            Check.That(unexpectedEosError).IsNotNull();
+            Check.That(unexpectedEosError.ExpectedTokens.Extracting(x => x.TokenId)).IsEquivalentTo(
+                IndentedWhileTokenGeneric.MINUS,IndentedWhileTokenGeneric.NOT, IndentedWhileTokenGeneric.QUESTION,
+                IndentedWhileTokenGeneric.OPEN_PAREN,IndentedWhileTokenGeneric.OPEN_FSTRING,IndentedWhileTokenGeneric.TRUE,
+                IndentedWhileTokenGeneric.INT,IndentedWhileTokenGeneric.FALSE,IndentedWhileTokenGeneric.IDENTIFIER);
         }
         
         [Fact]
