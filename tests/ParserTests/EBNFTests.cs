@@ -769,6 +769,36 @@ namespace ParserTests
 
             return "B()";
         }
+        
+        [Production("Ba : b* a")]
+        public string Ba(List<Token<TokenType>> bstr, Token<TokenType> a) {
+            var result = "Ba(";
+            if (bstr.Any())
+            {
+                result += bstr
+                    .Select(b => b.Value)
+                    .Aggregate((b1, b2) => b1 + ", " + b2);
+                result += ", ";
+            }
+
+            result += a.Value;
+            result += ")";
+            return result;
+        }
+        [Production("BA : b* A")]
+        public string BA(List<Token<TokenType>> bstr, string a) {
+            var result = "BA(";
+            if (bstr.Any())
+            {
+                result += bstr
+                    .Select(b => b.Value)
+                    .Aggregate((b1, b2) => b1 + ", " + b2);
+                result += ", ";
+            }
+            result += a;
+            result += ")";
+            return result;
+        }
 
        
 
@@ -1060,7 +1090,7 @@ namespace ParserTests
             Check.That(buildResult.IsError).IsFalse();
             Parser = buildResult.Result;
             Check.That(Parser.SyntaxParser).IsInstanceOf<EBNFRecursiveDescentSyntaxParser<TokenType, string>>();
-            Check.That(Parser.Configuration.NonTerminals).CountIs(4);
+            Check.That(Parser.Configuration.NonTerminals).CountIs(6);
             
             var nt = Parser.Configuration.NonTerminals["R"];
             Check.That(nt.Rules).CountIs(2);
@@ -1086,6 +1116,34 @@ namespace ParserTests
             var result = Parser.Parse("a bb c");
             Check.That(result.IsError).IsFalse();
             Check.That(result.Result).IsEqualTo("R(A(a),B(b, b),c)");            
+        }
+        
+        [Fact]
+        public void TestZeroOrMoreStarterFollowedByTerminal()
+        {
+            var buildResult = BuildParser();
+            Check.That(buildResult.IsError).IsFalse();
+            Parser = buildResult.Result;
+            var result = Parser.Parse("bbb a","Ba");
+            Check.That(result.IsError).IsFalse();
+            Check.That(result.Result).IsEqualTo("Ba(b, b, b, a)");
+            result = Parser.Parse("a","Ba");
+            Check.That(result.IsError).IsFalse();
+            Check.That(result.Result).IsEqualTo("Ba(a)"); 
+        }
+        
+        [Fact]
+        public void TestZeroOrMoreStarterFollowedByNonTerminal()
+        {
+            var buildResult = BuildParser();
+            Check.That(buildResult.IsError).IsFalse();
+            Parser = buildResult.Result;
+            var result = Parser.Parse("bbb a","BA");
+            Check.That(result.IsError).IsFalse();
+            Check.That(result.Result).IsEqualTo("BA(b, b, b, A(a))");    
+            result = Parser.Parse("a","BA");
+            Check.That(result.IsError).IsFalse();
+            Check.That(result.Result).IsEqualTo("BA(A(a))");    
         }
 
         [Fact]
