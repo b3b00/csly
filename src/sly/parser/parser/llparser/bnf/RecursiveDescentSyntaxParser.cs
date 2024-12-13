@@ -64,7 +64,17 @@ namespace sly.parser.llparser.bnf
             if (rs.Count > 0)
             {
                 result = rs.Find(r => r.IsEnded && !r.IsError);
-
+                if (result.EndingPosition < tokens.Count-1)
+                {
+                    SyntaxParseResult<IN> r = new SyntaxParseResult<IN>()
+                    {
+                        IsError = true,
+                        IsEnded = false
+                    };
+                    r.AddErrors(result.GetErrors().ToArray());
+                    return r;
+                }
+                
                 if (result == null)
                 {
                     int lastPosition = -1;
