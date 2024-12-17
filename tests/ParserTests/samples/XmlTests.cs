@@ -1,4 +1,5 @@
 using NFluent;
+using sly.parser;
 using sly.parser.generator;
 using XML;
 using Xunit;

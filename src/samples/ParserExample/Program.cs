@@ -133,7 +133,41 @@ namespace ParserExample
             return "_";
         }
 
+        private static void testIssue516() 
+        {
+            ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
+            var xmlparser = new MinimalXmlParser();
+            var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+            Check.That(r.IsError).IsFalse();
+            var parser = r.Result;
+            var parsed = parser.Parse(@"
+<?xml version=""1.0""?>
+<!-- starting doc -->
+<root name=""root"">
+    <autoInner name=""autoinner1""/>
+    <inner name=""inner"">
+         <?PI name=""pi""?> 
+        <innerinner name=""innerinner"">
+            inner inner content        
+");
+            if (parsed.IsError)
+            {
+                parsed.Errors.ForEach(Console.WriteLine);
+            }
 
+            return;
+            var jBuilder = new ParserBuilder<JsonTokenGeneric, JSon>();
+            var jsonParser = new EbnfJsonGenericParser();
+            var jr = jBuilder.BuildParser(jsonParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Check.That(jr).IsOk();
+            var jparsed = jr.Result.Parse("{ \"toto\":1");
+            if (jparsed.IsError)
+            {
+                jparsed.Errors.ForEach(Console.WriteLine);
+            }
+
+        }
+        
         private static void TestIssue507()
         {
             var tests = new EBNFTests();
@@ -1360,7 +1394,8 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            TestIssue507();
+            testIssue516();
+            //TestIssue507();
             //TestFStrings();
             //TestIssue495();
             //testGenericLexerJson();
