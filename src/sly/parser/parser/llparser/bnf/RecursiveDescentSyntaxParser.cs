@@ -36,7 +36,6 @@ namespace sly.parser.llparser.bnf
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var nt = NonTerminals[start];
 
-
             var rs = new List<SyntaxParseResult<IN>>();
 
             var matchingRuleCount = 0;

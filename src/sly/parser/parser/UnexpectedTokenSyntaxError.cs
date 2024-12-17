@@ -13,7 +13,7 @@ namespace sly.parser
     {
         private readonly string _i18N;
 
-        private readonly Dictionary<T, Dictionary<string, string>> _labels;
+        private readonly Dictionary<T, Dictionary<string, string>> _labels = new Dictionary<T, Dictionary<string, string>>();
         public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, Dictionary<T, Dictionary<string, string>> labels, string i18n=null, params LeadingToken<T>[] expectedTokens )
         {
             _labels = labels;

@@ -57,10 +57,10 @@ namespace sly.parser.llparser.ebnf
                             isError = isError || termRes.IsError;
                             break;
                         }
-                        case NonTerminalClause<IN> terminalClause:
+                        case NonTerminalClause<IN> nonTerminalClause:
                         {
                             var nonTerminalResult =
-                                ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
+                                ParseNonTerminal(tokens, nonTerminalClause, currentPosition, parsingContext);
                             if (!nonTerminalResult.IsError)
                             {
                                 errors.AddRange(nonTerminalResult.GetErrors());
@@ -154,7 +154,7 @@ namespace sly.parser.llparser.ebnf
                     node.ExpressionAffix = rule.ExpressionAffix;
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
-                    result.IsEnded = tokens[result.EndingPosition].IsEOS  
+                    result.IsEnded = tokens[result.EndingPosition].IsEOS
                                      || node.IsEpsilon && tokens[result.EndingPosition+1].IsEOS;  
                 }
             }

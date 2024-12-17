@@ -29,21 +29,25 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             EndingPosition = currentPosition
         };
 
+        List<SyntaxParseResult<IN>> alternateResults = new List<SyntaxParseResult<IN>>();
 
         foreach (var alternate in clause.Choices)
         {
             switch (alternate)
             {
                 case TerminalClause<IN> terminalAlternate:
-                    result = ParseTerminal(tokens, terminalAlternate, currentPosition, parsingContext);
+                    var rterm = ParseTerminal(tokens, terminalAlternate, currentPosition, parsingContext);
+                    alternateResults.Add(rterm);
                     break;
                 case NonTerminalClause<IN> nonTerminalAlternate:
-                    result = ParseNonTerminal(tokens, nonTerminalAlternate, currentPosition, parsingContext);
+                    var rnonterm = ParseNonTerminal(tokens, nonTerminalAlternate, currentPosition, parsingContext);
+                    alternateResults.Add(rnonterm);
                     break;
                 default:
                     throw new InvalidOperationException("unable to apply repeater inside  " + clause.GetType().Name);
             }
 
+            result = alternateResults.Last();
             if (result.IsOk)
             {
                 if (clause.IsTerminalChoice && clause.IsDiscarded && result.Root is SyntaxLeaf<IN> leaf)
@@ -57,12 +61,20 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             }
         }
 
-        if (result.IsError && clause.IsTerminalChoice)
+        // here all alternateResult ar KO 
+        if (clause.IsTerminalChoice)
         {
             var terminalAlternates = clause.Choices.Cast<TerminalClause<IN>>();
             var expected = terminalAlternates.Select(x => x.ExpectedToken).ToList();
             result.AddError(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition], LexemeLabels, I18n,
                 expected.ToArray()));
+        }
+        else
+        {
+            var greaterPosition = alternateResults.Select(x => x.EndingPosition).Max();
+            var errors=  alternateResults.Where(x => x.EndingPosition == greaterPosition).SelectMany(x => x.GetErrors()).ToList();
+            result.AddErrors(errors);
+            result.IsError = true;
         }
 
         parsingContext.Memoize(clause, position, result);
