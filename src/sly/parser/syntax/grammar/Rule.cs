@@ -21,6 +21,9 @@ namespace sly.parser.syntax.grammar
 
         public string NodeName { get; set; } = null;
         
+        public string[] SubNodeNames { get; set; } = null;
+        
+        
         public bool IsByPassRule { get; set; } = false;
 
         // visitors for operation rules

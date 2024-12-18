@@ -27,7 +27,9 @@ namespace sly.parser.syntax.tree
         {
             return $@"""{index}.{Token.TokenID.ToString()}"" : ""{Token.Value}""";
         }
-        
-        
+
+        public void ForceName(string name)
+        {
+        }
     }
 }

@@ -1,0 +1,62 @@
+
+genericLexer MinimalXmlLexer;
+
+[Mode]
+[Push("tag")]
+[Sugar] OPEN : "<";
+
+[UpTo] CONTENT : "<"; 
+
+[Mode]
+[Push("pi")]
+[Sugar] OPEN_PI : "<?";
+
+[Mode]
+[MultiLineComment] COMMENT : "<!--" "-->";
+
+[Mode("tag")]
+[Mode("pi")]
+[AlphaId] ID;
+
+[Mode("tag")]
+[Sugar] SLASH : "/";
+
+[Mode("tag", "pi")]
+[Sugar] EQUALS : "=";
+
+[Mode("tag", "pi")]
+[Mode("pi")]
+[String] VALUE;
+
+[Mode("pi")]
+[Pop]
+[Sugar] CLOSE_PI : "?>";
+
+[Mode("tag")]
+[Pop]
+[Sugar] CLOSE : ">";
+
+
+
+parser MinimalXmlParser;
+
+-> document : misc* element misc*;
+
+element : OPEN[d] ID attribute* SLASH[d] CLOSE[d];
+
+opentag : OPEN[d] ID attribute* CLOSE[d];
+
+closetag : OPEN[d] SLASH[d] ID CLOSE[d];
+
+element : opentag [element|pi|comment|content]* closetag;
+
+misc : [comment | pi | content];
+
+comment : COMMENT;
+
+pi : OPEN_PI[d] ID attribute* CLOSE_PI[d];
+
+attribute: ID EQUALS[d] VALUE;
+
+content : CONTENT;
+

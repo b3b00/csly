@@ -82,7 +82,7 @@ namespace sly.lexer
                 }
                 for (int i = 0; i < shift; i++)
                 {
-                    channel.Add(null);
+                    channel.Shift();
                 }
                 _tokenChannels[token.Channel] = channel;
             }
@@ -92,7 +92,7 @@ namespace sly.lexer
             {
                 for (int i = channel.Count; i < index; i++)
                 {
-                    channel.Add(null);
+                    channel.Shift();
                 }
 
                 if (channel.ChannelId == token.Channel)

@@ -50,11 +50,9 @@ namespace sly.lexer
             set => SetToken(key,value);
         }
 
-        public void Add(Token<IN> token)
+        public void Shift()
         {
-            Tokens.Add(token);
-            if (token != null) 
-                token.PositionInTokenFlow = Tokens.Count;
+            Tokens.Add(null);
         }
 
         [ExcludeFromCodeCoverage]

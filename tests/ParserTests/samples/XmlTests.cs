@@ -10,7 +10,38 @@ public class XmlTests
 {
 
     [Fact]
-    public void TestXmlParserWithLexerModes()
+    public void TestXmlParserWithLexerModesOk()
+    {
+        ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
+        var xmlparser = new MinimalXmlParser();
+        var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+        Check.That(r.IsError).IsFalse();
+        var parser = r.Result;
+        var parsed = parser.Parse(@"
+<?xml version=""1.0""?>
+<!-- starting doc -->
+<root name=""root"">
+    <autoInner name=""autoinner1""/>
+    <inner name=""inner"">
+         <?PI name=""pi""?> 
+        <innerinner name=""innerinner"">
+            inner inner content
+        </innerinner>
+    </inner>
+</root>        
+");
+        Check.That(parsed).IsOkParsing();
+        // var tree = parsed.SyntaxTree;
+        // var graphviz = new GraphVizEBNFSyntaxTreeVisitor<MinimalXmlLexer>();
+        // var root = graphviz.VisitTree(tree);
+        // string graph = graphviz.Graph.Compile();
+        // File.Delete("c:\\tmp\\tree.dot");
+        // File.AppendAllText("c:\\tmp\\tree.dot", graph);
+    }
+    
+    
+    [Fact]
+    public void TestXmlParserWithLexerModesKo()
     {
         ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
         var xmlparser = new MinimalXmlParser();

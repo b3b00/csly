@@ -13,6 +13,8 @@
         string Dump(string tab);
 
         string ToJson(int index = 0);
-        
+
+        void ForceName(string name);
+
     }
 }
