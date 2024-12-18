@@ -114,13 +114,6 @@ namespace sly.lexer
 
         private readonly IEqualityComparer<string> _keyWordComparer;
 
-        public GenericLexer(IdentifierType idType = IdentifierType.Alpha,
-            Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
-            params GenericToken[] staticTokens)
-            : this(new Config { IdType = idType, ExtensionBuilder = extensionBuilder }, staticTokens)
-        {
-        }
-
         public GenericLexer(Config lexerConfig, GenericToken[] staticTokens)
         {
             LexerConfig = lexerConfig;
@@ -143,6 +136,8 @@ namespace sly.lexer
             CallBacks[token] = callback;
         }
 
+
+    [ExcludeFromCodeCoverage]   
         public void AddDefinition(TokenDefinition<IN> tokenDefinition)
         {
         }
@@ -1271,11 +1266,13 @@ namespace sly.lexer
             return TempLexerFsm.ToGraphViz();
         }
 
+        [ExcludeFromCodeCoverage]
         public IList<string> GetSubLexers()
         {
             return SubLexersFsm.Keys.ToList();
         }
 
+        [ExcludeFromCodeCoverage]
         public string ToGraphViz(string subLexerName)
         {
             if (SubLexersFsm.TryGetValue(subLexerName, out var subLexer))

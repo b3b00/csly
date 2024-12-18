@@ -198,5 +198,15 @@ namespace ParserTests.samples
             Check.That(val.IsBool).IsTrue();
             Check.That(val.GetValue<bool>()).IsTrue();
         }
+        
+        [Fact]
+        public void TestIncompleteObject()
+        {
+            var r = Parser.Parse("{\"prop\":\"value\",\"prop2\":[1,2,3");
+            Check.That(r).Not.IsOkParsing();
+            Check.That(r.Errors).CountIs(1);
+            var error = r.Errors[0];
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+        }
     }
 }
