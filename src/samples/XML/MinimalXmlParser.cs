@@ -30,16 +30,16 @@ namespace XML
             return b.ToString();
         }
 
-        [Production("element : OPEN[d] ID attributes SLASH[d] CLOSE[d]")]
-        public string AutoElement(Token<MinimalXmlLexer> id, string attributes)
+        [Production("element : OPEN[d] ID attribute* SLASH[d] CLOSE[d]")]
+        public string AutoElement(Token<MinimalXmlLexer> id, List<string> attributes)
         {
-            return $"autoTag({id.Value}, {attributes})";
+            return $"autoTag({id.Value}, {string.Join(", ",attributes.Select(x => x.ToString()))})";
         }
 
-        [Production("opentag : OPEN[d] ID attributes CLOSE[d]")]
-        public string OpenTag(Token<MinimalXmlLexer> tagName, string attributes)
+        [Production("opentag : OPEN[d] ID attribute* CLOSE[d]")]
+        public string OpenTag(Token<MinimalXmlLexer> tagName, List<string> attributes)
         {
-            return $"open ({tagName.Value}, {attributes})";
+            return $"open ({tagName.Value}, {string.Join(", ",attributes.Select(x => x.ToString()))})";
         }
 
         [Production("closetag : OPEN[d] SLASH[d] ID CLOSE[d]")]
@@ -48,6 +48,7 @@ namespace XML
             return $"close({id.Value})";
         }
 
+        [SubNodeNames(null, "elements",null)]
         [Production("element : opentag [element|pi|comment|content]* closetag")]
         public string CompoundElement(string open, List<string> subs, string close)
         {
@@ -67,18 +68,12 @@ namespace XML
             return $"comment({comment.Value})";
         }
 
-        [Production("pi : OPEN_PI[d] ID attributes CLOSE_PI[d]")]
-        public string Pi(Token<MinimalXmlLexer> id , string attributes)
+        [Production("pi : OPEN_PI[d] ID attribute* CLOSE_PI[d]")]
+        public string Pi(Token<MinimalXmlLexer> id , List<string> attributes)
         {
-            return $"pi({id.Value} :: {attributes.ToString()})";
+            return $"pi({id.Value} :: {string.Join(", ",attributes.Select(x => x.ToString()))})";
         }
 
-        
-        [Production("attributes : attribute*")]
-        public string Attributes(List<string> attributes)
-        {
-            return string.Join(", ",attributes.Select(x => x.ToString()));
-        }
 
         [Production("attribute: ID EQUALS[d] VALUE")]
         public string Attribute(Token<MinimalXmlLexer> id, Token<MinimalXmlLexer> value)

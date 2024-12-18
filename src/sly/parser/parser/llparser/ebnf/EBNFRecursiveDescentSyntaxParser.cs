@@ -149,6 +149,18 @@ namespace sly.parser.llparser.ebnf
                 }
                 else
                 {
+                    if (rule.SubNodeNames != null && rule.SubNodeNames.Length > 0)
+                    {
+                        for (int i = 0; i < Math.Min(rule.SubNodeNames.Length,children.Count); i++)
+                        {
+                            var subNodeName = rule.SubNodeNames[i];
+                            if (subNodeName != null)
+                            {
+                                var child = children[i] as ISyntaxNode<IN>;
+                                child.ForceName(subNodeName);
+                            }
+                        }
+                    }
                     node = new SyntaxNode<IN>( nonTerminalName,  children);
                     node.Name = string.IsNullOrEmpty(rule.NodeName) ? nonTerminalName : rule.NodeName;
                     node.ExpressionAffix = rule.ExpressionAffix;

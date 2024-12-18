@@ -38,6 +38,11 @@ namespace sly.parser.syntax.tree
 
         public bool HasByPassNodes { get; set; } = false;
 
+        public void ForceName(string name)
+        {
+            Name = name;
+        }
+
         #region expression syntax nodes
 
         [JsonIgnore]
