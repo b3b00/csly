@@ -88,14 +88,7 @@ namespace sly.parser
             {
                 tokens = Lexer.LexerPostProcess(tokens);
             }
-            var position = 0;
-            var tokensWithoutComments = new List<Token<IN>>();
-            for (var i = 0; i < tokens.Count; i++)
-            {
-                var token = tokens[i];
-                token.PositionInTokenVisibleFlow = position;
-            }
-
+            
             result = ParseWithContext(tokens, context, startingNonTerminal);
 
 
