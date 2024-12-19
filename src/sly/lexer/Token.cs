@@ -26,8 +26,7 @@ namespace sly.lexer
         public char DecimalSeparator = '.';
         [JsonIgnore]
         public char CharDelimiter ='\'';
-        [JsonIgnore]
-        public bool Notignored;
+        
 
         [JsonIgnore] private string _hexaPrefix = "0x";
 

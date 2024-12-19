@@ -12,7 +12,6 @@ namespace sly.lexer
 
         public string SingleLineCommentStart;
 
-        public bool DoNotIgnore = false;
 
         public int Channel = 1;
 
@@ -22,7 +21,7 @@ namespace sly.lexer
             SingleLineCommentStart = singleLineStart;
             MultiLineCommentStart = multiLineStart;
             MultiLineCommentEnd = multiLineEnd;
-            DoNotIgnore = doNotIgnore;
+            //DoNotIgnore = doNotIgnore;
             Channel = channel;
         }
     }

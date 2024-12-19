@@ -412,7 +412,7 @@ namespace sly.lexer
             }
         }
 
-        private static NodeCallback<GenericToken> GetCallbackSingle<IN>(IN token, bool doNotIgnore, int channel)
+        private static NodeCallback<GenericToken> GetCallbackSingle<IN>(IN token, int channel)
             where IN : struct
         {
             NodeCallback<GenericToken> callback = match =>
@@ -420,21 +420,19 @@ namespace sly.lexer
                 match.Properties[GenericLexer<IN>.DerivedToken] = token;
                 match.Result.IsComment = true;
                 match.Result.CommentType = CommentType.Single;
-                match.Result.Notignored = doNotIgnore;
                 match.Result.Channel = channel;
                 return match;
             };
             return callback;
         }
 
-        private static NodeCallback<GenericToken> GetCallbackMulti<IN>(IN token, bool doNotIgnore, int channel)
+        private static NodeCallback<GenericToken> GetCallbackMulti<IN>(IN token, int channel)
             where IN : struct
         {
             NodeCallback<GenericToken> callbackMulti = match =>
             {
                 match.Properties[GenericLexer<IN>.DerivedToken] = token;
                 match.Result.IsComment = true;
-                match.Result.Notignored = doNotIgnore;
                 match.Result.CommentType = CommentType.Multi;
                 match.Result.Channel = channel;
                 return match;
@@ -636,8 +634,7 @@ namespace sly.lexer
                             fsmBuilder.ConstantTransition(commentAttr.SingleLineCommentStart);
                             fsmBuilder.Mark(GenericLexer<IN>.single_line_comment_start);
                             fsmBuilder.End(GenericToken.Comment);
-                            fsmBuilder.CallBack(GetCallbackSingle<IN>(comment.Key, commentAttr.DoNotIgnore,
-                                commentAttr.Channel));
+                            fsmBuilder.CallBack(GetCallbackSingle<IN>(comment.Key, commentAttr.Channel));
                         }
 
                         var hasMultiLine = !string.IsNullOrWhiteSpace(commentAttr.MultiLineCommentStart);
@@ -650,8 +647,7 @@ namespace sly.lexer
                             fsmBuilder.ConstantTransition(commentAttr.MultiLineCommentStart);
                             fsmBuilder.Mark(GenericLexer<IN>.multi_line_comment_start);
                             fsmBuilder.End(GenericToken.Comment);
-                            fsmBuilder.CallBack(GetCallbackMulti(comment.Key, commentAttr.DoNotIgnore,
-                                commentAttr.Channel));
+                            fsmBuilder.CallBack(GetCallbackMulti(comment.Key, commentAttr.Channel));
                         }
                     }
                 }

@@ -1248,7 +1248,6 @@ namespace sly.lexer
             tok.IsIndent = match.IsIndent;
             tok.IsUnIndent = match.IsUnIndent;
             tok.IndentationLevel = match.IndentationLevel;
-            tok.Notignored = match.Result.Notignored;
             tok.Channel = match.Result.Channel;
             tok.DecimalSeparator = match.DecimalSeparator;
             tok.DateTimeValue = match.DateTimeValue;
