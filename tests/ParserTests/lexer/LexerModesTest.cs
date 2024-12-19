@@ -93,34 +93,34 @@ world");
         [Fact]
         public static void TestLexerModes()
         {
-            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MinimalXmlLexer>>());
+            var lexerRes = LexerBuilder.BuildLexer(new BuildResult<ILexer<MinimalXmlLexer2>>());
             Check.That(lexerRes.IsError).IsFalse();
             var result = lexerRes.Result.Tokenize(@"hello
 <tag attr=""value"">inner text</tag>
 <!-- this is a comment -->
 <? PI attr=""test""?>");
             Check.That(result.IsOk).IsTrue();
-            var expectedTokens = new List<MinimalXmlLexer>()
+            var expectedTokens = new List<MinimalXmlLexer2>()
             {
-                MinimalXmlLexer.CONTENT,
-                MinimalXmlLexer.OPEN,
-                MinimalXmlLexer.ID,
-                MinimalXmlLexer.ID,
-                MinimalXmlLexer.EQUALS,
-                MinimalXmlLexer.VALUE,
-                MinimalXmlLexer.CLOSE,
-                MinimalXmlLexer.CONTENT,
-                MinimalXmlLexer.OPEN,
-                MinimalXmlLexer.SLASH,
-                MinimalXmlLexer.ID,
-                MinimalXmlLexer.CLOSE,
-                MinimalXmlLexer.COMMENT,
-                MinimalXmlLexer.OPEN_PI,
-                MinimalXmlLexer.ID,
-                MinimalXmlLexer.ID,
-                MinimalXmlLexer.EQUALS,
-                MinimalXmlLexer.VALUE,
-                MinimalXmlLexer.CLOSE_PI
+                MinimalXmlLexer2.CONTENT,
+                MinimalXmlLexer2.OPEN,
+                MinimalXmlLexer2.ID,
+                MinimalXmlLexer2.ID,
+                MinimalXmlLexer2.EQUALS,
+                MinimalXmlLexer2.VALUE,
+                MinimalXmlLexer2.CLOSE,
+                MinimalXmlLexer2.CONTENT,
+                MinimalXmlLexer2.OPEN,
+                MinimalXmlLexer2.SLASH,
+                MinimalXmlLexer2.ID,
+                MinimalXmlLexer2.CLOSE,
+                MinimalXmlLexer2.COMMENT,
+                MinimalXmlLexer2.OPEN_PI,
+                MinimalXmlLexer2.ID,
+                MinimalXmlLexer2.ID,
+                MinimalXmlLexer2.EQUALS,
+                MinimalXmlLexer2.VALUE,
+                MinimalXmlLexer2.CLOSE_PI
             };
             var tokens = result.Tokens.MainTokens();
             Check.That(expectedTokens).CountIs(tokens.Count-1);

@@ -3,8 +3,7 @@ using sly.lexer;
 
 namespace XML
 {
-    [Lexer()]
-    public enum MinimalXmlLexer
+    public enum MinimalXmlLexer2
     {
         EOS = 0,
         
@@ -27,18 +26,10 @@ namespace XML
         #endregion
         
         
-        [Sugar("<!--")]
-        [Push("comment")]
-        OPEN_COMMENT,
+        [MultiLineComment("<!--","-->",channel:Channels.Main)]
+        [Mode]
+        COMMENT,
         
-        [UpTo("-->")]
-        [Mode("comment")]
-        COMMENT_CONTENT,
-        
-        [Sugar("-->")]
-        [Mode("comment")]
-        [Pop]
-        CLOSE_COMMENT,
         
         
         #region pi

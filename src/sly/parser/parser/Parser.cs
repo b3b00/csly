@@ -93,15 +93,10 @@ namespace sly.parser
             for (var i = 0; i < tokens.Count; i++)
             {
                 var token = tokens[i];
-                if (!token.IsComment || token.Notignored)
-                {
-                    token.PositionInTokenVisibleFlow = position;
-                    tokensWithoutComments.Add(token);
-                    position++;
-                }
+                token.PositionInTokenVisibleFlow = position;
             }
 
-            result = ParseWithContext(tokensWithoutComments, context, startingNonTerminal);
+            result = ParseWithContext(tokens, context, startingNonTerminal);
 
 
             return result;
