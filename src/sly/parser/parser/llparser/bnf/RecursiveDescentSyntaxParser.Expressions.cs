@@ -42,11 +42,18 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                                 node.Visitor = visitor;
                                 node.Operation = rule.GetOperation(operatorNode.Token.TokenID);
                             }
+                            var lmabdaVisitor = rule.getLambdaVisitor(operatorNode.Token.TokenID);
+                            if (lmabdaVisitor != null)
+                            {
+                                node.LambdaVisitor = lmabdaVisitor;
+                                node.Operation = rule.GetOperation(operatorNode.Token.TokenID);
+                            }
                         }
 
                         break;
                     }
                     case false:
+                        node.LambdaVisitor = rule.getLambdaVisitor();
                         node.Visitor = rule.GetVisitor();
                         break;
                 }

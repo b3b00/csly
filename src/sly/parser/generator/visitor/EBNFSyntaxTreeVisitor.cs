@@ -91,7 +91,7 @@ namespace sly.parser.generator.visitor
             }
             
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
-            if (node.Visitor != null || node.IsByPassNode)
+            if (node.LambdaVisitor != null || node.Visitor != null || node.IsByPassNode)
             {
                 int parametersArrayLength = node.Children.Count + (context is NoContext ? 0 : 1); 
                 var parameters = new object[parametersArrayLength];
@@ -158,11 +158,19 @@ namespace sly.parser.generator.visitor
                             parametersCount++;
                         }
 
-                        method = node.Visitor;
-                        Array.Resize(ref parameters, parametersCount);
-                        var t = method.Invoke(ParserVsisitorInstance, parameters);
-                        var res = (OUT) t;
-                        result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                        if (node.Visitor != null)
+                        {
+                            method = node.Visitor;
+                            Array.Resize(ref parameters, parametersCount);
+                            var t = method.Invoke(ParserVsisitorInstance, parameters);
+                            var res = (OUT)t;
+                            result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                        }
+                        if (node.LambdaVisitor != null)
+                        {
+                            var t = node.LambdaVisitor(parameters.ToArray());
+                            result = SyntaxVisitorResult<IN,OUT>.NewValue(t);
+                        }
                     }
                     catch (TargetInvocationException tie)
                     {

@@ -121,6 +121,37 @@ namespace sly.parser.generator
             return result;
         }
 
+        internal bool GenerateExpressionParserRules(ParserConfiguration<IN, OUT> configuration, Type parserClass, BuildResult<ParserConfiguration<IN, OUT>> result,
+            Dictionary<int, List<OperationMetaData<IN, OUT>>> operationsByPrecedence, out BuildResult<ParserConfiguration<IN, OUT>> buildResult)
+        {
+            if (operationsByPrecedence.Count > 0)
+            {
+                var operandNonTerminal = GetOperandNonTerminal(parserClass,configuration, result);
+
+
+                if (operandNonTerminal != null && operationsByPrecedence.Count > 0)
+                    GenerateExpressionParser(configuration, operandNonTerminal, operationsByPrecedence,
+                        parserClass.Name);
+            }
+
+            configuration.UsesOperations = operationsByPrecedence.Any<KeyValuePair<int, List<OperationMetaData<IN, OUT>>>>(); 
+            result.Result = configuration;
+            var rec = LeftRecursionChecker<IN, OUT>.CheckLeftRecursion(configuration);
+            if (rec.foundRecursion)
+            {
+                var recs = string.Join("\n", rec.recursions.Select<List<string>, string>(x => string.Join(" > ",x)));
+                result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
+                    I18N.Instance.GetText(I18n,I18NMessage.LeftRecursion,recs),
+                    ErrorCodes.PARSER_LEFT_RECURSIVE));
+                {
+                    buildResult = result;
+                    return false;
+                }
+            }
+            buildResult = result;
+            return true;
+        }
+        
         private string GetOperandNonTerminal(Type parserClass, ParserConfiguration<IN,OUT> configuration,
             BuildResult<ParserConfiguration<IN, OUT>> result) 
         {

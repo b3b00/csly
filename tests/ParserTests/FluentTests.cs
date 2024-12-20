@@ -4,6 +4,7 @@ using NFluent;
 using sly.lexer;
 using sly.lexer.fluent;
 using sly.lexer.fsm;
+using sly.parser.generator;
 using Xunit;
 
 namespace ParserTests;
@@ -205,5 +206,53 @@ world
             FluentToken.THREE_DOT,
             FluentToken.WORLD
         });
+    }
+
+    [Fact]
+    public void TestFluentParser()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumDashId(FluentToken.ID)
+            .Date(FluentToken.DATE, DateFormat.YYYYMMDD, '-')
+            .AlphaNumDashId(FluentToken.ID)
+            .Keyword(FluentToken.HELLO, "hello")
+            .Keyword(FluentToken.WORLD, "world");
+        
+        
+        //FluentEBNFParserBuilder
+        var builder = FluentEBNFParserBuilder<FluentToken,string>.NewBuilder("root","en");
+        var result = builder.Production("h : HELLO ID", (args) =>
+            {
+                var h = args[0] as Token<FluentToken>;
+                var i = args[1] as Token<FluentToken>;
+                return $"{h.Value}, {i.Value}";
+            })
+            .Production("w : WORLD DATE", args =>
+            {
+                var h = args[0] as Token<FluentToken>;
+                var i = args[1] as Token<FluentToken>;
+                return $"{h.Value}, {i.Value}";
+            })
+            .Production("item : h w", args =>
+            {
+                var items = args.Cast<string>().ToList();
+                return $"hello({items[0]}) - world({items[1]})";
+            })
+            .Production("root : item*", args =>
+            {
+                var items = args[0] as List<string>;
+                return string.Join("\n", items);
+            })
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+
+        Check.That(result).IsOk();
+        var parser = result.Result;
+        var r = parser.Parse("hello olivier world 1977-03-30");
+        Check.That(r).IsOkParsing();
+        Check.That(r.Result).IsEqualTo(@"hello(hello, olivier) - world(world, 1977-03-30)");
     }
 }
