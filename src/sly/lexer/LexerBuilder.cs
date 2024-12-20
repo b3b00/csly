@@ -324,7 +324,7 @@ namespace sly.lexer
                 new Dictionary<string, IDictionary<IN, List<LexemeAttribute>>>();
             foreach (var attribute in attributes)
             {
-                var modes = GetModesForLexeme(attribute);
+                var modes = modesGetter(attribute);
                 foreach (var mode in modes.modes)
                 {
                     subLexers.AddToKey(mode, attribute.Key, attribute.Value.lexemes);
@@ -534,7 +534,8 @@ namespace sly.lexer
 
 
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(IDictionary<IN, List<LexemeAttribute>> attributes,
-            Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, BuildResult<ILexer<IN>> result, string lang, LexerAttribute lexerAttribute = null, Dictionary<IN, List<CommentAttribute>> comments = null,
+            Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, BuildResult<ILexer<IN>> result, string lang,
+            LexerAttribute lexerAttribute = null, Dictionary<IN, List<CommentAttribute>> comments = null,
             IList<string> explicitTokens = null) where IN : struct
         {
             result = CheckStringAndCharTokens<IN>(attributes, result, lang);

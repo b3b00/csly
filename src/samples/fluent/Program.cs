@@ -23,9 +23,10 @@ public class Program
             .Keyword(FluentToken.HELLO, "hello")
             .Keyword(FluentToken.WORLD, "world")
             .Sugar(FluentToken.START_ISLAND, ">>>").PushToMode("island")
-            .Sugar(FluentToken.CURLY_CLOSE, "<<<").WithModes("island").PopMode()
-            .Sugar(FluentToken.COMMA, ",")
             .UpTo(FluentToken.UPTO, "<<<").WithModes("island")
+            .Sugar(FluentToken.END_ISLAND, "<<<").WithModes("island").PopMode()
+            .Sugar(FluentToken.COMMA, ",")
+            
             .Build("en");
 
 
@@ -44,20 +45,20 @@ public class Program
 hello, world
 identifier
 /*
-comment
-content
+Lorem ipsum dolor 
+sit amet, consectetur.
 */
 ""string""
 1
 2.3
 >>>
-island content
+island content with int : 1, double :2.3, hexa 0xFFF, keyword : hello  
 <<< 
 ");
         if (tokenized.IsOk)
         {
             Console.WriteLine(" !!!!! YES !!!!!!!");
-            foreach (var token in tokenized.Tokens.MainTokens())
+            foreach (var token in tokenized.Tokens.AllTokens)
             {
                 Console.WriteLine(token.ToString());
             }

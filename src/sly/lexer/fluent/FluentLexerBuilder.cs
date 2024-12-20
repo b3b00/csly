@@ -338,6 +338,10 @@ public class FluentLexerBuilder<IN> :  IFluentLexemeBuilder<IN> where IN : struc
                     pushMode = null;
                 }
 
+                if (modes == null)
+                {
+                    modes = new List<string>() { ModeAttribute.DefaultLexerMode };
+                }
                 return (modes, isModePopper, pushMode);
             }; 
         

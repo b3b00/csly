@@ -20,6 +20,10 @@ namespace sly.lexer
         
         
         private readonly Dictionary<int, TokenChannel<IN>> _tokenChannels;
+        
+        private readonly List<Token<IN>> _allTokens;
+        
+        public List<Token<IN>> AllTokens => _allTokens; 
 
         public List<Token<IN>> MainTokens() => GetChannel(Channels.Main).Tokens.Where(x => x != null).ToList();
          
@@ -30,10 +34,11 @@ namespace sly.lexer
             _tokenChannels = new Dictionary<int, TokenChannel<IN>>();
         }
 
-        public TokenChannels(List<Token<IN>> tokens) : this()
+        public TokenChannels(List<Token<IN>> allTokens) : this()
         {
+            _allTokens = allTokens;
             int i = 0;
-            foreach (var token in tokens)
+            foreach (var token in allTokens)
             {
                 token.PositionInTokenFlow = i;
                 Add(token);

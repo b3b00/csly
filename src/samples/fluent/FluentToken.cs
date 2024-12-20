@@ -11,7 +11,7 @@ public enum FluentToken
     HELLO,
     WORLD,
     START_ISLAND,
-    CURLY_CLOSE,
+    END_ISLAND,
     COMMA,
     UPTO,
     DATE,
