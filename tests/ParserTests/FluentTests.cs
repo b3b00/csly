@@ -26,6 +26,7 @@ public enum FluentToken
     HEXA,
     COMMENT,
     THREE_DOT,
+    EOL
 }
 
 public class FluentTests
@@ -177,5 +178,32 @@ world
             FluentToken.HELLO,
         });
         
+    }
+
+    [Fact]
+    public void TestRegexFluentLexer()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .Regex(FluentToken.HELLO, "hello")
+            .Regex(FluentToken.WORLD, "world")
+            .Regex(FluentToken.THREE_DOT,".{3}")
+            .Regex(FluentToken.EOL,"[\\r\\n]*",true,true)
+            .Build("en");
+        Check.That(lexer).IsOk();
+        var tokenized = lexer.Result.Tokenize(@"
+hello
+...
+world
+");
+        Check.That(tokenized).IsOkLexing();
+        var all = tokenized.Tokens.AllExceptWhiteSpaces;
+        Check.That(all).CountIs(4);
+        Check.That(all.Extracting(x => x.TokenID).Take(3)).IsEqualTo(new List<FluentToken>()
+        {
+            FluentToken.HELLO,
+            FluentToken.THREE_DOT,
+            FluentToken.WORLD
+        });
     }
 }
