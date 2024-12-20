@@ -2,6 +2,7 @@
 
 using sly.lexer;
 using sly.lexer.fluent;
+using sly.lexer.fsm;
 
 namespace aot;
 
@@ -26,7 +27,22 @@ public class Program
             .UpTo(FluentToken.UPTO, "<<<").WithModes("island")
             .Sugar(FluentToken.END_ISLAND, "<<<").WithModes("island").PopMode()
             .Sugar(FluentToken.COMMA, ",")
-            
+            .Extension(FluentToken.EXTENSION)
+            .UseExtensionBuilder((
+                (FluentToken token, LexemeAttribute attribute, GenericLexer<FluentToken> genericLexer) =>
+                {
+                    var fsmBuilder = genericLexer.FSMBuilder;
+                    NodeCallback<GenericToken> callback = (FSMMatch<GenericToken> match) => 
+                    {
+                        match.Properties[GenericLexer<FluentToken>.DerivedToken] = FluentToken.EXTENSION;
+                        return match;
+                    };
+                    
+                    fsmBuilder.GoTo(GenericLexer<FluentToken>.start)
+                        .ConstantTransition("...")
+                        .End(GenericToken.Extension) // mark as ending node 
+                        .CallBack(callback); 
+                }))
             .Build("en");
 
 
