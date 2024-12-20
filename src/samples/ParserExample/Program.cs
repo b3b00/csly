@@ -478,17 +478,6 @@ return r";
             var column = error.Column; // 12
         }
 
-        private static void TestRuleParser()
-        {
-            Console.WriteLine("hum hum...");
-            var parserInstance = new RuleParser<EbnfToken>();
-            var builder = new ParserBuilder<EbnfToken, IClause<EbnfToken>>();
-            var r = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "rule");
-
-            var parser = r.Result;
-            var rule = parser.Parse("a ( b ) ", "clauses");
-        }
-
 
         public static BuildResult<Parser<ExpressionToken, int>> buildSimpleExpressionParserWithContext()
         {
@@ -737,7 +726,7 @@ return r";
             var parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, StartingRule);
             var result = parser.Result.Parse("2 + 2 * 3");
             var tree = result.SyntaxTree;
-            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
+            var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken, int>();
             var root = graphviz.VisitTree(tree);
             string graph = graphviz.Graph.Compile();
             // File.Delete("c:\\temp\\tree.dot");
@@ -781,32 +770,6 @@ return r";
                 Console.WriteLine("error building lexer : ");
                 Console.WriteLine(errors);
             }
-        }
-
-        private static void TestGrammarParser()
-        {
-            string productionRule = "clauses : clause (COMMA [D] clause)*";
-            var ruleparser = new RuleParser<TestGrammarToken>();
-            var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<TestGrammarToken>>();
-            var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
-            var result = grammarParser.Parse(productionRule);
-            //(grammarParser.Lexer as GenericLexer<TestGrammarToken>).ResetLexer();
-            Console.WriteLine($"alors ? {string.Join('\n',result.Errors.Select(e => e.ErrorMessage))}");
-            result = grammarParser.Parse(productionRule);
-            Console.WriteLine($"alors ? {string.Join('\n',result.Errors.Select(e => e.ErrorMessage))}");
-            ;
-            
-            Console.WriteLine("starting");
-            ErroneousGrammar parserInstance = new ErroneousGrammar();
-            Console.WriteLine("new instance");
-
-            var builder2 = new ParserBuilder<TestGrammarToken, object>();
-            Console.WriteLine("builder");
-
-            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"rule");
-            Console.WriteLine($"built : {Parser.IsOk}");
-
-            
         }
 
         public static void TestRecursion()
@@ -861,7 +824,7 @@ return r";
                 string ko2 = "|B|plotshape(data, style=shapexcross)|E|";
                 
                 var r = parser.Parse(ko1);
-                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken>();
+                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ScriptToken, object>();
                 var root = graphviz.VisitTree(r.SyntaxTree);
                 var graph = graphviz.Graph.Compile();
                 r = parser.Parse(ko2);
@@ -1195,8 +1158,8 @@ else
            
             var parseResult = parser.Parse(source);
             
-            GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer> grapher =
-                new GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer>();
+            GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer, Ast> grapher =
+                new GraphVizEBNFSyntaxTreeVisitor<IndentedLangLexer, Ast>();
             grapher.VisitTree(parseResult.SyntaxTree);
             var graph = grapher.Graph.Compile();
             //File.WriteAllText(@"c:\tmp\graph.dot", graph);
@@ -1624,7 +1587,7 @@ while a < 10 do
             else
             {
                 ;
-                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken>();
+                var graphviz = new GraphVizEBNFSyntaxTreeVisitor<ExpressionToken, int>();
                 var root = graphviz.VisitTree(r.SyntaxTree);
                 string graph = graphviz.Graph.Compile();
                 File.Delete("c:\\temp\\tree.dot");

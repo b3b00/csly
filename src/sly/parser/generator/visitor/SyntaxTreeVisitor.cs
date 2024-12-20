@@ -140,26 +140,26 @@ namespace sly.parser.generator.visitor
 
         public ParserConfiguration<IN, OUT> Configuration { get; set; }
 
-        public OUT VisitSyntaxTree(ISyntaxNode<IN> root, object context = null)
+        public OUT VisitSyntaxTree(ISyntaxNode<IN, OUT> root, object context = null)
         {
             var result = Visit(root, context);
             return result.ValueResult;
         }
 
-        protected virtual SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN> n, object context = null)
+        protected virtual SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN, OUT> n, object context = null)
         {
             switch (n)
             {
-                case SyntaxLeaf<IN> leaf:
+                case SyntaxLeaf<IN, OUT> leaf:
                     return Visit(leaf);
-                case SyntaxNode<IN> node:
+                case SyntaxNode<IN, OUT> node:
                     return Visit(node, context);
                 default:
                     return null;
             }
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN, OUT> node, object context = null)
         {
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
             if (node.Visitor != null || node.IsByPassNode)
@@ -215,7 +215,7 @@ namespace sly.parser.generator.visitor
             return result;
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN> leaf)
+        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN, OUT> leaf)
         {
             return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
         }

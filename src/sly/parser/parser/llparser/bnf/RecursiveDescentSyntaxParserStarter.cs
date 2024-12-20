@@ -16,33 +16,33 @@ namespace sly.parser.llparser.bnf
 
           public ParserConfiguration<IN, OUT> ComputeSubRules(ParserConfiguration<IN, OUT> configuration)
         {
-            var newNonTerms = new List<NonTerminal<IN>>();
+            var newNonTerms = new List<NonTerminal<IN, OUT>>();
             foreach (var nonTerm in configuration.NonTerminals)
             {
                 foreach (var rule in nonTerm.Value.Rules)
                 {
-                    var newclauses = new List<IClause<IN>>();
+                    var newclauses = new List<IClause<IN, OUT>>();
                     if (rule.ContainsSubRule)
                     {
                         foreach (var clause in rule.Clauses)
                             switch (clause)
                             {
-                                case GroupClause<IN> group:
+                                case GroupClause<IN, OUT> group:
                                 {
                                     var newNonTerm = CreateSubRule(group);
                                     newNonTerms.Add(newNonTerm);
-                                    var newClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                    var newClause = new NonTerminalClause<IN, OUT>(newNonTerm.Name);
                                     newClause.IsGroup = true;
                                     newclauses.Add(newClause);
                                     break;
                                 }
-                                case ManyClause<IN> many:
+                                case ManyClause<IN, OUT> many:
                                 {
-                                    if (many.Clause is GroupClause<IN> manyGroup)
+                                    if (many.Clause is GroupClause<IN, OUT> manyGroup)
                                     {
                                         var newNonTerm = CreateSubRule(manyGroup);
                                         newNonTerms.Add(newNonTerm);
-                                        var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                        var newInnerNonTermClause = new NonTerminalClause<IN, OUT>(newNonTerm.Name);
                                         newInnerNonTermClause.IsGroup = true;
                                         many.Clause = newInnerNonTermClause;
                                         newclauses.Add(many);
@@ -54,13 +54,13 @@ namespace sly.parser.llparser.bnf
 
                                     break;
                                 }
-                                case OptionClause<IN> option:
+                                case OptionClause<IN, OUT> option:
                                 {
-                                    if (option.Clause is GroupClause<IN> optionGroup)
+                                    if (option.Clause is GroupClause<IN, OUT> optionGroup)
                                     {
                                         var newNonTerm = CreateSubRule(optionGroup);
                                         newNonTerms.Add(newNonTerm);
-                                        var newInnerNonTermClause = new NonTerminalClause<IN>(newNonTerm.Name);
+                                        var newInnerNonTermClause = new NonTerminalClause<IN, OUT>(newNonTerm.Name);
                                         newInnerNonTermClause.IsGroup = true;
                                         option.Clause = newInnerNonTermClause;
                                         newclauses.Add(option);
@@ -87,12 +87,12 @@ namespace sly.parser.llparser.bnf
             return configuration;
         }
 
-        public NonTerminal<IN> CreateSubRule(GroupClause<IN> group)
+        public NonTerminal<IN, OUT> CreateSubRule(GroupClause<IN, OUT> group)
         {
             var clauses = string.Join("-",group.Clauses.Select(x => x.Dump())).Replace(" ","");
             var subRuleNonTerminalName = $"GROUP-{clauses}";
-            var nonTerminal = new NonTerminal<IN>(subRuleNonTerminalName);
-            var subRule = new Rule<IN>();
+            var nonTerminal = new NonTerminal<IN, OUT>(subRuleNonTerminalName);
+            var subRule = new Rule<IN, OUT>();
             subRule.Clauses = group.Clauses;
             subRule.IsSubRule = true;
             nonTerminal.Rules.Add(subRule);
@@ -119,7 +119,7 @@ namespace sly.parser.llparser.bnf
             }
         }
 
-        protected virtual void InitStartingTokensForNonTerminal(Dictionary<string, NonTerminal<IN>> nonTerminals,
+        protected virtual void InitStartingTokensForNonTerminal(Dictionary<string, NonTerminal<IN, OUT>> nonTerminals,
             string name)
         {
             if (nonTerminals.TryGetValue(name, out var nt))
@@ -128,8 +128,8 @@ namespace sly.parser.llparser.bnf
             }
         }
 
-        protected void InitStartingTokensForRule(Dictionary<string, NonTerminal<IN>> nonTerminals,
-            Rule<IN> rule)
+        protected void InitStartingTokensForRule(Dictionary<string, NonTerminal<IN, OUT>> nonTerminals,
+            Rule<IN, OUT> rule)
         {
             if (rule.PossibleLeadingTokens != null && rule.PossibleLeadingTokens.Count != 0) return;
             rule.PossibleLeadingTokens = new List<LeadingToken<IN>>();
@@ -137,11 +137,11 @@ namespace sly.parser.llparser.bnf
             var first = rule.Clauses[0];
             switch (first)
             {
-                case TerminalClause<IN> term:
+                case TerminalClause<IN, OUT> term:
                     rule.PossibleLeadingTokens.Add(term.ExpectedToken);
                     rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
                     break;
-                case NonTerminalClause<IN> nonTerminalClause:
+                case NonTerminalClause<IN, OUT> nonTerminalClause:
                 {
                     InitStartingTokensForNonTerminal(nonTerminals, nonTerminalClause.NonTerminalName);
                     if (nonTerminals.TryGetValue(nonTerminalClause.NonTerminalName, out var firstNonTerminal))
@@ -161,8 +161,8 @@ namespace sly.parser.llparser.bnf
             }
         }
 
-        protected virtual void InitStartingTokensForRuleExtensions(IClause<IN> first, Rule<IN> rule,
-            Dictionary<string, NonTerminal<IN>> nonTerminals)
+        protected virtual void InitStartingTokensForRuleExtensions(IClause<IN, OUT> first, Rule<IN, OUT> rule,
+            Dictionary<string, NonTerminal<IN, OUT>> nonTerminals)
         {
         }
 

@@ -24,19 +24,19 @@ namespace sly.parser.llparser.bnf
 
         #region parsing
 
-        public SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
+        public SyntaxParseResult<IN, OUT> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
         {
-            return SafeParse(tokens, new SyntaxParsingContext<IN>(Configuration.UseMemoization), startingNonTerminal);
+            return SafeParse(tokens, new SyntaxParsingContext<IN, OUT>(Configuration.UseMemoization), startingNonTerminal);
         }
         
-        public SyntaxParseResult<IN> SafeParse(IList<Token<IN>> tokens, SyntaxParsingContext<IN> parsingContext, string startingNonTerminal = null)
+        public SyntaxParseResult<IN, OUT> SafeParse(IList<Token<IN>> tokens, SyntaxParsingContext<IN, OUT> parsingContext, string startingNonTerminal = null)
         {
             var start = startingNonTerminal ?? StartingNonTerminal;
             var NonTerminals = Configuration.NonTerminals;
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var nt = NonTerminals[start];
 
-            var rs = new List<SyntaxParseResult<IN>>();
+            var rs = new List<SyntaxParseResult<IN, OUT>>();
 
             var matchingRuleCount = 0;
 
@@ -57,7 +57,7 @@ namespace sly.parser.llparser.bnf
                     nt.GetPossibleLeadingTokens().ToArray()));
             }
 
-            SyntaxParseResult<IN> result = null;
+            SyntaxParseResult<IN, OUT> result = null;
 
 
             if (rs.Count > 0)
@@ -68,7 +68,7 @@ namespace sly.parser.llparser.bnf
                 if (result == null)
                 {
                     int lastPosition = -1;
-                    List<SyntaxParseResult<IN>> furtherResults = new List<SyntaxParseResult<IN>>();
+                    List<SyntaxParseResult<IN, OUT>> furtherResults = new List<SyntaxParseResult<IN, OUT>>();
                     foreach (var r in rs)
                     {
                         if (r.EndingPosition > lastPosition)
@@ -95,7 +95,7 @@ namespace sly.parser.llparser.bnf
                 {
                     if (result.EndingPosition < tokens.Count-1)
                     {
-                        SyntaxParseResult<IN> r = new SyntaxParseResult<IN>()
+                        SyntaxParseResult<IN, OUT> r = new SyntaxParseResult<IN, OUT>()
                         {
                             IsError = true,
                             IsEnded = false
@@ -108,7 +108,7 @@ namespace sly.parser.llparser.bnf
 
             if (result == null)
             {
-                result = new SyntaxParseResult<IN>();
+                result = new SyntaxParseResult<IN, OUT>();
 
                 if (errors.Count > 0)
                 {
@@ -133,21 +133,21 @@ namespace sly.parser.llparser.bnf
         }
 
 
-        public virtual SyntaxParseResult<IN> Parse(IList<Token<IN>> tokens, Rule<IN> rule, int position,
-            string nonTerminalName, SyntaxParsingContext<IN> parsingContext)
+        public virtual SyntaxParseResult<IN, OUT> Parse(IList<Token<IN>> tokens, Rule<IN, OUT> rule, int position,
+            string nonTerminalName, SyntaxParsingContext<IN, OUT> parsingContext)
         {
             var currentPosition = position;
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
-            var children = new List<ISyntaxNode<IN>>();
+            var children = new List<ISyntaxNode<IN, OUT>>();
             if (!tokens[position].IsEOS && rule.Match(tokens, position, Configuration) && rule.Clauses is { Count: > 0 })
             {
-                children = new List<ISyntaxNode<IN>>();
+                children = new List<ISyntaxNode<IN, OUT>>();
                 foreach (var clause in rule.Clauses)
                 {
                     switch (clause)
                     {
-                        case TerminalClause<IN> terminalClause:
+                        case TerminalClause<IN, OUT> terminalClause:
                         {
                             var termRes = ParseTerminal(tokens, terminalClause, currentPosition, parsingContext);
                             if (!termRes.IsError)
@@ -165,7 +165,7 @@ namespace sly.parser.llparser.bnf
                             isError = termRes.IsError;
                             break;
                         }
-                        case NonTerminalClause<IN> terminalClause:
+                        case NonTerminalClause<IN, OUT> terminalClause:
                         {
                             var nonTerminalResult =
                                 ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
@@ -190,17 +190,17 @@ namespace sly.parser.llparser.bnf
                 }
             }
 
-            var result = new SyntaxParseResult<IN>();
+            var result = new SyntaxParseResult<IN, OUT>();
             result.IsError = isError;
             result.AddErrors(errors);
             result.EndingPosition = currentPosition;
             if (!isError)
             {
-                SyntaxNode<IN> node = null;
+                SyntaxNode<IN, OUT> node = null;
                 if (rule.IsSubRule)
-                    node = new GroupSyntaxNode<IN>(nonTerminalName, children);
+                    node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, children);
                 else
-                    node = new SyntaxNode<IN>(rule.NodeName ?? nonTerminalName, children);
+                    node = new SyntaxNode<IN, OUT>(rule.NodeName ?? nonTerminalName, children);
                 node = ManageExpressionRules(rule, node);
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                     result.Root = children[0];
@@ -214,7 +214,7 @@ namespace sly.parser.llparser.bnf
 
 
 
-        private SyntaxParseResult<IN> NoMatchingRuleError(IList<Token<IN>> tokens, int currentPosition,
+        private SyntaxParseResult<IN, OUT> NoMatchingRuleError(IList<Token<IN>> tokens, int currentPosition,
             List<LeadingToken<IN>> allAcceptableTokens)
         {
             var noRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
@@ -230,7 +230,7 @@ namespace sly.parser.llparser.bnf
                     allAcceptableTokens));
             }
 
-            var error = new SyntaxParseResult<IN>();
+            var error = new SyntaxParseResult<IN, OUT>();
             error.IsError = true;
             error.Root = null;
             error.IsEnded = false;
