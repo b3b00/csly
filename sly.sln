@@ -41,8 +41,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTemplate", "src/sampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlowEOS", "src\samples\SlowEOS\SlowEOS.csproj", "{F85C43C2-28EA-4486-9223-5EA3FC42D417}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fluent", "src\samples\fluent\fluent.csproj", "{D94CF2DC-FCAD-4A51-91F0-78FE93F2189A}"
-EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -128,10 +126,6 @@ Global
 		{F85C43C2-28EA-4486-9223-5EA3FC42D417}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F85C43C2-28EA-4486-9223-5EA3FC42D417}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F85C43C2-28EA-4486-9223-5EA3FC42D417}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D94CF2DC-FCAD-4A51-91F0-78FE93F2189A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D94CF2DC-FCAD-4A51-91F0-78FE93F2189A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D94CF2DC-FCAD-4A51-91F0-78FE93F2189A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D94CF2DC-FCAD-4A51-91F0-78FE93F2189A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -149,7 +143,6 @@ Global
 		{81E72CFA-A6D6-4DB4-B3B5-E167064E7858} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{F85C43C2-28EA-4486-9223-5EA3FC42D417} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
-		{D94CF2DC-FCAD-4A51-91F0-78FE93F2189A} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43254130-CF3E-480E-952F-E50CA5D2E417}
