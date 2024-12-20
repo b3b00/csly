@@ -1,13 +1,36 @@
-﻿// See https://aka.ms/new-console-template for more information
-
+using System.Collections.Generic;
+using System.Linq;
+using NFluent;
 using sly.lexer;
 using sly.lexer.fluent;
+using Xunit;
 
-namespace aot;
+namespace ParserTests;
 
-public class Program
+public enum FluentToken
 {
-    public static void Main(string[] args)
+    NO,
+    ID,
+    STRING,
+    INT,
+    DOUBLE,
+    CHAR,
+    HELLO,
+    WORLD,
+    START_ISLAND,
+    END_ISLAND,
+    COMMA,
+    ISLAND,
+    DATE,
+    HEXA,
+    COMMENT,
+    EXTENSION,
+}
+
+public class FluentTests
+{
+    [Fact]
+    public void TestFluentLexerBuilder()
     {
         var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
             .IgnoreEol(true)
@@ -23,22 +46,13 @@ public class Program
             .Keyword(FluentToken.HELLO, "hello")
             .Keyword(FluentToken.WORLD, "world")
             .Sugar(FluentToken.START_ISLAND, ">>>").PushToMode("island")
-            .UpTo(FluentToken.UPTO, "<<<").WithModes("island")
+            .UpTo(FluentToken.ISLAND, "<<<").WithModes("island")
             .Sugar(FluentToken.END_ISLAND, "<<<").WithModes("island").PopMode()
             .Sugar(FluentToken.COMMA, ",")
             
             .Build("en");
-
-
-        if (lexer.IsError)
-        {
-            Console.WriteLine(" !!!! ERROR WHILE BUILDING LEXER");
-            lexer.Errors.ForEach(e => Console.WriteLine(e));
-            return;
-        }
-
-        var graph = (lexer.Result as GenericLexer<FluentToken>).FSMBuilder.Fsm.ToGraphViz();
-        File.WriteAllText("c:/tmp/fluent.dot", graph);
+        Check.That(lexer).IsOk();
+        
         var tokenized = lexer.Result.Tokenize(@"
 2024-12-20
 0xb3b00
@@ -55,20 +69,20 @@ sit amet, consectetur.
 island content with int : 1, double :2.3, hexa 0xFFF, keyword : hello  
 <<< 
 ");
-        if (tokenized.IsOk)
+        Check.That(tokenized).IsOkLexing();
+        var all = tokenized.Tokens.AllExceptWhiteSpaces;
+        Check.That(all).CountIs(14);
+        Check.That(all.Extracting(x => x.TokenID).Take(13)).IsEqualTo(new List<FluentToken>()
         {
-            Console.WriteLine(" !!!!! YES !!!!!!!");
-            foreach (var token in tokenized.Tokens.AllExceptWhiteSpaces)
-            {
-                Console.WriteLine(token.ToString());
-            }
-        }
-        else
-        {
-            Console.WriteLine(" !!!!! OH NO !!!!!!!");
-            Console.WriteLine(tokenized.Error);
-        }
-
-
+            FluentToken.DATE,
+            FluentToken.HEXA,
+            FluentToken.HELLO, FluentToken.COMMA, FluentToken.WORLD,
+            FluentToken.ID,
+            FluentToken.COMMENT,
+            FluentToken.STRING,
+            FluentToken.INT,
+            FluentToken.DOUBLE,
+            FluentToken.START_ISLAND, FluentToken.ISLAND, FluentToken.END_ISLAND
+        });
     }
 }

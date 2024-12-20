@@ -23,8 +23,10 @@ namespace sly.lexer
         
         private readonly List<Token<IN>> _allTokens;
         
-        public List<Token<IN>> AllTokens => _allTokens; 
+        public List<Token<IN>> AllTokens => _allTokens;
 
+        public List<Token<IN>> AllExceptWhiteSpaces => _allTokens.Where(x => !x.IsWhiteSpace).ToList();
+        
         public List<Token<IN>> MainTokens() => GetChannel(Channels.Main).Tokens.Where(x => x != null).ToList();
          
         
