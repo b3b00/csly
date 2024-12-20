@@ -48,7 +48,7 @@ namespace sly.parser.generator
             List<string> lefts = new List<string>();
 
             int i = 0;
-            IClause<IN, OUT> current = rule.Clauses[0] as IClause<IN, OUT>;
+            IClause<IN, OUT> current = rule.Clauses[0];
             var currentLefts = GetLeftClausesName(current);
             bool stopped = false;
             while (i < rule.Clauses.Count && ! stopped && currentLefts != null && currentLefts.Any<string>())

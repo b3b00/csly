@@ -266,8 +266,7 @@ public class FluentLexerBuilder<IN> :  IFluentLexemeBuilder<IN> where IN : struc
     
     public IFluentLexemeBuilder<IN> Date(IN tokenId, DateFormat format, char separator)
     {
-        // TODO
-        Add(tokenId,new LexemeAttribute(GenericToken.Date, new []{ format.ToString(), separator.ToString()}),null);
+        Add(tokenId,new LexemeAttribute(GenericToken.Date, format.ToString(), separator.ToString()),null);
         return this;
     }
     
@@ -301,14 +300,7 @@ public class FluentLexerBuilder<IN> :  IFluentLexemeBuilder<IN> where IN : struc
         _lexerPostProcessor = lexerPostProcessor;
         return this;
     }
-
-    public IFluentLexerBuilder<IN> UseTokenCallback(IN tokenId, Func<Token<IN>, Token<IN>> callback)
-    {
-        _callbacks.Add((tokenId,callback));
-        return this;
-    }
-    
-    
+  
     
     
     public BuildResult<ILexer<IN>> Build(string lang)

@@ -313,7 +313,7 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
         OperationMetaData<IN, OUT> operationMeta = null;
         bool isEnumValue = EnumConverter.IsEnumValue<IN>(operation);
         
-        if (!isEnumValue && !string.IsNullOrEmpty(operation) && operation.StartsWith("'") && operation.EndsWith("'")) 
+        if (!isEnumValue && !string.IsNullOrEmpty(operation) && operation.StartsWith('\'') && operation.EndsWith('\'')) 
         {
             operationMeta = new OperationMetaData<IN, OUT>(precedence, associativity, loggedVisitor, affix, operation);
         }

@@ -140,7 +140,7 @@ extension
 
 
     [Fact]
-    public void TestFluentLexerBuilderWitTokenCallbacks()
+    public void TestFluentLexerBuilderWithTokenCallbacks()
     {
         var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
             .IgnoreEol(true)
@@ -151,12 +151,12 @@ extension
             .AlphaNumDashId(FluentToken.ID)
             .Keyword(FluentToken.HELLO, "hello")
             .Keyword(FluentToken.WORLD, "world")
-            .UseTokenCallback(FluentToken.WORLD, token =>
+            .WithCallback(FluentToken.WORLD, token =>
             {
                 token.TokenID = FluentToken.HELLO;
                 return token;
             })
-            .UseTokenCallback(FluentToken.HELLO, token =>
+            .WithCallback(FluentToken.HELLO, token =>
             {
                 token.TokenID = FluentToken.WORLD;
                 return token;

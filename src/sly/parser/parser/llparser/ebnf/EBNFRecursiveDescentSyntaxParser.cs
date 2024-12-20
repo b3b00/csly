@@ -156,7 +156,7 @@ namespace sly.parser.llparser.ebnf
                             var subNodeName = rule.SubNodeNames[i];
                             if (subNodeName != null)
                             {
-                                var child = children[i] as ISyntaxNode<IN, OUT>;
+                                var child = children[i];
                                 child.ForceName(subNodeName);
                             }
                         }

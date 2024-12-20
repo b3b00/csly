@@ -85,11 +85,6 @@ namespace sly.parser.generator.visitor
 
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN, OUT> node, object context = null)
         {
-            if (node.Name == "discard")
-            {
-                ;
-            }
-            
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
             if (node.LambdaVisitor != null || node.Visitor != null || node.IsByPassNode)
             {

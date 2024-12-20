@@ -286,7 +286,6 @@ namespace sly.lexer
                     {
                         foreach (var lexeme in lexemes.lexemes)
                         {
-                            var channel = lexeme.Channel == int.MinValue ? 0 : lexeme.Channel;
                             lexer.AddDefinition(new TokenDefinition<IN>(tokenID, lexeme.Pattern, lexeme.Channel,
                                 lexeme.IsSkippable,
                                 lexeme.IsLineEnding));
@@ -370,7 +369,6 @@ namespace sly.lexer
                             foreach (var mode in modes)
                             {
                                 result.modes.Add(mode);
-                                //subLexers.AddToKey(mode, attribute.Key, attribute.Value.lexemes);
                             }
                         }
                     }
@@ -378,7 +376,6 @@ namespace sly.lexer
                 else
                 {
                     result.modes.Add(ModeAttribute.DefaultLexerMode);
-                    //subLexers.AddToKey(ModeAttribute.DefaultLexerMode, attribute.Key, attribute.Value.lexemes);
                 }
 
                 var push = enumValue.GetAttributesOfType<PushAttribute>();

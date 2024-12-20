@@ -53,8 +53,6 @@ public interface IFluentLexerBuilder<IN> where IN : struct
     public IFluentLexerBuilder<IN> UseExtensionBuilder(Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder);
 
     public IFluentLexerBuilder<IN> UseLexerPostProcessor(LexerPostProcess<IN> lexerPostProcessor);
-
-    public IFluentLexerBuilder<IN> UseTokenCallback(IN tokenId, Func<Token<IN>, Token<IN>> callback);
     
     public IFluentLexerBuilder<IN> WithExplicitTokens(IList<string> explicitTokens = null);
 
