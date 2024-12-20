@@ -155,6 +155,13 @@ namespace sly.parser.generator
         private string GetOperandNonTerminal(Type parserClass, ParserConfiguration<IN,OUT> configuration,
             BuildResult<ParserConfiguration<IN, OUT>> result) 
         {
+            
+            if (configuration.OperandRules != null && configuration.OperandRules.Any())
+            {
+                string nonTerminalName = string.Join("-",configuration.OperandRules.Select(x => x.NonTerminalName).Distinct());
+                return nonTerminalName;
+            }
+            
             List<MethodInfo> methods;
             methods = parserClass.GetMethods().ToList<MethodInfo>();
             
