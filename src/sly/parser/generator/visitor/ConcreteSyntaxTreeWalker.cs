@@ -5,17 +5,17 @@ using sly.parser.syntax.tree;
 
 namespace sly.parser.generator.visitor
 {
-    public class ConcreteSyntaxTreeWalker<IN, OUT> where IN : struct
+    public class ConcreteSyntaxTreeWalker<IN, OUT, TREE_OUT> where IN : struct
     {
         
-        public IConcreteSyntaxTreeVisitor<IN,OUT> Visitor { get; set; }
+        public IConcreteSyntaxTreeVisitor<IN,OUT, TREE_OUT> Visitor { get; set; }
 
-        public ConcreteSyntaxTreeWalker(IConcreteSyntaxTreeVisitor<IN, OUT> visitor)
+        public ConcreteSyntaxTreeWalker(IConcreteSyntaxTreeVisitor<IN, OUT, TREE_OUT> visitor)
         {
             Visitor = visitor;
         } 
         
-        private OUT VisitLeaf(SyntaxLeaf<IN> leaf)
+        private TREE_OUT VisitLeaf(SyntaxLeaf<IN, OUT> leaf)
         {
             if (leaf.Token.IsIndent)
             {
@@ -32,46 +32,46 @@ namespace sly.parser.generator.visitor
             return Visitor.VisitLeaf(leaf.Token);
         }
         
-        public OUT Visit(ISyntaxNode<IN> n)
+        public TREE_OUT Visit(ISyntaxNode<IN, OUT> n)
         {
             switch (n)
             {
-                case SyntaxLeaf<IN> leaf:
+                case SyntaxLeaf<IN, OUT> leaf:
                     return VisitLeaf(leaf);
-                case GroupSyntaxNode<IN> node:
+                case GroupSyntaxNode<IN, OUT> node:
                     return Visit(node);
-                case ManySyntaxNode<IN> node:
+                case ManySyntaxNode<IN, OUT> node:
                     return Visit(node);
-                case OptionSyntaxNode<IN> node:
+                case OptionSyntaxNode<IN, OUT> node:
                     return Visit(node);
-                case SyntaxNode<IN> node:
+                case SyntaxNode<IN, OUT> node:
                     return Visit(node);
                 default:
                     return Visitor.VisitLeaf(new Token<IN>() {TokenID = default(IN),SpanValue="NULL".ToCharArray()});
             }
         }
 
-        private OUT Visit(GroupSyntaxNode<IN> node)
+        private TREE_OUT Visit(GroupSyntaxNode<IN, OUT> node)
         {
-            return Visit(node as SyntaxNode<IN>);
+            return Visit(node as SyntaxNode<IN, OUT>);
         }
 
-        private OUT Visit(OptionSyntaxNode<IN> node)
+        private TREE_OUT Visit(OptionSyntaxNode<IN, OUT> node)
         {
-            var child = node.Children != null && node.Children.Any<ISyntaxNode<IN>>() ? node.Children[0] : null;
+            var child = node.Children != null && node.Children.Any<ISyntaxNode<IN, OUT>>() ? node.Children[0] : null;
             if (child == null || node.IsEmpty)
             {
-                Visitor.VisitOptionNode(false, default(OUT));
+                Visitor.VisitOptionNode(false, default(TREE_OUT));
             }
             var r = Visit(child);
             return r;
         }
 
 
-        private OUT Visit(SyntaxNode<IN> node)
+        private TREE_OUT Visit(SyntaxNode<IN, OUT> node)
         {
             
-            var children = new List<OUT>();
+            var children = new List<TREE_OUT>();
 
             foreach (var n in node.Children)
             {
@@ -85,10 +85,10 @@ namespace sly.parser.generator.visitor
             return Visitor.VisitNode(node,children);
         }
         
-        private OUT Visit(ManySyntaxNode<IN> manyNode)
+        private TREE_OUT Visit(ManySyntaxNode<IN, OUT> manyNode)
         {
 
-            var children = new List<OUT>();
+            var children = new List<TREE_OUT>();
 
             foreach (var n in manyNode.Children)
             {

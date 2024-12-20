@@ -1,6 +1,6 @@
 ﻿namespace sly.parser.syntax.tree
 {
-    public interface ISyntaxNode<IN> where IN : struct
+    public interface ISyntaxNode<IN, OUT> where IN : struct
     {
 
         public bool IsEpsilon { get;}
@@ -13,8 +13,8 @@
         string Dump(string tab);
 
         string ToJson(int index = 0);
-
+        
         void ForceName(string name);
-
+        
     }
 }
