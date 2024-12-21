@@ -95,7 +95,10 @@ namespace sly.parser.syntax.grammar
             OperationMetaData<IN, OUT> operation = null;
             if (IsExpressionRule)
             {
-                LambdaVisitorsForOperation.TryGetValue(token, out operation);
+                if (!LambdaVisitorsForOperation.TryGetValue(token, out operation))
+                {
+                    VisitorMethodsForOperation.TryGetValue(token, out operation);
+                }
             }
 
             return operation;
