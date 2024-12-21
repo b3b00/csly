@@ -36,25 +36,23 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 
                         if (operatorIndex >= 0 && node.Children[operatorIndex] is SyntaxLeaf<IN, OUT> operatorNode)
                         {
-                            var visitor = rule.GetVisitor(operatorNode.Token.TokenID);
-                            if (visitor != null)
+                            var token = operatorNode.Token;
+                            string key = token.IsExplicit ? $"'{token.Value}'" : token.TokenID.ToString(); 
+                            var visitor = rule.GetVisitorMethod(key);
+                            var operation = rule.GetOperation(key);
+                            if (operation != null)
                             {
-                                node.Visitor = visitor;
-                                node.Operation = rule.GetOperation(operatorNode.Token.TokenID);
-                            }
-                            var lmabdaVisitor = rule.getLambdaVisitor(operatorNode.Token.TokenID);
-                            if (lmabdaVisitor != null)
-                            {
-                                node.LambdaVisitor = lmabdaVisitor;
-                                node.Operation = rule.GetOperation(operatorNode.Token.TokenID);
+                                node.Visitor = operation.VisitorMethod;
+                                node.LambdaVisitor = operation.LambdaVisitor;
+                                node.Operation = rule.GetOperation(key);
                             }
                         }
 
                         break;
                     }
                     case false:
-                        node.LambdaVisitor = rule.getLambdaVisitor();
-                        node.Visitor = rule.GetVisitor();
+                        node.LambdaVisitor = rule.getLambdaVisitor(null);
+                        node.Visitor = rule.GetVisitorMethod(null);
                         break;
                 }
     

@@ -30,7 +30,7 @@ namespace sly.parser.generator
         {
             Precedence = precedence;
             Associativity = assoc;
-            VisitorLambda = lambda;
+            LambdaVisitor = lambda;
             OperatorToken = oper;
             Affix = affix;
             NodeName = nodeName;
@@ -40,7 +40,7 @@ namespace sly.parser.generator
         {
             Precedence = precedence;
             Associativity = assoc;
-            VisitorLambda = lambda;
+            LambdaVisitor = lambda;
             ExplicitOperatorToken = oper;
             Affix = affix;
             NodeName = nodeName;
@@ -52,7 +52,7 @@ namespace sly.parser.generator
 
         public MethodInfo VisitorMethod { get; set; }
         
-        public Func<object[],OUT> VisitorLambda { get; set; }  
+        public Func<object[],OUT> LambdaVisitor { get; set; }  
 
         public IN OperatorToken { get; set; }
 

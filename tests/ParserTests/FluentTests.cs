@@ -190,7 +190,7 @@ world
             .IgnoreEol(true)
             .Regex(FluentToken.HELLO, "hello")
             .Regex(FluentToken.WORLD, "world")
-            .Regex(FluentToken.THREE_DOT, ".{3}")
+            .Regex(FluentToken.THREE_DOT, "\\.{3}")
             .Regex(FluentToken.EOL, "[\\r\\n]*", true, true)
             .Build("en");
         Check.That(lexer).IsOk();
@@ -322,6 +322,76 @@ world
         Check.That(result).IsOkParsing();
         Check.That(result.Result).IsEqualTo(1 + 2 * 3);
         result = parser.Parse("-1 + 2 ");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo(-1 + 2);
+        
+    }
+    
+    [Fact]
+    public void TestFluentExpressionParserWithExplicits()
+    {
+        var lexer = FluentLexerBuilder<ExpressionToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .Int(ExpressionToken.INT)
+            .Sugar(ExpressionToken.PLUS, "+")
+            .Sugar(ExpressionToken.MINUS, "-")
+            .Sugar(ExpressionToken.TIMES, "*")
+            .Sugar(ExpressionToken.DIVIDE, "/");
+
+        var build = FluentEBNFParserBuilder<ExpressionToken, int>.NewBuilder(new FluentTests(), "expression","en")
+            .Production($"expression : {nameof(FluentTests)}_expressions", args =>
+            {
+                return (int)args[0];
+            })
+            .Left("'moins'", 10, (object[] args) =>
+            {
+                var l = (int)args[0];
+                var r = (int)args[2];
+                return l - r;
+            })
+            .Left("'plus'", 10, (object[] args) =>
+            {
+                var l = (int)args[0];
+                var r = (int)args[2];
+                return l + r;
+            })
+            .Right("'fois'", 50, (object[] args) =>
+            {
+                var l = (int)args[0];
+                var r = (int)args[2];
+                return l * r;
+            })
+            .Left("'div'", 50, (object[] args) =>
+            {
+                var l = (int)args[0];
+                var r = (int)args[2];
+                return l / r;
+            })
+            .Prefix("'moins'", 100, (object[] args) =>
+            {
+                return -(int)args[1];
+            })
+            .Operand("operand : INT", args =>
+            {
+                var v = args[0] as Token<ExpressionToken>;
+                return v.IntValue;
+            })
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).IsOk();
+        var parser = build.Result;
+        var result = parser.Parse("2 plus 2");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo(2 + 2);
+        result = parser.Parse("1 moins 2  moins 3");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo(1 - 2 - 3);
+        result = parser.Parse("1 plus 2 fois 3");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo(1 + 2 * 3);
+        result = parser.Parse("moins 1 plus 2 ");
         Check.That(result).IsOkParsing();
         Check.That(result.Result).IsEqualTo(-1 + 2);
         

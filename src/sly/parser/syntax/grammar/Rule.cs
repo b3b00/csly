@@ -14,7 +14,8 @@ namespace sly.parser.syntax.grammar
         public Rule()
         {
             Clauses = new List<IClause<IN,OUT>>();
-            VisitorMethodsForOperation = new Dictionary<IN, OperationMetaData<IN, OUT>>();
+            VisitorMethodsForOperation = new Dictionary<string, OperationMetaData<IN, OUT>>();
+            LambdaVisitorsForOperation = new Dictionary<string, OperationMetaData<IN, OUT>>();
             Visitor = null;
             IsSubRule = false;
             NodeName = "";
@@ -27,7 +28,9 @@ namespace sly.parser.syntax.grammar
         public bool IsByPassRule { get; set; } = false;
 
         // visitors for operation rules
-        private Dictionary<IN, OperationMetaData<IN, OUT>> VisitorMethodsForOperation { get; }
+        private Dictionary<string, OperationMetaData<IN, OUT>> VisitorMethodsForOperation { get; }
+        
+        private Dictionary<string, OperationMetaData<IN, OUT>> LambdaVisitorsForOperation { get; }
         
         // visitor for classical rules
         private MethodInfo Visitor { get; set; }
@@ -87,17 +90,15 @@ namespace sly.parser.syntax.grammar
                                   || Clauses.Count == 1 && Clauses[0].MayBeEmpty();
 
 
-        public OperationMetaData<IN, OUT> GetOperation(IN token = default)
+        public OperationMetaData<IN, OUT> GetOperation(string token)
         {
+            OperationMetaData<IN, OUT> operation = null;
             if (IsExpressionRule)
             {
-                var operation = VisitorMethodsForOperation.TryGetValue(token, out var value)
-                    ? value
-                    : null;
-                return operation;
+                LambdaVisitorsForOperation.TryGetValue(token, out operation);
             }
 
-            return null;
+            return operation;
         }
         
         public List<OperationMetaData<IN, OUT>> GetOperations()
@@ -110,15 +111,15 @@ namespace sly.parser.syntax.grammar
             return null;
         }
 
-        public Func<object[], OUT> getLambdaVisitor(IN token = default)
+        public Func<object[], OUT> getLambdaVisitor(string token )
         {
             Func<object[], OUT> visitor = null;
-            if (IsExpressionRule)
+            if (IsExpressionRule && !string.IsNullOrEmpty(token))
             {
-                var operation = VisitorMethodsForOperation.TryGetValue(token, out var value)
+                var operation = LambdaVisitorsForOperation.TryGetValue(token.ToString(), out var value)
                     ? value
                     : null;
-                visitor = operation?.VisitorLambda;
+                visitor = operation?.LambdaVisitor;
             }
             else
             {
@@ -133,10 +134,10 @@ namespace sly.parser.syntax.grammar
             LambdaVisitor = lambdaVisitor;
         }
         
-        public MethodInfo GetVisitor(IN token = default)
+        public MethodInfo GetVisitorMethod(string token = null)
         {
             MethodInfo visitor = null;
-            if (IsExpressionRule)
+            if (IsExpressionRule && !string.IsNullOrEmpty(token))
             {
                 var operation = VisitorMethodsForOperation.TryGetValue(token, out var value)
                     ? value
@@ -146,6 +147,24 @@ namespace sly.parser.syntax.grammar
             else
             {
                 visitor = Visitor;
+            }
+
+            return visitor;
+        }
+        
+        public Func<object[], OUT> GetLambdaVisitor(string token = null)
+        {
+            Func<object[], OUT> visitor = null;
+            if (IsExpressionRule && !string.IsNullOrEmpty(token))
+            {
+                var operation = LambdaVisitorsForOperation.TryGetValue(token, out var value)
+                    ? value
+                    : null;
+                visitor = operation?.LambdaVisitor;
+            }
+            else
+            {
+                visitor = LambdaVisitor;
             }
 
             return visitor;
@@ -163,7 +182,12 @@ namespace sly.parser.syntax.grammar
 
         public void SetVisitor(OperationMetaData<IN, OUT> operation)
         {
-            VisitorMethodsForOperation[operation.OperatorToken] = operation;
+            if (operation.VisitorMethod != null)
+                VisitorMethodsForOperation[operation.Operatorkey] = operation;
+            else if (operation.LambdaVisitor != null)
+            {
+                LambdaVisitorsForOperation[operation.Operatorkey] = operation;
+            }
         }
 
         
