@@ -56,7 +56,7 @@ namespace sly.parser.generator
 
         public IN OperatorToken { get; set; }
 
-        public string Operatorkey => NodeName ?? (IsExplicitOperatorToken ? ExplicitOperatorToken : OperatorToken.ToString());
+        public string Operatorkey => (IsExplicitOperatorToken ? ExplicitOperatorToken : OperatorToken.ToString());
 
         public Affix Affix { get; set; }
         

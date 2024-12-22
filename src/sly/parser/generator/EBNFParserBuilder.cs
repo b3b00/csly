@@ -178,6 +178,7 @@ namespace sly.parser.generator
                     if (!parseResult.IsError)
                     {
                         var rule = (Rule<IN, OUT>)parseResult.Result;
+                        rule.ForcedName = nodeName != null;
                         rule.NodeName = nodeName;
                         rule.SubNodeNames = subNodeNames;
                         rule.RuleString = ruleString;

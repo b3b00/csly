@@ -89,15 +89,27 @@ namespace sly.parser.syntax.grammar
                                   || Clauses.Count == 0
                                   || Clauses.Count == 1 && Clauses[0].MayBeEmpty();
 
+        public bool ForcedName { get; set; }
+
 
         public OperationMetaData<IN, OUT> GetOperation(string token)
         {
             OperationMetaData<IN, OUT> operation = null;
             if (IsExpressionRule)
             {
-                if (!LambdaVisitorsForOperation.TryGetValue(token, out operation))
+                if (LambdaVisitorsForOperation.ContainsKey(token))
                 {
-                    VisitorMethodsForOperation.TryGetValue(token, out operation);
+                    return LambdaVisitorsForOperation[token];
+                }
+
+                if (VisitorMethodsForOperation.ContainsKey(token))
+                {
+                    return VisitorMethodsForOperation[token];
+                }
+                else
+                {
+                    ;
+                    
                 }
             }
 

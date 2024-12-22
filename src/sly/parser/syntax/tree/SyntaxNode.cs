@@ -109,7 +109,9 @@ namespace sly.parser.syntax.tree
                 }
             }
         }
-        
+
+        public bool ForcedName { get; set; }
+
         public string Dump(string tab)
         {
             StringBuilder builder = new StringBuilder();

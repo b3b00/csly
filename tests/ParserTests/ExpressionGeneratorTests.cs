@@ -8,6 +8,7 @@ using sly.parser;
 using sly.parser.generator;
 using Xunit;
 using ParserTests.Issue184;
+using sly.parser.generator.visitor;
 using ExpressionToken = expressionparser.ExpressionToken;
 
 namespace ParserTests
@@ -236,12 +237,12 @@ namespace ParserTests
             Check.That(nt.Rules[1].NodeName).IsEqualTo("integer");
             Check.That(nt.Rules[2].NodeName).IsEqualTo("group");
             nt = nonterminals[3];
-            Check.That(nt.Rules).IsSingle();
+            Check.That(nt.Rules).CountIs(1);
             Check.That(nt.Name).Contains("PLUS");
             Check.That(nt.Name).Contains("MINUS");
             nt = nonterminals[4];
             Check.That(nt.Rules).IsSingle();
-            Check.That(nt.Name).IsEqualTo("multiplication_or_division");
+            Check.That(nt.Name).IsEqualTo("TIMES_DIVIDE");
             nt = nonterminals[5];
             Check.That(nt.Rules).CountIs(3);
             Check.That(nt.Name).Contains("MINUS");
