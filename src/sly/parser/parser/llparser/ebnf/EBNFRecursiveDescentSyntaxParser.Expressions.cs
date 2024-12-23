@@ -37,14 +37,6 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
             var second = rule.Clauses[1];
             SyntaxParseResult<IN, OUT> secondResult = null;
             
-            var op = tokens[position];
-            string key = op.TokenID.ToString();
-            if (op.IsExplicit)
-            {
-                key = op.Value.ToString();
-            }
-            operation = rule.GetOperation(key);
-            
             switch (second)
             {
                 case ChoiceClause<IN, OUT> secondChoice:

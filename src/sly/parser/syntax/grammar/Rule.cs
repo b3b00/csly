@@ -25,6 +25,8 @@ namespace sly.parser.syntax.grammar
         
         public string[] SubNodeNames { get; set; } = null;
         
+        private Dictionary<string,string> NodeNamesMap { get; set; } = new Dictionary<string, string>();
+        
         public bool IsByPassRule { get; set; } = false;
 
         // visitors for operation rules
@@ -197,6 +199,7 @@ namespace sly.parser.syntax.grammar
 
         public void SetVisitor(OperationMetaData<IN, OUT> operation)
         {
+            NodeNamesMap[operation.Operatorkey] = operation.NodeName;
             if (operation.VisitorMethod != null)
                 VisitorMethodsForOperation[operation.Operatorkey] = operation;
             else if (operation.LambdaVisitor != null)

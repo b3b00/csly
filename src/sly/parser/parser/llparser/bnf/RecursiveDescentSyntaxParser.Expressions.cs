@@ -44,7 +44,10 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                                 node.Visitor = operation.VisitorMethod;
                                 node.LambdaVisitor = operation.LambdaVisitor;
                                 node.Operation = operation;
-                                node.Name = operation.NodeName;
+                                if (!string.IsNullOrEmpty(operation.NodeName))
+                                {
+                                    node.Name = operation.NodeName;
+                                }
                             }
                         }
                         break;

@@ -9,6 +9,7 @@ using sly.parser.generator;
 using Xunit;
 using ParserTests.Issue184;
 using sly.parser.generator.visitor;
+using sly.parser.syntax.tree;
 using ExpressionToken = expressionparser.ExpressionToken;
 
 namespace ParserTests
@@ -25,6 +26,32 @@ namespace ParserTests
             return 0;
         }
 
+    }
+
+    public class PrefixOperation
+    {
+        [Prefix("'##'",Associativity.Left,10)]
+        [NodeName("hash-hash")]
+        public string prefixHashHash(Token<SimpleExpressionToken> token, string operand)
+        {
+            return $"{token.Value}::{operand}";
+        }
+        
+        [Prefix("'@@'",Associativity.Left,10)]
+        [NodeName("at-at")]
+        public string prefixAtAt(Token<SimpleExpressionToken> token, string operand)
+        {
+            return $"{token.Value}::{operand}";
+        }
+        
+        
+
+        [Operand]
+        [Production("testOperand: INT")]
+        public string Operand(Token<SimpleExpressionToken> token)
+        {
+            return token.Value;
+        }
     }
     
     public class ExpressionGeneratorExplicitOperatorAsNames
@@ -48,6 +75,7 @@ namespace ParserTests
         }
         
         [Prefix((int) SimpleExpressionToken.MINUS,  Associativity.Right, 100)]
+        [NodeName("hash-hash")]
         public double PreFixExpression(Token<SimpleExpressionToken> operation, double value)
         {
             return -value;
@@ -429,6 +457,43 @@ namespace ParserTests
             var result = parser.Parse("-1 +2 TIMES (5 + 6) MINUS 4 ");
             Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo(-1+2*(5+6)-4);
+        }
+
+        [Fact]
+        public void TestPrefix()
+        {
+            StartingRule = $"{nameof(PrefixOperation)}_expressions";
+            var parserInstance = new PrefixOperation();
+            var builder = new ParserBuilder<SimpleExpressionToken, string>();
+            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            Check.That(buildResult).IsOk();
+            var parser = buildResult.Result;
+            
+            var result = parser.Parse("## 42");
+            Check.That(result).IsOkParsing();
+            Check.That(result.Result).IsEqualTo("##::42");
+            var tree = result.SyntaxTree;
+            var syntaxTree = tree as SyntaxNode<SimpleExpressionToken, string>;
+            Check.That(syntaxTree).IsNotNull();
+            Check.That(syntaxTree.Children).CountIs(1);
+            Check.That(syntaxTree.Name).IsEqualTo($"{nameof(PrefixOperation)}_expressions");
+            var child = syntaxTree.Children[0] as SyntaxNode<SimpleExpressionToken, string>;
+            Check.That(child).IsNotNull();
+            Check.That(child.Name).IsEqualTo("hash-hash");
+            Check.That(child.Children).CountIs(2);
+            
+            result = parser.Parse("@@ 42");
+            Check.That(result).IsOkParsing();
+            Check.That(result.Result).IsEqualTo("@@::42");
+            tree = result.SyntaxTree;
+            syntaxTree = tree as SyntaxNode<SimpleExpressionToken, string>;
+            Check.That(syntaxTree).IsNotNull();
+            Check.That(syntaxTree.Children).CountIs(1);
+            Check.That(syntaxTree.Name).IsEqualTo($"{nameof(PrefixOperation)}_expressions");
+            child = syntaxTree.Children[0] as SyntaxNode<SimpleExpressionToken, string>;
+            Check.That(child).IsNotNull();
+            Check.That(child.Name).IsEqualTo("at-at");
+            Check.That(child.Children).CountIs(2);
         }
     }
 }
