@@ -410,7 +410,19 @@ world
             .IgnoreKeywordCase(true)
             .AlphaNumDashId(FluentToken.ID)
             .Date(FluentToken.DATE, DateFormat.YYYYMMDD, '-')
-            .AlphaNumDashId(FluentToken.ID);
+            .AlphaNumDashId(FluentToken.ID)
+            .UseLexerPostProcessor(tokens =>
+            {
+                return tokens.Select<Token<FluentToken>, Token<FluentToken>>(x =>
+                {
+                    if (x.TokenID == FluentToken.ID)
+                    {
+                        x.SpanValue = x.Value.ToUpper().AsMemory();
+                    }
+
+                    return x;
+                }).ToList();
+            });
 
         var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
             .Production("root : (l  'SEP'[d] r)*", args =>
@@ -433,7 +445,7 @@ world
         Check.That(build).IsOk();
         var parsed = build.Result.Parse("a SEP b c SEP d ");
         Check.That(parsed).IsOkParsing();
-        Check.That(parsed.Result).IsEqualTo("a|b,c|d");
+        Check.That(parsed.Result).IsEqualTo("A|B,C|D");
         var tree = parsed.SyntaxTree as SyntaxNode<FluentToken, string>;
         Check.That(tree).IsNotNull();
         Check.That(tree.Children).IsSingle();
