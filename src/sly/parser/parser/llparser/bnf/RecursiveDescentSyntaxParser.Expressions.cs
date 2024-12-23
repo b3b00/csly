@@ -27,37 +27,38 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                             case 2 when node.ExpressionAffix == Affix.PreFix:
                                 operatorIndex = 0;
                                 break;
-                            case 2:
+                            case 2 when node.ExpressionAffix == Affix.PostFix:
                             {
-                                if (node.ExpressionAffix == Affix.PostFix) operatorIndex = 1;
+                                operatorIndex = 1;
                                 break;
                             }
                         }
 
                         if (operatorIndex >= 0 && node.Children[operatorIndex] is SyntaxLeaf<IN, OUT> operatorNode)
                         {
-                            var visitor = rule.GetVisitor(operatorNode.Token.TokenID);
-                            if (visitor != null)
+                            var token = operatorNode.Token;
+                            string key =  (token.IsExplicit ? $"'{token.Value}'" : token.TokenID.ToString());
+                            var operation = rule.GetOperation(key);
+                            if (operation != null)
                             {
-                                node.Visitor = visitor;
-                                node.Operation = rule.GetOperation(operatorNode.Token.TokenID);
-                            }
-                            var lmabdaVisitor = rule.getLambdaVisitor(operatorNode.Token.TokenID);
-                            if (lmabdaVisitor != null)
-                            {
-                                node.LambdaVisitor = lmabdaVisitor;
-                                node.Operation = rule.GetOperation(operatorNode.Token.TokenID);
+                                node.Visitor = operation.VisitorMethod;
+                                node.LambdaVisitor = operation.LambdaVisitor;
+                                node.Operation = operation;
+                                if (!string.IsNullOrEmpty(operation.NodeName))
+                                {
+                                    node.Name = operation.NodeName;
+                                }
                             }
                         }
-
                         break;
                     }
                     case false:
-                        node.LambdaVisitor = rule.getLambdaVisitor();
-                        node.Visitor = rule.GetVisitor();
+                    {
+                        node.LambdaVisitor = rule.getLambdaVisitor(null);
+                        node.Visitor = rule.GetVisitorMethod(null);
                         break;
+                    }
                 }
-    
                 return node;
             }
     

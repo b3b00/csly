@@ -256,6 +256,7 @@ namespace sly.parser.generator
             rule.IsByPassRule = true;
             rule.IsExpressionRule = true;
             rule.ExpressionAffix = Affix.NotOperator;
+            rule.SetLambdaVisitor((args) => (OUT)args[0]);
             configuration.NonTerminals[entrypoint.Name] = entrypoint;
             entrypoint.Rules.Add(rule);
         }
@@ -283,7 +284,9 @@ namespace sly.parser.generator
                 {
                     ExpressionAffix = Affix.InFix,
                     IsExpressionRule = true,
-                    NonTerminalName = name
+                    NonTerminalName = name,
+                    NodeName = InFixOps[0].NodeName,
+                    ForcedName = !string.IsNullOrEmpty(InFixOps[0].NodeName)
                 };
 
                 rule.Clauses.Add(new NonTerminalClause<IN, OUT>(nextName));
@@ -295,7 +298,8 @@ namespace sly.parser.generator
                     rule.SetVisitor(x);
                     rule.IsExpressionRule = true;
                     rule.IsInfixExpressionRule = true;
-
+                    rule.NodeName = x.NodeName;
+                    rule.ForcedName = !string.IsNullOrEmpty(x.NodeName);
                 });
                 nonTerminal.Rules.Add(rule);
                 if (isLastLevel)
@@ -306,7 +310,7 @@ namespace sly.parser.generator
                         ExpressionAffix = Affix.NotOperator,
                         IsExpressionRule = true,
                         NonTerminalName = name,
-                        IsByPassRule = true
+                        IsByPassRule = true,
                     };
 
                     rule2.Clauses.Add(new NonTerminalClause<IN, OUT>(nextName));
@@ -336,7 +340,9 @@ namespace sly.parser.generator
                 var rule = new Rule<IN, OUT>
                 {
                     ExpressionAffix = Affix.PreFix,
-                    IsExpressionRule = true
+                    IsExpressionRule = true,
+                    NodeName = PreFixOps[0].NodeName,
+                    ForcedName = !string.IsNullOrEmpty(PreFixOps[0].NodeName)
                 };
 
                 rule.Clauses.Add(PreFixClauses.Count == 1 ? PreFixClauses[0] : new ChoiceClause<IN, OUT>(PreFixClauses));
@@ -365,7 +371,9 @@ namespace sly.parser.generator
                 var rule = new Rule<IN, OUT>
                 {
                     ExpressionAffix = Affix.PostFix,
-                    IsExpressionRule = true
+                    IsExpressionRule = true,
+                    NodeName = PostFixOps[0].NodeName,
+                    ForcedName = !string.IsNullOrEmpty(PostFixOps[0].NodeName)
                 };
 
                 rule.Clauses.Add(new NonTerminalClause<IN, OUT>(nextName));

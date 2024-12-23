@@ -167,7 +167,6 @@ namespace sly.parser.generator
 
                 var nodeNames = (NodeNameAttribute[])m.GetCustomAttributes(typeof(NodeNameAttribute), true);
                 string nodeName = nodeNames != null && nodeNames.Any() ? nodeNames[0].Name : null;
-                
                 var subNodeNamesAttributes = (SubNodeNamesAttribute[])m.GetCustomAttributes(typeof(SubNodeNamesAttribute), true);
                 string[] subNodeNames = subNodeNamesAttributes != null && subNodeNamesAttributes.Any() ? subNodeNamesAttributes[0].Names : null;
                 
@@ -178,6 +177,7 @@ namespace sly.parser.generator
                     if (!parseResult.IsError)
                     {
                         var rule = (Rule<IN, OUT>)parseResult.Result;
+                        rule.ForcedName = nodeName != null;
                         rule.NodeName = nodeName;
                         rule.SubNodeNames = subNodeNames;
                         rule.RuleString = ruleString;

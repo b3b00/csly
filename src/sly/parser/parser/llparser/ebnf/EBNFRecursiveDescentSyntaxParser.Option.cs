@@ -65,7 +65,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                         {
                             IsError = false,
                             Root = new OptionSyntaxNode<IN, OUT>(rule.NonTerminalName, new List<ISyntaxNode<IN, OUT>>(),
-                                rule.GetVisitor()),
+                                rule.GetVisitorMethod()),
                             EndingPosition = position
                         };
                     }
@@ -79,7 +79,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                     var children = new List<ISyntaxNode<IN, OUT>> { innerResult.Root };
                     if (innerResult.IsError) children.Clear();
                     result.Root = new OptionSyntaxNode<IN, OUT>(rule.NonTerminalName, children,
-                        rule.GetVisitor());
+                        rule.GetVisitorMethod());
                     (result.Root as OptionSyntaxNode<IN, OUT>).IsGroupOption = clause.IsGroupOption;
                     result.EndingPosition = position;
                     break;
@@ -90,7 +90,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         {
             var children = new List<ISyntaxNode<IN, OUT>> { innerResult.Root };
             result.Root =
-                new OptionSyntaxNode<IN, OUT>(rule.NonTerminalName, children, rule.GetVisitor());
+                new OptionSyntaxNode<IN, OUT>(rule.NonTerminalName, children, rule.GetVisitorMethod());
             result.EndingPosition = innerResult.EndingPosition;
             result.HasByPassNodes = innerResult.HasByPassNodes;
         }

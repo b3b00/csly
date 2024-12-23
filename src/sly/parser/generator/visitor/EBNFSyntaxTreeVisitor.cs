@@ -86,7 +86,7 @@ namespace sly.parser.generator.visitor
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN, OUT> node, object context = null)
         {
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
-            if (node.LambdaVisitor != null || node.Visitor != null || node.IsByPassNode)
+            if (!node .IsByPassNode && (node.LambdaVisitor != null || node.Visitor != null ))
             {
                 int parametersArrayLength = node.Children.Count + (context is NoContext ? 0 : 1); 
                 var parameters = new object[parametersArrayLength];
@@ -175,6 +175,12 @@ namespace sly.parser.generator.visitor
                         }
                     }
                 }
+            }
+            else if (node.IsByPassNode)
+            {
+                var child = node.Children[0];
+                var v = Visit(child, context);
+                return v;
             }
 
             return result;

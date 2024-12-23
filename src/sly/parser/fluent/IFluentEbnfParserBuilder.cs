@@ -7,6 +7,8 @@ namespace sly.parser.generator;
 public interface IFluentEbnfRuleBuilder<IN, OUT> : IFluentEbnfParserBuilder<IN, OUT> where IN : struct
 {
     public IFluentEbnfParserBuilder<IN, OUT> Named(string name);
+    
+    public IFluentEbnfParserBuilder<IN, OUT> WithSubNodeNamed(params string[] subNodeNames);
 }
 
 public interface IFluentEbnfParserBuilder<IN,OUT> where IN : struct
