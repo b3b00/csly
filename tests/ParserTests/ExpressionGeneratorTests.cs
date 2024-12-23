@@ -8,6 +8,7 @@ using sly.parser;
 using sly.parser.generator;
 using Xunit;
 using ParserTests.Issue184;
+using sly.lexer.fluent;
 using sly.parser.generator.visitor;
 using sly.parser.syntax.tree;
 using ExpressionToken = expressionparser.ExpressionToken;
@@ -468,6 +469,69 @@ namespace ParserTests
             var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
             Check.That(buildResult).IsOk();
             var parser = buildResult.Result;
+            
+            var result = parser.Parse("## 42");
+            Check.That(result).IsOkParsing();
+            Check.That(result.Result).IsEqualTo("##::42");
+            var tree = result.SyntaxTree;
+            var syntaxTree = tree as SyntaxNode<SimpleExpressionToken, string>;
+            Check.That(syntaxTree).IsNotNull();
+            Check.That(syntaxTree.Children).CountIs(1);
+            Check.That(syntaxTree.Name).IsEqualTo($"{nameof(PrefixOperation)}_expressions");
+            var child = syntaxTree.Children[0] as SyntaxNode<SimpleExpressionToken, string>;
+            Check.That(child).IsNotNull();
+            Check.That(child.Name).IsEqualTo("hash-hash");
+            Check.That(child.Children).CountIs(2);
+            
+            result = parser.Parse("@@ 42");
+            Check.That(result).IsOkParsing();
+            Check.That(result.Result).IsEqualTo("@@::42");
+            tree = result.SyntaxTree;
+            syntaxTree = tree as SyntaxNode<SimpleExpressionToken, string>;
+            Check.That(syntaxTree).IsNotNull();
+            Check.That(syntaxTree.Children).CountIs(1);
+            Check.That(syntaxTree.Name).IsEqualTo($"{nameof(PrefixOperation)}_expressions");
+            child = syntaxTree.Children[0] as SyntaxNode<SimpleExpressionToken, string>;
+            Check.That(child).IsNotNull();
+            Check.That(child.Name).IsEqualTo("at-at");
+            Check.That(child.Children).CountIs(2);
+        }
+        
+        [Fact]
+        public void TestPrefixFluent()
+        {
+            StartingRule = $"{nameof(PrefixOperation)}_expressions";
+
+            var lexer = FluentLexerBuilder<SimpleExpressionToken>.NewBuilder()
+                .IgnoreEol(true)
+                .IgnoreWhiteSpace(true)
+                .IgnoreKeywordCase(true)
+                .Int(SimpleExpressionToken.INT);
+
+            var build = FluentEBNFParserBuilder<SimpleExpressionToken, string>.NewBuilder(new PrefixOperation(),
+                    $"{nameof(PrefixOperation)}_expressions", "en")
+                .Operand("testOperand: INT", (args =>
+                {
+                    return (args[0] as Token<SimpleExpressionToken>)?.Value;
+                }))
+                .Prefix("'##'", 10, args =>
+                {
+                    var token = args[0] as Token<SimpleExpressionToken>;
+                    var operand = args[1] as string;
+                    return $"{token?.Value}::{operand}";
+                }).Named("hash-hash")
+                .Prefix("'@@'", 10, args =>
+                {
+                    var token = args[0] as Token<SimpleExpressionToken>;
+                    var operand = args[1] as string;
+                    return $"{token?.Value}::{operand}";
+                }).Named("at-at")
+                .WithLexerbuilder(lexer)
+                .BuildParser();
+            
+            Check.That(build).IsOk();
+            var parser = build.Result;
+            
             
             var result = parser.Parse("## 42");
             Check.That(result).IsOkParsing();

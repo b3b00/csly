@@ -368,4 +368,13 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
         }
         return this;
     }
+
+    public IFluentEbnfParserBuilder<IN, OUT> WithSubNodeNamed(params string[] subNodeNames)
+    {
+        if (_currentRule != null)
+        {
+            _currentRule.SubNodeNames = subNodeNames;
+        }
+        return this;
+    }
 }
