@@ -15,6 +15,7 @@ namespace simpleExpressionParser
         
         [Operation((int) ExpressionToken.PLUS, Affix.InFix, Associativity.Right, 10)]
         [Operation("MINUS", Affix.InFix, Associativity.Left, 10)]
+        [NodeName("addition_or_substraction")]
         public double BinaryTermExpression(double left, Token<ExpressionToken> operation, double right)
         {
             double result = 0;
@@ -61,11 +62,13 @@ namespace simpleExpressionParser
 
 
         [Prefix((int) ExpressionToken.MINUS,  Associativity.Right, 100)]
+        [NodeName("minus")]
         public double PreFixExpression(Token<ExpressionToken> operation, double value)
         {
             return -value;
         }
 
+        [NodeName("factorial")]
         [Postfix((int) ExpressionToken.FACTORIAL, Associativity.Right, 100)]
         public double PostFixExpression(double value, Token<ExpressionToken> operation)
         {
@@ -76,7 +79,7 @@ namespace simpleExpressionParser
 
         [Operand]
         [Production("operand : primary_value")]
-        [NodeName("double")]
+        [NodeName("op_prim")]
         public double OperandValue(double value)
         {
             return value;
@@ -84,21 +87,21 @@ namespace simpleExpressionParser
 
 
         [Production("primary_value : DOUBLE")]
-        [NodeName("double")]
+        [NodeName("prim_double")]
         public double OperandDouble(Token<ExpressionToken> value)
         {
             return value.DoubleValue;
         }
         
         [Production("primary_value : INT")]
-        [NodeName("integer")]
+        [NodeName("prim_int")]
         public double OperandInt(Token<ExpressionToken> value)
         {
             return value.DoubleValue;
         }
 
         [Production("primary_value : LPAREN SimpleExpressionParser_expressions RPAREN")]
-        [NodeName("group")]
+        [NodeName("prim_group")]
         public double OperandParens(Token<ExpressionToken> lparen, double value, Token<ExpressionToken> rparen)
         {
             return value;

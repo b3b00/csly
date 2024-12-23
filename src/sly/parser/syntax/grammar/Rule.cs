@@ -109,7 +109,7 @@ namespace sly.parser.syntax.grammar
                 else
                 {
                     ;
-                    
+
                 }
             }
 

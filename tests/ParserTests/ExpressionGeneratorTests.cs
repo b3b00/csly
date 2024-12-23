@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using expressionparser;
+﻿using System;
+using System.Collections.Generic;
 using NFluent;
 using simpleExpressionParser;
 using sly.buildresult;
@@ -233,9 +233,9 @@ namespace ParserTests
             nt = nonterminals[2];
             Check.That(nt.Rules).CountIs(3);
             Check.That(nt.Name).Contains("primary_value");
-            Check.That(nt.Rules[0].NodeName).IsEqualTo("double");
-            Check.That(nt.Rules[1].NodeName).IsEqualTo("integer");
-            Check.That(nt.Rules[2].NodeName).IsEqualTo("group");
+            Check.That(nt.Rules[0].NodeName).IsEqualTo("prim_double");
+            Check.That(nt.Rules[1].NodeName).IsEqualTo("prim_int");
+            Check.That(nt.Rules[2].NodeName).IsEqualTo("prim_group");
             nt = nonterminals[3];
             Check.That(nt.Rules).CountIs(1);
             Check.That(nt.Name).Contains("PLUS");
@@ -274,9 +274,23 @@ namespace ParserTests
         public void TestGroup()
         {
             BuildParser();
-            var r = Parser.Result.Parse("(-1 + 2)  * 3", StartingRule);
+            var r = Parser.Result.Parse("(-1 + 2)  * 3!", StartingRule);
             Check.That(r).IsOkParsing();;
-            Check.That(r.Result).IsEqualTo(3.0);
+            Check.That(r.Result).IsEqualTo((-1 + 2 ) * 6.0);
+            
+            var d = r.SyntaxTree.Dump("  ");
+            Check.That(d).Contains("addition_or_substraction")
+                .And.Contains("multiplication_or_division")
+                .And.DoesNotContain("TIMES_DIVIDE");
+            
+            GraphVizEBNFSyntaxTreeVisitor<simpleExpressionParser.ExpressionToken, double> gvViz =
+            new GraphVizEBNFSyntaxTreeVisitor<simpleExpressionParser.ExpressionToken, double>();
+            gvViz.VisitTree(r.SyntaxTree);
+            string graph = gvViz.Graph.Compile();
+            
+            Check.That(graph).Contains("addition_or_substraction")
+                .And.Contains("multiplication_or_division")
+                .And.DoesNotContain("TIMES_DIVIDE");
         }
 
         [Fact]

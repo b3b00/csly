@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using sly.lexer;
 using sly.parser;
+using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 
@@ -14,6 +15,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
         int position,
         string nonTerminalName, SyntaxParsingContext<IN, OUT> parsingContext)
     {
+        OperationMetaData<IN,OUT> operation = null;
         var currentPosition = position;
         var children = new List<ISyntaxNode<IN, OUT>>();
         if (!tokens[position].IsEOS && rule.Match(tokens, position, Configuration) && rule.Clauses != null &&
@@ -34,6 +36,15 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
             currentPosition = firstResult.EndingPosition;
             var second = rule.Clauses[1];
             SyntaxParseResult<IN, OUT> secondResult = null;
+            
+            var op = tokens[position];
+            string key = op.TokenID.ToString();
+            if (op.IsExplicit)
+            {
+                key = op.Value.ToString();
+            }
+            operation = rule.GetOperation(key);
+            
             switch (second)
             {
                 case ChoiceClause<IN, OUT> secondChoice:
@@ -90,7 +101,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
                     children.Add(secondResult.Root);
                     children.Add(thirdResult.Root);
                     currentPosition = thirdResult.EndingPosition;
-                    var finalNode = new SyntaxNode<IN, OUT>(nonTerminalName, children);
+                    var finalNode = new SyntaxNode<IN, OUT>(rule.NodeName ?? nonTerminalName, children);
                     finalNode.ExpressionAffix = rule.ExpressionAffix;
                     finalNode = ManageExpressionRules(rule, finalNode);
                     var finalResult = new SyntaxParseResult<IN, OUT>();

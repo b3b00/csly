@@ -162,7 +162,7 @@ namespace sly.parser.llparser.ebnf
                         }
                     }
                     node = new SyntaxNode<IN, OUT>( nonTerminalName,  children);
-                    node.ForcedName = rule.ForcedName; 
+                    node.ForcedName = rule.ForcedName;
                     node.Name = string.IsNullOrEmpty(rule.NodeName) ? nonTerminalName : rule.NodeName;
                     node.ExpressionAffix = rule.ExpressionAffix;
                     node = ManageExpressionRules(rule, node);
