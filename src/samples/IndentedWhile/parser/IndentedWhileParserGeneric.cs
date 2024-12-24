@@ -317,7 +317,7 @@ namespace csly.indentedWhileLang.parser
         }
 
         [Operation((int) IndentedWhileTokenGeneric.NOT, Affix.PreFix, Associativity.Right, 100)]
-        public WhileAST binaryOrExpression(Token<IndentedWhileTokenGeneric> operatorToken, WhileAST value)
+        public WhileAST unaryNotExpression(Token<IndentedWhileTokenGeneric> operatorToken, WhileAST value)
         {
             return new Not(value as Expression);
         }
