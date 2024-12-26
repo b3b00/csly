@@ -160,41 +160,41 @@ public class FluentLexerBuilder<IN> :  IFluentLexemeBuilder<IN> where IN : struc
         return this;
     }
 
-    public IFluentLexemeBuilder<IN> Extension(IN tokenId, int channel = Channels.Main)
+    public IFluentLexemeBuilder<IN> Extension(IN tokenId)
     {
-        Add(tokenId,new LexemeAttribute(GenericToken.Extension,channel:channel), null);
+        Add(tokenId,new LexemeAttribute(GenericToken.Extension,Channels.Main), null);
         return this;
     }
     
-    public IFluentLexemeBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".", int channel = Channels.Main)
+    public IFluentLexemeBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".")
     {
-        Add(tokenId, new LexemeAttribute(GenericToken.Double, channel:Channels.Main, parameters:decimalDelimiter) , null);
+        Add(tokenId, new LexemeAttribute(GenericToken.Double, Channels.Main, parameters:decimalDelimiter) , null);
         return this;
     }
 
-    public IFluentLexemeBuilder<IN> Int(IN tokenId, int channel = Channels.Main) => Integer(tokenId, channel); 
+    public IFluentLexemeBuilder<IN> Int(IN tokenId) => Integer(tokenId); 
 
-    public IFluentLexemeBuilder<IN> Integer(IN tokenId, int channel = Channels.Main)
+    public IFluentLexemeBuilder<IN> Integer(IN tokenId)
     {
-        Add(tokenId,  new LexemeAttribute(GenericToken.Int, channel:Channels.Main) , null);
+        Add(tokenId,  new LexemeAttribute(GenericToken.Int, Channels.Main) , null);
         return this;
     }
 
-    public IFluentLexemeBuilder<IN> Sugar(IN tokenId, string token, int channel = Channels.Main)
+    public IFluentLexemeBuilder<IN> Sugar(IN tokenId, string token)
     {
-        Add(tokenId,  new LexemeAttribute(GenericToken.SugarToken, channel:Channels.Main, parameters:token), null);
+        Add(tokenId,  new LexemeAttribute(GenericToken.SugarToken, Channels.Main, parameters:token), null);
         return this;
     }
     
-    public IFluentLexemeBuilder<IN> Keyword(IN tokenId, string token, int channel = Channels.Main)
+    public IFluentLexemeBuilder<IN> Keyword(IN tokenId, string token)
     {
-        Add(tokenId,  new LexemeAttribute(GenericToken.KeyWord, channel:Channels.Main, parameters:token) ,null);
+        Add(tokenId,  new LexemeAttribute(GenericToken.KeyWord, Channels.Main, parameters:token) ,null);
         return this;
     }
 
-    public IFluentLexemeBuilder<IN> Keyword(IN tokenId, string[] tokens, int channel = Channels.Main)
+    public IFluentLexemeBuilder<IN> Keyword(IN tokenId, string[] tokens)
     {
-        Add(tokenId,  new LexemeAttribute(GenericToken.KeyWord, channel:Channels.Main, tokens.ToArray()) ,null);
+        Add(tokenId,  new LexemeAttribute(GenericToken.KeyWord, Channels.Main, tokens.ToArray()) ,null);
         return this;
     }
 
@@ -228,27 +228,27 @@ public class FluentLexerBuilder<IN> :  IFluentLexemeBuilder<IN> where IN : struc
         return this;
     }
 
-    public IFluentLexemeBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main)
+    public IFluentLexemeBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\")
     {
-        Add(tokenId,new LexemeAttribute(GenericToken.String,channel, delimiter,escapeChar),null);
+        Add(tokenId,new LexemeAttribute(GenericToken.String,Channels.Main, delimiter,escapeChar),null);
         return this;
     }
     
-    public IFluentLexemeBuilder<IN> Character(IN tokenId, string delimiter ="\'", string escapeChar = "\\", int channel = Channels.Main)
+    public IFluentLexemeBuilder<IN> Character(IN tokenId, string delimiter ="\'", string escapeChar = "\\")
     {
-        Add(tokenId,new LexemeAttribute(GenericToken.Char,channel, delimiter,escapeChar),null);
+        Add(tokenId,new LexemeAttribute(GenericToken.Char,Channels.Main, delimiter,escapeChar),null);
         return this;
     }
     
-    public IFluentLexemeBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false, int channel = Channels.Comments)
+    public IFluentLexemeBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false)
     {
-        AddComment(tokenId, new SingleLineCommentAttribute(start, doNotIgnore, channel));
+        AddComment(tokenId, new SingleLineCommentAttribute(start, doNotIgnore, Channels.Comments));
         return this;
     }
 
-    public IFluentLexemeBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments)
+    public IFluentLexemeBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false)
     {
-        AddComment(tokenId, new MultiLineCommentAttribute(start, end, doNotIgnore, channel));
+        AddComment(tokenId, new MultiLineCommentAttribute(start, end, doNotIgnore, Channels.Comments));
         return this;
     }
 
