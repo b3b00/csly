@@ -24,7 +24,7 @@ namespace ParserTests.samples
             {
                 var whileParser = new IndentedWhileParserGeneric();
                 FluentIndentedWhileParserBuilder builder = new FluentIndentedWhileParserBuilder();
-                Parser = builder.GetParser();
+                Parser = builder.GetParserWithManyOperands();
                 Check.That(Parser).IsOk();
             }
 
@@ -34,6 +34,31 @@ namespace ParserTests.samples
 
         [Fact]
         public void TestAssignAdd()
+        {
+            var whileParser = new IndentedWhileParserGeneric();
+            FluentIndentedWhileParserBuilder builder = new FluentIndentedWhileParserBuilder();
+            var Parser = builder.GetParserWithSingleOperand();
+            Check.That(Parser).IsOk();
+            var buildResult = buildParser();
+            var parser = buildResult.Result;
+            var result = parser.Parse("a:=1+1");
+            Check.That(result).IsOkParsing();
+
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
+            var seq = result.Result as SequenceStatement;
+            Check.That(seq.Get(0)).IsInstanceOf<AssignStatement>();
+            var assign = seq.Get(0) as AssignStatement;
+            Check.That(assign.VariableName).IsEqualTo("a");
+            var val = assign.Value;
+            Check.That(val).IsInstanceOf<BinaryOperation>();
+            var bin = val as BinaryOperation;
+            Check.That(bin.Operator).IsEqualTo(BinaryOperator.ADD);
+            Check.That((bin.Left as IntegerConstant)?.Value).IsEqualTo(1);
+            Check.That((bin.Right as IntegerConstant)?.Value).IsEqualTo(1);
+        }
+        
+        [Fact]
+        public void TestAssignAddSingleOperand()
         {
             var buildResult = buildParser();
             var parser = buildResult.Result;

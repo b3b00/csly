@@ -158,8 +158,37 @@ namespace sly.parser.generator
             
             if (configuration.OperandRules != null && configuration.OperandRules.Any())
             {
+                if (configuration.OperandRules.Count == 1)
+                {
+                    return configuration.OperandRules[0].NonTerminalName;
+                }
+                
                 string nonTerminalName = string.Join("-",configuration.OperandRules.Select(x => x.NonTerminalName).Distinct());
+                
+                // operandNonTerminalName = $"{parserClass.Name}_operand";
+                // var operandNonTerminals = operandMethods.Select<MethodInfo, string>(GetNonTerminalNameFromProductionMethod);
+                var operandNonTerminal = new NonTerminal<IN, OUT>(nonTerminalName);
+                
+                
+                foreach (var operand in configuration.OperandRules)
+                {
+                    if (!string.IsNullOrEmpty(operand.NonTerminalName))
+                    {
+                        var rule = new Rule<IN, OUT>
+                        {
+                            IsByPassRule = true,
+                            IsExpressionRule = true,
+                            Clauses = new List<IClause<IN, OUT>> {new NonTerminalClause<IN, OUT>(operand.NonTerminalName)}
+                        };
+                        operandNonTerminal.Rules.Add(rule);
+                    }
+                }
+
+                configuration.NonTerminals[nonTerminalName] = operandNonTerminal;
+                
+                
                 return nonTerminalName;
+                
             }
             
             List<MethodInfo> methods;
