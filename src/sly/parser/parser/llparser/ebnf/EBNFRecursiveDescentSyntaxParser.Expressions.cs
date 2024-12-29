@@ -15,7 +15,6 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
         int position,
         string nonTerminalName, SyntaxParsingContext<IN, OUT> parsingContext)
     {
-        OperationMetaData<IN,OUT> operation = null;
         var currentPosition = position;
         var children = new List<ISyntaxNode<IN, OUT>>();
         if (!tokens[position].IsEOS && rule.Match(tokens, position, Configuration) && rule.Clauses != null &&

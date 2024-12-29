@@ -26,7 +26,6 @@ namespace sly.parser.syntax.grammar
             bool setted = mayBeEmpty && !_mayBeEmpty;
             _mayBeEmpty = mayBeEmpty;
             return setted;
-            return false;
         }
 
         

@@ -46,10 +46,6 @@ namespace ParserTests
         }
     }
 
-    public class list<T>
-    {
-    }
-
     public class Parse
     {
         [Production("program : statement*")]

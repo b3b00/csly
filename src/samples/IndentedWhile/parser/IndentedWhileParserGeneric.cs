@@ -165,18 +165,21 @@ namespace csly.indentedWhileLang.parser
             return null;
         }
 
+        [Operand]
         [Production(
-            "primary : QUESTION[d] IndentedWhileParserGeneric_expressions ARROW[d] IndentedWhileParserGeneric_expressions COLON[d] IndentedWhileParserGeneric_expressions")]
+            "ternary : QUESTION[d] IndentedWhileParserGeneric_expressions ARROW[d] IndentedWhileParserGeneric_expressions COLON[d] IndentedWhileParserGeneric_expressions")]
         public WhileAST TernaryQuestion(WhileAST condition, WhileAST ifTrue, WhileAST ifFalse)
         {
             return new TernaryExpression(condition as Expression, ifTrue as Expression, ifFalse as Expression);
         }
 
-        [Production("primary : OPEN_PAREN[d] IndentedWhileParserGeneric_expressions CLOSE_PAREN[d]")]
+        [Operand]
+        [Production("group : OPEN_PAREN[d] IndentedWhileParserGeneric_expressions CLOSE_PAREN[d]")]
         public WhileAST Group(WhileAST expression) => expression;
         
+        [Operand]
         // fstrings 
-        [Production("primary : OPEN_FSTRING[d] fstring_element* CLOSE_FSTRING[d]")]
+        [Production("fstring : OPEN_FSTRING[d] fstring_element* CLOSE_FSTRING[d]")]
         public WhileAST fstring(List<WhileAST> elements)
         {
             if (elements.Count == 1)
@@ -199,14 +202,15 @@ namespace csly.indentedWhileLang.parser
         }
         
         
-        [Production("primary: INT")]
+        [Operand]
+        [Production("int: INT")]
         public WhileAST PrimaryInt(Token<IndentedWhileTokenGeneric> intToken)
         {
             return new IntegerConstant(intToken.IntValue);
         }
 
-        [Production("primary: TRUE")]
-        [Production("primary: FALSE")]
+        [Operand]
+        [Production("bool: [TRUE | FALSE]")]
         public WhileAST PrimaryBool(Token<IndentedWhileTokenGeneric> boolToken)
         {
             return new BoolConstant(bool.Parse(boolToken.StringWithoutQuotes));
@@ -218,18 +222,19 @@ namespace csly.indentedWhileLang.parser
         //     return new StringConstant(stringToken.StringWithoutQuotes);
         // }
 
-        [Production("primary: IDENTIFIER")]
+        [Operand]
+        [Production("id: IDENTIFIER")]
         public WhileAST PrimaryId(Token<IndentedWhileTokenGeneric> varToken)
         {
             return new Variable(varToken.StringWithoutQuotes);
         }
 
         [Operand]
-        [Production("operand: primary")]
-        public WhileAST Operand(WhileAST prim)
-        {
-            return prim;
-        }
+        // [Production("operand: primary")]
+        // public WhileAST Operand(WhileAST prim)
+        // {
+        //     return prim;
+        // }
 
         #endregion
 

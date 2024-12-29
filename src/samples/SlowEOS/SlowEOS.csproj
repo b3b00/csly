@@ -9,6 +9,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <OutputType>Exe</OutputType>
+        <NoWarn>8603</NoWarn>
     </PropertyGroup>
 
 </Project>
