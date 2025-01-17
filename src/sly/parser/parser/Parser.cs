@@ -109,7 +109,7 @@ namespace sly.parser
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
               
-                var r = Visitor.VisitSyntaxTree(syntaxResult.Root,parsingContext);
+                var r = Visitor.VisitSyntaxTree(syntaxResult.Root,parsingContext ?? new NoContext());
                 result.Result = r;
                 result.SyntaxTree = syntaxResult.Root;
                 result.IsError = false;
