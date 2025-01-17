@@ -1416,12 +1416,14 @@ namespace ParserTests
         {
             var startingRule = $"choice";
             var parserInstance = new AlternateChoiceTestError();
-            var builder = new ParserBuilder<OptionTestToken, string>();
+            var builder = new ParserBuilder<OptionTestToken, string>("en");
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
             Check.That(builtParser.IsError).IsTrue();
             Check.That(builtParser.Errors).CountIs(2);
             Check.That(builtParser.Errors.Select(x => x.Code)).Contains(ErrorCodes.PARSER_MIXED_CHOICES,
                 ErrorCodes.PARSER_NON_TERMINAL_CHOICE_CANNOT_BE_DISCARDED);
+            Check.That(builtParser.Errors.Select(x => x.Message)).Contains("choice : [ a | b | C | D] contains [ a(T) | b(T) | C(NT) | D(NT) ] with mixed terminal and nonterminal.");
+            
         }
         
         

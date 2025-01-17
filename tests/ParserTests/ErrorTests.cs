@@ -15,7 +15,7 @@ namespace ParserTests
         public void TestExpressionSyntaxError()
         {
             var exprParser = new ExpressionParser();
-            var builder = new ParserBuilder<ExpressionToken, int>();
+            var builder = new ParserBuilder<ExpressionToken, int>("en");
             var Parser = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression").Result;
 
             var r = Parser.Parse(" 2 + 3 + + 2");
@@ -29,6 +29,7 @@ namespace ParserTests
             Check.That(error.UnexpectedToken.TokenID).IsEqualTo(ExpressionToken.PLUS);
             Check.That(error.Line).IsEqualTo(1);
             Check.That(error.Column).IsEqualTo(10);
+            Check.That(error.ErrorMessage).Contains("unexpected plus sign ('+ (line 1, column 10)'). Expecting INT, opening parenthesis, minus sign, .");
         }
 
         [Fact]
