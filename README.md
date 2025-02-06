@@ -4,6 +4,7 @@
 [![Build](https://github.com/b3b00/csly/actions/workflows/dotnetcore.yml/badge.svg)](https://github.com/b3b00/csly/actions/workflows/dotnetcore.yml)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fb3b00%2Fcsly.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fb3b00%2Fcsly?ref=badge_shield)
 [![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=b3b00_csly)](https://sonarcloud.io/summary/new_code?id=b3b00_csly)
+[![](https://tokei.rs/b1/github/b3b00/csly?category=lines)](https://github.com/b3b00/csly).
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=dev&repo=89719340)
 
