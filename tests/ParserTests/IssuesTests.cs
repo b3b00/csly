@@ -1,192 +1,20 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using NFluent;
+using ParserTests.Issue218;
+using ParserTests.Issue219;
 using ParserTests.Issue251;
 using ParserTests.Issue260;
+using ParserTests.Issue277;
 using SlowEOS;
 using sly.buildresult;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
-using sly.parser.parser;
 using Xunit;
 
 namespace ParserTests
 {
-    
-    public enum Token218
-    {
-        [Lexeme(GenericToken.Double)]
-        DOUBLE,
-        [Lexeme(GenericToken.Int)]
-        INT,
-        [Lexeme(GenericToken.String, "\"", "\\")]
-        STRING,
-        [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumeric)]
-        IDENTIFIER,
-        [Lexeme(GenericToken.SugarToken, ";")]
-        SEMICOLON,
-        [Lexeme(GenericToken.SugarToken, ",")]
-        COMMA,
-        [Lexeme(GenericToken.SugarToken, "=")]
-        ASSIGNMENT,
-        [Lexeme(GenericToken.SugarToken, "(")]
-        LPAREN,
-        [Lexeme(GenericToken.SugarToken, ")")]
-        RPAREN,
-        [Lexeme(GenericToken.SugarToken, "{")]
-        LBRACE,
-        [Lexeme(GenericToken.SugarToken, "}")]
-        RBRACE,
-        [Lexeme(GenericToken.SugarToken, "[")]
-        LBRACKET,
-        [Lexeme(GenericToken.SugarToken, "]")]
-        RBRACKET,
-        [Lexeme(GenericToken.SugarToken, ">")]
-        GREATER,
-        [Lexeme(GenericToken.SugarToken, "<")]
-        LESSER,
-        [Lexeme(GenericToken.SugarToken, "==")]
-        DOUBLEEQUALS,
-        [Lexeme(GenericToken.SugarToken, "!=")]
-        DIFFERENT,
-        [Lexeme(GenericToken.SugarToken, "+")]
-        PLUS,
-        [Lexeme(GenericToken.SugarToken, "-")]
-        MINUS,
-        [Lexeme(GenericToken.SugarToken, "*")]
-        TIMES,
-        [Lexeme(GenericToken.SugarToken, "/")]
-        DIVIDE,
-        [Lexeme(GenericToken.SugarToken, "%")]
-        MODULUS,
-        [Lexeme(GenericToken.SugarToken, "++")]
-        PLUSPLUS,
-        [Lexeme(GenericToken.SugarToken, "--")]
-        MINUSMINUS,
-        [Lexeme(GenericToken.KeyWord, "if")]
-        IF,
-        [Lexeme(GenericToken.KeyWord, "else")]
-        ELSE,
-        [Lexeme(GenericToken.KeyWord, "loop")]
-        LOOP,
-        [Lexeme(GenericToken.KeyWord, "while")]
-        WHILE,
-        [Lexeme(GenericToken.KeyWord, "true")]
-        TRUE,
-        [Lexeme(GenericToken.KeyWord, "false")]
-        FALSE,
-        [Lexeme(GenericToken.KeyWord, "break")]
-        BREAK,
-        [Lexeme(GenericToken.KeyWord, "continue")]
-        CONTINUE,
-        [Lexeme(GenericToken.KeyWord, "return")]
-        RETURN,
-        [Lexeme(GenericToken.KeyWord, "function")]
-        FUNCTION,
-        [Lexeme(GenericToken.KeyWord, "import")]
-        IMPORT,
-        [Lexeme(GenericToken.KeyWord, "new")]
-        NEW,
-        [Comment("//", "/*", "*/")]
-        COMMENT
-    }
-
-
-    public enum Issue219Lexer
-    {
-        [Lexeme(GenericToken.Identifier, IdentifierType.Alpha)]
-        ID = 1,
-
-        [Lexeme(GenericToken.Int)] 
-        INT = 2,
-
-        [Lexeme(GenericToken.SugarToken, "=")] 
-        EQ = 3 
-    }
-    public interface I219Ast {
-    
-    }
-    
-    public class Root219 : I219Ast{
-        public List<I219Ast> Sets { get; set; }
-    }
-
-    public class Set219 : I219Ast
-    {
-        public string Id { get; set; }
-        public int Value { get; set; }
-
-        public Set219(string id, int value)
-        {
-            Id = id;
-            Value = value;
-        }
-    }
-
-    public class Exception219 : Exception
-    {
-        public Exception219(string error) : base(error)
-        {
-            
-        }
-    }
-        
-    public class Issue219ParserEBNF
-    {
-        [Production("root: set*")]
-        public I219Ast root(List<I219Ast> sets)
-        {
-            return new Root219() {Sets = sets};
-        }
-
-        [Production("set : ID EQ[d] INT")]
-        public Set219 set(Token<Issue219Lexer> id, Token<Issue219Lexer> value)
-        {
-            throw new Exception219("visitor error");
-        }
-    }
-    
-    public class Issue219ParserBNF
-    {
-        [Production("root: set")]
-        public I219Ast root(I219Ast set)
-        {
-            return new Root219() {Sets = new List<I219Ast>(){set}};
-        }
-
-        [Production("set : ID EQ INT")]
-        public Set219 set(Token<Issue219Lexer> id, Token<Issue219Lexer> eq, Token<Issue219Lexer> value)
-        {
-            throw new Exception219("visitor error");
-        }
-    }
-    
-    public enum Issue277Tokens
-    {
-        [Lexeme(GenericToken.Identifier, IdentifierType.AlphaNumericDash)]
-        IDENTIFIER,
-
-        [Lexeme(GenericToken.KeyWord, "or")]
-        OR
-    }
-    
-    public class Issue277Parser
-    {
-        [Production("widget: IDENTIFIER")]
-        public string Widget(Token<Issue277Tokens> widget)
-        {
-            return widget.Value;
-        }
-
-        [Production("expression: widget (OR [d] widget)+")]
-        public string Expression(string widget, List<Group<Issue277Tokens, string>> ors)
-        {
-            return ors.Aggregate($"{widget}", (acc, a) => $"{acc} | {a.Value("widget")}");
-        }
-    }
-    
     public class IssuesTests
     {
 
