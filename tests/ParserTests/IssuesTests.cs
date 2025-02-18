@@ -109,6 +109,7 @@ namespace ParserTests
             ParserBuilder<SlowOnBadParseEosToken, object> builder = new ParserBuilder<SlowOnBadParseEosToken, object>();
             var buildParser = builder.BuildParser(new SlowOnBadParseEos(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
             Check.That(buildParser).IsOk();
+            Check.That(buildParser.Errors).IsEmpty();
             var parser = buildParser.Result; 
             string source = "FUNCTIONCALL([Identifier]";
             Check.ThatCode(() =>
@@ -132,6 +133,7 @@ namespace ParserTests
             var equals = tokens[0];
             Check.That(equals).IsNotNull();
             Check.That(equals.TokenID).IsEqualTo(Token536.Equals);
+            var x = Token536.Equals;
         }
     }
 
