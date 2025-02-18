@@ -6,6 +6,7 @@ using ParserTests.Issue219;
 using ParserTests.Issue251;
 using ParserTests.Issue260;
 using ParserTests.Issue277;
+using ParserTests.Issue536;
 using SlowEOS;
 using sly.buildresult;
 using sly.lexer;
@@ -116,6 +117,21 @@ namespace ParserTests
                 Check.That(result).IsOkParsing();
             }).LastsLessThan(60_000, TimeUnit.Milliseconds);
 
+        }
+
+        [Fact]
+        public static void Issue536Test()
+        {
+            var lexerBuild = LexerBuilder.BuildLexer<Token536>();
+            Check.That(lexerBuild).IsOk();
+            var lexer = lexerBuild.Result;
+            var lexerResult = lexer.Tokenize("=");
+            Check.That(lexerResult).IsOkLexing();
+            var tokens = lexerResult.Tokens;
+            Check.That(tokens).CountIs(2);
+            var equals = tokens[0];
+            Check.That(equals).IsNotNull();
+            Check.That(equals.TokenID).IsEqualTo(Token536.Equals);
         }
     }
 
