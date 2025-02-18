@@ -7,6 +7,7 @@ namespace sly.buildresult
         
         #region Lexer
         
+        LEXER_DOES_NOT_HAVE_LEXEM = 1000,
         
         LEXER_UNKNOWN_ERROR = 0,
         

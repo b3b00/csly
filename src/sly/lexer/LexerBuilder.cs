@@ -37,7 +37,8 @@ namespace sly.lexer
         {
             var type = enumVal.GetType();
             var memInfo = type.GetMember(enumVal.ToString());
-            var attributes = (T[])memInfo[0].GetCustomAttributes(typeof(T), false);
+            var valueMembers = memInfo.Where(x => x.MemberType == MemberTypes.Field).ToList();
+            var attributes = (T[])valueMembers[0].GetCustomAttributes(typeof(T), false);
             return attributes;
         }
     }
@@ -86,7 +87,7 @@ namespace sly.lexer
                     {
                         result.AddError(new LexerInitializationError(ErrorLevel.WARN,
                             $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme",
-                            ErrorCodes.NOT_AN_ERROR));
+                            ErrorCodes.LEXER_DOES_NOT_HAVE_LEXEM));
                     }
                     else
                     {
@@ -301,7 +302,7 @@ namespace sly.lexer
                 {
                     result.AddError(new LexerInitializationError(ErrorLevel.WARN,
                         $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme",
-                        ErrorCodes.NOT_AN_ERROR));
+                        ErrorCodes.LEXER_DOES_NOT_HAVE_LEXEM));
                 }
             }
 
