@@ -145,7 +145,7 @@ namespace ParserTests
             Check.That(buildParser).IsOk();
             var parser = buildParser.Result;
             var parsed = parser.Parse("1");
-            Check.That(parsed.IsOk).IsTrue();
+            Check.That(parsed).IsOkParsing();
         }
     }
 

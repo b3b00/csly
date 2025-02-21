@@ -7,7 +7,7 @@ using sly.lexer;
 
 namespace ParserTests.Issue540
 {
-    public partial class Issue540Parser
+    public class Issue540Parser
     {
 
         [Production($"NtSection: NtStatement*")]
@@ -171,11 +171,7 @@ namespace ParserTests.Issue540
         [Production(
             $"NtBaseType: [TypeByte | TypeShort | TypeInt | TypeLong | TypeLongInt | TypeFloat | TypeDouble | TypeRational | TypeNumber | TypeString | TypeChar | TypeVoid]")]
         public object NtBaseType(Token<Issue540Token> typeToken) => null;
-    }
 
-
-    public partial class Issue540Parser
-    {
         #region ComparisonExpressions
 
         const int EqualToPrecedence = NotExprPrecedence + 1;
