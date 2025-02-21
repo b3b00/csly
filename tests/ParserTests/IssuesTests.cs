@@ -141,11 +141,11 @@ namespace ParserTests
         public static void Issue540Test()
         {
             ParserBuilder<Issue540Token, object> builder = new ParserBuilder<Issue540Token, object>();
-            var buildParser = builder.BuildParser(new Issue540Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "NTSCExpr");
+            var buildParser = builder.BuildParser(new Issue540Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "NtSCExpr");
             Check.That(buildParser).IsOk();
             var parser = buildParser.Result;
             var parsed = parser.Parse("1");
-            Check.That(parsed).IsOkParsing();
+            Check.That(parsed.IsOk).IsTrue();
         }
     }
 
