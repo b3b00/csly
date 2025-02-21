@@ -137,41 +137,13 @@ namespace ParserTests
             Check.That(equals.TokenID).IsEqualTo(Token536.Equals);
             var x = Token536.Equals;
         }
-
-        private static void PrintLeadings(ParserConfiguration<Issue540Token, object> configuration, string nonterminal)
-        {
-            var nt = configuration.NonTerminals[nonterminal];
-            var leading = $">>{nonterminal}<< {string.Join(", ", nt.GetPossibleLeadingTokens())}";
-            Console.WriteLine(leading);
-            File.AppendAllLines("c:/tmp/leadings.txt", new []{leading,""});
-        }
-        
+   
         [Fact]
         public static void Issue540Test()
         {
             ParserBuilder<Issue540Token, object> builder = new ParserBuilder<Issue540Token, object>();
             var buildParser = builder.BuildParser(new Issue540Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "NtSCExpr");
             Check.That(buildParser).IsOk();
-
-            var configuration = buildParser.Result.Configuration;
-            
-            PrintLeadings(configuration, "NtAssignmentExpr1");
-
-            PrintLeadings(configuration, "NtAssignmentExpr");
-
-            PrintLeadings(configuration, "NtDeclarationExpr");
-
-            PrintLeadings(configuration, "NtAliasExpr");
-
-            PrintLeadings(configuration, "NtExpression");
-
-            PrintLeadings(configuration, "NtSCExpr");
-
-            PrintLeadings(configuration, "NtStatement");
-
-            PrintLeadings(configuration, "NtSection");
-            
-            
             
             var parser = buildParser.Result;
             var parsed = parser.Parse("1;");            
