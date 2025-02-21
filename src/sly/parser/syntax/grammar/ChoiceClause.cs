@@ -37,7 +37,7 @@ namespace sly.parser.syntax.grammar
 
         public bool MayBeEmpty()
         {
-            return true;
+            return false;
         }
         
         [ExcludeFromCodeCoverage]

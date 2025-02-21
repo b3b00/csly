@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using System.Linq;
 using NFluent;
 using ParserTests.Issue218;
@@ -8,11 +6,11 @@ using ParserTests.Issue251;
 using ParserTests.Issue260;
 using ParserTests.Issue277;
 using ParserTests.Issue536;
+using ParserTests.Issue538;
 using ParserTests.Issue540;
 using SlowEOS;
 using sly.buildresult;
 using sly.lexer;
-using sly.parser;
 using sly.parser.generator;
 using Xunit;
 
@@ -137,6 +135,16 @@ namespace ParserTests
             Check.That(equals.TokenID).IsEqualTo(Token536.Equals);
             var x = Token536.Equals;
         }
+
+
+        [Fact]
+        public static void Issue538Test()
+        {
+            ParserBuilder<Issue538Token, object> builder = new ParserBuilder<Issue538Token, object>();
+            var buildParser = builder.BuildParser(new Issue538Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "NTSection");
+            Check.That(buildParser).IsOk();
+        }
+
    
         [Fact]
         public static void Issue540Test()
@@ -149,6 +157,7 @@ namespace ParserTests
             var parsed = parser.Parse("1;");            
             Check.That(parsed).IsOkParsing(checkIfResultisNull:false);
         }
+
     }
 
    
