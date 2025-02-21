@@ -44,7 +44,12 @@ namespace sly.parser
             var expressionGenerator = new ExpressionRulesGenerator<IN, OUT>(I18n);
             exprResult = expressionGenerator.BuildExpressionRules(Configuration, Instance.GetType(), exprResult);
             Configuration = exprResult.Result;
-            SyntaxParser.Init(exprResult.Result, startingRule);
+            if (exprResult.IsOk)
+            {
+                // #540 : recompute starting tokens taking account of expression rules 
+                SyntaxParser.Init(exprResult.Result, startingRule);
+            }
+
             if (startingRule != null)
             {
                 Configuration.StartingRule = startingRule;
