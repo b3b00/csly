@@ -17,5 +17,11 @@ public enum Issue538Token
     For,
     
     [Keyword("While")]
-    While
+    While,
+    
+    [Keyword("Else")]
+    Else,
+    
+    [AlphaId]
+    Identifier
 }
