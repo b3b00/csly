@@ -247,6 +247,11 @@ namespace sly.parser.llparser.bnf
         public virtual void Init(ParserConfiguration<IN, OUT> configuration, string root)
         {
             if (root != null) StartingNonTerminal = root;
+            // #540 : reset all leading tokens and recompute with the new configuration (expression rules)
+            foreach (var nonTerminal in configuration.NonTerminals.Values)
+            {
+                nonTerminal?.Rules?.ForEach(x => x?.PossibleLeadingTokens?.Clear());
+            }
             InitializeStartingTokens(configuration, StartingNonTerminal);
         }
 

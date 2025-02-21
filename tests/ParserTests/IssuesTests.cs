@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using NFluent;
 using ParserTests.Issue218;
@@ -7,6 +8,7 @@ using ParserTests.Issue251;
 using ParserTests.Issue260;
 using ParserTests.Issue277;
 using ParserTests.Issue536;
+using ParserTests.Issue540;
 using SlowEOS;
 using sly.buildresult;
 using sly.lexer;
@@ -134,6 +136,18 @@ namespace ParserTests
             Check.That(equals).IsNotNull();
             Check.That(equals.TokenID).IsEqualTo(Token536.Equals);
             var x = Token536.Equals;
+        }
+   
+        [Fact]
+        public static void Issue540Test()
+        {
+            ParserBuilder<Issue540Token, object> builder = new ParserBuilder<Issue540Token, object>();
+            var buildParser = builder.BuildParser(new Issue540Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "NtSCExpr");
+            Check.That(buildParser).IsOk();
+            
+            var parser = buildParser.Result;
+            var parsed = parser.Parse("1;");            
+            Check.That(parsed).IsOkParsing(checkIfResultisNull:false);
         }
     }
 
