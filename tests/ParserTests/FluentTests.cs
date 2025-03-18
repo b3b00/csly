@@ -529,4 +529,54 @@ world
         Check.That(build.Errors.Extracting(x => x.Code)).Contains(ErrorCodes.PARSER_LEFT_RECURSIVE);
 
     }
+
+    [Fact]
+    public void TestLexerErrorBadStringDelimiter()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumDashId(FluentToken.ID)
+            .String(FluentToken.DATE, "x","y")
+            .Int(FluentToken.DATE)
+            .AlphaNumDashId(FluentToken.ID)
+            .UseLexerPostProcessor(tokens =>
+            {
+                return tokens.Select<Token<FluentToken>, Token<FluentToken>>(x =>
+                {
+                    if (x.TokenID == FluentToken.ID)
+                    {
+                        x.SpanValue = x.Value.ToUpper().AsMemory();
+                    }
+
+                    return x;
+                }).ToList();
+            });
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : DATE", args => "root").WithSubNodeNamed("root")
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).Not.IsOk();
+        Check.That(build.Errors.Extracting(x => x.Code))
+            .Contains(ErrorCodes.LEXER_STRING_DELIMITER_CANNOT_BE_LETTER_OR_DIGIT);
+    }
+    
+    [Fact]
+    public void TestLexerErrorManySingleLineComment()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .Regex(FluentToken.START_ISLAND, "<")
+            .AlphaNumId(FluentToken.ID);
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : DATE", args => "root").WithSubNodeNamed("root")
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).Not.IsOk();
+        Check.That(build.Errors.Extracting(x => x.Code))
+            .Contains(ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX);
+    }
 }
