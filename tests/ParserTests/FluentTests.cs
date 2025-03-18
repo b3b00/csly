@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NFluent;
 using simpleExpressionParser;
+using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fluent;
 using sly.lexer.fsm;
@@ -461,5 +462,121 @@ world
         var l = first.Children.FirstOrDefault() as SyntaxNode<FluentToken, string>;
         Check.That(l).IsNotNull();
         Check.That(l.Name).IsEqualTo("left");
+    }
+    
+     [Fact]
+    public void TestFluentBuildErrorMissingNonTerminal()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumDashId(FluentToken.ID)
+            .Date(FluentToken.DATE, DateFormat.YYYYMMDD, '-')
+            .AlphaNumDashId(FluentToken.ID)
+            .UseLexerPostProcessor(tokens =>
+            {
+                return tokens.Select<Token<FluentToken>, Token<FluentToken>>(x =>
+                {
+                    if (x.TokenID == FluentToken.ID)
+                    {
+                        x.SpanValue = x.Value.ToUpper().AsMemory();
+                    }
+
+                    return x;
+                }).ToList();
+            });
+  
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : l r", args => "root").WithSubNodeNamed("root")
+            .Production("r : ID", args => "right").Named("right")
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).Not.IsOk();
+        Check.That(build.Errors.Extracting(x => x.Code)).Contains(ErrorCodes.PARSER_REFERENCE_NOT_FOUND);
+
+    }
+    
+    [Fact]
+    public void TestFluentBuildErrorLeftRecursion()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumDashId(FluentToken.ID)
+            .Date(FluentToken.DATE, DateFormat.YYYYMMDD, '-')
+            .AlphaNumDashId(FluentToken.ID)
+            .UseLexerPostProcessor(tokens =>
+            {
+                return tokens.Select<Token<FluentToken>, Token<FluentToken>>(x =>
+                {
+                    if (x.TokenID == FluentToken.ID)
+                    {
+                        x.SpanValue = x.Value.ToUpper().AsMemory();
+                    }
+
+                    return x;
+                }).ToList();
+            });
+  
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : l", args => "root").WithSubNodeNamed("root")
+            .Production("l : l r ", args => "recurse").Named("recurse")
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).Not.IsOk();
+        Check.That(build.Errors.Extracting(x => x.Code)).Contains(ErrorCodes.PARSER_LEFT_RECURSIVE);
+
+    }
+
+    [Fact]
+    public void TestLexerErrorBadStringDelimiter()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumDashId(FluentToken.ID)
+            .String(FluentToken.DATE, "x","y")
+            .Int(FluentToken.DATE)
+            .AlphaNumDashId(FluentToken.ID)
+            .UseLexerPostProcessor(tokens =>
+            {
+                return tokens.Select<Token<FluentToken>, Token<FluentToken>>(x =>
+                {
+                    if (x.TokenID == FluentToken.ID)
+                    {
+                        x.SpanValue = x.Value.ToUpper().AsMemory();
+                    }
+
+                    return x;
+                }).ToList();
+            });
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : DATE", args => "root").WithSubNodeNamed("root")
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).Not.IsOk();
+        Check.That(build.Errors.Extracting(x => x.Code))
+            .Contains(ErrorCodes.LEXER_STRING_DELIMITER_CANNOT_BE_LETTER_OR_DIGIT);
+    }
+    
+    [Fact]
+    public void TestLexerErrorManySingleLineComment()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .Regex(FluentToken.START_ISLAND, "<")
+            .AlphaNumId(FluentToken.ID);
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : DATE", args => "root").WithSubNodeNamed("root")
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).Not.IsOk();
+        Check.That(build.Errors.Extracting(x => x.Code))
+            .Contains(ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX);
     }
 }

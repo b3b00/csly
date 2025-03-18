@@ -315,7 +315,7 @@ public class FluentLexerBuilder<IN> :  IFluentLexemeBuilder<IN> where IN : struc
             KeyWordIgnoreCase = _keyWordIgnoreCase
         };
         
-        BuildResult<ILexer<IN>> r = new BuildResult<ILexer<IN>>();
+        BuildResult<ILexer<IN>> lexerResult = new BuildResult<ILexer<IN>>();
 
         Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>, (List<string> modes,
             bool isModePopper, string pushTarget)> modesGetter =
@@ -336,11 +336,13 @@ public class FluentLexerBuilder<IN> :  IFluentLexemeBuilder<IN> where IN : struc
                 }
                 return (modes, isModePopper, pushMode);
             }; 
-        
-        
-        
-        var lexerResult = LexerBuilder.BuildLexer(r, _extensionBuilder, lang, _lexerPostProcessor, _explicitTokens, _lexemesDefinitionsAndLabels, lexerConfig, _comments, modesGetter, () => _callbacks);
-       
+
+        if (lexerResult.IsOk)
+        {
+            lexerResult = LexerBuilder.BuildLexer(lexerResult, _extensionBuilder, lang, _lexerPostProcessor,
+                _explicitTokens, _lexemesDefinitionsAndLabels, lexerConfig, _comments, modesGetter, () => _callbacks);
+        }
+
         return lexerResult;
     }
     

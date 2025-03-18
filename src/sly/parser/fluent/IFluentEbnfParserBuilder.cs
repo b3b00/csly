@@ -8,6 +8,8 @@ public interface IFluentEbnfRuleBuilder<IN, OUT> : IFluentEbnfParserBuilder<IN, 
 {
     public IFluentEbnfParserBuilder<IN, OUT> Named(string name);
     
+    public IFluentEbnfParserBuilder<IN, OUT> WithLang(string i18nLang);
+    
     public IFluentEbnfParserBuilder<IN, OUT> WithSubNodeNamed(params string[] subNodeNames);
 }
 
@@ -44,7 +46,7 @@ public interface IFluentEbnfParserBuilder<IN,OUT> where IN : struct
     
     IFluentEbnfRuleBuilder<IN,OUT> Postfix(string operation, int precedence, Func<object[], OUT> visitor);
     
-    public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result); 
+    public BuildResult<ISyntaxParser<IN, OUT>> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result); 
     
     public BuildResult<Parser<IN, OUT>> BuildParser();
 

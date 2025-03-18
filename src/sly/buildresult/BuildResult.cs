@@ -7,13 +7,18 @@ namespace sly.buildresult
 {
     public class BuildResult<R>
     {
-        public BuildResult() : this(default)
+        public BuildResult() : this(default(R))
         { }
 
         public BuildResult(R result)
         {
             Result = result;
             Errors = new List<InitializationError>();
+        }
+
+        public BuildResult(List<InitializationError> errors)
+        {
+            Errors = errors;
         }
 
         public List<InitializationError> Errors { get; }

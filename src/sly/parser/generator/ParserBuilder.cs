@@ -277,7 +277,7 @@ namespace sly.parser.generator
 
         private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result)
         {
-            var checkers = new List<Func<BuildResult<Parser<IN, OUT>>,NonTerminal<IN, OUT>,BuildResult<Parser<IN, OUT>>>>
+            var checkers = new List<Func<ParserConfiguration<IN,OUT>, BuildResult<Parser<IN, OUT>>,NonTerminal<IN, OUT>,BuildResult<Parser<IN, OUT>>>>
             {
                 CheckUnreachable,
                 CheckNotFound,
@@ -294,22 +294,42 @@ namespace sly.parser.generator
             {
                 if (checker != null)
                     result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN, OUT>>()
-                        .ForEach(nt => result = checker(result, nt));
+                        .ForEach(nt => result = checker(result.Result.Configuration, result, nt));
             }
 
             return result;
         }
 
-        private BuildResult<Parser<IN, OUT>> CheckUnreachable(BuildResult<Parser<IN, OUT>> result,
+        public BuildResult<Parser<IN, OUT>> CheckParser(ParserConfiguration<IN, OUT> configuration)
+        {
+            var checkers = new List<Func<ParserConfiguration<IN,OUT>, BuildResult<Parser<IN, OUT>>,NonTerminal<IN, OUT>,BuildResult<Parser<IN, OUT>>>>
+            {
+                CheckUnreachable,
+                CheckNotFound,
+                CheckAlternates
+            };
+            var result = new BuildResult<Parser<IN, OUT>>(); 
+            
+            foreach (var checker in checkers)
+            {
+                if (checker != null)
+                    configuration.NonTerminals.Values.ToList<NonTerminal<IN, OUT>>()
+                        .ForEach(nt => result = checker(configuration, result, nt));
+            }
+
+            return result;
+        }
+        
+        private BuildResult<Parser<IN, OUT>> CheckUnreachable(ParserConfiguration<IN,OUT> configuration, BuildResult<Parser<IN, OUT>> result,
             NonTerminal<IN, OUT> nonTerminal)
         {
-            var conf = result.Result.Configuration;
+            
             var found = false;
-            if (nonTerminal.Name == conf.StartingRule)
+            if (nonTerminal.Name == configuration.StartingRule)
             {
                 return result;
             }
-            foreach (var nt in result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN, OUT>>())
+            foreach (var nt in configuration.NonTerminals.Values.ToList<NonTerminal<IN, OUT>>())
                 if (nt.Name != nonTerminal.Name)
                 {
                     found = IsNonTerminalReferencing(nt, nonTerminal.Name);
@@ -395,17 +415,17 @@ namespace sly.parser.generator
         }
 
 
-        private BuildResult<Parser<IN, OUT>> CheckNotFound(BuildResult<Parser<IN, OUT>> result,
+        private BuildResult<Parser<IN, OUT>> CheckNotFound(ParserConfiguration<IN,OUT> configuration, BuildResult<Parser<IN, OUT>> result,
             NonTerminal<IN, OUT> nonTerminal)
         {
-            var conf = result.Result.Configuration;
+            
             foreach (var rule in nonTerminal.Rules)
             {
                 foreach (var clause in rule.Clauses)
                 {
                     {
                         if (clause is NonTerminalClause<IN, OUT> ntClause &&
-                            !conf.NonTerminals.ContainsKey(ntClause.NonTerminalName))
+                            !configuration.NonTerminals.ContainsKey(ntClause.NonTerminalName))
                         {
                             result.AddError(new ParserInitializationError(ErrorLevel.ERROR,
                                 i18n.I18N.Instance.GetText(I18N, I18NMessage.ReferenceNotFound,
@@ -420,7 +440,7 @@ namespace sly.parser.generator
             return result;
         }
 
-        private BuildResult<Parser<IN, OUT>> CheckAlternates(BuildResult<Parser<IN, OUT>> result,
+        private BuildResult<Parser<IN, OUT>> CheckAlternates(ParserConfiguration<IN,OUT> configuration, BuildResult<Parser<IN, OUT>> result,
             NonTerminal<IN, OUT> nonTerminal)
         {
             foreach (var rule in nonTerminal.Rules)
@@ -451,7 +471,7 @@ namespace sly.parser.generator
             return result;
         }
 
-        private BuildResult<Parser<IN, OUT>> CheckVisitorsSignature(BuildResult<Parser<IN, OUT>> result,
+        private BuildResult<Parser<IN, OUT>> CheckVisitorsSignature(ParserConfiguration<IN,OUT> configuration, BuildResult<Parser<IN, OUT>> result,
             NonTerminal<IN, OUT> nonTerminal)
         {
             foreach (var rule in nonTerminal.Rules)

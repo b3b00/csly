@@ -119,7 +119,7 @@ namespace sly.parser.generator
             return parser;
         }
 
-        private void SetEmptyNonTerminals(ParserConfiguration<IN, OUT> conf)
+        public void SetEmptyNonTerminals(ParserConfiguration<IN, OUT> conf)
         {
             bool stillSetting = true;
             while (stillSetting)
