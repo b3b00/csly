@@ -39,10 +39,16 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
     private Rule<IN,OUT> _currentRule;
 
     private ParserConfiguration<IN, OUT> _configuration = null;
+
+    private string I18N { get; set; } = "en";
+    
+    
     public static IFluentEbnfParserBuilder<IN,OUT> NewBuilder(object parserInstance, string rootRule, string i18N = "en") 
     {
         return new FluentEBNFParserBuilder<IN,OUT>(i18N, parserInstance, rootRule);
     }
+    
+    
     
     public static IFluentEbnfParserBuilder<IN,OUT> NewBuilder(string rootRule, string i18N = "en")
     {
@@ -59,7 +65,7 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
         _grammarParser = grammar.Result;
     }
 
-    public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result)
+    public BuildResult<ISyntaxParser<IN, OUT>> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result)
     {
         // build configuration
         _configuration = new ParserConfiguration<IN, OUT>();
@@ -80,11 +86,11 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
                 _operationsByPrecedence, out var expressionResult);
             if (!ok)
             {
-                return null;
+                return new BuildResult<ISyntaxParser<IN, OUT>>(result.Errors);
             }
         }
 
-        var b = new EBNFParserBuilder<IN,OUT>("en");
+        var b = new EBNFParserBuilder<IN,OUT>(I18N);
         b.SetEmptyNonTerminals(_configuration);
         // check left recursion.
         var (foundRecursion, recursions) = LeftRecursionChecker<IN, OUT>.CheckLeftRecursion(_configuration);
@@ -94,21 +100,27 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
             result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
                 i18n.I18N.Instance.GetText(I18N, I18NMessage.LeftRecursion, recs),
                 ErrorCodes.PARSER_LEFT_RECURSIVE));
-            return result;
+            return new BuildResult<ISyntaxParser<IN, OUT>>(result.Errors);
         }
         var syntaxParser = b.BuildSyntaxParser(_configuration, ParserType.EBNF_LL_RECURSIVE_DESCENT, _rootRule);
-        b.CheckParser(_configuration);
-        
+        var checkResult =b.CheckParser(_configuration);
+        if (!checkResult.IsOk)
+        {
+            result.AddErrors(checkResult.Errors);
+            var checkedParser = new BuildResult<ISyntaxParser<IN, OUT>>();
+            checkedParser.AddErrors(checkResult.Errors);
+            return checkedParser;
+        }
         
         // initialize starting tokens
         syntaxParser.Init(_configuration,_rootRule);
-        return syntaxParser;
+        return new BuildResult<ISyntaxParser<IN, OUT>>(syntaxParser);
     }
 
     public BuildResult<Parser<IN, OUT>> BuildParser()
     {
         var buildResult = new BuildResult<ParserConfiguration<IN, OUT>>();
-        var syntaxParser = BuildSyntaxParser(buildResult);
+        var syntaxParserResult = BuildSyntaxParser(buildResult);
         if (buildResult.IsError)
         {
             var result = new BuildResult<Parser<IN, OUT>>();
@@ -127,7 +139,7 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
 
         if (lexer.IsOk)
         {
-            Parser<IN, OUT> parser = new Parser<IN, OUT>(_i18N, syntaxParser, visitor);
+            Parser<IN, OUT> parser = new Parser<IN, OUT>(_i18N, syntaxParserResult.Result, visitor);
             parser.Configuration = _configuration;
             parser.Lexer = lexer.Result;
             return new BuildResult<Parser<IN, OUT>>(parser);
@@ -136,6 +148,12 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
         var error = new BuildResult<Parser<IN, OUT>>();
         error.AddErrors(lexer.Errors);
         return error;
+    }
+
+    public IFluentEbnfParserBuilder<IN, OUT> WithLang(string i18nLang)
+    {
+        I18N = i18nLang;
+        return this;
     }
     
     public IFluentEbnfParserBuilder<IN, OUT> WithLexerbuilder(IFluentLexerBuilder<IN> lexerBuilder)

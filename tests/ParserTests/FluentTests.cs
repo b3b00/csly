@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NFluent;
 using simpleExpressionParser;
+using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fluent;
 using sly.lexer.fsm;
@@ -464,7 +465,7 @@ world
     }
     
      [Fact]
-    public void TestBuildError()
+    public void TestFluentBuildErrorMissingNonTerminal()
     {
         var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
             .IgnoreEol(true)
@@ -485,29 +486,47 @@ world
                     return x;
                 }).ToList();
             });
-
-        /*
-        root : l r
-        r : ID
-        => l not defined
-         */
-        
+  
         var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
-            .Production("root : l r", args =>
-            {
-                var l = args[0] as string;
-                var r = args[1] as string;
-                
-                return l+", "+r;
-
-            }).WithSubNodeNamed("root")
-            .Production("r : ID", args =>
-            {
-                return (args[0] as Token<FluentToken>)?.Value;
-            }).Named("right")
+            .Production("root : l r", args => "root").WithSubNodeNamed("root")
+            .Production("r : ID", args => "right").Named("right")
             .WithLexerbuilder(lexer)
             .BuildParser();
         Check.That(build).Not.IsOk();
-        
+        Check.That(build.Errors.Extracting(x => x.Code)).Contains(ErrorCodes.PARSER_REFERENCE_NOT_FOUND);
+
+    }
+    
+    [Fact]
+    public void TestFluentBuildErrorLeftRecursion()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumDashId(FluentToken.ID)
+            .Date(FluentToken.DATE, DateFormat.YYYYMMDD, '-')
+            .AlphaNumDashId(FluentToken.ID)
+            .UseLexerPostProcessor(tokens =>
+            {
+                return tokens.Select<Token<FluentToken>, Token<FluentToken>>(x =>
+                {
+                    if (x.TokenID == FluentToken.ID)
+                    {
+                        x.SpanValue = x.Value.ToUpper().AsMemory();
+                    }
+
+                    return x;
+                }).ToList();
+            });
+  
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : l", args => "root").WithSubNodeNamed("root")
+            .Production("l : l r ", args => "recurse").Named("recurse")
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).Not.IsOk();
+        Check.That(build.Errors.Extracting(x => x.Code)).Contains(ErrorCodes.PARSER_LEFT_RECURSIVE);
+
     }
 }
