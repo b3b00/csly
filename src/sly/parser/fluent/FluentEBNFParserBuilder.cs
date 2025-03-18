@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.buildresult;
+using sly.i18n;
 using sly.lexer.fluent;
 using sly.parser.fluent;
 using sly.parser.generator.visitor;
@@ -84,7 +85,21 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
         }
 
         var b = new EBNFParserBuilder<IN,OUT>("en");
+        b.SetEmptyNonTerminals(_configuration);
+        // check left recursion.
+        var (foundRecursion, recursions) = LeftRecursionChecker<IN, OUT>.CheckLeftRecursion(_configuration);
+        if (foundRecursion)
+        {
+            var recs = string.Join("\n", recursions.Select<List<string>, string>(x => string.Join(" > ", x)));
+            result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
+                i18n.I18N.Instance.GetText(I18N, I18NMessage.LeftRecursion, recs),
+                ErrorCodes.PARSER_LEFT_RECURSIVE));
+            return result;
+        }
         var syntaxParser = b.BuildSyntaxParser(_configuration, ParserType.EBNF_LL_RECURSIVE_DESCENT, _rootRule);
+        b.CheckParser(_configuration);
+        
+        
         // initialize starting tokens
         syntaxParser.Init(_configuration,_rootRule);
         return syntaxParser;

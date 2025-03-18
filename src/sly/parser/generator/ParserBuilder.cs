@@ -300,6 +300,26 @@ namespace sly.parser.generator
             return result;
         }
 
+        public BuildResult<Parser<IN, OUT>> CheckParser(ParserConfiguration<IN, OUT> configuration)
+        {
+            var checkers = new List<Func<BuildResult<Parser<IN, OUT>>,NonTerminal<IN, OUT>,BuildResult<Parser<IN, OUT>>>>
+            {
+                CheckUnreachable,
+                CheckNotFound,
+                CheckAlternates,
+                CheckVisitorsSignature
+            };
+            var result = new BuildResult<Parser<IN, OUT>>(); 
+            foreach (var checker in checkers)
+            {
+                if (checker != null)
+                    result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN, OUT>>()
+                        .ForEach(nt => result = checker(result, nt));
+            }
+
+            return result;
+        }
+        
         private BuildResult<Parser<IN, OUT>> CheckUnreachable(BuildResult<Parser<IN, OUT>> result,
             NonTerminal<IN, OUT> nonTerminal)
         {

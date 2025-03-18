@@ -462,4 +462,52 @@ world
         Check.That(l).IsNotNull();
         Check.That(l.Name).IsEqualTo("left");
     }
+    
+     [Fact]
+    public void TestBuildError()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumDashId(FluentToken.ID)
+            .Date(FluentToken.DATE, DateFormat.YYYYMMDD, '-')
+            .AlphaNumDashId(FluentToken.ID)
+            .UseLexerPostProcessor(tokens =>
+            {
+                return tokens.Select<Token<FluentToken>, Token<FluentToken>>(x =>
+                {
+                    if (x.TokenID == FluentToken.ID)
+                    {
+                        x.SpanValue = x.Value.ToUpper().AsMemory();
+                    }
+
+                    return x;
+                }).ToList();
+            });
+
+        /*
+        root : l r
+        r : ID
+        => l not defined
+         */
+        
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : l r", args =>
+            {
+                var l = args[0] as string;
+                var r = args[1] as string;
+                
+                return l+", "+r;
+
+            }).WithSubNodeNamed("root")
+            .Production("r : ID", args =>
+            {
+                return (args[0] as Token<FluentToken>)?.Value;
+            }).Named("right")
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).Not.IsOk();
+        
+    }
 }
