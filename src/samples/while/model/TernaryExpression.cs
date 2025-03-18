@@ -36,7 +36,6 @@ public class TernaryExpression : Expression
         return $"{Condition.Transpile(context)} ? {TrueExpression.Transpile(context)} :  {FalseExpression.Transpile(context)};";
     }
 
-    private Local _local;
     public Emit<Func<int>> EmitByteCodeForVariable(CompilerContext context, Emit<Func<int>> emiter)
     {
         var falseAssign = new AssignStatement($"ternary_{Number}",FalseExpression);

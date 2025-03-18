@@ -133,7 +133,6 @@ namespace ParserTests
             var equals = tokens[0];
             Check.That(equals).IsNotNull();
             Check.That(equals.TokenID).IsEqualTo(Token536.Equals);
-            var x = Token536.Equals;
         }
 
 

@@ -155,7 +155,7 @@ namespace ParserExample
                 parsed.Errors.ForEach(Console.WriteLine);
             }
 
-            return;
+            
             var jBuilder = new ParserBuilder<JsonTokenGeneric, JSon>();
             var jsonParser = new EbnfJsonGenericParser();
             var jr = jBuilder.BuildParser(jsonParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
