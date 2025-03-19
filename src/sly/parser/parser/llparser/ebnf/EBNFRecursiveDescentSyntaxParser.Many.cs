@@ -108,15 +108,8 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         var innerClause = clause.Clause;
         SyntaxParseResult<IN, OUT> innerResult = null;
         bool hasByPasNodes = false;
-        bool isError = false;
 
         List<UnexpectedTokenSyntaxError<IN>> innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
-
-        
-        
-        int min = clause.MinRepetitionCount == clause.MaxRepetitionCount
-            ? 0
-            : clause.MinRepetitionCount;
         
         for (int i = 0; i < clause.MaxRepetitionCount; i++)
         {
@@ -147,8 +140,6 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         {
             result.IsError = true;
             isRangeError = true;
-            var currentToken = tokens[currentPosition];
-            var error = new UnexpectedTokenSyntaxError<IN>(currentToken, LexemeLabels, I18n, null);
             result.AddErrors(innerErrors);
         }
         
