@@ -20,7 +20,35 @@ using String = System.String;
 
 namespace ParserTests
 {
-    
+    public enum BasicToken
+    {
+        [AlphaId]
+        ID,
+        
+        [Int]
+        INT,
+        
+        [Sugar(".")]
+        PERIOD
+    }
+
+    public class RepeatParser
+    {
+        [Production("root : thing{0-6} PERIOD[d]")]
+        public string Root(List<string> things)
+        {
+            return string.Join(",", things);
+        }
+
+        [Production("thing : ID INT")]
+        public string Thing(Token<BasicToken> id, Token<BasicToken> integer)
+        {
+            return $"{id.Value}({integer.IntValue})";
+        }
+    }
+
+
+
     [Lexer(IgnoreWS = true, IgnoreEOL = true)]
     public enum DoNotIgnoreCommentsTokenWithChannels
     {
@@ -1818,6 +1846,33 @@ if truc == 1
             Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
         }
 
-        
+
+        [Fact]
+        public void TestRepeat()
+        {
+            ParserBuilder<BasicToken, string> builder = new ParserBuilder<BasicToken, string>();
+            var instance = new RepeatParser();
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            Check.That(parserRes).IsOk();
+            
+            var parser = parserRes.Result;
+            Check.That(parser).IsNotNull();
+            var parseResult = parser.Parse("a1b2c3d4e5.");
+            Check.That(parseResult).IsOkParsing();
+            Check.That(parseResult.Result).IsEqualTo("a(1),b(2),c(3),d(4),e(5)");
+            parseResult = parser.Parse(".");
+            Check.That(parseResult).IsOkParsing();
+            Check.That(parseResult.Result).IsEqualTo("");
+            parseResult = parser.Parse("a1b2c3d4e5f6g7");
+            Check.That(parseResult).Not.IsOkParsing();
+            Check.That(parseResult.Errors).CountIs(1);
+            var error = parseResult.Errors[0] as UnexpectedTokenSyntaxError<BasicToken>;
+            Check.That(error).IsNotNull();
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+            
+            Check.That(error.UnexpectedToken.TokenID).IsEqualTo(BasicToken.ID);
+            Check.That(error.UnexpectedToken.Value).IsEqualTo("g");
+            
+        }
     }
 }
