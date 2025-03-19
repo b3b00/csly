@@ -15,6 +15,12 @@ namespace sly.parser.generator
         [Lexeme("^\\(")] LPAREN = 8,
 
         [Lexeme("^\\)")] RPAREN = 9,
+        
+        [Lexeme("\\{")] LCURLY = 20,
+        
+        [Lexeme("\\{")] RCURLY = 21,
+        
+        [Lexeme("\\-")] DASH = 22,
 
         [Lexeme("[\\n\\r]+", true, true)] EOL = 10
     }
@@ -54,8 +60,19 @@ namespace sly.parser.generator
         [Lexeme(GenericToken.SugarToken,"]")]
         RCROG = 12,
 
-        [Lexeme(GenericToken.String, "'","\\")]  
+        [Lexeme(GenericToken.String, "'","\\")]
         STRING = 13,
+        
+        [Lexeme(GenericToken.SugarToken, "-")]
+        DASH = 14,
+        
+        [Lexeme(GenericToken.SugarToken, "{")]  
+        LCURLY = 15,
+        
+        [Lexeme(GenericToken.SugarToken, "}")]  
+        RCURLY = 16,
 
+        [Int]
+        INT = 17
     }
 }

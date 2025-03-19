@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using sly.lexer;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
@@ -91,6 +92,110 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         result.HasByPassNodes = hasByPasNodes;
         parsingContext.Memoize(clause, position, result);
         return result;
+    }
+
+    public SyntaxParseResult<IN, OUT> ParseRepeat(IList<Token<IN>> tokens, RepeatClause<IN, OUT> clause, int position,
+        SyntaxParsingContext<IN, OUT> parsingContext)
+    {
+        if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
+        {
+            return parseResult;
+        }
+        var result = new SyntaxParseResult<IN, OUT>();
+        var manyNode = new ManySyntaxNode<IN, OUT>($"{clause.Clause.ToString()}+");
+        
+        var currentPosition = position;
+        var innerClause = clause.Clause;
+        SyntaxParseResult<IN, OUT> innerResult = null;
+        bool hasByPasNodes = false;
+        bool isError = false;
+
+        List<UnexpectedTokenSyntaxError<IN>> innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
+
+        
+        
+        int min = clause.MinRepetitionCount == clause.MaxRepetitionCount
+            ? 0
+            : clause.MinRepetitionCount;
+        
+        for (int i = 0; i < clause.MaxRepetitionCount; i++)
+        {
+            innerResult = ParseInnerRepeat(tokens, parsingContext, innerClause, manyNode, currentPosition, out hasByPasNodes);
+            
+            
+            if (innerResult.IsError && clause.MinRepetitionCount != 0 && i != 0)
+            {
+                result.IsError = true;
+                result.AddErrors(innerResult.GetErrors());
+                
+                break;
+            }
+
+            var errors = innerResult.GetErrors();
+            if (errors != null && errors.Any())
+            {
+                innerErrors.AddRange(innerResult.GetErrors());
+                break;
+            }
+
+            manyNode.Add(innerResult.Root);
+            currentPosition = innerResult.EndingPosition;
+        }
+
+        bool isRangeError = false;
+        if (manyNode.Children.Count < clause.MinRepetitionCount)
+        {
+            result.IsError = true;
+            isRangeError = true;
+            var currentToken = tokens[currentPosition];
+            var error = new UnexpectedTokenSyntaxError<IN>(currentToken, LexemeLabels, I18n, null);
+            result.AddErrors(innerErrors);
+        }
+        
+        result.EndingPosition = currentPosition;
+        result.IsError = isRangeError;
+        result.AddErrors(innerErrors);
+        result.Root = manyNode;
+        result.IsEnded = innerResult != null && innerResult.IsEnded;
+        result.HasByPassNodes = hasByPasNodes;
+        parsingContext.Memoize(clause, position, result);
+        
+        
+        return result;
+    }
+
+    private SyntaxParseResult<IN, OUT> ParseInnerRepeat(IList<Token<IN>> tokens, SyntaxParsingContext<IN, OUT> parsingContext, IClause<IN, OUT> innerClause,
+        ManySyntaxNode<IN, OUT> manyNode, int currentPosition, out bool hasByPasNodes)
+    {
+        SyntaxParseResult<IN, OUT> innerResult;
+        switch (innerClause)
+        {
+            case TerminalClause<IN, OUT> terminalClause:
+                manyNode.IsManyTokens = true;
+                innerResult = ParseTerminal(tokens, terminalClause, currentPosition, parsingContext);
+                hasByPasNodes = innerResult.HasByPassNodes;
+                break;
+            case NonTerminalClause<IN, OUT> nonTerm:
+            {
+                innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition, parsingContext);
+                hasByPasNodes = innerResult.HasByPassNodes;
+                if (nonTerm.IsGroup)
+                    manyNode.IsManyGroups = true;
+                else
+                    manyNode.IsManyValues = true;
+                break;
+            }
+            case ChoiceClause<IN, OUT> choice:
+                manyNode.IsManyTokens = choice.IsTerminalChoice;
+                manyNode.IsManyValues = choice.IsNonTerminalChoice;
+                innerResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
+                hasByPasNodes = innerResult.HasByPassNodes;
+                break;
+            default:
+                throw new InvalidOperationException("unable to apply repeater to " + innerClause.GetType().Name);
+        }
+
+        return innerResult;
     }
 
     public SyntaxParseResult<IN, OUT> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN, OUT> clause, int position,

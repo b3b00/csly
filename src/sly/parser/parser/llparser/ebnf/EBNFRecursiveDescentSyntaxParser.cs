@@ -77,10 +77,14 @@ namespace sly.parser.llparser.ebnf
                         }
                         case OneOrMoreClause<IN, OUT> _:
                         case ZeroOrMoreClause<IN, OUT> _:
+                        case RepeatClause<IN, OUT> _:
                         {
                             SyntaxParseResult<IN, OUT> manyResult = null;
                             switch (clause)
                             {
+                                case RepeatClause<IN,OUT> repeat:
+                                    manyResult = ParseRepeat(tokens, repeat, currentPosition, parsingContext);
+                                    break;
                                 case OneOrMoreClause<IN, OUT> oneOrMore:
                                     manyResult = ParseOneOrMore(tokens, oneOrMore, currentPosition, parsingContext);
                                     break;

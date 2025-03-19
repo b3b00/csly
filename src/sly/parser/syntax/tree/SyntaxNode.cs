@@ -20,7 +20,7 @@ namespace sly.parser.syntax.tree
         }
 
         private readonly bool _isEpsilon = false;
-        public bool IsEpsilon => _isEpsilon;
+        public virtual bool IsEpsilon => _isEpsilon;
     
         public List<ISyntaxNode<IN, OUT>> Children { get; }
 

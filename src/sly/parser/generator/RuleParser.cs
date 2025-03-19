@@ -46,6 +46,22 @@ namespace sly.parser.generator
             var innerClause = BuildTerminalOrNonTerimal(id.Value);
             return new OneOrMoreClause<IN,OUT>(innerClause);
         }
+        
+       
+        
+        [Production("clause : IDENTIFIER LCURLY INT DASH INT RCURLY")]
+        public IClause<IN,OUT> RepeatClauseMinMax(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> lcurl, Token<EbnfTokenGeneric> min, Token<EbnfTokenGeneric> dash, Token<EbnfTokenGeneric> max, Token<EbnfTokenGeneric> rcurl)
+        {
+            var innerClause = BuildTerminalOrNonTerimal(id.Value);
+            return new RepeatClause<IN,OUT>(innerClause, min.IntValue, max.IntValue);
+        }
+        
+        [Production("clause : IDENTIFIER LCURLY INT RCURLY")]
+        public IClause<IN,OUT> RepeatClause(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> lcurl, Token<EbnfTokenGeneric> min,  Token<EbnfTokenGeneric> rcurl)
+        {
+            var innerClause = BuildTerminalOrNonTerimal(id.Value);
+            return new RepeatClause<IN,OUT>(innerClause, min.IntValue, min.IntValue);
+        }
 
         [Production("clause : IDENTIFIER OPTION")]
         public IClause<IN,OUT> OptionClause(Token<EbnfTokenGeneric> id, Token<EbnfTokenGeneric> discarded)

@@ -23,7 +23,11 @@ public class FluentRuleParser<IN, OUT> where IN : struct
             .Sugar(EbnfTokenGeneric.OR, "|")
             .Sugar(EbnfTokenGeneric.LCROG, "[")
             .Sugar(EbnfTokenGeneric.RCROG, "]")
-            .String(EbnfTokenGeneric.STRING, "'", "\\");
+            .String(EbnfTokenGeneric.STRING, "'", "\\")
+            .Sugar(EbnfTokenGeneric.DASH, "-")
+            .Sugar(EbnfTokenGeneric.LCURLY, "{")
+            .Sugar(EbnfTokenGeneric.RCURLY, "}")
+            .Int(EbnfTokenGeneric.INT);
         return builder;
     }
 
@@ -53,6 +57,28 @@ public class FluentRuleParser<IN, OUT> where IN : struct
                 {
                     return instance.OneMoreClause((Token<EbnfTokenGeneric>)args[0],
                         (Token<EbnfTokenGeneric>)args[1]);
+                }))
+            .Production("clause : IDENTIFIER LCURLY INT DASH INT RCURLY",
+                (args =>
+                {
+                    return instance.RepeatClauseMinMax(
+                            ((Token<EbnfTokenGeneric>)args[0]),
+                            ((Token<EbnfTokenGeneric>)args[1]),
+                        ((Token<EbnfTokenGeneric>)args[2]) ,
+                        ((Token<EbnfTokenGeneric>)args[3]),
+                            (Token<EbnfTokenGeneric>)args[4],
+                                ((Token<EbnfTokenGeneric>)args[5])
+                            );
+                }))
+            .Production("clause : IDENTIFIER LCURLY INT RCURLY",
+                (args =>
+                {
+                    return instance.RepeatClause(
+                        ((Token<EbnfTokenGeneric>)args[0]),
+                        ((Token<EbnfTokenGeneric>)args[1]) ,
+                        ((Token<EbnfTokenGeneric>)args[2]),
+                        ((Token<EbnfTokenGeneric>)args[3])
+                    );
                 }))
             .Production("clause : IDENTIFIER OPTION",
                 (args =>

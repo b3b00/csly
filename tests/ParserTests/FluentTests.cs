@@ -7,6 +7,7 @@ using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fluent;
 using sly.lexer.fsm;
+using sly.parser;
 using sly.parser.generator;
 using sly.parser.parser;
 using sly.parser.syntax.tree;
@@ -578,5 +579,138 @@ world
         Check.That(build).Not.IsOk();
         Check.That(build.Errors.Extracting(x => x.Code))
             .Contains(ErrorCodes.LEXER_CANNOT_MIX_GENERIC_AND_REGEX);
+    }
+    
+    [Fact]
+    public void TestRepetition()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumId(FluentToken.ID)
+            .Int(FluentToken.INT);
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : ID{6} INT", args =>
+            {
+                List<Token<FluentToken>> items = (List<Token<FluentToken>>)args[0];
+                return string.Join(",",items.Select(x => x.Value));
+            }).WithSubNodeNamed("root")
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).IsOk();
+        Check.That(build.Result).IsNotNull();
+        var parser = build.Result;
+        var parsed = parser.Parse("a b c d e f  6");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a,b,c,d,e,f");
+        parsed = parser.Parse("a b c d e 5");
+        Check.That(parsed).Not.IsOkParsing();
+        var error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>;
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("5");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.INT);
+        parsed = parser.Parse("a b c d e f g h i j k l 12");
+        Check.That(parsed).Not.IsOkParsing();
+        error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>; 
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("g");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.ID);
+        
+        
+        
+        
+    }
+    
+    [Fact]
+    public void TestRepetitionRange()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumId(FluentToken.ID)
+            .Int(FluentToken.INT);
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : ID{3-6} INT", args =>
+            {
+                List<Token<FluentToken>> items = (List<Token<FluentToken>>)args[0];
+                return string.Join(",",items.Select(x => x.Value));
+            })
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).IsOk();
+        Check.That(build.Result).IsNotNull();
+        var parser = build.Result;
+        var parsed = parser.Parse("a b c d e f 6 ");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a,b,c,d,e,f");
+        parsed = parser.Parse("a b c 3 ");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a,b,c");
+        parsed = parser.Parse("a b c d 4");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a,b,c,d");
+        
+        
+        parsed = parser.Parse("a b 2");
+        Check.That(parsed).Not.IsOkParsing();
+        var error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>; 
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("2");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.INT);
+        parsed = parser.Parse("a b c d e f g 7");
+        Check.That(parsed).Not.IsOkParsing();
+        error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>; 
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("g");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.ID);
+        
+        
+        
+        
+    }
+    
+    [Fact]
+    public void TestRepetitionEmptyRange()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumId(FluentToken.ID)
+            .Int(FluentToken.INT);
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : ID{0-6} INT", args =>
+            {
+                List<Token<FluentToken>> items = (List<Token<FluentToken>>)args[0];
+                Token<FluentToken> n = (Token<FluentToken>)args[1];
+                return string.Join(",",items.Select(x => x.Value))+ "#"+n.IntValue;
+            })
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).IsOk();
+        Check.That(build.Result).IsNotNull();
+        var parser = build.Result;
+        var parsed = parser.Parse("a b c d e f 6 ");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a,b,c,d,e,f#6");
+        parsed = parser.Parse("a b c 3 ");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a,b,c#3");
+        parsed = parser.Parse("0");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("#0");
+        parsed = parser.Parse("a b c d e f g 7");
+        Check.That(parsed).Not.IsOkParsing();
+        var error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>; 
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("g");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.ID);
+        Check.That(error.ExpectedTokens.Extracting(x => x.TokenId)).Contains(FluentToken.INT);
+
+
+
+
     }
 }
