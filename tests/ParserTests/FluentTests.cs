@@ -623,6 +623,92 @@ world
     }
     
     [Fact]
+    public void TestGroupRepeat()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumId(FluentToken.ID)
+            .Int(FluentToken.INT);
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : (ID INT){6} INT", args =>
+            {
+                List<Group<FluentToken, string>> items = (List<Group<FluentToken, string>>)args[0];
+                return string.Join(",",items.Select(x => x.Token(0).Value+"-"+x.Token(1).Value));
+            }).WithSubNodeNamed("root")
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).IsOk();
+        Check.That(build.Result).IsNotNull();
+        var parser = build.Result;
+        var parsed = parser.Parse("a 1 b 2 c 3 d 4 e 5 f 6 999");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a-1,b-2,c-3,d-4,e-5,f-6");
+        parsed = parser.Parse("a 1 b 2 c 3 d 4 e 5 0");
+        Check.That(parsed).Not.IsOkParsing();
+        var error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>;
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("0");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.INT);
+        parsed = parser.Parse("a 1 b 2 c 3 d 4 e 5 f 6 g 7 h 8 i 9 j 10 k 11 l 12 8129");
+        Check.That(parsed).Not.IsOkParsing();
+        error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>; 
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("g");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.ID);
+    }
+    
+    [Fact]
+    public void TestGroupRepetitionRange()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumId(FluentToken.ID)
+            .Int(FluentToken.INT);
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : (ID INT){3-6} INT", args =>
+            {
+                List<Group<FluentToken, string>> items = (List<Group<FluentToken, string>>)args[0];
+                return string.Join(",",items.Select(x => x.Token(0).Value+"-"+x.Token(1).Value));
+            })
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).IsOk();
+        Check.That(build.Result).IsNotNull();
+        var parser = build.Result;
+        var parsed = parser.Parse("a 1 b 2 c 3 d 4 e 5 f 6 0");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a-1,b-2,c-3,d-4,e-5,f-6");
+        parsed = parser.Parse("a 1 b 2 c 3 0");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a-1,b-2,c-3");
+        parsed = parser.Parse("a 1 b 2 c 3 d 4 0");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a-1,b-2,c-3,d-4");
+        
+        
+        parsed = parser.Parse("a 1 b 2 0");
+        Check.That(parsed).Not.IsOkParsing();
+        var error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>; 
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("0");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.INT);
+        parsed = parser.Parse("a 1 b 2 c 3 d 4 e 5 f 6 g 0");
+        Check.That(parsed).Not.IsOkParsing();
+        error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>; 
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("g");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.ID);
+        
+        
+        
+        
+    }
+    
+    [Fact]
     public void TestRepetitionRange()
     {
         var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
@@ -712,5 +798,90 @@ world
 
 
 
+    }
+    
+    
+     [Fact]
+    public void TestChoiceRepeat()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumId(FluentToken.ID)
+            .Sugar(FluentToken.COMMA,",")
+            .Int(FluentToken.INT);
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : [ID|INT]{6} COMMA", args =>
+            {
+                List<Token<FluentToken>> items = (List<Token<FluentToken>>)args[0];
+                return string.Join(",",items.Select(x => x.Value));
+            }).WithSubNodeNamed("root")
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).IsOk();
+        Check.That(build.Result).IsNotNull();
+        var parser = build.Result;
+        var parsed = parser.Parse("a 1 b 2 c 3 ,");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a,1,b,2,c,3");
+        parsed = parser.Parse("a 1 b 2 c 3 d ,");
+        Check.That(parsed).Not.IsOkParsing();
+        var error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>;
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("d");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.ID);
+    }
+    
+    [Fact]
+    public void TestChoiceRepetitionRange()
+    {
+        var lexer = FluentLexerBuilder<FluentToken>.NewBuilder()
+            .IgnoreEol(true)
+            .IgnoreWhiteSpace(true)
+            .IgnoreKeywordCase(true)
+            .AlphaNumId(FluentToken.ID)
+            .Int(FluentToken.INT)
+            .Sugar(FluentToken.COMMA, ",")
+            .Keyword(FluentToken.HELLO,"hello");
+        
+        var build = FluentEBNFParserBuilder<FluentToken, string>.NewBuilder(new FluentTests(), "root", "en")
+            .Production("root : [ID|INT]{3-6} COMMA", args =>
+            {
+                List<Token<FluentToken>> items = (List<Token<FluentToken>>)args[0];
+                return string.Join(",",items.Select(x => x.Value));
+            })
+            .WithLexerbuilder(lexer)
+            .BuildParser();
+        Check.That(build).IsOk();
+        Check.That(build.Result).IsNotNull();
+        var parser = build.Result;
+        var parsed = parser.Parse("a 1 b 2 c 3 ,");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a,1,b,2,c,3");
+        parsed = parser.Parse("a 1 b  ,");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a,1,b");
+        parsed = parser.Parse("a 1 b 2 ,");
+        Check.That(parsed).IsOkParsing();
+        Check.That(parsed.Result).IsEqualTo("a,1,b,2");
+        
+        
+        parsed = parser.Parse("a 1 b 2 hello");
+        Check.That(parsed).Not.IsOkParsing();
+        var error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>; 
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("hello");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.HELLO);
+        parsed = parser.Parse("a 1 b 2 c 3 d 4 e 5 f 6 g 0");
+        Check.That(parsed).Not.IsOkParsing();
+        error = parsed.Errors[0] as UnexpectedTokenSyntaxError<FluentToken>; 
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(error.UnexpectedToken.Value).IsEqualTo("d");
+        Check.That(error.UnexpectedToken.TokenID).IsEqualTo(FluentToken.ID);
+        
+        
+        
+        
     }
 }

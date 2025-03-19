@@ -80,6 +80,21 @@ public class FluentRuleParser<IN, OUT> where IN : struct
                         ((Token<EbnfTokenGeneric>)args[3])
                     );
                 }))
+            .Production("clause : LPAREN  groupclauses RPAREN LCURLY INT DASH INT RCURLY",
+        args =>
+            {
+                return instance.GroupRepeatRange((Token<EbnfTokenGeneric>) args[0],(GroupClause<IN,OUT>) args[1],
+                    (Token<EbnfTokenGeneric>) args[2],(Token<EbnfTokenGeneric>) args[3],
+                    (Token<EbnfTokenGeneric>) args[4],(Token<EbnfTokenGeneric>) args[5],
+                    (Token<EbnfTokenGeneric>) args[6], (Token<EbnfTokenGeneric>) args[7]);
+            })
+            .Production("clause : LPAREN  groupclauses RPAREN LCURLY INT RCURLY",
+                args =>
+                {
+                    return instance.GroupRepeat((Token<EbnfTokenGeneric>)args[0], (GroupClause<IN, OUT>)args[1],
+                        (Token<EbnfTokenGeneric>)args[2], (Token<EbnfTokenGeneric>)args[3],
+                        (Token<EbnfTokenGeneric>)args[4], (Token<EbnfTokenGeneric>)args[5]);
+                })
             .Production("clause : IDENTIFIER OPTION",
                 (args =>
                 {
@@ -183,6 +198,24 @@ public class FluentRuleParser<IN, OUT> where IN : struct
                 args =>
                 {
                     return instance.ChoiceOptional((ChoiceClause<IN, OUT>)args[0], (Token<EbnfTokenGeneric>)args[1]);
+                })
+            .Production("clause : choiceclause LCURLY INT DASH INT RCURLY",
+                args =>
+                {
+                    return instance.ChoiceRepeatRange((ChoiceClause<IN, OUT>)args[0],
+                        ((Token<EbnfTokenGeneric>)args[1]),
+                        ((Token<EbnfTokenGeneric>)args[2]),
+                        ((Token<EbnfTokenGeneric>)args[3]),
+                        (Token<EbnfTokenGeneric>)args[4],
+                        ((Token<EbnfTokenGeneric>)args[5]));
+                })
+            .Production("clause : choiceclause LCURLY INT  RCURLY",
+                args =>
+                {
+                    return instance.ChoiceRepeat((ChoiceClause<IN, OUT>)args[0],
+                        ((Token<EbnfTokenGeneric>)args[1]),
+                        ((Token<EbnfTokenGeneric>)args[2]),
+                        ((Token<EbnfTokenGeneric>)args[3]));
                 })
             .WithLexerbuilder(GetEbnfLexerBuilder());
 

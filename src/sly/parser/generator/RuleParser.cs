@@ -167,6 +167,21 @@ namespace sly.parser.generator
             return new ZeroOrMoreClause<IN,OUT>(choices);
         }
         
+        [Production("clause : choiceclause LCURLY INT DASH INT RCURLY")]
+        public IClause<IN,OUT> ChoiceRepeatRange(ChoiceClause<IN,OUT> choices,Token<EbnfTokenGeneric> dicardLcurl,
+            Token<EbnfTokenGeneric> min, Token<EbnfTokenGeneric> discardDash, Token<EbnfTokenGeneric> max, 
+            Token<EbnfTokenGeneric> discardRcurl)
+        {
+            return new RepeatClause<IN, OUT>(choices, min.IntValue, max.IntValue);
+        }
+        
+        [Production("clause : choiceclause LCURLY INT RCURLY")]
+        public IClause<IN,OUT> ChoiceRepeat(ChoiceClause<IN,OUT> choices,Token<EbnfTokenGeneric> dicardLcurl,
+            Token<EbnfTokenGeneric> min,   Token<EbnfTokenGeneric> discardRcurl)
+        {
+            return new RepeatClause<IN, OUT>(choices, min.IntValue, min.IntValue);
+        }
+        
 
         [Production("clause : choiceclause OPTION ")]
         public IClause<IN,OUT> ChoiceOptional(ChoiceClause<IN,OUT> choices,Token<EbnfTokenGeneric> discardOption)
@@ -188,6 +203,23 @@ namespace sly.parser.generator
             return new ZeroOrMoreClause<IN,OUT>(clauses);
         }
 
+        [Production("clause : LPAREN  groupclauses RPAREN LCURLY INT DASH INT RCURLY")]
+        public IClause<IN,OUT> GroupRepeatRange(Token<EbnfTokenGeneric> discardLeft, GroupClause<IN,OUT> clauses,
+            Token<EbnfTokenGeneric> discardRight, Token<EbnfTokenGeneric> discardLcurl, Token<EbnfTokenGeneric> min,
+            Token<EbnfTokenGeneric> discarddash, Token<EbnfTokenGeneric> max, Token<EbnfTokenGeneric> discardRcurl)
+        {
+            return new RepeatClause<IN,OUT>(clauses, min.IntValue, max.IntValue);
+        }
+        
+        [Production("clause : LPAREN  groupclauses RPAREN LCURLY INT RCURLY")]
+        public IClause<IN,OUT> GroupRepeat(Token<EbnfTokenGeneric> discardLeft, GroupClause<IN,OUT> clauses,
+            Token<EbnfTokenGeneric> discardRight, Token<EbnfTokenGeneric> discardLcurl, Token<EbnfTokenGeneric> min,
+            Token<EbnfTokenGeneric> discardRcurl)
+        {
+            return new RepeatClause<IN,OUT>(clauses, min.IntValue, min.IntValue);
+        }
+
+        
         [Production("clause : LPAREN  groupclauses RPAREN OPTION ")]
         public IClause<IN,OUT> GroupOptional(Token<EbnfTokenGeneric> discardLeft, GroupClause<IN,OUT> group,
             Token<EbnfTokenGeneric> discardRight, Token<EbnfTokenGeneric> option)
