@@ -2,7 +2,6 @@
 using System.Linq;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
-using sly.parser.llparser.bnf;
 
 namespace sly.parser.llparser.ebnf
 {
@@ -19,51 +18,19 @@ namespace sly.parser.llparser.ebnf
                 case ZeroOrMoreClause<IN, OUT> zeroOrMore:
                 {
                     InitStartingTokensWithZeroOrMore(rule, zeroOrMore, nonTerminals);
-                    int i = 1;
-                    bool optional = true;
-                    while (i < rule.Clauses.Count && optional)
-                    {
-                        IClause<IN, OUT> clause = rule.Clauses[i];
-
-                        switch (clause)
-                        {
-                            case TerminalClause<IN, OUT> terminalClause:
-                            {
-                                rule.PossibleLeadingTokens.Add(terminalClause.ExpectedToken);
-                                break;
-                            }
-                            case NonTerminalClause<IN, OUT> nonTerminalClause:
-                            {
-                                InitStartingTokensForNonTerminal(nonTerminals, nonTerminalClause.NonTerminalName);
-                                NonTerminal<IN, OUT> nonTerminal = nonTerminals[nonTerminalClause.NonTerminalName];
-                                {
-                                    rule.PossibleLeadingTokens.AddRange(nonTerminal.GetPossibleLeadingTokens());
-                                }
-                                break;
-                            }
-                            case ChoiceClause<IN, OUT> choice:
-                            {
-                                InitStartingTokensWithChoice(rule, choice, nonTerminals);
-                                break;
-                            }
-                            case OptionClause<IN, OUT> option:
-                            {
-                                InitStartingTokensWithOption(rule, option, nonTerminals);
-                                break;
-                            }
-                        }
-
-                        // add startig tokens of clause in rule.startingtokens
-                        optional = clause is ZeroOrMoreClause<IN, OUT> || clause is OptionClause<IN, OUT>;
-                        i++;
-                    }
+                    InitWithinRepetitions(rule, nonTerminals);
 
                     break;
                 }
                 case OneOrMoreClause<IN, OUT> clause:
                 {
-                    var many = clause;
-                    InitStartingTokensWithOneOrMore(rule, many, nonTerminals);
+                    InitStartingTokensWithOneOrMore(rule, clause, nonTerminals);
+                    break;
+                }
+                case RepeatClause<IN, OUT> repeat:
+                {
+                    InitStartingTokensWithRepeat(rule, repeat, nonTerminals);
+                    InitWithinRepetitions(rule,nonTerminals);
                     break;
                 }
                 case ChoiceClause<IN, OUT> choice:
@@ -117,12 +84,58 @@ namespace sly.parser.llparser.ebnf
                         }
 
                         // add startig tokens of clause in rule.startingtokens
-                        optional = clause is ZeroOrMoreClause<IN, OUT> || clause is OptionClause<IN, OUT>;
+                        optional = clause is ZeroOrMoreClause<IN, OUT> 
+                                   || clause is OptionClause<IN, OUT>
+                                   || (clause is RepeatClause<IN, OUT> repeat && repeat.MayBeEmpty());
                         i++;
                     }
 
                     break;
                 }
+            }
+        }
+
+        private void InitWithinRepetitions(Rule<IN, OUT> rule, Dictionary<string, NonTerminal<IN, OUT>> nonTerminals)
+        {
+            int i = 1;
+            bool optional = true;
+            while (i < rule.Clauses.Count && optional)
+            {
+                IClause<IN, OUT> clause = rule.Clauses[i];
+
+                switch (clause)
+                {
+                    case TerminalClause<IN, OUT> terminalClause:
+                    {
+                        rule.PossibleLeadingTokens.Add(terminalClause.ExpectedToken);
+                        break;
+                    }
+                    case NonTerminalClause<IN, OUT> nonTerminalClause:
+                    {
+                        InitStartingTokensForNonTerminal(nonTerminals, nonTerminalClause.NonTerminalName);
+                        NonTerminal<IN, OUT> nonTerminal = nonTerminals[nonTerminalClause.NonTerminalName];
+                        {
+                            rule.PossibleLeadingTokens.AddRange(nonTerminal.GetPossibleLeadingTokens());
+                        }
+                        break;
+                    }
+                    case ChoiceClause<IN, OUT> choice:
+                    {
+                        InitStartingTokensWithChoice(rule, choice, nonTerminals);
+                        break;
+                    }
+                    case OptionClause<IN, OUT> option:
+                    {
+                        InitStartingTokensWithOption(rule, option, nonTerminals);
+                        break;
+                    }
+                }
+
+                // add startig tokens of clause in rule.startingtokens
+                optional = clause is ZeroOrMoreClause<IN, OUT> 
+                           || clause is OptionClause<IN, OUT> 
+                           || (clause is RepeatClause<IN, OUT> repeat && repeat.MayBeEmpty());
+                i++;
             }
         }
 
@@ -195,6 +208,23 @@ namespace sly.parser.llparser.ebnf
         }
 
         private void InitStartingTokensWithOneOrMore(Rule<IN, OUT> rule, OneOrMoreClause<IN, OUT> manyClause,
+            Dictionary<string, NonTerminal<IN, OUT>> nonTerminals)
+        {
+            switch (manyClause.Clause)
+            {
+                case TerminalClause<IN ,OUT> term:
+                    InitStartingTokensWithTerminal(rule, term);
+                    break;
+                case NonTerminalClause<IN ,OUT> nonterm:
+                    InitStartingTokensWithNonTerminal(rule, nonterm, nonTerminals);
+                    break;
+                case ChoiceClause<IN, OUT> choice:
+                    InitStartingTokensWithChoice(rule, choice, nonTerminals);
+                    break;
+            }
+        }
+        
+        private void InitStartingTokensWithRepeat(Rule<IN, OUT> rule, RepeatClause<IN, OUT> manyClause,
             Dictionary<string, NonTerminal<IN, OUT>> nonTerminals)
         {
             switch (manyClause.Clause)

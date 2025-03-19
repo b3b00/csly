@@ -14,6 +14,8 @@ namespace sly.parser.syntax.tree
 
         public bool IsManyGroups { get; set; }
 
+        public override bool IsEpsilon => Children.Count == 0;
+        
 
         public void Add(ISyntaxNode<IN, OUT> child)
         {
