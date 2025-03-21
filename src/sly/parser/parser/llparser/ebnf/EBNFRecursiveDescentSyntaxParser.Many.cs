@@ -102,7 +102,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             return parseResult;
         }
         var result = new SyntaxParseResult<IN, OUT>();
-        var manyNode = new ManySyntaxNode<IN, OUT>($"{clause.Clause.ToString()}+");
+        var manyNode = new ManySyntaxNode<IN, OUT>($"{clause.Clause.ToString()}_{clause.DumpRange().Replace("{","").Replace("}","").Replace("-","_")}");
         
         var currentPosition = position;
         var innerClause = clause.Clause;

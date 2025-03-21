@@ -24,7 +24,7 @@ namespace sly.parser.syntax.grammar
            
         }
 
-        private string DumpRange()
+        public string DumpRange()
         {
             if (IsRangeRepetition)
             {
@@ -42,11 +42,7 @@ namespace sly.parser.syntax.grammar
         }
         
         [ExcludeFromCodeCoverage]
-        public override string Dump()
-        {
-            var t = Clause.Dump() + DumpRange();
-            return t;
-        }
+        public override string Dump() => ToString();
 
         public override bool Equals(IClause<IN,OUT> other)
         {
