@@ -46,16 +46,17 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 rulesResults.Add(innerRuleRes);
 
                 var other = greaterIndex == 0 && innerRuleRes.EndingPosition == 0;
-                if (innerRuleRes.EndingPosition > greaterIndex && innerRuleRes.GetErrors() != null &&
-                    innerRuleRes.GetErrors().Count == 0 || other)
+                var innerRuleResErrors = innerRuleRes.GetErrors();
+                if (innerRuleRes.EndingPosition > greaterIndex && innerRuleResErrors != null &&
+                    innerRuleResErrors.Count == 0 || other)
                 {
                     greaterIndex = innerRuleRes.EndingPosition;
-                    if (innerRuleRes.GetErrors() != null)
-                        innerRuleErrors.AddRange(innerRuleRes.GetErrors());
+                    if (innerRuleResErrors != null)
+                        innerRuleErrors.AddRange(innerRuleResErrors);
                 }
 
-                if (innerRuleRes.GetErrors() != null)
-                    innerRuleErrors.AddRange(innerRuleRes.GetErrors());
+                if (innerRuleResErrors != null)
+                    innerRuleErrors.AddRange(innerRuleResErrors);
             }
 
             i++;
@@ -123,9 +124,10 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         List<UnexpectedTokenSyntaxError<IN>> terr = new List<UnexpectedTokenSyntaxError<IN>>();
         foreach (var ruleResult in rulesResults)
         {
-            if (ruleResult.GetErrors() != null)
+            var ruleErrors = ruleResult.GetErrors();
+            if (ruleErrors != null)
             {
-                terr.AddRange(ruleResult.GetErrors());
+                terr.AddRange(ruleErrors);
             }
         }
 

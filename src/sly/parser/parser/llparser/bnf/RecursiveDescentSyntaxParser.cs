@@ -169,16 +169,17 @@ namespace sly.parser.llparser.bnf
                         {
                             var nonTerminalResult =
                                 ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
+                            var ntErrors = nonTerminalResult.GetErrors();
                             if (!nonTerminalResult.IsError)
                             {
                                 children.Add(nonTerminalResult.Root);
                                 currentPosition = nonTerminalResult.EndingPosition;
-                                if (nonTerminalResult.GetErrors() != null && nonTerminalResult.GetErrors().Count > 0)
-                                    errors.AddRange(nonTerminalResult.GetErrors());
+                                if (ntErrors != null && ntErrors.Count > 0)
+                                    errors.AddRange(ntErrors);
                             }
                             else
                             {
-                                errors.AddRange(nonTerminalResult.GetErrors());
+                                errors.AddRange(ntErrors);
                             }
 
                             isError = nonTerminalResult.IsError;

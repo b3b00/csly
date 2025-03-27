@@ -67,9 +67,10 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 currentPosition = innerResult.EndingPosition;
                 lastInnerResult = innerResult;
                 hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
-                if (lastInnerResult.GetErrors() != null)
+                var lastInnerErrors = lastInnerResult.GetErrors();
+                if (lastInnerErrors != null)
                 {
-                    innerErrors.AddRange(lastInnerResult.GetErrors());
+                    innerErrors.AddRange(lastInnerErrors);
                 }
             }
             else
