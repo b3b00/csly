@@ -12,7 +12,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 
-    public SyntaxParseResult<IN, OUT> ParseChoice(IList<Token<IN>> tokens, ChoiceClause<IN, OUT> clause,
+    public SyntaxParseResult<IN, OUT> ParseChoice(Token<IN>[] tokens, ChoiceClause<IN, OUT> clause,
         int position, SyntaxParsingContext<IN, OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))

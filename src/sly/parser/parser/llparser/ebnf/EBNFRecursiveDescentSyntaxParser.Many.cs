@@ -11,7 +11,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 
-    public SyntaxParseResult<IN, OUT> ParseZeroOrMore(IList<Token<IN>> tokens, ZeroOrMoreClause<IN, OUT> clause, int position,
+    public SyntaxParseResult<IN, OUT> ParseZeroOrMore(Token<IN>[] tokens, ZeroOrMoreClause<IN, OUT> clause, int position,
         SyntaxParsingContext<IN, OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
@@ -81,7 +81,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 }
             }
 
-            stillOk = innerResult != null && !innerResult.IsError && currentPosition < tokens.Count;
+            stillOk = innerResult != null && !innerResult.IsError && currentPosition < tokens.Length;
         }
 
 
@@ -95,7 +95,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         return result;
     }
 
-    public SyntaxParseResult<IN, OUT> ParseRepeat(IList<Token<IN>> tokens, RepeatClause<IN, OUT> clause, int position,
+    public SyntaxParseResult<IN, OUT> ParseRepeat(Token<IN>[] tokens, RepeatClause<IN, OUT> clause, int position,
         SyntaxParsingContext<IN, OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
@@ -156,7 +156,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         return result;
     }
 
-    private SyntaxParseResult<IN, OUT> ParseInnerRepeat(IList<Token<IN>> tokens, SyntaxParsingContext<IN, OUT> parsingContext, IClause<IN, OUT> innerClause,
+    private SyntaxParseResult<IN, OUT> ParseInnerRepeat(Token<IN>[] tokens, SyntaxParsingContext<IN, OUT> parsingContext, IClause<IN, OUT> innerClause,
         ManySyntaxNode<IN, OUT> manyNode, int currentPosition, out bool hasByPasNodes)
     {
         SyntaxParseResult<IN, OUT> innerResult;
@@ -190,7 +190,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         return innerResult;
     }
 
-    public SyntaxParseResult<IN, OUT> ParseOneOrMore(IList<Token<IN>> tokens, OneOrMoreClause<IN, OUT> clause, int position,
+    public SyntaxParseResult<IN, OUT> ParseOneOrMore(Token<IN>[] tokens, OneOrMoreClause<IN, OUT> clause, int position,
         SyntaxParsingContext<IN, OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))

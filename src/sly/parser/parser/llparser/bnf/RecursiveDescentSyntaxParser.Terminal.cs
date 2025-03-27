@@ -9,7 +9,7 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 {
     #region parsing
 
-    public SyntaxParseResult<IN, OUT> ParseTerminal(IList<Token<IN>> tokens, TerminalClause<IN, OUT> terminal, int position,
+    public SyntaxParseResult<IN, OUT> ParseTerminal(Token<IN>[] tokens, TerminalClause<IN, OUT> terminal, int position,
         SyntaxParsingContext<IN, OUT> parsingContext)
     {
         if (parsingContext.TryGetParseResult(terminal, position, out var parseResult))

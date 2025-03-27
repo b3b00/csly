@@ -19,7 +19,7 @@ namespace sly.parser.llparser.ebnf
 
         #region parsing
 
-        public override SyntaxParseResult<IN, OUT> Parse(IList<Token<IN>> tokens, Rule<IN, OUT> rule, int position,
+        public override SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, Rule<IN, OUT> rule, int position,
             string nonTerminalName, SyntaxParsingContext<IN, OUT> parsingContext)
         {
             if (rule.IsInfixExpressionRule && rule.IsExpressionRule)
@@ -147,9 +147,9 @@ namespace sly.parser.llparser.ebnf
                     node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, children);
                     node = ManageExpressionRules(rule, node);
                     result.Root = node;
-                    result.IsEnded = currentPosition >= tokens.Count - 1
-                                     || currentPosition == tokens.Count - 2 &&
-                                     tokens[tokens.Count - 1].IsEOS;
+                    result.IsEnded = currentPosition >= tokens.Length - 1
+                                     || currentPosition == tokens.Length - 2 &&
+                                     tokens[tokens.Length - 1].IsEOS;
                 }
                 else
                 {
