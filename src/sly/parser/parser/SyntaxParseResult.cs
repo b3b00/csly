@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 
@@ -14,7 +15,7 @@ namespace sly.parser
 
         
         
-        private List<UnexpectedTokenSyntaxError<IN>> Errors { get; set; } 
+        private HashSet<UnexpectedTokenSyntaxError<IN>> Errors { get; set; } 
 
         public int EndingPosition { get; set; }
 
@@ -22,8 +23,9 @@ namespace sly.parser
 
         private void InitErrors()
         {
-            if (Errors == null) { 
-                Errors = new List<UnexpectedTokenSyntaxError<IN>>();
+            if (Errors == null)
+            {
+                Errors = new HashSet<UnexpectedTokenSyntaxError<IN>>();
             }
         }
         
@@ -39,14 +41,10 @@ namespace sly.parser
         public void AddError(UnexpectedTokenSyntaxError<IN> error)
         {
             InitErrors();
-            if (!Errors.Contains(error))
-            {
-                // #493 : dedup errors 
-                Errors.Add(error);
-            }
+            Errors.Add(error);
         }
 
-        public IList<UnexpectedTokenSyntaxError<IN>> GetErrors() => Errors;
+        public IList<UnexpectedTokenSyntaxError<IN>> GetErrors() => Errors?.ToList();
         
         public List<LeadingToken<IN>> Expecting {get; set;}
 
