@@ -24,12 +24,12 @@ namespace sly.parser.llparser.bnf
 
         #region parsing
 
-        public SyntaxParseResult<IN, OUT> Parse(IList<Token<IN>> tokens, string startingNonTerminal = null)
+        public SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, string startingNonTerminal = null)
         {
             return SafeParse(tokens, new SyntaxParsingContext<IN, OUT>(Configuration.UseMemoization), startingNonTerminal);
         }
         
-        public SyntaxParseResult<IN, OUT> SafeParse(IList<Token<IN>> tokens, SyntaxParsingContext<IN, OUT> parsingContext, string startingNonTerminal = null)
+        public SyntaxParseResult<IN, OUT> SafeParse(Token<IN>[] tokens, SyntaxParsingContext<IN, OUT> parsingContext, string startingNonTerminal = null)
         {
             var start = startingNonTerminal ?? StartingNonTerminal;
             var NonTerminals = Configuration.NonTerminals;
@@ -93,7 +93,7 @@ namespace sly.parser.llparser.bnf
                 }
                 else
                 {
-                    if (result.EndingPosition < tokens.Count-1)
+                    if (result.EndingPosition < tokens.Length-1)
                     {
                         SyntaxParseResult<IN, OUT> r = new SyntaxParseResult<IN, OUT>()
                         {
@@ -133,7 +133,7 @@ namespace sly.parser.llparser.bnf
         }
 
 
-        public virtual SyntaxParseResult<IN, OUT> Parse(IList<Token<IN>> tokens, Rule<IN, OUT> rule, int position,
+        public virtual SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, Rule<IN, OUT> rule, int position,
             string nonTerminalName, SyntaxParsingContext<IN, OUT> parsingContext)
         {
             var currentPosition = position;
@@ -169,16 +169,17 @@ namespace sly.parser.llparser.bnf
                         {
                             var nonTerminalResult =
                                 ParseNonTerminal(tokens, terminalClause, currentPosition, parsingContext);
+                            var ntErrors = nonTerminalResult.GetErrors();
                             if (!nonTerminalResult.IsError)
                             {
                                 children.Add(nonTerminalResult.Root);
                                 currentPosition = nonTerminalResult.EndingPosition;
-                                if (nonTerminalResult.GetErrors() != null && nonTerminalResult.GetErrors().Count > 0)
-                                    errors.AddRange(nonTerminalResult.GetErrors());
+                                if (ntErrors != null && ntErrors.Count > 0)
+                                    errors.AddRange(ntErrors);
                             }
                             else
                             {
-                                errors.AddRange(nonTerminalResult.GetErrors());
+                                errors.AddRange(ntErrors);
                             }
 
                             isError = nonTerminalResult.IsError;
@@ -214,12 +215,12 @@ namespace sly.parser.llparser.bnf
 
 
 
-        private SyntaxParseResult<IN, OUT> NoMatchingRuleError(IList<Token<IN>> tokens, int currentPosition,
+        private SyntaxParseResult<IN, OUT> NoMatchingRuleError(Token<IN>[] tokens, int currentPosition,
             List<LeadingToken<IN>> allAcceptableTokens)
         {
             var noRuleErrors = new List<UnexpectedTokenSyntaxError<IN>>();
 
-            if (currentPosition < tokens.Count)
+            if (currentPosition < tokens.Length)
             {
                 noRuleErrors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[currentPosition], I18n,
                     allAcceptableTokens));

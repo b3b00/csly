@@ -11,7 +11,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
 {
     #region parsing
 
-    public virtual SyntaxParseResult<IN, OUT> ParseInfixExpressionRule(IList<Token<IN>> tokens, Rule<IN, OUT> rule,
+    public virtual SyntaxParseResult<IN, OUT> ParseInfixExpressionRule(Token<IN>[] tokens, Rule<IN, OUT> rule,
         int position,
         string nonTerminalName, SyntaxParsingContext<IN, OUT> parsingContext)
     {
@@ -97,9 +97,9 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
                     finalNode = ManageExpressionRules(rule, finalNode);
                     var finalResult = new SyntaxParseResult<IN, OUT>();
                     finalResult.Root = finalNode;
-                    finalResult.IsEnded = currentPosition >= tokens.Count - 1
-                                          || currentPosition == tokens.Count - 2 &&
-                                          tokens[tokens.Count - 1].IsEOS;
+                    finalResult.IsEnded = currentPosition >= tokens.Length - 1
+                                          || currentPosition == tokens.Length - 2 &&
+                                          tokens[tokens.Length - 1].IsEOS;
                     finalResult.EndingPosition = currentPosition;
                     return finalResult;
                 }
@@ -120,9 +120,9 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
         if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
             result.Root = children[0];
         result.Root = node;
-        result.IsEnded = result.EndingPosition >= tokens.Count - 1
-                         || result.EndingPosition == tokens.Count - 2 &&
-                         tokens[tokens.Count - 1].IsEOS;
+        result.IsEnded = result.EndingPosition >= tokens.Length - 1
+                         || result.EndingPosition == tokens.Length - 2 &&
+                         tokens[tokens.Length - 1].IsEOS;
         return result;
     }
 
