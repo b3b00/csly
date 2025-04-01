@@ -88,7 +88,7 @@ namespace sly.parser.llparser.bnf
 
                     if (errors.Count == 0)
                     {
-                        errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[lastPosition], LexemeLabels, null));
+                        errors.Add(parsingContext.GetError(tokens[lastPosition], LexemeLabels, null));
                     }
                 }
                 else

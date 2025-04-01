@@ -50,7 +50,7 @@ namespace sly.parser.llparser.ebnf
                             else
                             {
                                 var tok = tokens[currentPosition];
-                                errors.Add(new UnexpectedTokenSyntaxError<IN>(tok, LexemeLabels, I18n,
+                                errors.Add(parsingContext.GetError(tok, LexemeLabels, I18n,
                                     termClause.ExpectedToken));
                             }
 
