@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using csly.cli;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.model;
 using jsonparser;
@@ -110,13 +111,39 @@ if i == 589 then
 
             }
         }
+
+        static void ProfileCslyCli()
+        {
+	        string source = File.ReadAllText("./meta.txt");
+	        var cslycliParser = new CLIParser();
+	        var builder = new ParserBuilder<CLIToken,object>("en");
+	        var built =builder.BuildParser(cslycliParser,ParserType.EBNF_LL_RECURSIVE_DESCENT);
+	        if (built.IsOk)
+	        {
+		        var parser = built.Result;
+		        var parsed = parser.Parse(source);
+		        if (parsed.IsOk)
+		        {
+			        Console.WriteLine("Parse OK !");
+		        }
+		        else
+		        {
+			        parsed.Errors.ForEach(Console.WriteLine);
+		        }
+	        }
+	        else
+	        {
+		        built.Errors.ForEach(Console.WriteLine);
+	        }
+	        
+        }
         
         static void Main(string[] args)
         {
             //ProfileJson();
             for (int i = 0; i < 15; i++)
             {
-                ProfileWhile();
+                ProfileCslyCli();
             }
         }
 

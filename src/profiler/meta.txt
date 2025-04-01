@@ -1,0 +1,349 @@
+
+genericLexer CLIToken;
+
+[IgnoreEndOfLines(true)]
+[IgnoreWhiteSpaces(true)]
+[Mode]
+@label("en","semicolon");
+@label("fr","point-virgule");
+[Sugar] SEMICOLON : ";";
+
+[Mode("default", "EXT")]
+@label("en","integer");
+@label("fr","entier");
+[Int] INT;
+
+@label("en","string");
+@label("fr","chaine de caractère");
+[String] STRING : "\"" "\\";
+
+[Mode("EXT", "default")]
+[Mode]
+@label("en","comment");
+@label("fr","commentaire");
+[SingleLineComment] COMMENT : "#";
+[MultiLineComment] COMMENT : "/*" "*/";
+
+[Mode("default", "EXT")]
+@label("fr","crochet ouvrant");
+@label("en","opening square bracket");
+[Sugar] LEFTBRACKET : "[";
+
+[Mode("default", "EXT")]
+@label("fr","crochet fermant");
+@label("en","closing square bracket");
+[Sugar] RIGHTBRACKET : "]";
+
+[Mode("EXT", "default")]
+@label("fr","paranthèse ouvrante");
+@label("en","opening paranthesis");
+[Sugar] LEFTPAREN : "(";
+
+[Mode("EXT", "default")]
+@label("fr","paranthèse fermante");
+@label("en","closing paranthesis");
+[Sugar] RIGHTPAREN : ")";
+
+[Mode("default", "EXT")]
+@label("fr","deux point");
+@label("en","colon");
+[Sugar] COLON : ":";
+
+[Mode("EXT")]
+@label("fr","sauf");
+@label("en","except");
+[Sugar] NOT : "^";
+
+@label("fr","mot clé 'genericLexer'");
+@label("en","'genericLexer' keyword");
+[KeyWord] GENERICLEXER : "genericLexer";
+
+@label("fr","mot clé 'parser'");
+@label("en","'parser' keyword");
+[KeyWord] PARSER : "parser";
+
+@label("fr","mot clé 'string'");
+@label("en","string' keyword");
+[KeyWord] STRINGTOKEN : "String";
+
+@label("fr","mot clé 'haracter'");
+@label("en","'Character' keyword");
+[KeyWord] CHARTOKEN : "Character";
+
+@label("fr","mot clé 'Int'");
+@label("en","'Int' keyword");
+[KeyWord] INTTOKEN : "Int";
+
+@label("fr","mot clé 'Date'");
+@label("en","'Date' keyword");
+[KeyWord] DATETOKEN : "Date";
+
+@label("fr","mot clé 'Double'");
+@label("en","'Double' keyword");
+[KeyWord] DOUBLETOKEN : "Double";
+
+@label("fr","mot clé 'AlphaId'");
+@label("en","'AlphaId' keyword");
+[KeyWord] ALPHAIDTOKEN : "AlphaId";
+
+@label("fr","mot clé 'AlphaNumId'");
+@label("en","'AlphaNumId' keyword");
+[KeyWord] ALPHANUMIDTOKEN : "AlphaNumId";
+
+@label("fr","mot clé 'AlphaNumDashId'");
+@label("en","'AlphanumDashId' keyword");
+[KeyWord] ALPHANUMDASHIDTOKEN : "AlphaNumDashId";
+
+@label("fr","mot clé 'Keyword'");
+@label("en","'Keyword' keyword");
+[KeyWord] KEYWORDTOKEN : "KeyWord";
+
+@label("fr","mot clé 'Sugar'");
+@label("en","'Sugar' keyword");
+[KeyWord] SUGARTOKEN : "Sugar";
+
+@label("fr","mot clé 'SingleLineComment'");
+@label("en","'SingleLineComment' keyword");
+[KeyWord] SINGLELINECOMMENT : "SingleLineComment";
+
+@label("fr","mot clé 'MultiLineComment'");
+@label("en","'MultiLineComment' keyword");
+[KeyWord] MULTILINECOMMENT : "MultiLineComment";
+
+@label("fr","mot clé 'Extension'");
+@label("en","'Extension' keyword");
+[KeyWord] EXTENSIONTOKEN : "Extension";
+
+@label("fr","mot clé 'UpTo'");
+@label("en","'UpTo' keyword");
+[KeyWord] UPTOTOKEN : "UpTo";
+
+@label("fr","mot clé 'Hexa'");
+@label("en","'Hexa' keyword");
+[KeyWord] HEXATOKEN : "Hexa";
+
+@label("fr","mot clé 'Push'");
+@label("en","'Push' keyword");
+[KeyWord] PUSH : "Push";
+
+@label("fr","mot clé 'Mode'");
+@label("en","'Mode' keyword");
+[KeyWord] MODE : "Mode";
+
+@label("fr","mot clé 'Pop'");
+@label("en","'Pop' keyword");
+[KeyWord] POP : "Pop";
+
+@label("fr","mot clé 'true'");
+@label("en","'true' keyword");
+[KeyWord] TRUE : "true";
+
+@label("fr","mot clé 'false'");
+@label("en","'false' keyword");
+[KeyWord] FALSE : "false";
+
+@label("fr","mot clé 'UseMemoization'");
+@label("en","'UseMemoization' keyword");
+[KeyWord] USEMEMOIZATION : "UseMemoization";
+
+@label("fr","mot clé 'BroadenTokenWindow'");
+@label("en","'BroadenTokenWindow' keyword");
+[KeyWord] BROADENTOKENWINDOW : "BroadenTokenWindow";
+
+@label("fr","mot clé 'AutoCloseIndentations'");
+@label("en","'AutoCloseIndentations' keyword");
+[KeyWord] AUTOCLOSEINDENTATION : "AutoCloseIndentations";
+
+@label("fr","mot clé 'IndentationAware'");
+@label("en","'IndentationAware' keyword");
+[KeyWord] INDENTATIONAWARE : "IndentationAware";
+
+@label("fr","mot clé 'IgnoreWhiteSpaces'");
+@label("en","'IgnoreWhiteSpaces' keyword");
+[KeyWord] IGNOREWHITESPACES : "IgnoreWhiteSpaces";
+
+@label("fr","mot clé 'IgnoreEndOfLines'");
+@label("en","'IgnoreEndOfLines' keyword");
+[KeyWord] IGNOREEOL : "IgnoreEndOfLines";
+
+@label("fr","mot clé 'IgnoreKeyWordCase'");
+@label("en","'IgnoreKeyWordCase' keyword");
+[KeyWord] IGNOREKEYWORDCASING : "IgnoreKeyWordCase";
+
+@label("fr","mot clé 'YYYYMMDD'");
+@label("en","'YYYYMMDD' keyword");
+[KeyWord] YYYYMMDD : "YYYYMMDD";
+
+@label("fr","mot clé 'DDMMYYYY'");
+@label("en","'DDMMYYYY' keyword");
+[KeyWord] DDMMYYYY : "DDMMYYYY";
+
+@label("fr","mot clé 'INDENT'");
+@label("en","'INDENT' keyword");
+[KeyWord] INDENT : "INDENT";
+
+@label("fr","mot clé 'UINDENT'");
+@label("en","'UINDENT' keyword");
+[KeyWord] UINDENT : "UINDENT";
+
+[Mode("default", "EXT")]
+@label("fr","identifiant");
+@label("en","identifier");
+[AlphaNumDashId] ID;
+
+[Mode("default", "EXT")]
+@label("fr","caractère");
+@label("en","character");
+[Character] CHAR : "'" "\\";
+
+[Mode("default", "EXT")]
+@label("fr","zéro ou plus");
+@label("en","zero or more");
+[Sugar] ZEROORMORE : "*";
+
+[Mode("default", "EXT")]
+@label("fr","un ou plus");
+@label("en","one or more");
+[Sugar] ONEORMORE : "+";
+
+@label("fr","optionnel");
+@label("en","optional");
+[Sugar] OPTION : "?";
+
+@label("fr","écarter");
+@label("en","discard");
+[Sugar] DISCARD : "[d]";
+
+@label("fr","alternative");
+@label("en","alternative");
+[Sugar] OR : "|";
+
+@label("fr","mot clé 'Right'");
+@label("en","'Right' keyword");
+[KeyWord] RIGHT : "Right";
+
+@label("fr","mot clé 'Left'");
+@label("en","'Left' keyword");
+[KeyWord] LEFT : "Left";
+
+@label("fr","mot clé 'Operand'");
+@label("en","'Operand' keyword");
+[KeyWord] OPERAND : "Operand";
+
+@label("fr","mot clé 'Prefix'");
+@label("en","'Prefix' keyword");
+[KeyWord] PREFIX : "Prefix";
+
+@label("fr","mot clé 'Postfix'");
+@label("en","'Postfix' keyword");
+[KeyWord] POSTFIX : "Postfix";
+
+[Push("EXT")]
+[Mode]
+@label("fr","ouverture de définition d'extension");
+@label("en","extension definition opening");
+[Sugar] OPEN_EXT : ">>>";
+
+[Mode("EXT", "default")]
+@label("fr","flèche");
+@label("en","arrow");
+[Sugar] ARROW : "->";
+
+[Mode("EXT", "default")]
+@label("fr","arobase");
+@label("en","at");
+[Sugar] AT : "@";
+
+[Mode("EXT", "default")]
+@label("fr","tiret haut");
+@label("en","dash");
+[Sugar] DASH : "-";
+
+[Mode("EXT", "default")]
+@label("fr","accolade ouvrante");
+@label("en","opening curly brace");
+[Sugar] LEFTCURL : "{";
+
+[Mode("EXT", "default")]
+@label("fr","accolade fermante");
+@label("en","closing curly brace");
+[Sugar] RIGHTCURL : "}";
+
+[Mode("default", "EXT")]
+@label("fr","virgule");
+@label("en","comma");
+[Sugar] COMMA : ",";
+
+[Mode("EXT")]
+@label("fr","mot clé END");
+@label("en","END keyword");
+[KeyWord] ENDTOKEN : "END";
+
+[Pop]
+[Mode("EXT")]
+@label("fr","fermeture de définition d'extension");
+@label("en","extension definition closing");
+[Sugar] CLOSE_EXT : "<<<";
+
+parser CLIParser;
+-> root: genericRoot parserRoot ;
+parserRoot : PARSER[d] ID SEMICOLON[d] parser_optimization* rule*;
+parser_optimization : LEFTBRACKET[d] [USEMEMOIZATION|BROADENTOKENWINDOW|AUTOCLOSEINDENTATION] RIGHTBRACKET[d];
+genericRoot : GENERICLEXER[d] ID SEMICOLON[d] lexer_option* modedToken*;
+modedToken : mode* token;
+mode : LEFTBRACKET[d] PUSH[d] LEFTPAREN[d] STRING RIGHTPAREN[d] RIGHTBRACKET[d];
+mode : LEFTBRACKET[d] POP RIGHTBRACKET[d];
+mode : LEFTBRACKET[d] MODE[d] LEFTPAREN[d] STRING (COMMA[d] STRING )* RIGHTPAREN[d] RIGHTBRACKET[d];
+mode : LEFTBRACKET[d] MODE[d] RIGHTBRACKET[d];
+token : attribute* LEFTBRACKET[d] [SUGARTOKEN|SINGLELINECOMMENT|HEXATOKEN] RIGHTBRACKET[d] IdentifierOrString COLON[d] STRING SEMICOLON[d];
+token : attribute* LEFTBRACKET[d] [STRINGTOKEN|CHARTOKEN|MULTILINECOMMENT] RIGHTBRACKET[d] IdentifierOrString COLON[d] STRING STRING SEMICOLON[d];
+token : attribute* LEFTBRACKET[d] [KEYWORDTOKEN] RIGHTBRACKET[d] IdentifierOrString COLON[d]  STRING* SEMICOLON[d];
+token :attribute* LEFTBRACKET[d] DATETOKEN[d] RIGHTBRACKET[d] IdentifierOrString COLON[d] [DDMMYYYY|YYYYMMDD] CHAR SEMICOLON[d];
+token :attribute* LEFTBRACKET[d] UPTOTOKEN[d] RIGHTBRACKET[d] IdentifierOrString COLON[d] STRING* SEMICOLON[d];
+token : attribute* LEFTBRACKET[d] [STRINGTOKEN|INTTOKEN|ALPHAIDTOKEN|ALPHANUMIDTOKEN|ALPHANUMDASHIDTOKEN|DOUBLETOKEN|HEXATOKEN] RIGHTBRACKET[d] IdentifierOrString SEMICOLON[d];
+token : attribute* LEFTBRACKET[d] EXTENSIONTOKEN[d] RIGHTBRACKET[d] IdentifierOrString extension ;
+extension : OPEN_EXT[d] transition_chain+ CLOSE_EXT[d];
+transition_chain : (LEFTPAREN[d] ID RIGHTPAREN[d])? transition+  (ARROW ENDTOKEN)?;
+transition : ARROW[d] (LEFTPAREN[d] ID RIGHTPAREN[d])? pattern repeater? (AT[d] ID)?;
+repeater : ZEROORMORE[d];
+repeater : ONEORMORE[d];
+repeater : LEFTCURL[d] INT RIGHTCURL[d];
+pattern : CHAR;
+pattern : LEFTBRACKET[d] range (COMMA[d] range)* RIGHTBRACKET[d];
+range : CHAR DASH[d] CHAR;
+lexer_option : LEFTBRACKET[d] [IGNOREKEYWORDCASING|INDENTATIONAWARE|IGNOREWHITESPACES|IGNOREEOL] LEFTPAREN[d][TRUE|FALSE]RIGHTPAREN[d] RIGHTBRACKET[d];
+IdentifierOrString : [ID | GENERICLEXER | STRINGTOKEN |  PARSER | CHARTOKEN | INTTOKEN | DATETOKEN | DOUBLETOKEN | HEXATOKEN | 
+                ALPHAIDTOKEN | ALPHANUMIDTOKEN | ALPHANUMDASHIDTOKEN | KEYWORDTOKEN | SUGARTOKEN | SINGLELINECOMMENT | UPTOTOKEN | 
+                MULTILINECOMMENT | EXTENSIONTOKEN | PUSH | MODE | POP | TRUE | FALSE | INDENT | UINDENT | YYYYMMDD | DDMMYYYY | STRING ];
+operand :  LEFTBRACKET[d] OPERAND[d] RIGHTBRACKET[d];
+rule  :  attribute* ARROW? operand? IdentifierOrString COLON[d] clause+ SEMICOLON[d];
+rule  :  attribute* operand? IdentifierOrString+ SEMICOLON[d];
+rule : attribute* LEFTBRACKET[d] PREFIX[d] INT RIGHTBRACKET[d] IdentifierOrString* SEMICOLON[d];
+rule : attribute* LEFTBRACKET[d] POSTFIX[d] INT RIGHTBRACKET[d] IdentifierOrString* SEMICOLON[d];
+rule : attribute* LEFTBRACKET[d] [RIGHT|LEFT] INT RIGHTBRACKET[d] IdentifierOrString+ SEMICOLON[d];
+item : IdentifierOrString;
+item : choiceclause;
+clause : item ZEROORMORE[d];
+clause : item ONEORMORE[d];
+clause : item LEFTCURL[d] INT RIGHTCURL[d];
+clause : item LEFTCURL[d] INT DASH[d] INT RIGHTCURL[d];
+clause : item OPTION[d];
+clause :discardeditem;
+clause : item ;
+clause : choiceclause;
+choiceclause : LEFTBRACKET[d]  item ( OR[d] item)* RIGHTBRACKET[d]  ;
+clause : choiceclause ONEORMORE[d] ;
+clause : choiceclause ZEROORMORE[d] ;
+clause : choiceclause LEFTCURL[d] INT RIGHTCURL[d];
+clause : choiceclause LEFTCURL[d] INT DASH[d] INT RIGHTCURL[d];
+clause : choiceclause OPTION[d] ;
+clause : group;
+group : LEFTPAREN[d] discardeditem* RIGHTPAREN[d] ;
+discardeditem : item DISCARD?;
+clause : group ONEORMORE[d] ;
+clause : group ZEROORMORE [d];
+clause : group LEFTCURL[d] INT RIGHTCURL[d];
+clause : group LEFTCURL[d] INT DASH[d] INT RIGHTCURL[d];
+clause : group OPTION[d] ;
+attribute :  AT[d] ID LEFTPAREN[d] [ID|STRING] (COMMA[d] [ID|STRING])*  RIGHTPAREN[d] SEMICOLON[d];
+
