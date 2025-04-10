@@ -578,7 +578,7 @@ namespace sly.lexer
         public void AddDate(IN token, DateFormat format, char separator, LexemeAttribute doubleLexeme,
             BuildResult<ILexer<IN>> result)
         {
-            if (doubleLexeme != null)
+            if (doubleLexeme != null && FSMBuilder.HasMark(in_double))
             {
                 char decimalSeparator = (doubleLexeme.HasGenericTokenParameters)
                     ? doubleLexeme.GenericTokenParameters[0][0]
