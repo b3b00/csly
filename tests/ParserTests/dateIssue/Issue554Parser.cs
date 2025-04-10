@@ -8,8 +8,8 @@ namespace ParserTests.dateIssue;
     public class Issue554Parser
     {
         [Production("root : DOUBLE INT DATE")]
-        public object root_DOUBLE_INT_DATE(Token<Issue554lexer> p0, Token<Issue554lexer> p1, Token<Issue554lexer> p2)
+        public string root_DOUBLE_INT_DATE(Token<Issue554lexer> d, Token<Issue554lexer> i, Token<Issue554lexer> date)
         {
-            return default(object);
+            return $"{d.Value}/{i.Value}/{date.Value}";  
         }
     }

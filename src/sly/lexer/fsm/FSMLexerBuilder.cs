@@ -582,6 +582,11 @@ namespace sly.lexer.fsm
         }
         
         #endregion
+
+        public bool HasMark(string mark)
+        {
+            return Marks.ContainsKey(mark);
+        }
     }
 
     
