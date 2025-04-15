@@ -37,6 +37,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2"/>
+    <PackageReference Include="PolySharp" Version="1.15.0" Condition=" $(TargetFramework.StartsWith('netstandard')) OR '$(TargetFramework)' == 'net6.0'">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="System.Collections.Immutable" Version="6.0.0"/>
     <PackageReference Include="System.ValueTuple" Version="4.6.0"/>    
   </ItemGroup>

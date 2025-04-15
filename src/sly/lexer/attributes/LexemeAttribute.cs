@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace sly.lexer
 {
@@ -14,7 +15,7 @@ namespace sly.lexer
         
         internal string Mode { get; set; }
         
-        public LexemeAttribute(string pattern, bool isSkippable = false, bool isLineEnding = false)
+        public LexemeAttribute([StringSyntax(StringSyntaxAttribute.Regex)] string pattern, bool isSkippable = false, bool isLineEnding = false)
         {
             Pattern = pattern;
             IsSkippable = isSkippable;
@@ -55,6 +56,7 @@ namespace sly.lexer
         
         public string IdentifierRestPattern { get; }
 
+        [StringSyntax(StringSyntaxAttribute.Regex)]
         public string Pattern { get; set; }
 
         public bool IsSkippable { get; set; }
