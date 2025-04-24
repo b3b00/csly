@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 
 namespace sly.parser.syntax.tree
 {
-    public class ManySyntaxNode<IN, OUT> : SyntaxNode<IN, OUT> where IN : struct
+    public class ManySyntaxNode<IN, OUT> : SyntaxNode<IN, OUT> where IN : struct, Enum
     {
         public ManySyntaxNode(string name) : base(name, new List<ISyntaxNode<IN, OUT>>())
         {

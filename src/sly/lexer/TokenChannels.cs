@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -15,7 +16,7 @@ namespace sly.lexer
         public const int Comments = 2;
     }
     
-    public class TokenChannels<IN> : IEnumerable<Token<IN>>  where IN : struct
+    public class TokenChannels<IN> : IEnumerable<Token<IN>>  where IN : struct, Enum
     {
         
         

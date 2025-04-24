@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace sly.parser.syntax.grammar
 {
-    public sealed class ClauseSequence<IN,OUT> : IClause<IN,OUT> where IN : struct
+    public sealed class ClauseSequence<IN,OUT> : IClause<IN,OUT> where IN : struct, Enum
     {
         public ClauseSequence(IClause<IN,OUT> item)
         {

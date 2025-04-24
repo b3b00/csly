@@ -10,7 +10,7 @@ namespace sly.lexer
     ///     T is the token type
     /// </summary>
     /// <typeparam name="T">T is the enum Token type</typeparam>
-    public class Lexer<T> : ILexer<T> where T : struct
+    public class Lexer<T> : ILexer<T> where T : struct, Enum
     {
         public Dictionary<T, Dictionary<string, string>> LexemeLabels { get; set; }
         public string I18n { get; set; }

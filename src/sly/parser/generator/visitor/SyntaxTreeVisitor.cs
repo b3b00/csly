@@ -8,7 +8,7 @@ using static sly.parser.parser.ValueOptionConstructors;
 
 namespace sly.parser.generator.visitor
 {
-    public class SyntaxVisitorResult<IN, OUT> where IN : struct
+    public class SyntaxVisitorResult<IN, OUT> where IN : struct, Enum
     {
         public List<Group<IN, OUT>> GroupListResult;
 
@@ -126,7 +126,7 @@ namespace sly.parser.generator.visitor
 
     }
 
-    public class SyntaxTreeVisitor<IN, OUT> where IN : struct
+    public class SyntaxTreeVisitor<IN, OUT> where IN : struct, Enum
     {
         public SyntaxTreeVisitor(ParserConfiguration<IN, OUT> conf, object parserInstance)
         {

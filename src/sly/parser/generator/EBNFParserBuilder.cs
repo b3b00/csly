@@ -16,7 +16,7 @@ namespace sly.parser.generator
     /// <summary>
     ///     this class provides API to build parser
     /// </summary>
-    internal class EBNFParserBuilder<IN, OUT> : ParserBuilder<IN, OUT> where IN : struct
+    internal class EBNFParserBuilder<IN, OUT> : ParserBuilder<IN, OUT> where IN : struct, Enum
     {
         public EBNFParserBuilder(string i18n = null) : base(i18n)
         {

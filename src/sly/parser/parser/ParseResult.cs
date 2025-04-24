@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using sly.parser.syntax.tree;
 
 namespace sly.parser
 {
-    public class ParseResult<IN, OUT> where IN : struct
+    public class ParseResult<IN, OUT> where IN : struct, Enum
     {
         public OUT Result { get; set; }
         

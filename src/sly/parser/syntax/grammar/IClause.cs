@@ -6,7 +6,7 @@ namespace sly.parser.syntax.grammar
     ///     a clause within a grammar rule
     /// </summary>
     /// <typeparam name="IN"></typeparam>
-    public interface IClause<IN,OUT> : GrammarNode<IN,OUT>, IEquatable<IClause<IN,OUT>> where IN : struct
+    public interface IClause<IN,OUT> : GrammarNode<IN,OUT>, IEquatable<IClause<IN,OUT>> where IN : struct, Enum
     {
         bool MayBeEmpty();
         string Dump();

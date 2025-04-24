@@ -3,11 +3,12 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Linq;
+using System;
 
 namespace sly.parser.syntax.grammar
 {
     [DebuggerDisplay("{ToString()}")]
-    public sealed class GroupClause<IN,OUT> : IClause<IN,OUT> where IN : struct
+    public sealed class GroupClause<IN,OUT> : IClause<IN,OUT> where IN : struct, Enum
     {
         public GroupClause(IClause<IN,OUT> clause)
         {

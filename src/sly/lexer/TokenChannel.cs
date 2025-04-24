@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System;
 
 namespace sly.lexer
 {
-    public class TokenChannel<IN>  where IN : struct
+    public class TokenChannel<IN>  where IN : struct, Enum
     {
         public readonly List<Token<IN>> Tokens;
 

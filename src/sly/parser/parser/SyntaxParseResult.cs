@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.parser.syntax.grammar;
@@ -5,7 +6,7 @@ using sly.parser.syntax.tree;
 
 namespace sly.parser
 {
-    public class SyntaxParseResult<IN, OUT> where IN : struct
+    public class SyntaxParseResult<IN, OUT> where IN : struct, Enum
     {
         public ISyntaxNode<IN, OUT> Root { get; set; }
 

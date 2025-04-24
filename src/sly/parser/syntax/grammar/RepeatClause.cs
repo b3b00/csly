@@ -1,8 +1,9 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
-    public sealed class RepeatClause<IN,OUT> : ManyClause<IN,OUT> where IN : struct
+    public sealed class RepeatClause<IN,OUT> : ManyClause<IN,OUT> where IN : struct, Enum
     {
         public int MinRepetitionCount { get; set; }
         

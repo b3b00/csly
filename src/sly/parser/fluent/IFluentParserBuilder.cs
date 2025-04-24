@@ -7,7 +7,7 @@ using sly.parser.generator;
 
 namespace sly.parser.fluent;
 
-public interface IFluentParserBuilder<IN,OUT> where IN : struct
+public interface IFluentParserBuilder<IN,OUT> where IN : struct, Enum
 {
 
     IFluentParserBuilder<IN, OUT> UseMemoization(bool use = true);

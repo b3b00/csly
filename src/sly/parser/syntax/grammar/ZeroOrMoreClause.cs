@@ -1,8 +1,9 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
-    public sealed class ZeroOrMoreClause<IN,OUT> : ManyClause<IN,OUT> where IN : struct
+    public sealed class ZeroOrMoreClause<IN,OUT> : ManyClause<IN,OUT> where IN : struct, Enum
     {
         
         public ZeroOrMoreClause(IClause<IN,OUT> clause)

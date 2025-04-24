@@ -7,7 +7,7 @@ using sly.lexer.fsm;
 
 namespace sly.lexer.fluent;
 
-public class FluentLexerBuilder<IN> :  IFluentLexemeBuilder<IN> where IN : struct
+public class FluentLexerBuilder<IN> :  IFluentLexemeBuilder<IN> where IN : struct, Enum
 {
     private bool _ignoreWs = true;
 

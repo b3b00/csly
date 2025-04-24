@@ -20,7 +20,7 @@ namespace sly.parser.generator
 
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class OperationAttribute : Attribute //where IN : struct
+    public class OperationAttribute : Attribute //where IN : struct, Enum
     {
         /// <summary>
         ///     token as an int as attribute can not be generics.

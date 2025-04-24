@@ -7,7 +7,7 @@ using sly.lexer;
 namespace sly.parser.syntax.grammar
 {
     [DebuggerDisplay("Terminal {(ExpectedToken.ToString())}{Discarded ? \"[d]\" : \"\"}")]
-    public class TerminalClause<IN,OUT> : IClause<IN,OUT> where IN : struct
+    public class TerminalClause<IN,OUT> : IClause<IN,OUT> where IN : struct, Enum
     {
         public TerminalClause(LeadingToken<IN> token)
         {
@@ -101,7 +101,7 @@ namespace sly.parser.syntax.grammar
         UnIndent
     }
     
-    public sealed class IndentTerminalClause<T,OUT> : TerminalClause<T,OUT> where T : struct
+    public sealed class IndentTerminalClause<T,OUT> : TerminalClause<T,OUT> where T : struct, Enum
     {
         private IndentationType ExpectedIndentation;
         

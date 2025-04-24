@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace sly.lexer.fsm
 {
-    public class FSMMatch<N>  where N : struct
+    public class FSMMatch<N>  where N : struct, Enum
     {
         public Dictionary<string, object> Properties { get; }
 

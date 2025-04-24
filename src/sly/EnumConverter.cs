@@ -17,13 +17,13 @@ namespace sly
 
 
         
-        public static IN ConvertStringToEnum<IN>(string name)  where IN : struct
+        public static IN ConvertStringToEnum<IN>(string name)  where IN : struct, Enum
         {
             Enum.TryParse(name, out IN token);
             return token;
         }
         
-        public static bool IsEnumValue<IN>(string name)  where IN : struct
+        public static bool IsEnumValue<IN>(string name)  where IN : struct, Enum
         {
             return Enum.TryParse(name, out IN token);
         }

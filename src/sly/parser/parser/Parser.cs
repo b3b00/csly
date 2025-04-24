@@ -14,7 +14,7 @@ using sly.parser.syntax.tree;
 
 namespace sly.parser
 {
-    public class Parser<IN, OUT> where IN : struct
+    public class Parser<IN, OUT> where IN : struct, Enum
     {   
 
         public Dictionary<IN, Dictionary<string, string>> LexemeLabels => Lexer.LexemeLabels;

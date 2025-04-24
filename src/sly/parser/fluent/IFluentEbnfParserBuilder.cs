@@ -4,7 +4,7 @@ using sly.lexer.fluent;
 
 namespace sly.parser.generator;
 
-public interface IFluentEbnfRuleBuilder<IN, OUT> : IFluentEbnfParserBuilder<IN, OUT> where IN : struct
+public interface IFluentEbnfRuleBuilder<IN, OUT> : IFluentEbnfParserBuilder<IN, OUT> where IN : struct, Enum
 {
     public IFluentEbnfParserBuilder<IN, OUT> Named(string name);
     
@@ -13,7 +13,7 @@ public interface IFluentEbnfRuleBuilder<IN, OUT> : IFluentEbnfParserBuilder<IN, 
     public IFluentEbnfParserBuilder<IN, OUT> WithSubNodeNamed(params string[] subNodeNames);
 }
 
-public interface IFluentEbnfParserBuilder<IN,OUT> where IN : struct
+public interface IFluentEbnfParserBuilder<IN,OUT> where IN : struct, Enum
 {
 
     IFluentEbnfParserBuilder<IN, OUT> UseMemoization(bool use = true);

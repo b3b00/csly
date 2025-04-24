@@ -19,9 +19,9 @@ namespace sly.lexer.fsm
         }
     }
 
-    public delegate List<Token<IN>> LexerPostProcess<IN>(List<Token<IN>> tokens) where IN : struct;
+    public delegate List<Token<IN>> LexerPostProcess<IN>(List<Token<IN>> tokens) where IN : struct, Enum;
 
-    public class FSMLexer<N> where N : struct
+    public class FSMLexer<N> where N : struct, Enum
     {
         public string Mode { get; set; }
 

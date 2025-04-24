@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace sly.parser.generator
 {
-    public class OperationMetaData<IN, OUT> where IN : struct
+    public class OperationMetaData<IN, OUT> where IN : struct, Enum
     {
         public OperationMetaData(int precedence, Associativity assoc, MethodInfo method, Affix affix, IN oper, string nodeName = null)
         {

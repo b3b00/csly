@@ -9,7 +9,7 @@ using sly.lexer.fsm.transitioncheck;
 
 namespace sly.lexer
 {
-    public class GenericLexer<IN> : ILexer<IN> where IN : struct
+    public class GenericLexer<IN> : ILexer<IN> where IN : struct, Enum
     {
         public class Config
         {

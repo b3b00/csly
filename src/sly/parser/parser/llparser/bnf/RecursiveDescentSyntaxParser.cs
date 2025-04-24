@@ -4,10 +4,11 @@ using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 using System.Linq;
+using System;
 
 namespace sly.parser.llparser.bnf
 {
-    public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
+    public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct, Enum
     {
         public RecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal,
             string i18n)

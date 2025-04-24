@@ -15,7 +15,7 @@ namespace sly.lexer
     }
 
     [DebuggerDisplay("{TokenID} : {Value} - {IsExplicit}")]
-    public class Token<T> where T:struct
+    public class Token<T> where T:struct, Enum
     {
         
         

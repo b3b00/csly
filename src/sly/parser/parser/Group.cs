@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -5,7 +6,7 @@ using sly.lexer;
 
 namespace sly.parser.parser
 {
-    public class Group<IN, OUT> where IN : struct
+    public class Group<IN, OUT> where IN : struct, Enum
     {
         public readonly List<GroupItem<IN, OUT>> Items;
 

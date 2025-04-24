@@ -10,7 +10,7 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator;
 
-public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> where IN : struct
+public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> where IN : struct, Enum
 {
     readonly Dictionary<string, NonTerminal<IN,OUT>> _nonTerminals = new ();
 

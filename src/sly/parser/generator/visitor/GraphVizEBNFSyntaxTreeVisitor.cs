@@ -8,7 +8,7 @@ using sly.parser.syntax.tree;
 namespace sly.parser.generator.visitor
 {
     [ExcludeFromCodeCoverage]
-    public class GraphVizEBNFSyntaxTreeVisitor<IN, OUT>  : IConcreteSyntaxTreeVisitor<IN, OUT, DotNode> where IN : struct
+    public class GraphVizEBNFSyntaxTreeVisitor<IN, OUT>  : IConcreteSyntaxTreeVisitor<IN, OUT, DotNode> where IN : struct, Enum
     {
         public DotGraph Graph { get; private set; }
 

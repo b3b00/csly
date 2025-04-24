@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {
-    public class LeftRecursionChecker<IN,OUT> where IN : struct
+    public class LeftRecursionChecker<IN,OUT> where IN : struct, Enum
     {
         public LeftRecursionChecker()
         {

@@ -7,7 +7,7 @@ namespace sly.lexer.fluent;
 
 
 
-public interface IFluentLexerBuilder<IN> where IN : struct
+public interface IFluentLexerBuilder<IN> where IN : struct, Enum
 {
     
     public IFluentLexemeBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".");
