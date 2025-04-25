@@ -8,7 +8,7 @@ using sly.parser.generator;
 
 namespace sly.parser.syntax.tree
 {
-    public class SyntaxNode<IN, OUT> : ISyntaxNode<IN, OUT> where IN : struct
+    public class SyntaxNode<IN, OUT> : ISyntaxNode<IN, OUT> where IN : struct, Enum
     {
         
         public SyntaxNode(string name, List<ISyntaxNode<IN, OUT>> children = null, MethodInfo visitor = null)

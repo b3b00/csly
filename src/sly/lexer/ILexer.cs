@@ -5,7 +5,7 @@ using sly.lexer.fsm;
 
 namespace sly.lexer
 {
-    public interface ILexer<T> where T : struct
+    public interface ILexer<T> where T : struct, Enum
     {
         
         Dictionary<T, Dictionary<string, string>> LexemeLabels { get; set; }

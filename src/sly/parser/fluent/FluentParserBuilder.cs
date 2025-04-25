@@ -13,7 +13,7 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.fluent;
 
-public class FluentParserBuilder<IN, OUT> : IFluentParserBuilder<IN,OUT> where IN : struct
+public class FluentParserBuilder<IN, OUT> : IFluentParserBuilder<IN,OUT> where IN : struct, Enum
 {
     readonly Dictionary<string, NonTerminal<IN,OUT>> _nonTerminals = new Dictionary<string, NonTerminal<IN,OUT>>();
 

@@ -1,3 +1,5 @@
+using System;
+
 using sly.buildresult;
 using sly.lexer;
 using sly.lexer.fluent;
@@ -6,7 +8,7 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.fluent;
 
-public class FluentRuleParser<IN, OUT> where IN : struct
+public class FluentRuleParser<IN, OUT> where IN : struct, Enum
 {
     public IFluentLexerBuilder<EbnfTokenGeneric> GetEbnfLexerBuilder()
     {

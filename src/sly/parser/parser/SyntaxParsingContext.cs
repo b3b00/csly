@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using sly.parser.syntax.grammar;
@@ -5,7 +6,7 @@ using sly.parser.syntax.grammar;
 namespace sly.parser
 {
     
-    public class SyntaxParsingContext<IN, OUT> where IN : struct
+    public class SyntaxParsingContext<IN, OUT> where IN : struct, Enum
     {
         private readonly Dictionary<string, SyntaxParseResult<IN, OUT>> _memoizedNonTerminalResults = new Dictionary<string, SyntaxParseResult<IN, OUT>>();
 

@@ -9,7 +9,7 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {
-    public class ExpressionRulesGenerator<IN,OUT> where IN : struct
+    public class ExpressionRulesGenerator<IN,OUT> where IN : struct, Enum
     {
         public string I18n { get; set; }
         

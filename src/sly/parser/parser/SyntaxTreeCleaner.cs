@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using sly.parser.syntax.tree;
 
 namespace sly.parser.parser
 {
-    public class SyntaxTreeCleaner<IN, OUT> where IN : struct
+    public class SyntaxTreeCleaner<IN, OUT> where IN : struct, Enum
     {
         public SyntaxParseResult<IN, OUT> CleanSyntaxTree(SyntaxParseResult<IN, OUT> result)
         {

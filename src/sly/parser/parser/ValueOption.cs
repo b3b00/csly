@@ -9,7 +9,7 @@ namespace sly.parser.parser
             return new ValueOption<T>();
         }
 
-        public static ValueOption<Group<IN, OUT>> NoneGroup<IN, OUT>()  where IN : struct
+        public static ValueOption<Group<IN, OUT>> NoneGroup<IN, OUT>()  where IN : struct, Enum
         {
             var noneGroup = new ValueOption<Group<IN,OUT>>(true);
             return noneGroup;

@@ -9,7 +9,7 @@ using sly.parser.generator;
 
 namespace sly.parser.syntax.grammar
 {
-    public class Rule<IN,OUT> : GrammarNode<IN,OUT> where IN : struct
+    public class Rule<IN,OUT> : GrammarNode<IN,OUT> where IN : struct, Enum
     {
         public Rule()
         {

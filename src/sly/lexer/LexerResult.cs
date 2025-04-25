@@ -1,9 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace sly.lexer
 {
-    public class LexerResult<IN> where IN : struct
+    public class LexerResult<IN> where IN : struct, Enum
     {
         public bool IsError { get; set; }
 

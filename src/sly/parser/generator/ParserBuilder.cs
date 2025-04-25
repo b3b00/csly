@@ -17,7 +17,7 @@ namespace sly.parser.generator
     /// <summary>
     ///     this class provides API to build parser
     /// </summary>
-    public class ParserBuilder<IN, OUT> where IN : struct
+    public class ParserBuilder<IN, OUT> where IN : struct, Enum
     {
         #region API
 

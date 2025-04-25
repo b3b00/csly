@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
@@ -5,7 +6,7 @@ using sly.parser.syntax.tree;
 
 namespace sly.parser.generator.visitor
 {
-    public class ConcreteSyntaxTreeWalker<IN, OUT, TREE_OUT> where IN : struct
+    public class ConcreteSyntaxTreeWalker<IN, OUT, TREE_OUT> where IN : struct, Enum
     {
         
         public IConcreteSyntaxTreeVisitor<IN,OUT, TREE_OUT> Visitor { get; set; }

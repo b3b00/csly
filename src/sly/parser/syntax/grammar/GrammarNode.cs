@@ -1,6 +1,8 @@
-﻿namespace sly.parser.syntax.grammar
+﻿using System;
+
+namespace sly.parser.syntax.grammar
 {
-    public interface GrammarNode<IN,OUT> where IN : struct
+    public interface GrammarNode<IN,OUT> where IN : struct, Enum
     {
     }
 }

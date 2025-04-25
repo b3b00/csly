@@ -9,7 +9,7 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser
 {
-    public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable where T : struct
+    public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable where T : struct, Enum
     {
         private readonly string _i18N;
 

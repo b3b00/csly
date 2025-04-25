@@ -1,6 +1,8 @@
-﻿namespace sly.parser.syntax.grammar
+﻿using System;
+
+namespace sly.parser.syntax.grammar
 {
-    public abstract class ManyClause<IN,OUT> : IClause<IN,OUT> where IN : struct
+    public abstract class ManyClause<IN,OUT> : IClause<IN,OUT> where IN : struct, Enum
     {
         public IClause<IN,OUT> Clause { get; set; }
 

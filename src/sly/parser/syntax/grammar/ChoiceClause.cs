@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace sly.parser.syntax.grammar
 {
-    public sealed class ChoiceClause<IN,OUT> : IClause<IN,OUT> where IN : struct
+    public sealed class ChoiceClause<IN,OUT> : IClause<IN,OUT> where IN : struct, Enum
     {
 
         public bool IsDiscarded { get; set; } = false;

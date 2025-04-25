@@ -9,7 +9,7 @@ using sly.parser.syntax.tree;
 namespace sly.parser.generator.visitor
 {
     [ExcludeFromCodeCoverage]
-    public class MermaidEBNFSyntaxTreeVisitor<IN, OUT>  : IConcreteSyntaxTreeVisitor<IN, OUT, MermaidNode> where IN : struct
+    public class MermaidEBNFSyntaxTreeVisitor<IN, OUT>  : IConcreteSyntaxTreeVisitor<IN, OUT, MermaidNode> where IN : struct, Enum
     {
         public MermaidGraph Graph { get; private set; }
 

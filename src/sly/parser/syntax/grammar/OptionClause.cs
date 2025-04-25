@@ -1,8 +1,9 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 
 namespace sly.parser.syntax.grammar
 {
-    public sealed class OptionClause<IN,OUT> : IClause<IN,OUT> where IN : struct
+    public sealed class OptionClause<IN,OUT> : IClause<IN,OUT> where IN : struct, Enum
     {
         public OptionClause(IClause<IN,OUT> clause)
         {

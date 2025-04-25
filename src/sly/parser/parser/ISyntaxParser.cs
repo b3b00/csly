@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using sly.lexer;
 using sly.parser.generator;
 
 namespace sly.parser
 {
-    public interface ISyntaxParser<IN, OUT> where IN : struct
+    public interface ISyntaxParser<IN, OUT> where IN : struct, Enum
     {
         string StartingNonTerminal { get; set; }
         

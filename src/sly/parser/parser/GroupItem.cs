@@ -4,7 +4,7 @@ using sly.lexer;
 
 namespace sly.parser.parser
 {
-    public class GroupItem<IN, OUT> where IN : struct
+    public class GroupItem<IN, OUT> where IN : struct, Enum
     {
         public string Name;
 

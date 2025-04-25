@@ -1,10 +1,12 @@
+using System;
+
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 
 namespace sly.parser.llparser.bnf;
 
-public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
+public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct, Enum
 {
     
             protected SyntaxNode<IN, OUT> ManageExpressionRules(Rule<IN, OUT> rule, SyntaxNode<IN, OUT> node)

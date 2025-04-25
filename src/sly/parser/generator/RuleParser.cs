@@ -4,7 +4,7 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {
-     public class RuleParser<IN,OUT> where IN : struct
+     public class RuleParser<IN,OUT> where IN : struct, Enum
     {
         #region rules grammar
 

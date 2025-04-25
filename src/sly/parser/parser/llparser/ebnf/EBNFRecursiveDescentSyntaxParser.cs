@@ -9,7 +9,7 @@ using sly.parser.llparser.bnf;
 
 namespace sly.parser.llparser.ebnf
 {
-    public partial  class EBNFRecursiveDescentSyntaxParser<IN, OUT> : RecursiveDescentSyntaxParser<IN, OUT> where IN : struct
+    public partial  class EBNFRecursiveDescentSyntaxParser<IN, OUT> : RecursiveDescentSyntaxParser<IN, OUT> where IN : struct, Enum
     {
         public EBNFRecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal, string i18n)
             : base(configuration, startingNonTerminal, i18n)

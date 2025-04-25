@@ -1,8 +1,10 @@
+using System;
+
 using sly.lexer;
 
 namespace sly.parser.syntax.tree
 {
-    public class SyntaxLeaf<IN, OUT> : ISyntaxNode<IN, OUT> where IN : struct
+    public class SyntaxLeaf<IN, OUT> : ISyntaxNode<IN, OUT> where IN : struct, Enum
     {
         public SyntaxLeaf(Token<IN> token, bool discarded)
         {

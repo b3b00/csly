@@ -5,7 +5,7 @@ using sly.lexer.fsm;
 
 namespace sly.lexer.fluent;
 
-public interface IFluentLexemeBuilder<IN> : IFluentLexerBuilder<IN> where IN : struct {
+public interface IFluentLexemeBuilder<IN> : IFluentLexerBuilder<IN> where IN : struct, Enum {
     
     IFluentLexemeBuilder<IN> WithLabel(string lang, string label);
     

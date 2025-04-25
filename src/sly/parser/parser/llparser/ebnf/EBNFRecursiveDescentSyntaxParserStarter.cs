@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.llparser.ebnf
 {
-    public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
+    public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct, Enum
     {
 
         #region STARTING_TOKENS

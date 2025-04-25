@@ -1,6 +1,8 @@
-﻿namespace sly.parser.syntax.tree
+﻿using System;
+
+namespace sly.parser.syntax.tree
 {
-    public interface ISyntaxNode<IN, OUT> where IN : struct
+    public interface ISyntaxNode<IN, OUT> where IN : struct, Enum
     {
 
         public bool IsEpsilon { get;}

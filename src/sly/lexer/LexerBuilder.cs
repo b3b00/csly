@@ -45,13 +45,13 @@ namespace sly.lexer
 
     public delegate (List<string> modes, bool isModePopper, string pushTarget) ModesForLexemeGetter<IN>(
         KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)> attribute)
-        where IN : struct;
+        where IN : struct, Enum;
     
     public static class LexerBuilder
     {
         
         public static Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> GetLexemesWithReflection<IN>(BuildResult<ILexer<IN>> result, string lang)
-            where IN : struct
+            where IN : struct, Enum
         {
             var attributes = new Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)>();
 
@@ -101,7 +101,7 @@ namespace sly.lexer
 
         public static BuildResult<ILexer<IN>> BuildLexer<IN>(
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
-            LexerPostProcess<IN> lexerPostProcess = null) where IN : struct
+            LexerPostProcess<IN> lexerPostProcess = null) where IN : struct, Enum
         {
             return BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, lexerPostProcess: lexerPostProcess);
         }
@@ -115,7 +115,7 @@ namespace sly.lexer
             Dictionary<IN,List<CommentAttribute>> comments = null,
             Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>,(List<string> modes, bool isModePopper, string pushTarget)> modesGetter = null,
             Func<List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)>> callbacksGetter = null)
-            where IN : struct
+            where IN : struct, Enum
         {
             attributes = attributes ?? GetLexemesWithReflection<IN>(result, lang);
             lexerAttribute = lexerAttribute ?? typeof(IN).GetCustomAttribute<LexerAttribute>();
@@ -143,7 +143,7 @@ namespace sly.lexer
             return result;
         }
 
-        private static List<Token<IN>> LabelTokens<IN>(string lang, List<Token<IN>> tokens, Dictionary<IN, Dictionary<string, string>> labels) where IN : struct
+        private static List<Token<IN>> LabelTokens<IN>(string lang, List<Token<IN>> tokens, Dictionary<IN, Dictionary<string, string>> labels) where IN : struct, Enum
         {
             List<Token<IN>> labeledTokens;
             labeledTokens = tokens.Select(token =>
@@ -175,7 +175,7 @@ namespace sly.lexer
             string lang = null,
             IList<string> explicitTokens = null, Dictionary<IN, List<CommentAttribute>> comments = null,
             Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>, (List<string>
-                modes, bool isModePopper, string pushTarget)> modesGetter = null,  Func<List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)>> callbacksGetter = null) where IN : struct
+                modes, bool isModePopper, string pushTarget)> modesGetter = null,  Func<List<(IN tokenId, Func<Token<IN>, Token<IN>> callback)>> callbacksGetter = null) where IN : struct, Enum
         {
             var hasRegexLexemes = IsRegexLexer<IN>(attributes);
             var hasGenericLexemes = IsGenericLexer<IN>(attributes);
@@ -214,7 +214,7 @@ namespace sly.lexer
 
         private static BuildResult<ILexer<IN>> SetLabels<IN>(
             Dictionary<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)> attributes,
-            BuildResult<ILexer<IN>> result) where IN : struct
+            BuildResult<ILexer<IN>> result) where IN : struct, Enum
         {
             if (result.IsOk && result.Result != null)
             {
@@ -269,7 +269,7 @@ namespace sly.lexer
         private static BuildResult<ILexer<IN>> BuildRegexLexer<IN>(
             Dictionary<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)> attributes,
             string lang,
-            BuildResult<ILexer<IN>> result) where IN : struct
+            BuildResult<ILexer<IN>> result) where IN : struct, Enum
         {
             var lexer = new Lexer<IN>()
             {
@@ -314,7 +314,7 @@ namespace sly.lexer
         
         
         private static Dictionary<string, IDictionary<IN, List<LexemeAttribute>>> GetSubLexers<IN>(
-            IDictionary<IN, (List<LexemeAttribute> lexemes,List<LexemeLabelAttribute> labels)> attributes, Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>,(List<string> modes, bool isModePopper, string pushTarget)> modesGetter = null) where IN : struct
+            IDictionary<IN, (List<LexemeAttribute> lexemes,List<LexemeLabelAttribute> labels)> attributes, Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>,(List<string> modes, bool isModePopper, string pushTarget)> modesGetter = null) where IN : struct, Enum
         {
             if (modesGetter == null)
             {
@@ -354,7 +354,7 @@ namespace sly.lexer
             return subLexers;
         }
 
-        private static (List<string> modes,bool isModePopper, string pushTarget) GetModesForLexeme<IN>(KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)> attribute) where IN : struct
+        private static (List<string> modes,bool isModePopper, string pushTarget) GetModesForLexeme<IN>(KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)> attribute) where IN : struct, Enum
         {
             (List<string> modes, bool isModePopper, string pushTarget) result = (new List<string>(), false, null);
             if (attribute.Key is Enum enumValue)
@@ -403,7 +403,7 @@ namespace sly.lexer
 
         private static (GenericLexer<IN>.Config, GenericToken[]) GetConfigAndGenericTokens<IN>(
             IDictionary<IN, List<LexemeAttribute>> attributes, LexerAttribute lexerAttribute = null)
-            where IN : struct
+            where IN : struct, Enum
         {
             var config = new GenericLexer<IN>.Config();
             if (lexerAttribute != null)
@@ -460,7 +460,7 @@ namespace sly.lexer
         }
 
         private static NodeCallback<GenericToken> GetCallbackSingle<IN>(IN token, int channel)
-            where IN : struct
+            where IN : struct, Enum
         {
             NodeCallback<GenericToken> callback = match =>
             {
@@ -474,7 +474,7 @@ namespace sly.lexer
         }
 
         private static NodeCallback<GenericToken> GetCallbackMulti<IN>(IN token, int channel)
-            where IN : struct
+            where IN : struct, Enum
         {
             NodeCallback<GenericToken> callbackMulti = match =>
             {
@@ -494,7 +494,7 @@ namespace sly.lexer
             IList<string> explicitTokens = null, LexerAttribute lexerAttribute = null,
             Dictionary<IN, List<CommentAttribute>> comments = null,
             Func<KeyValuePair<IN, (List<LexemeAttribute> lexemes, List<LexemeLabelAttribute> labels)>, (List<string>
-                modes, bool isModePopper, string pushTarget)> modesGetter = null, Func<List<(IN tokenId, Func<Token<IN>, Token<IN>> callback) >> callbacksGetter = null) where IN : struct
+                modes, bool isModePopper, string pushTarget)> modesGetter = null, Func<List<(IN tokenId, Func<Token<IN>, Token<IN>> callback) >> callbacksGetter = null) where IN : struct, Enum
         {
             GenericLexer<IN> genLexer = null;
             var subLexers = GetSubLexers(attributes, modesGetter);
@@ -534,7 +534,7 @@ namespace sly.lexer
         private static BuildResult<ILexer<IN>> BuildGenericLexer<IN>(IDictionary<IN, List<LexemeAttribute>> attributes,
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, BuildResult<ILexer<IN>> result, string lang,
             LexerAttribute lexerAttribute = null, Dictionary<IN, List<CommentAttribute>> comments = null,
-            IList<string> explicitTokens = null) where IN : struct
+            IList<string> explicitTokens = null) where IN : struct, Enum
         {
             result = CheckStringAndCharTokens<IN>(attributes, result, lang);
             var (config, tokens) = GetConfigAndGenericTokens<IN>(attributes, lexerAttribute);
@@ -783,7 +783,7 @@ namespace sly.lexer
 
         private static BuildResult<ILexer<IN>> CheckStringAndCharTokens<IN>(
             IDictionary<IN, List<LexemeAttribute>> attributes, BuildResult<ILexer<IN>> result, string lang)
-            where IN : struct
+            where IN : struct, Enum
         {
             var allLexemes = attributes.Values.SelectMany<List<LexemeAttribute>, LexemeAttribute>(a => a);
 
@@ -809,7 +809,7 @@ namespace sly.lexer
 
 
         private static Dictionary<IN, List<CommentAttribute>> GetCommentsAttribute<IN>(BuildResult<ILexer<IN>> result,
-            string lang) where IN : struct
+            string lang) where IN : struct, Enum
         {
             var attributes = new Dictionary<IN, List<CommentAttribute>>();
 
@@ -861,7 +861,7 @@ namespace sly.lexer
         }
 
         private static void AddExtensions<IN>(Dictionary<IN, LexemeAttribute> extensions,
-            Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, GenericLexer<IN> lexer) where IN : struct
+            Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder, GenericLexer<IN> lexer) where IN : struct, Enum
         {
             if (extensionBuilder != null)
             {

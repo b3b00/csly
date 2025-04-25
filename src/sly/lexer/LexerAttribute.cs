@@ -2,10 +2,14 @@ using System;
 
 namespace sly.lexer
 {
+
     [AttributeUsage(AttributeTargets.Enum)]
     public class LexerAttribute : Attribute
     {
-        private static readonly GenericLexer<int>.Config Defaults = new GenericLexer<int>.Config();
+        private enum DefaultEnum : int
+        {
+        }
+        private static readonly GenericLexer<DefaultEnum>.Config Defaults = new GenericLexer<DefaultEnum>.Config();
 
         private bool? ignoreWS;
 
