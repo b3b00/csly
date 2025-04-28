@@ -1,10 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.model;
 using jsonparser;
 using jsonparser.JsonModel;
+using simpleExpressionParser;
+using sly.buildresult;
+using sly.parser;
 using sly.parser.generator;
 
 namespace profiler
@@ -113,11 +120,77 @@ if i == 589 then
         
         static void Main(string[] args)
         {
+	        ProfileExpressions(800, 2, false);
             //ProfileJson();
-            for (int i = 0; i < 15; i++)
-            {
-                ProfileWhile();
-            }
+            // for (int i = 0; i < 15; i++)
+            // {
+            //     ProfileWhile();
+            // }
+        }
+
+        static void ProfileExpressions(int max = 5000, int step = 2, bool progression=false)
+        {
+	        SimpleExpressionParser parser = new SimpleExpressionParser();
+	        var builder = new ParserBuilder<ExpressionToken, double>();
+	        var b = builder.BuildParser(parser, ParserType.EBNF_LL_RECURSIVE_DESCENT);
+	        if (b.IsError)
+	        {
+		        foreach (var error in b.Errors)
+		        {
+			        Console.WriteLine(error.Message);
+		        }
+		        return;
+	        }
+
+	        List<(int count, long time)> results = new();
+	        
+	        if (progression)
+	        {
+		        for (int i = 2; i < max; i += step)
+		        {
+			        
+			        Stopwatch watch = new Stopwatch();
+			        watch.Start();
+			        SingleExpressionProfile(i,b);
+			        watch.Stop();
+			        results.Add((i, watch.ElapsedMilliseconds));
+			        Console.WriteLine($"{i}: {watch.ElapsedMilliseconds} ms");
+			        File.AppendAllText("c:/tmp/progression.csv", $"{i};{watch.ElapsedMilliseconds}\n");
+		        }  
+		        
+	        }
+	        else
+	        {
+		        SingleExpressionProfile(max, b);
+	        }
+        }
+
+        private static void SingleExpressionProfile(int max, BuildResult<Parser<ExpressionToken, double>> b)
+        {
+	        var rnd = new Random();
+	        //int width = rnd.Next(100, max);
+	        char[] ops = new[] { '+', '-', '*', '/' };
+	        var getOp = () => ops[rnd.Next(0, ops.Length)];
+	        var expression = rnd.Next(0, 100).ToString();
+	        for(int i = 0; i < max; i++)
+	        {
+		        var op = getOp();
+		        var right = rnd.Next(0, 100);
+		        expression += $"{op} {right}";
+		       
+	        }
+	        //Console.WriteLine($"parsing {expression}");
+	        var result = b.Result.Parse(expression);
+	        if (result.IsError)
+	        {
+		        File.WriteAllLines("c:/progress_errors.txt", new[] { expression });
+		        File.WriteAllLines("c:/progress_errors.txt", result.Errors.Select(x => x.ErrorMessage).ToArray() );
+		        Console.WriteLine($"error parsing {expression}");
+		        Environment.Exit(max);
+
+		        return;
+	        }
+	        Console.WriteLine("OK");
         }
 
         private static void ProfileJson()
