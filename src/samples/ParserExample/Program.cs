@@ -871,6 +871,11 @@ return r";
             return builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
         }
 
+        private static void Schtak()
+        {
+            Stacker.Stack();
+        }
+
         
         public static void TestAssociativityFactorExpressionParser()
         {
@@ -1357,7 +1362,8 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            testIssue516();
+            Schtak();
+            //testIssue516();
             //TestIssue507();
             //TestFStrings();
             //TestIssue495();
