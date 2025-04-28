@@ -17,14 +17,10 @@ public enum StackStateType
 
 public class StackDescentSyntaxParser<IN, OUT>: ISyntaxParser<IN,OUT> where IN : struct, Enum
 {
-    
-    public StackState<IN, OUT> CurrentState { get; set; }
-    
-    public Stack<StackState<IN, OUT>> Stack { get; set; } = new Stack<StackState<IN, OUT>>();
-    
     public Dictionary<IN, Dictionary<string, string>> LexemeLabels { get; set; }
     public SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, string startingNonTerminal = null)
     {
+        var stack = new Stack<StackState<IN, OUT>>();
         var root = new StackState<IN, OUT>();
         var start = Configuration.StartingRule ?? startingNonTerminal;
         if (string.IsNullOrEmpty(start))
@@ -34,19 +30,19 @@ public class StackDescentSyntaxParser<IN, OUT>: ISyntaxParser<IN,OUT> where IN :
 
         NonTerminalClause<IN, OUT> startNode = new NonTerminalClause<IN, OUT>(start);
         StackState<IN,OUT> state = new StackState<IN, OUT>(root,startNode);
-        Stack.Push(root);
-        Stack.Push(state);
+        stack.Push(root);
+        stack.Push(state);
 
-        var current = Stack.Pop();
+        var current = stack.Pop();
         while (current != null && current.Type != StackStateType.Root)
         {
             if (current.Type == StackStateType.NonTerminal)
             {
-                ParseNonTerminal(current);
+                ParseNonTerminal(current, stack);
             }
             else if (current.Type == StackStateType.Terminal)
             {
-                ParseTerminal(current);
+                ParseTerminal(current, stack);
             }
             else if (current.Type == StackStateType.Rule)
             {
@@ -58,10 +54,10 @@ public class StackDescentSyntaxParser<IN, OUT>: ISyntaxParser<IN,OUT> where IN :
                 ruleState.NonTerminal = current.NonTerminal;
                 ruleState.Tokens = current.Tokens;
                 ruleState.Position = current.Position;
-                Stack.Push(ruleState);
+                stack.Push(ruleState);
             }
 
-            current = Stack.Pop();
+            current = stack.Pop();
         }
         
             
@@ -72,9 +68,6 @@ public class StackDescentSyntaxParser<IN, OUT>: ISyntaxParser<IN,OUT> where IN :
     public void Init(ParserConfiguration<IN, OUT> configuration, string root)
     {
         Configuration = configuration;
-        CurrentState = new StackState<IN, OUT>();
-        Stack = new Stack<StackState<IN, OUT>>();
-        Stack.Push(CurrentState);
     }
 
     public string Dump() => Configuration.Dump();
@@ -91,7 +84,7 @@ public class StackDescentSyntaxParser<IN, OUT>: ISyntaxParser<IN,OUT> where IN :
         Init(configuration,configuration.StartingRule);
     }
 
-    public void ParseNonTerminal(StackState<IN, OUT> state)
+    public void ParseNonTerminal(StackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         NonTerminalClause<IN,OUT> nonTerminal = state.NonTerminal;
         if (Configuration.NonTerminals.TryGetValue(nonTerminal.NonTerminalName, out var nonTerminalClause))
@@ -106,7 +99,7 @@ public class StackDescentSyntaxParser<IN, OUT>: ISyntaxParser<IN,OUT> where IN :
                 ruleState.NonTerminal = nonTerminal;
                 ruleState.Tokens = state.Tokens;
                 ruleState.Position = state.Position;
-                Stack.Push(ruleState);
+                stack.Push(ruleState);
             }
         }
         else
@@ -115,7 +108,7 @@ public class StackDescentSyntaxParser<IN, OUT>: ISyntaxParser<IN,OUT> where IN :
         }
     }
     
-    public void ParseTerminal(StackState<IN,OUT> state)
+    public void ParseTerminal(StackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
 
     {
         TerminalClause<IN,OUT> terminal = state.Terminal;
