@@ -29,13 +29,19 @@ public class StackDescentSyntaxParser<IN, OUT>: ISyntaxParser<IN,OUT> where IN :
         }
 
         NonTerminalClause<IN, OUT> startNode = new NonTerminalClause<IN, OUT>(start);
-        StackState<IN,OUT> state = new StackState<IN, OUT>(root,startNode);
+        StackState<IN, OUT> state = new StackState<IN, OUT>(root, startNode)
+        {
+            Position = 0,
+            Tokens = tokens
+        };
+        
         stack.Push(root);
         stack.Push(state);
 
         var current = stack.Pop();
         while (current != null && current.Type != StackStateType.Root)
         {
+            Console.WriteLine(current.ToString() + " @" + current.Position+ " depth : "+stack.Count);
             if (current.Type == StackStateType.NonTerminal)
             {
                 ParseNonTerminal(current, stack);
@@ -47,23 +53,23 @@ public class StackDescentSyntaxParser<IN, OUT>: ISyntaxParser<IN,OUT> where IN :
             else if (current.Type == StackStateType.Rule)
             {
                 // TODO
-                var rule = current.Rule;
-                var ruleState = new StackState<IN, OUT>(current.Parent, rule);
-                ruleState.Parent = current.Parent;
-                ruleState.Rule = rule;
-                ruleState.NonTerminal = current.NonTerminal;
-                ruleState.Tokens = current.Tokens;
-                ruleState.Position = current.Position;
-                stack.Push(ruleState);
+                ParseRule(current, stack);
             }
 
+            var prev = current;
             current = stack.Pop();
+            if (current == null || current.Type == StackStateType.Root)
+            {
+                ;
+            }
         }
         
-            
-        
-        throw new NotImplementedException();
+            Console.WriteLine("done");
+        Console.WriteLine(current);
+        return null; // TODO: return the result
     }
+
+   
 
     public void Init(ParserConfiguration<IN, OUT> configuration, string root)
     {
@@ -90,15 +96,16 @@ public class StackDescentSyntaxParser<IN, OUT>: ISyntaxParser<IN,OUT> where IN :
         if (Configuration.NonTerminals.TryGetValue(nonTerminal.NonTerminalName, out var nonTerminalClause))
         {
             var rules = nonTerminalClause.Rules;
+            StackState<IN, OUT> sibling = null;
             for(int i = rules.Count-1; i >= 0; i--)
             {
                 var rule = rules[i];
-                var ruleState = new StackState<IN, OUT>(state,rule);
-                ruleState.Parent = state;
-                ruleState.Rule = rule;
-                ruleState.NonTerminal = nonTerminal;
-                ruleState.Tokens = state.Tokens;
-                ruleState.Position = state.Position;
+                
+                var ruleState = new RuleStackState<IN, OUT>(state,rule, sibling) {
+                    Tokens = state.Tokens,
+                    Position = state.Position
+                };
+                sibling = ruleState;
                 stack.Push(ruleState);
             }
         }
@@ -125,8 +132,57 @@ public class StackDescentSyntaxParser<IN, OUT>: ISyntaxParser<IN,OUT> where IN :
             result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
         }
 
-        state.Parent.AddChild(result);
+        var x = state.Parent.AddChild(result);
+        if (x != null)
+        {
+            PopTill(stack, x);
+        }
         
+    }
+    
+    private void ParseRule(StackState<IN, OUT> current, Stack<StackState<IN, OUT>> stack)
+    {
+        var rule = current.Rule;
+        if (rule != null)
+        {
+            for(int i = rule.Clauses.Count-1; i >= 0; i--)
+            {
+                var clause = rule.Clauses[i];
+                StackState<IN, OUT> sibling = null;
+                switch (clause)
+                {
+                    case TerminalClause<IN, OUT> terminalClause:
+                    {
+                        var terminalState = new TerminalStackState<IN, OUT>(current, terminalClause)
+                        {
+                            Tokens = current.Tokens,
+                            Position = current.Position
+                        };
+                        stack.Push(terminalState);
+                        break;
+                    }
+                    case NonTerminalClause<IN, OUT> nonTerminalClause:
+                    {
+                        var nonTerminalState = new NonTerminalStackState<IN, OUT>(current, nonTerminalClause, sibling)
+                        {
+                            Tokens = current.Tokens,
+                            Position = current.Position
+                        };
+                        stack.Push(nonTerminalState);
+                        break;
+                    }
+                }
+                sibling = stack.Peek();
+            }
+        }
+    }
+    
+    private void PopTill(Stack<StackState<IN, OUT>> stack, StackState<IN,OUT> state)
+    {
+        while (stack.Count > 0 && stack.Peek() != state)
+        {
+            stack.Pop();
+        }
     }
     
 }

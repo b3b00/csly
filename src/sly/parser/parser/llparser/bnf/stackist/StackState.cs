@@ -17,7 +17,7 @@ public class StackState<IN, OUT> where IN : struct, Enum
     
     public StackStateType Type { get; set; }
     
-    public List<Token<IN>> Tokens { get; set; }
+    public Token<IN>[] Tokens { get; set; }
     
     public StackState<IN,OUT> Parent { get; set; }
     
@@ -52,9 +52,10 @@ public class StackState<IN, OUT> where IN : struct, Enum
 
     public List<SyntaxParseResult<IN,OUT>> Children { get; set; } = new List<SyntaxParseResult<IN,OUT>>();
     
-    public void AddChild(SyntaxParseResult<IN,OUT> result)
+    public virtual StackState<IN,OUT> AddChild(SyntaxParseResult<IN,OUT> result)
     {
         Children.Add(result);
+        return null;
     }
 
     public Token<IN> GetToken()
