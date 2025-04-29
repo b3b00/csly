@@ -130,7 +130,7 @@ namespace sly.parser.syntax.tree
                 expressionSuffix = $">{expressionSuffix}<";
             }
             
-            builder.AppendLine($"{tab}+ {Name} {(IsByPassNode ? "===":"")}");
+            builder.AppendLine($"{tab}+ {Name} {(IsByPassNode ? "===":"")} {(Visitor != null ? Visitor.Name : "no visitor?")}() {expressionSuffix}");
             
             foreach (var child in Children)
             {

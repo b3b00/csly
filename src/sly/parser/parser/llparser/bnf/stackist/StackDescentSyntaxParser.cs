@@ -27,8 +27,23 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
     public string I18n { get; set; }
 
+    public StackDescentSyntaxParser(string i18n,
+        ParserConfiguration<IN, OUT> configuration)
+    {
+        Init(configuration, configuration.StartingRule);
+    }
+    
+    public void Init(ParserConfiguration<IN, OUT> configuration, string root)
+    {
+        Configuration = configuration;
+        InitializeStartingTokens(Configuration, root ?? configuration.StartingRule);
+    }
+
+    public string Dump() => Configuration.Dump();
+    
     public SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, string startingNonTerminal = null)
     {
+        Console.WriteLine($"\t{string.Join(" ",tokens.Select(x => x.Value))}");
         var stack = new Stack<StackState<IN, OUT>>();
         var root = new RootStackState<IN, OUT>();
         var start = Configuration.StartingRule ?? startingNonTerminal;
@@ -63,6 +78,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     break;
                 case RootStackState<IN, OUT> rootState:
                 {
+                    Console.WriteLine(rootState.Result.Dump());
                     return rootState.Result;
                 }
             }
@@ -83,21 +99,11 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
 
 
-    public void Init(ParserConfiguration<IN, OUT> configuration, string root)
-    {
-        Configuration = configuration;
-        InitializeStartingTokens(Configuration, root ?? configuration.StartingRule);
-    }
-
-    public string Dump() => Configuration.Dump();
+   
 
 
 
-    public StackDescentSyntaxParser(string i18n,
-        ParserConfiguration<IN, OUT> configuration)
-    {
-        Init(configuration, configuration.StartingRule);
-    }
+   
 
     public void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
@@ -189,6 +195,30 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 };
                 stack.Push(ruleState);
             }
+            else
+            {
+                var result = new SyntaxParseResult<IN, OUT>();
+                var token = state.Tokens[state.Position];
+
+                result.IsError = true;
+                var expected = rule.PossibleLeadingTokens;
+                result.EndingPosition = state.Position;
+
+                result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, expected.ToArray()));
+                if (state.Parent is RuleStackState<IN, OUT> ruleState)
+                {
+                    ruleState.AddChild(result);
+                }
+                else if (state.Parent is RootStackState<IN, OUT> rootState)
+                {
+                    rootState.SetResult(result);
+                }
+                else
+                {
+                    Console.WriteLine(
+                        $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
+                }
+            }
         }
         else
         {
@@ -249,10 +279,19 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 {
                     ;
                 }
-                var node = new SyntaxNode<IN, OUT>(state.Rule.NodeName ?? state.Rule.NonTerminalName, state.Children.Select(x => x.Root).ToList());// TODO
-                node.Visitor = state.Rule.GetVisitorMethod();
-                result.Root = node;
-                parentState.SetResult(result);
+
+                if (state.LastResult.IsError)
+                {
+                    parentState.SetResult(state.LastResult);   
+                }
+                else
+                {
+                    var node = new SyntaxNode<IN, OUT>(state.Rule.NodeName ?? state.Rule.NonTerminalName,
+                        state.Children.Select(x => x.Root).ToList()); // TODO
+                    node.Visitor = state.Rule.GetVisitorMethod();
+                    result.Root = node;
+                    parentState.SetResult(result);
+                }
             }
             else
             {
