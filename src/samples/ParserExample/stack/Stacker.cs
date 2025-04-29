@@ -1,8 +1,10 @@
 using System;
+using expressionparser;
 using NFluent;
 using ParserTests;
 using simpleExpressionParser;
 using sly.parser.generator;
+using ExpressionToken = expressionparser.ExpressionToken;
 
 namespace ParserExample;
 
@@ -78,6 +80,26 @@ public class Stacker
             r = parser.Result.Parse("1+2+3+4+5+6+7+8+9+10");
             Check.That(r).IsOkParsing();
             Check.That(r.Result).IsEqualTo(55);
+        }
+        else
+        {
+            foreach (var error in parser.Errors)
+            {
+                Console.WriteLine(error.Message);
+            }
+        }
+        
+        var instance2 = new ExpressionParser();
+        ParserBuilder<ExpressionToken, int> builder2 = new ParserBuilder<ExpressionToken, int>();
+        var parser2 = builder2.BuildParser(instance2, ParserType.LL_STACK,"expression");
+        if (parser.IsOk)
+        {
+            var r = parser.Result.Parse("1+2+3+4");
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result).IsEqualTo(10);
+            r = parser.Result.Parse("1+2+3+4+5+6+7+8+9*10");
+            Check.That(r).IsOkParsing();
+            Check.That(r.Result).IsEqualTo(135);
         }
         else
         {

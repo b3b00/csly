@@ -10,7 +10,11 @@ namespace sly.parser.llparser.bnf.stackist;
 [DebuggerDisplay("{DebugString}")]
 public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
 {
-    public override string DebugString => $"Rule {Rule.RuleString} [{Index}] @{Position}";
+    
+    private static int Counter = 0;
+    
+    public int Id { get; set; }
+    public override string DebugString => $"Rule <<{Id}>> {Rule.RuleString} [{Index}] @{Position}";
     
     public int Index { get; set; }
     
@@ -25,6 +29,7 @@ public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
         Rule = rule;
         Type = StackStateType.Rule;
         Index = 0;
+        Id = Counter++;
     }
   
     public List<SyntaxParseResult<IN,OUT>> Children { get; set; } = new ();

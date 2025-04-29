@@ -170,6 +170,10 @@ namespace sly.parser.generator
             {
                 parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
             }
+            else if (parserType == ParserType.LL_STACK)
+            {
+                parser = new StackDescentSyntaxParser<IN, OUT>(I18N, conf);
+            }
             return parser;
         }
 

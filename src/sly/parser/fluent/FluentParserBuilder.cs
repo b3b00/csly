@@ -45,7 +45,8 @@ public class FluentParserBuilder<IN, OUT> : IFluentParserBuilder<IN,OUT> where I
         _rootRule = rootRule;
     }
 
-    public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result)
+    public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result,
+        ParserType parserType = ParserType.LL_RECURSIVE_DESCENT)
     {
         // build configuration
         _configuration = new ParserConfiguration<IN, OUT>();
@@ -59,15 +60,15 @@ public class FluentParserBuilder<IN, OUT> : IFluentParserBuilder<IN,OUT> where I
       
 
         var b = new ParserBuilder<IN,OUT>("en");
-        var syntaxParser = b.BuildSyntaxParser(_configuration, ParserType.LL_RECURSIVE_DESCENT, _rootRule);
+        var syntaxParser = b.BuildSyntaxParser(_configuration, parserType, _rootRule);
         // initialize starting tokens
         syntaxParser.Init(_configuration,_rootRule);
         return syntaxParser;
     }
 
-    public BuildResult<Parser<IN, OUT>> BuildParser()
+    public BuildResult<Parser<IN, OUT>> BuildParser(ParserType parserType = ParserType.LL_RECURSIVE_DESCENT)
     {
-        var syntaxParser = BuildSyntaxParser(new BuildResult<ParserConfiguration<IN, OUT>>());
+        var syntaxParser = BuildSyntaxParser(new BuildResult<ParserConfiguration<IN, OUT>>(), parserType);
         
         var tokens = _configuration.GetAllExplicitTokenClauses();
         if (tokens != null && tokens.Any())
