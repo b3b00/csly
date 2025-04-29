@@ -26,20 +26,8 @@ public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
         Type = StackStateType.Rule;
         Index = 0;
     }
-
-    public RuleStackState<IN, OUT> Shift()
-    {
-        var nextState = new RuleStackState<IN, OUT>(Parent, Rule)
-        {
-            Index = Index + 1,
-            Tokens = Tokens,
-            Position = Position,
-            Children = Children
-        };
-        return nextState;
-    }
-    
-    public List<SyntaxParseResult<IN,OUT>> Children { get; set; } = new List<SyntaxParseResult<IN,OUT>>();
+  
+    public List<SyntaxParseResult<IN,OUT>> Children { get; set; } = new ();
 
     public void AddChild(SyntaxParseResult<IN, OUT> result)
     {

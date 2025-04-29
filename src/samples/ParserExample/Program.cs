@@ -873,12 +873,12 @@ return r";
 
         private static void Schtak()
         {
-            Console.WriteLine("basic");
-            Stacker.Stack();
+            // Console.WriteLine("basic");
+            // Stacker.Stack();
             Console.WriteLine("a bit more complicated");
             Stacker.MoreStack();
-            Console.WriteLine("a bit more more complicated");
-            Stacker.EvenMoreStack();
+            // Console.WriteLine("a bit more more complicated");
+            // Stacker.EvenMoreStack();
         }
 
         

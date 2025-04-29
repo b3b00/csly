@@ -63,20 +63,23 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     break;
                 case RootStackState<IN, OUT> rootState:
                 {
-                    return rootState.Children.Last();
+                    return rootState.Result;
                 }
             }
 
-            var prev = current;
-            current = stack.Pop();
-            if (current == null || current.Type == StackStateType.Root)
-            {
-                ;
-            }
-        }
 
-        return null; // TODO: return the result
+            var prev = current;
+                    current = stack.Pop();
+                    if (current == null || current.Type == StackStateType.Root)
+                    {
+                        ;
+                    }
+            }
+
+        return null;
     }
+
+        
 
 
 
@@ -100,34 +103,59 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
 
-        if (state.Index > 0 &&  state.LastResult != null && state.LastResult.IsOk)
-        {
-            if (state.Parent is RuleStackState<IN, OUT> ruleState)
-            {
-                ruleState.AddChild(state.LastResult);
-            }
-            else if (state.Parent is RootStackState<IN, OUT> rootState)
-            {
-                rootState.AddChild(state.LastResult);
-            }
-            else
-            {
-                Console.WriteLine(
-                    $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
-            }
-
-            return;
-        }
-        
-
         if (Configuration.NonTerminals.TryGetValue(nonTerminal.NonTerminalName, out var nonTerminalClause))
         {
+            if (state.Index >= nonTerminalClause.Rules.Count && state.Result != null)
+            {
+                if (state.Parent is RuleStackState<IN, OUT> ruleState)
+                {
+                    ruleState.AddChild(state.Result);
+                }
+                else if (state.Parent is RootStackState<IN, OUT> rootState)
+                {
+                    rootState.SetResult(state.Result);
+                }
+                else
+                {
+                    Console.WriteLine(
+                        $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
+                }
+                return;
+            }
+            
+            
+            if (state.Index > 0 && state.Result != null && state.Result.IsOk)
+            {
+                // here : last rule returned OK => returning right now
+                if (state.Parent is RuleStackState<IN, OUT> ruleState)
+                {
+                    ruleState.AddChild(state.Result);
+                }
+                else if (state.Parent is RootStackState<IN, OUT> rootState)
+                {
+                    rootState.SetResult(state.Result);
+                }
+                else
+                {
+                    Console.WriteLine(
+                        $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
+                }
+
+                return;
+            }
+
+
+
             var rules = nonTerminalClause.Rules;
             if (state.Index >= rules.Count)
             {
                 if (state.Parent is RuleStackState<IN, OUT> ruleState)
                 {
-                    ruleState.AddChild(state.LastResult);
+                    ruleState.AddChild(state.Result);
+                }
+                else if (state.Parent is RootStackState<IN, OUT> rootState)
+                {
+                    rootState.SetResult(state.Result);
                 }
                 else
                 {
@@ -139,10 +167,11 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             }
 
             // first stack self shifting
-            var nextState = state.Shift();
-            stack.Push(nextState);
-
             var rule = rules[state.Index];
+            state.Index++;
+            stack.Push(state);
+
+            
             // TODO beware the position ! parse may be ended
             if (state.Position >= state.Tokens.Length)
             {
@@ -150,15 +179,20 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 return; // TODO ???
                 ;
             }
-            if (rule.Match(state.Tokens, state.Position, Configuration)) 
+
+            if (rule.Match(state.Tokens, state.Position, Configuration))
             {
-                var ruleState = new RuleStackState<IN, OUT>(nextState, rule)
+                var ruleState = new RuleStackState<IN, OUT>(state, rule)
                 {
                     Tokens = state.Tokens,
                     Position = state.Position
                 };
                 stack.Push(ruleState);
             }
+        }
+        else
+        {
+            Console.WriteLine($"ERRRRRROR  >{state.NonTerminal.NonTerminalName}< not found");
         }
     }
 
@@ -169,9 +203,16 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
         TerminalClause<IN, OUT> terminal = terminalState.Terminal;
         var result = new SyntaxParseResult<IN, OUT>();
-        result.IsError = !terminal.Check(terminalState.Tokens[terminalState.Position]);
-        result.EndingPosition = !result.IsError ? terminalState.Position + 1 : terminalState.Position;
         var token = terminalState.Tokens[terminalState.Position];
+        var isError = !terminal.Check(token);
+        result.IsError = isError;
+        result.EndingPosition = !result.IsError ? terminalState.Position + 1 : terminalState.Position;
+        if (isError)
+        {
+            result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
+            ;
+        }
+        
         token.Discarded = terminal.Discarded;
         token.IsExplicit = terminal.IsExplicitToken;
         result.Root = new SyntaxLeaf<IN, OUT>(token, terminal.Discarded);
@@ -208,11 +249,10 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 {
                     ;
                 }
-                var node = new SyntaxNode<IN, OUT>(state.Rule.NodeName, state.Children.Select(x => x.Root).ToList());// TODO
+                var node = new SyntaxNode<IN, OUT>(state.Rule.NodeName ?? state.Rule.NonTerminalName, state.Children.Select(x => x.Root).ToList());// TODO
                 node.Visitor = state.Rule.GetVisitorMethod();
                 result.Root = node;
-                parentState.AddChild(result);
-                
+                parentState.SetResult(result);
             }
             else
             {
@@ -233,10 +273,10 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
             var clause = rule.Clauses[state.Index];
             // first self stack with index shift
-            var nextRuleState = state.Shift();
-            nextRuleState.Position = newPosition;
+            state.Index++;
+            state.Position = newPosition;
 
-            stack.Push(nextRuleState);
+            stack.Push(state);
 
             // then push the clause
 
@@ -244,7 +284,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             {
                 case TerminalClause<IN, OUT> terminalClause:
                 {
-                    var terminalState = new TerminalStackState<IN, OUT>(nextRuleState, terminalClause)
+                    var terminalState = new TerminalStackState<IN, OUT>(state, terminalClause)
                     {
                         Tokens = state.Tokens,
                         Position = newPosition
@@ -254,7 +294,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 }
                 case NonTerminalClause<IN, OUT> nonTerminalClause:
                 {
-                    var nonTerminalState = new NonTerminalStackState<IN, OUT>(nextRuleState, nonTerminalClause)
+                    var nonTerminalState = new NonTerminalStackState<IN, OUT>(state, nonTerminalClause)
                     {
                         Tokens = state.Tokens,
                         Position = state.Position

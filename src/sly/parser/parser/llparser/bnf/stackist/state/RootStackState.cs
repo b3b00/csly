@@ -7,18 +7,16 @@ namespace sly.parser.llparser.bnf.stackist;
 [DebuggerDisplay("root")]
 public class RootStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
 {
-    
-    public List<SyntaxParseResult<IN,OUT>> Children { get; set; } 
 
     public RootStackState() : base()
     {
-        Children = new List<SyntaxParseResult<IN, OUT>>();
+        Result = null;
         Type = StackStateType.Root;
     }
     
-    public void AddChild(SyntaxParseResult<IN, OUT> result)
+    public void SetResult(SyntaxParseResult<IN, OUT> result)
     {
-        Children.Add(result);
+        Result = result;
     }
     
     

@@ -51,5 +51,18 @@ namespace sly.parser
 
         public bool HasByPassNodes { get; set; } = false;
         public bool UsesOperations { get; set; }
+
+        public string Dump()
+        {
+            if (IsOk)
+            {
+                return "OK : \n" + Root.Dump("  ");
+            }
+            else
+            {
+                return "KO "+Errors.First().ErrorMessage;
+            }
+                
+        }
     }
 }

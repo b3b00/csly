@@ -43,7 +43,18 @@ public class Stacker
         var parser = builder.BuildParser(instance, ParserType.LL_STACK,"root");
         if (parser.IsOk)
         {
-            parser.Result.Parse("1 2 3");
+            var r = parser.Result.Parse("1 2");
+            if (r.IsOk)
+            {
+                Console.WriteLine($"PARSE OK !!! >{r.Result}<");
+            }
+            else
+            {
+                foreach (var error in r.Errors)
+                {
+                    Console.WriteLine(error.ErrorMessage);
+                }
+            }
         }
         else
         {
