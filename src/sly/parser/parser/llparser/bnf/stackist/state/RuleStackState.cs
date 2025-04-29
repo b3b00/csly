@@ -34,6 +34,7 @@ public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
             Index = Index + 1,
             Tokens = Tokens,
             Position = Position,
+            Children = Children
         };
         return nextState;
     }
@@ -42,6 +43,10 @@ public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
 
     public void AddChild(SyntaxParseResult<IN, OUT> result)
     {
+        if (result == null)
+        {
+            return;
+        }
         Children.Add(result);
     }
     

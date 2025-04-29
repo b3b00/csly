@@ -29,7 +29,7 @@ public class NonTerminalStackState<IN,OUT> : StackState<IN,OUT> where IN : struc
         Type = StackStateType.NonTerminal;
     }
 
-    public SyntaxParseResult<IN, OUT> LastResult => Children.Last();
+    public SyntaxParseResult<IN, OUT> LastResult => Children.Any() ? Children.Last() : null;
     
     
     

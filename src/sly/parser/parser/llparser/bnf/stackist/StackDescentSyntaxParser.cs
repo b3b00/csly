@@ -50,7 +50,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         var current = stack.Pop();
         while (current != null)
         {
-            Console.WriteLine(current.ToString() + " @" + current.Position + " depth : " + stack.Count);
             switch (current)
             {
                 case RuleStackState<IN, OUT> ruleState:
@@ -76,8 +75,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             }
         }
 
-        Console.WriteLine("done");
-        Console.WriteLine(current);
         return null; // TODO: return the result
     }
 
@@ -103,7 +100,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
 
-        if (state.Index > 0 && state.LastResult.IsOk)
+        if (state.Index > 0 &&  state.LastResult != null && state.LastResult.IsOk)
         {
             if (state.Parent is RuleStackState<IN, OUT> ruleState)
             {
@@ -146,7 +143,14 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             stack.Push(nextState);
 
             var rule = rules[state.Index];
-            if (rule.Match(state.Tokens, state.Position, Configuration)) // TODO beware the position ?
+            // TODO beware the position ! parse may be ended
+            if (state.Position >= state.Tokens.Length)
+            {
+                // TODO here we have ended .... so what ?
+                return; // TODO ???
+                ;
+            }
+            if (rule.Match(state.Tokens, state.Position, Configuration)) 
             {
                 var ruleState = new RuleStackState<IN, OUT>(nextState, rule)
                 {
@@ -200,6 +204,10 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             {
                 // TODO : get build the result
                 var result = new SyntaxParseResult<IN, OUT>();
+                if (state.Children.Exists(x => x == null))
+                {
+                    ;
+                }
                 var node = new SyntaxNode<IN, OUT>(state.Rule.NodeName, state.Children.Select(x => x.Root).ToList());// TODO
                 node.Visitor = state.Rule.GetVisitorMethod();
                 result.Root = node;
