@@ -67,7 +67,7 @@ public class StackParserTests
             {
                 return ((Token<ExpressionToken>)args[0]).Value + "," + (string)args[1];
             })
-            .BuildParser(ParserType.LL_STACK);
+            .BuildParser(ParserType.LL_RECURSIVEDESCENT);
         Check.That(parser).IsOk();
         var result = parser.Result.Parse("1");
         Check.That(result).IsOkParsing();
