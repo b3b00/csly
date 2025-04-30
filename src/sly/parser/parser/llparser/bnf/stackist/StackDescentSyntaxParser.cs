@@ -19,6 +19,8 @@ public enum StackStateType
 
 public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> where IN : struct, Enum
 {
+
+    private const bool DEBUG = false;
     public Dictionary<IN, Dictionary<string, string>> LexemeLabels { get; set; }
 
     public ParserConfiguration<IN, OUT> Configuration { get; set; }
@@ -44,7 +46,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     
     public SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, string startingNonTerminal = null)
     {
-        Console.WriteLine($"\t{string.Join(" ",tokens.Select(x => x.Value))}");
         var stack = new Stack<StackState<IN, OUT>>();
         var root = new RootStackState<IN, OUT>();
         var start =  startingNonTerminal ?? Configuration.StartingRule;
@@ -66,15 +67,19 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         var current = stack.Pop();
         while (current != null)
         {
+
             switch (current)
             {
                 case RuleStackState<IN, OUT> ruleState:
+                    Log(ruleState.Progress(), stack);
                     ParseRule(ruleState, stack);
                     break;
                 case NonTerminalStackState<IN, OUT> nonTerminalState:
+                    Log(current.DebugString, stack);
                     ParseNonTerminal(nonTerminalState, stack);
                     break;
                 case TerminalStackState<IN, OUT> terminalState:
+                    Log(current.DebugString, stack);
                     ParseTerminal(terminalState, stack);
                     break;
                 case RootStackState<IN, OUT> rootState:
@@ -82,30 +87,13 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     return rootState.Result;
                 }
             }
-
-
-            var prev = current;
-                    current = stack.Pop();
-                    if (current == null || current.Type == StackStateType.Root)
-                    {
-                        ;
-                    }
-            }
+            current = stack.Pop();
+        }
 
         return null;
     }
 
-        
-
-
-
-   
-
-
-
-   
-
-    public void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    private void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
         if (Configuration.NonTerminals.TryGetValue(nonTerminal.NonTerminalName, out var nonTerminalClause))
@@ -122,13 +110,48 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 }
                 else
                 {
-                    Console.WriteLine(
-                        $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
+                    throw new Exception($"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
                 }
                 return;
             }
-            
-            
+
+            if (state.Index >= nonTerminalClause.Rules.Count && state.Result == null)
+            {
+                // TODO : here we have a problem
+                var result = new SyntaxParseResult<IN, OUT>();
+                result.IsError = true;
+                result.EndingPosition = state.Position;
+                var expected = nonTerminalClause.Rules.SelectMany(x => x.PossibleLeadingTokens).Distinct().ToArray();
+                if (state.Position >= state.Tokens.Length)
+                {
+                    var error = new UnexpectedTokenSyntaxError<IN>(state.Tokens.Last(), LexemeLabels, I18n,
+                        expected);
+                    result.AddError(error);
+                }
+                else
+                {
+                    var error = new UnexpectedTokenSyntaxError<IN>(state.Tokens[state.Position], LexemeLabels, I18n,
+                        expected);
+                    result.AddError(error);
+                }
+
+                if (state.Parent is RuleStackState<IN, OUT> ruleState)
+                {
+                    ruleState.AddChild(result);
+                }
+                else if (state.Parent is RootStackState<IN, OUT> rootState)
+                {
+                    rootState.SetResult(result);
+                }
+                else
+                {
+                    throw new Exception(
+                        $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
+                }
+                
+                return;
+            }
+
             if (state.Index > 0 && state.Result != null && state.Result.IsOk)
             {
                 // here : last rule returned OK => returning right now
@@ -142,7 +165,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 }
                 else
                 {
-                    Console.WriteLine(
+                    throw new Exception(
                         $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
                 }
 
@@ -164,7 +187,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 }
                 else
                 {
-                    Console.WriteLine(
+                    throw new Exception(
                         $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
                 }
 
@@ -177,12 +200,9 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             stack.Push(state);
 
             
-            // TODO beware the position ! parse may be ended
             if (state.Position >= state.Tokens.Length)
             {
-                // TODO here we have ended .... so what ?
-                return; // TODO ???
-                ;
+                return; // TODO ??? 
             }
 
             if (rule.Match(state.Tokens, state.Position, Configuration))
@@ -196,6 +216,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             }
             else
             {
+                Log($"KO rule {rule.RuleString} does not match {state.Tokens[state.Position]}",stack,1);
                 var result = new SyntaxParseResult<IN, OUT>();
                 var token = state.Tokens[state.Position];
 
@@ -214,14 +235,14 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 }
                 else
                 {
-                    Console.WriteLine(
+                    throw new Exception(
                         $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
                 }
             }
         }
         else
         {
-            Console.WriteLine($"ERRRRRROR  >{state.NonTerminal.NonTerminalName}< not found");
+            throw new Exception($"ERRRRRROR  >{state.NonTerminal.NonTerminalName}< not found");
         }
     }
 
@@ -237,8 +258,13 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         result.EndingPosition = !result.IsError ? terminalState.Position + 1 : terminalState.Position;
         if (isError)
         {
+            Log($"error found {token} expected {terminal.ExpectedToken}",stack,1);
             result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
             ;
+        }
+        else
+        {
+            Log($"OK {token}",stack,1);
         }
         
         token.Discarded = terminal.Discarded;
@@ -256,7 +282,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         }
         else
         {
-            Console.WriteLine(
+            throw new Exception(
                 $"HOOPS something bad here ! terminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
         }
         // TODO more ? I don't think so 
@@ -268,36 +294,64 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         var rule = state.Rule;
         if (state.Index > 0 && state.IsEnded)
         {
+            if (state.LastResult.IsError)
+            {
+                Log("KO "+state.LastResult.GetErrors().First().ErrorMessage,stack,1);
+            }
+            else
+            {
+                Log("OK",stack,1);
+            }
             // TODO : rule has ended ...
             if (state.Parent is NonTerminalStackState<IN, OUT> parentState)
             {
+                
+                
                 // TODO : get build the result
                 var result = new SyntaxParseResult<IN, OUT>();
-                if (state.Children.Exists(x => x == null))
-                {
-                    ;
-                }
 
                 if (state.LastResult.IsError)
                 {
+                    if (state.LastResult == null)
+                    {
+                        ;
+                    }
                     parentState.SetResult(state.LastResult);   
                 }
                 else
                 {
-                    var node = new SyntaxNode<IN, OUT>(state.Rule.NodeName ?? state.Rule.NonTerminalName,
-                        state.Children.Select(x => x.Root).ToList()); // TODO
+                    string name = "";
+                    if (!string.IsNullOrEmpty(state.Rule.NodeName))
+                    {
+                        name = state.Rule.NodeName;
+                    }
+                    else
+                    {
+                        name = state.Rule.NonTerminalName;
+                    }
+                    var node = new SyntaxNode<IN, OUT>(name,
+                        state.Children.Select(x => x.Root).ToList()); // TODO ??
                     node.Visitor = state.Rule.GetVisitorMethod();
                     node.LambdaVisitor = state.Rule.getLambdaVisitor(null);
                     result.Root = node;
                     // send new position upward
                     result.EndingPosition = state.Children.Last().EndingPosition;
+                    if (result == null)
+                    {
+                        ;
+                    }
                     parentState.SetResult(result);
                 }
             }
             else
             {
-                Console.WriteLine(
+                throw new Exception(
                     $"HOOPS something very bad happened here ! terminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
+            }
+
+            if (state.Parent.Result == null)
+            {
+                ;
             }
             return;
         }
@@ -345,11 +399,19 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             }
         }
     }
-    private void PopTill(Stack<StackState<IN, OUT>> stack, StackState<IN, OUT> state)
+   
+
+    private void Log(string message, Stack<StackState<IN, OUT>> stack, int plus = 0)
     {
-        while (stack.Count > 0 && stack.Peek() != state)
+        if (DEBUG)
         {
-            stack.Pop();
+            string tab = "  ";
+            for (int i = 0; i < stack.Count + plus; i++)
+            {
+                tab += "  ";
+            }
+
+            Console.WriteLine(tab + message);
         }
     }
 

@@ -15,8 +15,7 @@ namespace ParserExample;
 
 public enum P
 {
-    [Sugar("+")]
-    e,
+    [Sugar("+")] e,
 }
 
 public enum L
@@ -27,12 +26,11 @@ public enum L
 
 public class Stacker
 {
-    
     public static void Stack()
     {
         var instance = new EvenSimplerStackParser();
         ParserBuilder<SimplerStackLexer, string> builder = new ParserBuilder<SimplerStackLexer, string>();
-        var parser = builder.BuildParser(instance, ParserType.LL_STACK,"root");
+        var parser = builder.BuildParser(instance, ParserType.LL_STACK, "root");
         if (parser.IsOk)
         {
             var r = parser.Result.Parse("1 2");
@@ -56,12 +54,12 @@ public class Stacker
             }
         }
     }
-    
+
     public static void MoreStack()
     {
         var instance = new SimplerStackParser();
         ParserBuilder<SimplerStackLexer, string> builder = new ParserBuilder<SimplerStackLexer, string>();
-        var parser = builder.BuildParser(instance, ParserType.LL_STACK,"root");
+        var parser = builder.BuildParser(instance, ParserType.LL_STACK, "root");
         if (parser.IsOk)
         {
             var r = parser.Result.Parse("1");
@@ -73,7 +71,6 @@ public class Stacker
             r = parser.Result.Parse("1 2 3 4 5");
             Check.That(r).IsOkParsing();
             Check.That(r.Result).IsEqualTo("1,2,3,4,5");
-            
         }
         else
         {
@@ -88,20 +85,13 @@ public class Stacker
     {
         var lexer = FluentLexerBuilder<ExpressionToken>.NewBuilder()
             .Int(ExpressionToken.INT);
-        var parser = FluentParserBuilder<ExpressionToken, string>.NewBuilder(new ParserTests.stack.SimplerStackParser(), "root", "en")
+        var parser = FluentParserBuilder<ExpressionToken, string>
+            .NewBuilder(new ParserTests.stack.SimplerStackParser(), "root", "en")
             .WithLexerbuilder(lexer)
-            .Production("root : expr", (object[] args) =>
-            {
-                return (string)args[0];
-            })
-            .Production("expr : INT", (args) =>
-            {
-                return ((Token<ExpressionToken>)args[0]).Value;
-            })
-            .Production("expr : INT expr", (args) =>
-            {
-                return ((Token<ExpressionToken>)args[0]).Value + "," + (string)args[1];
-            })
+            .Production("root : expr", (object[] args) => { return (string)args[0]; })
+            .Production("expr : INT", (args) => { return ((Token<ExpressionToken>)args[0]).Value; })
+            .Production("expr : INT expr",
+                (args) => { return ((Token<ExpressionToken>)args[0]).Value + "," + (string)args[1]; })
             .BuildParser(ParserType.LL_STACK);
         Check.That(parser).IsOk();
         var result = parser.Result.Parse("1");
@@ -134,23 +124,29 @@ public class Stacker
             }
         }
     }
+
     public static void Expression()
     {
-    var instance = new ExpressionParser();
-        ParserBuilder<expressionparser.ExpressionToken, int> builder2 = new ParserBuilder<expressionparser.ExpressionToken, int>();
-        var parser = builder2.BuildParser(instance, ParserType.LL_STACK,"expression");
+        var instance = new ExpressionParser();
+        ParserBuilder<expressionparser.ExpressionToken, int> builder2 =
+            new ParserBuilder<expressionparser.ExpressionToken, int>();
+        var parser = builder2.BuildParser(instance, ParserType.LL_STACK, "expression");
         if (parser.IsOk)
         {
             string source = "2+2";
-;            Console.WriteLine($"start parsing {source}");
+            ;
+            Console.WriteLine($"start parsing {source}");
             var r = parser.Result.Parse(source);
-            Console.WriteLine($"parsing done : {(r.IsOk ? "OK": "KO")}");
+            Console.WriteLine($"parsing done : {(r.IsOk ? "OK" : "KO")}");
             Check.That(r).IsOkParsing();
             Check.That(r.Result).IsEqualTo(4);
-            r = parser.Result.Parse("1+2+3+4+5+6+7+8+9*10");
+            source = "1+2+3+4+5+6+7+8+9*10";
+            Console.WriteLine($"start parsing {source}");
+            r = parser.Result.Parse(source);
             Check.That(r).IsOkParsing();
             Check.That(r.Result).IsEqualTo(126);
-            Console.WriteLine("parsing done !!! OOH YEAH !! ");;
+            Console.WriteLine("parsing done !!! OOH YEAH !! :: "+r.Result);
+            ;
         }
         else
         {
@@ -166,35 +162,35 @@ public class Stacker
         // RuleParser<EbnfTokenGeneric, GrammarNode<P,object>> ruleParser = new RuleParser<EbnfTokenGeneric, GrammarNode<P,object>>();
         // ParserBuilder<EbnfTokenGeneric, GrammarNode<P, object>> builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<P, object>>("en");
         // var grammarParser = builder.BuildParser(ruleParser, ParserType.LL_RECURSIVE_DESCENT, "rule");
-        
+
         var ruleparser = new RuleParser<P, object>();
         var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<P, object>>("en");
 
         var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
-        
+
         Check.That(grammarParser).IsOk();
         var parser = grammarParser.Result;
         var r = parser.Parse("E : e");
         Check.That(r).IsOkParsing();
-        
+
         grammarParser = builder.BuildParser(ruleparser, ParserType.LL_STACK, "rule");
-        
+
         Check.That(grammarParser).IsOk();
         parser = grammarParser.Result;
-        r = parser.Parse("E : e","rule");
+        r = parser.Parse("E : e", "rule");
         Check.That(r).IsOkParsing();
+        Console.WriteLine("OK "+r.Result.ToString());
+        Console.WriteLine(r.SyntaxTree.Dump("  "));
     }
 
     public static void List()
     {
         var lexer = FluentLexerBuilder<L>.NewBuilder()
-            .Keyword(L.A,"A")
-            .Keyword(L.B,"B");;
-        var p = FluentParserBuilder<L, string>.NewBuilder(new Dumb(),"r","en")
-            .Production("r : cs", (args) =>
-            {
-                return args[0].ToString();
-            })
+            .Keyword(L.A, "A")
+            .Keyword(L.B, "B");
+        ;
+        var p = FluentParserBuilder<L, string>.NewBuilder(new Dumb(), "r", "en")
+            .Production("r : cs", (args) => { return args[0].ToString(); })
             .Production("cs : c cs", (args) =>
             {
                 var head = (string)args[0];
@@ -202,16 +198,16 @@ public class Stacker
 
                 return head + ".." + tail;
             })
-            .Production("cs : c", (args) =>
-            {
-                return (string)args[0];
-            })
+            .Production("cs : c", (args) => { return (string)args[0]; })
+            .Production("c : A", (args) => { return ((Token<L>)args[0]).Value; })
+            .Production("c : B", (args) => { return ((Token<L>)args[0]).Value; })
             .WithLexerbuilder(lexer)
             .BuildParser(ParserType.LL_STACK);
         Check.That(p.IsOk);
-        var t = p.Result.Parse("A A B B A");
+        var t = p.Result.Parse("A  B", "cs");
         Check.That(t).IsOkParsing();
-        Check.That(t.Result).IsEqualTo("A..A..B..B..A");
-
+        Check.That(t.Result).IsEqualTo("A..B");
+        Console.WriteLine("OK : "+t.Result);
+        Console.WriteLine(t.SyntaxTree.Dump("  "));
     }
 }
