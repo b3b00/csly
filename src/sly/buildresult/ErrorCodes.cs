@@ -72,6 +72,6 @@ namespace sly.buildresult
         #endregion
 
 
-        
+        PARSER_RULE_SYNTAX_ERROR
     }
 }

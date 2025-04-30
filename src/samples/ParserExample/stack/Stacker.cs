@@ -7,9 +7,16 @@ using sly.lexer;
 using sly.lexer.fluent;
 using sly.parser.fluent;
 using sly.parser.generator;
+using sly.parser.syntax.grammar;
 using ExpressionToken = expressionparser.ExpressionToken;
 
 namespace ParserExample;
+
+public enum P
+{
+    [Sugar("+")]
+    e,
+}
 
 public class Stacker
 {
@@ -145,5 +152,22 @@ public class Stacker
                 Console.WriteLine(error.Message);
             }
         }
+    }
+
+    public static void Rules()
+    {
+        // RuleParser<EbnfTokenGeneric, GrammarNode<P,object>> ruleParser = new RuleParser<EbnfTokenGeneric, GrammarNode<P,object>>();
+        // ParserBuilder<EbnfTokenGeneric, GrammarNode<P, object>> builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<P, object>>("en");
+        // var grammarParser = builder.BuildParser(ruleParser, ParserType.LL_RECURSIVE_DESCENT, "rule");
+        
+        var ruleparser = new RuleParser<P, object>();
+        var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<P, object>>("en");
+
+        var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_STACK, "rule");
+        
+        Check.That(grammarParser).IsOk();
+        var parser = grammarParser.Result;
+        var r = parser.Parse("E : e");
+        Check.That(r).IsOkParsing();
     }
 }

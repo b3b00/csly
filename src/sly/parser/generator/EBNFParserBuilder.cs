@@ -44,7 +44,7 @@ namespace sly.parser.generator
             var ruleparser = new RuleParser<IN, OUT>();
             var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN, OUT>>(I18N);
 
-            var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
+            var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_STACK, "rule").Result;
 
 
             var result = new BuildResult<Parser<IN, OUT>>();
@@ -54,6 +54,15 @@ namespace sly.parser.generator
             try
             {
                 configuration = ExtractEbnfParserConfiguration(parserInstance.GetType(), grammarParser);
+                if (configuration.IsError)
+                {
+                    foreach (var error in configuration.Errors)
+                    {
+                        result.AddError(new ParserInitializationError(ErrorLevel.FATAL, error,
+                            ErrorCodes.PARSER_RULE_SYNTAX_ERROR));    
+                    }
+                    return result;
+                }
                 configuration.UseMemoization = useMemoization;
                 configuration.BroadenTokenWindow = broadenTokenWindow;
                 configuration.AutoCloseIndentations = autoCloseIndentations;
@@ -197,7 +206,7 @@ namespace sly.parser.generator
                             .Select<ParseError, string>(e => e.ErrorMessage)
                             .Aggregate<string>((e1, e2) => e1 + "\n" + e2);
                         message = $"rule error [{ruleString}] : {message}";
-                        throw new ParserConfigurationException(message);
+                        conf.AddError(message);
                     }
                 }
             });

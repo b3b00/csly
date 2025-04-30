@@ -879,8 +879,10 @@ return r";
             // Stacker.MoreStack();
             // Console.WriteLine("even more complicated");
             // Stacker.EvenMoreStack();
-            Console.WriteLine("and finally an expression");
-            Stacker.Expression();
+            // Console.WriteLine("and finally an expression");
+            // Stacker.Expression();
+            Console.WriteLine("one more with rules parser");
+            Stacker.Rules();
         }
 
         
