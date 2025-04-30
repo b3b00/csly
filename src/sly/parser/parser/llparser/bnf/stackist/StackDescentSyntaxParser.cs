@@ -30,6 +30,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     public StackDescentSyntaxParser(string i18n,
         ParserConfiguration<IN, OUT> configuration)
     {
+        I18n = i18n;
         Init(configuration, configuration.StartingRule);
     }
     
@@ -78,7 +79,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     break;
                 case RootStackState<IN, OUT> rootState:
                 {
-                    Console.WriteLine(rootState.Result.Dump());
                     return rootState.Result;
                 }
             }
@@ -108,7 +108,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     public void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
-
         if (Configuration.NonTerminals.TryGetValue(nonTerminal.NonTerminalName, out var nonTerminalClause))
         {
             if (state.Index >= nonTerminalClause.Rules.Count && state.Result != null)
@@ -230,7 +229,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     public void ParseTerminal(TerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         var terminalState = state as TerminalStackState<IN, OUT>;
-
         TerminalClause<IN, OUT> terminal = terminalState.Terminal;
         var result = new SyntaxParseResult<IN, OUT>();
         var token = terminalState.Tokens[terminalState.Position];
@@ -291,6 +289,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     node.Visitor = state.Rule.GetVisitorMethod();
                     node.LambdaVisitor = state.Rule.getLambdaVisitor(null);
                     result.Root = node;
+                    // send new position upward
+                    result.EndingPosition = state.Children.Last().EndingPosition;
                     parentState.SetResult(result);
                 }
             }
@@ -345,8 +345,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             }
         }
     }
-
-
     private void PopTill(Stack<StackState<IN, OUT>> stack, StackState<IN, OUT> state)
     {
         while (stack.Count > 0 && stack.Peek() != state)

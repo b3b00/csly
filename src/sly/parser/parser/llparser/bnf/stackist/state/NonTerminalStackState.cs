@@ -23,6 +23,7 @@ public class NonTerminalStackState<IN, OUT> : StackState<IN, OUT> where IN : str
 
 
     public override string DebugString => $"Non-Terminal<<{Id}>> {NonTerminal.NonTerminalName} [{Index}] @{Position}";
+    public bool IsError => Result != null && Result.IsError;
 
     public NonTerminalStackState(StackState<IN, OUT> parent, NonTerminalClause<IN, OUT> nonTerminal,
         StackState<IN, OUT> sibling = null) : base(parent)

@@ -236,6 +236,10 @@ namespace sly.parser.syntax.grammar
 
             int i = 0;
             bool match = false;
+            if (position < 0 || position >= tokens.Count)
+            {
+                return false;
+            }
             var token = tokens[position];
             if (MayBeEmpty)
             {

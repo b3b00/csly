@@ -877,8 +877,10 @@ return r";
             // Stacker.Stack();
             // Console.WriteLine("a bit more complicated");
             // Stacker.MoreStack();
-            Console.WriteLine("a bit more more complicated");
-            Stacker.EvenMoreStack();
+            // Console.WriteLine("even more complicated");
+            // Stacker.EvenMoreStack();
+            Console.WriteLine("and finally an expression");
+            Stacker.Expression();
         }
 
         

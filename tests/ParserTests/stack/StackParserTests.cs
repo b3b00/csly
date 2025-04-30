@@ -1,10 +1,11 @@
+using expressionparser;
 using NFluent;
-using simpleExpressionParser;
 using sly.lexer;
 using sly.lexer.fluent;
 using sly.parser.fluent;
 using sly.parser.generator;
 using Xunit;
+
 
 namespace ParserTests.stack;
 
@@ -47,13 +48,31 @@ public class StackParserTests
         Check.That(r).IsOkParsing();
         Check.That(r.Result).IsEqualTo("1,2,3,4,5");
     }
+    
+    [Fact]
+    public void expression()
+    {
+        var instance = new ExpressionParser();
+        ParserBuilder<ExpressionToken, int> builder = new ParserBuilder<ExpressionToken, int>();
+        var parser = builder.BuildParser(instance, ParserType.LL_STACK, "expression");
+        Check.That(parser).IsOk();
+        var r = parser.Result.Parse("1");
+        Check.That(r).IsOkParsing();
+        Check.That(r.Result).IsEqualTo(1);
+        r = parser.Result.Parse("2 + 2");
+        Check.That(r).IsOkParsing();
+        //Check.That(r.Result).IsEqualTo(4);
+        r = parser.Result.Parse("1 + 2 + 3 + 4 * 5");
+        Check.That(r).IsOkParsing();
+        Check.That(r.Result).IsEqualTo(1+2+3+4*5);
+    }
 
     [Fact]
     public void basicFluent()
     {
         var lexer = FluentLexerBuilder<ExpressionToken>.NewBuilder()
             .Int(ExpressionToken.INT);
-        var parser = FluentParserBuilder<ExpressionToken, string>.NewBuilder(new Dumb(), "root", "en")
+        var parser = FluentParserBuilder<ExpressionToken, string>.NewBuilder(new SimplerStackParser(), "root", "en")
             .WithLexerbuilder(lexer)
             .Production("root : expr", (object[] args) =>
             {
@@ -67,7 +86,7 @@ public class StackParserTests
             {
                 return ((Token<ExpressionToken>)args[0]).Value + "," + (string)args[1];
             })
-            .BuildParser(ParserType.LL_RECURSIVEDESCENT);
+            .BuildParser(ParserType.LL_RECURSIVE_DESCENT);
         Check.That(parser).IsOk();
         var result = parser.Result.Parse("1");
         Check.That(result).IsOkParsing();
