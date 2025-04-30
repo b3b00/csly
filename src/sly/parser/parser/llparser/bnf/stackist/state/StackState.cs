@@ -23,8 +23,8 @@ public class StackState<IN, OUT> where IN : struct, Enum
     public Token<IN>[] Tokens { get; set; }
     
     public StackState<IN,OUT> Parent { get; set; }
-    
-    public SyntaxParseResult<IN,OUT> Result { get; set; }
+
+    public SyntaxParseResult<IN, OUT> Result { get; protected set; } = null;
 
     public StackState(StackState<IN,OUT> parent)
     {
@@ -42,6 +42,15 @@ public class StackState<IN, OUT> where IN : struct, Enum
     {
         Parent = null;
         Type = StackStateType.Root;
+    }
+
+    public void SetResult(SyntaxParseResult<IN, OUT> result)
+    {
+        if (result == null)
+        {
+            ;
+        }
+        Result = result;
     }
 
     

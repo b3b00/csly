@@ -10,7 +10,6 @@ public class RootStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
 
     public RootStackState() : base()
     {
-        Result = null;
         Type = StackStateType.Root;
     }
     

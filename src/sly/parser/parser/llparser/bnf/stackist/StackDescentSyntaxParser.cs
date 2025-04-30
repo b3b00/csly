@@ -47,7 +47,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         Console.WriteLine($"\t{string.Join(" ",tokens.Select(x => x.Value))}");
         var stack = new Stack<StackState<IN, OUT>>();
         var root = new RootStackState<IN, OUT>();
-        var start = Configuration.StartingRule ?? startingNonTerminal;
+        var start =  startingNonTerminal ?? Configuration.StartingRule;
         if (string.IsNullOrEmpty(start))
         {
             throw new Exception("No starting rule defined");

@@ -2,6 +2,7 @@ using System;
 using expressionparser;
 using NFluent;
 using ParserTests;
+using ParserTests.stack;
 using simpleExpressionParser;
 using sly.lexer;
 using sly.lexer.fluent;
@@ -16,6 +17,12 @@ public enum P
 {
     [Sugar("+")]
     e,
+}
+
+public enum L
+{
+    [Keyword("A")] A,
+    [Keyword("B")] B,
 }
 
 public class Stacker
@@ -163,11 +170,48 @@ public class Stacker
         var ruleparser = new RuleParser<P, object>();
         var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<P, object>>("en");
 
-        var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_STACK, "rule");
+        var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
         
         Check.That(grammarParser).IsOk();
         var parser = grammarParser.Result;
         var r = parser.Parse("E : e");
         Check.That(r).IsOkParsing();
+        
+        grammarParser = builder.BuildParser(ruleparser, ParserType.LL_STACK, "rule");
+        
+        Check.That(grammarParser).IsOk();
+        parser = grammarParser.Result;
+        r = parser.Parse("E : e","rule");
+        Check.That(r).IsOkParsing();
+    }
+
+    public static void List()
+    {
+        var lexer = FluentLexerBuilder<L>.NewBuilder()
+            .Keyword(L.A,"A")
+            .Keyword(L.B,"B");;
+        var p = FluentParserBuilder<L, string>.NewBuilder(new Dumb(),"r","en")
+            .Production("r : cs", (args) =>
+            {
+                return args[0].ToString();
+            })
+            .Production("cs : c cs", (args) =>
+            {
+                var head = (string)args[0];
+                var tail = (string)args[1];
+
+                return head + ".." + tail;
+            })
+            .Production("cs : c", (args) =>
+            {
+                return (string)args[0];
+            })
+            .WithLexerbuilder(lexer)
+            .BuildParser(ParserType.LL_STACK);
+        Check.That(p.IsOk);
+        var t = p.Result.Parse("A A B B A");
+        Check.That(t).IsOkParsing();
+        Check.That(t.Result).IsEqualTo("A..A..B..B..A");
+
     }
 }
