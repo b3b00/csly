@@ -179,7 +179,11 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 {
                     return;
                 }
-                
+                else
+                {
+                    Log("end of token stream not reached, looking forward", stack, 1);
+                }
+
                 //return;
             }
 
