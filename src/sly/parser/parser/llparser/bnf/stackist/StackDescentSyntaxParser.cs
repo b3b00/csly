@@ -173,9 +173,14 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                         $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
                 }
 
-                // TODO : other rules may beter match if  
+                bool hasParseEnded = state.Result.EndingPosition  >= state.Tokens.Length;
+                // TODO : other rules may beter match if  parse has not ended
+                if (hasParseEnded)
+                {
+                    return;
+                }
                 
-                return;
+                //return;
             }
 
 
