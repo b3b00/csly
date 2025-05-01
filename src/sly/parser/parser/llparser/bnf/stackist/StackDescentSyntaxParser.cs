@@ -96,7 +96,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     private void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
-        if (nonTerminal.NonTerminalName == "choices")
+        if (nonTerminal.NonTerminalName == "choices" && state.Id == 1)
         {
             ;
         }
@@ -126,6 +126,28 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 result.IsError = true;
                 result.EndingPosition = state.Position;
                 var expected = nonTerminalClause.Rules.SelectMany(x => x.PossibleLeadingTokens).Distinct().ToArray();
+
+                if (state.Successes.Any())
+                {
+                    Log($"{state.NonTerminal.NonTerminalName}<<{state.Index}>> : no more alternative but at least one match has been found ",stack,1);
+                    var last = state.Successes.OrderBy(x => x.EndingPosition).Last();
+                    if (state.Parent is RuleStackState<IN, OUT> rState)
+                    {
+                        rState.AddChild(result);
+                    }
+                    else if (state.Parent is RootStackState<IN, OUT> rootState)
+                    {
+                        rootState.SetResult(result);
+                    }
+                    else
+                    {
+                        throw new Exception(
+                            $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
+                    }
+
+                    return;
+                }
+                
                 if (state.Position >= state.Tokens.Length)
                 {
                     var error = new UnexpectedTokenSyntaxError<IN>(state.Tokens.Last(), LexemeLabels, I18n,
@@ -152,7 +174,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     throw new Exception(
                         $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
                 }
-                
                 return;
             }
 
@@ -181,6 +202,9 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 }
                 else
                 {
+                    // TODO : end of token stream not reached, looking forward
+                    // TODO : but now we must take a trace of successful branches !
+                    state.AddSuccess(state.Result);
                     Log("end of token stream not reached, looking forward", stack, 1);
                 }
 
