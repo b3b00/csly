@@ -16,6 +16,8 @@ namespace ParserExample;
 public enum P
 {
     [Sugar("+")] e,
+    [Keyword("true")] True,
+    [Keyword("false")] False,
 }
 
 public enum L
@@ -170,16 +172,21 @@ public class Stacker
 
         Check.That(grammarParser).IsOk();
         var parser = grammarParser.Result;
-        var r = parser.Parse("E : e");
+        string source = "True|False";
+        string start = "choices";
+        var r = parser.Parse(source,start);
         Check.That(r).IsOkParsing();
+        string expected = r.Result.ToString();
 
         grammarParser = builder.BuildParser(ruleparser, ParserType.LL_STACK, "rule");
 
         Check.That(grammarParser).IsOk();
         parser = grammarParser.Result;
-        r = parser.Parse("E : e", "rule");
+        r = parser.Parse(source, start);
         Check.That(r).IsOkParsing();
-        Console.WriteLine("OK "+r.Result.ToString());
+        var actual = r.Result.ToString();
+        Check.That(actual).IsEqualTo(expected);
+        Console.WriteLine("OK "+r.Result);
         Console.WriteLine(r.SyntaxTree.Dump("  "));
     }
 

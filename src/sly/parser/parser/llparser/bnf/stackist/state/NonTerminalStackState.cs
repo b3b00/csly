@@ -2,9 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
+using sly.parser.generator;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.llparser.bnf.stackist;
+
+public static class NonterminalExt
+{
+    public static string Progress<IN, OUT>(this NonTerminalStackState<IN, OUT> state, ParserConfiguration<IN,OUT> config) where IN : struct, Enum
+    {
+        string count = "unknown";
+        if (config.NonTerminals.TryGetValue(state.NonTerminal.NonTerminalName, out var nonTerminalClause))
+        {
+            count = nonTerminalClause.Rules.Count().ToString();
+        }
+
+        return $"Non-Terminal<<{state.Id}>> {state.NonTerminal.NonTerminalName} [{state.Index}/{count}] @{state.Position}";
+    }
+}
+
 
 [DebuggerDisplay("{DebugString}")]
 public class NonTerminalStackState<IN, OUT> : StackState<IN, OUT> where IN : struct, Enum

@@ -20,7 +20,7 @@ public enum StackStateType
 public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> where IN : struct, Enum
 {
 
-    private const bool DEBUG = false;
+    private const bool DEBUG = true;
     public Dictionary<IN, Dictionary<string, string>> LexemeLabels { get; set; }
 
     public ParserConfiguration<IN, OUT> Configuration { get; set; }
@@ -75,7 +75,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     ParseRule(ruleState, stack);
                     break;
                 case NonTerminalStackState<IN, OUT> nonTerminalState:
-                    Log(current.DebugString, stack);
+                    Log(nonTerminalState.Progress(Configuration), stack);
                     ParseNonTerminal(nonTerminalState, stack);
                     break;
                 case TerminalStackState<IN, OUT> terminalState:
@@ -96,6 +96,10 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     private void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
+        if (nonTerminal.NonTerminalName == "choices")
+        {
+            ;
+        }
         if (Configuration.NonTerminals.TryGetValue(nonTerminal.NonTerminalName, out var nonTerminalClause))
         {
             if (state.Index >= nonTerminalClause.Rules.Count && state.Result != null)
@@ -169,6 +173,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                         $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
                 }
 
+                // TODO : other rules may beter match if  
+                
                 return;
             }
 
