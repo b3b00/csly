@@ -96,7 +96,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     private void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
-        if (nonTerminal.NonTerminalName == "choices" && state.Id == 1)
+        if (nonTerminal.NonTerminalName == "choices" && state.Id == 1 && state.Index == 1)
         {
             ;
         }
@@ -194,7 +194,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                         $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
                 }
 
-                bool hasParseEnded = state.Result.EndingPosition  >= state.Tokens.Length;
+                bool hasParseEnded = state.Result.EndingPosition  >= state.Tokens.Length-1;
                 // TODO : other rules may beter match if  parse has not ended
                 if (hasParseEnded)
                 {

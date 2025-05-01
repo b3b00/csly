@@ -4,6 +4,7 @@ using sly.lexer;
 using sly.lexer.fluent;
 using sly.parser.fluent;
 using sly.parser.generator;
+using sly.parser.syntax.grammar;
 using Xunit;
 
 
@@ -12,6 +13,13 @@ namespace ParserTests.stack;
 public class Dumb
 {
     
+}
+
+public enum P
+{
+    [Sugar("+")] e,
+    [Keyword("true")] True,
+    [Keyword("false")] False,
 }
 
 [ParserRoot("root")]
@@ -97,5 +105,23 @@ public class StackParserTests
         
 
 
+    }
+
+    [Fact]
+    public void RuleChoices()
+    {
+        var ruleparser = new RuleParser<P, object>();
+        var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<P, object>>("en");
+        
+        var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_STACK, "rule");
+        string source = "True|False";
+        string start = "choices";
+        Check.That(grammarParser).IsOk();
+        var parser = grammarParser.Result;
+        var r = parser.Parse(source, start);
+        Check.That(r).IsOkParsing();
+        var actual = r.Result.ToString();
+        Check.That(actual).IsEqualTo("[ True(T) | False(T) ]");
+        
     }
 }
