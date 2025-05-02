@@ -37,8 +37,6 @@ public class NonTerminalStackState<IN, OUT> : StackState<IN, OUT> where IN : str
 
     public int Id { get; set; }
 
-    StackState<IN, OUT> Sibling { get; set; }
-
     public NonTerminalClause<IN, OUT> NonTerminal { get; set; }
 
     public int Index { get; set; }
@@ -55,7 +53,6 @@ public class NonTerminalStackState<IN, OUT> : StackState<IN, OUT> where IN : str
     {
         Id = Counter++;
         NonTerminal = nonTerminal;
-        Sibling = sibling;
         Index = 0;
         Type = StackStateType.NonTerminal;
         Successes = new List<SyntaxParseResult<IN,OUT>>();
@@ -63,6 +60,10 @@ public class NonTerminalStackState<IN, OUT> : StackState<IN, OUT> where IN : str
 
     public void AddSuccess(SyntaxParseResult<IN, OUT> success)
     {
+        if (Id == 1)
+        {
+            ;
+        }
         Successes.Add(success);
     }
 

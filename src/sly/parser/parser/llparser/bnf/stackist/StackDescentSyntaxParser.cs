@@ -72,7 +72,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         var current = stack.Pop();
         while (current != null)
         {
-
+            
             switch (current)
             {
                 case RuleStackState<IN, OUT> ruleState:
@@ -80,7 +80,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     ParseRule(ruleState, stack);
                     break;
                 case NonTerminalStackState<IN, OUT> nonTerminalState:
-                    // Log(nonTerminalState.Progress(Configuration), stack);
+                    Log(nonTerminalState.Progress(Configuration), stack);
                     ParseNonTerminal(nonTerminalState, stack);
                     break;
                 case TerminalStackState<IN, OUT> terminalState:
@@ -101,7 +101,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     private void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
-        if (nonTerminal.NonTerminalName == "choices" && state.Id == 1 && state.Index == 1)
+        if (state.Id == 2 )
         {
             ;
         }
@@ -126,6 +126,10 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
             if (state.Index >= nonTerminalClause.Rules.Count && state.Result == null)
             {
+                if (state.Id == 1)
+                {
+                    ;
+                }
                 // TODO : here we have a problem
                 var result = new SyntaxParseResult<IN, OUT>();
                 result.IsError = true;
@@ -260,7 +264,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             }
             else
             {
-                Log($"KO rule {rule.RuleString} does not match {state.Tokens[state.Position]}",stack,1);
+                Log($"KO rule (( {rule.RuleString} )) does not match {state.Tokens[state.Position]}",stack,1);
                 var result = new SyntaxParseResult<IN, OUT>();
                 var token = state.Tokens[state.Position];
 
@@ -335,9 +339,10 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
     private void ParseRule(RuleStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
+        
         var rule = state.Rule;
 
-        if (rule.NonTerminalName == "clauses" && state.Id == 9)
+        if (state.Id == 1)
         {
             ;
         }
@@ -391,6 +396,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                         ;
                     }
                     parentState.SetResult(result);
+                    parentState.AddSuccess(result);
                 }
             }
             else
