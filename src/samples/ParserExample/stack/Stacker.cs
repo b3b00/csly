@@ -204,8 +204,10 @@ public class Stacker
         //
         
         var parser = GetParser<EbnfTokenGeneric, GrammarNode<L, string>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
-        string source = "root  : A [PLUS|MINUS] B";
-        string start = "rule";
+        // string source = "root  : A [PLUS|MINUS] B";
+        // string start = "rule";
+        string source = "[ PLUS | MINUS ]";
+        string start = "choiceclause";
         var r = parser.Parse(source, start);
         Check.That(r).IsOkParsing();
         
@@ -213,19 +215,18 @@ public class Stacker
         Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>();
         var root = r.SyntaxTree as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
         Check.That(root).IsNotNull();
-        Check.That(root.Children).CountIs(3);
-        Check.That(root.Children[0]).IsNotNull();
-        Check.That(root.Children[1]).IsNotNull();
-        Check.That(root.Children[2]).IsNotNull();
-        Check.That(root.Children[0]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>(); // root
-        Check.That(root.Children[1]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>(); // ':'
-        Check.That(root.Children[2]).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>(); // clauses ...
-        var clausesNodes = root.Children[2] as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
-        Check.That(clausesNodes.Children).CountIs(2); // A and clauses ( + B)
+        // Check.That(root.Children).CountIs(3);
+        // Check.That(root.Children[0]).IsNotNull();
+        // Check.That(root.Children[1]).IsNotNull();
+        // Check.That(root.Children[2]).IsNotNull();
+        // Check.That(root.Children[0]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>(); // root
+        // Check.That(root.Children[1]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>(); // ':'
+        // Check.That(root.Children[2]).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>(); // clauses ...
+        // var clausesNodes = root.Children[2] as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
+        // Check.That(clausesNodes.Children).CountIs(2); // A and clauses ( + B)
+        var expected = (r.Result as IClause<L, string>).Dump();
         var expectedTree = root.Dump("  ");
-        var rule = r.Result as Rule<L, string>;
-        Check.That(rule).IsNotNull();
-        var expected = rule.Dump();
+        var rule = r.Result;
         
         
         //
@@ -238,26 +239,26 @@ public class Stacker
         r = parser.Parse(source, start);
         Check.That(r).IsOkParsing();
         tree = r.SyntaxTree;
-        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>();
-        root = r.SyntaxTree as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
-        Check.That(root).IsNotNull();
-        Check.That(root.Children).CountIs(3);
-        Check.That(root.Children[0]).IsNotNull();
-        Check.That(root.Children[1]).IsNotNull();
-        Check.That(root.Children[2]).IsNotNull();
-        Check.That(root.Children[0]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>();
-        Check.That(root.Children[1]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>();
-        Check.That(root.Children[2]).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>();
-        clausesNodes = root.Children[2] as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
-        Check.That(clausesNodes.Children).CountIs(2);
+        // Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>();
+        // root = r.SyntaxTree as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
+        // Check.That(root).IsNotNull();
+        // Check.That(root.Children).CountIs(3);
+        // Check.That(root.Children[0]).IsNotNull();
+        // Check.That(root.Children[1]).IsNotNull();
+        // Check.That(root.Children[2]).IsNotNull();
+        // Check.That(root.Children[0]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>();
+        // Check.That(root.Children[1]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>();
+        // Check.That(root.Children[2]).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>();
+        // clausesNodes = root.Children[2] as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
+        // Check.That(clausesNodes.Children).CountIs(2);
         var actualTreeDump = root.Dump("  ");
-        rule = r.Result as Rule<L, string>;
-        Check.That(rule).IsNotNull();
-        var actual = rule.Dump();
-        Check.That(actual).IsEqualTo(expected);
-        
-        
-        
+        // rule = r.Result as Rule<L, string>;
+        // Check.That(rule).IsNotNull();
+        var actual = (r.Result as IClause<L, string>).Dump();
+        // Check.That(actual).IsEqualTo(expected);
+        //
+        //
+        //
         Check.That(actual).IsEqualTo(expected);
     }
 

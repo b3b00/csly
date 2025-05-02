@@ -13,7 +13,7 @@ public static class RuleExt
     public static string Progress<IN, OUT>(this RuleStackState<IN, OUT> state) where IN : struct, Enum
     {
         StringBuilder b = new StringBuilder();
-        b.Append("<<").Append(state.Id).Append(">> @").Append(state.Position).Append(" :: ");
+        b.Append("<<").Append(state.Id).Append($">>[{state.Index}] @").Append(state.Position).Append(" :: ");
         b.Append(state.Rule.NonTerminalName).Append(" : ");
         for (int i = 0; i < state.Rule.Clauses.Count; i++)
         {

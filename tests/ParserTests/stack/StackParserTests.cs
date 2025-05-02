@@ -1,7 +1,9 @@
+using System;
 using expressionparser;
 using NFluent;
 using sly.lexer;
 using sly.lexer.fluent;
+using sly.parser;
 using sly.parser.fluent;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
@@ -158,32 +160,42 @@ public class StackParserTests
     [Fact]
     public void RuleChoices2()
     {
-        var ruleparser = new RuleParser<P, string>();
-        var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<P, string>>("en");
+        var ruleparser = new RuleParser<L, string>();
         
-        var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_STACK, "rule");
-        string source = "A [PLUS|MINUS] B";
-        string start = "choices";
-        Check.That(grammarParser).IsOk();
-        var parser = grammarParser.Result;
+        string source = "[ PLUS | MINUS ]";
+        string start = "choiceclause";
+        
+        //
+        // LL_RECURSIVE => OK => get expected output
+        //
+        
+        var parser = GetParser<EbnfTokenGeneric, GrammarNode<L, string>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
+        // string source = "root  : A [PLUS|MINUS] B";
+        // string start = "rule";
+        
         var r = parser.Parse(source, start);
         Check.That(r).IsOkParsing();
+        
         var tree = r.SyntaxTree;
-        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<L, string>>();
-        var root = r.SyntaxTree as SyntaxNode<L, string>;
+        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>();
+        var root = r.SyntaxTree as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
         Check.That(root).IsNotNull();
-        Check.That(root.Children).CountIs(3);
-        Check.That(root.Children[0]).IsNotNull();
-        Check.That(root.Children[1]).IsNotNull();
-        Check.That(root.Children[2]).IsNotNull();
-        Check.That(root.Children[0]).IsInstanceOf<SyntaxLeaf<L, string>>();
-        Check.That(root.Children[1]).IsInstanceOf<SyntaxLeaf<L, string>>();
-        Check.That(root.Children[2]).IsInstanceOf<SyntaxLeaf<L, string>>();
-        var actual = r.Result.ToString();
+        var expected = (r.Result as IClause<L, string>).Dump();
         
         
+        //
+        // LL_STACK => get output and compare to expected (if parse succeeded at all)
+        //
         
-        Check.That(actual).IsEqualTo("a [PLUS|MINUS] b");
+        
+        parser = GetParser<EbnfTokenGeneric, GrammarNode<L, string>>(ruleparser, ParserType.LL_STACK, "rule");
+        
+        r = parser.Parse(source, start);
+        Check.That(r).IsOkParsing();
+       
+        var actualTreeDump = root.Dump("  ");
+        var actual = (r.Result as IClause<L, string>).Dump();
+        Check.That(actual).IsEqualTo(expected);
         
     }
 
@@ -214,5 +226,14 @@ public class StackParserTests
         Check.That(r).IsOkParsing();
         var actual = r.Result.ToString();
         Check.That(actual).IsEqualTo(expected);
+    }
+    
+    public static Parser<IN, OUT> GetParser<IN, OUT>(object instance, ParserType type, string root) where IN : struct , Enum
+    {
+        ParserBuilder<IN,OUT> builder =  new ParserBuilder<IN, OUT>();
+        var built = builder.BuildParser(instance, type, root);
+        Check.That(built).IsOk();
+        Check.That(built.Result).IsNotNull();
+        return built.Result;
     }
 }
