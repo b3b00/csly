@@ -1,14 +1,16 @@
 using System;
+using System.Linq;
 using expressionparser;
 using NFluent;
 using ParserTests;
 using ParserTests.stack;
-using simpleExpressionParser;
 using sly.lexer;
 using sly.lexer.fluent;
+using sly.parser;
 using sly.parser.fluent;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
+using sly.parser.syntax.tree;
 using ExpressionToken = expressionparser.ExpressionToken;
 
 namespace ParserExample;
@@ -24,6 +26,29 @@ public enum L
 {
     [Keyword("A")] A,
     [Keyword("B")] B,
+    [Sugar("+")] PLUS,
+    [Sugar("-")] MINUS
+}
+
+public class Visitor {
+
+    [Production("root  : a [PLUS|MINUS] b")]
+    public string Root(string a, Token<L> op, string b)
+    {
+        return "a <" + op.Value + "> b";
+    }
+
+    [Production("a : A")]
+    public string A(Token<L> a)
+    {
+        return a.Value;
+    }
+    
+    [Production("b : B")]
+    public string B(Token<L> b)
+    {
+        return b.Value;
+    }
 }
 
 public class Stacker
@@ -88,7 +113,7 @@ public class Stacker
         var lexer = FluentLexerBuilder<ExpressionToken>.NewBuilder()
             .Int(ExpressionToken.INT);
         var parser = FluentParserBuilder<ExpressionToken, string>
-            .NewBuilder(new ParserTests.stack.SimplerStackParser(), "root", "en")
+            .NewBuilder(new SimplerStackParser(), "root", "en")
             .WithLexerbuilder(lexer)
             .Production("root : expr", (object[] args) => { return (string)args[0]; })
             .Production("expr : INT", (args) => { return ((Token<ExpressionToken>)args[0]).Value; })
@@ -159,35 +184,81 @@ public class Stacker
         }
     }
 
+
+    public static void Geuh()
+    {
+        var parser = GetParser<L, string>(new Visitor(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+        var parsed = parser.Parse("A + B");
+        Check.That(parsed).IsOkParsing();
+        
+        
+    }
+    
     public static void Rules()
     {
-        // RuleParser<EbnfTokenGeneric, GrammarNode<P,object>> ruleParser = new RuleParser<EbnfTokenGeneric, GrammarNode<P,object>>();
-        // ParserBuilder<EbnfTokenGeneric, GrammarNode<P, object>> builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<P, object>>("en");
-        // var grammarParser = builder.BuildParser(ruleParser, ParserType.LL_RECURSIVE_DESCENT, "rule");
-
-        var ruleparser = new RuleParser<P, object>();
-        var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<P, object>>("en");
-
-        var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
-
-        Check.That(grammarParser).IsOk();
-        var parser = grammarParser.Result;
-        string source = "True|False";
-        string start = "choices";
-        var r = parser.Parse(source,start);
+        var ruleparser = new RuleParser<L, string>();
+        var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<L, string>>("en");
+        
+        //
+        // LL_RECURSIVE => OK => get expected output
+        //
+        
+        var parser = GetParser<EbnfTokenGeneric, GrammarNode<L, string>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
+        string source = "root  : A [PLUS|MINUS] B";
+        string start = "rule";
+        var r = parser.Parse(source, start);
         Check.That(r).IsOkParsing();
-        string expected = r.Result.ToString();
-
-        grammarParser = builder.BuildParser(ruleparser, ParserType.LL_STACK, "rule");
-
-        Check.That(grammarParser).IsOk();
-        parser = grammarParser.Result;
+        
+        var tree = r.SyntaxTree;
+        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>();
+        var root = r.SyntaxTree as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
+        Check.That(root).IsNotNull();
+        Check.That(root.Children).CountIs(3);
+        Check.That(root.Children[0]).IsNotNull();
+        Check.That(root.Children[1]).IsNotNull();
+        Check.That(root.Children[2]).IsNotNull();
+        Check.That(root.Children[0]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>(); // root
+        Check.That(root.Children[1]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>(); // ':'
+        Check.That(root.Children[2]).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>(); // clauses ...
+        var clausesNodes = root.Children[2] as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
+        Check.That(clausesNodes.Children).CountIs(2); // A and clauses ( + B)
+        var expectedTree = root.Dump("  ");
+        var rule = r.Result as Rule<L, string>;
+        Check.That(rule).IsNotNull();
+        var expected = rule.Dump();
+        
+        
+        //
+        // LL_STACK => get output and compare to expected (if parse succeeded at all)
+        //
+        
+        
+        parser = GetParser<EbnfTokenGeneric, GrammarNode<L, string>>(ruleparser, ParserType.LL_STACK, "rule");
+        
         r = parser.Parse(source, start);
         Check.That(r).IsOkParsing();
-        var actual = r.Result.ToString();
+        tree = r.SyntaxTree;
+        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>();
+        root = r.SyntaxTree as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
+        Check.That(root).IsNotNull();
+        Check.That(root.Children).CountIs(3);
+        Check.That(root.Children[0]).IsNotNull();
+        Check.That(root.Children[1]).IsNotNull();
+        Check.That(root.Children[2]).IsNotNull();
+        Check.That(root.Children[0]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>();
+        Check.That(root.Children[1]).IsInstanceOf<SyntaxLeaf<EbnfTokenGeneric, GrammarNode<L, string>>>();
+        Check.That(root.Children[2]).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>();
+        clausesNodes = root.Children[2] as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
+        Check.That(clausesNodes.Children).CountIs(2);
+        var actualTreeDump = root.Dump("  ");
+        rule = r.Result as Rule<L, string>;
+        Check.That(rule).IsNotNull();
+        var actual = rule.Dump();
         Check.That(actual).IsEqualTo(expected);
-        Console.WriteLine("OK "+r.Result);
-        Console.WriteLine(r.SyntaxTree.Dump("  "));
+        
+        
+        
+        Check.That(actual).IsEqualTo(expected);
     }
 
     public static void List()
@@ -216,5 +287,14 @@ public class Stacker
         Check.That(t.Result).IsEqualTo("A..B");
         Console.WriteLine("OK : "+t.Result);
         Console.WriteLine(t.SyntaxTree.Dump("  "));
+    }
+
+    public static Parser<IN, OUT> GetParser<IN, OUT>(object instance, ParserType type, string root) where IN : struct , Enum
+    {
+        ParserBuilder<IN,OUT> builder =  new ParserBuilder<IN, OUT>();
+        var built = builder.BuildParser(instance, type, root);
+        Check.That(built).IsOk();
+        Check.That(built.Result).IsNotNull();
+        return built.Result;
     }
 }

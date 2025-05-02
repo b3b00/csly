@@ -49,12 +49,6 @@ namespace sly.parser.syntax.grammar
             {
                 return token.IsUnIndent;
             }
-
-            if (token.IsEOS)
-            {
-                return false;
-            }
-
             return TokenId.Equals(token.TokenID);
         }
 

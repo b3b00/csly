@@ -70,7 +70,7 @@ public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
 
     public void AddChild(SyntaxParseResult<IN, OUT> result)
     {
-        if (Id == 4)
+        if (Id == 9)
         {
             ;
         }

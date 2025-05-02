@@ -5,6 +5,7 @@ using sly.lexer;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
+using System.IO;
 
 namespace sly.parser.llparser.bnf.stackist;
 
@@ -46,6 +47,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     
     public SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, string startingNonTerminal = null)
     {
+        
+        
         var stack = new Stack<StackState<IN, OUT>>();
         var root = new RootStackState<IN, OUT>();
         var start =  startingNonTerminal ?? Configuration.StartingRule;
@@ -60,6 +63,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             Position = 0,
             Tokens = tokens
         };
+        var toks = string.Join(" ", tokens.Select(x => x.Value));
+        Log($"start :: {toks}",stack);
 
         stack.Push(root);
         stack.Push(state);
@@ -75,11 +80,11 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     ParseRule(ruleState, stack);
                     break;
                 case NonTerminalStackState<IN, OUT> nonTerminalState:
-                    Log(nonTerminalState.Progress(Configuration), stack);
+                    // Log(nonTerminalState.Progress(Configuration), stack);
                     ParseNonTerminal(nonTerminalState, stack);
                     break;
                 case TerminalStackState<IN, OUT> terminalState:
-                    Log(current.DebugString, stack);
+                    // Log(current.DebugString, stack);
                     ParseTerminal(terminalState, stack);
                     break;
                 case RootStackState<IN, OUT> rootState:
@@ -129,7 +134,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
                 if (state.Successes.Any())
                 {
-                    Log($"{state.NonTerminal.NonTerminalName}<<{state.Index}>> : no more alternative but at least one match has been found ",stack,1);
+                    // Log($"{state.NonTerminal.NonTerminalName}<<{state.Index}>> : no more alternative but at least one match has been found ",stack,1);
                     var last = state.Successes.OrderBy(x => x.EndingPosition).Last();
                     if (state.Parent is RuleStackState<IN, OUT> rState)
                     {
@@ -205,7 +210,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     // TODO : end of token stream not reached, looking forward
                     // TODO : but now we must take a trace of successful branches !
                     state.AddSuccess(state.Result);
-                    Log("end of token stream not reached, looking forward", stack, 1);
+                    //Log("end of token stream not reached, looking forward", stack, 1);
                 }
 
                 //return;
@@ -331,11 +336,17 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     private void ParseRule(RuleStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         var rule = state.Rule;
+
+        if (rule.NonTerminalName == "clauses" && state.Id == 9)
+        {
+            ;
+        }
+        
         if (state.Index > 0 && state.IsEnded)
         {
             if (state.LastResult.IsError)
             {
-                Log("KO "+state.LastResult.GetErrors().First().ErrorMessage,stack,1);
+                //Log("KO "+state.LastResult.GetErrors().First().ErrorMessage,stack,1);
             }
             else
             {
@@ -451,6 +462,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             }
 
             Console.WriteLine(tab + message);
+            File.AppendAllText("c:/tmp/debug.txt", tab + message+"\n");
         }
     }
 

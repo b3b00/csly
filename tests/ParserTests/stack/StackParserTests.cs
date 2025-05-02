@@ -5,6 +5,7 @@ using sly.lexer.fluent;
 using sly.parser.fluent;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
+using sly.parser.syntax.tree;
 using Xunit;
 
 
@@ -20,6 +21,35 @@ public enum P
     [Sugar("+")] e,
     [Keyword("true")] True,
     [Keyword("false")] False,
+}
+
+public enum L
+{
+    [Keyword("A")] A,
+    [Keyword("B")] B,
+    [Sugar("+")] PLUS,
+    [Sugar("-")] MINUS,
+}
+
+public class Visitor {
+
+    [Production("root  : a [PLUS|MINUS] b")]
+    public string Root(string a, Token<L> op, string b)
+    {
+        return "a <" + op.Value + "> b";
+    }
+
+    [Production("a : A")]
+    public string A(Token<L> a)
+    {
+        return a.Value;
+    }
+    
+    [Production("a : A")]
+    public string B(Token<L> b)
+    {
+        return b.Value;
+    }
 }
 
 [ParserRoot("root")]
@@ -123,5 +153,66 @@ public class StackParserTests
         var actual = r.Result.ToString();
         Check.That(actual).IsEqualTo("[ True(T) | False(T) ]");
         
+    }
+    
+    [Fact]
+    public void RuleChoices2()
+    {
+        var ruleparser = new RuleParser<P, string>();
+        var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<P, string>>("en");
+        
+        var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_STACK, "rule");
+        string source = "A [PLUS|MINUS] B";
+        string start = "choices";
+        Check.That(grammarParser).IsOk();
+        var parser = grammarParser.Result;
+        var r = parser.Parse(source, start);
+        Check.That(r).IsOkParsing();
+        var tree = r.SyntaxTree;
+        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<L, string>>();
+        var root = r.SyntaxTree as SyntaxNode<L, string>;
+        Check.That(root).IsNotNull();
+        Check.That(root.Children).CountIs(3);
+        Check.That(root.Children[0]).IsNotNull();
+        Check.That(root.Children[1]).IsNotNull();
+        Check.That(root.Children[2]).IsNotNull();
+        Check.That(root.Children[0]).IsInstanceOf<SyntaxLeaf<L, string>>();
+        Check.That(root.Children[1]).IsInstanceOf<SyntaxLeaf<L, string>>();
+        Check.That(root.Children[2]).IsInstanceOf<SyntaxLeaf<L, string>>();
+        var actual = r.Result.ToString();
+        
+        
+        
+        Check.That(actual).IsEqualTo("a [PLUS|MINUS] b");
+        
+    }
+
+    [Fact]
+    public void ChoicesVisitorTest()
+    {
+        var ruleparser = new RuleParser<L, string>();
+        var builder = new ParserBuilder<L, string>("en");
+        var instance = new Visitor();
+        
+        string source = "a + b";
+        string start = "root";
+        
+        var grammarParser = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, start);
+
+        Check.That(grammarParser).IsOk();
+        var parser = grammarParser.Result;
+       
+        var r = parser.Parse(source,start);
+        Check.That(r).IsOkParsing();
+        string expected = r.Result.ToString();
+
+        grammarParser = builder.BuildParser(instance, ParserType.LL_STACK, start);
+
+        Check.That(grammarParser).IsOk();
+        parser = grammarParser.Result;
+        r = parser.Parse(source, start);
+        Check.That(r).IsOkParsing();
+        var actual = r.Result.ToString();
+        Check.That(actual).IsEqualTo(expected);
     }
 }
