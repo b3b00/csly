@@ -198,6 +198,48 @@ public class StackParserTests
         Check.That(actual).IsEqualTo(expected);
         
     }
+    
+    [Fact]
+    public void RuleChoicesRule()
+    {
+        var ruleparser = new RuleParser<L, string>();
+        
+        string source = "rule : A  [ PLUS | MINUS ] B";
+        string start = "rule";
+        
+        //
+        // LL_RECURSIVE => OK => get expected output
+        //
+        
+        var parser = GetParser<EbnfTokenGeneric, GrammarNode<L, string>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
+        // string source = "root  : A [PLUS|MINUS] B";
+        // string start = "rule";
+        
+        var r = parser.Parse(source, start);
+        Check.That(r).IsOkParsing();
+        
+        var tree = r.SyntaxTree;
+        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>>();
+        var root = r.SyntaxTree as SyntaxNode<EbnfTokenGeneric, GrammarNode<L, string>>;
+        Check.That(root).IsNotNull();
+        var expected = (r.Result as Rule<L, string>).Dump();
+        
+        
+        //
+        // LL_STACK => get output and compare to expected (if parse succeeded at all)
+        //
+        
+        
+        parser = GetParser<EbnfTokenGeneric, GrammarNode<L, string>>(ruleparser, ParserType.LL_STACK, "rule");
+        
+        r = parser.Parse(source, start);
+        Check.That(r).IsOkParsing();
+       
+        var actualTreeDump = root.Dump("  ");
+        var actual = (r.Result as Rule<L, string>).Dump();
+        Check.That(actual).IsEqualTo(expected);
+        
+    }
 
     [Fact]
     public void ChoicesVisitorTest()
