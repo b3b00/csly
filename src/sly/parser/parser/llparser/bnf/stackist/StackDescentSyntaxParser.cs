@@ -101,7 +101,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     private void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
-        if (state.Id == 2 )
+        if (state.Id == 2  && state.Index == 2)
         {
             ;
         }
@@ -109,13 +109,19 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         {
             if (state.Index >= nonTerminalClause.Rules.Count && state.Result != null)
             {
+                var realResult = state.Result;
+                // success may have happened previously !
+                if (realResult.IsError && state.Successes.Any(x => x.IsOk))
+                {
+                    realResult = state.Successes.First(x => x.IsOk);
+                } 
                 if (state.Parent is RuleStackState<IN, OUT> ruleState)
                 {
-                    ruleState.AddChild(state.Result);
+                    ruleState.AddChild(realResult);
                 }
                 else if (state.Parent is RootStackState<IN, OUT> rootState)
                 {
-                    rootState.SetResult(state.Result);
+                    rootState.SetResult(realResult);
                 }
                 else
                 {
@@ -342,7 +348,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         
         var rule = state.Rule;
 
-        if (state.Id == 1)
+        if (state.Id == 4)
         {
             ;
         }
@@ -351,7 +357,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         {
             if (state.LastResult.IsError)
             {
-                //Log("KO "+state.LastResult.GetErrors().First().ErrorMessage,stack,1);
+                Log("KO "+state.LastResult.GetErrors().First().ErrorMessage,stack,1);
             }
             else
             {
@@ -396,7 +402,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                         ;
                     }
                     parentState.SetResult(result);
-                    parentState.AddSuccess(result);
+                    //parentState.AddSuccess(result);
                 }
             }
             else
