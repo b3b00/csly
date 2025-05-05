@@ -109,8 +109,15 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 // success may have happened previously !
                 if (realResult.IsError && state.Successes.Any(x => x.IsOk))
                 {
-                    realResult = state.Successes.First(x => x.IsOk);
+                    Log(state.DebugString+$" ended with {state.Successes.Count} successes",stack,1);
+                    realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
                 } 
+                else if (state.Successes.Where(x => x.IsOk).Count() > 1)
+                {
+                    Log(state.DebugString+$" ended with {state.Successes.Count} successes",stack,1);
+                    realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
+                    Log($" choosing one ending at {realResult.EndingPosition}",stack,2);
+                }
                 if (state.Parent is RuleStackState<IN, OUT> ruleState)
                 {
                     ruleState.AddChild(realResult);
