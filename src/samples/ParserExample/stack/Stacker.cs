@@ -32,7 +32,7 @@ public enum L
 
 public class Visitor {
 
-    [Production("root  : a [PLUS|MINUS] b")]
+    [Production("root  : a [ PLUS | MINUS ] b")]
     public string Root(string a, Token<L> op, string b)
     {
         return "a <" + op.Value + "> b";
@@ -185,13 +185,34 @@ public class Stacker
     }
 
 
-    public static void Geuh()
+    public static void ParseVisitorAPlusB()
     {
-        var parser = GetParser<L, string>(new Visitor(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
-        var parsed = parser.Parse("A + B");
-        Check.That(parsed).IsOkParsing();
+        var builder = new ParserBuilder<L, string>("en");
+        var instance = new Visitor();
         
+        string source = "A + B";
+        string start = "root";
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
         
+        var grammarParser = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, start);
+
+        Check.That(grammarParser).IsOk();
+        var parser = grammarParser.Result;
+       
+        var r = parser.Parse(source,start);
+        Check.That(r).IsOkParsing();
+        string expected = r.Result.ToString();
+
+        RuleParserType.ParserType = ParserType.LL_STACK;
+        
+        grammarParser = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, start);
+
+        Check.That(grammarParser).IsOk();
+        parser = grammarParser.Result;
+        r = parser.Parse(source, start);
+        Check.That(r).IsOkParsing();
+        var actual = r.Result.ToString();
+        Check.That(actual).IsEqualTo(expected);
     }
     
     public static void Rules()

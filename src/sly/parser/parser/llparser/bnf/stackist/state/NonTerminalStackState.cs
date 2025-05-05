@@ -60,19 +60,11 @@ public class NonTerminalStackState<IN, OUT> : StackState<IN, OUT> where IN : str
 
     public void AddSuccess(SyntaxParseResult<IN, OUT> success)
     {
-        if (Id == 2)
-        {
-            ;
-        }
         Successes.Add(success);
     }
 
     public void SetResult(SyntaxParseResult<IN, OUT> result)
     {
-        if (Id == 2)
-        {
-            ;
-        }
         Result = result;
     }
 

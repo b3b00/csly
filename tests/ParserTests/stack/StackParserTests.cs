@@ -33,8 +33,14 @@ public enum L
     [Sugar("-")] MINUS,
 }
 
-public class Visitor {
+public class Visitor : IDisposable {
 
+    public void Dispose()
+    {
+        
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
+    }
+    
     [Production("root  : a [PLUS|MINUS] b")]
     public string Root(string a, Token<L> op, string b)
     {
@@ -47,7 +53,7 @@ public class Visitor {
         return a.Value;
     }
     
-    [Production("a : A")]
+    [Production("b : B")]
     public string B(Token<L> b)
     {
         return b.Value;
@@ -207,13 +213,7 @@ public class StackParserTests
         string source = "rule : A  [ PLUS | MINUS ] B";
         string start = "rule";
         
-        //
-        // LL_RECURSIVE => OK => get expected output
-        //
-        
         var parser = GetParser<EbnfTokenGeneric, GrammarNode<L, string>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
-        // string source = "root  : A [PLUS|MINUS] B";
-        // string start = "rule";
         
         var r = parser.Parse(source, start);
         Check.That(r).IsOkParsing();
@@ -224,12 +224,8 @@ public class StackParserTests
         Check.That(root).IsNotNull();
         var expected = (r.Result as Rule<L, string>).Dump();
         
-        
-        //
         // LL_STACK => get output and compare to expected (if parse succeeded at all)
-        //
-        
-        
+
         parser = GetParser<EbnfTokenGeneric, GrammarNode<L, string>>(ruleparser, ParserType.LL_STACK, "rule");
         
         r = parser.Parse(source, start);
@@ -244,15 +240,14 @@ public class StackParserTests
     [Fact]
     public void ChoicesVisitorTest()
     {
-        var ruleparser = new RuleParser<L, string>();
         var builder = new ParserBuilder<L, string>("en");
         var instance = new Visitor();
         
-        string source = "a + b";
+        string source = "A + B";
         string start = "root";
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
         
-        var grammarParser = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, start);
-
+        var grammarParser = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, start);
         Check.That(grammarParser).IsOk();
         var parser = grammarParser.Result;
        
@@ -260,14 +255,19 @@ public class StackParserTests
         Check.That(r).IsOkParsing();
         string expected = r.Result.ToString();
 
-        grammarParser = builder.BuildParser(instance, ParserType.LL_STACK, start);
-
+        RuleParserType.ParserType = ParserType.LL_STACK;
+        
+        grammarParser = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, start);
         Check.That(grammarParser).IsOk();
         parser = grammarParser.Result;
+        
         r = parser.Parse(source, start);
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
         Check.That(r).IsOkParsing();
         var actual = r.Result.ToString();
         Check.That(actual).IsEqualTo(expected);
+        
+        
     }
     
     public static Parser<IN, OUT> GetParser<IN, OUT>(object instance, ParserType type, string root) where IN : struct , Enum

@@ -4,8 +4,16 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
 {
-     public class RuleParser<IN,OUT> where IN : struct, Enum
+
+    public static class RuleParserType
     {
+        public static ParserType ParserType = ParserType.LL_RECURSIVE_DESCENT;
+    }
+     public class RuleParser<IN,OUT> where IN : struct, Enum
+     {
+
+         
+        
         #region rules grammar
 
         [Production("rule : IDENTIFIER COLON clauses")]

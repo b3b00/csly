@@ -101,10 +101,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     private void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
-        if (state.Id == 2  && state.Index == 2)
-        {
-            ;
-        }
         if (Configuration.NonTerminals.TryGetValue(nonTerminal.NonTerminalName, out var nonTerminalClause))
         {
             if (state.Index >= nonTerminalClause.Rules.Count && state.Result != null)
@@ -132,11 +128,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
             if (state.Index >= nonTerminalClause.Rules.Count && state.Result == null)
             {
-                if (state.Id == 1)
-                {
-                    ;
-                }
-                // TODO : here we have a problem
                 var result = new SyntaxParseResult<IN, OUT>();
                 result.IsError = true;
                 result.EndingPosition = state.Position;
@@ -345,13 +336,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
     private void ParseRule(RuleStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
-        
         var rule = state.Rule;
-
-        if (state.Id == 4)
-        {
-            ;
-        }
         
         if (state.Index > 0 && state.IsEnded)
         {
@@ -397,12 +382,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     result.Root = node;
                     // send new position upward
                     result.EndingPosition = state.Children.Last().EndingPosition;
-                    if (result == null)
-                    {
-                        ;
-                    }
                     parentState.SetResult(result);
-                    //parentState.AddSuccess(result);
                 }
             }
             else
@@ -411,10 +391,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     $"HOOPS something very bad happened here ! terminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
             }
 
-            if (state.Parent.Result == null)
-            {
-                ;
-            }
             return;
         }
 
