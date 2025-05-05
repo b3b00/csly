@@ -1,6 +1,7 @@
 using System;
 using expressionparser;
 using NFluent;
+using ParserTests.Issue239;
 using sly.lexer;
 using sly.lexer.fluent;
 using sly.parser;
@@ -268,6 +269,30 @@ public class StackParserTests
         Check.That(actual).IsEqualTo(expected);
         
         
+    }
+
+    [Fact]
+    public void TestIssue239()
+    {
+        string source = "INT[d] ID SEMI[d]";
+        string start = "clauses";
+        var ruleparser = new RuleParser<Issue239Lexer, object>();
+        var parser = GetParser<EbnfTokenGeneric, GrammarNode<Issue239Lexer, object>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "clauses");
+
+        var r = parser.Parse(source, start);
+        Check.That(r).IsOkParsing();
+        Check.That(r.Result).IsInstanceOf < ClauseSequence<Issue239Lexer, object>>();
+        var rule = r.Result as ClauseSequence<Issue239Lexer, object>;
+        var expected = rule.Dump();
+        
+        parser = GetParser<EbnfTokenGeneric, GrammarNode<Issue239Lexer, object>>(ruleparser, ParserType.LL_STACK, "rule");
+
+        r = parser.Parse(source, start);
+        Check.That(r).IsOkParsing();
+        Check.That(r.Result).IsInstanceOf < ClauseSequence<Issue239Lexer, object>>();
+        rule = r.Result as ClauseSequence<Issue239Lexer, object>;
+        var actual = rule.Dump();
+        Check.That(actual).IsEqualTo(expected);
     }
     
     public static Parser<IN, OUT> GetParser<IN, OUT>(object instance, ParserType type, string root) where IN : struct , Enum

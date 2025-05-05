@@ -26,7 +26,7 @@ namespace ParserTests.Issue239
         {
             var parser = BuildParser();
             var parseResult = parser.Parse("int x; int y; a = 12;");
-            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult).IsOkParsing();
             Check.That(parseResult.Result).IsInstanceOf<List<object>>();
             var lst = parseResult.Result as List<object>;
             Check.That(lst).CountIs(3);
