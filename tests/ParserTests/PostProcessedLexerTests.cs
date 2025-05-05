@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using NFluent;
 using Xunit;
 using postProcessedLexerParser.expressionModel;
+using sly.parser.generator;
 
 namespace ParserTests
 {
@@ -10,6 +11,7 @@ namespace ParserTests
         [Fact]
         public void TestPostLexerProcessing()
         {
+            RuleParserType.ParserType = ParserType.LL_STACK;
             var Parser = postProcessedLexerParser.PostProcessedLexerParserBuilder.buildPostProcessedLexerParser();
             
             var r = Parser.Parse("2 * x");

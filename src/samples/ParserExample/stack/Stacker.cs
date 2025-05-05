@@ -315,4 +315,46 @@ public class Stacker
 
 
     }
+
+    public static void TestPostProcessedLexer()
+    {
+        string start = "clauses";
+        string source = "IDENTIFIER LPAREN[d] FormulaParser_expressions (COMMA FormulaParser_expressions)* ";
+        var ruleparser = new RuleParser<FormulaToken, Expression>();
+ 
+        
+        //
+        // LL_RECURSIVE => OK => get expected output
+        //
+        
+        var parser = GetParser<EbnfTokenGeneric, GrammarNode<FormulaToken, Expression>>(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule");
+
+        var r = parser.Parse(source, start);
+        Check.That(r).IsOkParsing();
+        
+        var tree = r.SyntaxTree;
+        Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<FormulaToken, Expression>>>();
+        var root = r.SyntaxTree as SyntaxNode<EbnfTokenGeneric, GrammarNode<FormulaToken, Expression>>;
+        Check.That(root).IsNotNull();
+        Check.That(r.Result).IsInstanceOf<ClauseSequence<FormulaToken,postProcessedLexerParser.expressionModel.Expression >> ();
+        var rule = r.Result as ClauseSequence<FormulaToken, Expression>;
+        var expected = rule.Dump();
+        
+        
+        //
+        // LL_STACK => get output and compare to expected (if parse succeeded at all)
+        //
+        
+        
+        parser = GetParser<EbnfTokenGeneric, GrammarNode<FormulaToken, Expression>>(ruleparser, ParserType.LL_STACK, "rule");
+        
+        r = parser.Parse(source, start);
+        Check.That(r).IsOkParsing();
+        tree = r.SyntaxTree;
+        Check.That(r.Result).IsInstanceOf<ClauseSequence<FormulaToken,postProcessedLexerParser.expressionModel.Expression >> ();
+        rule = r.Result as ClauseSequence<FormulaToken, Expression>;
+        var actual = rule.Dump();
+        Check.That(actual).IsEqualTo(expected);
+
+    }
 }
