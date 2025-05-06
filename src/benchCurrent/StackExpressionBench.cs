@@ -1,5 +1,6 @@
 using System;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Toolchains.CsProj;
@@ -15,6 +16,7 @@ namespace benchCurrent
     [MemoryDiagnoser]
     
     [Config(typeof(Config))]
+    //[Config(typeof(ConfigWithPercentage))]
     public class StackExpressionBench
     {
 
@@ -23,6 +25,7 @@ namespace benchCurrent
         {
             public Config()
             {
+                SummaryStyle = BenchmarkDotNet.Reports.SummaryStyle.Default.WithRatioStyle(RatioStyle.Trend);
                 var baseJob = Job.MediumRun.With(CsProjCoreToolchain.NetCoreApp80);
             }
         }
@@ -35,8 +38,8 @@ namespace benchCurrent
             expression = GetExpression(1000);
         }
         
-        [Params(ParserType.LL_RECURSIVE_DESCENT,ParserType.LL_STACK )]
-        public ParserType parserType { get; set; }
+        //[Params(ParserType.LL_RECURSIVE_DESCENT,ParserType.LL_STACK )]
+        //public ParserType parserType { get; set; }
 
         public string GetExpression(int max)
         {
@@ -57,13 +60,18 @@ Console.WriteLine(expr);
         }
 
 
+        [Benchmark(Baseline = true)]
+        public void recursive() => BenchLargeExpression(ParserType.LL_RECURSIVE_DESCENT);
+
         [Benchmark]
-        public void BenchLargeExpression()
+        public void stacked() => BenchLargeExpression(ParserType.LL_STACK);
+        
+        public void BenchLargeExpression(ParserType type)
         {
             var instance = new ExpressionParser();
             ParserBuilder<expressionparser.ExpressionToken, int> builder =
                 new ParserBuilder<expressionparser.ExpressionToken, int>();
-            var parser = builder.BuildParser(instance, parserType, "expression");
+            var parser = builder.BuildParser(instance, type, "expression");
             if (!parser.IsOk)
             {
                 foreach (var error in parser.Errors)
