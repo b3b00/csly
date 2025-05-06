@@ -7,12 +7,14 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.model;
+using expressionparser;
 using jsonparser;
 using jsonparser.JsonModel;
 using simpleExpressionParser;
 using sly.buildresult;
 using sly.parser;
 using sly.parser.generator;
+using ExpressionToken = simpleExpressionParser.ExpressionToken;
 
 namespace profiler
 {
@@ -120,7 +122,7 @@ if i == 589 then
         
         static void Main(string[] args)
         {
-	        ProfileExpressions(800, 2, false);
+	        ProfileExpressions(10000, 100, true);
             //ProfileJson();
             // for (int i = 0; i < 15; i++)
             // {
@@ -128,11 +130,13 @@ if i == 589 then
             // }
         }
 
-        static void ProfileExpressions(int max = 5000, int step = 2, bool progression=false)
+        static void ProfileExpressions(int max = 10000, int step = 100, bool progression=false)
         {
-	        SimpleExpressionParser parser = new SimpleExpressionParser();
-	        var builder = new ParserBuilder<ExpressionToken, double>();
-	        var b = builder.BuildParser(parser, ParserType.EBNF_LL_RECURSIVE_DESCENT);
+	        var instance = new ExpressionParser();
+	        ParserBuilder<expressionparser.ExpressionToken, int> builder =
+		        new ParserBuilder<expressionparser.ExpressionToken, int>();
+	        
+	        var b = builder.BuildParser(instance, ParserType.LL_STACK, "expression");
 	        if (b.IsError)
 	        {
 		        foreach (var error in b.Errors)
@@ -165,11 +169,11 @@ if i == 589 then
 	        }
         }
 
-        private static void SingleExpressionProfile(int max, BuildResult<Parser<ExpressionToken, double>> b)
+        private static void SingleExpressionProfile(int max, BuildResult<Parser<expressionparser.ExpressionToken, int>> b)
         {
 	        var rnd = new Random();
 	        //int width = rnd.Next(100, max);
-	        char[] ops = new[] { '+', '-', '*', '/' };
+	        char[] ops = new[] { '+', '-', '*' };
 	        var getOp = () => ops[rnd.Next(0, ops.Length)];
 	        var expression = rnd.Next(0, 100).ToString();
 	        for(int i = 0; i < max; i++)

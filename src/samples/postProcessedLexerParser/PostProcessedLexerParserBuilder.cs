@@ -10,7 +10,7 @@ namespace postProcessedLexerParser
     public class PostProcessedLexerParserBuilder
     {
         
-        private static List<Token<FormulaToken>> postProcessFormula(List<Token<FormulaToken>> tokens)
+        public static List<Token<FormulaToken>> postProcessFormula(List<Token<FormulaToken>> tokens)
         {
             var mayLeft = new List<FormulaToken>()
             {

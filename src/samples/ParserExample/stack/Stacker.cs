@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using expressionparser;
 using NFluent;
 using ParserTests;
@@ -12,7 +11,7 @@ using sly.parser.fluent;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
-using ExpressionToken = expressionparser.ExpressionToken;
+using postProcessedLexerParser.expressionModel;
 
 namespace ParserExample;
 
