@@ -461,7 +461,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             }
 
             Console.WriteLine(tab + message);
-            File.AppendAllText("c:/tmp/debug.txt", tab + message+"\n");
         }
     }
 
