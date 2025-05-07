@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NFluent;
+using postProcessedLexerParser;
 using Xunit;
 using postProcessedLexerParser.expressionModel;
 using sly.parser.generator;
@@ -14,6 +15,11 @@ namespace ParserTests
             RuleParserType.ParserType = ParserType.LL_STACK;
             var Parser = postProcessedLexerParser.PostProcessedLexerParserBuilder.buildPostProcessedLexerParser();
             
+            var parserInstance = new FormulaParser();
+            var builder = new ParserBuilder<FormulaToken, Expression>();
+            var build = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, $"{nameof(FormulaParser)}_expressions",
+                lexerPostProcess: PostProcessedLexerParserBuilder.postProcessFormula);
+            Check.That(build).IsOk();
             var r = Parser.Parse("2 * x");
             Check.That(r.IsError).IsFalse();
             

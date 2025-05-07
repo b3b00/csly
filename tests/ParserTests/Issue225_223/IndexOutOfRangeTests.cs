@@ -24,11 +24,8 @@ namespace ParserTests.Issue225_IndexOutOfRangeException
 
             var buildResult =
                 builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression");
-            // if (buildResult.IsError)
-            //     throw new AggregateException(
-            //         buildResult.Errors
-            //             .Select(e => new Exception($"{e.Level} {e.Code} {e.Message}"))
-            //     );
+       
+            Check.That(buildResult).IsOk();
             var parser = buildResult.Result;
 
             var queryExpression = parser.Parse(query.Trim());

@@ -112,10 +112,14 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     Log(state.DebugString+$" ended with {state.Successes.Count} successes",stack,1);
                     realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
                 } 
-                else if (state.Successes.Where(x => x.IsOk).Count() > 1)
+                else if (state.Successes.Count(x => x.IsOk) >= 1)
                 {
                     Log(state.DebugString+$" ended with {state.Successes.Count} successes",stack,1);
-                    realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
+                    var otherResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
+                    if (otherResult.EndingPosition > realResult.EndingPosition)
+                    {
+                        realResult = otherResult;
+                    }
                     Log($" choosing one ending at {realResult.EndingPosition}",stack,2);
                 }
                 if (state.Parent is RuleStackState<IN, OUT> ruleState)
@@ -353,7 +357,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             }
             else
             {
-                Log("OK",stack,1);
+                Log("OK Rule",stack,1);
             }
             // TODO : rule has ended ...
             if (state.Parent is NonTerminalStackState<IN, OUT> parentState)

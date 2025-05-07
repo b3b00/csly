@@ -317,8 +317,12 @@ public class Stacker
 
     public static void TestPostProcessedLexer()
     {
-        string start = "clauses";
-        string source = "IDENTIFIER LPAREN[d] FormulaParser_expressions (COMMA FormulaParser_expressions)* ";
+        string start = "rule";
+        string source = "rule : IDENTIFIER LPAREN[d] FormulaParser_expressions (COMMA FormulaParser_expressions)* ";
+        //string source = "IDENTIFIER LPAREN[d] FormulaParser_expressions (COMMA FormulaParser_expressions)* ";
+//        string source = "FormulaParser_expressions (COMMA FormulaParser_expressions)* ";
+        //string source = "(COMMA FormulaParser_expressions)* ";
+        //string source = "( COMMA FormulaParser_expressions )";
         var ruleparser = new RuleParser<FormulaToken, Expression>();
  
         
@@ -335,8 +339,8 @@ public class Stacker
         Check.That(r.SyntaxTree).IsInstanceOf<SyntaxNode<EbnfTokenGeneric, GrammarNode<FormulaToken, Expression>>>();
         var root = r.SyntaxTree as SyntaxNode<EbnfTokenGeneric, GrammarNode<FormulaToken, Expression>>;
         Check.That(root).IsNotNull();
-        Check.That(r.Result).IsInstanceOf<ClauseSequence<FormulaToken,postProcessedLexerParser.expressionModel.Expression >> ();
-        var rule = r.Result as ClauseSequence<FormulaToken, Expression>;
+        Check.That(r.Result).IsInstanceOf<Rule<FormulaToken,postProcessedLexerParser.expressionModel.Expression >> ();
+        var rule = r.Result as Rule<FormulaToken, Expression>;
         var expected = rule.Dump();
         
         
@@ -350,10 +354,13 @@ public class Stacker
         r = parser.Parse(source, start);
         Check.That(r).IsOkParsing();
         tree = r.SyntaxTree;
-        Check.That(r.Result).IsInstanceOf<ClauseSequence<FormulaToken,postProcessedLexerParser.expressionModel.Expression >> ();
-        rule = r.Result as ClauseSequence<FormulaToken, Expression>;
+        Check.That(r.Result).IsInstanceOf<Rule<FormulaToken,postProcessedLexerParser.expressionModel.Expression >> ();
+        rule = r.Result as Rule<FormulaToken, Expression>;
         var actual = rule.Dump();
         Check.That(actual).IsEqualTo(expected);
-
+Console.WriteLine("***************************************");
+Console.WriteLine("*** YAHOO ! WE'VE DONE A GREAT JOB");
+Console.WriteLine($"*** {actual} == {expected}");
+Console.WriteLine("***************************************");
     }
 }
