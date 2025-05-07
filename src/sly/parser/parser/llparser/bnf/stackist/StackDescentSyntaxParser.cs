@@ -40,7 +40,9 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     public void Init(ParserConfiguration<IN, OUT> configuration, string root)
     {
         Configuration = configuration;
-        InitializeStartingTokens(Configuration, root ?? configuration.StartingRule);
+        RecursiveDescentSyntaxParser<IN, OUT> recursive =
+            new RecursiveDescentSyntaxParser<IN, OUT>(configuration, configuration.StartingRule, I18n);
+        recursive.Init(configuration, configuration.StartingRule);
     }
 
     public string Dump() => Configuration.Dump();

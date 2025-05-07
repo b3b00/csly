@@ -12,15 +12,28 @@ namespace ParserTests
         {
             var parserInstance = new ExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, int>();
-            Parser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression").Result;
+            RecursiveParser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression").Result;
+            StackParser = builder.BuildParser(parserInstance, ParserType.LL_STACK, "expression").Result;
+            
+            
         }
 
-        private readonly Parser<ExpressionToken, int> Parser;
+        private readonly Parser<ExpressionToken, int> RecursiveParser;
+        
+        private readonly Parser<ExpressionToken, int> StackParser;
 
         [Fact]
         public void TestFactorDivide()
         {
-            var r = Parser.Parse("42/2");
+            var r = RecursiveParser.Parse("42/2");
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsEqualTo(21);
+        }
+        
+        [Fact]
+        public void TestFactorDivideStack()
+        {
+            var r = StackParser.Parse("42/2");
             Check.That(r.IsError).IsFalse();
             Check.That(r.Result).IsEqualTo(21);
         }
@@ -28,7 +41,15 @@ namespace ParserTests
         [Fact]
         public void TestFactorTimes()
         {
-            var r = Parser.Parse("2*2");
+            var r = RecursiveParser.Parse("2*2");
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsEqualTo(4);
+        }
+        
+        [Fact]
+        public void TestFactorTimesStack()
+        {
+            var r = StackParser.Parse("2*2");
             Check.That(r.IsError).IsFalse();
             Check.That(r.Result).IsEqualTo(4);
         }
@@ -36,7 +57,15 @@ namespace ParserTests
         [Fact]
         public void TestGroup()
         {
-            var r = Parser.Parse("(2 + 2)");
+            var r = RecursiveParser.Parse("(2 + 2)");
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsEqualTo(4);
+        }
+        
+        [Fact]
+        public void TestGroupStack()
+        {
+            var r = StackParser.Parse("(2 + 2)");
             Check.That(r.IsError).IsFalse();
             Check.That(r.Result).IsEqualTo(4);
         }
@@ -44,7 +73,15 @@ namespace ParserTests
         [Fact]
         public void TestGroup2()
         {
-            var r = Parser.Parse("6 * (2 + 2)");
+            var r = RecursiveParser.Parse("6 * (2 + 2)");
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsEqualTo(24);
+        }
+        
+        [Fact]
+        public void TestGroup2Stack()
+        {
+            var r = StackParser.Parse("6 * (2 + 2)");
             Check.That(r.IsError).IsFalse();
             Check.That(r.Result).IsEqualTo(24);
         }
@@ -52,7 +89,15 @@ namespace ParserTests
         [Fact]
         public void TestPrecedence()
         {
-            var r = Parser.Parse("6 * 2 + 2");
+            var r = RecursiveParser.Parse("6 * 2 + 2");
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsEqualTo(14);
+        }
+        
+        [Fact]
+        public void TestPrecedenceStack()
+        {
+            var r = StackParser.Parse("6 * 2 + 2");
             Check.That(r.IsError).IsFalse();
             Check.That(r.Result).IsEqualTo(14);
         }
@@ -60,7 +105,15 @@ namespace ParserTests
         [Fact]
         public void TestSingleNegativeValue()
         {
-            var r = Parser.Parse("-1");
+            var r = RecursiveParser.Parse("-1");
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsEqualTo(-1);
+        }
+        
+        [Fact]
+        public void TestSingleNegativeValueStack()
+        {
+            var r = StackParser.Parse("-1");
             Check.That(r.IsError).IsFalse();
             Check.That(r.Result).IsEqualTo(-1);
         }
@@ -69,7 +122,15 @@ namespace ParserTests
         [Fact]
         public void TestSingleValue()
         {
-            var r = Parser.Parse("1");
+            var r = RecursiveParser.Parse("1");
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsEqualTo(1);
+        }
+        
+        [Fact]
+        public void TestSingleValueStack()
+        {
+            var r = StackParser.Parse("1");
             Check.That(r.IsError).IsFalse();
             Check.That(r.Result).IsEqualTo(1);
         }
@@ -77,7 +138,15 @@ namespace ParserTests
         [Fact]
         public void TestTermMinus()
         {
-            var r = Parser.Parse("1 - 1");
+            var r = RecursiveParser.Parse("1 - 1");
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsEqualTo(0);
+        }
+        
+        [Fact]
+        public void TestTermMinusStack()
+        {
+            var r = StackParser.Parse("1 - 1");
             Check.That(r.IsError).IsFalse();
             Check.That(r.Result).IsEqualTo(0);
         }
@@ -85,7 +154,15 @@ namespace ParserTests
         [Fact]
         public void TestTermPlus()
         {
-            var r = Parser.Parse("1 + 1");
+            var r = RecursiveParser.Parse("1 + 1");
+            Check.That(r.IsError).IsFalse();
+            Check.That(r.Result).IsEqualTo(2);
+        }
+        
+        [Fact]
+        public void TestTermPlusStack()
+        {
+            var r = StackParser.Parse("1 + 1");
             Check.That(r.IsError).IsFalse();
             Check.That(r.Result).IsEqualTo(2);
         }
@@ -93,15 +170,27 @@ namespace ParserTests
         [Fact]
         public void TestIssue351NotReachingEOS()
         {
-            var r = Parser.Parse("1 + 1 + 1");
-            Check.That(r.IsError).IsFalse();
+            var r = RecursiveParser.Parse("1 + 1 + 1");
+            Check.That(r).IsOkParsing();
             
-            r = Parser.Parse("1 + 1 + ");
-            Check.That(r.IsError).IsTrue();
+            r = RecursiveParser.Parse("1 + 1 + ");
+            Check.That(r).Not.IsOkParsing();
             Check.That(r.Errors).CountIs(1);
+            var error = r.Errors[0];
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+        }
+        
+        [Fact]
+        public void TestIssue351NotReachingEOSStack()
+        {
+            var r = StackParser.Parse("1 + 1 + 1");
+            Check.That(r).IsOkParsing();
             
-            
-            
+            r = RecursiveParser.Parse("1 + 1 + ");
+            Check.That(r).Not.IsOkParsing();
+            Check.That(r.Errors).CountIs(1);
+            var error = r.Errors[0];
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
         }
     }
 }
