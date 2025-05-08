@@ -66,6 +66,10 @@ public class NonTerminalStackState<IN, OUT> : StackState<IN, OUT> where IN : str
     public void SetResult(SyntaxParseResult<IN, OUT> result)
     {
         Result = result;
+        if (result.IsOk)
+        {
+            AddSuccess(result);
+        }
     }
 
     public override string ToString()
