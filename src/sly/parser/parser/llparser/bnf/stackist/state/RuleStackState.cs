@@ -68,6 +68,12 @@ public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
   
     public List<SyntaxParseResult<IN,OUT>> Children { get; set; } = new ();
 
+    public override void SetResult(SyntaxParseResult<IN, OUT> result)
+    {
+        base.SetResult(result);
+        AddChild(result);
+    }
+
     public void AddChild(SyntaxParseResult<IN, OUT> result)
     {
         if (Id == 9)

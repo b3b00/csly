@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using expressionparser;
 using NFluent;
 using ParserTests;
@@ -28,6 +30,22 @@ public enum L
     [Keyword("B")] B,
     [Sugar("+")] PLUS,
     [Sugar("-")] MINUS
+}
+
+
+public class SimpleEBNFZeroPlus
+{
+    [Production("root : astar")]
+    public string Root(string astar)
+    {
+        return astar;
+    }
+
+    [Production("astar : A*")]
+    public string Astar(List<Token<L>> all)
+    {
+        return string.Join(",",all.Select(x => x.Value));
+    }
 }
 
 public class Visitor {
@@ -362,5 +380,19 @@ Console.WriteLine("***************************************");
 Console.WriteLine("*** YAHOO ! WE'VE DONE A GREAT JOB");
 Console.WriteLine($"*** {actual} == {expected}");
 Console.WriteLine("***************************************");
+    }
+
+    public static void TestEbnfSimpleZeroOrMore()
+    {
+        var ebnf = new SimpleEBNFZeroPlus();
+        
+        var parser = GetParser<EbnfTokenGeneric, GrammarNode<L, string>>(ebnf, ParserType.EBNF_LL_STACK, "rule");
+
+        Check.That(parser).IsNotNull();
+
+        var parseResult = parser.Parse(" a  a  a a");
+        Check.That(parseResult).IsOkParsing();
+        var result = parseResult.Result;
+        Check.That(result).IsEqualTo("a,a,a,a");
     }
 }

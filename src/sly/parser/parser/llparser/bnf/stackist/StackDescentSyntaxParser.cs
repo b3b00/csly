@@ -27,7 +27,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     public ParserConfiguration<IN, OUT> Configuration { get; set; }
 
     public string StartingNonTerminal { get; set; }
-
+    
     public string I18n { get; set; }
 
     public StackDescentSyntaxParser(string i18n,
@@ -46,6 +46,12 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     }
 
     public string Dump() => Configuration.Dump();
+
+
+    public virtual void ParseExtension(StackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    {
+        
+    }
     
     public SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, string startingNonTerminal = null)
     {
@@ -93,6 +99,11 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 {
                     return rootState.Result;
                 }
+                default:
+                {
+                    ParseExtension(current, stack);
+                    break;
+                }
             }
             current = stack.Pop();
         }
@@ -122,7 +133,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 }
                 if (state.Parent is RuleStackState<IN, OUT> ruleState)
                 {
-                    ruleState.AddChild(realResult);
+                    ruleState.SetResult(realResult);
                 }
                 else if (state.Parent is RootStackState<IN, OUT> rootState)
                 {
@@ -148,7 +159,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     var last = state.Successes.OrderBy(x => x.EndingPosition).Last();
                     if (state.Parent is RuleStackState<IN, OUT> rState)
                     {
-                        rState.AddChild(result);
+                        rState.SetResult(result);
                     }
                     else if (state.Parent is RootStackState<IN, OUT> rootState)
                     {
@@ -178,7 +189,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
                 if (state.Parent is RuleStackState<IN, OUT> ruleState)
                 {
-                    ruleState.AddChild(result);
+                    ruleState.SetResult(result);
                 }
                 else if (state.Parent is RootStackState<IN, OUT> rootState)
                 {
@@ -197,7 +208,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 // here : last rule returned OK => returning right now
                 if (state.Parent is RuleStackState<IN, OUT> ruleState)
                 {
-                    ruleState.AddChild(state.Result);
+                    ruleState.SetResult(state.Result);
                 }
                 else if (state.Parent is RootStackState<IN, OUT> rootState)
                 {
@@ -230,7 +241,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             {
                 if (state.Parent is RuleStackState<IN, OUT> ruleState)
                 {
-                    ruleState.AddChild(state.Result);
+                    ruleState.SetResult(state.Result);
                 }
                 else if (state.Parent is RootStackState<IN, OUT> rootState)
                 {
@@ -278,7 +289,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, expected.ToArray()));
                 if (state.Parent is RuleStackState<IN, OUT> ruleState)
                 {
-                    ruleState.AddChild(result);
+                    ruleState.SetResult(result);
                 }
                 else if (state.Parent is RootStackState<IN, OUT> rootState)
                 {
@@ -327,15 +338,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
         }
 
-        if (state.Parent is RuleStackState<IN, OUT> parentState)
-        {
-            parentState.AddChild(result);
-        }
-        else
-        {
-            throw new Exception(
-                $"HOOPS something bad here ! terminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
-        }
+        
+        state.Parent.SetResult(result);
     }
 
     private void ParseRule(RuleStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
@@ -413,32 +417,49 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
             // then push the clause
 
-            switch (clause)
-            {
-                case TerminalClause<IN, OUT> terminalClause:
-                {
-                    var terminalState = new TerminalStackState<IN, OUT>(state, terminalClause)
-                    {
-                        Tokens = state.Tokens,
-                        Position = newPosition
-                    };
-                    stack.Push(terminalState);
-                    break;
-                }
-                case NonTerminalClause<IN, OUT> nonTerminalClause:
-                {
-                    var nonTerminalState = new NonTerminalStackState<IN, OUT>(state, nonTerminalClause)
-                    {
-                        Tokens = state.Tokens,
-                        Position = state.Position
-                    };
-                    stack.Push(nonTerminalState);
-                    break;
-                }
-            }
+            
+            PushClause(clause, stack, state);
         }
     }
-   
+
+
+    public void PushClause(IClause<IN, OUT> clause, Stack<StackState<IN, OUT>> stack, StackState<IN,OUT> parent)
+    {
+        switch (clause)
+        {
+            case TerminalClause<IN, OUT> terminalClause:
+            {
+                var terminalState = new TerminalStackState<IN, OUT>(parent, terminalClause)
+                {
+                    Tokens = parent.Tokens,
+                    Position = parent.Position
+                };
+                stack.Push(terminalState);
+                break;
+            }
+            case NonTerminalClause<IN, OUT> nonTerminalClause:
+            {
+                var nonTerminalState = new NonTerminalStackState<IN, OUT>(parent, nonTerminalClause)
+                {
+                    Tokens = parent.Tokens,
+                    Position = parent.Position
+                };
+                stack.Push(nonTerminalState);
+                break;
+            }
+            default:
+            {
+                PushClauseExtension(clause, stack, parent);
+                break;
+            }
+            
+        }
+    }
+
+    public virtual void PushClauseExtension(IClause<IN, OUT> clause, Stack<StackState<IN, OUT>> stack, StackState<IN,OUT> parent)
+    {
+        
+    }
 
     private void Log(string message, Stack<StackState<IN, OUT>> stack, int plus = 0)
     {

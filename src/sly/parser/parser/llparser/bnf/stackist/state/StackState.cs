@@ -44,7 +44,7 @@ public class StackState<IN, OUT> where IN : struct, Enum
         Type = StackStateType.Root;
     }
 
-    public void SetResult(SyntaxParseResult<IN, OUT> result)
+    public virtual void SetResult(SyntaxParseResult<IN, OUT> result)
     {
         if (result == null)
         {
