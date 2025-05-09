@@ -13,6 +13,8 @@ using Xunit;
 
 namespace ParserTests.samples
 {
+    
+    [Collection("WhileLang")]
     public class IndentedWhileTests
     {
         private static BuildResult<Parser<IndentedWhileTokenGeneric, WhileAST>> Parser;

@@ -13,6 +13,7 @@ using Xunit;
 
 namespace ParserTests.samples
 {
+    [Collection("WhileLang")]
     public class FluentIndentedWhileTests
     {
         private static BuildResult<Parser<IndentedWhileTokenGeneric, WhileAST>> Parser;
@@ -237,6 +238,7 @@ return a
 
 
         [Fact]
+        
         public void TestFString()
         {
             var buildResult = buildParser();
