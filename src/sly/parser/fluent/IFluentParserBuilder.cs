@@ -19,9 +19,9 @@ public interface IFluentParserBuilder<IN,OUT> where IN : struct, Enum
     IFluentParserBuilder<IN,OUT> Production(string ruleString, Func<object[], OUT> visitor);
     
     
-    public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result); 
+    public ISyntaxParser<IN, OUT> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result, ParserType parserType = ParserType.LL_RECURSIVE_DESCENT); 
     
-    public BuildResult<Parser<IN, OUT>> BuildParser();
+    public BuildResult<Parser<IN, OUT>> BuildParser(ParserType parserType = ParserType.LL_RECURSIVE_DESCENT);
 
     public IFluentParserBuilder<IN, OUT> WithLexerbuilder(IFluentLexerBuilder<IN> lexerBuilder);
 

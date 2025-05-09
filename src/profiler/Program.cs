@@ -1,11 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.model;
+using expressionparser;
 using jsonparser;
 using jsonparser.JsonModel;
+using simpleExpressionParser;
+using sly.buildresult;
+using sly.parser;
 using sly.parser.generator;
+using ExpressionToken = simpleExpressionParser.ExpressionToken;
 
 namespace profiler
 {
@@ -113,11 +123,123 @@ if i == 589 then
         
         static void Main(string[] args)
         {
-            //ProfileJson();
-            for (int i = 0; i < 15; i++)
-            {
-                ProfileWhile();
-            }
+	        Dictionary<int,Dictionary<ParserType,long>> timings = new Dictionary<int, Dictionary<ParserType,long>>();
+	        ProfileExpressions(10000, 100, true, timings);            
+        }
+
+        static void ProfileExpressions(int max, int step, bool progression,
+	        Dictionary<int, Dictionary<ParserType, long>> timings)
+        {
+	        var instance = new ExpressionParser();
+	        ParserBuilder<expressionparser.ExpressionToken, int> builder =
+		        new ParserBuilder<expressionparser.ExpressionToken, int>();
+
+	        var types = new List<ParserType>() { ParserType.LL_STACK, ParserType.LL_RECURSIVE_DESCENT };
+	        foreach (var type in types)
+	        {
+		        Console.WriteLine();
+		        Console.WriteLine(type);
+		        var b = builder.BuildParser(instance, type, "expression");
+		        if (b.IsError)
+		        {
+			        foreach (var error in b.Errors)
+			        {
+				        Console.WriteLine(error.Message);
+			        }
+			        return;
+		        }
+
+
+
+		        if (progression)
+		        {
+			        for (int i = 2; i < max; i += step)
+			        {
+				        Console.Write(i);
+
+				        Stopwatch watch = new Stopwatch();
+				        watch.Start();
+				        SingleExpressionProfile(i, b);
+				        watch.Stop();
+
+				        Dictionary<ParserType, long> timing;
+				        if (!timings.TryGetValue(i, out timing))
+				        {
+					        timing = new Dictionary<ParserType, long>();
+				        }
+
+				        timing[type] = watch.ElapsedMilliseconds;
+				        timings[i] = timing;
+				        var pos = Console.GetCursorPosition();
+				        var l = i.ToString().Length;
+				        Console.SetCursorPosition(pos.Left - l, pos.Top);
+				        WriteTimings(timings, types);
+			        }
+		        }
+		        else
+		        {
+			        SingleExpressionProfile(max, b);
+		        }
+	        }
+
+	        
+
+	        
+        }
+
+        private static void WriteTimings(Dictionary<int, Dictionary<ParserType, long>> timings, List<ParserType> types)
+        {
+	        var csvBuilder = new StringBuilder();
+	        csvBuilder.Append("time");
+	        foreach (var type in types)
+	        {
+		        csvBuilder.Append($";{type}");
+	        }
+	        foreach (var line in timings)
+	        {
+		        csvBuilder.Append($"\n{line.Key}");
+		        foreach (var type in types)
+		        {
+			        csvBuilder.Append(";");
+			        if (line.Value.TryGetValue(type, out var value)) 
+			        {
+				        csvBuilder.Append(value);
+			        }
+		        }
+	        }
+	        if (File.Exists("c:/tmp/progression.csv"))
+	        {
+		        File.Delete("c:/tmp/progresssion.csv");
+	        }
+	        
+	        File.WriteAllText("c:/tmp/progression.csv",csvBuilder.ToString());
+        }
+
+        private static void SingleExpressionProfile(int max, BuildResult<Parser<expressionparser.ExpressionToken, int>> b)
+        {
+	        var rnd = new Random();
+	        //int width = rnd.Next(100, max);
+	        char[] ops = new[] { '+', '-', '*' };
+	        var getOp = () => ops[rnd.Next(0, ops.Length)];
+	        var expression = rnd.Next(0, 100).ToString();
+	        for(int i = 0; i < max; i++)
+	        {
+		        var op = getOp();
+		        var right = rnd.Next(0, 100);
+		        expression += $"{op} {right}";
+		       
+	        }
+	        //Console.WriteLine($"parsing {expression}");
+	        var result = b.Result.Parse(expression);
+	        if (result.IsError)
+	        {
+		        File.WriteAllLines("c:/progress_errors.txt", new[] { expression });
+		        File.WriteAllLines("c:/progress_errors.txt", result.Errors.Select(x => x.ErrorMessage).ToArray() );
+		        Console.WriteLine($"error parsing {expression}");
+		        Environment.Exit(max);
+
+		        return;
+	        }
         }
 
         private static void ProfileJson()

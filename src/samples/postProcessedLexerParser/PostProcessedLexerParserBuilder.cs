@@ -10,7 +10,7 @@ namespace postProcessedLexerParser
     public class PostProcessedLexerParserBuilder
     {
         
-        private static List<Token<FormulaToken>> postProcessFormula(List<Token<FormulaToken>> tokens)
+        public static List<Token<FormulaToken>> postProcessFormula(List<Token<FormulaToken>> tokens)
         {
             var mayLeft = new List<FormulaToken>()
             {
@@ -50,6 +50,7 @@ namespace postProcessedLexerParser
             var builder = new ParserBuilder<FormulaToken, Expression>();
             var build = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, $"{nameof(FormulaParser)}_expressions",
                 lexerPostProcess: postProcessFormula);
+            
             if (build.IsError)
             {
                 foreach (var error in build.Errors)

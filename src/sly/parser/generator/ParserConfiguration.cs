@@ -9,6 +9,10 @@ namespace sly.parser.generator
 {
     public class ParserConfiguration<IN, OUT> where IN : struct, Enum
     {
+        public bool IsError { get; set; } = false;
+
+        public List<string> Errors = new List<string>();
+        
         public string StartingRule { get; set; }
         public Dictionary<string, NonTerminal<IN, OUT>> NonTerminals { get; set; }
 
@@ -70,6 +74,12 @@ namespace sly.parser.generator
                 return nonTerminalConfig.Rules.ToList();
             }
             return new List<Rule<IN, OUT>>();
+        }
+        
+        public void AddError(string error)
+        {
+            IsError = true;
+            Errors.Add(error);
         }
         
         [ExcludeFromCodeCoverage]

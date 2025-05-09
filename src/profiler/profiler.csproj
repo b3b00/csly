@@ -8,6 +8,7 @@
     <ItemGroup>
       <ProjectReference Include="..\samples\IndentedWhile\indentedWhile.csproj" />
       <ProjectReference Include="..\samples\jsonparser\jsonparser.csproj" />
+      <ProjectReference Include="..\samples\SimpleExpressionParser\SimpleExpressionParser.csproj" />
       <ProjectReference Include="..\samples\while\while.csproj" />
       <ProjectReference Include="..\sly\sly.csproj" />
     </ItemGroup>

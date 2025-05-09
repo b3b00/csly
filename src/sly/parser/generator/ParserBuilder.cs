@@ -9,6 +9,7 @@ using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser.generator.visitor;
 using sly.parser.llparser.bnf;
+using sly.parser.llparser.bnf.stackist;
 using sly.parser.parser;
 using sly.parser.syntax.grammar;
 
@@ -90,6 +91,31 @@ namespace sly.parser.generator
                         extensionBuilder, lexerPostProcess);
                     break;
                 }
+                case ParserType.LL_STACK:
+                {
+                    var configuration = ExtractParserConfiguration(parserInstance.GetType());
+                    var (foundRecursion, recursions) = LeftRecursionChecker<IN, OUT>.CheckLeftRecursion(configuration);
+                    if (foundRecursion)
+                    {
+                        var recs = string.Join("\n",
+                            recursions.Select<List<string>, string>(x => string.Join(" > ", x)));
+                        result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
+                            i18n.I18N.Instance.GetText(I18N, I18NMessage.LeftRecursion, recs),
+                            ErrorCodes.PARSER_LEFT_RECURSIVE));
+                        return result;
+                    }
+
+                    configuration.StartingRule = rootRule;
+                    //var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
+                    var syntaxParser = new StackDescentSyntaxParser<IN, OUT>("en", configuration);
+                    var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
+                    parser = new Parser<IN, OUT>(I18N, syntaxParser, visitor);
+
+                    parser.Instance = parserInstance;
+                    parser.Configuration = configuration;
+                    result.Result = parser;
+                    break;
+                }
             }
 
             parser = result.Result;
@@ -143,6 +169,10 @@ namespace sly.parser.generator
             if(parserType == ParserType.LL_RECURSIVE_DESCENT)
             {
                 parser = new RecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
+            }
+            else if (parserType == ParserType.LL_STACK)
+            {
+                parser = new StackDescentSyntaxParser<IN, OUT>(I18N, conf);
             }
             return parser;
         }

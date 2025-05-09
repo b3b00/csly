@@ -49,3 +49,4 @@ BenchmarkDotNet.Artifacts
 AotTester/*
 *.dtp
 *.dtp.state
+src/samples/HandMadeExpres*

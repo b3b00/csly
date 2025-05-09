@@ -1,5 +1,6 @@
 ﻿using System;
 using BenchmarkDotNet.Running;
+using sly.parser.generator;
 
 namespace benchCurrent
 {
@@ -15,7 +16,13 @@ namespace benchCurrent
             // var summary3 = BenchmarkRunner.Run<WhileBench>();
 
             //var summary4 = BenchmarkRunner.Run<SimpleExpressionBench>();
-            var summary5 = BenchmarkRunner.Run<JsonStringEscapingBench>();
+            
+            // StackExpressionBench bench = new StackExpressionBench();
+            // bench.parserType = ParserType.LL_RECURSIVE_DESCENT;
+            // bench.Setup();
+            // bench.BenchLargeExpression();
+            
+            var summary5 = BenchmarkRunner.Run<StackExpressionBench>();
 
         }
         static void Main(string[] args)
