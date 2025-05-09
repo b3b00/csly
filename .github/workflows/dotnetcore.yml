@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
         matrix:
-          os: [ubuntu-latest, windows-latest]
+          os: [ubuntu-latest]
     steps:
     - uses: actions/checkout@v2
     - name: Setup .NET Core
@@ -53,7 +53,7 @@ jobs:
           **/*.trx
     - name: coveralls
       uses: coverallsapp/github-action@v1.1.1
-      if: matrix.os == 'windows-latest' && env.RUN_TESTS
+      if: matrix.os == 'ubuntu-latest' && env.RUN_TESTS
       with:
         github-token: ${{secrets.GITHUB_TOKEN }}
         path-to-lcov: ${{steps.coverlet.outputs.coverageFile}}
@@ -71,7 +71,7 @@ jobs:
       with:
            path: coveragereport/Summary.md
     - name: publish nuget
-      if:  ${{success() && matrix.os == 'windows-latest' && env.PUBLISH_NUGET}}
+      if:  ${{success() && matrix.os == 'ubuntu-latest' && env.PUBLISH_NUGET}}
       id: publish_nuget
       uses: alirezanet/publish-nuget@v3.0.0
       with:
@@ -81,7 +81,7 @@ jobs:
           VERSION_FILE_PATH: ${{env.MAIN_CSPROJ}}
           INCLUDE_SYMBOLS: true
     - name: Create Release
-      if: ${{ success() && matrix.os == 'windows-latest' && steps.publish_nuget.outputs.VERSION != ''  && steps.publish_nuget.outputs.VERSION != null }}
+      if: ${{ success() && matrix.os == 'ubuntu-latest' && steps.publish_nuget.outputs.VERSION != ''  && steps.publish_nuget.outputs.VERSION != null }}
       id: create_release
       uses: b3b00/create-release@1.0.7
       env:
@@ -93,7 +93,7 @@ jobs:
         prerelease: false
         failsOnCreationError: false   
     - name: Upload Release nuget Asset
-      if: ${{ success() && matrix.os == 'windows-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
+      if: ${{ success() && matrix.os == 'ubuntu-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
       id: upload-release-nuget-asset 
       uses: actions/upload-release-asset@v1
       env:
@@ -104,7 +104,7 @@ jobs:
         asset_name: ${{ steps.publish_nuget.outputs.PACKAGE_NAME }}
         asset_content_type: application/zip
     - name: Upload Release symbols nuget Asset
-      if: ${{ success() && matrix.os == 'windows-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
+      if: ${{ success() && matrix.os == 'ubuntu-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
       id: upload-release-nuget-symbols-asset 
       uses: actions/upload-release-asset@v1
       env:
