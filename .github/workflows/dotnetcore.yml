@@ -13,6 +13,7 @@ on:
       - dev
 permissions:
   pull-requests: write
+  checks: write
 jobs:  
   build:
     env:
@@ -44,7 +45,12 @@ jobs:
         threshold: 80
         outputFormat: 'lcov'
         excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*,[postProcessedLexerParser]*,[XML]*,[SimpleTemplate]*,[SlowEOS]*'
-
+    - name: Publish Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      if: always()
+      with:
+        files: |
+          **/*.trx
     - name: coveralls
       uses: coverallsapp/github-action@v1.1.1
       if: matrix.os == 'windows-latest' && env.RUN_TESTS
