@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.model;
@@ -122,51 +123,103 @@ if i == 589 then
         
         static void Main(string[] args)
         {
-	        ProfileExpressions(10000, 100, true);
-            //ProfileJson();
-            // for (int i = 0; i < 15; i++)
-            // {
-            //     ProfileWhile();
-            // }
+	        Dictionary<int,Dictionary<ParserType,long>> timings = new Dictionary<int, Dictionary<ParserType,long>>();
+	        ProfileExpressions(10000, 100, true, timings);            
         }
 
-        static void ProfileExpressions(int max = 10000, int step = 100, bool progression=false)
+        static void ProfileExpressions(int max, int step, bool progression,
+	        Dictionary<int, Dictionary<ParserType, long>> timings)
         {
 	        var instance = new ExpressionParser();
 	        ParserBuilder<expressionparser.ExpressionToken, int> builder =
 		        new ParserBuilder<expressionparser.ExpressionToken, int>();
-	        
-	        var b = builder.BuildParser(instance, ParserType.LL_STACK, "expression");
-	        if (b.IsError)
+
+	        var types = new List<ParserType>() { ParserType.LL_STACK, ParserType.LL_RECURSIVE_DESCENT };
+	        foreach (var type in types)
 	        {
-		        foreach (var error in b.Errors)
+		        Console.WriteLine();
+		        Console.WriteLine(type);
+		        var b = builder.BuildParser(instance, type, "expression");
+		        if (b.IsError)
 		        {
-			        Console.WriteLine(error.Message);
+			        foreach (var error in b.Errors)
+			        {
+				        Console.WriteLine(error.Message);
+			        }
+			        return;
 		        }
-		        return;
+
+		        
+
+		        if (progression)
+		        {
+			        for (int i = 2; i < max; i += step)
+			        {
+						Console.Write(i);
+				        
+						Stopwatch watch = new Stopwatch();
+				        try
+				        {
+					        watch.Start();
+					        SingleExpressionProfile(i, b);
+					        watch.Stop();
+				        }
+				        catch (StackOverflowException soex)
+				        {
+					        break;
+				        }
+				        
+				        Dictionary<ParserType, long> timing;
+				        if (!timings.TryGetValue(i, out timing))
+				        {
+					        timing = new Dictionary<ParserType, long>();
+				        }
+				        
+				        timing[type] = watch.ElapsedMilliseconds;
+				        timings[i] = timing;
+				        var pos = Console.GetCursorPosition();
+				        var l = i.ToString().Length;
+				        Console.SetCursorPosition(pos.Left-l,pos.Top);
+				        WriteTimings(timings, types);
+			        }
+		        }
+		        else
+		        {
+			        SingleExpressionProfile(max, b);
+		        }
 	        }
 
-	        List<(int count, long time)> results = new();
 	        
-	        if (progression)
+
+	        
+        }
+
+        private static void WriteTimings(Dictionary<int, Dictionary<ParserType, long>> timings, List<ParserType> types)
+        {
+	        var csvBuilder = new StringBuilder();
+	        csvBuilder.Append("time");
+	        foreach (var type in types)
 	        {
-		        for (int i = 2; i < max; i += step)
+		        csvBuilder.Append($";{type}");
+	        }
+	        foreach (var line in timings)
+	        {
+		        csvBuilder.Append($"\n{line.Key}");
+		        foreach (var type in types)
 		        {
-			        
-			        Stopwatch watch = new Stopwatch();
-			        watch.Start();
-			        SingleExpressionProfile(i,b);
-			        watch.Stop();
-			        results.Add((i, watch.ElapsedMilliseconds));
-			        Console.WriteLine($"{i}: {watch.ElapsedMilliseconds} ms");
-			        File.AppendAllText("c:/tmp/progression.csv", $"{i};{watch.ElapsedMilliseconds}\n");
-		        }  
-		        
+			        csvBuilder.Append(";");
+			        if (line.Value.TryGetValue(type, out var value)) 
+			        {
+				        csvBuilder.Append(value);
+			        }
+		        }
 	        }
-	        else
+	        if (File.Exists("c:/tmp/progression.csv"))
 	        {
-		        SingleExpressionProfile(max, b);
+		        File.Delete("c:/tmp/progresssion.csv");
 	        }
+	        
+	        File.WriteAllText("c:/tmp/progression.csv",csvBuilder.ToString());
         }
 
         private static void SingleExpressionProfile(int max, BuildResult<Parser<expressionparser.ExpressionToken, int>> b)
@@ -194,7 +247,6 @@ if i == 589 then
 
 		        return;
 	        }
-	        Console.WriteLine("OK");
         }
 
         private static void ProfileJson()

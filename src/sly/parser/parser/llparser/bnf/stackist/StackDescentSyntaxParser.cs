@@ -219,7 +219,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 {
                     // TODO : end of token stream not reached, looking forward
                     // TODO : but now we must take a trace of successful branches !
-                    state.AddSuccess(state.Result);
+                    // TODO TEST UT FIX vs PERF : state.AddSuccess(state.Result);
                     //Log("end of token stream not reached, looking forward", stack, 1);
                 }
 
