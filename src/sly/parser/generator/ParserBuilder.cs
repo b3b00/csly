@@ -107,7 +107,7 @@ namespace sly.parser.generator
 
                     configuration.StartingRule = rootRule;
                     //var syntaxParser = BuildSyntaxParser(configuration, parserType, rootRule);
-                    var syntaxParser = new StackDescentSyntaxParser<IN, OUT>("en", configuration);//TODO
+                    var syntaxParser = new StackDescentSyntaxParser<IN, OUT>("en", configuration);
                     var visitor = new SyntaxTreeVisitor<IN, OUT>(configuration, parserInstance);
                     parser = new Parser<IN, OUT>(I18N, syntaxParser, visitor);
 

@@ -210,17 +210,14 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 }
 
                 bool hasParseEnded = state.Result.EndingPosition  >= state.Tokens.Length-1;
-                // TODO : other rules may beter match if  parse has not ended
+                // other rules may beter match if  parse has not ended
                 if (hasParseEnded)
                 {
                     return;
                 }
                 else
                 {
-                    // TODO : end of token stream not reached, looking forward
-                    // TODO : but now we must take a trace of successful branches !
-                    // TODO TEST UT FIX vs PERF : state.AddSuccess(state.Result);
-                    //Log("end of token stream not reached, looking forward", stack, 1);
+                    Log("end of token stream not reached, looking forward", stack, 1);
                 }
 
                 //return;
@@ -256,7 +253,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             
             if (state.Position >= state.Tokens.Length)
             {
-                return; // TODO ??? 
+                return; 
             }
 
             if (rule.Match(state.Tokens, state.Position, Configuration))
@@ -339,8 +336,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             throw new Exception(
                 $"HOOPS something bad here ! terminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
         }
-        // TODO more ? I don't think so 
-
     }
 
     private void ParseRule(RuleStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
@@ -357,12 +352,9 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             {
                 Log("OK Rule",stack,1);
             }
-            // TODO : rule has ended ...
+            
             if (state.Parent is NonTerminalStackState<IN, OUT> parentState)
             {
-                
-                
-                // TODO : get build the result
                 var result = new SyntaxParseResult<IN, OUT>();
 
                 if (state.LastResult.IsError)
@@ -385,7 +377,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                         name = state.Rule.NonTerminalName;
                     }
                     var node = new SyntaxNode<IN, OUT>(name,
-                        state.Children.Select(x => x.Root).ToList()); // TODO ??
+                        state.Children.Select(x => x.Root).ToList()); 
                     node.Visitor = state.Rule.GetVisitorMethod();
                     node.LambdaVisitor = state.Rule.getLambdaVisitor(null);
                     result.Root = node;
