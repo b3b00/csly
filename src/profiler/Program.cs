@@ -149,37 +149,30 @@ if i == 589 then
 			        return;
 		        }
 
-		        
+
 
 		        if (progression)
 		        {
 			        for (int i = 2; i < max; i += step)
 			        {
-						Console.Write(i);
-				        
-						Stopwatch watch = new Stopwatch();
-				        try
-				        {
-					        watch.Start();
-					        SingleExpressionProfile(i, b);
-					        watch.Stop();
-				        }
-				        catch (StackOverflowException soex)
-				        {
-					        break;
-				        }
-				        
+				        Console.Write(i);
+
+				        Stopwatch watch = new Stopwatch();
+				        watch.Start();
+				        SingleExpressionProfile(i, b);
+				        watch.Stop();
+
 				        Dictionary<ParserType, long> timing;
 				        if (!timings.TryGetValue(i, out timing))
 				        {
 					        timing = new Dictionary<ParserType, long>();
 				        }
-				        
+
 				        timing[type] = watch.ElapsedMilliseconds;
 				        timings[i] = timing;
 				        var pos = Console.GetCursorPosition();
 				        var l = i.ToString().Length;
-				        Console.SetCursorPosition(pos.Left-l,pos.Top);
+				        Console.SetCursorPosition(pos.Left - l, pos.Top);
 				        WriteTimings(timings, types);
 			        }
 		        }
