@@ -10,6 +10,7 @@ using sly.lexer.fsm;
 using sly.parser.generator.visitor;
 using sly.parser.llparser.bnf;
 using sly.parser.llparser.bnf.stackist;
+using sly.parser.llparser.ebnf;
 using sly.parser.parser;
 using sly.parser.parser.llparser.ebnf.stackist;
 using sly.parser.syntax.grammar;
@@ -119,17 +120,17 @@ namespace sly.parser.generator
                 
                 case ParserType.EBNF_LL_STACK:
                 {
-                    var configuration = ExtractParserConfiguration(parserInstance.GetType());
-                    var (foundRecursion, recursions) = LeftRecursionChecker<IN, OUT>.CheckLeftRecursion(configuration);
-                    if (foundRecursion)
+                    // use EBNFParserBuilder to extract configuration
+                    var builder = new EBNFParserBuilder<IN, OUT>(I18N);
+                    result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,
+                        extensionBuilder, lexerPostProcess);
+                    if (result.IsError)
                     {
-                        var recs = string.Join("\n",
-                            recursions.Select<List<string>, string>(x => string.Join(" > ", x)));
-                        result.AddError(new ParserInitializationError(ErrorLevel.FATAL,
-                            i18n.I18N.Instance.GetText(I18N, I18NMessage.LeftRecursion, recs),
-                            ErrorCodes.PARSER_LEFT_RECURSIVE));
                         return result;
                     }
+
+                    var configuration = result.Result.Configuration;
+ 
 
                     configuration.StartingRule = rootRule;
                     var syntaxParser = new EBNFStackDescentSyntaxParser<IN, OUT>("en", configuration);

@@ -11,8 +11,10 @@ namespace sly.parser.parser.llparser.ebnf.stackist;
 
 public class EBNFStackDescentSyntaxParser<IN,OUT> : StackDescentSyntaxParser<IN,OUT> where IN : struct, Enum
 {
-    public EBNFStackDescentSyntaxParser(string i18n, ParserConfiguration<IN, OUT> configuration) : base(i18n, configuration)
+    public EBNFStackDescentSyntaxParser(string i18n, ParserConfiguration<IN, OUT> configuration)
     {
+        I18n = i18n;
+        Configuration = configuration;
     }
     
     public virtual void ParseExtension(StackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)

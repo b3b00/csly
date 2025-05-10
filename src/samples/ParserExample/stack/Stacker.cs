@@ -386,7 +386,7 @@ Console.WriteLine("***************************************");
     {
         var ebnf = new SimpleEBNFZeroPlus();
         
-        var parser = GetParser<EbnfTokenGeneric, GrammarNode<L, string>>(ebnf, ParserType.EBNF_LL_STACK, "rule");
+        var parser = GetParser<L, string>(ebnf, ParserType.EBNF_LL_STACK, "root");
 
         Check.That(parser).IsNotNull();
 

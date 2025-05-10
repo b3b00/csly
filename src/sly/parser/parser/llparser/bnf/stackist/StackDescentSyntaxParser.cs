@@ -30,6 +30,11 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     
     public string I18n { get; set; }
 
+
+    public StackDescentSyntaxParser()
+    {
+        
+    }
     public StackDescentSyntaxParser(string i18n,
         ParserConfiguration<IN, OUT> configuration)
     {
