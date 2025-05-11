@@ -385,14 +385,14 @@ Console.WriteLine("***************************************");
     public static void TestEbnfSimpleZeroOrMore()
     {
         var ebnf = new SimpleEBNFZeroPlus();
-        
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
         var parser = GetParser<L, string>(ebnf, ParserType.EBNF_LL_STACK, "root");
 
         Check.That(parser).IsNotNull();
 
-        var parseResult = parser.Parse(" a  a  a a");
+        var parseResult = parser.Parse(" A  A  A A");
         Check.That(parseResult).IsOkParsing();
         var result = parseResult.Result;
-        Check.That(result).IsEqualTo("a,a,a,a");
+        Check.That(result).IsEqualTo("A,A,A,A");
     }
 }
