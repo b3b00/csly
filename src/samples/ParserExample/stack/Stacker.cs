@@ -26,23 +26,35 @@ public enum P
 
 public enum L
 {
-    [Keyword("A")] A,
-    [Keyword("B")] B,
-    [Sugar("+")] PLUS,
-    [Sugar("-")] MINUS
+    [Keyword("A")] A = 1,
+    [Keyword("B")] B = 2,
+    [Sugar("+")] PLUS = 3,
+    [Sugar("-")] MINUS = 4
 }
 
 
-public class SimpleEBNFZeroPlus
+public class SimpleEBNFMany
 {
     [Production("root : astar")]
     public string Root(string astar)
     {
         return astar;
     }
+    
+    [Production("rootplus : aplus")]
+    public string RootPlus(string aplus)
+    {
+        return aplus;
+    }
 
     [Production("astar : A*")]
     public string Astar(List<Token<L>> all)
+    {
+        return string.Join(",",all.Select(x => x.Value));
+    }
+    
+    [Production("aplus : A+")]
+    public string Aplus(List<Token<L>> all)
     {
         return string.Join(",",all.Select(x => x.Value));
     }
@@ -384,9 +396,23 @@ Console.WriteLine("***************************************");
 
     public static void TestEbnfSimpleZeroOrMore()
     {
-        var ebnf = new SimpleEBNFZeroPlus();
+        var ebnf = new SimpleEBNFMany();
         RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
         var parser = GetParser<L, string>(ebnf, ParserType.EBNF_LL_STACK, "root");
+
+        Check.That(parser).IsNotNull();
+
+        var parseResult = parser.Parse(" A  A  A A");
+        Check.That(parseResult).IsOkParsing();
+        var result = parseResult.Result;
+        Check.That(result).IsEqualTo("A,A,A,A");
+    }
+    
+    public static void TestEbnfSimpleOneOrMore()
+    {
+        var ebnf = new SimpleEBNFMany();
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
+        var parser = GetParser<L, string>(ebnf, ParserType.EBNF_LL_STACK, "rootplus");
 
         Check.That(parser).IsNotNull();
 

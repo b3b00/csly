@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using expressionparser;
 using NFluent;
 using ParserTests.Issue239;
@@ -19,6 +21,21 @@ public class Dumb
     
 }
 
+public class SimpleEBNFZeroPlus
+{
+    [Production("root : astar")]
+    public string Root(string astar)
+    {
+        return astar;
+    }
+
+    [Production("astar : A*")]
+    public string Astar(List<Token<L>> all)
+    {
+        return string.Join(",",all.Select(x => x.Value));
+    }
+}
+
 public enum P
 {
     [Sugar("+")] e,
@@ -28,10 +45,10 @@ public enum P
 
 public enum L
 {
-    [Keyword("A")] A,
-    [Keyword("B")] B,
-    [Sugar("+")] PLUS,
-    [Sugar("-")] MINUS,
+    [Keyword("A")] A = 1,
+    [Keyword("B")] B = 2,
+    [Sugar("+")] PLUS = 3,
+    [Sugar("-")] MINUS = 4
 }
 
 public class Visitor : IDisposable {
@@ -294,6 +311,21 @@ public class StackParserTests
         var actual = rule.Dump();
         Check.That(actual).IsEqualTo(expected);
     }
+
+    [Fact]
+    public void TestEbnfZeroOrMore()
+    {
+        var ebnf = new SimpleEBNFZeroPlus();
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
+        var parser = GetParser<L, string>(ebnf, ParserType.EBNF_LL_STACK, "root");
+
+        Check.That(parser).IsNotNull();
+
+        var parseResult = parser.Parse(" A  A  A A");
+        Check.That(parseResult).IsOkParsing();
+        var result = parseResult.Result;
+        Check.That(result).IsEqualTo("A,A,A,A");
+    } 
     
     public static Parser<IN, OUT> GetParser<IN, OUT>(object instance, ParserType type, string root) where IN : struct , Enum
     {
