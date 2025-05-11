@@ -17,7 +17,7 @@ public class EBNFStackDescentSyntaxParser<IN,OUT> : StackDescentSyntaxParser<IN,
         Configuration = configuration;
     }
     
-    public virtual void ParseExtension(StackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    public override void ParseExtension(StackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         switch (state)
         {
@@ -31,10 +31,10 @@ public class EBNFStackDescentSyntaxParser<IN,OUT> : StackDescentSyntaxParser<IN,
 
     private void ParseZeroOrMore(ZeroOrMoreStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
-        // TODO 
-        if (state.IsOk)
+        // either first time we evaluate sub clause or previous evaluation is ok
+        if (state.Result == null || state.IsOk)
         {
-            state.Position = state.Children.Last().EndingPosition;
+            state.Position = state.Children.Count > 0 ? state.Children.Last().EndingPosition : state.Position;
             // push self 
             stack.Push(state);
             
@@ -44,7 +44,7 @@ public class EBNFStackDescentSyntaxParser<IN,OUT> : StackDescentSyntaxParser<IN,
         }
         else
         {
-            // TODO : create a node with children
+            // TODO : no more match return
             var result = new SyntaxParseResult<IN, OUT>();
             var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
             foreach (var child in state.Children)
@@ -53,6 +53,7 @@ public class EBNFStackDescentSyntaxParser<IN,OUT> : StackDescentSyntaxParser<IN,
             }
 
             result.Root = manyNode;
+            state.Parent.SetResult(result);
         }
     }
 

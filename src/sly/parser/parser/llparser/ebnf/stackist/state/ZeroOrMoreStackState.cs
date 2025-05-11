@@ -21,7 +21,7 @@ public class ZeroOrMoreStackState<IN,OUT> : StackState<IN,OUT> where IN : struct
     public ZeroOrMoreStackState(ZeroOrMoreClause<IN, OUT> zeroOrMore, StackState<IN, OUT> parent)
     {
         _clause =  zeroOrMore;
-        _parent = parent;
+        Parent = parent;
         _children = new List<SyntaxParseResult<IN,OUT>>();
     } 
     

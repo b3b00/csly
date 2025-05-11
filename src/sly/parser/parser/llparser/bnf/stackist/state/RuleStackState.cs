@@ -28,7 +28,10 @@ public static class RuleExt
 
         if (state.Index >= state.Rule.Clauses.Count)
         {
-            b.Append(" DONE :").Append(state.LastResult.IsError ? " KO" : " OK");
+            var last = state.Children.FirstOrDefault(x => x != null);
+            
+            var isError = last != null && last.IsError;
+            b.Append(" DONE :").Append(isError ? " KO" : " OK");
             
         } 
         return b.ToString();

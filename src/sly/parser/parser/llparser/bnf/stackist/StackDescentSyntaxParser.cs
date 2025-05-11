@@ -21,7 +21,7 @@ public enum StackStateType
 public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> where IN : struct, Enum
 {
 
-    private const bool DEBUG = false;
+    private const bool DEBUG = true;
     public Dictionary<IN, Dictionary<string, string>> LexemeLabels { get; set; }
 
     public ParserConfiguration<IN, OUT> Configuration { get; set; }
@@ -55,7 +55,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
     public virtual void ParseExtension(StackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
-        
+       
     }
     
     public SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, string startingNonTerminal = null)
@@ -318,6 +318,19 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     {
         var terminalState = state as TerminalStackState<IN, OUT>;
         TerminalClause<IN, OUT> terminal = terminalState.Terminal;
+        if (terminalState.Position >= state.Tokens.Length)
+        {
+            Log($"end of stream found expected {terminal.ExpectedToken}", stack, 2);
+            var resultEos = new SyntaxParseResult<IN, OUT>();
+            var eosToken = terminalState.Tokens[terminalState.Position-1]; // get EOS token
+            resultEos.AddError(new UnexpectedTokenSyntaxError<IN>(eosToken, LexemeLabels, I18n, terminal.ExpectedToken));
+            resultEos.IsError = true;
+            resultEos.EndingPosition = terminalState.Position;
+            resultEos.Expecting = new List<LeadingToken<IN>>() { terminal.ExpectedToken };
+            state.Parent.SetResult(resultEos);
+            return;
+        }
+        
         var result = new SyntaxParseResult<IN, OUT>();
         var token = terminalState.Tokens[terminalState.Position];
         var isError = !terminal.Check(token);
