@@ -26,6 +26,11 @@ public class EBNFStackDescentSyntaxParser<IN,OUT> : StackDescentSyntaxParser<IN,
                 ParseZeroOrMore(zeroOrmMore, stack);
                 break;
             }
+            case OneOrMoreStackState<IN, OUT> oneOrMore:
+            {
+                ParseOneOrMore(oneOrMore, stack);
+                break;
+            }
         }
     }
 
@@ -45,6 +50,44 @@ public class EBNFStackDescentSyntaxParser<IN,OUT> : StackDescentSyntaxParser<IN,
         else
         {
             // TODO : no more match return
+            var result = new SyntaxParseResult<IN, OUT>();
+            var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
+            manyNode.IsManyTokens = state.RepeatedClause is TerminalClause<IN, OUT>;
+            manyNode.IsManyValues = state.RepeatedClause is NonTerminalClause<IN, OUT>;
+            // TODO many groups
+            foreach (var child in state.Children)
+            {
+                manyNode.Add(child.Root);                
+            }
+
+            result.Root = manyNode;
+            state.Parent.SetResult(result);
+        }
+    }
+    
+    private void ParseOneOrMore(OneOrMoreStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    {
+        // either first time we evaluate sub clause or previous evaluation is ok
+        if (state.Result == null || state.IsOk)
+        {
+            state.Position = state.Children.Count > 0 ? state.Children.Last().EndingPosition : state.Position;
+            // push self 
+            stack.Push(state);
+            
+            // keep on trying 
+            PushClause(state.RepeatedClause, stack, state);
+            return;
+        }
+        else
+        {
+            // TODO : no more match return
+            if (state.Children.Count == 0)
+            {
+                // error expecting at least one ...
+                state.Parent.SetResult(state.Result);
+                return;
+            }
+            
             var result = new SyntaxParseResult<IN, OUT>();
             var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
             manyNode.IsManyTokens = state.RepeatedClause is TerminalClause<IN, OUT>;
