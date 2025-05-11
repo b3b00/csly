@@ -17,7 +17,11 @@ public class ZeroOrMoreStackState<IN,OUT> : StackState<IN,OUT> where IN : struct
     public List<SyntaxParseResult<IN, OUT>> Children => _children;
 
     public IClause<IN, OUT> RepeatedClause => _clause.Clause;
+
+    public bool IsManyToken { get; set; }
     
+    public bool IsManyValue { get; set; }
+
     public ZeroOrMoreStackState(ZeroOrMoreClause<IN, OUT> zeroOrMore, StackState<IN, OUT> parent)
     {
         _clause =  zeroOrMore;
