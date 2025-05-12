@@ -21,16 +21,28 @@ public class Dumb
     
 }
 
-public class SimpleEBNFZeroPlus
+public class SimpleEBNFMany
 {
     [Production("root : astar")]
     public string Root(string astar)
     {
         return astar;
     }
+    
+    [Production("rootplus : aplus")]
+    public string RootPlus(string aplus)
+    {
+        return aplus;
+    }
 
     [Production("astar : A*")]
     public string Astar(List<Token<L>> all)
+    {
+        return string.Join(",",all.Select(x => x.Value));
+    }
+    
+    [Production("aplus : A+")]
+    public string Aplus(List<Token<L>> all)
     {
         return string.Join(",",all.Select(x => x.Value));
     }
@@ -315,7 +327,7 @@ public class StackParserTests
     [Fact]
     public void TestEbnfZeroOrMore()
     {
-        var ebnf = new SimpleEBNFZeroPlus();
+        var ebnf = new SimpleEBNFMany();
         RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
         var parser = GetParser<L, string>(ebnf, ParserType.EBNF_LL_STACK, "root");
 
@@ -325,6 +337,42 @@ public class StackParserTests
         Check.That(parseResult).IsOkParsing();
         var result = parseResult.Result;
         Check.That(result).IsEqualTo("A,A,A,A");
+        
+        parseResult = parser.Parse(" A  ");
+        Check.That(parseResult).IsOkParsing();
+        result = parseResult.Result;
+        Check.That(result).IsEqualTo("A");
+        
+        parseResult = parser.Parse("   ");
+        Check.That(parseResult).IsOkParsing();
+        result = parseResult.Result;
+        Check.That(result).IsEqualTo("");
+    } 
+    
+    [Fact]
+    public void TestEbnfOneOrMore()
+    {
+        var ebnf = new SimpleEBNFMany();
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
+        var parser = GetParser<L, string>(ebnf, ParserType.EBNF_LL_STACK, "rootplus");
+
+        Check.That(parser).IsNotNull();
+
+        var parseResult = parser.Parse(" A  A  A A");
+        Check.That(parseResult).IsOkParsing();
+        var result = parseResult.Result;
+        Check.That(result).IsEqualTo("A,A,A,A");
+        
+        parseResult = parser.Parse(" A  ");
+        Check.That(parseResult).IsOkParsing();
+        result = parseResult.Result;
+        Check.That(result).IsEqualTo("A");
+        
+        parseResult = parser.Parse("   ");
+        Check.That(parseResult).Not.IsOkParsing();
+        Check.That(parseResult.Errors).CountIs(1);
+        var error = parseResult.Errors[0];
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
     } 
     
     public static Parser<IN, OUT> GetParser<IN, OUT>(object instance, ParserType type, string root) where IN : struct , Enum

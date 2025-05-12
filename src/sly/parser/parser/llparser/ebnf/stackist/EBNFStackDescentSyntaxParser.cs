@@ -9,14 +9,14 @@ using sly.parser.syntax.tree;
 
 namespace sly.parser.parser.llparser.ebnf.stackist;
 
-public class EBNFStackDescentSyntaxParser<IN,OUT> : StackDescentSyntaxParser<IN,OUT> where IN : struct, Enum
+public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN, OUT> where IN : struct, Enum
 {
     public EBNFStackDescentSyntaxParser(string i18n, ParserConfiguration<IN, OUT> configuration)
     {
         I18n = i18n;
         Configuration = configuration;
     }
-    
+
     public override void ParseExtension(StackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         switch (state)
@@ -31,10 +31,39 @@ public class EBNFStackDescentSyntaxParser<IN,OUT> : StackDescentSyntaxParser<IN,
                 ParseOneOrMore(oneOrMore, stack);
                 break;
             }
+            case OptionStackState<IN, OUT> option:
+            {
+                ParseOption(option, stack);
+                break;
+            }
         }
     }
 
-    private void ParseZeroOrMore(ZeroOrMoreStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    private void ParseOption(OptionStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    {
+        if (state.Result == null)
+        {
+            PushClause(state.OptionalClause, stack, state);
+        }
+        else
+        {
+            var innerResult = state.Result;
+            var result = new SyntaxParseResult<IN, OUT>();
+            if (state.Result.IsOk)
+            {
+               // TODO : ok => Option(state.Result.Root)
+            }
+            else if (state.Result.IsError)
+            {
+                // TODO : empty node
+            }
+        }
+    }
+
+
+
+
+private void ParseZeroOrMore(ZeroOrMoreStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         // either first time we evaluate sub clause or previous evaluation is ok
         if (state.Result == null || state.IsOk)
@@ -121,6 +150,16 @@ public class EBNFStackDescentSyntaxParser<IN,OUT> : StackDescentSyntaxParser<IN,
             case OneOrMoreClause<IN, OUT> oneOrMore:
             {
                 var state = new OneOrMoreStackState<IN, OUT>(oneOrMore, parent)
+                {
+                    Tokens = parent.Tokens,
+                    Position = parent.Position
+                };
+                stack.Push(state);
+                break;
+            }
+            case OptionClause<IN, OUT> option:
+            {
+                var state = new OptionStackState<IN, OUT>(option, parent)
                 {
                     Tokens = parent.Tokens,
                     Position = parent.Position
