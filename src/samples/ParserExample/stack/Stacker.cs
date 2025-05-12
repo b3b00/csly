@@ -406,6 +406,16 @@ Console.WriteLine("***************************************");
         Check.That(parseResult).IsOkParsing();
         var result = parseResult.Result;
         Check.That(result).IsEqualTo("A,A,A,A");
+        
+        parseResult = parser.Parse(" A  ");
+        Check.That(parseResult).IsOkParsing();
+        result = parseResult.Result;
+        Check.That(result).IsEqualTo("A");
+        
+        parseResult = parser.Parse("   ");
+        Check.That(parseResult).IsOkParsing();
+        result = parseResult.Result;
+        Check.That(result).IsEqualTo("");
     }
     
     public static void TestEbnfSimpleOneOrMore()
@@ -420,5 +430,17 @@ Console.WriteLine("***************************************");
         Check.That(parseResult).IsOkParsing();
         var result = parseResult.Result;
         Check.That(result).IsEqualTo("A,A,A,A");
+        
+        parseResult = parser.Parse(" A  ");
+        Check.That(parseResult).IsOkParsing();
+        result = parseResult.Result;
+        Check.That(result).IsEqualTo("A");
+        
+        parseResult = parser.Parse("   ");
+        Check.That(parseResult).Not.IsOkParsing();
+        Check.That(parseResult.Errors).CountIs(1);
+        var error = parseResult.Errors[0];
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+
     }
 }

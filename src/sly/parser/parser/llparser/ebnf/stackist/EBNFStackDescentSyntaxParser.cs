@@ -118,6 +118,16 @@ public class EBNFStackDescentSyntaxParser<IN,OUT> : StackDescentSyntaxParser<IN,
                 stack.Push(state);
                 break;
             }
+            case OneOrMoreClause<IN, OUT> oneOrMore:
+            {
+                var state = new OneOrMoreStackState<IN, OUT>(oneOrMore, parent)
+                {
+                    Tokens = parent.Tokens,
+                    Position = parent.Position
+                };
+                stack.Push(state);
+                break;
+            }
         }
     }
 }
