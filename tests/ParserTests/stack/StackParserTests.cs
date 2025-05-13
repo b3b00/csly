@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using expressionparser;
 using NFluent;
 using ParserTests.Issue239;
@@ -9,6 +7,7 @@ using sly.lexer.fluent;
 using sly.parser;
 using sly.parser.fluent;
 using sly.parser.generator;
+using sly.parser.parser;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 using Xunit;
@@ -19,75 +18,6 @@ namespace ParserTests.stack;
 public class Dumb
 {
     
-}
-
-public class SimpleEBNFMany
-{
-    [Production("root : astar")]
-    public string Root(string astar)
-    {
-        return astar;
-    }
-    
-    [Production("rootplus : aplus")]
-    public string RootPlus(string aplus)
-    {
-        return aplus;
-    }
-
-    [Production("astar : A*")]
-    public string Astar(List<Token<L>> all)
-    {
-        return string.Join(",",all.Select(x => x.Value));
-    }
-    
-    [Production("aplus : A+")]
-    public string Aplus(List<Token<L>> all)
-    {
-        return string.Join(",",all.Select(x => x.Value));
-    }
-}
-
-public enum P
-{
-    [Sugar("+")] e,
-    [Keyword("true")] True,
-    [Keyword("false")] False,
-}
-
-public enum L
-{
-    [Keyword("A")] A = 1,
-    [Keyword("B")] B = 2,
-    [Sugar("+")] PLUS = 3,
-    [Sugar("-")] MINUS = 4
-}
-
-public class Visitor : IDisposable {
-
-    public void Dispose()
-    {
-        
-        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
-    }
-    
-    [Production("root  : a [PLUS|MINUS] b")]
-    public string Root(string a, Token<L> op, string b)
-    {
-        return "a <" + op.Value + "> b";
-    }
-
-    [Production("a : A")]
-    public string A(Token<L> a)
-    {
-        return a.Value;
-    }
-    
-    [Production("b : B")]
-    public string B(Token<L> b)
-    {
-        return b.Value;
-    }
 }
 
 [ParserRoot("root")]
@@ -373,7 +303,93 @@ public class StackParserTests
         Check.That(parseResult.Errors).CountIs(1);
         var error = parseResult.Errors[0];
         Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
-    } 
+    }
+
+    [Fact]
+    void TestOptionTerminal()
+    {
+        var lexer = FluentLexerBuilder<L>.NewBuilder()
+            .Keyword(L.A, "A")
+            .Keyword(L.B, "B");
+        
+        var buildResult = FluentEBNFParserBuilder<L, string>.NewBuilder(new FluentTests(), "root", "en")
+            .WithLexerbuilder(lexer)
+            .Production("root : o", (object[] args) =>
+            {
+                return (string)args[0];
+            })
+            .Production("o : A B? A", (args) =>
+            {
+                var a1 = (Token<L>)args[0];
+                var b = (Token<L>)args[1];
+                var a2 = (Token<L>)args[0];
+                if (b.IsEmpty)
+                {
+                    return "ah ah !";
+                }
+                else
+                {
+                    return "ABBA";
+                }
+            })           
+            .BuildParser(ParserType.EBNF_LL_STACK);
+
+        Check.That(buildResult).IsOk();
+        var parser = buildResult.Result;
+        var result = parser.Parse("A A");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("ah ah !");
+        result = parser.Parse("A B A");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("ABBA");
+    }
+    
+    [Fact]
+    void TestOptionNonTerminal()
+    {
+        var lexer = FluentLexerBuilder<L>.NewBuilder()
+            .Keyword(L.A, "A")
+            .Keyword(L.B, "B");
+        
+        var buildResult = FluentEBNFParserBuilder<L, string>.NewBuilder(new FluentTests(), "root", "en")
+            .WithLexerbuilder(lexer)
+            .Production("root : o", (object[] args) =>
+            {
+                return (string)args[0];
+            })
+            .Production("o : a b? a", (args) =>
+            {
+                var a1 = (string)args[0];
+                var b = (ValueOption<string>)args[1];
+                var a2 = (string)args[0];
+                if (b.IsNone)
+                {
+                    return "ah ah !";
+                }
+                else
+                {
+                    return "ABBA";
+                }
+            })
+            .Production("a : A", (args =>
+            {
+                return "a";
+            }))
+            .Production("b : B", (args =>
+            {
+                return "b";
+            }))
+            .BuildParser(ParserType.EBNF_LL_RECURSIVE_DESCENT);
+
+        Check.That(buildResult).IsOk();
+        var parser = buildResult.Result;
+        var result = parser.Parse("A A");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("ah ah !");
+        result = parser.Parse("A B A");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("ABBA");
+    }
     
     public static Parser<IN, OUT> GetParser<IN, OUT>(object instance, ParserType type, string root) where IN : struct , Enum
     {
@@ -382,5 +398,39 @@ public class StackParserTests
         Check.That(built).IsOk();
         Check.That(built.Result).IsNotNull();
         return built.Result;
+    }
+    
+    
+    [Fact]
+    void TestChoiceTerminal()
+    {
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
+        var parser = GetParser<L, String>(new TerminalChoice(), ParserType.EBNF_LL_STACK, "root");
+
+        Check.That(parser).IsNotNull();
+        var result = parser.Parse("A");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("A");
+        result = parser.Parse("B");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("B");
+    }
+    
+    [Fact]
+    void TestManyChoiceTerminal()
+    {
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
+        var parser = GetParser<L, String>(new ManyTerminalChoice(), ParserType.EBNF_LL_STACK, "root");
+
+        Check.That(parser).IsNotNull();
+        var result = parser.Parse("A");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("A");
+        result = parser.Parse("A B B A");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("A,B,B,A");
+        result = parser.Parse("");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("");
     }
 }

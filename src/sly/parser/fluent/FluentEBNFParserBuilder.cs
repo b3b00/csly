@@ -65,7 +65,7 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
         _grammarParser = grammar.Result;
     }
 
-    public BuildResult<ISyntaxParser<IN, OUT>> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result)
+    public BuildResult<ISyntaxParser<IN, OUT>> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result, ParserType parserType = ParserType.EBNF_LL_RECURSIVE_DESCENT)
     {
         // build configuration
         _configuration = new ParserConfiguration<IN, OUT>();
@@ -102,7 +102,7 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
                 ErrorCodes.PARSER_LEFT_RECURSIVE));
             return new BuildResult<ISyntaxParser<IN, OUT>>(result.Errors);
         }
-        var syntaxParser = b.BuildSyntaxParser(_configuration, ParserType.EBNF_LL_RECURSIVE_DESCENT, _rootRule);
+        var syntaxParser = b.BuildSyntaxParser(_configuration, parserType, _rootRule);
         var checkResult =b.CheckParser(_configuration);
         if (!checkResult.IsOk)
         {
@@ -117,10 +117,10 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
         return new BuildResult<ISyntaxParser<IN, OUT>>(syntaxParser);
     }
 
-    public BuildResult<Parser<IN, OUT>> BuildParser()
+    public BuildResult<Parser<IN, OUT>> BuildParser(ParserType parserType = ParserType.EBNF_LL_RECURSIVE_DESCENT)
     {
         var buildResult = new BuildResult<ParserConfiguration<IN, OUT>>();
-        var syntaxParserResult = BuildSyntaxParser(buildResult);
+        var syntaxParserResult = BuildSyntaxParser(buildResult, parserType);
         if (buildResult.IsError)
         {
             var result = new BuildResult<Parser<IN, OUT>>();

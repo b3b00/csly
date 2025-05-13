@@ -200,6 +200,19 @@ namespace sly.parser.generator
             {
                 parser = new StackDescentSyntaxParser<IN, OUT>(I18N, conf);
             }
+            else if (parserType == ParserType.EBNF_LL_STACK)
+            {
+                // use EBNFParserBuilder to extract configuration
+                var builder = new EBNFParserBuilder<IN, OUT>(I18N);
+                var result = builder.BuildParser(new {}, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule);
+                
+
+                var configuration = result.Result.Configuration;
+ 
+
+                configuration.StartingRule = rootRule;
+                parser = new EBNFStackDescentSyntaxParser<IN, OUT>(I18N, configuration);
+            }
             return parser;
         }
 

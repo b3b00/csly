@@ -46,9 +46,9 @@ public interface IFluentEbnfParserBuilder<IN,OUT> where IN : struct, Enum
     
     IFluentEbnfRuleBuilder<IN,OUT> Postfix(string operation, int precedence, Func<object[], OUT> visitor);
     
-    public BuildResult<ISyntaxParser<IN, OUT>> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result); 
+    public BuildResult<ISyntaxParser<IN, OUT>> BuildSyntaxParser(BuildResult<ParserConfiguration<IN, OUT>> result, ParserType parserType = ParserType.EBNF_LL_RECURSIVE_DESCENT); 
     
-    public BuildResult<Parser<IN, OUT>> BuildParser();
+    public BuildResult<Parser<IN, OUT>> BuildParser(ParserType parserType = ParserType.EBNF_LL_RECURSIVE_DESCENT);
 
     public IFluentEbnfParserBuilder<IN, OUT> WithLexerbuilder(IFluentLexerBuilder<IN> lexerBuilder);
 

@@ -9,6 +9,7 @@ using sly.lexer.fsm;
 using sly.parser.generator.visitor;
 using sly.parser.llparser.bnf;
 using sly.parser.llparser.ebnf;
+using sly.parser.parser.llparser.ebnf.stackist;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.generator
@@ -124,6 +125,11 @@ namespace sly.parser.generator
             if (parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT)
             {
                 parser = new EBNFRecursiveDescentSyntaxParser<IN, OUT>(conf, rootRule, I18N);
+            }
+
+            if (parserType == ParserType.EBNF_LL_STACK)
+            {
+                parser = new EBNFStackDescentSyntaxParser<IN, OUT>(I18N, conf);
             }
             return parser;
         }

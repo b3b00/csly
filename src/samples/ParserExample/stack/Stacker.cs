@@ -443,4 +443,42 @@ Console.WriteLine("***************************************");
         Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
 
     }
+
+    public static void TestFluentOption()
+    {
+        var lexer = FluentLexerBuilder<L>.NewBuilder()
+            .Keyword(L.A, "A")
+            .Keyword(L.B, "B");
+        
+        var buildResult = FluentEBNFParserBuilder<L, string>.NewBuilder(new FluentTests(), "root", "en")
+            .WithLexerbuilder(lexer)
+            .Production("root : o", (object[] args) =>
+            {
+                return (string)args[0];
+            })
+            .Production("o : A B? A", (args) =>
+            {
+                var a1 = (Token<L>)args[0];
+                var b = (Token<L>)args[1];
+                var a2 = (Token<L>)args[0];
+                if (b.IsEmpty)
+                {
+                    return "ah ah !";
+                }
+                else
+                {
+                    return "ABBA";
+                }
+            })           
+            .BuildParser(ParserType.EBNF_LL_RECURSIVE_DESCENT);
+
+        Check.That(buildResult).IsOk();
+        var parser = buildResult.Result;
+        var result = parser.Parse("A A");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("ah ah !");
+        result = parser.Parse("A B A");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("ABBA");
+    }
 }

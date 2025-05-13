@@ -42,7 +42,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         Init(configuration, configuration.StartingRule);
     }
     
-    public void Init(ParserConfiguration<IN, OUT> configuration, string root)
+    public virtual void Init(ParserConfiguration<IN, OUT> configuration, string root)
     {
         Configuration = configuration;
         RecursiveDescentSyntaxParser<IN, OUT> recursive =
@@ -136,18 +136,9 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
                     Log($" choosing one ending at {realResult.EndingPosition}",stack,2);
                 }
-                if (state.Parent is RuleStackState<IN, OUT> ruleState)
-                {
-                    ruleState.SetResult(realResult);
-                }
-                else if (state.Parent is RootStackState<IN, OUT> rootState)
-                {
-                    rootState.SetResult(realResult);
-                }
-                else
-                {
-                    throw new Exception($"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
-                }
+
+                state.Parent.SetResult(realResult);
+               
                 return;
             }
 
@@ -192,19 +183,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     result.AddError(error);
                 }
 
-                if (state.Parent is RuleStackState<IN, OUT> ruleState)
-                {
-                    ruleState.SetResult(result);
-                }
-                else if (state.Parent is RootStackState<IN, OUT> rootState)
-                {
-                    rootState.SetResult(result);
-                }
-                else
-                {
-                    throw new Exception(
-                        $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
-                }
+                state.Parent.SetResult(result);
                 return;
             }
 
@@ -292,19 +271,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 result.EndingPosition = state.Position;
 
                 result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, expected.ToArray()));
-                if (state.Parent is RuleStackState<IN, OUT> ruleState)
-                {
-                    ruleState.SetResult(result);
-                }
-                else if (state.Parent is RootStackState<IN, OUT> rootState)
-                {
-                    rootState.SetResult(result);
-                }
-                else
-                {
-                    throw new Exception(
-                        $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
-                }
+                state.Parent.SetResult(result);
             }
         }
         else
