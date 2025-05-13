@@ -79,10 +79,6 @@ public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
 
     public void AddChild(SyntaxParseResult<IN, OUT> result)
     {
-        if (Id == 9)
-        {
-            ;
-        }
         if (Children.Any(x => x == null))
         {
             ;

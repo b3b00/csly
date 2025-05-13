@@ -433,4 +433,64 @@ public class StackParserTests
         Check.That(result).IsOkParsing();
         Check.That(result.Result).IsEqualTo("");
     }
+    
+    [Fact]
+    void TestChoiceNonTerminal()
+    {
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
+        var parser = GetParser<L, String>(new NonTerminalChoice(), ParserType.EBNF_LL_STACK, "root");
+
+        Check.That(parser).IsNotNull();
+        var result = parser.Parse("A");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("A");
+        result = parser.Parse("B");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("B");
+    }
+
+    [Fact]
+    void TestBasicGroup()
+    {
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
+        var parser = GetParser<L, String>(new BasicGroup(), ParserType.EBNF_LL_STACK, "root");
+        
+        Check.That(parser).IsNotNull();
+        var result = parser.Parse("A B");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("A B");
+        result = parser.Parse("A A");
+        Check.That(result).Not.IsOkParsing();
+    }
+    
+    [Fact]
+    void TestManyGroup()
+    {
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
+        var parser = GetParser<L, String>(new ManyGroup(), ParserType.EBNF_LL_STACK, "root");
+        
+        Check.That(parser).IsNotNull();
+        var result = parser.Parse("A B");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("A B");
+        result = parser.Parse("A B A B");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("A B,A B");
+    }
+    
+    [Fact]
+    void TestOptionGroup()
+    {
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
+        var parser = GetParser<L, String>(new OptionGroup(), ParserType.EBNF_LL_STACK, "root");
+        
+        Check.That(parser).IsNotNull();
+        var result = parser.Parse("A B");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("A B");
+        result = parser.Parse("");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("nothing");
+    }
+    
 }

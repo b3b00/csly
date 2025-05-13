@@ -365,8 +365,18 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     {
                         name = state.Rule.NonTerminalName;
                     }
-                    var node = new SyntaxNode<IN, OUT>(name,
-                        state.Children.Select(x => x.Root).ToList()); 
+
+                    SyntaxNode<IN, OUT> node = null;
+                    if (rule.IsSubRule)
+                    {
+                        node = new GroupSyntaxNode<IN, OUT>(rule.NodeName,state.Children.Select(x => x.Root).ToList());    
+                    }
+                    else
+                    {
+                        node = new SyntaxNode<IN, OUT>(name,
+                            state.Children.Select(x => x.Root).ToList());
+                    }
+
                     node.Visitor = state.Rule.GetVisitorMethod();
                     node.LambdaVisitor = state.Rule.getLambdaVisitor(null);
                     result.Root = node;

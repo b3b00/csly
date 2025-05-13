@@ -74,7 +74,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 var node = new OptionSyntaxNode<IN, OUT>($"{state.OptionalClause.ToString()}?",
                     new List<ISyntaxNode<IN, OUT>>() { innerResult.Root }, null);
                 result.Root = node;
-                node.IsGroupOption = state.OptionalClause is GroupClause<IN, OUT>;
+                node.IsGroupOption = state.OptionalClause is NonTerminalClause<IN, OUT> nt && nt.IsGroup;
 
 
                 var children = new List<ISyntaxNode<IN, OUT>> { innerResult.Root };
@@ -161,8 +161,6 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
     }
 
 
-
-
     private void ParseZeroOrMore(ZeroOrMoreStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         // either first time we evaluate sub clause or previous evaluation is ok
@@ -181,8 +179,16 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             // TODO : no more match return
             var result = new SyntaxParseResult<IN, OUT>();
             var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
-            manyNode.IsManyTokens = state.RepeatedClause is TerminalClause<IN, OUT> || state.RepeatedClause is ChoiceClause<IN,OUT> tc && tc.IsTerminalChoice;
-            manyNode.IsManyValues = state.RepeatedClause is NonTerminalClause<IN, OUT> || state.RepeatedClause is ChoiceClause<IN,OUT> ntc && ntc.IsNonTerminalChoice;
+            manyNode.IsManyGroups = state.RepeatedClause is NonTerminalClause<IN, OUT> nt && nt.IsGroup;
+            if (!manyNode.IsManyGroups)
+            {
+                manyNode.IsManyTokens = state.RepeatedClause is TerminalClause<IN, OUT> ||
+                                        state.RepeatedClause is ChoiceClause<IN, OUT> tc && tc.IsTerminalChoice;
+                manyNode.IsManyValues = state.RepeatedClause is NonTerminalClause<IN, OUT> ||
+                                        state.RepeatedClause is ChoiceClause<IN, OUT> ntc && ntc.IsNonTerminalChoice;
+            }
+
+
             // TODO many groups
             foreach (var child in state.Children)
             {
