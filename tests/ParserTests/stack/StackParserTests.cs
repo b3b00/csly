@@ -435,6 +435,24 @@ public class StackParserTests
     }
     
     [Fact]
+    void TestOptionChoiceTerminal()
+    {
+        RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
+        var parser = GetParser<L, String>(new OptionTerminalChoice(), ParserType.EBNF_LL_STACK, "root");
+
+        Check.That(parser).IsNotNull();
+        // var result = parser.Parse("A");
+        // Check.That(result).IsOkParsing();
+        // Check.That(result.Result).IsEqualTo("A");
+        // result = parser.Parse("B");
+        // Check.That(result).IsOkParsing();
+        // Check.That(result.Result).IsEqualTo("B");
+        var result = parser.Parse("");
+        Check.That(result).IsOkParsing();
+        Check.That(result.Result).IsEqualTo("nothing");
+    }
+    
+    [Fact]
     void TestChoiceNonTerminal()
     {
         RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;

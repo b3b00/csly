@@ -82,8 +82,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                     new OptionSyntaxNode<IN, OUT>("nevermind", children, null);
                 result.EndingPosition = innerResult.EndingPosition;
                 result.HasByPassNodes = innerResult.HasByPassNodes;
-                state.Parent.SetResult(state.Result);
-
+                state.Parent.SetResult(result);
             }
             else if (state.Result.IsError)
             {
@@ -106,6 +105,28 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                     result.EndingPosition = state.Position;
                     state.Parent.SetResult(result);
                     ;
+                }
+                else if (state.OptionalClause is ChoiceClause<IN, OUT> choiceClause)
+                {
+                    if (choiceClause.IsTerminalChoice)
+                    {
+                        result.Root = new SyntaxLeaf<IN, OUT>(Token<IN>.Empty(), false);
+                        state.Parent.SetResult(result);
+                    }
+                    else if (choiceClause.IsNonTerminalChoice) 
+                    {
+                        result = new SyntaxParseResult<IN, OUT>();
+                        result.AddErrors(innerResult.GetErrors());
+                        //result.IsError = true;
+                        var children = new List<ISyntaxNode<IN, OUT>> { innerResult.Root };
+                        if (innerResult.IsError) children.Clear();
+                        var node = new OptionSyntaxNode<IN, OUT>("", children,
+                            null);
+                        node.IsGroupOption = false;
+                        result.Root = node;
+                        result.EndingPosition = state.Position;
+                        state.Parent.SetResult(result);
+                    }
                 }
             }
         }
