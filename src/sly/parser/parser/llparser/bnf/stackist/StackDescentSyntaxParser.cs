@@ -153,19 +153,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 {
                     // Log($"{state.NonTerminal.NonTerminalName}<<{state.Index}>> : no more alternative but at least one match has been found ",stack,1);
                     var last = state.Successes.OrderBy(x => x.EndingPosition).Last();
-                    if (state.Parent is RuleStackState<IN, OUT> rState)
-                    {
-                        rState.SetResult(result);
-                    }
-                    else if (state.Parent is RootStackState<IN, OUT> rootState)
-                    {
-                        rootState.SetResult(result);
-                    }
-                    else
-                    {
-                        throw new Exception(
-                            $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
-                    }
+                    state.Parent.SetResult(result);
+                    
 
                     return;
                 }
@@ -190,20 +179,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             if (state.Index > 0 && state.Result != null && state.Result.IsOk)
             {
                 // here : last rule returned OK => returning right now
-                if (state.Parent is RuleStackState<IN, OUT> ruleState)
-                {
-                    ruleState.SetResult(state.Result);
-                }
-                else if (state.Parent is RootStackState<IN, OUT> rootState)
-                {
-                    rootState.SetResult(state.Result);
-                }
-                else
-                {
-                    throw new Exception(
-                        $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
-                }
-
+                state.Parent.SetResult(state.Result);
                 bool hasParseEnded = state.Result.EndingPosition  >= state.Tokens.Length-1;
                 // other rules may beter match if  parse has not ended
                 if (hasParseEnded)
@@ -223,20 +199,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             var rules = nonTerminalClause.Rules;
             if (state.Index >= rules.Count)
             {
-                if (state.Parent is RuleStackState<IN, OUT> ruleState)
-                {
-                    ruleState.SetResult(state.Result);
-                }
-                else if (state.Parent is RootStackState<IN, OUT> rootState)
-                {
-                    rootState.SetResult(state.Result);
-                }
-                else
-                {
-                    throw new Exception(
-                        $"HOOPS something bad here ! nonterminal's parent should not be a {state.Parent.GetType().Name} : {state.Parent}");
-                }
-
+                state.Parent.SetResult(state.Result);
+                
                 return;
             }
 
