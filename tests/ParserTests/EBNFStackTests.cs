@@ -13,6 +13,7 @@ using sly.parser;
 using sly.parser.generator;
 using sly.parser.llparser.ebnf;
 using sly.parser.parser;
+using sly.parser.parser.llparser.ebnf.stackist;
 using sly.parser.syntax.grammar;
 using Xunit;
 using ExpressionToken = simpleExpressionParser.ExpressionToken;
@@ -411,7 +412,7 @@ namespace ParserTests
             var buildResult = BuildParser();
             Check.That(buildResult.IsError).IsFalse();
             Parser = buildResult.Result;
-            Check.That(Parser.SyntaxParser).IsInstanceOf<EBNFRecursiveDescentSyntaxParser<TokenType, string>>();
+            Check.That(Parser.SyntaxParser).IsInstanceOf<EBNFStackDescentSyntaxParser<TokenType, string>>();
             Check.That(Parser.Configuration.NonTerminals).CountIs(6);
             
             var nt = Parser.Configuration.NonTerminals["R"];
@@ -472,10 +473,10 @@ namespace ParserTests
         public void TestZeroOrMoreWithNone()
         {
             var buildResult = BuildParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             Parser = buildResult.Result;
             var result = Parser.Parse("a  c");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("R(A(a),B(),c)");
         }
 
