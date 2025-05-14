@@ -194,6 +194,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         {
             state.Position = state.Children.Count > 0 ? state.Children.Last().EndingPosition : state.Position;
             // push self 
+            state.Index++;
             stack.Push(state);
             
             // keep on trying 
@@ -214,11 +215,12 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                                         state.RepeatedClause is ChoiceClause<IN, OUT> ntc && ntc.IsNonTerminalChoice;
             }
 
-
-            // TODO many groups
             foreach (var child in state.Children)
             {
-                manyNode.Add(child.Root);                
+                if (child.Root != null)
+                {
+                    manyNode.Add(child.Root);
+                }
             }
 
             result.Root = manyNode;

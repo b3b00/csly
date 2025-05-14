@@ -151,7 +151,7 @@ namespace ParserTests.samples
         }
 
         [Fact]
-        public void TestSingleListValue()
+        public void TestListSingleValue()
         {
             var r = Parser.Parse("[1]");
             Check.That(r).IsOkParsing();

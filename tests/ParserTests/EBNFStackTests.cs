@@ -129,7 +129,7 @@ namespace ParserTests
 
         private BuildResult<Parser<TokenType, string>> BuildParser()
         {
-            var parserInstance = new EBNFTests();
+            var parserInstance = new EBNFStackTests();
             var builder = new ParserBuilder<TokenType, string>();
             var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, "R");
             return result;
@@ -375,10 +375,10 @@ namespace ParserTests
         public void TestOneOrMoreNonTerminal()
         {
             var buildResult = BuildParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             Parser = buildResult.Result;
             var result = Parser.Parse("e f e f");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("R(G(e,f),G(e,f))");
         }
 
@@ -846,8 +846,7 @@ namespace ParserTests
             var parser = builtParser.Result;
 
             var test = parser.Parse("a /*commented b*/b");
-            Check.That(test.IsOk).IsTrue();
-            Check.That(test.Result).IsNotNull();
+            Check.That(test).IsOkParsing();            
             Check.That(test.Result).IsInstanceOf<IdentifierList>();
             
             var list = test.Result as IdentifierList;
@@ -874,12 +873,12 @@ else
             ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
             var instance = new IndentedParser();
             var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "root");
-            Check.That(parserRes.IsOk).IsTrue();
+            Check.That(parserRes).IsOk();
             
             var parser = parserRes.Result;
             Check.That(parser).IsNotNull();
             var parseResult = parser.Parse(source);
-            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult).IsOkParsing();
             
             var ast = parseResult.Result;
             Check.That(ast).IsNotNull();
