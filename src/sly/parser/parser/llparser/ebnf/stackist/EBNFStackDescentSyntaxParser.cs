@@ -178,7 +178,12 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             ;
         }
 
-        PushClause(state.Choice.Choices[state.Index - 1], stack, state);
+        var next = state.Choice.Choices[state.Index - 1];
+        if (next is TerminalClause<IN, OUT> terminalClause)
+        {
+            terminalClause.Discarded = state.Choice.IsDiscarded;
+        }
+        PushClause(next, stack, state);
     }
 
 
