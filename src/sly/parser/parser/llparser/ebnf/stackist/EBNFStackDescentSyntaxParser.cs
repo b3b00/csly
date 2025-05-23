@@ -234,6 +234,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         if (state.Result == null || state.IsOk)
         {
             state.Position = state.Children.Count > 0 ? state.Children.Last().EndingPosition : state.Position;
+            state.Index++;
             // push self 
             stack.Push(state);
             
@@ -266,7 +267,10 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             
             foreach (var child in state.Children)
             {
-                manyNode.Add(child.Root);                
+                if (child.Root != null)
+                {
+                    manyNode.Add(child.Root);
+                }              
             }
 
             result.Root = manyNode;

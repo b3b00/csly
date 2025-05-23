@@ -21,7 +21,7 @@ namespace ParserTests
                 lexerPostProcess: PostProcessedLexerParserBuilder.postProcessFormula);
             Check.That(build).IsOk();
             var r = Parser.Parse("2 * x");
-            Check.That(r.IsError).IsFalse();
+            Check.That(r).IsOkParsing();
             
             var res = r.Result.Evaluate(new ExpressionContext(new Dictionary<string, double>()
                 { { "x", 2 } }));

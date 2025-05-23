@@ -23,6 +23,7 @@ namespace ParserTests
 {
     
 
+    [Collection("stack")]
     public class EBNFStackTests
     {
         public enum TokenType
@@ -51,12 +52,17 @@ namespace ParserTests
         [Production("R : G+ ")]
         public string RManyNT(List<string> gs)
         {
-            var result = "R(";
-            result += gs
-                .Select(g => g.ToString())
-                .Aggregate((s1, s2) => s1 + "," + s2);
-            result += ")";
-            return result;
+            if (gs.Any())
+            {
+                var result = "R(";
+                result += gs
+                    .Select(g => g.ToString())
+                    .Aggregate((s1, s2) => s1 + "," + s2);
+                result += ")";
+                return result;
+            }
+
+            return "";
         }
 
         [Production("G : e f ")]
@@ -820,11 +826,11 @@ namespace ParserTests
         [Fact]
         public void TestIssue193()
         {
+            RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
             var builtParser = BuildParser();
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Result).IsNotNull();
             var parser = builtParser.Result;
-
             var test = parser.Parse("a b");
 
             Check.That(test.IsError).IsTrue();

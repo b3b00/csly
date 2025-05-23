@@ -7,6 +7,7 @@ using Xunit;
 
 namespace ParserTests.samples
 {
+    [Collection("stack")]
     public class JsonGenericStackTests
     {
         public JsonGenericStackTests()

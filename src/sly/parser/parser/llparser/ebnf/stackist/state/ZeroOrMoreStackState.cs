@@ -39,7 +39,10 @@ public class ZeroOrMoreStackState<IN,OUT> : StackState<IN,OUT> where IN : struct
     public override void SetResult(SyntaxParseResult<IN, OUT> result)
     {
         base.SetResult(result);
-        AddChild(result);
+        if (result.IsOk)
+        {
+            AddChild(result);
+        }
     }
 
     public void AddChild(SyntaxParseResult<IN, OUT> result)
