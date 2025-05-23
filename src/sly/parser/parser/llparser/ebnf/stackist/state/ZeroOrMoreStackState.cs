@@ -20,9 +20,6 @@ public class ZeroOrMoreStackState<IN,OUT> : StackState<IN,OUT> where IN : struct
 
     public IClause<IN, OUT> RepeatedClause => _clause.Clause;
 
-    public bool IsManyToken { get; set; }
-    
-    public bool IsManyValue { get; set; }
 
     public ZeroOrMoreStackState(ZeroOrMoreClause<IN, OUT> zeroOrMore, StackState<IN, OUT> parent)
     {

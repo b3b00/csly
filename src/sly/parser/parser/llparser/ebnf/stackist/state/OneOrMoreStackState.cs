@@ -19,10 +19,6 @@ public class OneOrMoreStackState<IN, OUT>: StackState<IN,OUT> where IN : struct,
 
     public IClause<IN, OUT> RepeatedClause => _clause.Clause;
 
-    public bool IsManyToken { get; set; }
-    
-    public bool IsManyValue { get; set; }
-
     public OneOrMoreStackState(OneOrMoreClause<IN, OUT> oneOrMore, StackState<IN, OUT> parent) 
     {
         _clause =  oneOrMore;

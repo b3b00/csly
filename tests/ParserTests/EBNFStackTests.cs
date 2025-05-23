@@ -397,7 +397,7 @@ namespace ParserTests
             Check.That(buildResult.IsError).IsFalse();
             Parser = buildResult.Result;
             var result = Parser.Parse("aaa b c");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("R(A(a, a, a),B(b),c)");
         }
 
@@ -833,7 +833,7 @@ namespace ParserTests
             var parser = builtParser.Result;
             var test = parser.Parse("a b");
 
-            Check.That(test.IsError).IsTrue();
+            Check.That(test).Not.IsOkParsing();
             Check.That(test.Errors).CountIs(1);
             var error = test.Errors[0] as UnexpectedTokenSyntaxError<TokenType>;
             Check.That(error).IsNotNull();
@@ -1140,7 +1140,7 @@ if truc == 1
             var parser = parserRes.Result;
             Check.That(parser).IsNotNull();
             var parseResult = parser.Parse(source);
-            Check.That(parseResult.IsOk).Not.IsTrue();
+            Check.That(parseResult).Not.IsOkParsing();
             Check.That(parseResult.Errors).CountIs(1);
             var error = parseResult.Errors[0];
             Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);

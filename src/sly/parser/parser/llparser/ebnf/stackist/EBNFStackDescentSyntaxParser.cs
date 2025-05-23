@@ -148,7 +148,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         {
             SyntaxParseResult<IN, OUT> result = new SyntaxParseResult<IN, OUT>();
             result.IsError = true;
-            result.EndingPosition = state.Position;
+            result.EndingPosition = state.Result.EndingPosition;
             LeadingToken<IN>[] expected = [];
             if (state.Choice.IsTerminalChoice)
             {
@@ -206,6 +206,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             // TODO : no more match return
             var result = new SyntaxParseResult<IN, OUT>();
             var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
+            
             manyNode.IsManyGroups = state.RepeatedClause is NonTerminalClause<IN, OUT> nt && nt.IsGroup;
             if (!manyNode.IsManyGroups)
             {
@@ -215,13 +216,24 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                                         state.RepeatedClause is ChoiceClause<IN, OUT> ntc && ntc.IsNonTerminalChoice;
             }
 
-            foreach (var child in state.Children)
+
+            if (state.Children.Any())
             {
-                if (child.Root != null)
+                foreach (var child in state.Children)
                 {
-                    manyNode.Add(child.Root);
+                    if (child.Root != null)
+                    {
+                        result.EndingPosition = Math.Max(result.EndingPosition, child.EndingPosition);
+                        manyNode.Add(child.Root);
+                    }
                 }
             }
+            else
+            {
+                ;
+                result.EndingPosition = state.Result.EndingPosition;
+            }
+
 
             result.Root = manyNode;
             state.Parent.SetResult(result);
@@ -269,6 +281,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             {
                 if (child.Root != null)
                 {
+                    result.EndingPosition = Math.Max(result.EndingPosition, child.EndingPosition);
                     manyNode.Add(child.Root);
                 }              
             }
