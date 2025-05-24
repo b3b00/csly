@@ -26,11 +26,18 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             new EBNFRecursiveDescentSyntaxParser<IN, OUT>(configuration, configuration.StartingRule, I18n);
         recursive.Init(configuration, configuration.StartingRule);
     }
-    
+
     public override void ParseExtension(StackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         switch (state)
         {
+            case ExpressionStackState<IN, OUT> expression:
+            {
+                ParseExpressionRule(expression, stack);
+                {
+                    break;
+                }
+            }
             case ZeroOrMoreStackState<IN, OUT> zeroOrmMore:
             {
                 ParseZeroOrMore(zeroOrmMore, stack);
@@ -57,10 +64,10 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
     private void ParseOption(OptionStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         if (state.Result == null)
-        { 
+        {
             // push itself
             stack.Push(state);
-            
+
             PushClause(state.OptionalClause, stack, state);
         }
         else
@@ -113,7 +120,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                         result.Root = new SyntaxLeaf<IN, OUT>(Token<IN>.Empty(), false);
                         state.Parent.SetResult(result);
                     }
-                    else if (choiceClause.IsNonTerminalChoice) 
+                    else if (choiceClause.IsNonTerminalChoice)
                     {
                         result = new SyntaxParseResult<IN, OUT>();
                         result.AddErrors(innerResult.GetErrors());
@@ -134,7 +141,6 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
 
     private void ParseChoice(ChoiceStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
-
         // match has been found return immediatly
         if (state.Result != null && state.Result.IsOk)
         {
@@ -170,7 +176,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             return;
         }
 
-        
+
         state.Index++;
         stack.Push(state);
         if (state.Index - 1 < 0 || state.Index - 1 >= state.Choice.Choices.Count)
@@ -183,6 +189,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         {
             terminalClause.Discarded = state.Choice.IsDiscarded;
         }
+
         PushClause(next, stack, state);
     }
 
@@ -196,7 +203,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             // push self 
             state.Index++;
             stack.Push(state);
-            
+
             // keep on trying 
             PushClause(state.RepeatedClause, stack, state);
             return;
@@ -206,7 +213,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             // TODO : no more match return
             var result = new SyntaxParseResult<IN, OUT>();
             var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
-            
+
             manyNode.IsManyGroups = state.RepeatedClause is NonTerminalClause<IN, OUT> nt && nt.IsGroup;
             if (!manyNode.IsManyGroups)
             {
@@ -239,7 +246,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             state.Parent.SetResult(result);
         }
     }
-    
+
     private void ParseOneOrMore(OneOrMoreStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         // either first time we evaluate sub clause or previous evaluation is ok
@@ -249,7 +256,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             state.Index++;
             // push self 
             stack.Push(state);
-            
+
             // keep on trying 
             PushClause(state.RepeatedClause, stack, state);
             return;
@@ -263,7 +270,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 state.Parent.SetResult(state.Result);
                 return;
             }
-            
+
             var result = new SyntaxParseResult<IN, OUT>();
             var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
             manyNode.IsManyTokens = state.RepeatedClause is TerminalClause<IN, OUT>;
@@ -276,14 +283,14 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 manyNode.IsManyTokens = choice.IsTerminalChoice;
                 manyNode.IsManyValues = choice.IsNonTerminalChoice;
             }
-            
+
             foreach (var child in state.Children)
             {
                 if (child.Root != null)
                 {
                     result.EndingPosition = Math.Max(result.EndingPosition, child.EndingPosition);
                     manyNode.Add(child.Root);
-                }              
+                }
             }
 
             result.Root = manyNode;
@@ -291,14 +298,94 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         }
     }
 
+    private void ParseExpressionRule(ExpressionStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    {
+        if (state.ExpressionState == ExpressionRuleState.NotStarted)
+        {
+            state.ExpressionState = ExpressionRuleState.Left;
+            stack.Push(state);
+            var nextClause = state.Rule.Clauses[0];
+            PushClause(nextClause, stack, state);   
+        }
+        // TODO
+        if (state.Result.IsOk)
+        {
+            if (state.ExpressionState == ExpressionRuleState.Done)
+            {
+                // TODO : build result ok (Left, Operator, Right)
+                state.Parent.SetResult(null);
+            }
+
+            if (state.ExpressionState == ExpressionRuleState.Left)
+            {
+                state.Left = state.Result;
+                state.ExpressionState = ExpressionRuleState.Operator;
+                stack.Push(state);
+                var nextClause = state.Rule.Clauses[1];
+                PushClause(nextClause, stack, state);
+            }
+            if (state.ExpressionState == ExpressionRuleState.Operator)
+            {
+                state.Operator = state.Result;
+                state.ExpressionState = ExpressionRuleState.Right;
+                stack.Push(state);
+                var nextClause = state.Rule.Clauses[2];
+                PushClause(nextClause, stack, state);
+            }
+            if (state.ExpressionState == ExpressionRuleState.Right)
+            {
+                state.Right = state.Result;
+                state.ExpressionState = ExpressionRuleState.Done;
+                stack.Push(state);
+            }
+        }
+        else
+        {
+            if (state.Result.IsError)
+            {
+                if (state.ExpressionState == ExpressionRuleState.Right)
+                {
+                    // fail on operator parsing => return expression with left operand
+                    state.Parent.SetResult(state.Left);
+                    return;
+                }
+                
+                // fail otherwise => return current result (left if left or right if done)
+                state.Parent.SetResult(state.Result);
+                return;
+            }
+        }
+    }
+
+    public override bool IsExtension(IClause<IN, OUT> clause)
+    {
+        if (clause is Rule<IN, OUT> rule && rule.IsInfixExpressionRule)
+        {
+            // only infix . prefix is a regular rule and postfix are managed through 2 generic rules
+            return true;
+        }
+
+        return (clause is OptionClause<IN, OUT> || clause is ManyClause<IN, OUT> || clause is ChoiceClause<IN, OUT>);
+    }
+
     public override void PushClauseExtension(IClause<IN, OUT> clause, Stack<StackState<IN, OUT>> stack,
         StackState<IN, OUT> parent)
     {
         switch (clause)
         {
+            case Rule<IN, OUT> rule when rule.IsInfixExpressionRule:
+            {
+                var state = new ExpressionStackState<IN, OUT>(rule, parent)
+                {
+                    Tokens = parent.Tokens,
+                    Position = parent.Position
+                };
+                stack.Push(state);
+                break;
+            }
             case ZeroOrMoreClause<IN, OUT> zeroOrMore:
             {
-                var state = new ZeroOrMoreStackState<IN,OUT>(zeroOrMore, parent)
+                var state = new ZeroOrMoreStackState<IN, OUT>(zeroOrMore, parent)
                 {
                     Tokens = parent.Tokens,
                     Position = parent.Position

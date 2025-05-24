@@ -57,6 +57,11 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     {
        
     }
+
+    public virtual bool IsExtension(IClause<IN, OUT> clause)
+    {
+        return false;
+    }
     
     public SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, string startingNonTerminal = null)
     {
@@ -384,6 +389,11 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
     public void PushClause(IClause<IN, OUT> clause, Stack<StackState<IN, OUT>> stack, StackState<IN,OUT> parent)
     {
+        if (IsExtension(clause))
+        {
+            PushClauseExtension(clause, stack, parent);
+            return;
+        }
         switch (clause)
         {
             case TerminalClause<IN, OUT> terminalClause:
@@ -411,7 +421,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 PushClauseExtension(clause, stack, parent);
                 break;
             }
-            
         }
     }
 
