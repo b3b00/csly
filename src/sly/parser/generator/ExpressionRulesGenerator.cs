@@ -285,7 +285,12 @@ namespace sly.parser.generator
             rule.IsByPassRule = true;
             rule.IsExpressionRule = true;
             rule.ExpressionAffix = Affix.NotOperator;
-            rule.SetLambdaVisitor((args) => (OUT)args[0]);
+            // BUG  : what if a parse context exists ! 
+            rule.SetLambdaVisitor((args) =>
+            {
+                ;
+                return (OUT)args[0];
+            });
             configuration.NonTerminals[entrypoint.Name] = entrypoint;
             entrypoint.Rules.Add(rule);
         }

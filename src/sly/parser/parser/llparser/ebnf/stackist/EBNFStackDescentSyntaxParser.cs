@@ -328,6 +328,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                                       state.Tokens[state.Tokens.Length - 1].IsEOS;
                 finalResult.EndingPosition = currentPosition;
                 state.Parent.SetResult(finalResult);
+                return;
             }
 
             if (state.ExpressionState == ExpressionRuleState.Left)
@@ -337,6 +338,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 stack.Push(state);
                 var nextClause = state.Rule.Clauses[1];
                 PushClause(nextClause, stack, state);
+                return;
             }
             if (state.ExpressionState == ExpressionRuleState.Operator)
             {
@@ -345,18 +347,27 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 stack.Push(state);
                 var nextClause = state.Rule.Clauses[2];
                 PushClause(nextClause, stack, state);
+                return;
             }
             if (state.ExpressionState == ExpressionRuleState.Right)
             {
                 state.Right = state.Result;
                 state.ExpressionState = ExpressionRuleState.Done;
                 stack.Push(state);
+                return;
             }
         }
         else
         {
             if (state.Result.IsError)
             {
+                if (state.ExpressionState == ExpressionRuleState.Operator)
+                {
+                    // return Left (ok)
+                    state.Parent.SetResult(state.Left);
+                    return;
+                }
+                
                 if (state.ExpressionState == ExpressionRuleState.Right)
                 {
                     // fail on operator parsing => return expression with left operand
