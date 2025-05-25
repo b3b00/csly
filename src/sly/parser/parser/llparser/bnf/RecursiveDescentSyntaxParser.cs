@@ -203,7 +203,7 @@ namespace sly.parser.llparser.bnf
                     node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, children);
                 else
                     node = new SyntaxNode<IN, OUT>(rule.NodeName ?? nonTerminalName, children);
-                node = ManageExpressionRules(rule, node);
+                node = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(rule, node);
                 if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
                     result.Root = children[0];
                 result.Root = node;

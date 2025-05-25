@@ -145,7 +145,7 @@ namespace sly.parser.llparser.ebnf
                 if (rule.IsSubRule)
                 {
                     node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, children);
-                    node = ManageExpressionRules(rule, node);
+                    node = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(rule, node);
                     result.Root = node;
                     result.IsEnded = currentPosition >= tokens.Length - 1
                                      || currentPosition == tokens.Length - 2 &&
@@ -169,7 +169,7 @@ namespace sly.parser.llparser.ebnf
                     node.ForcedName = rule.ForcedName;
                     node.Name = string.IsNullOrEmpty(rule.NodeName) ? nonTerminalName : rule.NodeName;
                     node.ExpressionAffix = rule.ExpressionAffix;
-                    node = ManageExpressionRules(rule, node);
+                    node = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(rule, node);
                     result.Root = node;
                     result.IsEnded = tokens[result.EndingPosition].IsEOS
                                      || node.IsEpsilon && tokens[result.EndingPosition+1].IsEOS;  

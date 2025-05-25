@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using sly.lexer;
 using sly.parser;
 using sly.parser.generator;
+using sly.parser.llparser.bnf;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 
@@ -94,7 +95,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
                     currentPosition = thirdResult.EndingPosition;
                     var finalNode = new SyntaxNode<IN, OUT>(rule.NodeName ?? nonTerminalName, children);
                     finalNode.ExpressionAffix = rule.ExpressionAffix;
-                    finalNode = ManageExpressionRules(rule, finalNode);
+                    finalNode = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(rule, finalNode);
                     var finalResult = new SyntaxParseResult<IN, OUT>();
                     finalResult.Root = finalNode;
                     finalResult.IsEnded = currentPosition >= tokens.Length - 1
@@ -116,7 +117,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
             node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, children);
         else
             node = new SyntaxNode<IN, OUT>(nonTerminalName, children);
-        node = ManageExpressionRules(rule, node);
+        node = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(rule, node);
         if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
             result.Root = children[0];
         result.Root = node;

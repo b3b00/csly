@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
 using sly.parser.generator;
+using sly.parser.llparser.bnf;
 using sly.parser.llparser.bnf.stackist;
 using sly.parser.llparser.ebnf;
 using sly.parser.parser.llparser.ebnf.stackist.state;
@@ -306,14 +307,27 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             stack.Push(state);
             var nextClause = state.Rule.Clauses[0];
             PushClause(nextClause, stack, state);   
+            return;
         }
-        // TODO
         if (state.Result.IsOk)
         {
             if (state.ExpressionState == ExpressionRuleState.Done)
             {
-                // TODO : build result ok (Left, Operator, Right)
-                state.Parent.SetResult(null);
+                var children = new List<ISyntaxNode<IN, OUT>>();
+                children.Add(state.Left.Root);
+                children.Add(state.Operator.Root);
+                children.Add(state.Right.Root);
+                int currentPosition = state.Right.EndingPosition;
+                var finalNode = new SyntaxNode<IN, OUT>(state.Rule.NodeName ?? state.Rule.NonTerminalName, children);
+                finalNode.ExpressionAffix = state.Rule.ExpressionAffix;
+                finalNode = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(state.Rule, finalNode);
+                var finalResult = new SyntaxParseResult<IN, OUT>();
+                finalResult.Root = finalNode;
+                finalResult.IsEnded = currentPosition >= state.Tokens.Length - 1
+                                      || currentPosition == state.Tokens.Length - 2 &&
+                                      state.Tokens[state.Tokens.Length - 1].IsEOS;
+                finalResult.EndingPosition = currentPosition;
+                state.Parent.SetResult(finalResult);
             }
 
             if (state.ExpressionState == ExpressionRuleState.Left)

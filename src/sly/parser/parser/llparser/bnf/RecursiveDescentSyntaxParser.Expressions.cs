@@ -6,10 +6,10 @@ using sly.parser.syntax.tree;
 
 namespace sly.parser.llparser.bnf;
 
-public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct, Enum
+public class ExpressionRuleManager<IN, OUT> where IN : struct, Enum
 {
     
-            protected SyntaxNode<IN, OUT> ManageExpressionRules(Rule<IN, OUT> rule, SyntaxNode<IN, OUT> node)
+            public static SyntaxNode<IN, OUT> ManageExpressionRules(Rule<IN, OUT> rule, SyntaxNode<IN, OUT> node)
             {
                 var operatorIndex = -1;
                 switch (rule.IsExpressionRule)
