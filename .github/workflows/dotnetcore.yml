@@ -52,18 +52,6 @@ jobs:
         github-token: ${{secrets.GITHUB_TOKEN }}
         path-to-lcov: ${{steps.coverlet.outputs.coverageFile}}
         #base-path: ${{github.workspace}}
-    - name: ReportGenerator
-      uses: danielpalme/ReportGenerator-GitHub-Action@4.8.12
-      with:
-        reports: ${{steps.coverlet.outputs.coverageFile}}
-        targetdir: 'coveragereport'
-        reporttypes: 'HtmlInline;MarkdownSummary'
-        verbosity: 'Info' # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
-        tag: '${{ github.run_number }}_${{ github.run_id }}'
-    - name: Publish coverage summary
-      uses: marocchino/sticky-pull-request-comment@v2
-      with:
-           path: coveragereport/Summary.md
     - name: publish nuget
       if:  ${{success() && matrix.os == 'windows-latest' && env.PUBLISH_NUGET}}
       id: publish_nuget
