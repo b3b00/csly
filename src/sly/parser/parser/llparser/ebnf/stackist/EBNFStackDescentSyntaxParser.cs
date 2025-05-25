@@ -31,7 +31,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
     {
         switch (state)
         {
-            case ExpressionStackState<IN, OUT> expression:
+            case InfixExpressionStackState<IN, OUT> expression:
             {
                 ParseExpressionRule(expression, stack);
                 {
@@ -298,7 +298,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         }
     }
 
-    private void ParseExpressionRule(ExpressionStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    private void ParseExpressionRule(InfixExpressionStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         if (state.ExpressionState == ExpressionRuleState.NotStarted)
         {
@@ -357,25 +357,29 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         }
     }
 
-    public override bool IsExtension(IClause<IN, OUT> clause)
+    public override bool IsExtension(GrammarNode<IN, OUT> clause)
     {
         if (clause is Rule<IN, OUT> rule && rule.IsInfixExpressionRule)
         {
             // only infix . prefix is a regular rule and postfix are managed through 2 generic rules
             return true;
         }
+        if (clause is Rule<IN, OUT> rule2 && rule2.IsExpressionRule)
+        {
+            ;
+        } 
 
         return (clause is OptionClause<IN, OUT> || clause is ManyClause<IN, OUT> || clause is ChoiceClause<IN, OUT>);
     }
 
-    public override void PushClauseExtension(IClause<IN, OUT> clause, Stack<StackState<IN, OUT>> stack,
+    public override void PushClauseExtension(GrammarNode<IN, OUT> clause, Stack<StackState<IN, OUT>> stack,
         StackState<IN, OUT> parent)
     {
         switch (clause)
         {
             case Rule<IN, OUT> rule when rule.IsInfixExpressionRule:
             {
-                var state = new ExpressionStackState<IN, OUT>(rule, parent)
+                var state = new InfixExpressionStackState<IN, OUT>(rule, parent)
                 {
                     Tokens = parent.Tokens,
                     Position = parent.Position

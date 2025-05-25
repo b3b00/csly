@@ -58,7 +58,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
        
     }
 
-    public virtual bool IsExtension(IClause<IN, OUT> clause)
+    public virtual bool IsExtension(GrammarNode<IN, OUT> clause)
     {
         return false;
     }
@@ -90,6 +90,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         var current = stack.Pop();
         while (current != null)
         {
+            
             
             switch (current)
             {
@@ -222,12 +223,13 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
             if (rule.Match(state.Tokens, state.Position, Configuration))
             {
-                var ruleState = new RuleStackState<IN, OUT>(state, rule)
-                {
-                    Tokens = state.Tokens,
-                    Position = state.Position
-                };
-                stack.Push(ruleState);
+                PushClause(rule,stack,state);
+                // var ruleState = new RuleStackState<IN, OUT>(state, rule)
+                // {
+                //     Tokens = state.Tokens,
+                //     Position = state.Position
+                // };
+                // stack.Push(ruleState);
             }
             else
             {
@@ -387,7 +389,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     }
 
 
-    public void PushClause(IClause<IN, OUT> clause, Stack<StackState<IN, OUT>> stack, StackState<IN,OUT> parent)
+    public void PushClause(GrammarNode<IN, OUT> clause, Stack<StackState<IN, OUT>> stack, StackState<IN,OUT> parent)
     {
         if (IsExtension(clause))
         {
@@ -396,6 +398,16 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         }
         switch (clause)
         {
+            case Rule<IN, OUT> rule:
+            {
+                var ruleState = new RuleStackState<IN, OUT>(parent, rule)
+                {
+                    Tokens = parent.Tokens,
+                    Position = parent.Position
+                };
+                stack.Push(ruleState);
+                break;
+            }
             case TerminalClause<IN, OUT> terminalClause:
             {
                 var terminalState = new TerminalStackState<IN, OUT>(parent, terminalClause)
@@ -424,7 +436,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         }
     }
 
-    public virtual void PushClauseExtension(IClause<IN, OUT> clause, Stack<StackState<IN, OUT>> stack, StackState<IN,OUT> parent)
+    public virtual void PushClauseExtension(GrammarNode<IN, OUT> clause, Stack<StackState<IN, OUT>> stack, StackState<IN,OUT> parent)
     {
         
     }

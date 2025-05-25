@@ -513,11 +513,11 @@ namespace ParserTests
         public void TestContextualParsing()
         {
             var buildResult = buildSimpleExpressionParserWithContext();
-
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
+            //Check.That(buildResult.IsError).IsFalse();
             var parser = buildResult.Result;
             var res = parser.ParseWithContext("2 + a", new Dictionary<string, int> {{"a", 2}});
-            Check.That(res.IsOk).IsTrue();
+            Check.That(res).IsOkParsing();
             Check.That(res.Result).IsEqualTo(4);
         }
 
