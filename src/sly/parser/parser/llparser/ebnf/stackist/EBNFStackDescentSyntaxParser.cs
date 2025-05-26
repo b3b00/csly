@@ -318,11 +318,16 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 children.Add(state.Operator.Root);
                 children.Add(state.Right.Root);
                 int currentPosition = state.Right.EndingPosition;
-                var finalNode = new SyntaxNode<IN, OUT>(state.Rule.NodeName ?? state.Rule.NonTerminalName, children);
-                finalNode.ExpressionAffix = state.Rule.ExpressionAffix;
-                finalNode = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(state.Rule, finalNode);
+                var node = new SyntaxNode<IN, OUT>(state.Rule.NodeName ?? state.Rule.NonTerminalName, children);
+                node.ExpressionAffix = state.Rule.ExpressionAffix;
+                node = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(state.Rule, node);
+                node.IsByPassNode = state.Rule.IsByPassRule;
+                var op = (state.Operator.Root as SyntaxLeaf<IN, OUT>).Token;
+                var key = op.IsExplicit ? op.Value : op.TokenID.ToString();
+                node.Operation = state.Rule.GetOperation(key);
+                //node.Visitor = state.Rule.GetVisitorMethod();
                 var finalResult = new SyntaxParseResult<IN, OUT>();
-                finalResult.Root = finalNode;
+                finalResult.Root = node;
                 finalResult.IsEnded = currentPosition >= state.Tokens.Length - 1
                                       || currentPosition == state.Tokens.Length - 2 &&
                                       state.Tokens[state.Tokens.Length - 1].IsEOS;
@@ -333,7 +338,12 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
 
             if (state.ExpressionState == ExpressionRuleState.Left)
             {
+                if (state.Rule.NonTerminalName.Contains("PLUS"))
+                {
+                    ;
+                }
                 state.Left = state.Result;
+                state.Position = state.Left.EndingPosition;
                 state.ExpressionState = ExpressionRuleState.Operator;
                 stack.Push(state);
                 var nextClause = state.Rule.Clauses[1];
@@ -344,6 +354,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             {
                 state.Operator = state.Result;
                 state.ExpressionState = ExpressionRuleState.Right;
+                state.Position = state.Operator.EndingPosition;
                 stack.Push(state);
                 var nextClause = state.Rule.Clauses[2];
                 PushClause(nextClause, stack, state);
@@ -353,6 +364,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             {
                 state.Right = state.Result;
                 state.ExpressionState = ExpressionRuleState.Done;
+                state.Position =  state.Right.EndingPosition;
                 stack.Push(state);
                 return;
             }

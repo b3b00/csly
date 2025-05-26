@@ -348,6 +348,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                             state.Children.Select(x => x.Root).ToList());
                     }
 
+                    node.IsByPassNode = rule.IsByPassRule;
                     node.Visitor = state.Rule.GetVisitorMethod();
                     node.LambdaVisitor = state.Rule.getLambdaVisitor(null);
                     result.Root = node;
