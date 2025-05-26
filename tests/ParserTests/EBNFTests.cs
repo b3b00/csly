@@ -1203,7 +1203,7 @@ namespace ParserTests
         {
             var startingRule = $"{nameof(SimpleExpressionParserWithContext)}_expressions";
             var parserInstance = new SimpleExpressionParserWithContext();
-            var builder = new ParserBuilder<ExpressionToken, int>();
+            var builder = new ParserBuilder<ExpressionToken, int>("en");
             var parser = builder.BuildParser(parserInstance, parserType, startingRule);
             return parser;
         }
@@ -1218,6 +1218,18 @@ namespace ParserTests
             var res = parser.ParseWithContext("2 + a", new Dictionary<string, int> {{"a", 2}});
             Check.That(res.IsOk).IsTrue();
             Check.That(res.Result).IsEqualTo(4);
+        }
+        
+        [Fact]
+        public void TestContextualParsingPrefixPostfix()
+        {
+            var buildResult = buildSimpleExpressionParserWithContext();
+
+            Check.That(buildResult.IsError).IsFalse();
+            var parser = buildResult.Result;
+            var res = parser.ParseWithContext("-3!", new Dictionary<string, int> {});
+            Check.That(res).IsOkParsing();
+            Check.That(res.Result).IsEqualTo(-6);
         }
 
         [Fact]
