@@ -338,10 +338,6 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
 
             if (state.ExpressionState == ExpressionRuleState.Left)
             {
-                if (state.Rule.NonTerminalName.Contains("PLUS"))
-                {
-                    ;
-                }
                 state.Left = state.Result;
                 state.Position = state.Left.EndingPosition;
                 state.ExpressionState = ExpressionRuleState.Operator;

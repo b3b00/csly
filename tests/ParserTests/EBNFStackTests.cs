@@ -532,6 +532,18 @@ namespace ParserTests
             Check.That(res.IsOk).IsTrue();
             Check.That(res.Result).IsEqualTo(8);
         }
+        
+        [Fact]
+        public void TestContextualParsingPrefixAndPostfix()
+        {
+            var buildResult = buildSimpleExpressionParserWithContext();
+
+            Check.That(buildResult.IsError).IsFalse();
+            var parser = buildResult.Result;
+            var res = parser.ParseWithContext("- a!", new Dictionary<string, int> {{"a", 3}});
+            Check.That(res.IsOk).IsTrue();
+            Check.That(res.Result).IsEqualTo(-(1*2*3));
+        }
 
         [Fact]
         public void TestContextualParsingWithEbnf()
