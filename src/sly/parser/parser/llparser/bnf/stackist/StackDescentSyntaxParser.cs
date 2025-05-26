@@ -351,6 +351,10 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     node.IsByPassNode = rule.IsByPassRule;
                     node.Visitor = state.Rule.GetVisitorMethod();
                     node.LambdaVisitor = state.Rule.getLambdaVisitor(null);
+                    node.Visitor = state.Rule.GetVisitorMethod();
+                    
+                    
+                    node = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(state.Rule, node);
                     result.Root = node;
                     // send new position upward
                     result.EndingPosition = state.Children.Last().EndingPosition;

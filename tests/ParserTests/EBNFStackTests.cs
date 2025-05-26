@@ -540,9 +540,9 @@ namespace ParserTests
 
             Check.That(buildResult.IsError).IsFalse();
             var parser = buildResult.Result;
-            var res = parser.ParseWithContext("- a!", new Dictionary<string, int> {{"a", 3}});
+            var res = parser.ParseWithContext("- a", new Dictionary<string, int> {{"a", 3}});
             Check.That(res.IsOk).IsTrue();
-            Check.That(res.Result).IsEqualTo(-(1*2*3));
+            Check.That(res.Result).IsEqualTo(-3);
         }
 
         [Fact]

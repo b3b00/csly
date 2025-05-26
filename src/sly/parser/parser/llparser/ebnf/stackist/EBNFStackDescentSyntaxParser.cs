@@ -34,10 +34,8 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         {
             case InfixExpressionStackState<IN, OUT> expression:
             {
-                ParseExpressionRule(expression, stack);
-                {
-                    break;
-                }
+                ParseInfixExpressionRule(expression, stack);
+                break;
             }
             case ZeroOrMoreStackState<IN, OUT> zeroOrmMore:
             {
@@ -299,7 +297,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         }
     }
 
-    private void ParseExpressionRule(InfixExpressionStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    private void ParseInfixExpressionRule(InfixExpressionStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         if (state.ExpressionState == ExpressionRuleState.NotStarted)
         {
@@ -325,7 +323,6 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 var op = (state.Operator.Root as SyntaxLeaf<IN, OUT>).Token;
                 var key = op.IsExplicit ? op.Value : op.TokenID.ToString();
                 node.Operation = state.Rule.GetOperation(key);
-                //node.Visitor = state.Rule.GetVisitorMethod();
                 var finalResult = new SyntaxParseResult<IN, OUT>();
                 finalResult.Root = node;
                 finalResult.IsEnded = currentPosition >= state.Tokens.Length - 1

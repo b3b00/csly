@@ -1371,7 +1371,8 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            Schtak();
+            TestPrefixPostfixStack();
+            //Schtak();
             //testIssue516();
             //TestIssue507();
             //TestFStrings();
@@ -1862,6 +1863,21 @@ else
           {
               IndentedWhileTests tests = new IndentedWhileTests();
               tests.TestFString();
+          }
+
+          public static void TestPrefixPostfixStack()
+          {
+              var startingRule = $"{nameof(SimpleExpressionParserWithContext)}_expressions";
+              var parserInstance = new SimpleExpressionParserWithContext();
+              var builder = new ParserBuilder<ExpressionToken, int>();
+              var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
+
+              Check.That(buildResult.IsError).IsFalse();
+              var parser = buildResult.Result;
+              Console.Clear();
+              var res = parser.ParseWithContext("- a !", new Dictionary<string, int> {{"a", 3}});
+              Check.That(res.IsOk).IsTrue();
+              Check.That(res.Result).IsEqualTo(3*2*1);
           }
     }
 
