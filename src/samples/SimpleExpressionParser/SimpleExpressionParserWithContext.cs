@@ -60,7 +60,7 @@ namespace simpleExpressionParser
             return -value;
         }
 
-        [Operation((int) ExpressionToken.FACTORIAL, Affix.PostFix, Associativity.Right, 100)]
+        [Operation((int) ExpressionToken.FACTORIAL, Affix.PostFix, Associativity.Right, 110)]
         public int PostFixExpression(int value, Token<ExpressionToken> operation,Dictionary<string,int> context)
         {
             var factorial = 1;
