@@ -22,7 +22,9 @@ namespace benchCurrent
             // bench.Setup();
             // bench.BenchLargeExpression();
             
-            var summary5 = BenchmarkRunner.Run<StackExpressionBench>();
+            //var summary5 = BenchmarkRunner.Run<StackExpressionBench>();
+            
+            var summary5 = BenchmarkRunner.Run<StackEbnfExpressionBench>();
 
         }
         static void Main(string[] args)
