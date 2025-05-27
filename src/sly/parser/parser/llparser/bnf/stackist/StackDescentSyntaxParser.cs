@@ -21,7 +21,7 @@ public enum StackStateType
 public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> where IN : struct, Enum
 {
 
-    private const bool DEBUG = false;
+    private const bool DEBUG = true;
     public Dictionary<IN, Dictionary<string, string>> LexemeLabels { get; set; }
 
     public ParserConfiguration<IN, OUT> Configuration { get; set; }
