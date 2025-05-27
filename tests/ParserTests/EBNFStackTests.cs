@@ -848,8 +848,9 @@ namespace ParserTests
             Check.That(test).Not.IsOkParsing();
             Check.That(test.Errors).CountIs(1);
             var error = test.Errors[0] as UnexpectedTokenSyntaxError<TokenType>;
+            // TODO : parser does not return furthest error. 
             Check.That(error).IsNotNull();
-            Check.That(error.UnexpectedToken.IsEOS).IsTrue();
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
         }
         
         [Fact]
