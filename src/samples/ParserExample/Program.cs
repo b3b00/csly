@@ -1869,7 +1869,7 @@ else
           {
               var startingRule = $"{nameof(SimpleExpressionParserWithContext)}_expressions";
               var parserInstance = new SimpleExpressionParserWithContext();
-              var builder = new ParserBuilder<ExpressionToken, int>();
+              var builder = new ParserBuilder<ExpressionToken, int>("en");
               var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
 
               Check.That(buildResult.IsError).IsFalse();
