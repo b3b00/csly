@@ -4,11 +4,9 @@ using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Toolchains.CsProj;
-using expressionparser;
 using simpleExpressionParser;
-using sly.parser;
 using sly.parser.generator;
-using ExpressionToken = simpleExpressionParser.ExpressionToken;
+
 
 namespace benchCurrent
 {
@@ -69,8 +67,8 @@ Console.WriteLine(expr);
         public void BenchLargeExpression(ParserType type)
         {
             var instance = new SimpleExpressionParser();
-            ParserBuilder<expressionparser.ExpressionToken, double> builder =
-                new ParserBuilder<expressionparser.ExpressionToken, double>();
+            ParserBuilder<ExpressionToken, double> builder =
+                new ParserBuilder<ExpressionToken, double>();
             var parser = builder.BuildParser(instance, type, "root");
             if (!parser.IsOk)
             {
