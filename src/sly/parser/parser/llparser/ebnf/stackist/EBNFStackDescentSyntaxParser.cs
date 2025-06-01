@@ -12,6 +12,18 @@ using sly.parser.syntax.tree;
 
 namespace sly.parser.parser.llparser.ebnf.stackist;
 
+public enum EbnfStackStateType
+{
+    Infix,
+    Prefix,
+    Postfix,
+    OneOrMore,
+    ZeroOrMore,
+    Choice,
+    Option,
+    None,
+}
+
 public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN, OUT> where IN : struct, Enum
 {
     public EBNFStackDescentSyntaxParser(string i18n, ParserConfiguration<IN, OUT> configuration)
@@ -30,31 +42,38 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
 
     public override void ParseExtension(StackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
-        switch (state)
+        var ebnfState = state as EbnfStackState<IN, OUT>;
+        
+        switch (ebnfState.EbnfStackType)
         {
-            case InfixExpressionStackState<IN, OUT> expression:
+            case EbnfStackStateType.Infix:
             {
-                ParseInfixExpressionRule(expression, stack);
+                ParseInfixExpressionRule(ebnfState as InfixExpressionStackState<IN, OUT>, stack);
                 break;
             }
-            case ZeroOrMoreStackState<IN, OUT> zeroOrmMore:
+            case EbnfStackStateType.ZeroOrMore:
             {
-                ParseZeroOrMore(zeroOrmMore, stack);
+                ParseZeroOrMore(ebnfState as ZeroOrMoreStackState<IN, OUT>, stack);
                 break;
             }
-            case OneOrMoreStackState<IN, OUT> oneOrMore:
+            case EbnfStackStateType.OneOrMore:
             {
-                ParseOneOrMore(oneOrMore, stack);
+                ParseOneOrMore(ebnfState as OneOrMoreStackState<IN, OUT>, stack);
                 break;
             }
-            case OptionStackState<IN, OUT> option:
+            case EbnfStackStateType.Option:
             {
-                ParseOption(option, stack);
+                ParseOption(ebnfState as OptionStackState<IN, OUT>, stack);
                 break;
             }
-            case ChoiceStackState<IN, OUT> choice:
+            case EbnfStackStateType.Choice:
             {
-                ParseChoice(choice, stack);
+                ParseChoice(ebnfState as ChoiceStackState<IN, OUT>, stack);
+                break;
+            }
+            default : 
+            {
+                ;
                 break;
             }
         }

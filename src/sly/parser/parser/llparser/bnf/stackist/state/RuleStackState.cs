@@ -49,7 +49,8 @@ public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
     public override string DebugString => $"Rule <<{Id}>> {Rule.RuleString} [{Index}] @{Position}";
     
     public int Index { get; set; }
-    
+
+    public override StackStateType Type => StackStateType.Rule;
     public Rule<IN, OUT> Rule { get; set; }
     
     public bool IsEnded => Index >= Rule.Clauses.Count || LastResult == null || LastResult.IsError;
@@ -59,7 +60,6 @@ public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
     public RuleStackState(StackState<IN, OUT> parent, Rule<IN, OUT> rule) : base(parent)
     {
         Rule = rule;
-        Type = StackStateType.Rule;
         Index = 0;
         Id = Counter++;
         Children = new List<SyntaxParseResult<IN, OUT>>(rule.Clauses.Count);

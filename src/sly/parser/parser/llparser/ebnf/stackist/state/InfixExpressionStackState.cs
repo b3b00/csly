@@ -7,14 +7,15 @@ using sly.parser.syntax.grammar;
 namespace sly.parser.parser.llparser.ebnf.stackist.state;
 
 [DebuggerDisplay("{DebugString}")]
-public class InfixExpressionStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
+public class InfixExpressionStackState<IN, OUT> : EbnfStackState<IN,OUT> where IN : struct, Enum
 {
     public override string DebugString => $"expression  {Rule.Dump()} [{ExpressionState}]  @{Position}";
 
     public SyntaxParseResult<IN, OUT> Left;
     public SyntaxParseResult<IN, OUT> Operator;
     public SyntaxParseResult<IN, OUT> Right;
-    
+
+    public override EbnfStackStateType EbnfStackType => EbnfStackStateType.Infix;
     public ExpressionRuleState ExpressionState { get; set; }
     
     public Rule<IN, OUT> Rule { get; set; }
@@ -24,7 +25,6 @@ public class InfixExpressionStackState<IN,OUT> : StackState<IN,OUT> where IN : s
     public InfixExpressionStackState(Rule<IN, OUT> rule, StackState<IN, OUT> parent) : base(parent)
     {
         Rule = rule;
-        Type = StackStateType.Rule;
         ExpressionState = ExpressionRuleState.NotStarted;
     }
     

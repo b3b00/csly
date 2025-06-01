@@ -7,9 +7,30 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.parser.llparser.ebnf.stackist.state;
 
-[DebuggerDisplay("{DebugString}")]
-public class ChoiceStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
+
+public abstract class EbnfStackState<IN, OUT> : StackState<IN, OUT> where IN : struct, Enum
 {
+    public virtual EbnfStackStateType EbnfStackType => EbnfStackStateType.None;
+
+    public EbnfStackState()
+    {
+        
+    }
+    
+    public EbnfStackState(StackState<IN, OUT> parent) : base(parent)
+    {
+        
+    }
+
+    public override StackStateType Type => StackStateType.Extension;
+}
+
+[DebuggerDisplay("{DebugString}")]
+public class ChoiceStackState<IN,OUT> : EbnfStackState<IN,OUT> where IN : struct, Enum
+{
+
+    public override EbnfStackStateType EbnfStackType => EbnfStackStateType.Choice;
+    
     public override string DebugString => $"Choice  {Choice.Dump()} [{Index}]  @{Position}";
     
     public int Index { get; set; }
@@ -19,7 +40,6 @@ public class ChoiceStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, En
     public ChoiceStackState(ChoiceClause<IN, OUT> choice, StackState<IN, OUT> parent) : base(parent)
     {
         Choice = choice;
-        Type = StackStateType.Rule;
         Index = 0;
     }
     

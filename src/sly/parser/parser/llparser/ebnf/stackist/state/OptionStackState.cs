@@ -5,12 +5,12 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.parser.llparser.ebnf.stackist.state;
 
-public class OptionStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
+public class OptionStackState<IN,OUT> : EbnfStackState<IN,OUT> where IN : struct, Enum
 {
     private readonly OptionClause<IN, OUT> _clause;
     private readonly StackState<IN, OUT> _parent;
     
-    
+    public override EbnfStackStateType EbnfStackType => EbnfStackStateType.Option;
     
     private List<SyntaxParseResult<IN,OUT>> _children;
 

@@ -15,6 +15,7 @@ public enum StackStateType
     NonTerminal,
     Rule,
     Root,
+    Extension,
     Result
 }
 
@@ -82,7 +83,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             Tokens = tokens
         };
         var toks = string.Join(" ", tokens.Select(x => x.Value));
-        Log($"start :: {toks}",stack);
+        //Log($"start :: {toks}",stack);
 
         stack.Push(root);
         stack.Push(state);
@@ -92,23 +93,27 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         {
             
             
-            switch (current)
+            switch (current.Type)
             {
-                case RuleStackState<IN, OUT> ruleState:
-                    Log(ruleState.Progress(), stack);
-                    ParseRule(ruleState, stack);
-                    break;
-                case NonTerminalStackState<IN, OUT> nonTerminalState:
-                    Log(nonTerminalState.Progress(Configuration), stack);
-                    ParseNonTerminal(nonTerminalState, stack);
-                    break;
-                case TerminalStackState<IN, OUT> terminalState:
-                    // Log(current.DebugString, stack);
-                    ParseTerminal(terminalState, stack);
-                    break;
-                case RootStackState<IN, OUT> rootState:
+                case StackStateType.Rule:
                 {
-                    return rootState.Result;
+                    //Log(ruleState.Progress(), stack);
+                    ParseRule(current as RuleStackState<IN, OUT>, stack);
+                    break;
+                }
+                case StackStateType.NonTerminal:
+                {
+                    ////Log(nonTerminalState.Progress(Configuration), stack);
+                    ParseNonTerminal(current as NonTerminalStackState<IN, OUT>, stack);
+                    break;
+                }
+                case StackStateType.Terminal:
+                    // //Log(current.DebugString, stack);
+                    ParseTerminal(current as TerminalStackState<IN, OUT>, stack);
+                    break;
+                case StackStateType.Root:
+                {
+                    return current.Result;
                 }
                 default:
                 {
@@ -133,14 +138,14 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 // success may have happened previously !
                 if (realResult.IsError && state.Successes.Any(x => x.IsOk))
                 {
-                    Log(state.DebugString+$" ended with {state.Successes.Count} successes",stack,1);
+                    //Log(state.DebugString+$" ended with {state.Successes.Count} successes",stack,1);
                     realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
                 } 
                 else if (state.Successes.Count(x => x.IsOk) > 1)
                 {
-                    Log(state.DebugString+$" ended with {state.Successes.Count} successes",stack,1);
+                    //Log(state.DebugString+$" ended with {state.Successes.Count} successes",stack,1);
                     realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
-                    Log($" choosing one ending at {realResult.EndingPosition}",stack,2);
+                    //Log($" choosing one ending at {realResult.EndingPosition}",stack,2);
                 }
 
                 state.Parent.SetResult(realResult);
@@ -157,7 +162,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
                 if (state.Successes.Any())
                 {
-                    // Log($"{state.NonTerminal.NonTerminalName}<<{state.Index}>> : no more alternative but at least one match has been found ",stack,1);
+                    // //Log($"{state.NonTerminal.NonTerminalName}<<{state.Index}>> : no more alternative but at least one match has been found ",stack,1);
                     var last = state.Successes.OrderBy(x => x.EndingPosition).Last();
                     state.Parent.SetResult(result);
                     
@@ -194,7 +199,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 }
                 else
                 {
-                    Log("end of token stream not reached, looking forward", stack, 1);
+                    //Log("end of token stream not reached, looking forward", stack, 1);
                 }
 
                 //return;
@@ -233,7 +238,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             }
             else
             {
-                Log($"KO rule (( {rule.RuleString} )) does not match {state.Tokens[state.Position]}",stack,1);
+                //Log($"KO rule (( {rule.RuleString} )) does not match {state.Tokens[state.Position]}",stack,1);
                 var result = new SyntaxParseResult<IN, OUT>();
                 var token = state.Tokens[state.Position];
 
@@ -258,7 +263,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         TerminalClause<IN, OUT> terminal = terminalState.Terminal;
         if (terminalState.Position >= state.Tokens.Length)
         {
-            Log($"end of stream found expected {terminal.ExpectedToken}", stack, 2);
+            //Log($"end of stream found expected {terminal.ExpectedToken}", stack, 2);
             var resultEos = new SyntaxParseResult<IN, OUT>();
             var eosToken = terminalState.Tokens[terminalState.Position-1]; // get EOS token
             resultEos.AddError(new UnexpectedTokenSyntaxError<IN>(eosToken, LexemeLabels, I18n, terminal.ExpectedToken));
@@ -276,13 +281,13 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         result.EndingPosition = !result.IsError ? terminalState.Position + 1 : terminalState.Position;
         if (isError)
         {
-            Log($"error found {token} expected {terminal.ExpectedToken}",stack,1);
+            //Log($"error found {token} expected {terminal.ExpectedToken}",stack,1);
             result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
             ;
         }
         else
         {
-            Log($"OK {token}",stack,1);
+            //Log($"OK {token}",stack,1);
         }
         
         token.Discarded = terminal.Discarded;
@@ -306,11 +311,11 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         {
             if (state.LastResult.IsError)
             {
-                Log("KO "+state.LastResult.GetErrors().First().ErrorMessage,stack,1);
+                //Log("KO "+state.LastResult.GetErrors().First().ErrorMessage,stack,1);
             }
             else
             {
-                Log("OK Rule",stack,1);
+                //Log("OK Rule",stack,1);
             }
             
             if (state.Parent is NonTerminalStackState<IN, OUT> parentState)
@@ -446,18 +451,18 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         
     }
 
-    private void Log(string message, Stack<StackState<IN, OUT>> stack, int plus = 0)
-    {
-        if (DEBUG)
-        {
-            string tab = "  ";
-            for (int i = 0; i < stack.Count + plus; i++)
-            {
-                tab += "  ";
-            }
-
-            Console.WriteLine(tab + message);
-        }
-    }
+    // private void Log(string message, Stack<StackState<IN, OUT>> stack, int plus = 0)
+    // {
+    //     if (DEBUG)
+    //     {
+    //         string tab = "  ";
+    //         for (int i = 0; i < stack.Count + plus; i++)
+    //         {
+    //             tab += "  ";
+    //         }
+    //
+    //         Console.WriteLine(tab + message);
+    //     }
+    // }
 
 }

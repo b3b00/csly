@@ -6,13 +6,14 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.parser.llparser.ebnf.stackist.state;
 
-public class ZeroOrMoreStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
+public class ZeroOrMoreStackState<IN,OUT> : EbnfStackState<IN,OUT> where IN : struct, Enum
 {
     private readonly ZeroOrMoreClause<IN, OUT> _clause;
     private readonly StackState<IN, OUT> _parent;
     
     public int Index { get; set; }
     
+    public override EbnfStackStateType EbnfStackType => EbnfStackStateType.ZeroOrMore;
     
     private List<SyntaxParseResult<IN,OUT>> _children;
 

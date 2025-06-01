@@ -12,10 +12,12 @@ public class TerminalStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, 
     public override string DebugString => $"Terminal {Terminal.ExpectedToken} @{Position}";
     
     public StackState<IN,OUT> Sibling { get; set; }
+    
+    public override  StackStateType Type => StackStateType.Terminal;
     public TerminalStackState(StackState<IN, OUT> parent, TerminalClause<IN, OUT> terminal) : base(parent)
     {
         Terminal = terminal;
-        Type = StackStateType.Terminal;
+        
     }
 
     public override string ToString()

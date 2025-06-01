@@ -22,7 +22,45 @@ namespace profiler
     class Program
     {
 
-        static void ProfileWhile()
+	    static string GetExpression(int max)
+	    {
+		    var rnd = new Random();
+		    //int width = rnd.Next(100, max);
+		    char[] ops = new[] { '+', '-', '*' };
+		    var getOp = () => ops[rnd.Next(0, ops.Length)];
+		    var expr = rnd.Next(0, 100).ToString();
+		    for (int i = 0; i < max; i++)
+		    {
+			    var op = getOp();
+			    var right = rnd.Next(0, 100);
+			    expr += $"{op} {right}";
+
+		    }
+			return expr;
+	    }
+
+	    static void ProfileStackEbnfExpresion()
+	    {
+		    var expresion = GetExpression(1000);
+		    var instance = new SimpleExpressionParser();
+		    ParserBuilder<ExpressionToken, double> builder =
+			    new ParserBuilder<ExpressionToken, double>();
+		    var parser = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "root");
+		    if (!parser.IsOk)
+		    {
+			    foreach (var error in parser.Errors)
+			    {
+				    Console.WriteLine(error.Message);
+			    }
+
+			    Environment.Exit(1);
+		    }
+
+		    var r = parser.Result.Parse(expresion);
+		    ;
+	    }
+
+	    static void ProfileWhile()
         {
             string source = @"
 r:=1
@@ -123,8 +161,9 @@ if i == 589 then
         
         static void Main(string[] args)
         {
-	        Dictionary<int,Dictionary<ParserType,long>> timings = new Dictionary<int, Dictionary<ParserType,long>>();
-	        ProfileExpressions(10000, 100, true, timings);            
+	        // Dictionary<int,Dictionary<ParserType,long>> timings = new Dictionary<int, Dictionary<ParserType,long>>();
+	        // ProfileExpressions(10000, 100, true, timings);
+	        ProfileStackEbnfExpresion();
         }
 
         static void ProfileExpressions(int max, int step, bool progression,

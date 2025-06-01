@@ -42,6 +42,8 @@ public class NonTerminalStackState<IN, OUT> : StackState<IN, OUT> where IN : str
     public int Index { get; set; }
     
     public List<SyntaxParseResult<IN,OUT>> Successes  { get; set; }
+    
+    public override  StackStateType Type => StackStateType.NonTerminal;
 
 
 
@@ -54,7 +56,6 @@ public class NonTerminalStackState<IN, OUT> : StackState<IN, OUT> where IN : str
         Id = Counter++;
         NonTerminal = nonTerminal;
         Index = 0;
-        Type = StackStateType.NonTerminal;
         Successes = new List<SyntaxParseResult<IN,OUT>>();
     }
 
