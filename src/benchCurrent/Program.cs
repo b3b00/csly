@@ -24,7 +24,7 @@ namespace benchCurrent
             
             //var summary5 = BenchmarkRunner.Run<StackExpressionBench>();
             
-            var summary5 = BenchmarkRunner.Run<StackEbnfExpressionBench>();
+            var summary6 = BenchmarkRunner.Run<StackEbnfExpressionBench>();
 
         }
         static void Main(string[] args)
