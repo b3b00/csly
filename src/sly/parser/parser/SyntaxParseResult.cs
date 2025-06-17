@@ -42,6 +42,11 @@ namespace sly.parser
         public void AddError(UnexpectedTokenSyntaxError<IN> error)
         {
             InitErrors();
+            if (Errors.Any())
+            {
+                int compare = error.CompareTo(Errors.First());
+                bool eq = error.Equals(Errors.First());
+            }
             Errors.Add(error);
         }
 

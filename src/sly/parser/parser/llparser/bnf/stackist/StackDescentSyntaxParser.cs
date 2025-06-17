@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
+using sly.lexer.fsm;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
-using System.IO;
+
 
 namespace sly.parser.llparser.bnf.stackist;
 
@@ -141,6 +142,31 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     //Log(state.DebugString+$" ended with {state.Successes.Count} successes",stack,1);
                     realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
                 } 
+                else if (!state.Successes.Any(x => x.IsOk) && state.Errors.Any())
+                {
+                    // only errors : return error result merging errors
+                    if (typeof(IN).Name.Contains("TokenType") && state.NonTerminal.NonTerminalName.Contains("R"))
+                    {
+                        ;
+                    }
+
+                    if (!state.Errors.Any())
+                    {
+                        ;
+                    }
+                    var max = state.Errors.Max(x => x.EndingPosition);
+                    realResult = new SyntaxParseResult<IN, OUT>()
+                    {
+                        IsError = true,
+                        EndingPosition = max,
+                    };
+                    //var allErrors = state.Errors.SelectMany(x => x.GetErrors()).Distinct().ToList();
+                    
+                    var errors = state.Errors.Where(x => x.EndingPosition == max)
+                        .SelectMany(x => x.GetErrors())
+                        .DistinctWithPredicate(( x,  y) => x.Line == y.Line && x.Column == y.Column).ToList();
+                    realResult.AddErrors(errors);
+                }
                 else if (state.Successes.Count(x => x.IsOk) > 1)
                 {
                     //Log(state.DebugString+$" ended with {state.Successes.Count} successes",stack,1);
@@ -186,7 +212,32 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 state.Parent.SetResult(result);
                 return;
             }
+            else if (!state.Successes.Any(x => x.IsOk) && state.Errors.Any())
+            {
+                // only errors : return error result merging errors
+                if (typeof(IN).Name.Contains("TokenType") && state.NonTerminal.NonTerminalName.Contains("R"))
+                {
+                    ;
+                }
 
+                if (!state.Errors.Any())
+                {
+                    ;
+                }
+                
+                var max = state.Errors.Max(x => x.EndingPosition);
+                var realResult = new SyntaxParseResult<IN, OUT>()
+                {
+                    IsError = true,
+                    EndingPosition = max,
+                };
+                //var allErrors = state.Errors.SelectMany(x => x.GetErrors()).Distinct().ToList();
+                    
+                var errors = state.Errors.Where(x => x.EndingPosition == max)
+                    .SelectMany(x => x.GetErrors())
+                    .DistinctWithPredicate(( x,  y) => x.Line == y.Line && x.Column == y.Column).ToList();
+                realResult.AddErrors(errors);
+            }
             if (state.Index > 0 && state.Result != null && state.Result.IsOk)
             {
                 // here : last rule returned OK => returning right now
@@ -204,9 +255,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
 
                 //return;
             }
-
-
-
+            
             var rules = nonTerminalClause.Rules;
             if (state.Index >= rules.Count)
             {

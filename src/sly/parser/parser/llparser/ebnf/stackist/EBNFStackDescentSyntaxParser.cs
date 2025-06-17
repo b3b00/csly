@@ -228,8 +228,10 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         }
         else
         {
-            // TODO : no more match return
+            // TODO : add errors ! cré nin diou !!!!!
             var result = new SyntaxParseResult<IN, OUT>();
+            result.AddErrors(state.Result.GetErrors());
+            result.IsError = true;
             var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
 
             manyNode.IsManyGroups = state.RepeatedClause is NonTerminalClause<IN, OUT> nt && nt.IsGroup;
@@ -281,7 +283,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         }
         else
         {
-            // TODO : no more match return
+            // TODO : add errors ! cré nin diou !!!!!
             if (state.Children.Count == 0)
             {
                 // error expecting at least one ...
@@ -290,6 +292,8 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             }
 
             var result = new SyntaxParseResult<IN, OUT>();
+            result.AddErrors(state.Result.GetErrors());
+            result.IsError = true;
             var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
             manyNode.IsManyTokens = state.RepeatedClause is TerminalClause<IN, OUT>;
             manyNode.IsManyValues = state.RepeatedClause is NonTerminalClause<IN, OUT>;
