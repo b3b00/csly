@@ -179,18 +179,18 @@ namespace ParserTests
         public void TestBuildGroupParser()
         {
             var buildResult = BuildGroupParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
         }
 
         [Fact]
         public void TestEmptyOptionalNonTerminal()
         {
             var buildResult = BuildOptionParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var optionParser = buildResult.Result;
 
             var result = optionParser.Parse("a c", "root2");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("R(a,<none>,c)");
         }
 
@@ -198,11 +198,11 @@ namespace ParserTests
         public void TestEmptyOptionTerminalInMiddle()
         {
             var buildResult = BuildOptionParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var optionParser = buildResult.Result;
 
             var result = optionParser.Parse("a c", "root2");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("R(a,<none>,c)");
         }
 
@@ -211,11 +211,11 @@ namespace ParserTests
         public void TestEmptyTerminalOption()
         {
             var buildResult = BuildOptionParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var optionParser = buildResult.Result;
 
             var result = optionParser.Parse("a b", "root3");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("R(a,B(b),<none>)");
         }
 
@@ -237,17 +237,17 @@ namespace ParserTests
                 var message = e.Message;
             }
 
-            Check.That(r.IsError).IsTrue();
+            Check.That(r).Not.IsOkParsing();
         }
 
         [Fact]
         public void TestGroupSyntaxManyParser()
         {
             var buildResult = BuildGroupParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ,a , a ,a,a", "rootMany");
-            Check.That(res.IsError).IsFalse();
+            Check.That(res).IsOkParsing();
             Check.That(res.Result).IsEqualTo("R(a,a,a,a,a)");
         }
         
@@ -255,16 +255,16 @@ namespace ParserTests
         public void TestGroupSyntaxChoicesParser()
         {
             var buildResult = BuildGroupParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ;a ", "rootGroupChoice");
 
-            Check.That(res.IsError).IsFalse();
+            Check.That(res).IsOkParsing();
             Check.That(res.Result).IsEqualTo("R(a,a)"); 
             
             res = groupParser.Parse("a ,a ", "rootGroupChoice");
 
-            Check.That(res.IsError).IsFalse();
+            Check.That(res).IsOkParsing();
             Check.That(res.Result).IsEqualTo("R(a,a)");
         }
         
@@ -272,10 +272,10 @@ namespace ParserTests
         public void TestGroupSyntaxChoicesManyParser()
         {
             var buildResult = BuildGroupParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ;a,a  ; a,a ", "rootGroupChoiceMany");
-            Check.That(res.IsError).IsFalse();
+            Check.That(res).IsOkParsing();
             Check.That(res.Result).IsEqualTo("R(a,a,a,a,a)"); // rootMany
         }
 
@@ -283,10 +283,10 @@ namespace ParserTests
         public void TestGroupSyntaxOptionIsSome()
         {
             var buildResult = BuildGroupParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ; a ", "rootOption");
-            Check.That(res.IsError).IsFalse();
+            Check.That(res).IsOkParsing();
             Check.That(res.Result).IsEqualTo("R(a;a)");
         }
 
@@ -294,10 +294,10 @@ namespace ParserTests
         public void TestGroupSyntaxOptionIsNone()
         {
             var buildResult = BuildGroupParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ", "rootOption");
-            Check.That(res.IsError).IsFalse();
+            Check.That(res).IsOkParsing();
             Check.That(res.Result).IsEqualTo("R(a;<none>)");
         }
 
@@ -305,11 +305,11 @@ namespace ParserTests
         public void TestGroupSyntaxParser()
         {
             var buildResult = BuildGroupParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ,a");
 
-            Check.That(res.IsError).IsFalse();
+            Check.That(res).IsOkParsing();
             Check.That(res.Result).IsEqualTo("R(a; {,,,a})");
         }
 
@@ -318,11 +318,11 @@ namespace ParserTests
         public void TestJsonList()
         {
             var buildResult = BuildEbnfJsonParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var jsonParser = buildResult.Result;
 
             var result = jsonParser.Parse("[1,2,3,4]");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result.IsList).IsTrue();
             
             var list = (JList) result.Result;
@@ -338,10 +338,10 @@ namespace ParserTests
         public void TestJsonObject()
         {
             var buildResult = BuildEbnfJsonParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var jsonParser = buildResult.Result;
             var result = jsonParser.Parse("{\"one\":1,\"two\":2,\"three\":\"trois\" }");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result.IsObject).IsTrue();
             
             var o = (JObject) result.Result;
@@ -356,11 +356,11 @@ namespace ParserTests
         public void TestNonEmptyOptionalNonTerminal()
         {
             var buildResult = BuildOptionParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var optionParser = buildResult.Result;
 
             var result = optionParser.Parse("a b c", "root2");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("R(a,B(b),c)");
         }
 
@@ -369,11 +369,11 @@ namespace ParserTests
         public void TestNonEmptyTerminalOption()
         {
             var buildResult = BuildOptionParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var optionParser = buildResult.Result;
 
             var result = optionParser.Parse("a b c", "root");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("R(a,b,c)");
         }
 
@@ -394,7 +394,7 @@ namespace ParserTests
         public void TestOneOrMoreWithMany()
         {
             var buildResult = BuildParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             Parser = buildResult.Result;
             var result = Parser.Parse("aaa b c");
             Check.That(result).IsOkParsing();
@@ -405,10 +405,10 @@ namespace ParserTests
         public void TestOneOrMoreWithOne()
         {
             var buildResult = BuildParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             Parser = buildResult.Result;
             var result = Parser.Parse(" b c");
-            Check.That(result.IsError).IsTrue();
+            Check.That(result).Not.IsOkParsing();
             
         }
 
@@ -416,7 +416,7 @@ namespace ParserTests
         public void TestParseBuild()
         {
             var buildResult = BuildParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             Parser = buildResult.Result;
             Check.That(Parser.SyntaxParser).IsInstanceOf<EBNFStackDescentSyntaxParser<TokenType, string>>();
             Check.That(Parser.Configuration.NonTerminals).CountIs(6);
@@ -440,10 +440,10 @@ namespace ParserTests
         public void TestZeroOrMoreWithMany()
         {
             var buildResult = BuildParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             Parser = buildResult.Result;
             var result = Parser.Parse("a bb c");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("R(A(a),B(b, b),c)");            
         }
         
@@ -451,13 +451,13 @@ namespace ParserTests
         public void TestZeroOrMoreStarterFollowedByTerminal()
         {
             var buildResult = BuildParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             Parser = buildResult.Result;
             var result = Parser.Parse("bbb a","Ba");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("Ba(b, b, b, a)");
             result = Parser.Parse("a","Ba");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("Ba(a)"); 
         }
         
@@ -465,13 +465,13 @@ namespace ParserTests
         public void TestZeroOrMoreStarterFollowedByNonTerminal()
         {
             var buildResult = BuildParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             Parser = buildResult.Result;
             var result = Parser.Parse("bbb a","BA");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("BA(b, b, b, A(a))");    
             result = Parser.Parse("a","BA");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("BA(A(a))");    
         }
 
@@ -490,10 +490,10 @@ namespace ParserTests
         public void TestZeroOrMoreWithOne()
         {
             var buildResult = BuildParser();
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             Parser = buildResult.Result;
             var result = Parser.Parse("a b c");
-            Check.That(result.IsError).IsFalse();
+            Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo("R(A(a),B(b),c)");
         }
 
@@ -514,7 +514,7 @@ namespace ParserTests
         {
             var buildResult = buildSimpleExpressionParserWithContext();
             Check.That(buildResult).IsOk();
-            //Check.That(buildResult.IsError).IsFalse();
+            //Check.That(buildResult).IsOkParsing();
             var parser = buildResult.Result;
             var res = parser.ParseWithContext("2 + a", new Dictionary<string, int> {{"a", 2}});
             Check.That(res).IsOkParsing();
@@ -526,7 +526,7 @@ namespace ParserTests
         {
             var buildResult = buildSimpleExpressionParserWithContext();
 
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var parser = buildResult.Result;
             var res = parser.ParseWithContext("2 + a * b", new Dictionary<string, int> {{"a", 2}, {"b", 3}});
             Check.That(res.IsOk).IsTrue();
@@ -538,7 +538,7 @@ namespace ParserTests
         {
             var buildResult = buildSimpleExpressionParserWithContext();
 
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var parser = buildResult.Result;
             var res = parser.ParseWithContext("- a", new Dictionary<string, int> {{"a", 3}});
             Check.That(res.IsOk).IsTrue();
@@ -550,7 +550,7 @@ namespace ParserTests
         {
             var buildResult = buildSimpleExpressionParserWithContext(ParserType.EBNF_LL_STACK);
 
-            Check.That(buildResult.IsError).IsFalse();
+            Check.That(buildResult).IsOk();
             var parser = buildResult.Result;
             var res = parser.ParseWithContext("2 + a * b", new Dictionary<string, int> {{"a", 2}, {"b", 3}});
             Check.That(res.IsOk).IsTrue();
@@ -564,7 +564,7 @@ namespace ParserTests
             var parserInstance = new Bugfix100Test();
             var builder = new ParserBuilder<GroupTestToken, int>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             Check.That(builtParser.Result).IsNotNull();
             var parser = builtParser.Result;
             var conf = parser.Configuration;
@@ -590,7 +590,7 @@ namespace ParserTests
             var parserInstance = new Bugfix104Test();
             var builder = new ParserBuilder<GroupTestToken, int>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             Check.That(builtParser.Errors).IsEmpty();
         }
 
@@ -601,7 +601,7 @@ namespace ParserTests
             var parserInstance = new AlternateChoiceTestTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a", "choice");
             Check.That(parseResult.IsOk).IsTrue();
@@ -623,7 +623,7 @@ namespace ParserTests
             var parserInstance = new AlternateChoiceTestNonTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a", "choice");
             Check.That(parseResult.IsOk).IsTrue();
@@ -645,10 +645,10 @@ namespace ParserTests
             var parserInstance = new AlternateChoiceTestOneOrMoreNonTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b", "choice");
-            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult).IsOkParsing();
             Check.That(parseResult.Result).IsEqualTo("A(a) B(b)");
             
             parseResult = builtParser.Result.Parse("b", "choice");
@@ -668,7 +668,7 @@ namespace ParserTests
             var parserInstance = new AlternateChoiceTestZeroOrMoreTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b c", "choice");
             Check.That(parseResult.IsOk).IsTrue();
@@ -684,10 +684,10 @@ namespace ParserTests
             var parserInstance = new AlternateChoiceTestOneOrMoreTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b c", "choice");
-            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult).IsOkParsing();
             Check.That(parseResult.Result).IsEqualTo("a,b,c");
             parseResult = builtParser.Result.Parse("b", "choice");
             Check.That(parseResult.IsOk).IsTrue();
@@ -700,7 +700,7 @@ namespace ParserTests
             var parserInstance = new AlternateChoiceTestOptionTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b", "choice");
             Check.That(parseResult.IsOk).IsTrue();
@@ -717,7 +717,7 @@ namespace ParserTests
             var parserInstance = new AlternateChoiceTestOptionNonTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b f", "choice");
             Check.That(parseResult.IsOk).IsTrue();
@@ -741,13 +741,13 @@ namespace ParserTests
             var parserInstance = new AlternateChoiceTestOptionDiscardedTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b", "choice");
             Check.That(parseResult.IsOk).IsTrue();
             Check.That(parseResult.Result).IsEqualTo("a");
             parseResult = builtParser.Result.Parse("a", "choice");
-            Check.That(parseResult.IsError).IsTrue();
+            Check.That(parseResult).Not.IsOkParsing();
             Check.That(parseResult.Errors).CountIs(1);
             Check.That(parseResult.Errors[0].ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
         }
@@ -759,7 +759,7 @@ namespace ParserTests
             var parserInstance = new AlternateChoiceTestError();
             var builder = new ParserBuilder<OptionTestToken, string>("en");
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsTrue();
+            Check.That(builtParser).Not.IsOk();
             Check.That(builtParser.Errors).CountIs(2);
             Check.That(builtParser.Errors.Select(x => x.Code)).Contains(ErrorCodes.PARSER_MIXED_CHOICES,
                 ErrorCodes.PARSER_NON_TERMINAL_CHOICE_CANNOT_BE_DISCARDED);
@@ -776,7 +776,7 @@ namespace ParserTests
             var parserInstance = new LeftRecWithChoiceInGroup();
             var builder = new ParserBuilder<OptionTestToken, string>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsTrue();
+            Check.That(builtParser).Not.IsOk();
             Check.That(builtParser.Errors).CountIs(1);
             Check.That(builtParser.Errors.First().Code).IsEqualTo(ErrorCodes.PARSER_LEFT_RECURSIVE);
         }
@@ -825,7 +825,7 @@ namespace ParserTests
             var parserInstance = new Issue190parser();
             var builder = new ParserBuilder<Issue190Token, bool>();
             var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             var parser = builtParser.Result;
             var parserResultNotTrue = parser.Parse("not true");
             Check.That(parserResultNotTrue.IsOk).IsTrue();
@@ -840,7 +840,7 @@ namespace ParserTests
         {
             RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
             var builtParser = BuildParser();
-            Check.That(builtParser.IsError).IsFalse();
+            Check.That(builtParser).IsOk();
             Check.That(builtParser.Result).IsNotNull();
             var parser = builtParser.Result;
             var test = parser.Parse("a b");
@@ -935,11 +935,11 @@ final = 9999
             ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
             var instance = new IndentedParser();
             var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "root");
-            Check.That(parserRes.IsOk).IsTrue();
+            Check.That(parserRes).IsOk();
             var parser = parserRes.Result;
             Check.That(parser).IsNotNull();
             var parseResult = parser.Parse(source);
-            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult).IsOkParsing();
             
             var ast = parseResult.Result;
             Check.That(ast).IsNotNull();
@@ -994,7 +994,7 @@ else
             var parser = parserRes.Result;
             Check.That(parser).IsNotNull();
             var parseResult = parser.Parse(source);
-            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult).IsOkParsing();
             var ast = parseResult.Result;
             Check.That(ast).IsNotNull();
             Check.That(ast).IsInstanceOf<Block>();
@@ -1034,7 +1034,7 @@ else
             Check.That(parser).IsNotNull();
             
             var parseResult = parser.Parse(source);
-            Check.That(parseResult.IsOk).IsTrue();
+            Check.That(parseResult).IsOkParsing();
             var ast = parseResult.Result;
             Check.That(ast).IsNotNull();
             Check.That(ast).IsInstanceOf<Block>();
@@ -1083,7 +1083,7 @@ d
 
 ");
 
-            Check.That(test.IsOk).IsTrue();
+            Check.That(test).IsOkParsing();
             Check.That(test.Result).IsNotNull();
             Check.That(test.Result).IsInstanceOf<IdentifierList>();
             var list = test.Result as IdentifierList;
