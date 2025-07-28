@@ -332,11 +332,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         {
             //Log($"error found {token} expected {terminal.ExpectedToken}",stack,1);
             result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
-            ;
-        }
-        else
-        {
-            //Log($"OK {token}",stack,1);
         }
         
         token.Discarded = terminal.Discarded;

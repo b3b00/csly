@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using expressionparser;
+using indented;
 using NFluent;
 using ParserTests;
 using ParserTests.Issue239;
@@ -406,16 +407,39 @@ Console.WriteLine("***************************************");
         Check.That(parseResult).IsOkParsing();
         var result = parseResult.Result;
         Check.That(result).IsEqualTo("A,A,A,A");
+        Console.WriteLine("parse A A A A : OK");
         
         parseResult = parser.Parse(" A  ");
         Check.That(parseResult).IsOkParsing();
         result = parseResult.Result;
         Check.That(result).IsEqualTo("A");
+        Console.WriteLine("parse A  : OK");
         
         parseResult = parser.Parse("   ");
         Check.That(parseResult).IsOkParsing();
         result = parseResult.Result;
         Check.That(result).IsEqualTo("");
+        Console.WriteLine("parse  (empty) : OK");
+    }
+
+    public static void TestIndentedNotClosing()
+    {
+        var source =@"
+if truc == 1
+    un = 1
+    deux = 2";
+        ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
+        var instance = new IndentedParser();
+        var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "root");
+        Check.That(parserRes.IsOk).IsTrue();
+            
+        var parser = parserRes.Result;
+        Check.That(parser).IsNotNull();
+        var parseResult = parser.Parse(source);
+        Check.That(parseResult).Not.IsOkParsing();
+        Check.That(parseResult.Errors).CountIs(1);
+        var error = parseResult.Errors[0];
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
     }
     
     public static void TestEbnfSimpleOneOrMore()

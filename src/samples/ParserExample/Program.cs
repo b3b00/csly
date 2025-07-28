@@ -881,8 +881,10 @@ return r";
             // Stacker.EvenMoreStack();
             // Console.WriteLine("and finally an expression");
             // Stacker.Expression();
-            Console.WriteLine("one more with rules parser");
-            Stacker.Rules();
+            //Console.WriteLine("one more with rules parser");
+            //Stacker.Rules();
+            Console.WriteLine("EBNF many (*)");
+            Stacker.TestEbnfSimpleZeroOrMore();
         }
 
         

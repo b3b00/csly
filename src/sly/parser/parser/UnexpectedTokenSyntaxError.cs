@@ -19,10 +19,6 @@ namespace sly.parser
             _labels = labels;
             _i18N = i18n;
             ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
-            if (unexpectedToken.IsEOS && typeof(T).Name.Contains("TokenType"))
-            {
-                ;
-            }
             UnexpectedToken = unexpectedToken;
             if (expectedTokens != null)
             {
@@ -129,6 +125,16 @@ namespace sly.parser
                 if (_labels != null && _labels.TryGetValue(expected.TokenId, out var labels) && labels.TryGetValue(_i18N, out var label))
                 {
                     lbl = label;
+                }
+
+                if (expected.IsIndent)
+                {
+                    lbl = "INDENT";
+                }
+
+                if (expected.IsUnindent)
+                {
+                    lbl = "UINDENT";
                 }
 
                 message.Append(lbl);
