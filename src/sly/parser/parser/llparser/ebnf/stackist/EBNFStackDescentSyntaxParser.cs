@@ -228,10 +228,9 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         }
         else
         {
-            // TODO : add errors ! cré nin diou !!!!!
             var result = new SyntaxParseResult<IN, OUT>();
             result.AddErrors(state.Result.GetErrors());
-            result.IsError = true;
+            result.IsError = false; // zero or more is always ok , either empty or with many values
             var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
 
             manyNode.IsManyGroups = state.RepeatedClause is NonTerminalClause<IN, OUT> nt && nt.IsGroup;
@@ -306,12 +305,16 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 manyNode.IsManyValues = choice.IsNonTerminalChoice;
             }
 
-            foreach (var child in state.Children)
+            if (state.Children.Any())
             {
-                if (child.Root != null)
+                result.IsError = false;
+                foreach (var child in state.Children)
                 {
-                    result.EndingPosition = Math.Max(result.EndingPosition, child.EndingPosition);
-                    manyNode.Add(child.Root);
+                    if (child.Root != null)
+                    {
+                        result.EndingPosition = Math.Max(result.EndingPosition, child.EndingPosition);
+                        manyNode.Add(child.Root);
+                    }
                 }
             }
 
