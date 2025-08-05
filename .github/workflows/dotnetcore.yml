@@ -49,6 +49,7 @@ jobs:
       uses: coverallsapp/github-action@v1.1.1
       if: matrix.os == 'windows-latest' && env.RUN_TESTS
       with:
+        fail-on-error: false
         github-token: ${{secrets.GITHUB_TOKEN }}
         path-to-lcov: ${{steps.coverlet.outputs.coverageFile}}
         #base-path: ${{github.workspace}}
