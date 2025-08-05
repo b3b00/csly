@@ -26,7 +26,7 @@ namespace sly.lexer
         
         public List<Token<IN>> AllTokens => _allTokens;
 
-        public List<Token<IN>> AllExceptWhiteSpaces => _allTokens.Where(x => !x.IsWhiteSpace).ToList();
+        public IEnumerable<Token<IN>> GetAllExceptWhiteSpaces() => _allTokens.Where(x => !x.IsWhiteSpace);
         
         public List<Token<IN>> MainTokens() => GetChannel(Channels.Main).Tokens.Where(x => x != null).ToList();
          

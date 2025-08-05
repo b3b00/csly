@@ -79,7 +79,7 @@ island content with int : 1, double :2.3, hexa 0xFFF, keyword : hello
 <<< 
 ");
         Check.That(tokenized).IsOkLexing();
-        var all = tokenized.Tokens.AllExceptWhiteSpaces;
+        var all = tokenized.Tokens.GetAllExceptWhiteSpaces();
         Check.That(all).CountIs(14);
         Check.That(all.Extracting(x => x.TokenID).Take(13)).IsEqualTo(new List<FluentToken>()
         {
@@ -131,7 +131,7 @@ extension
 ...
 ");
         Check.That(tokenized).IsOkLexing();
-        var all = tokenized.Tokens.AllExceptWhiteSpaces;
+        var all = tokenized.Tokens.GetAllExceptWhiteSpaces().ToList();
         Check.That(all).CountIs(4);
         Check.That(all.Extracting(x => x.TokenID).Take(3)).IsEqualTo(new List<FluentToken>()
         {
@@ -175,7 +175,7 @@ hello
 world
 ");
         Check.That(tokenized).IsOkLexing();
-        var all = tokenized.Tokens.AllExceptWhiteSpaces;
+        var all = tokenized.Tokens.GetAllExceptWhiteSpaces();
         Check.That(all).CountIs(5);
         Check.That(all.Extracting(x => x.TokenID).Take(4)).IsEqualTo(new List<FluentToken>()
         {
@@ -204,7 +204,7 @@ hello
 world
 ");
         Check.That(tokenized).IsOkLexing();
-        var all = tokenized.Tokens.AllExceptWhiteSpaces;
+        var all = tokenized.Tokens.GetAllExceptWhiteSpaces();
         Check.That(all).CountIs(4);
         Check.That(all.Extracting(x => x.TokenID).Take(3)).IsEqualTo(new List<FluentToken>()
         {
