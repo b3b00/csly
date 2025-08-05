@@ -11,4 +11,3 @@ updates:
       interval: "daily"
     ignore:
         - dependency-name: "sly"
-        - update-types: ["version-update:semver-patch","version-update:semver-minor","version-update:semver-major"]
