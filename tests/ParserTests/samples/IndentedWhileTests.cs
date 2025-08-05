@@ -15,20 +15,16 @@ namespace ParserTests.samples
 {
     public class IndentedWhileTests
     {
-        private static BuildResult<Parser<IndentedWhileTokenGeneric, WhileAST>> Parser;
+        
 
 
         public BuildResult<Parser<IndentedWhileTokenGeneric, WhileAST>> buildParser()
         {
-            if (Parser == null)
-            {
                 var whileParser = new IndentedWhileParserGeneric();
                 var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
-                Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
-                Check.That(Parser).IsOk();
-            }
-
-            return Parser;
+                var parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+                Check.That(parser).IsOk();
+                return parser;
         }
 
 

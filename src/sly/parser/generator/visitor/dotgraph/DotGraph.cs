@@ -6,40 +6,40 @@ namespace sly.parser.generator.visitor.dotgraph
 {
     public class DotGraph
     {
-        private readonly string GraphName;
-        private readonly bool Directed;
-        private List<DotNode> nodes;
-        private List<DotArrow> edges;
+        private readonly string _graphName;
+        private readonly bool _directed;
+        private readonly List<DotNode> _nodes;
+        private readonly List<DotArrow> _edges;
         
         public DotGraph(string graphName, bool directed)
         {
-            GraphName = graphName;
-            Directed = directed;
-            nodes = new List<DotNode>();
-            edges = new List<DotArrow>();
+            _graphName = graphName;
+            _directed = directed;
+            _nodes = new List<DotNode>();
+            _edges = new List<DotArrow>();
         }
 
         public void Add(DotNode node)
         {
-            nodes.Add(node);
+            _nodes.Add(node);
         }
 
         public void Add(DotArrow edge)
         {
-            edges.Add(edge);
+            _edges.Add(edge);
         }
 
         public string Compile()
         {
             StringBuilder builder = new StringBuilder();
-            builder.Append(Directed ? "digraph" : "graph");
-            builder.AppendLine($" {GraphName} {{");
-            foreach (var node in nodes)
+            builder.Append(_directed ? "digraph" : "graph");
+            builder.AppendLine($" {_graphName} {{");
+            foreach (var node in _nodes)
             {
                 builder.AppendLine(node.ToGraph());
             }
 
-            foreach (var edge in edges)
+            foreach (var edge in _edges)
             {
                 builder.AppendLine(edge.ToGraph());
             }
@@ -49,13 +49,13 @@ namespace sly.parser.generator.visitor.dotgraph
 
         public List<DotNode> FindRoots()
         {
-            var roots = edges.Where(x => !edges.Any(y => y.Destination?.Name == x.Source?.Name));
+            var roots = _edges.Where(x => !_edges.Any(y => y.Destination?.Name == x.Source?.Name));
             return roots.Select(x => x.Source).ToList();
         }
 
         public IList<DotArrow> FindEgdes(DotNode node)
         {
-            var nodeEdges = edges.Where(x => x.Source?.Name == node.Name);
+            var nodeEdges = _edges.Where(x => x.Source?.Name == node.Name);
             return nodeEdges.ToList();
         }
 

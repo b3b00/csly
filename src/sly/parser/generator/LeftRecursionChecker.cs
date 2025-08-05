@@ -7,10 +7,7 @@ namespace sly.parser.generator
 {
     public class LeftRecursionChecker<IN,OUT> where IN : struct, Enum
     {
-        public LeftRecursionChecker()
-        {
-            
-        }
+
 
         private static List<string> BuildPath(List<string> current, string step)
         {
@@ -58,10 +55,9 @@ namespace sly.parser.generator
                 lefts.AddRange(currentLefts);
                 stopped = !current.MayBeEmpty();
                 i++;
-                if (i < rule.Clauses.Count<IClause<IN, OUT>>())
+                if (i < rule.Clauses.Count)
                 {
-                    current = rule.Clauses[i];
-                    currentLefts = GetLeftClausesName(current);
+                    currentLefts = GetLeftClausesName(rule.Clauses[i]);
                 }
                 else
                 {

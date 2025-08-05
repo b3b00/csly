@@ -22,7 +22,10 @@ namespace sly.lexer.fsm.transitioncheck
         public override string ToGraphViz()
         {
             var t = "";
-            if (Precondition != null) t = "[|] ";
+            if (Precondition != null)
+            {
+                t = "[|] ";
+            }
              t += TransitionToken.ToEscaped();
             return $@"[ label=""{t}"" ]";
         }

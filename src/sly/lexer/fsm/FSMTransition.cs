@@ -24,8 +24,6 @@ namespace sly.lexer.fsm
         
         public string ToGraphViz<N>(Dictionary<int, FSMNode<N>> nodes)
         {
-            // string f = "\""+nodes[FromNode].GraphVizNodeLabel<N>()+"\"";
-            // string t = "\""+nodes[ToNode].GraphVizNodeLabel<N>()+"\"";
             return $"{nodes[FromNode].Id} -> {nodes[ToNode].Id} {Check.ToGraphViz()}";
         }
 

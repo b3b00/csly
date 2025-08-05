@@ -16,13 +16,6 @@
         public virtual string ErrorMessage { get; protected set; }
         public virtual int Line { get; protected set; }
 
-
-        //public ParseError(int line, int column)
-        //{
-        //    Column = column;
-        //    Line = line;
-        //}
-
         public int CompareTo(object obj)
         {
             var comparison = 0;

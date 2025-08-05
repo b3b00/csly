@@ -5,14 +5,12 @@ namespace sly.lexer.fsm.transitioncheck
 {
     public class TransitionMultiRange : AbstractTransitionCheck
     {
-//        private readonly char RangeEnd;
-//        private readonly char RangeStart;
 
-        private (char start, char end)[] ranges;
+        private readonly (char start, char end)[] _ranges;
 
         public TransitionMultiRange(params (char start, char end)[] ranges)
         {
-            this.ranges = ranges;
+            this._ranges = ranges;
         }
 
 
@@ -32,7 +30,7 @@ namespace sly.lexer.fsm.transitioncheck
             }
 
             builder.Append("[");
-            foreach (var range in ranges)
+            foreach (var range in _ranges)
             {
                 builder
                     .Append(range.start)
@@ -50,10 +48,10 @@ namespace sly.lexer.fsm.transitioncheck
         {
             bool match = false;
             int i = 0;
-            while (!match && i < ranges.Length)
+            while (!match && i < _ranges.Length)
             {
-                var range = ranges[i];
-                match = match ||  input.CompareTo(range.start) >= 0 && input.CompareTo(range.end) <= 0;
+                var range = _ranges[i];
+                match = input.CompareTo(range.start) >= 0 && input.CompareTo(range.end) <= 0;
                 i++;
             }
 

@@ -128,7 +128,7 @@ namespace sly.parser
                 foreach (var expecting in byEnding)
                 {
                     var expectingTokens = expecting.SelectMany(x => x.ExpectedTokens ?? new List<LeadingToken<IN>>()).Distinct();
-                    var expectedTokens =  expectingTokens.Any() ? expectingTokens?.ToArray() : null;
+                    var expectedTokens =  expectingTokens?.ToArray();
                     if (expectedTokens != null)
                     {
                         var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, LexemeLabels, I18n,

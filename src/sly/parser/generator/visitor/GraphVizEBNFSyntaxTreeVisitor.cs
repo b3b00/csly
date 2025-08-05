@@ -71,7 +71,6 @@ namespace sly.parser.generator.visitor
                         ArrowHeadShape = "none"
                     };
                     Graph.Add(edge);
-                    //Graph.Add(child);
                 }
             }
             return result;
