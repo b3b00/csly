@@ -1,4 +1,6 @@
-﻿namespace sly.parser
+﻿using System.Text;
+
+namespace sly.parser
 {
 
     public enum ErrorType
@@ -33,5 +35,19 @@
         }
 
         public virtual string GetContextualMessage(string fullSource) => ErrorMessage;
+        
+        
+        protected string GetContextualMessage(string fullSource, int line, int column, string message)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(ErrorMessage);
+            var theLine = fullSource.GetLines()[line];
+            var tab = " ".Multiply(line.ToString().Length);
+            sb.Append(tab).AppendLine(" |");
+            sb.Append(line).Append(" |").AppendLine(theLine);
+            sb.Append($"{tab} |").Append(" ".Multiply(column)).Append("^^^").AppendLine($" {message}");
+            
+            return sb.ToString();
+        }
     }
 }

@@ -15,16 +15,24 @@ namespace sly.lexer
             _i18N = i18n;
         }
 
-        private readonly string _i18N;
-        
+        protected readonly string _i18N;
+
         public char UnexpectedChar { get; set; }
 
-        public override string ErrorMessage => I18N.Instance.GetText(_i18N,I18NMessage.UnexpectedChar,UnexpectedChar.ToString(), Line.ToString(), Column.ToString(), ((int)UnexpectedChar).ToString());
+        public override string ErrorMessage => I18N.Instance.GetText(_i18N, I18NMessage.UnexpectedChar,
+            UnexpectedChar.ToString(), Line.ToString(), Column.ToString(), ((int)UnexpectedChar).ToString());
 
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return ErrorMessage;
+        }
+
+        public override string GetContextualMessage(string fullSource)
+        {
+            var message = I18N.Instance.GetText(_i18N, I18NMessage.UnexpectedCharacter,
+                UnexpectedChar.ToString());
+            return GetContextualMessage(fullSource, Line, Column, message);
         }
     }
 }

@@ -22,30 +22,30 @@ public enum ContextualErrorToken
     ID,
     
     [Sugar("+")]
-    [LexemeLabel("fr","plus")]
-    [LexemeLabel("en","plus")]
+    [LexemeLabel("fr","+")]
+    [LexemeLabel("en","+")]
     PLUS,
     [Sugar("-")]
-    [LexemeLabel("fr","moins")]
-    [LexemeLabel("en","minus")]
+    [LexemeLabel("fr","-")]
+    [LexemeLabel("en","-")]
     MINUS,
     [Sugar("*")]
-    [LexemeLabel("fr","fois")]
-    [LexemeLabel("en","times")]
+    [LexemeLabel("fr","*")]
+    [LexemeLabel("en","*")]
     MULTIPLY,
     [Sugar("/")]
-    [LexemeLabel("fr","diviser par")]
-    [LexemeLabel("en","divide sign")]
+    [LexemeLabel("fr","/")]
+    [LexemeLabel("en","/")]
     DIVIDE,
     
     [Sugar("=")]
-    [LexemeLabel("fr","égal")]
-    [LexemeLabel("en","equals")]
+    [LexemeLabel("fr","=")]
+    [LexemeLabel("en","=")]
     ASSIGN,
     
     [Sugar("==")]
-    [LexemeLabel("fr","double égal")]
-    [LexemeLabel("en","double equals")]
+    [LexemeLabel("fr","==")]
+    [LexemeLabel("en","==")]
     EQUALS,
 }
 
@@ -113,7 +113,7 @@ public class ContextualErrorMessages
     
     public static Parser<ContextualErrorToken,string> BuildParser()
     {
-        ParserBuilder<ContextualErrorToken,string> builder = new ParserBuilder<ContextualErrorToken,string>();
+        ParserBuilder<ContextualErrorToken, string> builder = new ParserBuilder<ContextualErrorToken, string>();
         var result = builder.BuildParser(new ContextualErrorParser(),ParserType.EBNF_LL_RECURSIVE_DESCENT,"root");
         Check.That(result).IsOk();
         return result.Result;
@@ -124,11 +124,25 @@ public class ContextualErrorMessages
         var parser = BuildParser();
         var source = @"
 if 89 == 12 then
-y = 14 + + 28
+y = 14 +  28
+else
+y = 101 
+@end";
+        var result = parser.Parse(source);
+        Check.That(result).Not.IsOkParsing();
+        foreach (var error in result.Errors)
+        {
+            Console.Error.WriteLine(error);
+            Console.Error.WriteLine(error.GetContextualMessage(source));
+        }
+        
+        source = @"
+if 89 == 12 then
+y = 14+ +  28
 else
 y = 101 
 endif";
-        var result = parser.Parse(source);
+        result = parser.Parse(source);
         Check.That(result).Not.IsOkParsing();
         foreach (var error in result.Errors)
         {
