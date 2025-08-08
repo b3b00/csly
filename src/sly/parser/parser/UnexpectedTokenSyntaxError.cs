@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Text;
 using sly.i18n;
@@ -9,6 +10,37 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser
 {
+
+    public static class StringExtensions
+    {
+        public static List<string> GetLines(this string text)
+        {
+            List<string> lines = new List<string>();
+            using (var reader = new StringReader(text))
+            {
+                string line = reader.ReadLine();
+                while (line != null)
+                {
+                    lines.Add(line);
+                    line = reader.ReadLine();
+                }
+            }
+            return lines;
+        }
+
+        public static string Multiply(this string str, int n)
+        {
+            string result = "";
+            for (int i = 0; i < n; i++)
+            {
+                result += str;
+            }
+
+            return result;
+        }
+    }
+        
+    
     public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable where T : struct, Enum
     {
         private readonly string _i18N;
@@ -138,6 +170,24 @@ namespace sly.parser
         public override string ToString()
         {
             return ErrorMessage;
+        }
+        
+        
+        public override string GetContextualMessage(string fullSource)
+        {
+            string expected = string.Join("", ExpectedTokens.Select(x => GetMessageForExpectedToken(x)));
+            int line = UnexpectedToken.Position.Line;
+            int column = UnexpectedToken.Position.Column;
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(ErrorMessage);
+            var theLine = fullSource.GetLines()[line];
+            sb.Append("--> ").AppendLine(UnexpectedToken.Position.ToString());
+            var tab = " ".Multiply(line.ToString().Length);
+            sb.Append(tab).AppendLine(" |");
+            sb.Append(line).Append(" |").AppendLine(theLine);
+            sb.Append($"{tab} |").Append(" ".Multiply(column)).Append("^^^").AppendLine($"expected {expected}");
+            
+            return sb.ToString();
         }
     }
 }
