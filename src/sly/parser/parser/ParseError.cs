@@ -9,7 +9,7 @@
         IndentationError
     }
     
-    public class ParseError
+    public abstract class ParseError
     {
         public virtual ErrorType ErrorType { get; protected set; }
         public virtual int Column { get; protected set; }
@@ -31,5 +31,7 @@
 
             return comparison;
         }
+
+        public virtual string GetContextualMessage(string fullSource) => ErrorMessage;
     }
 }
