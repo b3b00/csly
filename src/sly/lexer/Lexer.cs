@@ -29,8 +29,7 @@ namespace sly.lexer
             List<Token<T>> tokens = new List<Token<T>>();
             
             var currentIndex = 0;
-            //List<Token<T>> tokens = new List<Token<T>>();
-            var currentLine = 1;
+            var currentLine = 0;
             var currentColumn = 0;
             var currentLineStartIndex = 0;
             Token<T> previousToken = null;
