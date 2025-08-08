@@ -5,12 +5,14 @@ UnexpectedTokenExpecting=意外的 {1} ('{0}'). 期望为 {2}.
 UnexpectedEosExpecting=意外的流结尾. 期望为 {2}.
 UnexpectedToken=意外的 {0} {1}.
 UnexpectedEos=意外的流结尾.
+Expecting=期望为 {0}
+IndentError=压痕错误
 
 #
 # lexer errors
 #
 UnexpectedChar =词法错误, 第 {1} 行, 第 {2} 列 : 未识别符号 '{0}' ({3})
-
+UnexpectedCharacter =未识别符号 '{0}'
 
 ##########################################
 #

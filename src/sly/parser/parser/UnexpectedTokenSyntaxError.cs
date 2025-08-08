@@ -176,18 +176,9 @@ namespace sly.parser
         public override string GetContextualMessage(string fullSource)
         {
             string expected = string.Join("", ExpectedTokens.Select(x => GetMessageForExpectedToken(x)));
-            int line = UnexpectedToken.Position.Line;
-            int column = UnexpectedToken.Position.Column;
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine(ErrorMessage);
-            var theLine = fullSource.GetLines()[line];
-            sb.Append("--> ").AppendLine(UnexpectedToken.Position.ToString());
-            var tab = " ".Multiply(line.ToString().Length);
-            sb.Append(tab).AppendLine(" |");
-            sb.Append(line).Append(" |").AppendLine(theLine);
-            sb.Append($"{tab} |").Append(" ".Multiply(column)).Append("^^^").AppendLine($"expected {expected}");
-            
-            return sb.ToString();
+            var message = I18N.Instance.GetText(_i18N, I18NMessage.Expecting, expected);
+            var position = UnexpectedToken.Position;
+            return GetContextualMessage(fullSource,position.Line,position.Column, message);
         }
     }
 }
