@@ -78,6 +78,7 @@ namespace sly.parser
                 result = new ParseResult<IN, OUT>();
                 result.IsError = true;
                 result.Errors = new List<ParseError>();
+                lexingResult.Error.SetContextualErrorMessage(source);
                 result.Errors.Add(lexingResult.Error);
                 return result;
             }
@@ -95,7 +96,10 @@ namespace sly.parser
             }
             
             result = ParseWithContext(tokens, context, startingNonTerminal);
-
+            if (result != null && result.Errors != null && result.Errors.Any())
+            {
+                result.Errors.ForEach(error => error.SetContextualErrorMessage(source));
+            }
 
             return result;
         }
@@ -142,7 +146,6 @@ namespace sly.parser
                         errors.Add(expected);
                     }
                 }
-                
                 result.Errors.AddRange(errors);
                 result.IsError = true;
             }

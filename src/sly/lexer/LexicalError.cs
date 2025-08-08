@@ -28,7 +28,7 @@ namespace sly.lexer
             return ErrorMessage;
         }
 
-        public override string GetContextualMessage(string fullSource)
+        protected override string GetContextualMessage(string fullSource)
         {
             var message = I18N.Instance.GetText(_i18N, I18NMessage.UnexpectedCharacter,
                 UnexpectedChar.ToString());

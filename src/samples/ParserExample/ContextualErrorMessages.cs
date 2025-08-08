@@ -132,8 +132,7 @@ y = 101
         Check.That(result).Not.IsOkParsing();
         foreach (var error in result.Errors)
         {
-            Console.Error.WriteLine(error);
-            Console.Error.WriteLine(error.GetContextualMessage(source));
+            Console.Error.WriteLine(error.ContextualErrorMessage);
         }
         
         source = @"
@@ -146,8 +145,7 @@ endif";
         Check.That(result).Not.IsOkParsing();
         foreach (var error in result.Errors)
         {
-            Console.Error.WriteLine(error);
-            Console.Error.WriteLine(error.GetContextualMessage(source));
+            Console.Error.WriteLine(error.ContextualErrorMessage);
         }
     }
     

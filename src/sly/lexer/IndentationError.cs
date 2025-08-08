@@ -16,7 +16,7 @@ namespace sly.lexer
         public override string ErrorMessage =>
             $"Indentation error at  (line {Line}, column {Column}).";
         
-        public override string GetContextualMessage(string fullSource)
+        protected override string GetContextualMessage(string fullSource)
         {
             var message = I18N.Instance.GetText(_i18N, I18NMessage.IndentError);
             return GetContextualMessage(fullSource, Line, Column, message);
