@@ -209,6 +209,11 @@ namespace sly.lexer
                 result = SetLabels(attributes, result);
             }
 
+            if (result != null && result.IsOk && result.Result != null)
+            {
+                result.Result.I18n = lang;
+            }
+
             return result;
         }
 

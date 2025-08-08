@@ -36,13 +36,13 @@ public class I18nTests
         Check.That(unexpectedTokenError.ExpectedTokens).IsNotNull();
         Check.That(unexpectedTokenError.ExpectedTokens).Not.IsEmpty();
         Check.That(unexpectedTokenError.ExpectedTokens).CountIs(5);
-        Check.That(unexpectedTokenError.UnexpectedToken.Position.Line).IsEqualTo(1);
+        Check.That(unexpectedTokenError.UnexpectedToken.Position.Line).IsEqualTo(0);
         Check.That(unexpectedTokenError.UnexpectedToken.Position.Column).IsEqualTo(3);
         Check.That(unexpectedTokenError.ExpectedTokens.Extracting(x => x.TokenId)).Contains(new[]
         {
             ExpressionToken.FACTORIAL,ExpressionToken.DIVIDE,ExpressionToken.TIMES,ExpressionToken.MINUS,ExpressionToken.PLUS
         });
-        Check.That(error.ErrorMessage).Contains("(line 1, column 3)");
+        Check.That(error.ErrorMessage).Contains("(line 0, column 3)");
         Check.That(error.ErrorMessage).Contains("opening parenthesis");
 
     }
