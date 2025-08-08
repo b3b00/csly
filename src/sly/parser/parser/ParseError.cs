@@ -18,6 +18,7 @@ namespace sly.parser
         public virtual string ErrorMessage { get; protected set; }
         public virtual int Line { get; protected set; }
 
+        public string ContextualErrorMessage { get; protected set; }
         public int CompareTo(object obj)
         {
             var comparison = 0;
@@ -34,7 +35,12 @@ namespace sly.parser
             return comparison;
         }
 
-        public virtual string GetContextualMessage(string fullSource) => ErrorMessage;
+        public void SetContextualErrorMessage(string fullSource)
+        {
+            ContextualErrorMessage = GetContextualMessage(fullSource);
+        }
+        
+        protected virtual string GetContextualMessage(string fullSource) => ErrorMessage;
         
         
         protected string GetContextualMessage(string fullSource, int line, int column, string message)

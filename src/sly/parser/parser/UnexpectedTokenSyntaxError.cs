@@ -173,7 +173,7 @@ namespace sly.parser
         }
         
         
-        public override string GetContextualMessage(string fullSource)
+        protected override string GetContextualMessage(string fullSource)
         {
             string expected = string.Join("", ExpectedTokens.Select(x => GetMessageForExpectedToken(x)));
             var message = I18N.Instance.GetText(_i18N, I18NMessage.Expecting, expected);
