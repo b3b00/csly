@@ -3,12 +3,22 @@ using jsonparser;
 using jsonparser.JsonModel;
 using NFluent;
 using sly.lexer;
+using sly.lexer.fluent;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
 
 namespace ParserTests
 {
+
+    [Lexer(KeyWordIgnoreCase = true)]
+    public enum ContextualToken
+    {
+        A,
+        B,
+        C
+    }
+    
     public class ErrorTests
     {
         [Fact]
@@ -154,6 +164,10 @@ a c b";
             Check.That(parsed.Errors).CountIs(1);
             var error = parsed.Errors[0];
             var message = error.ContextualErrorMessage;
+            var lines = message.GetLines();
+            Check.That(lines).CountIs(4);
+            Check.That(lines[2]).Contains("1 |a c b");
+            Check.That(lines[3]).Contains("  |  ^^^ expected B");
             
             source = "a , c b";
             parsed = build.Result.Parse(source);
@@ -161,6 +175,10 @@ a c b";
             Check.That(parsed.Errors).CountIs(1);
             error = parsed.Errors[0];
             message = error.ContextualErrorMessage;
+            lines = message.GetLines();
+            Check.That(lines).CountIs(4);
+            Check.That(lines[2]).Contains("0 |a , c b");
+            Check.That(lines[3]).Contains("  |  ^^^ unexpected char ','");
 
 
 
