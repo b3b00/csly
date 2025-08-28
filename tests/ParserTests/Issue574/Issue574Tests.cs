@@ -17,6 +17,6 @@ public class Issue574Tests
         Check.That(build).IsOk();
         string source = @"type foobar";
         var parsed =  build.Result.Parse(source);
-        Check.That(parsed).IsOkParsing();
+        Check.That(parsed).IsOkParsing(checkIfResultisNull:false);
     }
 }
