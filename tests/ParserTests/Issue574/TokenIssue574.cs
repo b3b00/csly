@@ -10,10 +10,8 @@ namespace ParserTests.Issue574
         Identifier,
         [Sugar(",")]
         Comma,
-        [Keyword("specifier1")]
-        Specifier1,
-        [Keyword("specifier2")]
-        Specifier2,
+        [Keyword("specifier")]
+        Specifier,
         [Keyword("type")]
         Type,
     }
