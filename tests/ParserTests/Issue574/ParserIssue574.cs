@@ -3,6 +3,10 @@ using sly.parser.generator;
 using System.Collections.Generic;
 using sly.parser.parser;
 
+/*
+ https://b3b00.github.io/CslyViz/grammar#Q1NMWS1NQVJLI2dlbmVyaWNMZXhlciBUb2tlbjsKCltDdXN0b21JZF0gSWRlbnRpZmllciA6ICJfQS1aYS16IiAiXzAtOUEtWmEteiI7CgoKCltTdWdhcl0gQ29tbWEgOiAiLCI7CgpbS2V5V29yZF0gU3BlY2lmaWVyOiAic3BlY2lmaWVyIjsKCgoKI1tLZXlXb3JkXSBJbW11dCA6ICJpbW11dCI7CgoKW0tleVdvcmRdIFR5cGUgOiAidHlwZSI7CgpwYXJzZXIgUGFyc2VyOwoKcm9vdCA6IE5UVHlwZUFuZElkZW50aWZpZXJDU1ZFbGVtZW50KiA7CgotPiBOVFR5cGVBbmRJZGVudGlmaWVyQ1NWRWxlbWVudDogTlRNYW55U3BlY2lmaWNpZXJzIFR5cGUgSWRlbnRpZmllcjsKCk5UTWFueVNwZWNpZmljaWVyczogTlRTcGVjaWZpZXIqOwoKTlRTcGVjaWZpZXI6ICBTcGVjaWZpZXIgIDsKCgoKJCMkIHR5cGUgeA== 
+ */
+
 namespace ParserTests.Issue574
 {
     [ParserRoot("Root")]
@@ -14,34 +18,24 @@ namespace ParserTests.Issue574
             return default(object);
         }
 
-        [Production("Item : NTManySpecificiers NTType Identifier")]
-        public object NTTypeAndIdentifierCSVElement_NTManySpecificiers_NTType_Identifier(object p0, object p1, Token<TokenIssue574> p2)
+        [Production("Item : NTManySpecificiers Type Identifier")]
+        public object Item(object p0, Token<TokenIssue574> p1, Token<TokenIssue574> p2)
         {
             return default(object);
         }
 
         [Production("NTManySpecificiers : NTSpecifier *")]
-        public object NTManySpecificiers_NTSpecifier_(List<object> p0)
+        public object NTManySpecificiers(List<object> p0)
         {
             return default(object);
         }
 
-        [Production("NTSpecifier : [ Specifier1 | Specifier2 ]")]
-        public object NTSpecifier_Specifier1_Specifier2_(Token<TokenIssue574> p0)
+        [Production("NTSpecifier :  Specifier ")]
+        public object NTSpecifier(Token<TokenIssue574> p0)
         {
             return default(object);
         }
 
-        [Production("NTType : NTBaseType")]
-        public object NTType_NTBaseType(object p0)
-        {
-            return default(object);
-        }
-
-        [Production("NTBaseType : Type")]
-        public object NTBaseType_Type(Token<TokenIssue574> p0)
-        {
-            return default(object);
-        }
+        
     }
 }
