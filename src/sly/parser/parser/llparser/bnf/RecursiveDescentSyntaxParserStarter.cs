@@ -136,29 +136,39 @@ namespace sly.parser.llparser.bnf
             rule.PossibleLeadingTokens = new List<LeadingToken<IN>>();
             if (rule.Clauses.Count <= 0) return;
             var first = rule.Clauses[0];
-            switch (first)
+            
+            int i = 0;
+            bool canBeEmpty = true;
+            // #574 : loop over clauses while clause can be empty
+            while (i < rule.Clauses.Count && canBeEmpty)
             {
-                case TerminalClause<IN, OUT> term:
-                    rule.PossibleLeadingTokens.Add(term.ExpectedToken);
-                    rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
-                    break;
-                case NonTerminalClause<IN, OUT> nonTerminalClause:
+                IClause<IN, OUT> c = rule.Clauses[i];
+                canBeEmpty = c.MayBeEmpty();
+                i++;
+                switch (c)
                 {
-                    InitStartingTokensForNonTerminal(nonTerminals, nonTerminalClause.NonTerminalName);
-                    if (nonTerminals.TryGetValue(nonTerminalClause.NonTerminalName, out var firstNonTerminal))
+                    case TerminalClause<IN, OUT> term:
+                        rule.PossibleLeadingTokens.Add(term.ExpectedToken);
+                        rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.Distinct().ToList();
+                        break;
+                    case NonTerminalClause<IN, OUT> nonTerminalClause:
                     {
-                        firstNonTerminal.Rules.ForEach(r =>
+                        InitStartingTokensForNonTerminal(nonTerminals, nonTerminalClause.NonTerminalName);
+                        if (nonTerminals.TryGetValue(nonTerminalClause.NonTerminalName, out var firstNonTerminal))
                         {
-                            rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
-                        });
-                        rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.ToList();
-                    }
+                            firstNonTerminal.Rules.ForEach(r =>
+                            {
+                                rule.PossibleLeadingTokens.AddRange(r.PossibleLeadingTokens);
+                            });
+                            rule.PossibleLeadingTokens = rule.PossibleLeadingTokens.ToList();
+                        }
 
-                    break;
+                        break;
+                    }
+                    default:
+                        InitStartingTokensForRuleExtensions(first, rule, nonTerminals);
+                        break;
                 }
-                default:
-                    InitStartingTokensForRuleExtensions(first,rule,nonTerminals);
-                    break;
             }
         }
 
