@@ -348,6 +348,7 @@ namespace issue576
         }
 
         [Infix("Subtraction", Associativity.Left, 9)]
+        [Infix("Subtraction", Associativity.Left, 9)]
         public object Subtraction(object left, Token<Issue576Lexer> oper, object right)
         {
             return left;

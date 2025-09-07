@@ -11,7 +11,8 @@ namespace issue576
         Number,
         [CustomId("_A-Za-z", "_0-9A-Za-z")]
         Identifier,
-        [String("'", "\\")]
+        [Lexeme(GenericToken.String)]
+        [Lexeme(GenericToken.String, "'")]
         String,
         [Sugar("&")]
         BitwiseAnd,
