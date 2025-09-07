@@ -1,5 +1,5 @@
 
-genericLexer TokenType;
+genericLexer Issue576Lexer;
 
 [Int] Number;
 [Double] Number;
@@ -192,7 +192,7 @@ genericLexer TokenType;
 
 
 
-parser SmallLangParser;
+parser Issue576Parser;
 
 -> NTSection: NTStatement*;
 
@@ -258,7 +258,7 @@ NTAssignmentPrime: Equals NTExpression;
 
 NTAssignmentExpr: NTAssignmentExpr1;
 
-NTAssignmentExpr1: SmallLangParser_expressions;
+NTAssignmentExpr1: Issue576Parser_expressions;
 
 [Operand] NTPrimary: NTLPrimary;
 

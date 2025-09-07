@@ -200,8 +200,8 @@ namespace issue576
             return default(object);
         }
 
-        [Production("NTAssignmentExpr1 : SmallLangParser_expressions")]
-        public object NTAssignmentExpr1_SmallLangParserexpressions(object p0)
+        [Production("NTAssignmentExpr1 : Issue576Parser_expressions")]
+        public object NTAssignmentExpr1_Issue576Parserexpressions(object p0)
         {
             return default(object);
         }
