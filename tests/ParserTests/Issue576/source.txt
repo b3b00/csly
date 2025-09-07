@@ -1,0 +1,1 @@
+frozen int j = (i as number) + 1;
