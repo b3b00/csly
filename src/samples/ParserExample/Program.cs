@@ -15,6 +15,7 @@ using csly.whileLang.parser;
 using expressionparser;
 using GenericLexerWithCallbacks;
 using indented;
+using issue576;
 using jsonparser;
 using jsonparser.JsonModel;
 using NFluent;
@@ -1355,9 +1356,30 @@ while a < 10 do
             var result = parser.Parse(program);
             Console.WriteLine($"{result.IsOk}");
         }
+
+        private static void TestIssue576()
+        {
+            ParserBuilder<Issue576Lexer, object> builder = new ParserBuilder<Issue576Lexer, object>("en");
+            var buildResult = builder.BuildParser(new Issue576Parser(),ParserType.EBNF_LL_RECURSIVE_DESCENT,"NTSection");
+            Check.That(buildResult).IsOk();
+            var parser = buildResult.Result;
+            var parsed = parser.Parse("frozen int j = (i as number) + 1;");
+            if (parsed.IsOk)
+            {
+                Console.WriteLine("issue 576 parse is ok");
+            }
+            else
+            {
+                foreach (var error in parsed.Errors)
+                {
+                        Console.WriteLine(error.ContextualErrorMessage);
+                }
+            }
+        }
         private static void Main(string[] args)
         {
-            testIssue516();
+            TestIssue576();
+            //testIssue516();
             //TestIssue507();
             //TestFStrings();
             //TestIssue495();
@@ -1914,6 +1936,7 @@ else
         {
             return o;
         }
+        
     }
     
 }
