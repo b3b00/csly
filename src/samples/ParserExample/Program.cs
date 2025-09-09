@@ -1400,7 +1400,7 @@ while a < 10 do
         
         private static void Main(string[] args)
         {
-            testIssue516();
+            TestIssue576();
             //TestIssue507();
             //TestFStrings();
             //TestIssue495();
