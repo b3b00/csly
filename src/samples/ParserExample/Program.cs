@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Common.Tokens;
 using csly.indentedWhileLang.compiler;
 using csly.indentedWhileLang.parser;
 using csly.whileLang.compiler;
@@ -1360,7 +1359,7 @@ while a < 10 do
 
         private static void TestIssue576()
         {
-            ParserBuilder<Issue576Lexer, object> builder = new ParserBuilder<Issue576Lexer, object>("en");
+            ParserBuilder<Issue576Lexer, int> builder = new ParserBuilder<Issue576Lexer, int>("en");
             Stopwatch chrono = new Stopwatch();
             chrono.Start();
             var buildResult = builder.BuildParser(new Issue576Parser(),ParserType.EBNF_LL_RECURSIVE_DESCENT,"NTSection");
@@ -1370,18 +1369,19 @@ while a < 10 do
             Check.That(buildResult).IsOk();
             var parser = buildResult.Result;
             chrono.Start();
-            var parsed = parser.Parse(@"immut int i = 12;
-
-i as index;
-
-((((i!)!)!)!)!;
-
-frozen int j = (i as number) + 1;
-j as rational rationalJ;
-
-dict<[int, string]> converter = new dict<[int, string]>(1, ""1"", 2, ""2"");
-
-SOut(converter[j]);");
+            var source = @"immut int i = 12;
+        
+        i as index;
+        
+        ((((i!)!)!)!)!;
+        
+        frozen int j = (i as number) + 1;
+        j as rational rationalJ;
+        
+        dict<[int, string]> converter = new dict<[int, string]>(1, ""1"", 2, ""2"");
+        
+        SOut(converter[j]);";
+            var parsed = parser.Parse(source);
             chrono.Stop();
             Console.WriteLine($"source parsed in {chrono.ElapsedMilliseconds} ms");
             if (parsed.IsOk)
@@ -1397,48 +1397,10 @@ SOut(converter[j]);");
             }
         }
         
-        private static void TestIssue576Bis()
-                {
-                    ParserBuilder<SmallLangToken, int> builder = new ParserBuilder<SmallLangToken, int>("en");
-                    Stopwatch chrono = new Stopwatch();
-                    chrono.Start();
-                    var buildResult = builder.BuildParser(new SmallLangParser(),ParserType.EBNF_LL_RECURSIVE_DESCENT,"NTSection");
-                    chrono.Stop();
-                    Console.WriteLine($"parser built in {chrono.ElapsedMilliseconds} ms");
-                    chrono.Reset();
-                    Check.That(buildResult).IsOk();
-                    var parser = buildResult.Result;
-                    chrono.Start();
-                    var parsed = parser.Parse(@"immut int i = 12;
         
-        i as index;
-        
-        ((((i!)!)!)!)!;
-        
-        frozen int j = (i as number) + 1;
-        j as rational rationalJ;
-        
-        dict<[int, string]> converter = new dict<[int, string]>(1, ""1"", 2, ""2"");
-        
-        SOut(converter[j]);");
-                    chrono.Stop();
-                    Console.WriteLine($"source parsed in {chrono.ElapsedMilliseconds} ms");
-                    if (parsed.IsOk)
-                    {
-                        Console.WriteLine("issue 576 parse is ok");
-                    }
-                    else
-                    {
-                        foreach (var error in parsed.Errors)
-                        {
-                                Console.WriteLine(error.ContextualErrorMessage);
-                        }
-                    }
-                }
         private static void Main(string[] args)
         {
-            TestIssue576Bis();
-            //testIssue516();
+            testIssue516();
             //TestIssue507();
             //TestFStrings();
             //TestIssue495();

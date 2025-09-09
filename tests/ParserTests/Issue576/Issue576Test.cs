@@ -1,6 +1,7 @@
-using Common.Tokens;
+
 using NFluent;
 using ParserTests;
+using sly.parser;
 using sly.parser.generator;
 using Xunit;
 
@@ -11,11 +12,11 @@ public class Issue576Test
     [Fact]
     public void TestIssue576()
     {
-        ParserBuilder<SmallLangToken, int> builder = new ParserBuilder<SmallLangToken, int>("en");
+        ParserBuilder<Issue576Lexer, int> builder = new ParserBuilder<Issue576Lexer, int>("en");
         var buildResult = builder.BuildParser(new Issue576Parser(),ParserType.EBNF_LL_RECURSIVE_DESCENT,"NTSection");
         Check.That(buildResult).IsOk();
         var parser = buildResult.Result;
-        var parsed = parser.Parse(@"immut int i = 12;
+        var source = @"immut int i = 12;
         
         i as index;
         
@@ -26,7 +27,13 @@ public class Issue576Test
         
         dict<[int, string]> converter = new dict<[int, string]>(1, ""1"", 2, ""2"");
         
-        SOut(converter[j]);");
+        SOut(converter[j]);";
+        var parsed = parser.Parse(source);
         Check.That(parsed).IsOkParsing();
+
+        Check.ThatCode(() => parser.Parse(source).IsOk).LastsLessThan(500, TimeUnit.Milliseconds);
+
+
+
     }
 }
