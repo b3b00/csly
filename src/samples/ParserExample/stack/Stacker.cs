@@ -505,4 +505,21 @@ if truc == 1
         Check.That(result).IsOkParsing();
         Check.That(result.Result).IsEqualTo("ABBA");
     }
+
+    public static void TestIndented()
+    {
+        var source =@"
+if truc == 1
+    un = 1
+    deux = 2";
+        ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
+        var instance = new IndentedParser();
+        var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "root");
+        Check.That(parserRes.IsOk).IsTrue();
+            
+        var parser = parserRes.Result;
+        Check.That(parser).IsNotNull();
+        var parseResult = parser.Parse(source);
+        Check.That(parseResult).Not.IsOkParsing();
+    }
 }

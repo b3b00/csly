@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
+using sly.lexer.fsm;
 using sly.parser.generator;
 using sly.parser.llparser.bnf;
 using sly.parser.llparser.bnf.stackist;
@@ -173,23 +174,14 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             SyntaxParseResult<IN, OUT> result = new SyntaxParseResult<IN, OUT>();
             result.IsError = true;
             result.EndingPosition = state.Result.EndingPosition;
-            LeadingToken<IN>[] expected = [];
-            if (state.Choice.IsTerminalChoice)
-            {
-                expected = state.Choice.Choices.Cast<TerminalClause<IN, OUT>>().Select(x => x.ExpectedToken)
-                    .ToArray();
-            }
-            else if (state.Choice.IsNonTerminalChoice)
-            {
-                var nonTerminals = state.Choice.Choices.Cast<NonTerminalClause<IN, OUT>>();
-                expected = nonTerminals.Select(x => Configuration.NonTerminals[x.NonTerminalName])
-                    .SelectMany(y => y.Rules)
-                    .SelectMany(z => z.PossibleLeadingTokens)
-                    .ToArray();
-            }
 
-            result.AddError(
-                new UnexpectedTokenSyntaxError<IN>(state.Tokens[state.Position], LexemeLabels, I18n, expected));
+            var max = state.Children.Max(x => x.EndingPosition);
+            
+            var errors = state.Children.Where(x => x.EndingPosition == max)
+                .SelectMany(x => x.GetErrors())
+                .DistinctWithPredicate(( x,  y) => x.Line == y.Line && x.Column == y.Column).ToList();
+            
+            result.AddErrors(errors);
             state.Parent.SetResult(result);
             return;
         }
