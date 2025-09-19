@@ -21,8 +21,8 @@ using sly.parser.generator;
             [Lexeme("\\*")] OP_MULTIPLY,
             [Lexeme("/")] OP_DIVIDE,
             [Lexeme("%")] OP_MODULE,
-            [Lexeme("(")] PARENTHESIS_L,
-            [Lexeme(")")] PARENTHESIS_R,
+            [Lexeme("\\(")] PARENTHESIS_L,
+            [Lexeme("\\)")] PARENTHESIS_R,
 
             [Lexeme("[ \\t][ \\t]*", isSkippable: true)]
             IGNORED // simply discarded in lexer
