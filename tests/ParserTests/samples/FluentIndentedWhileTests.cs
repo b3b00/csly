@@ -13,7 +13,7 @@ using Xunit;
 
 namespace ParserTests.samples
 {
-    [Collection("WhileLang")]
+    [CollectionDefinition("while", DisableParallelization = true)]
     public class FluentIndentedWhileTests
     {
         private static BuildResult<Parser<IndentedWhileTokenGeneric, WhileAST>> Parser;

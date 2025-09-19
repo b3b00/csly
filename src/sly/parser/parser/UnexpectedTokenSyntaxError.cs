@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Text;
 using sly.i18n;
@@ -9,6 +10,37 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser
 {
+
+    public static class StringExtensions
+    {
+        public static List<string> GetLines(this string text)
+        {
+            List<string> lines = new List<string>();
+            using (var reader = new StringReader(text))
+            {
+                string line = reader.ReadLine();
+                while (line != null)
+                {
+                    lines.Add(line);
+                    line = reader.ReadLine();
+                }
+            }
+            return lines;
+        }
+
+        public static string Multiply(this string str, int n)
+        {
+            string result = "";
+            for (int i = 0; i < n; i++)
+            {
+                result += str;
+            }
+
+            return result;
+        }
+    }
+        
+    
     public class UnexpectedTokenSyntaxError<T> : ParseError, IComparable where T : struct, Enum
     {
         private readonly string _i18N;
@@ -148,6 +180,15 @@ namespace sly.parser
         public override string ToString()
         {
             return ErrorMessage;
+        }
+        
+        
+        protected override string GetContextualMessage(string fullSource)
+        {
+            string expected = string.Join("", ExpectedTokens.Select(x => GetMessageForExpectedToken(x)));
+            var message = I18N.Instance.GetText(_i18N, I18NMessage.Expecting, expected);
+            var position = UnexpectedToken.Position;
+            return GetContextualMessage(fullSource,position.Line,position.Column, message);
         }
     }
 }

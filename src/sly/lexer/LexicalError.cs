@@ -12,19 +12,27 @@ namespace sly.lexer
             Column = column;
             UnexpectedChar = unexpectedChar;
             ErrorType = ErrorType.UnexpectedChar;
-            I18n = i18n;
+            _i18N = i18n;
         }
 
-        private string I18n;
-        
+        protected readonly string _i18N;
+
         public char UnexpectedChar { get; set; }
 
-        public override string ErrorMessage => I18N.Instance.GetText(I18n,I18NMessage.UnexpectedChar,UnexpectedChar.ToString(), Line.ToString(), Column.ToString(), ((int)UnexpectedChar).ToString());
+        public override string ErrorMessage => I18N.Instance.GetText(_i18N, I18NMessage.UnexpectedChar,
+            UnexpectedChar.ToString(), Line.ToString(), Column.ToString(), ((int)UnexpectedChar).ToString());
 
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return ErrorMessage;
+        }
+
+        protected override string GetContextualMessage(string fullSource)
+        {
+            var message = I18N.Instance.GetText(_i18N, I18NMessage.UnexpectedCharacter,
+                UnexpectedChar.ToString());
+            return GetContextualMessage(fullSource, Line, Column, message);
         }
     }
 }

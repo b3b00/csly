@@ -21,7 +21,6 @@ namespace sly.lexer
             SingleLineCommentStart = singleLineStart;
             MultiLineCommentStart = multiLineStart;
             MultiLineCommentEnd = multiLineEnd;
-            //DoNotIgnore = doNotIgnore;
             Channel = channel;
         }
     }

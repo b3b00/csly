@@ -129,7 +129,7 @@ namespace sly.parser.generator
                 var operandNonTerminal = GetOperandNonTerminal(parserClass,configuration, result);
 
 
-                if (operandNonTerminal != null && operationsByPrecedence.Count > 0)
+                if (operandNonTerminal != null)
                     GenerateExpressionParser(configuration, operandNonTerminal, operationsByPrecedence,
                         parserClass.Name);
             }
@@ -165,8 +165,6 @@ namespace sly.parser.generator
                 
                 string nonTerminalName = string.Join("-",configuration.OperandRules.Select(x => x.NonTerminalName).Distinct());
                 
-                // operandNonTerminalName = $"{parserClass.Name}_operand";
-                // var operandNonTerminals = operandMethods.Select<MethodInfo, string>(GetNonTerminalNameFromProductionMethod);
                 var operandNonTerminal = new NonTerminal<IN, OUT>(nonTerminalName);
                 
                 
@@ -445,8 +443,6 @@ namespace sly.parser.generator
         private string GetNonTerminalNameForPrecedence( List<string> operators) 
         {
             var operatorsPart = operators
-                //.Select<IN, string>(oper => oper.ToString())
-                .ToList<string>()
                 .Aggregate<string>((s1, s2) => $"{s1}_{s2}");
             
             return $"{operatorsPart}";

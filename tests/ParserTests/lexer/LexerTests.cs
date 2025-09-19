@@ -70,7 +70,7 @@ namespace ParserTests.lexer
 
             var expectedLinePositions = new List<int>
             {
-                1, 1,1,2,2
+                0, 0,0,1,1
             };
 
             Check.That(tokens.Take(5).Extracting(x => x.Position.Line)).Contains(expectedLinePositions);
@@ -106,7 +106,7 @@ namespace ParserTests.lexer
 
             var expectedLinePositions = new List<int>
             {
-                1, 1, 1, 1, 2, 2, 2, 2, 2
+                0, 0, 0, 0, 1, 1, 1, 1, 1
             };
 
             Check.That(tokens.Take(9).Extracting(x => x.Position.Line)).Contains(expectedLinePositions);

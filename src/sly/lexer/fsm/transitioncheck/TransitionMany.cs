@@ -5,17 +5,17 @@ namespace sly.lexer.fsm.transitioncheck
 {
     public class TransitionMany : AbstractTransitionCheck
     {
-        private readonly char[] TransitionToken;
+        private readonly char[] _transitionToken;
 
         public TransitionMany(char[] token)
         {
-            TransitionToken = token;
+            _transitionToken = token;
         }
 
 
         public TransitionMany(char[] token, TransitionPrecondition precondition)
         {
-            TransitionToken = token;
+            _transitionToken = token;
             Precondition = precondition;
         }
 
@@ -23,14 +23,17 @@ namespace sly.lexer.fsm.transitioncheck
         public override string ToGraphViz()
         {
             var t = "";
-            if (Precondition != null) t = "[|] ";
-             t += "["+string.Join(",",TransitionToken.Select<char, string>(x => x.ToEscaped()))+"]";
+            if (Precondition != null)
+            {
+                t = "[|] ";
+            }
+            t += "["+string.Join(",",_transitionToken.Select<char, string>(x => x.ToEscaped()))+"]";
             return $@"[ label=""{t}"" ]";
         }
 
         public override bool Match(char input)
         {
-            return TransitionToken.Contains<char>(input);
+            return _transitionToken.Contains<char>(input);
         }
     }
 }

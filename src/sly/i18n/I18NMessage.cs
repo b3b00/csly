@@ -7,6 +7,9 @@ namespace sly.i18n
         UnexpectedToken,
         UnexpectedEos,
         UnexpectedChar,
+        UnexpectedCharacter,
+        Expecting,
+        IndentError,
         
         CannotMixGenericAndRegex,
         DuplicateStringCharDelimiters,

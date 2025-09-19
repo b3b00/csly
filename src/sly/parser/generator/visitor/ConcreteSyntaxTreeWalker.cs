@@ -80,9 +80,7 @@ namespace sly.parser.generator.visitor
 
                 children.Add(v);
             }
-
            
-            //return callback(node, children);
             return Visitor.VisitNode(node,children);
         }
         

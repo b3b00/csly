@@ -11,6 +11,7 @@ using Xunit;
 
 namespace ParserTests.samples
 {
+    [CollectionDefinition("while", DisableParallelization = true)]
     public class WhileTests
     {
         private static BuildResult<Parser<WhileToken, WhileAST>> Parser;

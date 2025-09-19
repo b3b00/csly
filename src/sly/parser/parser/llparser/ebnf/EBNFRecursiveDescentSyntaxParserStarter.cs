@@ -132,7 +132,7 @@ namespace sly.parser.llparser.ebnf
                     }
                 }
 
-                // add startig tokens of clause in rule.startingtokens
+                // add starting tokens of clause in rule.startingtokens
                 optional = clause is ZeroOrMoreClause<IN, OUT> 
                            || clause is OptionClause<IN, OUT> 
                            || (clause is RepeatClause<IN, OUT> repeat && repeat.MayBeEmpty());

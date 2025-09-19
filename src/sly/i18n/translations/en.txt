@@ -5,12 +5,14 @@ UnexpectedTokenExpecting=unexpected {1} ('{0}'). Expecting {2}.
 UnexpectedEosExpecting=unexpected end of stream. Expecting {2}.
 UnexpectedToken=unexpected {0} {1}.
 UnexpectedEos=unexpected end of stream.
+Expecting=expected {0}
+IndentError=indentation error
 
 #
 # lexer errors
 #
 UnexpectedChar =Lexical Error, line {1}, column {2} : Unrecognized symbol '{0}' ({3})
-
+UnexpectedCharacter=unexpected char '{0}'
 
 ##########################################
 #
