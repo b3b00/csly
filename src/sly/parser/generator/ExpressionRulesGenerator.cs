@@ -283,7 +283,7 @@ namespace sly.parser.generator
             rule.IsByPassRule = true;
             rule.IsExpressionRule = true;
             rule.ExpressionAffix = Affix.NotOperator;
-            // BUG  : what if a parse context exists ! 
+            // BUG ?  : what if a parse context exists ! 
             rule.SetLambdaVisitor((args) =>
             {
                 ;

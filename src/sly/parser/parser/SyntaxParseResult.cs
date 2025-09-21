@@ -32,10 +32,13 @@ namespace sly.parser
         
         public void AddErrors(IList<UnexpectedTokenSyntaxError<IN>> errors)
         {
-            InitErrors();
-            foreach (var error in errors)
+            if (errors != null)
             {
-                AddError(error);
+                InitErrors();
+                foreach (var error in errors)
+                {
+                    AddError(error);
+                }
             }
         }
 

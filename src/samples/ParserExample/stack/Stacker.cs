@@ -521,5 +521,9 @@ if truc == 1
         Check.That(parser).IsNotNull();
         var parseResult = parser.Parse(source);
         Check.That(parseResult).Not.IsOkParsing();
+        Check.That(parseResult.Errors).IsSingle();
+        var error = parseResult.Errors[0];
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+        
     }
 }

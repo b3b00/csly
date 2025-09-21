@@ -128,11 +128,17 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         return null;
     }
 
+
+    private const string debugged = "root"; 
     private void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
         if (Configuration.NonTerminals.TryGetValue(nonTerminal.NonTerminalName, out var nonTerminalClause))
         {
+            if (nonTerminal.NonTerminalName == debugged)
+            {
+                ;
+            }
             if (state.Index >= nonTerminalClause.Rules.Count && state.Result != null)
             {
                 var realResult = state.Result;
@@ -160,7 +166,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                         IsError = true,
                         EndingPosition = max,
                     };
-                    //var allErrors = state.Errors.SelectMany(x => x.GetErrors()).Distinct().ToList();
                     
                     var errors = state.Errors.Where(x => x.EndingPosition == max)
                         .SelectMany(x => x.GetErrors())
@@ -169,9 +174,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 }
                 else if (state.Successes.Count(x => x.IsOk) > 1)
                 {
-                    //Log(state.DebugString+$" ended with {state.Successes.Count} successes",stack,1);
                     realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
-                    //Log($" choosing one ending at {realResult.EndingPosition}",stack,2);
                 }
 
                 state.Parent.SetResult(realResult);
@@ -350,17 +353,15 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     private void ParseRule(RuleStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
     {
         var rule = state.Rule;
+        if (rule.NonTerminalName == debugged)
+        {
+            ;
+        }
+        
         
         if (state.Index > 0 && state.IsEnded)
         {
-            if (state.LastResult.IsError)
-            {
-                //Log("KO "+state.LastResult.GetErrors().First().ErrorMessage,stack,1);
-            }
-            else
-            {
-                //Log("OK Rule",stack,1);
-            }
+            
             
             if (state.Parent is NonTerminalStackState<IN, OUT> parentState)
             {
@@ -401,7 +402,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     node.Visitor = state.Rule.GetVisitorMethod();
                     node.LambdaVisitor = state.Rule.getLambdaVisitor(null);
                     node.Visitor = state.Rule.GetVisitorMethod();
-                    
+                    result.AddErrors(state.Result.GetErrors());
                     
                     node = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(state.Rule, node);
                     result.Root = node;
