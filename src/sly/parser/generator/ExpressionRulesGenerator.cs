@@ -286,7 +286,6 @@ namespace sly.parser.generator
             // BUG ?  : what if a parse context exists ! 
             rule.SetLambdaVisitor((args) =>
             {
-                ;
                 return (OUT)args[0];
             });
             configuration.NonTerminals[entrypoint.Name] = entrypoint;
