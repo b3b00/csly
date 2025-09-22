@@ -7,7 +7,7 @@ namespace sly.parser.generator
 
     public static class RuleParserType
     {
-        public static ParserType ParserType = ParserType.LL_STACK;
+        public static ParserType ParserType = ParserType.LL_RECURSIVE_DESCENT;
     }
      public class RuleParser<IN,OUT> where IN : struct, Enum
      {

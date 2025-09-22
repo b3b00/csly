@@ -112,11 +112,44 @@ namespace sly.parser
             var result = new ParseResult<IN, OUT>();
 
             var cleaner = new SyntaxTreeCleaner<IN, OUT>();
+            if (!typeof(IN).Name.Contains("Ebnf"))
+            {
+                ;
+            }
             var syntaxResult = SyntaxParser.Parse(tokens.ToArray(), startingNonTerminal);
+            
             syntaxResult.UsesOperations = Configuration.UsesOperations;
             syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);
             if (!syntaxResult.IsError && syntaxResult.Root != null)
             {
+                if (!syntaxResult.IsEnded)
+                {
+                    result.Errors = new List<ParseError>();
+                    // TODO something wrong can happen here not ended without error  
+                    var unexpectedTokens = syntaxResult.GetErrors();
+                    var byEnding = unexpectedTokens.GroupBy(x => x.UnexpectedToken.Position).OrderBy(x => x.Key);
+                    var errors = new List<ParseError>();  
+                    foreach (var expecting in byEnding)
+                    {
+                        var expectingTokens = expecting.SelectMany(x => x.ExpectedTokens ?? new List<LeadingToken<IN>>()).Distinct();
+                        var expectedTokens =  expectingTokens?.ToArray();
+                        if (expectedTokens != null)
+                        {
+                            var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, LexemeLabels, I18n,
+                                expectedTokens);
+                            errors.Add(expected);
+                        }
+                        else
+                        {
+                            var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, LexemeLabels, I18n,
+                                new LeadingToken<IN>[]{});
+                            errors.Add(expected);
+                        }
+                    }
+                    result.Errors.AddRange(errors);
+                    result.IsError = true;
+                    return result;
+                }
                 var r = Visitor.VisitSyntaxTree(syntaxResult.Root,parsingContext ?? new NoContext());
                 result.Result = r;
                 result.SyntaxTree = syntaxResult.Root;

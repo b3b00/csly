@@ -38,7 +38,7 @@ namespace indented
             return new Cond(id, i);
         }
 
-        [Production("root: statement+")]
+        [Production("root: statement*")]
         public Ast Root(List<Ast> statements)
         {
             return new Block(statements);

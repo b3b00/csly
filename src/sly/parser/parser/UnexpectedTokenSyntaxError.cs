@@ -68,7 +68,6 @@ namespace sly.parser
         {
             _i18N = i18n;
             ErrorType = unexpectedToken.IsEOS ? ErrorType.UnexpectedEOS : ErrorType.UnexpectedToken;
-            
             UnexpectedToken = unexpectedToken;
             if (expectedTokens != null)
             {
@@ -190,5 +189,13 @@ namespace sly.parser
             var position = UnexpectedToken.Position;
             return GetContextualMessage(fullSource,position.Line,position.Column, message);
         }
+
+        // public string Discriminant()
+        // {
+        //     StringBuilder builder = new StringBuilder();
+        //     builder.Append(UnexpectedToken.TokenID.ToString());
+        //     builder.Append(UnexpectedToken.Position.Index);
+        //     return builder.ToString();
+        // }
     }
 }

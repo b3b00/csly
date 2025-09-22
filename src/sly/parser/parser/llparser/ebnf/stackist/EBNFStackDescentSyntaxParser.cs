@@ -216,7 +216,6 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
 
             // keep on trying 
             PushClause(state.RepeatedClause, stack, state);
-            return;
         }
         else
         {
@@ -246,10 +245,15 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                     }
                 }
             }
-            else
+            else if (state.Children.Count == 0)
             {
-                ;
-                result.EndingPosition = state.Result.EndingPosition;
+                // If no children then there is no move : ending position does is starting position
+                result.EndingPosition = state.Position;
+            }
+            else if (result.GetErrors().Any(x => x.ErrorType == ErrorType.UnexpectedEOS))
+            {
+                // eos reached , rewind to start ? 
+                result.EndingPosition = state.Position;
             }
 
 
@@ -274,7 +278,6 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         }
         else
         {
-            // TODO : add errors ! cré nin diou !!!!!
             if (state.Children.Count == 0)
             {
                 // error expecting at least one ...

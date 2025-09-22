@@ -8,6 +8,7 @@ namespace sly.parser
 {
     public class SyntaxParseResult<IN, OUT> where IN : struct, Enum
     {
+        private bool _isEnded;
         public ISyntaxNode<IN, OUT> Root { get; set; }
 
         public bool IsError { get; set; }
@@ -20,7 +21,11 @@ namespace sly.parser
 
         public int EndingPosition { get; set; }
 
-        public bool IsEnded { get; set; }
+        public bool IsEnded
+        {
+            get => _isEnded;
+            set => _isEnded = value;
+        }
 
         private void InitErrors()
         {
@@ -32,10 +37,13 @@ namespace sly.parser
         
         public void AddErrors(IList<UnexpectedTokenSyntaxError<IN>> errors)
         {
-            InitErrors();
-            foreach (var error in errors)
+            if (errors != null)
             {
-                AddError(error);
+                InitErrors();
+                foreach (var error in errors)
+                {
+                    AddError(error);
+                }
             }
         }
 
@@ -50,7 +58,8 @@ namespace sly.parser
             Errors.Add(error);
         }
 
-        public IList<UnexpectedTokenSyntaxError<IN>> GetErrors() => Errors?.ToList();
+        public IList<UnexpectedTokenSyntaxError<IN>> GetErrors() =>
+            Errors == null ? new List<UnexpectedTokenSyntaxError<IN>>() : Errors?.ToList();
         
         public List<LeadingToken<IN>> Expecting {get; set;}
 
