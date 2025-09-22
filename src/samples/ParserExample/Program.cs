@@ -15,6 +15,7 @@ using csly.whileLang.parser;
 using expressionparser;
 using GenericLexerWithCallbacks;
 using indented;
+using issue576;
 using jsonparser;
 using jsonparser.JsonModel;
 using NFluent;
@@ -1371,11 +1372,56 @@ while a < 10 do
             var result = parser.Parse(program);
             Console.WriteLine($"{result.IsOk}");
         }
+
+        public static void TestIssue576()
+        {
+            ParserBuilder<Issue576Lexer, int> builder = new ParserBuilder<Issue576Lexer, int>("en");
+            Stopwatch chrono = new Stopwatch();
+            chrono.Start();
+            var buildResult = builder.BuildParser(new Issue576Parser(),ParserType.EBNF_LL_STACK,"NTSection");
+            chrono.Stop();
+            Console.WriteLine($"parser built in {chrono.ElapsedMilliseconds} ms");
+            chrono.Reset();
+            Check.That(buildResult).IsOk();
+            var parser = buildResult.Result;
+            chrono.Start();
+            var source = @"immut int i = 12;
+        
+        i as index;
+        
+        ((((i!)!)!)!)!;
+        
+        frozen int j = (i as number) + 1;
+        j as rational rationalJ;
+        
+        dict<[int, string]> converter = new dict<[int, string]>(1, ""1"", 2, ""2"");
+        
+        SOut(converter[j]);";
+            var parsed = parser.Parse(source);
+            chrono.Stop();
+            Console.WriteLine($"source parsed in {chrono.ElapsedMilliseconds} ms");
+            if (parsed.IsOk)
+            {
+                Console.WriteLine("issue 576 parse is ok");
+            }
+            else
+            {
+                foreach (var error in parsed.Errors)
+                {
+                        Console.WriteLine(error.ContextualErrorMessage);
+                }
+            }
+        }
+        
+        
         private static void Main(string[] args)
         {
-            TestPrefixPostfixStack();
+            //TestPrefixPostfixStack();
             //Schtak();
             //testIssue516();
+            //testIssue516();
+            TestIssue576();
+
             //TestIssue507();
             //TestFStrings();
             //TestIssue495();
@@ -1947,6 +1993,7 @@ else
         {
             return o;
         }
+        
     }
     
 }

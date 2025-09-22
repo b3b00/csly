@@ -1,0 +1,366 @@
+
+genericLexer Issue576Lexer;
+
+[Int] Number;
+[Double] Number;
+
+[CustomId] Identifier : "_A-Za-z" "_0-9A-Za-z";
+
+
+[String] String : "'" "\\";
+
+[Sugar] BitwiseAnd : "&";
+
+[Sugar] BitwiseOr : "|";
+
+[Sugar] BitwiseXor : "^";
+
+[Sugar] BitwiseLeftShift : "<<";
+
+[Sugar] BitwiseRightShift : ">>";
+
+[Sugar] BitwiseNegation : "~";
+
+[Sugar] Addition : "+";
+
+[Sugar] Subtraction : "-";
+
+[Sugar] Multiplication : "*";
+
+[Sugar] Division : "/";
+
+[Sugar] Exponentiation : "**";
+
+[Sugar] Factorial : "!";
+
+[Sugar] PlusEquals : "+=";
+
+[Sugar] MinusEquals : "-=";
+
+[Sugar] MultiplicationEquals : "*=";
+
+[Sugar] DivideEquals : "/=";
+
+[Sugar] PowerEquals : "**=";
+
+[Sugar] BitwiseAndEquals : "&=";
+
+[Sugar] BitwiseOrEquals : "|=";
+
+[Sugar] BitwiseXorEquals : "^=";
+
+[Sugar] LeftShiftEquals : "<<=";
+
+[Sugar] RightShiftEquals : ">>=";
+
+[Sugar] BitwiseNegateEquals : "~=";
+
+[Sugar] Increment : "++";
+
+[Sugar] Decrement : "--";
+
+[KeyWord] LogicalAnd : "and";
+
+[KeyWord] LogicalOr : "or";
+
+[KeyWord] LogicalNot : "not";
+
+[KeyWord] LogicalXor : "xor";
+
+[KeyWord] LogicalImplies : "implies";
+
+[Sugar] OpenParen : "(";
+
+[Sugar] CloseParen : ")";
+
+[Sugar] OpenCurly : "{";
+
+[Sugar] CloseCurly : "}";
+
+[Sugar] OpenSquare : "[";
+
+[Sugar] CloseSquare : "]";
+
+[Sugar] OpenAngleSquare : "<[";
+
+[Sugar] CloseAngleSquare : "]>";
+
+[Sugar] Comma : ",";
+
+[Sugar] Colon : ":";
+
+[Sugar] Dot : ".";
+
+[Sugar] EqualTo : "==";
+
+[Sugar] NotEqualTo : "!=";
+
+[Sugar] GreaterThan : ">";
+
+[Sugar] LessThan : "<";
+
+[Sugar] GreaterThanOrEqualTo : ">=";
+
+[Sugar] LessThanOrEqualTo : "<=";
+
+[KeyWord] ComparisonIs : "is";
+
+[KeyWord] In : "in";
+
+[Sugar] Semicolon : ";";
+
+[Sugar] Equals : "=";
+
+[KeyWord] TypeFloat : "float";
+
+[KeyWord] TypeInt : "int";
+
+[KeyWord] TypeDouble : "double";
+
+[KeyWord] TypeNumber : "number";
+[KeyWord] TypeNumber : "bigfloat";
+
+[KeyWord] TypeLong : "long";
+
+[KeyWord] TypeLongInt : "longint";
+[KeyWord] TypeLongInt : "bigint";
+
+[KeyWord] TypeByte : "byte";
+
+[KeyWord] TypeArray : "array";
+
+[KeyWord] TypeList : "list";
+
+[KeyWord] TypeSet : "set";
+
+[KeyWord] TypeDict : "dict";
+
+[KeyWord] TypeShort : "short";
+
+[KeyWord] TypeRational : "rational";
+
+[KeyWord] TypeString : "string";
+
+[KeyWord] TypeChar : "char";
+
+[KeyWord] TypeVoid : "void";
+
+[KeyWord] TypeBool : "bool";
+
+[KeyWord] Return : "return";
+
+[KeyWord] Break : "break";
+
+[KeyWord] Continue : "continue";
+
+[KeyWord] If : "if";
+
+[KeyWord] Else : "else";
+
+[KeyWord] Switch : "switch";
+
+[KeyWord] For : "for";
+
+[KeyWord] While : "while";
+
+[KeyWord] As : "as";
+
+[KeyWord] Cascading : "cascading";
+
+[KeyWord] Copy : "copy";
+
+[KeyWord] Readonly : "readonly";
+
+[KeyWord] Frozen : "frozen";
+
+[KeyWord] Immut : "immut";
+
+[KeyWord] Ref : "ref";
+
+[KeyWord] New : "new";
+
+[KeyWord] TrueLiteral : "true";
+
+[KeyWord] FalseLiteral : "false";
+
+[KeyWord] TypeCollection : "collection";
+
+[KeyWord] Pass : "pass";
+
+[SingleLineComment] Comment : "#";
+[MultiLineComment] Comment : "/*" "*/";
+
+
+
+parser Issue576Parser;
+
+-> NTSection: NTStatement*;
+
+NTStatement: [NTSCExpr | NTLoop | NTCond | NTFunction | NTBlock | NTReturnStatement | NTLoopControlStatement];
+
+NTSCExpr: NTExpression Semicolon [d];
+
+NTReturnStatement: Return [d] NTExpression Semicolon [d];
+
+NTLoopControlStatement: [Break | Continue] NTNestedValueInLoopControl? Semicolon [d];
+
+NTNestedValueInLoopControl: Identifier;
+
+NTLoop: NTForLoop;
+
+NTLoop: NTWhileLoop;
+
+NTLoopLabel: As [d] Identifier;
+
+NTForLoop: For [d] OpenParen [d] NTExpression Semicolon [d] NTExpression Semicolon [d] NTExpression CloseParen [d] NTLoopLabel? NTStatement NTElse?;
+
+NTWhileLoop: While [d] OpenParen [d] NTExpression CloseParen [d] NTLoopLabel? NTStatement NTElse?;
+
+NTCond: [NTSwitch | NTIf];
+
+NTIf: If [d] OpenParen [d] NTExpression CloseParen [d] NTStatement NTElse?;
+
+NTElse: Else [d] NTStatement;
+
+NTSwitch: Switch [d] OpenParen [d] NTExpression CloseParen [d] OpenCurly [d] NTSwitchBody* CloseCurly [d];
+
+NTSwitchBody: NTExpression Colon [d] NTStatement;
+
+NTFunction: NTType Identifier OpenParen [d] NTTypeAndIdentifierCSVElement* CloseParen [d] NTStatement;
+
+NTTypeAndIdentifierCSVElement: NTFunctionArgDeclModifiersCombined NTType Identifier Comma?;
+
+NTBlock: OpenCurly [d] NTSection CloseCurly [d];
+
+NTExpression: NTAliasExpr;
+
+NTAliasExpr: [NTAliasExpr1 | NTAliasExpr2 | NTAliasExpr3 | NTDeclarationExpr];
+
+NTAliasExpr1: Identifier As [d] Identifier;
+
+NTAliasExpr2: Identifier As [d] NTType Identifier;
+
+NTAliasExpr3: Identifier As [d] NTType;
+
+NTDeclarationExpr: [NTDeclarationExpr1 | NTAssignmentExpr];
+
+NTDeclarationExpr1: NTDeclarationModifiersCombined? NTType Identifier NTAssignmentPrime?;
+
+NTDeclarationModifiersCombined: NTDeclarationModifier*;
+
+NTDeclarationModifier: [Ref | Readonly | Frozen | Immut];
+
+NTFunctionArgDeclModifier: [Ref | Readonly | Frozen | Immut | Copy];
+
+NTFunctionArgDeclModifiersCombined: NTFunctionArgDeclModifier*;
+
+NTAssignmentPrime: Equals NTExpression;
+
+NTAssignmentExpr: NTAssignmentExpr1;
+
+NTAssignmentExpr1: Issue576Parser_expressions;
+
+[Operand] NTPrimary: NTLPrimary;
+
+[Operand] NTPrimary: NTLPrimary OpenSquare NTExpression CloseSquare;
+
+[Operand] NTPrimary: NTLPrimary  OpenParen NTArgListElement* CloseParen;
+
+NTLPrimary: [NTNewExpr | NTLPrimary1 | NTLPrimary2 | NTLPrimary3];
+
+NTLPrimary1: OpenParen [d] NTExpression CloseParen [d];
+
+NTLPrimary2: Copy [d] NTExpression;
+
+NTLPrimary3: [Identifier | Number | String | TrueLiteral | FalseLiteral];
+
+NTNewExpr: New [d] NTType OpenParen [d] NTArgListElement* CloseParen [d];
+
+NTArgListElement: NTArgumentLabel? NTExpression Comma?;
+
+NTArgumentLabel: Identifier Colon [d];
+
+NTTypeCSV: NTType (Comma [d] NTType)*;
+
+NTType: [NTBaseType | NTGenericType];
+
+NTGenericType: [TypeArray | TypeList | TypeSet | TypeDict | TypeCollection] OpenAngleSquare [d] NTTypeCSV CloseAngleSquare [d];
+
+NTBaseType: [TypeBool | TypeByte | TypeShort | TypeInt | TypeLong | TypeLongInt | TypeFloat | TypeDouble | TypeRational | TypeNumber | TypeString | TypeChar | TypeVoid];
+
+[Postfix 13] Factorial;
+
+[Prefix 6] LogicalNot;
+
+[Prefix 18] BitwiseNegation;
+
+[Prefix 12] Subtraction;
+
+[Right 1] Equals;
+
+[Left 3] LogicalOr;
+
+[Left 4] LogicalXor;
+
+[Left 5] LogicalAnd;
+
+[Left 9] Addition;
+
+[Left 9] Subtraction;
+
+[Left 10] Division;
+
+[Left 10] Multiplication;
+
+[Right 11] Exponentiation;
+
+# [Left 12] Subtraction; also use for negation.... this is shitty I guess
+
+[Left 15] BitwiseOr;
+
+[Left 16] BitwiseXor;
+
+[Left 17] BitwiseAnd;
+
+[Left 14] BitwiseLeftShift;
+
+[Left 14] BitwiseRightShift;
+
+[Right 7] PlusEquals;
+
+[Right 7] MinusEquals;
+
+[Right 7] MultiplicationEquals;
+
+[Right 7] DivideEquals;
+
+[Right 11] PowerEquals;
+
+[Right 7] BitwiseAndEquals;
+
+[Right 7] BitwiseOrEquals;
+
+[Right 7] BitwiseXorEquals;
+
+[Right 7] BitwiseNegateEquals;
+
+[Right 7] LeftShiftEquals;
+
+[Right 7] RightShiftEquals;
+
+[Prefix 19] Increment;
+
+[Prefix 20] Decrement;
+
+[Right 8] EqualTo;
+
+[Right 8] NotEqualTo;
+
+[Right 8] GreaterThan;
+
+[Right 8] LessThan;
+
+[Right 8] GreaterThanOrEqualTo;
+
+[Right 8] LessThanOrEqualTo;
+
