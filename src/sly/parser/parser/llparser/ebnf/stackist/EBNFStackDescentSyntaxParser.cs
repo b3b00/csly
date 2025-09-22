@@ -245,9 +245,14 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                     }
                 }
             }
-            else
+            else if (state.Children.Count == 0)
             {
                 // If no children then there is no move : ending position does is starting position
+                result.EndingPosition = state.Position;
+            }
+            else if (result.GetErrors().Any(x => x.ErrorType == ErrorType.UnexpectedEOS))
+            {
+                // eos reached , rewind to start ? 
                 result.EndingPosition = state.Position;
             }
 

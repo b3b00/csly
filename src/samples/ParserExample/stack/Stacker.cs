@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using expressionparser;
 using indented;
+using jsonparser;
+using jsonparser.JsonModel;
 using NFluent;
 using ParserTests;
 using ParserTests.Issue239;
@@ -525,5 +527,24 @@ if truc == 1
         var error = parseResult.Errors[0];
         Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
         
+    }
+    
+    public static void TestIncompleteJsonObject()
+    {
+        var jsonParser = new EbnfJsonGenericParser();
+        var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
+            
+        var build  = builder.BuildParser(jsonParser, ParserType.EBNF_LL_STACK, "root");
+        Check.That(build).IsOk();
+        var parser = build.Result;
+        var r = parser.Parse("{\"prop\":\"value\",\"prop2\":[1,2,3");
+        Check.That(r).Not.IsOkParsing();
+        Check.That(r.Errors).CountIs(1);
+        var error = r.Errors[0];
+        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+        foreach (var rError in r.Errors)
+        {
+            Console.WriteLine(rError.ContextualErrorMessage);
+        }
     }
 }
