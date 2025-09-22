@@ -152,8 +152,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     };
                     
                     var errors = state.Errors.Where(x => x.EndingPosition == max)
-                        .SelectMany(x => x.GetErrors())
-                        .DistinctWithPredicate(( x,  y) => x.Line == y.Line && x.Column == y.Column).ToList();
+                        .SelectMany(x => x.GetErrors()).ToList();
+                        errors = ErrorAggregator.Aggregate(errors);
                     realResult.AddErrors(errors);
                 }
                 else if (state.Successes.Count(x => x.IsOk) > 1)
@@ -202,23 +202,12 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             else if (!state.Successes.Any(x => x.IsOk) && state.Errors.Any())
             {
                 // only errors : return error result merging errors
-                if (typeof(IN).Name.Contains("TokenType") && state.NonTerminal.NonTerminalName.Contains("R"))
-                {
-                    ;
-                }
-
-                if (!state.Errors.Any())
-                {
-                    ;
-                }
-                
                 var max = state.Errors.Max(x => x.EndingPosition);
                 var realResult = new SyntaxParseResult<IN, OUT>()
                 {
                     IsError = true,
                     EndingPosition = max,
                 };
-                //var allErrors = state.Errors.SelectMany(x => x.GetErrors()).Distinct().ToList();
                     
                 var errors = state.Errors.Where(x => x.EndingPosition == max)
                     .SelectMany(x => x.GetErrors())
@@ -235,12 +224,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 {
                     return;
                 }
-                else
-                {
-                    //Log("end of token stream not reached, looking forward", stack, 1);
-                }
-
-                //return;
             }
             
             var rules = nonTerminalClause.Rules;
@@ -265,16 +248,9 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             if (rule.Match(state.Tokens, state.Position, Configuration))
             {
                 PushClause(rule,stack,state);
-                // var ruleState = new RuleStackState<IN, OUT>(state, rule)
-                // {
-                //     Tokens = state.Tokens,
-                //     Position = state.Position
-                // };
-                // stack.Push(ruleState);
             }
             else
             {
-                //Log($"KO rule (( {rule.RuleString} )) does not match {state.Tokens[state.Position]}",stack,1);
                 var result = new SyntaxParseResult<IN, OUT>();
                 var token = state.Tokens[state.Position];
 
@@ -498,19 +474,5 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     {
         
     }
-
-    // private void Log(string message, Stack<StackState<IN, OUT>> stack, int plus = 0)
-    // {
-    //     if (DEBUG)
-    //     {
-    //         string tab = "  ";
-    //         for (int i = 0; i < stack.Count + plus; i++)
-    //         {
-    //             tab += "  ";
-    //         }
-    //
-    //         Console.WriteLine(tab + message);
-    //     }
-    // }
 
 }
