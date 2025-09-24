@@ -113,6 +113,13 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     break;
                 case StackStateType.Root:
                 {
+                    if (!current.Result.IsEnded && !current.Result.GetErrors().Any())
+                    {
+                        UnexpectedTokenSyntaxError<IN> error =
+                            new UnexpectedTokenSyntaxError<IN>(tokens[current.Result.EndingPosition]);
+                        current.Result.AddError(error);
+                    }
+                    
                     return current.Result;
                 }
                 default:
