@@ -289,9 +289,14 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             result.AddErrors(state.Result.GetErrors());
             result.IsError = true;
             var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
-            manyNode.IsManyTokens = state.RepeatedClause is TerminalClause<IN, OUT>;
-            manyNode.IsManyValues = state.RepeatedClause is NonTerminalClause<IN, OUT>;
             manyNode.IsManyGroups = state.RepeatedClause is NonTerminalClause<IN, OUT> nt && nt.IsGroup;
+            if (!manyNode.IsManyGroups)
+            {
+                manyNode.IsManyTokens = state.RepeatedClause is TerminalClause<IN, OUT> ||
+                                        state.RepeatedClause is ChoiceClause<IN, OUT> tc && tc.IsTerminalChoice;
+                manyNode.IsManyValues = state.RepeatedClause is NonTerminalClause<IN, OUT> ||
+                                        state.RepeatedClause is ChoiceClause<IN, OUT> ntc && ntc.IsNonTerminalChoice;
+            }
 
             if (state.RepeatedClause is ChoiceClause<IN, OUT> choice)
             {
