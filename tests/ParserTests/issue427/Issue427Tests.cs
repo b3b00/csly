@@ -75,13 +75,15 @@ public class Issue427MinimalParser
 
 public class Issue427Tests
 {
-    [Fact]
-    public void TestIssue427()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestIssue427(ParserType parserType)
     {
         ParserBuilder<Issue427Lexer, int> Parser = new ParserBuilder<Issue427Lexer, int>("en");
         Issue427Parser oparser = new Issue427Parser();
         
-        var r = Parser.BuildParser(oparser,ParserType.LL_RECURSIVE_DESCENT,"main");
+        var r = Parser.BuildParser(oparser,parserType,"main");
         Check.That(r).IsOk();
         var parser = r.Result;
         var result = parser.Parse("2 + 3");
@@ -94,13 +96,15 @@ public class Issue427Tests
 
     }
     
-    [Fact]
-    public void TestIssue427Bis()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestIssue427Bis(ParserType parserType)
     {
         ParserBuilder<Issue427Lexer, int> Parser = new ParserBuilder<Issue427Lexer, int>("en");
         var oparser = new Issue427BisParser();
         
-        var r = Parser.BuildParser(oparser,ParserType.LL_RECURSIVE_DESCENT,"main");
+        var r = Parser.BuildParser(oparser,parserType,"main");
         Check.That(r).IsOk();
         var parser = r.Result;
         var result = parser.Parse("2 + 3");

@@ -35,24 +35,28 @@ namespace ParserTests
         }
 
 
-        [Fact]
-        public static void Issue219EBNF()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public static void Issue219EBNF(ParserType parserType)
         {
             ParserBuilder<Issue219Lexer, I219Ast> builder = new ParserBuilder<Issue219Lexer, I219Ast>();
             Issue219ParserEBNF instance = new Issue219ParserEBNF();
-            var bres = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var bres = builder.BuildParser(instance, parserType, "root");
             Check.That(bres).IsOk();
             var parser = bres.Result;
             var exception = Check.ThatCode(() => { parser.Parse("a = 1 b = 2 c = 3"); }).Throws<Exception219>().Value;
             Check.That(exception.Message).IsEqualTo("visitor error");
         }
       
-        [Fact]
-        public static void Issue219BNF()
+        [Theory]
+        [InlineData(ParserType.LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.LL_STACK)]
+        public static void Issue219BNF(ParserType parserType)
         {
             ParserBuilder<Issue219Lexer, I219Ast> builder = new ParserBuilder<Issue219Lexer, I219Ast>();
             Issue219ParserBNF instance = new Issue219ParserBNF();
-            var bres = builder.BuildParser(instance, ParserType.LL_RECURSIVE_DESCENT, "root");
+            var bres = builder.BuildParser(instance, parserType, "root");
             Check.That(bres).IsOk();
             var parser = bres.Result;
             var exception = Check.ThatCode(() => { parser.Parse("a = 1"); }).Throws<Exception219>().Value;
@@ -81,14 +85,16 @@ namespace ParserTests
             Check.That(tokens[0]).IsEqualTo(Issue261Lexer.test, @"""test""");
         }
 
-        [Fact]
-        public static void Issue277Test()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public static void Issue277Test(ParserType parserType)
         {
             var parserInstance = new Issue277Parser();
             var builder = new ParserBuilder<Issue277Tokens, string>();
 
             var result = builder
-                .BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression");
+                .BuildParser(parserInstance, parserType, "expression");
 
             Check.That(result).IsOk();
             
@@ -103,11 +109,13 @@ namespace ParserTests
             Check.That(resAsString).IsEqualTo("foo | bar | baz");
         }
         
-        [Fact]
-        public static void Issue493Test()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public static void Issue493Test(ParserType parserType)
         { 
             ParserBuilder<SlowOnBadParseEosToken, object> builder = new ParserBuilder<SlowOnBadParseEosToken, object>();
-            var buildParser = builder.BuildParser(new SlowOnBadParseEos(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var buildParser = builder.BuildParser(new SlowOnBadParseEos(), parserType, "root");
             Check.That(buildParser).IsOk();
             Check.That(buildParser.Errors).IsEmpty();
             var parser = buildParser.Result; 
@@ -145,11 +153,13 @@ namespace ParserTests
         }
 
    
-        [Fact]
-        public static void Issue540Test()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public static void Issue540Test(ParserType parserType)
         {
             ParserBuilder<Issue540Token, object> builder = new ParserBuilder<Issue540Token, object>();
-            var buildParser = builder.BuildParser(new Issue540Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "NtSCExpr");
+            var buildParser = builder.BuildParser(new Issue540Parser(), parserType, "NtSCExpr");
             Check.That(buildParser).IsOk();
             
             var parser = buildParser.Result;

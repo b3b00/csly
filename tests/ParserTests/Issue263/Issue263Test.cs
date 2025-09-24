@@ -9,14 +9,16 @@ namespace ParserTests.Issue263
 {
     public class Issue263Test
     {
-        [Fact]
-        public void OperationCanBeParsed()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void OperationCanBeParsed(ParserType parserType)
         {
             var source = "()";
 
             var commandParser = new Issue263Parser();
             var parserBuilder = new ParserBuilder<Issue263Token, object>();
-            var buildResult = parserBuilder.BuildParser(commandParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "operation");
+            var buildResult = parserBuilder.BuildParser(commandParser, parserType, "operation");
 
             Check.That(buildResult.IsOk).IsTrue();
 
@@ -27,13 +29,15 @@ namespace ParserTests.Issue263
         }
 
         [Theory]
-        [InlineData("([", Issue263Token.LBRAC,Issue263Token.RPARA)]
-        [InlineData("()()(]", Issue263Token.RBRAC,Issue263Token.RPARA)]
-        public void OperationCannotBeParsedAndReturnsError(string source, Issue263Token unexpectedToken, params Issue263Token[] expectedTokens)
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT,"([", Issue263Token.LBRAC,Issue263Token.RPARA)]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT, "()()(]", Issue263Token.RBRAC,Issue263Token.RPARA)]
+        [InlineData(ParserType.EBNF_LL_STACK,"([", Issue263Token.LBRAC,Issue263Token.RPARA)]
+        [InlineData(ParserType.EBNF_LL_STACK, "()()(]", Issue263Token.RBRAC,Issue263Token.RPARA)]
+        public void OperationCannotBeParsedAndReturnsError(ParserType parserType, string source, Issue263Token unexpectedToken, params Issue263Token[] expectedTokens)
         {
             var commandParser = new Issue263Parser();
             var parserBuilder = new ParserBuilder<Issue263Token, object>();
-            var buildResult = parserBuilder.BuildParser(commandParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "operation");
+            var buildResult = parserBuilder.BuildParser(commandParser, parserType, "operation");
 
             Check.That(buildResult.IsOk).IsTrue();
 

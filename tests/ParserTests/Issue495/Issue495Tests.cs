@@ -10,12 +10,12 @@ public class Issue495Tests
 {
     public Parser<Issue495Token,string> _parser { get; set; }
 
-    public Parser<Issue495Token, string> GetParser()
+    public Parser<Issue495Token, string> GetParser(ParserType parserType)
     {
         if (_parser == null)
         {
             ParserBuilder<Issue495Token, string> builder = new ParserBuilder<Issue495Token, string>("en");
-            var build = builder.BuildParser(new Issue495Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+            var build = builder.BuildParser(new Issue495Parser(), parserType, "program");
             Check.That(build).IsOk();
             _parser = build.Result;
         }
@@ -23,10 +23,12 @@ public class Issue495Tests
         return _parser;
     }
 
-    [Fact]
-    public void TestIssue495()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestIssue495(ParserType parserType)
     {
-        var parser = GetParser();
+        var parser = GetParser(parserType);
         Check.That(parser).IsNotNull();
         Check.That(parser.Lexer).IsNotNull();
         Check.That(parser.Lexer).IsInstanceOf<GenericLexer<Issue495Token>>();

@@ -6,11 +6,13 @@ namespace ParserTests.Issue485;
 
 public class Issue485Tests
 {
-    [Fact]
-    public void TestIssue485()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestIssue485(ParserType parserType)
     {
         var builder = new ParserBuilder<Issue485Lexer, string>();
-        var build = builder.BuildParser(new Issue485Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT,"root");
+        var build = builder.BuildParser(new Issue485Parser(), parserType,"root");
         Check.That(build).IsOk();
         var parser = build.Result;
         Check.That(parser).IsNotNull();
@@ -21,11 +23,14 @@ public class Issue485Tests
         Check.That(result).IsNotEmpty();
         Check.That(result).Equals("Hello \"There\"\\nSecond line");
     }
-    [Fact]
-    public void TestIssue485SelfEscape()
+    
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestIssue485SelfEscape(ParserType parserType)
     {
         var builder = new ParserBuilder<Issue485SelfEscapeLexer, string>();
-        var build = builder.BuildParser(new Issue485SelfEscapeParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT,"root");
+        var build = builder.BuildParser(new Issue485SelfEscapeParser(), parserType,"root");
         Check.That(build).IsOk();
         var parser = build.Result;
         Check.That(parser).IsNotNull();
@@ -37,11 +42,13 @@ public class Issue485Tests
         Check.That(result).Equals("Hello \"There\"\\nSecond line");
     }
     
-    [Fact]
-    public void TestIssue485WithCallback()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestIssue485WithCallback(ParserType parserType)
     {
         var builder = new ParserBuilder<Issue485WithCallbackLexer, string>();
-        var build = builder.BuildParser(new Issue485WithCallbackParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT,"root");
+        var build = builder.BuildParser(new Issue485WithCallbackParser(), parserType,"root");
         Check.That(build).IsOk();
         var parser = build.Result;
         Check.That(parser).IsNotNull();

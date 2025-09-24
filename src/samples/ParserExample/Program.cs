@@ -1557,7 +1557,7 @@ while a < 10 do
 
         private static void TestIssue239()
         {
-            Issue239Tests.TestOk();
+            Issue239Tests.TestOk(ParserType.EBNF_LL_RECURSIVE_DESCENT);
             ;
         }
 

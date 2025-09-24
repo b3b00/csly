@@ -32,13 +32,15 @@ public class TemplateNode : INode
 public class TestIssue443
 {
 
-    [Fact]
-    public void Issue443Test()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void Issue443Test(ParserType parserType)
     {
         var issue443Parser = new Issue443Parser();
         var builder = new ParserBuilder<Issue443Lexer, INode>();
 
-        var parser = builder.BuildParser(issue443Parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "template");
+        var parser = builder.BuildParser(issue443Parser, parserType, "template");
 
         Check.That(parser).IsOk();
         var result = parser.Result.Parse(@"

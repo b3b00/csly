@@ -13,12 +13,14 @@ namespace ParserTests.Issue332;
 
 public class Issue332Tests
 {
-    [Fact]
-    public void TestIssue328()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestIssue328(ParserType parserType)
     {
         ParserBuilder<Issue332Token, object> Parser = new ParserBuilder<Issue332Token, object>();
         Issue332Parser oparser = new Issue332Parser();
-        var r = Parser.BuildParser(oparser,ParserType.EBNF_LL_RECURSIVE_DESCENT);
+        var r = Parser.BuildParser(oparser,parserType);
         Check.That(r).Not.IsOk();
         Check.That(r.Errors).Not.IsEmpty();
         var error = r.Errors.First();
