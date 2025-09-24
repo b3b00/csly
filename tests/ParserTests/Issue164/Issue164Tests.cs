@@ -11,31 +11,35 @@ namespace ParserTests.Issue164
 {
     public class Issue164Tests
     {
-        private static Parser<ExpressionToken, double> BuildParser()
+        private static Parser<ExpressionToken, double> BuildParser(ParserType parserType)
         {   
             var StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
-            var pBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            var pBuild = builder.BuildParser(parserInstance, parserType, StartingRule);
             Check.That(pBuild).IsOk();
             return pBuild.Result;
         }
         
         
 
-        [Fact]
-        public static void TestOk()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public static void TestOk(ParserType parserType)
         {
-            var parser = BuildParser();
+            var parser = BuildParser(parserType);
             var result = parser.Parse("2 + 2");
             Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo(4.0);
         }
         
-        [Fact]
-        public static void TestErrorMessage()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public static void TestErrorMessage(ParserType parserType)
         {
-            var parser = BuildParser();
+            var parser = BuildParser(parserType);
             var result = parser.Parse("2 ( 2");
             Check.That(result).Not.IsOkParsing();
             var errors = result.Errors;

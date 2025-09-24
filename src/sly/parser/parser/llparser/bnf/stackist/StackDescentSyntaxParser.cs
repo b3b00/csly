@@ -159,6 +159,18 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 {
                     realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
                 }
+                else
+                {
+                    // all is ok => embed existing errors
+                    if (state.Errors.Any())
+                    {
+                        var max = state.Errors.Max(x => x.EndingPosition);
+                        var errors = state.Errors.Where(x => x.EndingPosition == max)
+                            .SelectMany(x => x.GetErrors()).ToList();
+                        errors = ErrorAggregator.Aggregate(errors);
+                        realResult.AddErrors(errors);
+                    }
+                }
 
                 state.Parent.SetResult(realResult);
                

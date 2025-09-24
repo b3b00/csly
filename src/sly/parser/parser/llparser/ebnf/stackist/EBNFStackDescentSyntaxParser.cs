@@ -395,6 +395,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 {
                     // return Left (ok)
                     var errors = ErrorAggregator.Aggregate(state.Result.GetErrors().ToList());
+                    state.Left.AddErrors(errors);
                     state.Parent.SetResult(state.Left);
                     return;
                 }
