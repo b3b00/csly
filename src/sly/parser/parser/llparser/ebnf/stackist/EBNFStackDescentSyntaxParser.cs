@@ -403,7 +403,6 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 if (state.ExpressionState == ExpressionRuleState.Right)
                 {
                     // fail on operator parsing => return expression with left operand
-                    var errors = ErrorAggregator.Aggregate(state.Result.GetErrors().ToList());
                     state.Left.AddErrors(ErrorAggregator.Aggregate(state.Result.GetErrors().ToList()));
                     state.Parent.SetResult(state.Left);
                     return;
