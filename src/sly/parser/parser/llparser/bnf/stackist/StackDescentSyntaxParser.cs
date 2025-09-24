@@ -83,8 +83,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
             Position = 0,
             Tokens = tokens
         };
-        var toks = string.Join(" ", tokens.Select(x => x.Value));
-        //Log($"start :: {toks}",stack);
+       
 
         stack.Push(root);
         stack.Push(state);

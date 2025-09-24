@@ -30,6 +30,6 @@ public class InfixExpressionStackState<IN, OUT> : EbnfStackState<IN,OUT> where I
     
     public override string ToString()
     {
-        return "Expresion: " + Rule.Dump();
+        return "Infix Expresion: " + Rule.Dump();
     }
 }

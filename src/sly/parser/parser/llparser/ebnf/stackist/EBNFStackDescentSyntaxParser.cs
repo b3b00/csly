@@ -176,10 +176,10 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             result.EndingPosition = state.Result.EndingPosition;
 
             var max = state.Children.Max(x => x.EndingPosition);
-            
+
             var errors = state.Children.Where(x => x.EndingPosition == max)
-                .SelectMany(x => x.GetErrors())
-                .DistinctWithPredicate(( x,  y) => x.Line == y.Line && x.Column == y.Column).ToList();
+                .SelectMany(x => x.GetErrors()).ToList();
+            errors = ErrorAggregator.Aggregate(errors);
             
             result.AddErrors(errors);
             state.Parent.SetResult(result);
@@ -336,6 +336,9 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 children.Add(state.Left.Root);
                 children.Add(state.Operator.Root);
                 children.Add(state.Right.Root);
+                
+                // get errors from right if exist
+                var errors = ErrorAggregator.Aggregate(state.Right.GetErrors().ToList());
                 int currentPosition = state.Right.EndingPosition;
                 var node = new SyntaxNode<IN, OUT>(state.Rule.NodeName ?? state.Rule.NonTerminalName, children);
                 node.ExpressionAffix = state.Rule.ExpressionAffix;
@@ -346,6 +349,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 node.Operation = state.Rule.GetOperation(key);
                 var finalResult = new SyntaxParseResult<IN, OUT>();
                 finalResult.Root = node;
+                finalResult.AddErrors(errors);
                 finalResult.IsEnded = currentPosition >= state.Tokens.Length - 1
                                       || currentPosition == state.Tokens.Length - 2 &&
                                       state.Tokens[state.Tokens.Length - 1].IsEOS;
@@ -390,6 +394,7 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 if (state.ExpressionState == ExpressionRuleState.Operator)
                 {
                     // return Left (ok)
+                    var errors = ErrorAggregator.Aggregate(state.Result.GetErrors().ToList());
                     state.Parent.SetResult(state.Left);
                     return;
                 }
@@ -397,6 +402,8 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 if (state.ExpressionState == ExpressionRuleState.Right)
                 {
                     // fail on operator parsing => return expression with left operand
+                    var errors = ErrorAggregator.Aggregate(state.Result.GetErrors().ToList());
+                    state.Left.AddErrors(ErrorAggregator.Aggregate(state.Result.GetErrors().ToList()));
                     state.Parent.SetResult(state.Left);
                     return;
                 }

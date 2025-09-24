@@ -19,7 +19,9 @@ using jsonparser;
 using jsonparser.JsonModel;
 using NFluent;
 using ParserTests;
+using ParserTests.Issue164;
 using ParserTests.Issue239;
+using ParserTests.Issue259;
 using ParserTests.Issue332;
 using ParserTests.Issue414;
 using ParserTests.Issue495;
@@ -35,8 +37,8 @@ using sly.parser.generator;
 using sly.parser.syntax.grammar;
 using sly.buildresult;
 using sly.i18n;
+using sly.lexer.fluent;
 using sly.parser.generator.visitor;
-using sly.parser.parser;
 using XML;
 using Xunit;
 using ExpressionContext = postProcessedLexerParser.expressionModel.ExpressionContext;
@@ -1881,72 +1883,49 @@ else
               Check.That(res.IsOk).IsTrue();
               Check.That(res.Result).IsEqualTo(3*2*1);
           }
-    }
 
-    public enum TestGrammarToken
-    {
-        [Lexeme(GenericToken.SugarToken,",")]
-        COMMA = 1
-    }
-    
-    
+          public static void TestIssue164Option()
+          {
+              Issue164OptionTests.TestErrorMessage(ParserType.EBNF_LL_STACK);
+          }
 
-    public class ErroneousGrammar
-    {
-        [Production("clauses : clause (COMMA [D] clause)*")]
+          public static void TestIssue259()
+          {
+             
 
-            public object test()
-            {
-                return null;
-            }    
-    }
+              var expression = "1 < 2 AND 3 <= 4 AND 5 == 6 AND 7 >= 8 AND 9 > 10 AND 11 != 12 AND 13 <> 14";
+              expression = "1 < 2 AND  13 <> 14";
 
-    public class RecursiveGrammar
-    {
-        [Production("first : second COMMA[d]")]
-        public object FirstRecurse(object o)
-        {
-            return o;
-        } 
-        
-        [Production("second : third COMMA[d]")]
-        public object SecondRecurse(object o)
-        {
-            return o;
-        }
-        
-        [Production("third : first COMMA[d]")]
-        public object ThirdRecurse(object o)
-        {
-            return o;
-        }
+              var startingRule = $"{nameof(Issue259Parser)}_expressions";
+              var parserInstance = new Issue259Parser();
+              var builder = new ParserBuilder<Issue259ExpressionToken, string>("en");
+              var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
+              Check.That(parser.IsOk).IsTrue();
+              Check.That(parser.Result).IsNotNull();
+
+              var parseResult = parser.Result.Parse(expression);
+
+              Check.That(parseResult.IsError).IsTrue();
+              Check.That(parseResult.Errors).CountIs(1);
+
+
+              var error = parseResult.Errors[0];
+
+              var unexpectedTokenError = error as UnexpectedTokenSyntaxError<Issue259ExpressionToken>;
+              Check.That(unexpectedTokenError).IsNotNull();
+              Check.That(unexpectedTokenError.UnexpectedToken.TokenID).IsEqualTo(Issue259ExpressionToken.COMPARISON);
+              Check.That(unexpectedTokenError.UnexpectedToken.Value).IsEqualTo(">");
+              var expectedTokens = unexpectedTokenError.ExpectedTokens.Select(x => x.TokenId);
+              Check.That(expectedTokens).Contains(
+                  Issue259ExpressionToken.ON,
+                  Issue259ExpressionToken.OFF,
+                  Issue259ExpressionToken.MINUS,
+                  Issue259ExpressionToken.HEX_NUMBER,
+                  Issue259ExpressionToken.DECIMAL_NUMBER,
+                  Issue259ExpressionToken.LVAR,
+                  Issue259ExpressionToken.SIMVAR,
+                  Issue259ExpressionToken.LPAREN);
+              Console.WriteLine("test 259 OK !");
+          }
     }
-    
-    public class RecursiveGrammar2
-    {
-        [Production("first : second* third COMMA[d]")]
-        public object FirstRecurse(List<object> seconds, object third)
-        {
-            return third;
-        } 
-        
-        [Production("first : second? third COMMA[d]")]
-        public object FirstRecurse2(ValueOption<object> optSecond, object third)
-        {
-            return null;
-        }
-        
-        [Production("second :  COMMA[d]")]
-        public object SecondRecurse()
-        {
-            return null;
-        }
-        
-        [Production("third : first COMMA[d]")]
-        public object ThirdRecurse(object o)
-        {
-            return o;
-        }
-    }
-    
 }
