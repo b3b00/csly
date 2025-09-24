@@ -8,29 +8,33 @@ namespace ParserTests.Issue164
 {
     public class Issue164OptionTests
     {
-        private static Parser<TestOption164Lexer, int> BuildParser()
+        private static Parser<TestOption164Lexer, int> BuildParser(ParserType parserType)
         {
             var StartingRule = $"root";
             var parserInstance = new TestOption164Parser();
             var builder = new ParserBuilder<TestOption164Lexer, int>();
-            var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            var parser = builder.BuildParser(parserInstance, parserType, StartingRule);
             Check.That(parser).IsOk();
             return parser.Result;
         }
 
-        [Fact]
-        public static void TestOk()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public static void TestOk(ParserType parserType)
         {
-            var parser = BuildParser();
+            var parser = BuildParser(parserType);
             var result = parser.Parse("2 + 2");
             Check.That(result).IsOkParsing();
             Check.That(result.Result).IsEqualTo(4);
         }
         
-        [Fact]
-        public static void TestErrorMessage()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public static void TestErrorMessage(ParserType parserType)
         {
-            var parser = BuildParser();
+            var parser = BuildParser(parserType);
             var result = parser.Parse("2 ( 2");
             Check.That(result.IsError).IsTrue();
             var errors = result.Errors;

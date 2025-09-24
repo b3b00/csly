@@ -433,7 +433,8 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 var state = new InfixExpressionStackState<IN, OUT>(rule, parent)
                 {
                     Tokens = parent.Tokens,
-                    Position = parent.Position
+                    Position = parent.Position,
+                    StartPosition = parent.Position
                 };
                 stack.Push(state);
                 break;
@@ -443,7 +444,8 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 var state = new ZeroOrMoreStackState<IN, OUT>(zeroOrMore, parent)
                 {
                     Tokens = parent.Tokens,
-                    Position = parent.Position
+                    Position = parent.Position,
+                    StartPosition = parent.Position
                 };
                 stack.Push(state);
                 break;
@@ -453,7 +455,8 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 var state = new OneOrMoreStackState<IN, OUT>(oneOrMore, parent)
                 {
                     Tokens = parent.Tokens,
-                    Position = parent.Position
+                    Position = parent.Position,
+                    StartPosition = parent.Position
                 };
                 stack.Push(state);
                 break;
@@ -463,7 +466,8 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 var state = new OptionStackState<IN, OUT>(option, parent)
                 {
                     Tokens = parent.Tokens,
-                    Position = parent.Position
+                    Position = parent.Position,
+                    StartPosition = parent.Position
                 };
                 stack.Push(state);
                 break;
@@ -473,7 +477,8 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 var state = new ChoiceStackState<IN, OUT>(choice, parent)
                 {
                     Tokens = parent.Tokens,
-                    Position = parent.Position
+                    Position = parent.Position,
+                    StartPosition = parent.Position
                 };
                 stack.Push(state);
                 break;

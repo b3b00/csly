@@ -42,7 +42,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         ParserConfiguration<IN, OUT> configuration)
     {
         I18n = i18n;
-        _useMemoization = configuration.UseMemoization;
         Init(configuration, configuration.StartingRule);
     }
     
@@ -92,6 +91,9 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         stack.Push(state);
 
         var current = stack.Pop();
+        
+        var parsingContext = new SyntaxParsingContext<IN,OUT>(Configuration.UseMemoization);
+        
         while (current != null)
         {
             
@@ -101,18 +103,18 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 case StackStateType.Rule:
                 {
                     //Log(ruleState.Progress(), stack);
-                    ParseRule(current as RuleStackState<IN, OUT>, stack);
+                    ParseRule(current as RuleStackState<IN, OUT>, stack, parsingContext);
                     break;
                 }
                 case StackStateType.NonTerminal:
                 {
                     ////Log(nonTerminalState.Progress(Configuration), stack);
-                    ParseNonTerminal(current as NonTerminalStackState<IN, OUT>, stack);
+                    ParseNonTerminal(current as NonTerminalStackState<IN, OUT>, stack, parsingContext);
                     break;
                 }
                 case StackStateType.Terminal:
                     // //Log(current.DebugString, stack);
-                    ParseTerminal(current as TerminalStackState<IN, OUT>, stack);
+                    ParseTerminal(current as TerminalStackState<IN, OUT>, stack, parsingContext);
                     break;
                 case StackStateType.Root:
                 {
@@ -130,9 +132,18 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         return null;
     }
 
-    private void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    private void ParseNonTerminal(NonTerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack, SyntaxParsingContext<IN,OUT> parsingContext)
     {
         NonTerminalClause<IN, OUT> nonTerminal = state.NonTerminal;
+        if (parsingContext.TryGetParseResult(new NonTerminalClause<IN, OUT>(nonTerminal.NonTerminalName),
+                state.StartPosition,
+                out var memoizedResult))
+        {
+            state.Parent.SetResult(memoizedResult);
+            return;
+        }
+        
+        
         if (Configuration.NonTerminals.TryGetValue(nonTerminal.NonTerminalName, out var nonTerminalClause))
         {
             if (state.Index >= nonTerminalClause.Rules.Count && state.Result != null)
@@ -261,6 +272,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 result.EndingPosition = state.Position;
 
                 result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, expected.ToArray()));
+                parsingContext.Memoize(nonTerminal,state.StartPosition,result);
                 state.Parent.SetResult(result);
             }
         }
@@ -271,7 +283,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
     }
 
 
-    public void ParseTerminal(TerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    public void ParseTerminal(TerminalStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack, SyntaxParsingContext<IN,OUT> parsingContext)
     {
         var terminalState = state as TerminalStackState<IN, OUT>;
         TerminalClause<IN, OUT> terminal = terminalState.Terminal;
@@ -312,7 +324,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         state.Parent.SetResult(result);
     }
 
-    private void ParseRule(RuleStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack)
+    private void ParseRule(RuleStackState<IN, OUT> state, Stack<StackState<IN, OUT>> stack, SyntaxParsingContext<IN,OUT> parsingContext)
     {
         var rule = state.Rule;
         
@@ -331,25 +343,15 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                         .SelectMany(x => x.GetErrors())
                         .Distinct().ToList();
 
-                    var max = allErrors.Max(x => x.UnexpectedToken.Position.Index);
+                    var max = allErrors.Max(x => x.UnexpectedToken.PositionInTokenVisibleFlow);
                     var realResult = new SyntaxParseResult<IN, OUT>()
                     {
                         IsError = true,
                         EndingPosition = max,
                     };
-
-                    // if (allErrors.Count == 3)
-                    // {
-                    //     var grouped = allErrors.GroupBy(x => x.Discriminant()
-                    //     ).ToList();
-                    //     var expecting = grouped
-                    //         .Select(x => x
-                    //             .SelectMany(y => y.ExpectedTokens)
-                    //             .DistinctWithPredicate((w,z) => z.TokenId.Equals(w.TokenId)))
-                    //     ;
-                    // }
-                    // TODO aggregate errors
-                    var errors = allErrors.Where(x => x.UnexpectedToken.Position.Index == max)
+                    
+                    // TODO aggregate errors ? 
+                    var errors = allErrors.Where(x => x.UnexpectedToken.PositionInTokenVisibleFlow == max)
                         .ToList();
                     realResult.AddErrors(errors);
                     
@@ -439,7 +441,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 var ruleState = new RuleStackState<IN, OUT>(parent, rule)
                 {
                     Tokens = parent.Tokens,
-                    Position = parent.Position
+                    Position = parent.Position,
+                    StartPosition = parent.Position
                 };
                 stack.Push(ruleState);
                 break;
@@ -449,7 +452,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 var terminalState = new TerminalStackState<IN, OUT>(parent, terminalClause)
                 {
                     Tokens = parent.Tokens,
-                    Position = parent.Position
+                    Position = parent.Position,
+                    StartPosition = parent.Position
                 };
                 stack.Push(terminalState);
                 break;
@@ -459,7 +463,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 var nonTerminalState = new NonTerminalStackState<IN, OUT>(parent, nonTerminalClause)
                 {
                     Tokens = parent.Tokens,
-                    Position = parent.Position
+                    Position = parent.Position,
+                    StartPosition = parent.Position
                 };
                 stack.Push(nonTerminalState);
                 break;
@@ -477,37 +482,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         
     }
     
-    #region memoization
     
-    private readonly Dictionary<string, SyntaxParseResult<IN, OUT>> _memoizedNonTerminalResults = new Dictionary<string, SyntaxParseResult<IN, OUT>>();
-    
-    private readonly bool _useMemoization = false;
-    
-    private string GetKey(IClause<IN, OUT> clause, int position)
-    {
-        return $"{clause.Dump()} -- @{position}";
-    }
-        
-    public void Memoize(IClause<IN, OUT> clause, int position, SyntaxParseResult<IN, OUT> result)
-    {
-        if (_useMemoization)
-        {
-            _memoizedNonTerminalResults[GetKey(clause, position)] = result;
-        }
-    }
-
-    public bool TryGetParseResult(IClause<IN, OUT> clause, int position, out SyntaxParseResult<IN, OUT> result)
-    {
-        if (!_useMemoization)
-        {
-            result = null;
-            return false;
-        }
-        bool found = _memoizedNonTerminalResults.TryGetValue(GetKey(clause, position), out result);
-        return found;
-    }
-    
-    #endregion
     
 
 }

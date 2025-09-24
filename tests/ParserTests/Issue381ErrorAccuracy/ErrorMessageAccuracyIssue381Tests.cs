@@ -11,18 +11,20 @@ namespace ParserTests.Issue381ErrorAccuracy;
 
 public class ErrorMessageAccuracyIssue381Tests
 {
-    private static Parser<ErrorAccuracyIssue381Token, object> BuildParser()
+    private static Parser<ErrorAccuracyIssue381Token, object> BuildParser(ParserType parserType)
     {
         var StartingRule = $"statement";
         var parserInstance = new ErrorAccuracyIssue381Parser();
         var builder = new ParserBuilder<ErrorAccuracyIssue381Token, object>();
-        var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+        var parser = builder.BuildParser(parserInstance, parserType, StartingRule);
         Check.That(parser).IsOk();
         return parser.Result;
     }
 
-    [Fact]
-    public void TestAccuracy()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestAccuracy(ParserType parserType)
     {
         string source = @"
         variable = function(someVariable, ""string1"", ""string2"", 
@@ -32,7 +34,7 @@ public class ErrorMessageAccuracyIssue381Tests
             ""string6"", ""value4""
 ";
 
-        var parser = BuildParser();
+        var parser = BuildParser(parserType);
         var r = parser.Parse(source,"statements");
         Check.That(r).Not.IsOkParsing();
         var error = r.Errors.First();
@@ -50,8 +52,10 @@ public class ErrorMessageAccuracyIssue381Tests
         
     }
     
-    [Fact]
-    public void TestAccuracy2()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestAccuracy2(ParserType parserType)
     {
         string source = @"
         [
@@ -64,7 +68,7 @@ public class ErrorMessageAccuracyIssue381Tests
 ]            
 ";
 
-        var parser = BuildParser();
+        var parser = BuildParser(parserType);
         var r = parser.Parse(source,"statements");
         Check.That(r).Not.IsOkParsing();
         var error = r.Errors.First();

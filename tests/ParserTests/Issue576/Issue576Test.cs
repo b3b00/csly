@@ -9,11 +9,13 @@ namespace issue576;
 
 public class Issue576Test
 {
-    [Fact]
-    public void TestIssue576()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestIssue576(ParserType parserType)
     {
         ParserBuilder<Issue576Lexer, int> builder = new ParserBuilder<Issue576Lexer, int>("en");
-        var buildResult = builder.BuildParser(new Issue576Parser(),ParserType.EBNF_LL_RECURSIVE_DESCENT,"NTSection");
+        var buildResult = builder.BuildParser(new Issue576Parser(),parserType,"NTSection");
         Check.That(buildResult).IsOk();
         var parser = buildResult.Result;
         var source = @"immut int i = 12;
@@ -33,27 +35,5 @@ public class Issue576Test
 
     }
     
-    [Fact]
-    public void TestIssue576Stack()
-    {
-        ParserBuilder<Issue576Lexer, int> builder = new ParserBuilder<Issue576Lexer, int>("en");
-        var buildResult = builder.BuildParser(new Issue576Parser(),ParserType.EBNF_LL_STACK,"NTSection");
-        Check.That(buildResult).IsOk();
-        var parser = buildResult.Result;
-        var source = @"immut int i = 12;
-        
-        i as index;
-        
-        ((((i!)!)!)!)!;
-        
-        frozen int j = (i as number) + 1;
-        j as rational rationalJ;
-        
-        dict<[int, string]> converter = new dict<[int, string]>(1, ""1"", 2, ""2"");
-        
-        SOut(converter[j]);";
-        var parsed = parser.Parse(source);
-        Check.That(parsed).IsOkParsing();
-
-    }
+   
 }

@@ -7,10 +7,10 @@ namespace ParserTests.Issue311;
 
 public class Parser311
 {
-    public static Parser<Token311, Expression> GetParser()
+    public static Parser<Token311, Expression> GetParser(ParserType parserType)
     {
         var builder = new ParserBuilder<Token311, Expression>();
-        var result = builder.BuildParser(new Parser311(), ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(Parser311) + "_expressions");
+        var result = builder.BuildParser(new Parser311(), parserType, nameof(Parser311) + "_expressions");
         return result.Result;
     }
 

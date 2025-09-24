@@ -16,6 +16,8 @@ public class StackState<IN, OUT> where IN : struct, Enum
     }
     public int Position { get; set; }
     
+    public int StartPosition { get; set; }
+    
     public Token<IN> CurrentToken => Tokens[Position];
     
     public virtual StackStateType Type { get; }

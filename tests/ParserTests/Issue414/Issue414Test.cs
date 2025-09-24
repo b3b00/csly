@@ -10,12 +10,14 @@ namespace ParserTests.Issue414;
 
 public class Issue414Tests
 {
-    [Fact]
-    public void Issue414Test()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void Issue414Test(ParserType  parserType)
     {
         var parserInstance = new Issue414Parser();
         var builder = new ParserBuilder<Issue414Token, string>();
-        var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "block");//line-based, 1 statement per line.
+        var buildResult = builder.BuildParser(parserInstance, parserType, "block");//line-based, 1 statement per line.
         Check.That(buildResult).IsOk();
         var parser = buildResult.Result;
         string source = "funcA(funcC(B==2));";

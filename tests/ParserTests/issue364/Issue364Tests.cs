@@ -7,13 +7,15 @@ namespace ParserTests.Issue364;
 
 public class Issue364Tests
 {
-    [Fact]
-    public void TestIssue364()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestIssue364(ParserType parserType)
     {
         ParserBuilder<ExpressionToken, int> Parser = new ParserBuilder<ExpressionToken, int>("en");
         ExpressionParser oparser = new ExpressionParser();
         
-        var r = Parser.BuildParser(oparser,ParserType.LL_RECURSIVE_DESCENT,"expression");
+        var r = Parser.BuildParser(oparser,parserType,"expression");
         Check.That(r).IsOk();
         var parser = r.Result;
         var result = parser.Parse("1 + 1 ");

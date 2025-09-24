@@ -1373,12 +1373,24 @@ while a < 10 do
             Console.WriteLine($"{result.IsOk}");
         }
 
+
         public static void TestIssue576()
+        {
+            Console.WriteLine("**********************************************");
+            Console.WriteLine("***************** RECURSIVE ******************");
+            Console.WriteLine("**********************************************");            
+            Test576(ParserType.EBNF_LL_RECURSIVE_DESCENT, false);
+            Console.WriteLine("**********************************************");
+            Console.WriteLine("***************** STACK **********************");
+            Console.WriteLine("**********************************************");
+            Test576(ParserType.EBNF_LL_STACK, false);
+        }
+        public static void Test576(ParserType parserType, bool printErrors)
         {
             ParserBuilder<Issue576Lexer, int> builder = new ParserBuilder<Issue576Lexer, int>("en");
             Stopwatch chrono = new Stopwatch();
             chrono.Start();
-            var buildResult = builder.BuildParser(new Issue576Parser(),ParserType.EBNF_LL_STACK,"NTSection");
+            var buildResult = builder.BuildParser(new Issue576Parser(),parserType,"NTSection");
             chrono.Stop();
             Console.WriteLine($"parser built in {chrono.ElapsedMilliseconds} ms");
             chrono.Reset();
@@ -1406,9 +1418,13 @@ while a < 10 do
             }
             else
             {
-                foreach (var error in parsed.Errors)
+                Console.WriteLine("issue 576 parse is ko");
+                if (printErrors)
                 {
+                    foreach (var error in parsed.Errors)
+                    {
                         Console.WriteLine(error.ContextualErrorMessage);
+                    }
                 }
             }
         }
@@ -1603,7 +1619,7 @@ while a < 10 do
 
         private static void TestIssue239()
         {
-            Issue239Tests.TestOk();
+            Issue239Tests.TestOk(ParserType.EBNF_LL_RECURSIVE_DESCENT);
             ;
         }
 

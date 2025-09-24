@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using NFluent;
 using sly.lexer;
+using sly.parser.generator;
 using sly.parser.generator.visitor;
 using Xunit;
 
@@ -12,10 +13,12 @@ namespace ParserTests.Issue311;
 
 public class Issue311Tests
 {
-    [Fact]
-    public void TestIssue311()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public void TestIssue311(ParserType  parserType)
     {
-        var parser = Parser311.GetParser();
+        var parser = Parser311.GetParser(parserType);
         var constantResult = parser.Parse("123.456");
 // result1.Result is a ConstantExpression with Value=123456D
 // -> the decimal separator was ignored?

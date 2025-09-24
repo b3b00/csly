@@ -11,12 +11,14 @@ namespace ParserTests.Issue302
 {
     public class Issue302Test
     {
-        [Fact]
-        public void Test302()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void Test302(ParserType parserType)
         {
             var parse_inst = new Issue302Parser();
             var builder = new ParserBuilder<Issue302Token, object>();
-            var parser = builder.BuildParser(parse_inst, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expr");
+            var parser = builder.BuildParser(parse_inst, parserType, "expr");
 
             var r = parser.Result.Parse("ba + bb",nameof(Issue302Parser)+"_expressions");
 
