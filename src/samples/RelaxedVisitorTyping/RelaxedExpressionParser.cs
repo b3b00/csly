@@ -3,7 +3,7 @@ using sly.parser.generator;
 
 namespace RelaxedVisitorTyping;
 
-internal class RelaxedExpressionParser
+public class RelaxedExpressionParser
 {
     [Production("primary: Int")]
     public Int32 Primary_Int(Token<RelaxedExpressionToken> intToken)
@@ -25,6 +25,8 @@ internal class RelaxedExpressionParser
 
     [Production("op: Op_Equal")]
     [Production("op: Op_LowerThan")]
+    [Production("op: Op_GreaterThan")]
+    [Production("op: Op_NotEqual")]
     public string Op(Token<RelaxedExpressionToken> stringToken)
     {
         return stringToken.Value.Skip(1).ToString();

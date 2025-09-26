@@ -2,32 +2,40 @@
 
 namespace RelaxedVisitorTyping;
 
-internal enum RelaxedExpressionToken
+public enum RelaxedExpressionToken
 {
-    [Lexeme("\\(")]
-    LParen = 1,
+    [Sugar("(")]
+    LParen,
 
-    [Lexeme("\\)")]
-    RParen = 2,
+    [Sugar(")")]
+    RParen,
 
-    [Lexeme("[ \\t]+", isSkippable: true)]
-    WhiteSpace = 3,
 
-    [Lexeme("[a-zA-Z\\.]+")]
-    Property = 4,
+    [CustomId("a-zA-Z","a-zA-Z.")]
+    Property,
 
-    [Lexeme(@"""[^""]+""")]
-    String = 5,
+    [String]
+    String,
 
-    [Lexeme("[0-9]+[\\.,][0-9]+")]
-    Number = 6,
+    [Double]
+    Number,
 
-    [Lexeme("[0-9]+")]
-    Int = 7,
+    [Int]
+    Int,
 
-    [Lexeme("-eq(ual)?")]
-    Op_Equal = 101,
+    [Sugar("-eq")]
+    [Sugar("-equal")]
+    Op_Equal,
 
-    [Lexeme("-(lt|lowerthan)")]
-    Op_LowerThan = 102,
+    [Sugar("-lt")]
+    [Sugar("-lowerthan")]
+    Op_LowerThan,
+    
+    [Sugar("-neq")]
+    [Sugar("-notequal")]
+    Op_NotEqual,
+
+    [Sugar("-gt")]
+    [Sugar("-greatethan")]
+    Op_GreaterThan,
 }

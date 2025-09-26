@@ -24,7 +24,7 @@ namespace sly.parser.generator
 
         public override BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType,
             string rootRule = null, Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
-            LexerPostProcess<IN> lexerPostProcess = null)
+            LexerPostProcess<IN> lexerPostProcess = null, bool relaxed = false)
         {
             if (string.IsNullOrEmpty(rootRule))
             {

@@ -37,6 +37,10 @@ namespace sly.parser.generator
         {
         }
 
+        public virtual BuildResult<Parser<IN, OUT>> BuildRelaxedParser(object parserInstance, ParserType parserType,
+            string rootRule = null, Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
+            LexerPostProcess<IN> lexerPostProcess = null) => BuildParser(parserInstance,parserType,rootRule,extensionBuilder,lexerPostProcess,true);
+
         /// <summary>
         ///     Builds a parser (lexer, syntax parser and syntax tree visitor) according to a parser definition instance
         /// </summary>
@@ -53,7 +57,7 @@ namespace sly.parser.generator
         ///     <returns></returns>
         public virtual BuildResult<Parser<IN, OUT>> BuildParser(object parserInstance, ParserType parserType,
             string rootRule = null, Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
-            LexerPostProcess<IN> lexerPostProcess = null)
+            LexerPostProcess<IN> lexerPostProcess = null, bool relaxed = false)
         {
             Parser<IN, OUT> parser = null;
             var result = new BuildResult<Parser<IN, OUT>>();
@@ -119,7 +123,7 @@ namespace sly.parser.generator
                     result.Result = parser;
                 }
 
-                result = CheckParser(result);
+                result = CheckParser(result, relaxed);
                 if (result.IsError)
                 {
                     result.Result = null;
@@ -275,15 +279,23 @@ namespace sly.parser.generator
 
         #region parser checking
 
-        private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result)
+        private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result, bool relaxed = false)
         {
-            var checkers = new List<Func<ParserConfiguration<IN,OUT>, BuildResult<Parser<IN, OUT>>,NonTerminal<IN, OUT>,BuildResult<Parser<IN, OUT>>>>
+            var checkers = new List<Func<ParserConfiguration<IN, OUT>, BuildResult<Parser<IN, OUT>>, NonTerminal<IN, OUT>,
+                    BuildResult<Parser<IN, OUT>>>>();
+            
+            
+            checkers = new List<Func<ParserConfiguration<IN,OUT>, BuildResult<Parser<IN, OUT>>,NonTerminal<IN, OUT>,BuildResult<Parser<IN, OUT>>>>
             {
                 CheckUnreachable,
                 CheckNotFound,
-                CheckAlternates,
-                CheckVisitorsSignature
+                CheckAlternates
             };
+
+            if (!relaxed)
+            {
+                checkers.Add(CheckVisitorsSignature);
+            }
 
             if (result.Result == null || result.IsError)
             {

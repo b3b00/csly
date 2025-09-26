@@ -25,6 +25,7 @@ using ParserTests.Issue414;
 using ParserTests.Issue495;
 using ParserTests.lexer;
 using ParserTests.samples;
+using RelaxedVisitorTyping;
 using simpleExpressionParser;
 using SimpleTemplate;
 using SimpleTemplate.model;
@@ -1847,6 +1848,40 @@ else
           {
               IndentedWhileTests tests = new IndentedWhileTests();
               tests.TestFString();
+          }
+
+          public static void TestRelaxedTyping()
+          {
+              try
+              {
+                  var parserInstance = new RelaxedExpressionParser();
+
+                  var builder = new ParserBuilder<RelaxedExpressionToken, Clause>();
+                  var buildResult = builder.BuildRelaxedParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "compare");
+                  if (buildResult.IsError)
+                  {
+                      foreach (var error in buildResult.Errors)
+                      {
+                          Console.Error.WriteLine(error.Message);
+                      }
+                      Environment.Exit(1);
+                  }
+                  Console.WriteLine("parser succesfully built");
+                  var parser = buildResult.Result;
+
+                  var res = parser.Parse("abcd.def -eq 12");
+                  if (res.IsError) 
+                  {
+                      foreach(var error in res.Errors) 
+                      {
+                          Console.Error.WriteLine(error.ContextualErrorMessage);
+                      }
+                  }
+              }
+              catch (Exception e)
+              {
+                  Console.Error.WriteLine(e.Message+"\n"+e.StackTrace);
+              }
           }
     }
 

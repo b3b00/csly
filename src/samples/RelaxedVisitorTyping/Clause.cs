@@ -1,6 +1,6 @@
 namespace RelaxedVisitorTyping;
 
-internal class Clause
+public class Clause
 {
     public string Property { get; set; }
     

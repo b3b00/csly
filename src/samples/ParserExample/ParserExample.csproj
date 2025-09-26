@@ -26,6 +26,7 @@
     <ProjectReference Include="..\jsonparser\jsonparser.csproj" />
     <ProjectReference Include="..\..\sly\sly.csproj" />
     <ProjectReference Include="..\postProcessedLexerParser\postProcessedLexerParser.csproj" />
+    <ProjectReference Include="..\RelaxedVisitorTyping\RelaxedVisitorTyping.csproj" />
     <ProjectReference Include="..\SimpleExpressionParser\SimpleExpressionParser.csproj" />
     <ProjectReference Include="..\SimpleTemplate\SimpleTemplate.csproj" />
     <ProjectReference Include="..\while\while.csproj" />
