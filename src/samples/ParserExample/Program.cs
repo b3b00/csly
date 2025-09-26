@@ -1887,6 +1887,28 @@ else
                   Console.Error.WriteLine(e.Message+"\n"+e.StackTrace);
               }
           }
+
+          public static void TestEbnfRelaxedTyping()
+          {
+              try
+              {
+                  var parserInstance = new EbnfRelaxedExpressionParser();
+
+                  var builder = new ParserBuilder<RelaxedExpressionToken, List<int>>();
+                  var buildResult =
+                      builder.BuildRelaxedParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "many");
+                  Check.That(buildResult).IsOk();
+                  var parser = buildResult.Result;
+                  var parseResult = parser.Parse("1 2 3 4");
+                  Check.That(parseResult).IsOkParsing();
+                  Check.That(parseResult.Result).CountIs(4);
+                  Check.That(parseResult.Result).Contains(new List<int>() { 1, 2, 3, 4 });
+                  Console.WriteLine($"Parse OK :: [{string.Join(", ",parseResult.Result)}]");
+              }
+              catch(Exception e) {
+                  Console.Error.WriteLine(e.Message+"\n"+e.StackTrace);
+              }
+          }
     }
 
     public enum TestGrammarToken

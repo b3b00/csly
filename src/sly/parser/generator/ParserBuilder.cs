@@ -91,7 +91,7 @@ namespace sly.parser.generator
                 {
                     var builder = new EBNFParserBuilder<IN, OUT>(I18N);
                     result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, rootRule,
-                        extensionBuilder, lexerPostProcess);
+                        extensionBuilder, lexerPostProcess, relaxed);
                     break;
                 }
             }

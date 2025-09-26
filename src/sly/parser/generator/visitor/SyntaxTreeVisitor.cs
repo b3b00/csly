@@ -16,20 +16,26 @@ namespace sly.parser.generator.visitor
 
         public ValueOption<Group<IN, OUT>> OptionGroupResult;
 
+        public object RelaxedOptionGroupResult;
+
         public ValueOption<OUT> OptionResult;
+
+        public object RelaxedOptionResult;
 
         public List<Token<IN>> TokenListResult;
 
         public Token<IN> TokenResult;
 
         public List<OUT> ValueListResult;
+        
+        public object  RelaxedValueListResult;
 
         public OUT ValueResult;
 
         public object RelaxedValueResult;
 
-        public bool IsOption => OptionResult != null;
-        public bool IsOptionGroup => OptionGroupResult != null;
+        public bool IsOption => OptionResult != null || RelaxedOptionResult != null;
+        public bool IsOptionGroup => OptionGroupResult != null  || RelaxedOptionGroupResult != null;
 
         public bool IsToken { get; private set; }
 
@@ -74,6 +80,16 @@ namespace sly.parser.generator.visitor
             res.IsValueList = true;
             return res;
         }
+        
+        public static SyntaxVisitorResult<IN, OUT> NewRelaxedValueList(List<object> values)
+        {
+            var res = new SyntaxVisitorResult<IN, OUT>();
+            res.RelaxedValueListResult = values;
+            res.IsValueList = true;
+            return res;
+        }
+        
+       
 
         public static SyntaxVisitorResult<IN, OUT> NewGroupList(List<Group<IN, OUT>> values)
         {
@@ -154,11 +170,7 @@ namespace sly.parser.generator.visitor
         public OUT VisitSyntaxTree(ISyntaxNode<IN, OUT> root, object context = null)
         {
             var result = Visit(root, context);
-            if (IsRelaxed)
-            {
-                return (OUT)result.RelaxedValueResult;
-            }
-            return result.ValueResult;
+            return IsRelaxed ? (OUT)result.RelaxedValueResult : result.ValueResult;
         }
 
         protected virtual SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN, OUT> n, object context = null)
@@ -192,14 +204,7 @@ namespace sly.parser.generator.visitor
                     }
                     else if (v.IsValue)
                     {
-                        if (IsRelaxed)
-                        {
-                            args.Add(v.RelaxedValueResult);
-                        }
-                        else
-                        {
-                            args.Add(v.ValueResult);
-                        }
+                        args.Add(IsRelaxed ? v.RelaxedValueResult : v.ValueResult);
                     }
 
                     i++;

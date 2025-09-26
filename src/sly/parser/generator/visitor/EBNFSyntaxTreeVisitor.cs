@@ -10,8 +10,8 @@ namespace sly.parser.generator.visitor
 {
     public class EBNFSyntaxTreeVisitor<IN, OUT> : SyntaxTreeVisitor<IN, OUT> where IN : struct, Enum
     {
-        public EBNFSyntaxTreeVisitor(ParserConfiguration<IN, OUT> conf, object parserInstance) : base(conf,
-            parserInstance)
+        public EBNFSyntaxTreeVisitor(ParserConfiguration<IN, OUT> conf, object parserInstance, bool relaxed = false) : base(conf,
+            parserInstance, relaxed)
         {
         }
 
@@ -128,7 +128,7 @@ namespace sly.parser.generator.visitor
                     }
                     else if (v.IsValueList)
                     {
-                        parameters[parametersCount] = v.ValueListResult;
+                        parameters[parametersCount] = IsRelaxed ? v.RelaxedValueListResult : v.ValueListResult;
                         parametersCount++;
                     }
                     else if (v.IsGroupList)
@@ -157,15 +157,19 @@ namespace sly.parser.generator.visitor
                         {
                             method = node.Visitor;
                             Array.Resize(ref parameters, parametersCount);
-                            var t = method.Invoke(ParserVsisitorInstance, parameters);
-                            if (!IsRelaxed)
+                            if (IsRelaxed)
                             {
-                                var res = (OUT)t;
-                                result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                                parameters = RecastParameters(parameters, method);
+                            }
+                            
+                            var t = method.Invoke(ParserVsisitorInstance, parameters);
+                            if (IsRelaxed)
+                            {
+                                result = SyntaxVisitorResult<IN, OUT>.NewRelaxedValue(t);
                             }
                             else
                             {
-                                result = SyntaxVisitorResult<IN, OUT>.NewRelaxedValue(t);
+                                result = IsRelaxed ? SyntaxVisitorResult<IN, OUT>.NewRelaxedValue(t) : SyntaxVisitorResult<IN, OUT>.NewValue((OUT)t) ;
                             }
                         }
                         if (node.LambdaVisitor != null)
@@ -212,9 +216,19 @@ namespace sly.parser.generator.visitor
             }
             else if (node.IsManyValues)
             {
-                var vals = new List<OUT>();
-                values.ForEach(v => vals.Add(v.ValueResult));
-                result = SyntaxVisitorResult<IN, OUT>.NewValueList(vals);
+                
+                if (!IsRelaxed)
+                {
+                    var vals = new List<OUT>();
+                    values.ForEach(v => vals.Add(v.ValueResult));
+                    result = SyntaxVisitorResult<IN, OUT>.NewValueList(vals);
+                }
+                else
+                {
+                    var vals = new List<object>();
+                    values.ForEach(v => vals.Add(v.RelaxedValueResult));
+                    result = SyntaxVisitorResult<IN, OUT>.NewRelaxedValueList(vals);
+                }
             }
             else if (node.IsManyGroups)
             {
@@ -232,5 +246,36 @@ namespace sly.parser.generator.visitor
         {
             return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
         }
-    }
+
+        private object Recast(object value, Type type)
+        {
+            if (value.GetType() == type)
+            {
+                return value;
+            }
+            if (value is List<object> valueList)
+            {
+                var elementType = type.GetGenericArguments()[0];
+                var castMethod = typeof(Enumerable).GetMethod("Cast")!.MakeGenericMethod(elementType);
+                var toListMethod = typeof(Enumerable).GetMethod("ToList")!.MakeGenericMethod(elementType);
+
+                var casted = castMethod.Invoke(null, new object[] { valueList });
+                return toListMethod.Invoke(null, new object[] { casted });
+            }
+            return value;
+        }
+
+        private object[] RecastParameters(object[] parameters, MethodInfo method)
+        {
+            List<object> retypedArgs = new List<object>();
+            var types = method.GetParameters().Select(x =>  x.ParameterType).ToList();
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var retyped = Recast(parameters[i], types[i]);
+                retypedArgs.Add(retyped);
+            }
+            
+            return retypedArgs.ToArray();
+        }
+    }    
 }

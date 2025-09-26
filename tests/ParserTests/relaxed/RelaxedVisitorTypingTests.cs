@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NFluent;
 using RelaxedVisitorTyping;
 using sly.parser.generator;
@@ -20,5 +21,20 @@ public class RelaxedVisitorTypingTests
         var parseResult = parser.Parse("abcd.def -eq 12");
         Check.That(parseResult).IsOkParsing();
         Check.That(parseResult.Result.ToString()).Equals("abcd.def == 12");
+    }
+    
+    [Fact]
+    public void EbnfRelaxedVisitorTest()
+    {
+        var parserInstance = new EbnfRelaxedExpressionParser();
+
+        var builder = new ParserBuilder<RelaxedExpressionToken, List<int>>();
+        var buildResult = builder.BuildRelaxedParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "many");
+        Check.That(buildResult).IsOk();
+        var parser = buildResult.Result;
+        var parseResult = parser.Parse("1 2 3 4");
+        Check.That(parseResult).IsOkParsing();
+        Check.That(parseResult.Result).CountIs(4);
+        Check.That(parseResult.Result).Contains(new List<int>() { 1, 2, 3, 4 });
     }
 }

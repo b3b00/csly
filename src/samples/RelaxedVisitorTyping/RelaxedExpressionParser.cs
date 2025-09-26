@@ -47,3 +47,13 @@ public class RelaxedExpressionParser
         };
     }
 }
+
+public class EbnfRelaxedExpressionParser
+{
+    [Production("primary: Int")]
+    public int primaryInt(Token<RelaxedExpressionToken> integer) => integer.IntValue;
+
+    [Production("many : primary*")]
+    public List<int> Many(List<int> integers) => integers;
+
+}
