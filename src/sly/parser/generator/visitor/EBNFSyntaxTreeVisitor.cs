@@ -66,7 +66,7 @@ namespace sly.parser.generator.visitor
                 }
                 else
                 {
-                    return SyntaxVisitorResult<IN, OUT>.NewOptionNone();
+                    return IsRelaxed ? SyntaxVisitorResult<IN, OUT>.NewOptionNoneRelaxed(): SyntaxVisitorResult<IN, OUT>.NewOptionNone();
                 }
             }
 
@@ -78,7 +78,13 @@ namespace sly.parser.generator.visitor
                 case GroupSyntaxNode<IN, OUT> group:
                     return SyntaxVisitorResult<IN, OUT>.NewOptionGroupSome(innerResult.GroupResult);
                 default:
+                {
+                    if (IsRelaxed)
+                    {
+                        return SyntaxVisitorResult<IN, OUT>.NewOptionSomeRelaxed(innerResult.RelaxedValueResult);
+                    }
                     return SyntaxVisitorResult<IN, OUT>.NewOptionSome(innerResult.ValueResult);
+                }
             }
         }
 
@@ -108,7 +114,7 @@ namespace sly.parser.generator.visitor
                     }
                     else if (v.IsOption)
                     {
-                        parameters[parametersCount] = v.OptionResult;
+                        parameters[parametersCount] = IsRelaxed ? v.RelaxedOptionResult : v.OptionResult;
                         parametersCount++;
                     }
                     else if (v.IsOptionGroup)
@@ -261,6 +267,24 @@ namespace sly.parser.generator.visitor
 
                 var casted = castMethod.Invoke(null, new object[] { valueList });
                 return toListMethod.Invoke(null, new object[] { casted });
+            }
+
+            if (value is ValueOption<object> optionValue)
+            {
+                var elementType = type.GetGenericArguments()[0];
+                var valueOptionType = typeof(ValueOption<>).MakeGenericType(elementType);
+                var option = optionValue.Match((x) =>
+                {
+                    var casted = System.Convert.ChangeType(x, elementType);
+                    var instance = Activator.CreateInstance(valueOptionType,casted);
+                    return instance;
+                }, () =>
+                {
+                    var instance = Activator.CreateInstance(valueOptionType);
+                    return instance;
+                });
+                return option;
+
             }
             return value;
         }

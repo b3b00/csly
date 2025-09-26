@@ -20,7 +20,7 @@ namespace sly.parser.generator.visitor
 
         public ValueOption<OUT> OptionResult;
 
-        public object RelaxedOptionResult;
+        public ValueOption<object> RelaxedOptionResult;
 
         public List<Token<IN>> TokenListResult;
 
@@ -113,6 +113,14 @@ namespace sly.parser.generator.visitor
             res.OptionResult = Some<OUT>(value);
             return res;
         }
+        
+        public static SyntaxVisitorResult<IN, OUT> NewOptionSomeRelaxed(object value)
+        {
+            var res = new SyntaxVisitorResult<IN, OUT>();
+            res.RelaxedOptionResult = Some<object>(value);
+            return res;
+        }
+        
 
         public static SyntaxVisitorResult<IN, OUT> NewOptionGroupSome(Group<IN, OUT> group)
         {
@@ -133,6 +141,13 @@ namespace sly.parser.generator.visitor
         {
             var res = new SyntaxVisitorResult<IN, OUT>();
             res.OptionResult = None<OUT>();
+            return res;
+        }
+
+        public static SyntaxVisitorResult<IN, OUT> NewOptionNoneRelaxed()
+        {
+            var res = new SyntaxVisitorResult<IN, OUT>();
+            res.RelaxedOptionResult = None<object>();
             return res;
         }
 

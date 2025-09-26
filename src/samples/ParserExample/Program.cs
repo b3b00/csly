@@ -1892,18 +1892,35 @@ else
           {
               try
               {
-                  var parserInstance = new EbnfRelaxedExpressionParser();
+                  // var parserInstance = new EbnfManyRelaxedExpressionParser();
+                  //
+                  // var builder = new ParserBuilder<RelaxedExpressionToken, List<int>>();
+                  // var buildResult =
+                  //     builder.BuildRelaxedParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "many");
+                  // Check.That(buildResult).IsOk();
+                  // var parser = buildResult.Result;
+                  // var parseResult = parser.Parse("1 2 3 4");
+                  // Check.That(parseResult).IsOkParsing();
+                  // Check.That(parseResult.Result).CountIs(4);
+                  // Check.That(parseResult.Result).Contains(new List<int>() { 1, 2, 3, 4 });
+                  // Console.WriteLine($"Parse OK :: [{string.Join(", ",parseResult.Result)}]");
+                  
+                  var parserInstance2 = new EbnfOptionRelaxedExpressionParser();
 
-                  var builder = new ParserBuilder<RelaxedExpressionToken, List<int>>();
-                  var buildResult =
-                      builder.BuildRelaxedParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "many");
-                  Check.That(buildResult).IsOk();
-                  var parser = buildResult.Result;
-                  var parseResult = parser.Parse("1 2 3 4");
-                  Check.That(parseResult).IsOkParsing();
-                  Check.That(parseResult.Result).CountIs(4);
-                  Check.That(parseResult.Result).Contains(new List<int>() { 1, 2, 3, 4 });
-                  Console.WriteLine($"Parse OK :: [{string.Join(", ",parseResult.Result)}]");
+                  var builder2 = new ParserBuilder<RelaxedExpressionToken, string>();
+                  var buildResult2 = builder2.BuildRelaxedParser(parserInstance2, ParserType.EBNF_LL_RECURSIVE_DESCENT, "option");
+                  Check.That(buildResult2).IsOk();
+                  var parser2 = buildResult2.Result;
+                  var parseResult2 = parser2.Parse("1 2");
+                  Check.That(parseResult2).IsOkParsing();
+                  Check.That(parseResult2.Result).Not.IsNullOrEmpty();
+                  Check.That(parseResult2.Result).IsEqualTo("1-2");
+                  var parseResult3 = parser2.Parse("1");
+                  Check.That(parseResult3).IsOkParsing();
+                  Check.That(parseResult3.Result).Not.IsNullOrEmpty();
+                  Check.That(parseResult3.Result).IsEqualTo("1-NONE");
+                  
+                  
               }
               catch(Exception e) {
                   Console.Error.WriteLine(e.Message+"\n"+e.StackTrace);
