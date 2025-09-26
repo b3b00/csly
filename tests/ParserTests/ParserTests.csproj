@@ -28,6 +28,7 @@
     <ProjectReference Include="..\..\src\samples\indented\indented.csproj"/>
     <ProjectReference Include="..\..\src\samples\jsonparser\jsonparser.csproj"/>
     <ProjectReference Include="..\..\src\samples\postProcessedLexerParser\postProcessedLexerParser.csproj"/>
+    <ProjectReference Include="..\..\src\samples\RelaxedVisitorTyping\RelaxedVisitorTyping.csproj" />
     <ProjectReference Include="..\..\src\samples\SimpleExpressionParser\SimpleExpressionParser.csproj"/>
     <ProjectReference Include="..\..\src\samples\SimpleTemplate\SimpleTemplate.csproj"/>
     <ProjectReference Include="..\..\src\samples\SlowEOS\SlowEOS.csproj"/>
