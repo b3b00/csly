@@ -26,6 +26,8 @@ namespace sly.parser.generator.visitor
 
         public OUT ValueResult;
 
+        public object RelaxedValueResult;
+
         public bool IsOption => OptionResult != null;
         public bool IsOptionGroup => OptionGroupResult != null;
 
@@ -53,6 +55,14 @@ namespace sly.parser.generator.visitor
         {
             var res = new SyntaxVisitorResult<IN, OUT>();
             res.ValueResult = val;
+            res.IsValue = true;
+            return res;
+        }
+        
+        public static SyntaxVisitorResult<IN, OUT> NewRelaxedValue(object val)
+        {
+            var res = new SyntaxVisitorResult<IN, OUT>();
+            res.RelaxedValueResult = val;
             res.IsValue = true;
             return res;
         }
@@ -128,13 +138,14 @@ namespace sly.parser.generator.visitor
 
     public class SyntaxTreeVisitor<IN, OUT> where IN : struct, Enum
     {
-        public SyntaxTreeVisitor(ParserConfiguration<IN, OUT> conf, object parserInstance)
+        public SyntaxTreeVisitor(ParserConfiguration<IN, OUT> conf, object parserInstance, bool relaxed = false)
         {
             Configuration = conf;
             ParserVsisitorInstance = parserInstance;
+            IsRelaxed = relaxed;
         }
 
-        
+        public bool IsRelaxed { get; set; } = false;
 
         public object ParserVsisitorInstance { get; set; }
 
@@ -143,6 +154,10 @@ namespace sly.parser.generator.visitor
         public OUT VisitSyntaxTree(ISyntaxNode<IN, OUT> root, object context = null)
         {
             var result = Visit(root, context);
+            if (IsRelaxed)
+            {
+                return (OUT)result.RelaxedValueResult;
+            }
             return result.ValueResult;
         }
 
@@ -177,7 +192,14 @@ namespace sly.parser.generator.visitor
                     }
                     else if (v.IsValue)
                     {
-                        args.Add(v.ValueResult);
+                        if (IsRelaxed)
+                        {
+                            args.Add(v.RelaxedValueResult);
+                        }
+                        else
+                        {
+                            args.Add(v.ValueResult);
+                        }
                     }
 
                     i++;
@@ -201,8 +223,15 @@ namespace sly.parser.generator.visitor
                         {
                             method = node.Visitor;
                             var t = method?.Invoke(ParserVsisitorInstance, args.ToArray());
-                            var res = (OUT)t;
-                            result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                            if (!IsRelaxed)
+                            {
+                                var res = (OUT)t;
+                                result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                            }
+                            else
+                            {
+                                result = SyntaxVisitorResult<IN, OUT>.NewRelaxedValue(t);
+                            }
                         }
                         else if (node.LambdaVisitor != null)
                         {

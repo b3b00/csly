@@ -1877,6 +1877,10 @@ else
                           Console.Error.WriteLine(error.ContextualErrorMessage);
                       }
                   }
+                  else {
+                      Console.WriteLine("parse ok");
+                      Console.WriteLine(res.Result.ToString());
+                  }
               }
               catch (Exception e)
               {

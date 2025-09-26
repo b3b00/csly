@@ -8,19 +8,22 @@ public class RelaxedExpressionParser
     [Production("primary: Int")]
     public Int32 Primary_Int(Token<RelaxedExpressionToken> intToken)
     {
-        return intToken.IntValue;
+        var value = intToken.IntValue;
+        return value;
     }
 
     [Production("primary: Number")]
     public Double Primary_Number(Token<RelaxedExpressionToken> numberToken)
     {
-        return numberToken.DoubleValue;
+        var value = numberToken.DoubleValue;
+        return value;
     }
 
     [Production("primary: String")]
     public string Primary_String(Token<RelaxedExpressionToken> stringToken)
     {
-        return stringToken.Value;
+        var value = stringToken.Value;
+        return value;
     }
 
     [Production("op: Op_Equal")]
@@ -29,7 +32,8 @@ public class RelaxedExpressionParser
     [Production("op: Op_NotEqual")]
     public string Op(Token<RelaxedExpressionToken> stringToken)
     {
-        return stringToken.Value.Skip(1).ToString();
+        var op = stringToken.Value.Substring(1);
+        return op;
     }
 
     [Production("compare: Property op primary")]
@@ -38,7 +42,7 @@ public class RelaxedExpressionParser
         return new Clause()
         {
             Property = property.Value,
-            Op = op as string,
+            Op = op,
             Value = primary,
         };
     }

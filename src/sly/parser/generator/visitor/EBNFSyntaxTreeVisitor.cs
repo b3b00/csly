@@ -103,7 +103,7 @@ namespace sly.parser.generator.visitor
                     }
                     else if (v.IsValue)
                     {
-                        parameters[parametersCount] = v.ValueResult;
+                        parameters[parametersCount] = IsRelaxed ? v.RelaxedValueResult : v.ValueResult;
                         parametersCount++;
                     }
                     else if (v.IsOption)
@@ -158,8 +158,15 @@ namespace sly.parser.generator.visitor
                             method = node.Visitor;
                             Array.Resize(ref parameters, parametersCount);
                             var t = method.Invoke(ParserVsisitorInstance, parameters);
-                            var res = (OUT)t;
-                            result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                            if (!IsRelaxed)
+                            {
+                                var res = (OUT)t;
+                                result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                            }
+                            else
+                            {
+                                result = SyntaxVisitorResult<IN, OUT>.NewRelaxedValue(t);
+                            }
                         }
                         if (node.LambdaVisitor != null)
                         {
