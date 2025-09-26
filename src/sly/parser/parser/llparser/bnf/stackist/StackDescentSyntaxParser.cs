@@ -4,6 +4,7 @@ using System.Linq;
 using sly.lexer;
 using sly.lexer.fsm;
 using sly.parser.generator;
+using sly.parser.parser.llparser.ebnf.stackist.state;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 
@@ -119,7 +120,17 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                             new UnexpectedTokenSyntaxError<IN>(tokens[current.Result.EndingPosition]);
                         current.Result.AddError(error);
                     }
-                    
+
+                    if (current.Result.GetErrors().Any())
+                    {
+                        var errors = current.Result.GetErrors();
+                        var lastError = errors
+                            .OrderBy(x => x.UnexpectedToken.PositionInTokenFlow)
+                            .Last();
+                        current.Result.SetErrors(new List<UnexpectedTokenSyntaxError<IN>>() { lastError });
+                    }
+
+
                     return current.Result;
                 }
                 default:
@@ -129,6 +140,20 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 }
             }
             current = stack.Pop();
+            
+            Console.WriteLine($"\n---\n\tPOP depth={stack.Count} {current}");
+            if (current.Result != null &&  current.Result.GetErrors().Any())
+            {
+                Console.WriteLine($"\t{string.Join(", ",current.Result.GetErrors().Select(x => x.ErrorMessage))}");
+            }
+            else
+            {
+                Console.WriteLine("\t\tno result or errors");
+            }
+            if (stack.Count == 3 && current is ZeroOrMoreStackState<IN,OUT> zeroOrMore)
+            {
+                Console.WriteLine("oh oh oh");
+            }
         }
 
         return null;
@@ -146,6 +171,14 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 if (realResult.IsError && state.Successes.Any(x => x.IsOk))
                 {                    
                     realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
+                    if (state.Errors != null && state.Errors.Any())
+                    {
+                        var max = state.Errors.Max(x => x.EndingPosition);
+                        var errors = state.Errors.Where(x => x.EndingPosition == max)
+                            .SelectMany(x => x.GetErrors()).ToList();
+                        errors = ErrorAggregator.Aggregate(errors);
+                        realResult.AddErrors(errors);
+                    }
                 } 
                 else if (!state.Successes.Any(x => x.IsOk) && state.Errors.Any())
                 {
@@ -165,6 +198,14 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 else if (state.Successes.Count(x => x.IsOk) > 1)
                 {
                     realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
+                    if (state.Errors.Any())
+                    {
+                        var max = state.Errors.Max(x => x.EndingPosition);
+                        var errors = state.Errors.Where(x => x.EndingPosition == max)
+                            .SelectMany(x => x.GetErrors()).ToList();
+                        errors = ErrorAggregator.Aggregate(errors);
+                        realResult.AddErrors(errors);
+                    }
                 }
                 else
                 {
@@ -354,16 +395,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                         EndingPosition = max,
                     };
 
-                    // if (allErrors.Count == 3)
-                    // {
-                    //     var grouped = allErrors.GroupBy(x => x.Discriminant()
-                    //     ).ToList();
-                    //     var expecting = grouped
-                    //         .Select(x => x
-                    //             .SelectMany(y => y.ExpectedTokens)
-                    //             .DistinctWithPredicate((w,z) => z.TokenId.Equals(w.TokenId)))
-                    //     ;
-                    // }
                     // TODO aggregate errors
                     var errors = allErrors.Where(x => x.UnexpectedToken.Position.Index == max)
                         .ToList();
@@ -400,6 +431,13 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     node.Visitor = state.Rule.GetVisitorMethod();
                     result.IsEnded = state.Tokens[state.LastResult.EndingPosition].IsEOS;
                     result.AddErrors(state.Result.GetErrors());
+                    var max = state.Children.Max(x => x.EndingPosition);
+                    
+                    var errors = state.Children.Where(x => x.EndingPosition == max)
+                        .SelectMany(x => x.GetErrors()).ToList();
+                    errors = ErrorAggregator.Aggregate(errors);
+                    
+                    result.AddErrors(errors);
                     
                     node = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(state.Rule, node);
                     result.Root = node;

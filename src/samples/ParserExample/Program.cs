@@ -19,13 +19,16 @@ using jsonparser;
 using jsonparser.JsonModel;
 using NFluent;
 using ParserTests;
+using ParserTests.errorAccuracyIssue381;
 using ParserTests.Issue164;
 using ParserTests.Issue239;
 using ParserTests.Issue259;
 using ParserTests.Issue302;
 using ParserTests.Issue332;
+using ParserTests.Issue381ErrorAccuracy;
 using ParserTests.Issue414;
 using ParserTests.Issue495;
+using ParserTests.Issue527;
 using ParserTests.lexer;
 using ParserTests.samples;
 using simpleExpressionParser;
@@ -866,12 +869,12 @@ return r";
             ;
         }
 
-        private static BuildResult<Parser<ExpressionToken, double>> BuildParserExpression()
+        private static BuildResult<Parser<ExpressionToken, double>> BuildParserExpression(ParserType parserType = ParserType.EBNF_LL_RECURSIVE_DESCENT)
         {   
             var StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
-            return builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            return builder.BuildParser(parserInstance, parserType, StartingRule);
         }
 
         private static void Schtak()
@@ -972,15 +975,22 @@ return r";
         }
 
         public static void Test164() {
-            var Parser = BuildParserExpression();
-            var result = Parser.Result.Parse("1(1");
-            if (result.IsError)
-            {   
-                foreach (var error in result.Errors)
-                {
-                    Console.WriteLine(error.ErrorMessage);
-                }
-            }
+            var Parser = BuildParserExpression(ParserType.EBNF_LL_STACK);
+            var result = Parser.Result.Parse("2 ( 2");
+            Check.That(result).Not.IsOkParsing();
+            var errors = result.Errors;
+            Check.That(errors).IsSingle();
+            var error = errors.First();
+            Check.That(error).IsInstanceOf<UnexpectedTokenSyntaxError<ExpressionToken>>();
+            var unexpectedTokenError = error as UnexpectedTokenSyntaxError<ExpressionToken>;
+            Check.That(unexpectedTokenError).IsNotNull();
+            Check.That(unexpectedTokenError.ExpectedTokens).IsNotNull();
+            Check.That(unexpectedTokenError.ExpectedTokens).Not.IsEmpty();
+            Check.That(unexpectedTokenError.ExpectedTokens).CountIs(5);
+            Check.That(unexpectedTokenError.ExpectedTokens.Extracting(x => x.TokenId)).Contains(new[]
+            {
+                ExpressionToken.FACTORIAL,ExpressionToken.DIVIDE,ExpressionToken.TIMES,ExpressionToken.MINUS,ExpressionToken.PLUS
+            });
 
         }
 
@@ -1947,5 +1957,53 @@ else
               Check.That(error).IsNotNull();
               Check.That(error.UnexpectedToken.TokenID).IsEqualTo(Issue302Token.PLUS);
           }
+
+          public static void Test277()
+          {
+              ParserBuilder<Issue427Lexer, int> Parser = new ParserBuilder<Issue427Lexer, int>("en");
+              var oparser = new Issue427BisParser();
+        
+              var r = Parser.BuildParser(oparser,ParserType.EBNF_LL_STACK,"main");
+              Check.That(r).IsOk();
+              var parser = r.Result;
+             
+              var result = parser.Parse("(2 + 3)");
+              Check.That(result).IsOkParsing();
+              Check.That(result.Result).IsEqualTo(5);
+          }
+
+          public static void test381()
+          {
+              string source = @"
+        variable = function(someVariable, ""string1"", ""string2"", 
+            ""string3"", ""value1"",
+            ""string4"", ""value2""
+            ""string5"", ""value3"",
+            ""string6"", ""value4""
+";
+
+              var StartingRule = $"statement";
+              var parserInstance = new ErrorAccuracyIssue381Parser();
+              var builder = new ParserBuilder<ErrorAccuracyIssue381Token, object>();
+              var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, StartingRule);
+              Check.That(parser).IsOk();
+              
+              var r = parser.Result.Parse(source,"statements");
+              Check.That(r).Not.IsOkParsing();
+              Check.That(r.Errors).IsSingle();
+              var unexpected = r.Errors.First() as UnexpectedTokenSyntaxError<ErrorAccuracyIssue381Token>;
+              Check.That(unexpected).IsNotNull();
+              Check.That(unexpected.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+              Check.That(unexpected.Column).IsEqualTo(12);
+              Check.That(unexpected.Line).IsEqualTo(4);
+              Check.That(unexpected.UnexpectedToken.StringWithoutQuotes).IsEqualTo("string5");
+              Check.That(unexpected.UnexpectedToken.TokenID).IsEqualTo(ErrorAccuracyIssue381Token.String);
+              Check.That(unexpected.ExpectedTokens.Extracting(x => x.TokenId))
+                  .Contains(new List<ErrorAccuracyIssue381Token>()
+                      { ErrorAccuracyIssue381Token.Comma, ErrorAccuracyIssue381Token.Rparen });
+              Console.WriteLine("OOOOOOOOOOKKKKKKKKKKKKKKKKKK !!!!!!!!!!!!");
+          }
+
+          
     }
 }

@@ -77,4 +77,8 @@ public class ZeroOrMoreStackState<IN,OUT> : EbnfStackState<IN,OUT> where IN : st
         //Children.Add(result);
     }
 
+    public override string ToString()
+    {
+        return $"0+ {RepeatedClause.Dump()}";
+    }
 }

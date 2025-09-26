@@ -9,6 +9,8 @@ using Xunit;
 
 namespace ParserTests.Issue381ErrorAccuracy;
 
+
+
 public class ErrorMessageAccuracyIssue381Tests
 {
     private static Parser<ErrorAccuracyIssue381Token, object> BuildParser(ParserType parserType)

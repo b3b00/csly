@@ -219,8 +219,24 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         }
         else
         {
+            List<UnexpectedTokenSyntaxError<IN>> errors = new List<UnexpectedTokenSyntaxError<IN>>();
+            if (state.Children.Any())
+            {
+                var max = state.Children.Max(x => x.EndingPosition);
+
+
+                errors = state.Children.Where(x => x.EndingPosition == max)
+                    .SelectMany(x => x.GetErrors()).ToList();
+                var ordered = errors.OrderBy(x => x.UnexpectedToken.PositionInTokenFlow);
+                errors = ErrorAggregator.Aggregate(errors);
+            }
+           
+
+           
+            
             var result = new SyntaxParseResult<IN, OUT>();
-            result.AddErrors(state.Result.GetErrors());
+            result.AddErrors(errors);
+            //result.AddErrors(state.Result.GetErrors());
             result.IsError = false; // zero or more is always ok , either empty or with many values
             var manyNode = new ManySyntaxNode<IN, OUT>($"{state.RepeatedClause.ToString()}*");
 

@@ -18,6 +18,9 @@ public class RootStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
     {
         Result = result;
     }
-    
-    
+
+    public override string ToString()
+    {
+        return "ROOT";
+    }
 }

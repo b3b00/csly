@@ -78,5 +78,11 @@ namespace sly.parser
             }
                 
         }
+
+        public void SetErrors(IList<UnexpectedTokenSyntaxError<IN>> errors) 
+        {
+            Errors.Clear();
+            AddErrors(errors);
+        }
     }
 }
