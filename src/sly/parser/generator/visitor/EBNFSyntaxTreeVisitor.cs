@@ -37,22 +37,45 @@ namespace sly.parser.generator.visitor
 
         private SyntaxVisitorResult<IN, OUT> Visit(GroupSyntaxNode<IN, OUT> node, object context = null)
         {
-            var group = new Group<IN, OUT>();
-            var values = new List<SyntaxVisitorResult<IN, OUT>>();
-            foreach (var n in node.Children)
+
+            if (IsRelaxed)
             {
-                var v = Visit(n, context);
-
-                if (v.IsValue) group.Add(n.Name, v.ValueResult);
-                if (v.IsToken && !v.Discarded)
+                var group = new Group<IN, object>();
+                var values = new List<SyntaxVisitorResult<IN, OUT>>();
+                foreach (var n in node.Children)
                 {
-                    group.Add(n.Name, v.TokenResult);
+                    var v = Visit(n, context);
+
+                    if (v.IsValue) group.Add(n.Name, v.RelaxedValueResult);
+                    if (v.IsToken && !v.Discarded)
+                    {
+                        group.Add(n.Name, v.TokenResult);
+                    }
                 }
+
+                var res = SyntaxVisitorResult<IN, OUT>.NewRelaxedGroup(group);
+                    
+                return res;
             }
+            else
+            {
+                var group = new Group<IN, OUT>();
+                var values = new List<SyntaxVisitorResult<IN, OUT>>();
+                foreach (var n in node.Children)
+                {
+                    var v = Visit(n, context);
+
+                    if (v.IsValue) group.Add(n.Name, v.ValueResult);
+                    if (v.IsToken && !v.Discarded)
+                    {
+                        group.Add(n.Name, v.TokenResult);
+                    }
+                }
 
 
-            var res = SyntaxVisitorResult<IN, OUT>.NewGroup(group);
-            return res;
+                var res = SyntaxVisitorResult<IN, OUT>.NewGroup(group);
+                return res;
+            }
         }
 
         private SyntaxVisitorResult<IN, OUT> Visit(OptionSyntaxNode<IN, OUT> node, object context = null)
@@ -124,7 +147,7 @@ namespace sly.parser.generator.visitor
                     }
                     else if (v.IsGroup)
                     {
-                        parameters[parametersCount] = v.GroupResult;
+                        parameters[parametersCount] = IsRelaxed ? v.RelaxedGroupResult : v.GroupResult;
                         parametersCount++;
                     }
                     else if (v.IsTokenList)
@@ -255,6 +278,10 @@ namespace sly.parser.generator.visitor
 
         private object Recast(object value, Type type)
         {
+            if (value == null)
+            {
+                ;
+            }
             if (value.GetType() == type)
             {
                 return value;
@@ -284,6 +311,51 @@ namespace sly.parser.generator.visitor
                     return instance;
                 });
                 return option;
+
+            }
+
+            if (value is Group<IN, object> groupValue)
+            {
+                var elementType = type.GetGenericArguments()[1];
+                var valueGroupType = typeof(Group<,>).MakeGenericType(typeof(IN),elementType);
+                var valueGroupItemType = typeof(GroupItem<,>).MakeGenericType(typeof(IN),elementType);
+                var instance = Activator.CreateInstance(valueGroupType);
+                // TODO : get the correct add method
+                var addMethod = instance.GetType().GetMethod("Add", new Type[] {valueGroupItemType });
+                foreach (var item in groupValue.Items)
+                {
+                    var casted = Recast(item, elementType);
+                    addMethod.Invoke(instance, new[] {casted});
+                }
+
+                return instance;
+            }
+
+            if (value is GroupItem<IN, object> groupItemValue)
+            {
+                
+                var valueGroupItemType = typeof(GroupItem<,>).MakeGenericType(typeof(IN), type);
+
+                // Supposons que le constructeur prend (string name, IN key, elementType value)
+                var tokenCtor = valueGroupItemType.GetConstructor(new[] { typeof(string), typeof(Token<IN>)});
+                var valueCtor = valueGroupItemType.GetConstructor(new[] { typeof(string), type });
+                if (groupItemValue.IsToken)
+                {
+                    if (tokenCtor != null)
+                    {
+                        var instance =
+                            tokenCtor.Invoke([groupItemValue.Name, groupItemValue.Token]);
+                        return instance;
+                    }
+                }
+                else if (groupItemValue.IsValue) {
+                    if (valueCtor != null)
+                    {
+                        var castValue = Recast(groupItemValue.Value, type);
+                        var instance = valueCtor.Invoke([groupItemValue.Name, castValue]);
+                        return instance;
+                    }
+                }
 
             }
             return value;

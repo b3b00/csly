@@ -56,7 +56,12 @@ namespace sly.parser.parser
             _itemsByName[name] = groupItem;
         }
 
-
+        public void Add(GroupItem<IN, OUT> groupItem)
+        {
+            Items.Add(groupItem);
+            _itemsByName[groupItem.Name] = groupItem;
+        } 
+        
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {

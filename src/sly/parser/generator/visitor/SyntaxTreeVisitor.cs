@@ -13,6 +13,8 @@ namespace sly.parser.generator.visitor
         public List<Group<IN, OUT>> GroupListResult;
 
         public Group<IN, OUT> GroupResult;
+        
+        public Group<IN, object> RelaxedGroupResult;
 
         public ValueOption<Group<IN, OUT>> OptionGroupResult;
 
@@ -155,6 +157,14 @@ namespace sly.parser.generator.visitor
         {
             var res = new SyntaxVisitorResult<IN, OUT>();
             res.GroupResult = group;
+            res.IsGroup = true;
+            return res;
+        }
+        
+        public static SyntaxVisitorResult<IN, OUT> NewRelaxedGroup(Group<IN, object> group)
+        {
+            var res = new SyntaxVisitorResult<IN, OUT>();
+            res.RelaxedGroupResult = group;
             res.IsGroup = true;
             return res;
         }
