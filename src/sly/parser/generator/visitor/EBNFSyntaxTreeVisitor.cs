@@ -85,7 +85,7 @@ namespace sly.parser.generator.visitor
             {
                 if (node.IsGroupOption)
                 {
-                 return SyntaxVisitorResult<IN, OUT>.NewOptionGroupNone();   
+                 return IsRelaxed ? SyntaxVisitorResult<IN, OUT>.NewOptionGroupNoneRelaxed() : SyntaxVisitorResult<IN, OUT>.NewOptionGroupNone();   
                 }
                 else
                 {
@@ -142,7 +142,7 @@ namespace sly.parser.generator.visitor
                     }
                     else if (v.IsOptionGroup)
                     {
-                        parameters[parametersCount] = v.OptionGroupResult;
+                        parameters[parametersCount] = IsRelaxed ? v.RelaxedOptionGroupResult : v.OptionGroupResult;
                         parametersCount++;
                     }
                     else if (v.IsGroup)
@@ -162,7 +162,7 @@ namespace sly.parser.generator.visitor
                     }
                     else if (v.IsGroupList)
                     {
-                        parameters[parametersCount] = v.GroupListResult;
+                        parameters[parametersCount] = IsRelaxed ? v.RelaxedGroupListResult : v.GroupListResult;
                         parametersCount++;
                     }
                 }
@@ -186,6 +186,10 @@ namespace sly.parser.generator.visitor
                         {
                             method = node.Visitor;
                             Array.Resize(ref parameters, parametersCount);
+                            if (method.Name =="group") 
+                            {
+                                ;
+                            }
                             if (IsRelaxed)
                             {
                                 parameters = RecastParameters(parameters, method);
@@ -261,9 +265,18 @@ namespace sly.parser.generator.visitor
             }
             else if (node.IsManyGroups)
             {
-                var vals = new List<Group<IN, OUT>>();
-                values.ForEach(v => vals.Add(v.GroupResult));
-                result = SyntaxVisitorResult<IN, OUT>.NewGroupList(vals);
+                if (IsRelaxed)
+                {
+                    var vals = new List<Group<IN, object>>();
+                    values.ForEach(v => vals.Add(v.RelaxedGroupResult));
+                    result = SyntaxVisitorResult<IN, OUT>.NewRelaxedGroupList(vals);   
+                }
+                else
+                {
+                    var vals = new List<Group<IN, OUT>>();
+                    values.ForEach(v => vals.Add(v.GroupResult));
+                    result = SyntaxVisitorResult<IN, OUT>.NewGroupList(vals);
+                }
             }
 
 
@@ -286,6 +299,18 @@ namespace sly.parser.generator.visitor
             {
                 return value;
             }
+            if (value is List<Group<IN,object>> groupList)
+            {
+                var elementType = type.GetGenericArguments()[0];
+                var groups = typeof(Group<,>).MakeGenericType([typeof(IN),type]);
+                var castMethod = typeof(Enumerable).GetMethod("Cast")!.MakeGenericMethod(elementType);
+                var toListMethod = typeof(Enumerable).GetMethod("ToList")!.MakeGenericMethod(elementType);
+                var recastGroups = groupList.Select(x => Recast(x, elementType)).ToArray();
+                var casted = castMethod.Invoke(null, new Object[]{recastGroups });
+                return toListMethod.Invoke(null, new object[] { casted });
+                return null;
+            }
+            
             if (value is List<object> valueList)
             {
                 var elementType = type.GetGenericArguments()[0];
@@ -322,10 +347,16 @@ namespace sly.parser.generator.visitor
                 var instance = Activator.CreateInstance(valueGroupType);
                 // TODO : get the correct add method
                 var addMethod = instance.GetType().GetMethod("Add", new Type[] {valueGroupItemType });
-                foreach (var item in groupValue.Items)
+                if (addMethod != null)
                 {
-                    var casted = Recast(item, elementType);
-                    addMethod.Invoke(instance, new[] {casted});
+                    foreach (var item in groupValue.Items)
+                    {
+                        var casted = Recast(item, elementType);
+                        addMethod.Invoke(instance, new[] { casted });
+                    }
+                }
+                else {
+                    Console.WriteLine($"WTF : can't find {instance.GetType().FullName}.Add({valueGroupItemType.FullName})");
                 }
 
                 return instance;
@@ -336,7 +367,6 @@ namespace sly.parser.generator.visitor
                 
                 var valueGroupItemType = typeof(GroupItem<,>).MakeGenericType(typeof(IN), type);
 
-                // Supposons que le constructeur prend (string name, IN key, elementType value)
                 var tokenCtor = valueGroupItemType.GetConstructor(new[] { typeof(string), typeof(Token<IN>)});
                 var valueCtor = valueGroupItemType.GetConstructor(new[] { typeof(string), type });
                 if (groupItemValue.IsToken)
@@ -357,6 +387,25 @@ namespace sly.parser.generator.visitor
                     }
                 }
 
+            }
+
+            if (value is ValueOption<Group<IN, object>> optionGroupValue)
+            {
+                var groupType = type.GetGenericArguments()[0];
+                var elementType = groupType.GetGenericArguments()[1];
+                var valueOptionType = typeof(ValueOption<>).MakeGenericType(elementType);
+                var option = optionGroupValue.Match((x) =>
+                {
+                    var casted = Recast(x,elementType);
+                    //var casted = System.Convert.ChangeType(x, elementType);
+                    var instance = Activator.CreateInstance(valueOptionType,casted);
+                    return instance;
+                }, () =>
+                {
+                    var instance = Activator.CreateInstance(valueOptionType);
+                    return instance;
+                });
+                return option;
             }
             return value;
         }

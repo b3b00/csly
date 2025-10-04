@@ -1980,11 +1980,11 @@ else
                 var buildResult = builder.BuildRelaxedParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "group");
                 Check.That(buildResult).IsOk();
                 var parser = buildResult.Result;
-                var parseResult = parser.Parse("1 Prop 2");
+                var parseResult = parser.Parse("1 Prop 2 Attr 3");
                 Check.That(parseResult).IsOkParsing();
                 var result = parseResult.Result;
                 Check.That(result).Not.IsNullOrEmpty();
-                Check.That(result).IsEqualTo("1 Prop=2");
+                Check.That(result).IsEqualTo("1 Prop=2 Attr=3");
             }
             catch (Exception e)
             {
