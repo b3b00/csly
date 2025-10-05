@@ -106,10 +106,10 @@ public class SyntaxVisitorResult<IN, OUT> where IN : struct, Enum
         return res;
     }
 
-    public static SyntaxVisitorResult<IN, OUT> NewRelaxedGroupOption(ValueOption<Group<IN, object>> option)
+    public static SyntaxVisitorResult<IN, OUT> NewRelaxedGroupOption(Group<IN, object> group)
     {
         var res = new SyntaxVisitorResult<IN, OUT>();
-        res.RelaxedOptionGroupResult = option;
+        res.RelaxedOptionGroupResult = ValueOptionConstructors.Some(group);
         return res;
     }
 
@@ -170,7 +170,7 @@ public class SyntaxVisitorResult<IN, OUT> where IN : struct, Enum
     public static SyntaxVisitorResult<IN, OUT> NewOptionNoneRelaxed()
     {
         var res = new SyntaxVisitorResult<IN, OUT>();
-        res.RelaxedOptionGroupResult = ValueOptionConstructors.None<Group<IN, object>>();
+        res.RelaxedOptionResult = ValueOptionConstructors.None<object>();
         return res;
     }
     

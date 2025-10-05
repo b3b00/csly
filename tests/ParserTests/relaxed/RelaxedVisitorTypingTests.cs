@@ -70,6 +70,6 @@ public class RelaxedVisitorTypingTests
         Check.That(parseResult).IsOkParsing();
         var result = parseResult.Result;
         Check.That(result).Not.IsNullOrEmpty();
-        Check.That(result).IsEqualTo("1 Prop=2");
+        Check.That(result).IsEqualTo("1 Prop=2 - no option");
     }
 }

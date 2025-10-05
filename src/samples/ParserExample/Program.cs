@@ -1984,12 +1984,19 @@ else
                 Check.That(parseResult).IsOkParsing();
                 var result = parseResult.Result;
                 Check.That(result).Not.IsNullOrEmpty();
-                Check.That(result).IsEqualTo("1 Prop=2 Attr=3");
+                Check.That(result).IsEqualTo("1 Prop=2 Attr=3 - no option");
+                
+                parseResult = parser.Parse("1 Prop 2 Attr 3 End End ");
+                Check.That(parseResult).IsOkParsing();
+                result = parseResult.Result;
+                Check.That(result).Not.IsNullOrEmpty();
+                Check.That(result).IsEqualTo("1 Prop=2 Attr=3 - End=End");
             }
             catch (Exception e)
             {
                 Console.Error.WriteLine($"{e.Message}\n{e.StackTrace}");
             }
+            Console.WriteLine("!! OK !!");
         }
     }
 

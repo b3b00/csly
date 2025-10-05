@@ -41,7 +41,6 @@ namespace sly.parser.generator.visitor
             if (IsRelaxed)
             {
                 var group = new Group<IN, object>();
-                var values = new List<SyntaxVisitorResult<IN, OUT>>();
                 foreach (var n in node.Children)
                 {
                     var v = Visit(n, context);
@@ -60,7 +59,6 @@ namespace sly.parser.generator.visitor
             else
             {
                 var group = new Group<IN, OUT>();
-                var values = new List<SyntaxVisitorResult<IN, OUT>>();
                 foreach (var n in node.Children)
                 {
                     var v = Visit(n, context);
@@ -80,7 +78,7 @@ namespace sly.parser.generator.visitor
 
         private SyntaxVisitorResult<IN, OUT> Visit(OptionSyntaxNode<IN, OUT> node, object context = null)
         {
-            var child = node.Children != null && node.Children.Any<ISyntaxNode<IN, OUT>>() ? node.Children[0] : null;
+            var child = node.Children != null && node.Children.Any() ? node.Children[0] : null;
             if (child == null || node.IsEmpty)
             {
                 if (node.IsGroupOption)
@@ -98,8 +96,8 @@ namespace sly.parser.generator.visitor
             {
                 case SyntaxLeaf<IN, OUT> leaf:
                     return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
-                case GroupSyntaxNode<IN, OUT> group:
-                    return SyntaxVisitorResult<IN, OUT>.NewOptionGroupSome(innerResult.GroupResult);
+                case GroupSyntaxNode<IN, OUT> :
+                    return IsRelaxed ? SyntaxVisitorResult<IN,OUT>.NewRelaxedGroupOption(innerResult.RelaxedGroupResult) : (SyntaxVisitorResult<IN, OUT>.NewOptionGroupSome(innerResult.GroupResult))  ;
                 default:
                 {
                     if (IsRelaxed)
@@ -121,7 +119,7 @@ namespace sly.parser.generator.visitor
                 var parameters = new object[parametersArrayLength];
                 
                 int parametersCount = 0;
-
+                
                 foreach (var n in node.Children)
                 {
                     var v = Visit(n, context);
@@ -173,7 +171,6 @@ namespace sly.parser.generator.visitor
                 }
                 else
                 {
-                    MethodInfo method = null;
                     try
                     {
                         if (!(context is NoContext))
@@ -181,15 +178,10 @@ namespace sly.parser.generator.visitor
                             parameters[parametersCount] = context;
                             parametersCount++;
                         }
-
                         if (node.Visitor != null)
                         {
-                            method = node.Visitor;
+                            var method = node.Visitor;
                             Array.Resize(ref parameters, parametersCount);
-                            if (method.Name =="group") 
-                            {
-                                ;
-                            }
                             if (IsRelaxed)
                             {
                                 parameters = RecastParameters(parameters, method);
@@ -291,10 +283,6 @@ namespace sly.parser.generator.visitor
 
         private object Recast(object value, Type type)
         {
-            if (value == null)
-            {
-                ;
-            }
             if (value.GetType() == type)
             {
                 return value;
@@ -302,13 +290,11 @@ namespace sly.parser.generator.visitor
             if (value is List<Group<IN,object>> groupList)
             {
                 var elementType = type.GetGenericArguments()[0];
-                var groups = typeof(Group<,>).MakeGenericType([typeof(IN),type]);
                 var castMethod = typeof(Enumerable).GetMethod("Cast")!.MakeGenericMethod(elementType);
                 var toListMethod = typeof(Enumerable).GetMethod("ToList")!.MakeGenericMethod(elementType);
                 var recastGroups = groupList.Select(x => Recast(x, elementType)).ToArray();
-                var casted = castMethod.Invoke(null, new Object[]{recastGroups });
-                return toListMethod.Invoke(null, new object[] { casted });
-                return null;
+                var casted = castMethod.Invoke(null, [recastGroups]);
+                return toListMethod.Invoke(null, [casted]);
             }
             
             if (value is List<object> valueList)
@@ -317,8 +303,8 @@ namespace sly.parser.generator.visitor
                 var castMethod = typeof(Enumerable).GetMethod("Cast")!.MakeGenericMethod(elementType);
                 var toListMethod = typeof(Enumerable).GetMethod("ToList")!.MakeGenericMethod(elementType);
 
-                var casted = castMethod.Invoke(null, new object[] { valueList });
-                return toListMethod.Invoke(null, new object[] { casted });
+                var casted = castMethod.Invoke(null, [valueList]);
+                return toListMethod.Invoke(null, [casted]);
             }
 
             if (value is ValueOption<object> optionValue)
@@ -327,7 +313,7 @@ namespace sly.parser.generator.visitor
                 var valueOptionType = typeof(ValueOption<>).MakeGenericType(elementType);
                 var option = optionValue.Match((x) =>
                 {
-                    var casted = System.Convert.ChangeType(x, elementType);
+                    var casted = Convert.ChangeType(x, elementType);
                     var instance = Activator.CreateInstance(valueOptionType,casted);
                     return instance;
                 }, () =>
@@ -345,20 +331,15 @@ namespace sly.parser.generator.visitor
                 var valueGroupType = typeof(Group<,>).MakeGenericType(typeof(IN),elementType);
                 var valueGroupItemType = typeof(GroupItem<,>).MakeGenericType(typeof(IN),elementType);
                 var instance = Activator.CreateInstance(valueGroupType);
-                // TODO : get the correct add method
-                var addMethod = instance.GetType().GetMethod("Add", new Type[] {valueGroupItemType });
+                var addMethod = instance.GetType().GetMethod("Add", [valueGroupItemType ]);
                 if (addMethod != null)
                 {
                     foreach (var item in groupValue.Items)
                     {
                         var casted = Recast(item, elementType);
-                        addMethod.Invoke(instance, new[] { casted });
+                        addMethod.Invoke(instance, [casted]);
                     }
                 }
-                else {
-                    Console.WriteLine($"WTF : can't find {instance.GetType().FullName}.Add({valueGroupItemType.FullName})");
-                }
-
                 return instance;
             }
 
@@ -367,8 +348,8 @@ namespace sly.parser.generator.visitor
                 
                 var valueGroupItemType = typeof(GroupItem<,>).MakeGenericType(typeof(IN), type);
 
-                var tokenCtor = valueGroupItemType.GetConstructor(new[] { typeof(string), typeof(Token<IN>)});
-                var valueCtor = valueGroupItemType.GetConstructor(new[] { typeof(string), type });
+                var tokenCtor = valueGroupItemType.GetConstructor([typeof(string), typeof(Token<IN>)]);
+                var valueCtor = valueGroupItemType.GetConstructor([typeof(string), type]);
                 if (groupItemValue.IsToken)
                 {
                     if (tokenCtor != null)
@@ -392,11 +373,10 @@ namespace sly.parser.generator.visitor
             if (value is ValueOption<Group<IN, object>> optionGroupValue)
             {
                 var groupType = type.GetGenericArguments()[0];
-                var elementType = groupType.GetGenericArguments()[1];
-                var valueOptionType = typeof(ValueOption<>).MakeGenericType(elementType);
+                var valueOptionType = typeof(ValueOption<>).MakeGenericType(groupType);
                 var option = optionGroupValue.Match((x) =>
                 {
-                    var casted = Recast(x,elementType);
+                    var casted = Recast(x,groupType);
                     //var casted = System.Convert.ChangeType(x, elementType);
                     var instance = Activator.CreateInstance(valueOptionType,casted);
                     return instance;
@@ -412,7 +392,7 @@ namespace sly.parser.generator.visitor
 
         private object[] RecastParameters(object[] parameters, MethodInfo method)
         {
-            List<object> retypedArgs = new List<object>();
+            List<object> retypedArgs = [];
             var types = method.GetParameters().Select(x =>  x.ParameterType).ToList();
             for (int i = 0; i < parameters.Length; i++)
             {
