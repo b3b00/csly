@@ -49,9 +49,11 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                 continue;
             }
             var returnTypes = nonTerminal.Value.Rules.Select(x => x.GetVisitorMethod().ReturnParameter).Distinct().ToList();
-            if (returnTypes.Count > 1)
+            var t = nonTerminal.Value.Rules.Select(x => x.GetVisitorMethod().ReturnType);
+            var group = t.GroupBy(x => x.FullName);
+            if (group.Count() > 1)
             {
-                string names = string.Join(", ", returnTypes.Select(x => x.ParameterType.Name));
+                string names = string.Join(", ", group.Select(x => x.SelectMany(x => x.Name)));
                 var message = i18n.I18N.Instance.GetText(_i18n,
                     I18NMessage.ManyReturnTypeForNonTerminal, nonTerminal.Value.Name, names);
                 result.AddError(new InitializationError(ErrorLevel.FATAL,
@@ -129,26 +131,35 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
 
                 break;
             }
-            // case ManyClause<IN, OUT> many:
-            // {
-            //     Type expected = null;
-            //     if (many.Clause is NonTerminalClause<IN, OUT> nt && nt.IsGroup)
-            //     {
-            //         return result;
-            //     }
-            //
-            //     
-            //     if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
-            //     {
-            //         result.AddInitializationError(ErrorLevel.FATAL,
-            //             i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
-            //                 rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
-            //             ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
-            //     }
-            //
-            //     return result;
-            //
-            // }
+            case ManyClause<IN, OUT> many:
+            {
+                Type expected = null;
+                
+
+                if (many.Clause is TerminalClause<IN, OUT>)
+                {
+                    expected = typeof(List<Token<IN>>);
+                }
+
+                if (many.Clause is NonTerminalClause<IN, OUT> nt && !nt.IsGroup)
+                {
+                    if (_nonTerminalTypes.TryGetValue(nt.NonTerminalName, out var type))
+                    {
+                        expected = typeof(List<>).MakeGenericType(type);
+                    }
+                }
+                
+                if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
+                {
+                    result.AddInitializationError(ErrorLevel.FATAL,
+                        i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
+                            rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
+                }
+            
+                return result;
+            
+            }
             case NonTerminalClause<IN, OUT> nonTerminal:
             {
                 if (_nonTerminalTypes.TryGetValue(nonTerminal.NonTerminalName, out var expected))
