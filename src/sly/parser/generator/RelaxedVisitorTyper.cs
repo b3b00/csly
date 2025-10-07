@@ -160,6 +160,35 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                 return result;
             
             }
+            case OptionClause<IN, OUT> option:
+            {
+                Type expected = null;
+                
+
+                if (option.Clause is TerminalClause<IN, OUT>)
+                {
+                    expected = typeof(Token<IN>);
+                }
+
+                if (option.Clause is NonTerminalClause<IN, OUT> nt && !nt.IsGroup)
+                {
+                    if (_nonTerminalTypes.TryGetValue(nt.NonTerminalName, out var type))
+                    {
+                        expected = typeof(ValueOption<>).MakeGenericType(type);
+                    }
+                }
+                
+                if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
+                {
+                    result.AddInitializationError(ErrorLevel.FATAL,
+                        i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
+                            rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
+                }
+            
+                return result;
+            
+            }
             case NonTerminalClause<IN, OUT> nonTerminal:
             {
                 if (_nonTerminalTypes.TryGetValue(nonTerminal.NonTerminalName, out var expected))
