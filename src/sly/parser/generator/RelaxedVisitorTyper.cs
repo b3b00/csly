@@ -16,6 +16,8 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
     private string _i18n {get; set;}
     
     private IDictionary<string, Type> _nonTerminalTypes {get;set;}
+    
+    private ParserConfiguration<IN,OUT> _parserConfiguration {get;set;}
 
     public RelaxedVisitorTyper(string i18n)
     {
@@ -26,6 +28,7 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
     public BuildResult<Parser<IN, OUT>> CheckRelaxedVisitor(BuildResult<Parser<IN, OUT>> result,
         ParserConfiguration<IN, OUT> configuration)
     {
+        _parserConfiguration = configuration;
         result = CheckNonTerminalTypes(result, configuration);
         if (result.IsError)
         {
@@ -134,7 +137,18 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
             case ManyClause<IN, OUT> many:
             {
                 Type expected = null;
-                
+                if (many.Clause is NonTerminalClause<IN, OUT> ntgrp && ntgrp.IsGroup)
+                {
+                    var (res, type) = CheckGroup(result, ntgrp, rule.Dump());
+                    if (res.IsError)
+                    {
+                        return res;
+                    }
+
+                    expected = typeof(List<>).MakeGenericType(
+                        typeof(Group<,>).MakeGenericType(typeof(IN), type));
+
+                }
 
                 if (many.Clause is TerminalClause<IN, OUT>)
                 {
@@ -163,7 +177,17 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
             case OptionClause<IN, OUT> option:
             {
                 Type expected = null;
-                
+
+                if (option.Clause is NonTerminalClause<IN,OUT> ntgrp && ntgrp.IsGroup)
+                {
+                    var (res, type) = CheckGroup(result, ntgrp, rule.Dump());
+                    if (res.IsError)
+                    {
+                        return res;
+                    }
+                    expected = typeof(ValueOption<>).MakeGenericType(typeof(Group<,>).MakeGenericType(typeof(IN), type));
+                    
+                }
 
                 if (option.Clause is TerminalClause<IN, OUT>)
                 {
@@ -208,5 +232,38 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
         }
 
         return result;
+    }
+
+    private (BuildResult<Parser<IN, OUT>> result, Type groupType) CheckGroup(BuildResult<Parser<IN, OUT>> result, NonTerminalClause<IN, OUT> group,
+         string rule)
+    {
+        var rules = _parserConfiguration.GetRulesForNonTerminal(group.NonTerminalName);
+        var groupTypes = rules[0].Clauses
+            .Where(x => x is NonTerminalClause<IN, OUT>)
+            .Cast<NonTerminalClause<IN, OUT>>()
+            .Select(x =>
+            {
+                if (_nonTerminalTypes.TryGetValue(x.NonTerminalName, out var type))
+                {
+                    return type;
+                }
+
+                return null;
+            }).ToList();
+        var grouped = groupTypes.GroupBy(x => x.FullName).ToList();
+        if (grouped.Count > 1)
+        {
+            string names = string.Join(", ", grouped.SelectMany(x => x.Select(x => x.Name)));
+            var message = i18n.I18N.Instance.GetText(_i18n,
+                I18NMessage.ManyTypeInGroup, rule, group.Dump(), names);
+            result.AddError(new InitializationError(ErrorLevel.FATAL,
+                message,
+                ErrorCodes.RELAXED_PARSER_NON_TERMINAL_MUST_HAVE_SAME_TYPE_IN_GROUP));
+            return (result, null);
+        }
+        /*
+        
+            */
+        return (result, groupTypes.SingleOrDefault());
     }
 }

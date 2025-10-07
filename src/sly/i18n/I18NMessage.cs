@@ -41,6 +41,7 @@ namespace sly.i18n
         CannotUseExplicitTokensWithRegexLexer,
         ManyLexemWithSamelabel,
         ManyReturnTypeForNonTerminal,
+        ManyTypeInGroup,
         
     }
 }

@@ -54,3 +54,4 @@ IncorrectVisitorParameterNumber =visitor {0} for rule {1} has incorrect argument
 LeftRecursion =left recursion detected : {0}
 NonTerminalNeverUsed=non terminal [{0}] is never used.
 ManyReturnTypeForNonTerminal=non terminal [{0}] has many types : {1}
+ManyTypeInGroup=rule {0} : group {1} contains many non terminal types : {2}
