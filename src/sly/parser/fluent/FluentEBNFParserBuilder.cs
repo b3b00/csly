@@ -103,7 +103,7 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
             return new BuildResult<ISyntaxParser<IN, OUT>>(result.Errors);
         }
         var syntaxParser = b.BuildSyntaxParser(_configuration, ParserType.EBNF_LL_RECURSIVE_DESCENT, _rootRule);
-        var checkResult =b.CheckParser(_configuration);
+        var checkResult =b.CheckParser(_configuration, false);
         if (!checkResult.IsOk)
         {
             result.AddErrors(checkResult.Errors);

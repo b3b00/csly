@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using NFluent;
 using RelaxedVisitorTyping;
+using sly.lexer.fluent;
+using sly.parser.fluent;
 using sly.parser.generator;
 using Xunit;
 
@@ -72,4 +74,21 @@ public class RelaxedVisitorTypingTests
         Check.That(result).Not.IsNullOrEmpty();
         Check.That(result).IsEqualTo("1 Prop=2 - no option");
     }
+    
+    [Fact]
+    public void EbnfManyNonTerminalTypesInGroupErrorTest()
+    {
+        var parserInstance = new EbnfRelaxedGroupErrorParser();
+
+        var builder = new ParserBuilder<RelaxedExpressionToken, string>();
+        var buildResult = builder.BuildRelaxedParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "group");
+        Check.That(buildResult).IsOk();
+        var parser = buildResult.Result;
+
+        var exception = Check.ThatCode(() => parser.Parse("1 Prop 2 \"error\"")).Throws<ParserConfigurationException>().Value;
+        Check.That(exception.Message).Contains("error while calling visitor method group on parameter group");
+        
+    }
+    
+   
 }

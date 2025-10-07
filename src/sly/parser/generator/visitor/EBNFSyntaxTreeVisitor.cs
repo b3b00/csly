@@ -393,11 +393,19 @@ namespace sly.parser.generator.visitor
         private object[] RecastParameters(object[] parameters, MethodInfo method)
         {
             List<object> retypedArgs = [];
-            var types = method.GetParameters().Select(x =>  x.ParameterType).ToList();
+            var parameterDeclarations = method.GetParameters().Select(x =>  x).ToList();
             for (int i = 0; i < parameters.Length; i++)
             {
-                var retyped = Recast(parameters[i], types[i]);
-                retypedArgs.Add(retyped);
+                try
+                {
+                    var retyped = Recast(parameters[i], parameterDeclarations[i].ParameterType);
+                    retypedArgs.Add(retyped);
+                }
+                catch (Exception e)
+                {
+                    throw new ParserConfigurationException(
+                        $"error while calling visitor method {method.Name} on parameter {parameterDeclarations[i].Name}: {e.Message}");
+                }
             }
             
             return retypedArgs.ToArray();

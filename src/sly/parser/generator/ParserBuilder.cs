@@ -279,23 +279,17 @@ namespace sly.parser.generator
 
         #region parser checking
 
-        private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result, bool relaxed = false)
+        private BuildResult<Parser<IN, OUT>> CheckParser(BuildResult<Parser<IN, OUT>> result, bool isRelaxed = false)
         {
-            var checkers = new List<Func<ParserConfiguration<IN, OUT>, BuildResult<Parser<IN, OUT>>, NonTerminal<IN, OUT>,
-                    BuildResult<Parser<IN, OUT>>>>();
-            
-            
-            checkers = new List<Func<ParserConfiguration<IN,OUT>, BuildResult<Parser<IN, OUT>>,NonTerminal<IN, OUT>,BuildResult<Parser<IN, OUT>>>>
+            var checkers = new List< Func<ParserConfiguration<IN,OUT>,BuildResult<Parser<IN,OUT>>,NonTerminal<IN,OUT>,bool, BuildResult<Parser<IN,OUT>>>>
             {
                 CheckUnreachable,
                 CheckNotFound,
-                CheckAlternates
+                CheckAlternates,
+                CheckVisitorsSignature
             };
 
-            if (!relaxed)
-            {
-                checkers.Add(CheckVisitorsSignature);
-            }
+           
 
             if (result.Result == null || result.IsError)
             {
@@ -306,15 +300,15 @@ namespace sly.parser.generator
             {
                 if (checker != null)
                     result.Result.Configuration.NonTerminals.Values.ToList<NonTerminal<IN, OUT>>()
-                        .ForEach(nt => result = checker(result.Result.Configuration, result, nt));
+                        .ForEach(nt => result = checker(result.Result.Configuration, result, nt, isRelaxed));
             }
 
             return result;
         }
 
-        public BuildResult<Parser<IN, OUT>> CheckParser(ParserConfiguration<IN, OUT> configuration)
+        public BuildResult<Parser<IN, OUT>> CheckParser(ParserConfiguration<IN, OUT> configuration, bool isRelaxed)
         {
-            var checkers = new List<Func<ParserConfiguration<IN,OUT>, BuildResult<Parser<IN, OUT>>,NonTerminal<IN, OUT>,BuildResult<Parser<IN, OUT>>>>
+            var checkers = new List<Func<ParserConfiguration<IN,OUT>, BuildResult<Parser<IN, OUT>>,NonTerminal<IN, OUT>,bool,BuildResult<Parser<IN, OUT>>>>
             {
                 CheckUnreachable,
                 CheckNotFound,
@@ -326,14 +320,14 @@ namespace sly.parser.generator
             {
                 if (checker != null)
                     configuration.NonTerminals.Values.ToList<NonTerminal<IN, OUT>>()
-                        .ForEach(nt => result = checker(configuration, result, nt));
+                        .ForEach(nt => result = checker(configuration, result, nt, isRelaxed));
             }
 
             return result;
         }
         
         private BuildResult<Parser<IN, OUT>> CheckUnreachable(ParserConfiguration<IN,OUT> configuration, BuildResult<Parser<IN, OUT>> result,
-            NonTerminal<IN, OUT> nonTerminal)
+            NonTerminal<IN, OUT> nonTerminal, bool isRelaxed)
         {
             
             var found = false;
@@ -428,7 +422,7 @@ namespace sly.parser.generator
 
 
         private BuildResult<Parser<IN, OUT>> CheckNotFound(ParserConfiguration<IN,OUT> configuration, BuildResult<Parser<IN, OUT>> result,
-            NonTerminal<IN, OUT> nonTerminal)
+            NonTerminal<IN, OUT> nonTerminal, bool isRelaxed)
         {
             
             foreach (var rule in nonTerminal.Rules)
@@ -453,7 +447,7 @@ namespace sly.parser.generator
         }
 
         private BuildResult<Parser<IN, OUT>> CheckAlternates(ParserConfiguration<IN,OUT> configuration, BuildResult<Parser<IN, OUT>> result,
-            NonTerminal<IN, OUT> nonTerminal)
+            NonTerminal<IN, OUT> nonTerminal, bool isRelaxed)
         {
             foreach (var rule in nonTerminal.Rules)
             {
@@ -484,13 +478,20 @@ namespace sly.parser.generator
         }
 
         private BuildResult<Parser<IN, OUT>> CheckVisitorsSignature(ParserConfiguration<IN,OUT> configuration, BuildResult<Parser<IN, OUT>> result,
-            NonTerminal<IN, OUT> nonTerminal)
+            NonTerminal<IN, OUT> nonTerminal, bool isRelaxed)
         {
+            if (isRelaxed)
+            {
+                RelaxedVisitorTyper<IN, OUT> relaxedTyper = new RelaxedVisitorTyper<IN, OUT>();
+                result = relaxedTyper.CheckRelaxedVisitor(result, configuration, I18N);
+                return result;
+            }
+            
             foreach (var rule in nonTerminal.Rules)
             {
                 if (!rule.IsSubRule)
                 {
-                    result = CheckVisitorSignature(result, rule);
+                    result = CheckVisitorSignature(result, rule, isRelaxed); 
                 }
             }
 
@@ -499,7 +500,7 @@ namespace sly.parser.generator
 
 
         private BuildResult<Parser<IN, OUT>> CheckVisitorSignature(BuildResult<Parser<IN, OUT>> result,
-            Rule<IN, OUT> rule)
+            Rule<IN, OUT> rule, bool isRelaxed)
         {
             if (!rule.IsExpressionRule)
             {

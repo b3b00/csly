@@ -26,8 +26,12 @@ namespace sly.i18n
                 translation = Load(lang);
             }
 
-            
-            return translation.TryGetValue(key, out var pattern) ? string.Format(pattern, args) : "";
+            if (translation.TryGetValue(key, out var pattern))
+            {
+                return string.Format(pattern, args);
+            }
+
+            return "";
         }
 
 

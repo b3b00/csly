@@ -68,6 +68,10 @@ namespace sly.buildresult
         PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER = 107,
         
         PARSER_LEFT_RECURSIVE = 108,
+        
+        RELAXED_PARSER_MANY_RETURN_TYPE_FOR_NONTERMINAL = 109,
+        
+        RELAXED_PARSER_NON_TERMINAL_MUST_HAVE_SAME_TYPE_IN_GROUP = 110
 
         #endregion
 

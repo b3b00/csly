@@ -39,7 +39,8 @@ namespace sly.i18n
         LeftRecursion,
         NonTerminalNeverUsed,
         CannotUseExplicitTokensWithRegexLexer,
-        ManyLexemWithSamelabel
+        ManyLexemWithSamelabel,
+        ManyReturnTypeForNonTerminal,
         
     }
 }

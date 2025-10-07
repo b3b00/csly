@@ -1,0 +1,122 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using sly.buildresult;
+using sly.i18n;
+using sly.lexer;
+using sly.parser.parser;
+using sly.parser.syntax.grammar;
+
+namespace sly.parser.generator;
+
+public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
+{
+    public BuildResult<Parser<IN, OUT>> CheckRelaxedVisitor(BuildResult<Parser<IN, OUT>> result,
+        ParserConfiguration<IN, OUT> configuration, string I18N)
+    {
+        foreach (var nonTerminal in configuration.NonTerminals)
+        {
+            result = CheckNonTerminal(result, nonTerminal.Value, I18N);
+        }
+
+        return result;
+    }
+
+    private BuildResult<Parser<IN, OUT>> CheckNonTerminal(BuildResult<Parser<IN, OUT>> result,
+        NonTerminal<IN, OUT> nonTerminal, string I18N)
+    {
+        if (nonTerminal.IsSubRule)
+        {
+            return result;
+            // TODO ?
+        }
+        var returnTypes = nonTerminal.Rules.Select(x => x.GetVisitorMethod().ReturnParameter).Distinct().ToList();
+        if (returnTypes.Count > 1)
+        {
+            string names = string.Join(", ", returnTypes.Select(x => x.ParameterType.Name));
+            var message = i18n.I18N.Instance.GetText(I18N,
+                I18NMessage.ManyReturnTypeForNonTerminal, nonTerminal.Name, names);
+            result.AddError(new InitializationError(ErrorLevel.FATAL,
+                message,
+                ErrorCodes.RELAXED_PARSER_MANY_RETURN_TYPE_FOR_NONTERMINAL));
+        }
+
+        foreach (var rule in nonTerminal.Rules)
+        {
+            CheckVisitorSignature(result, rule, I18N);
+        }
+
+        return result;
+    }
+
+    private BuildResult<Parser<IN, OUT>> CheckVisitorSignature(BuildResult<Parser<IN, OUT>> result,
+        Rule<IN, OUT> rule, string I18N)
+    {
+        var visitor = rule.GetVisitorMethod();
+        var parameters = rule.GetVisitorMethod().GetParameters();
+        if (parameters.Length != rule.Clauses.Count)
+        {
+            result.AddError(new InitializationError(ErrorLevel.FATAL, i18n.I18N.Instance.GetText(I18N,
+                I18NMessage.IncorrectVisitorParameterNumber, visitor.Name,
+                rule.RuleString, rule.Clauses.Count.ToString(), (rule.Clauses.Count + 1).ToString(),
+                visitor.GetParameters().Length.ToString()), ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
+            return result;
+        }
+
+        for (int i = 0; i < rule.Clauses.Count; i++)
+        {
+            var clause = rule.Clauses[i];
+            var arg = parameters[i];
+
+            result = CheckVisitorArgument(result, rule, visitor, clause, arg, I18N);
+        }
+
+        return result;
+    }
+
+    private BuildResult<Parser<IN, OUT>> CheckVisitorArgument(BuildResult<Parser<IN, OUT>> result, Rule<IN, OUT> rule,
+        MethodInfo visitor,
+        IClause<IN, OUT> clause, ParameterInfo arg, string I18N)
+    {
+        switch (clause)
+        {
+            case TerminalClause<IN, OUT> terminal:
+            {
+                var expected = typeof(Token<IN>);
+                if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
+                {
+                    result.AddInitializationError(ErrorLevel.FATAL,
+                        i18n.I18N.Instance.GetText(I18N, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
+                            rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
+                }
+
+                return result;
+                break;
+            }
+            case ManyClause<IN, OUT> many:
+            {
+                Type expected = null;
+                if (many.Clause is NonTerminalClause<IN, OUT> nt && nt.IsGroup)
+                {
+                    return result;
+                }
+
+                
+                if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
+                {
+                    result.AddInitializationError(ErrorLevel.FATAL,
+                        i18n.I18N.Instance.GetText(I18N, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
+                            rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
+                }
+
+                return result;
+
+            }
+        }
+
+        return result;
+    }
+}

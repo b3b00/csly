@@ -10,6 +10,9 @@ public class EbnfGroupRelaxedExpressionParser
     [Production("primary: Int")]
     public int primaryInt(Token<RelaxedExpressionToken> integer) => integer.IntValue;
 
+    [Production("primary: String")]
+    public string primaryString(Token<RelaxedExpressionToken> stringLiteral) => stringLiteral.Value;
+    
     [Production("group : primary (Property primary)+ (Property Property)?")]
     public string group(int first, List<Group<RelaxedExpressionToken, int>> groups,
         ValueOption<Group<RelaxedExpressionToken, int>> option)
