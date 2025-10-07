@@ -12,52 +12,87 @@ namespace sly.parser.generator;
 
 public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
 {
+    
+    private string _i18n {get; set;}
+    
+    private IDictionary<string, Type> _nonTerminalTypes {get;set;}
+
+    public RelaxedVisitorTyper(string i18n)
+    {
+        _i18n = i18n;
+        _nonTerminalTypes =  new Dictionary<string, Type>();
+    }
+    
     public BuildResult<Parser<IN, OUT>> CheckRelaxedVisitor(BuildResult<Parser<IN, OUT>> result,
-        ParserConfiguration<IN, OUT> configuration, string I18N)
+        ParserConfiguration<IN, OUT> configuration)
+    {
+        result = CheckNonTerminalTypes(result, configuration);
+        if (result.IsError)
+        {
+            return result;
+        }
+        foreach (var nonTerminal in configuration.NonTerminals)
+        {
+            result = CheckNonTerminal(result, nonTerminal.Value);
+        }
+
+        return result;
+    }
+
+    private BuildResult<Parser<IN, OUT>> CheckNonTerminalTypes(BuildResult<Parser<IN, OUT>> result,
+        ParserConfiguration<IN, OUT> configuration)
     {
         foreach (var nonTerminal in configuration.NonTerminals)
         {
-            result = CheckNonTerminal(result, nonTerminal.Value, I18N);
+            if (nonTerminal.Value.IsSubRule)
+            {
+                continue;
+            }
+            var returnTypes = nonTerminal.Value.Rules.Select(x => x.GetVisitorMethod().ReturnParameter).Distinct().ToList();
+            if (returnTypes.Count > 1)
+            {
+                string names = string.Join(", ", returnTypes.Select(x => x.ParameterType.Name));
+                var message = i18n.I18N.Instance.GetText(_i18n,
+                    I18NMessage.ManyReturnTypeForNonTerminal, nonTerminal.Value.Name, names);
+                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    message,
+                    ErrorCodes.RELAXED_PARSER_MANY_RETURN_TYPE_FOR_NONTERMINAL));
+            }
+            else
+            {
+                _nonTerminalTypes[nonTerminal.Key] = returnTypes[0].ParameterType;
+            }
         }
 
         return result;
     }
 
     private BuildResult<Parser<IN, OUT>> CheckNonTerminal(BuildResult<Parser<IN, OUT>> result,
-        NonTerminal<IN, OUT> nonTerminal, string I18N)
+        NonTerminal<IN, OUT> nonTerminal)
     {
         if (nonTerminal.IsSubRule)
         {
             return result;
             // TODO ?
         }
-        var returnTypes = nonTerminal.Rules.Select(x => x.GetVisitorMethod().ReturnParameter).Distinct().ToList();
-        if (returnTypes.Count > 1)
-        {
-            string names = string.Join(", ", returnTypes.Select(x => x.ParameterType.Name));
-            var message = i18n.I18N.Instance.GetText(I18N,
-                I18NMessage.ManyReturnTypeForNonTerminal, nonTerminal.Name, names);
-            result.AddError(new InitializationError(ErrorLevel.FATAL,
-                message,
-                ErrorCodes.RELAXED_PARSER_MANY_RETURN_TYPE_FOR_NONTERMINAL));
-        }
+        
 
         foreach (var rule in nonTerminal.Rules)
         {
-            CheckVisitorSignature(result, rule, I18N);
+            CheckVisitorSignature(result, rule);
         }
 
         return result;
     }
 
     private BuildResult<Parser<IN, OUT>> CheckVisitorSignature(BuildResult<Parser<IN, OUT>> result,
-        Rule<IN, OUT> rule, string I18N)
+        Rule<IN, OUT> rule)
     {
         var visitor = rule.GetVisitorMethod();
         var parameters = rule.GetVisitorMethod().GetParameters();
         if (parameters.Length != rule.Clauses.Count)
         {
-            result.AddError(new InitializationError(ErrorLevel.FATAL, i18n.I18N.Instance.GetText(I18N,
+            result.AddError(new InitializationError(ErrorLevel.FATAL, i18n.I18N.Instance.GetText(_i18n,
                 I18NMessage.IncorrectVisitorParameterNumber, visitor.Name,
                 rule.RuleString, rule.Clauses.Count.ToString(), (rule.Clauses.Count + 1).ToString(),
                 visitor.GetParameters().Length.ToString()), ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_NUMBER));
@@ -69,7 +104,7 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
             var clause = rule.Clauses[i];
             var arg = parameters[i];
 
-            result = CheckVisitorArgument(result, rule, visitor, clause, arg, I18N);
+            result = CheckVisitorArgument(result, rule, visitor, clause, arg);
         }
 
         return result;
@@ -77,7 +112,7 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
 
     private BuildResult<Parser<IN, OUT>> CheckVisitorArgument(BuildResult<Parser<IN, OUT>> result, Rule<IN, OUT> rule,
         MethodInfo visitor,
-        IClause<IN, OUT> clause, ParameterInfo arg, string I18N)
+        IClause<IN, OUT> clause, ParameterInfo arg)
     {
         switch (clause)
         {
@@ -87,33 +122,48 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                 if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
                 {
                     result.AddInitializationError(ErrorLevel.FATAL,
-                        i18n.I18N.Instance.GetText(I18N, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
+                        i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
                             rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
                         ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
                 }
 
-                return result;
                 break;
             }
-            case ManyClause<IN, OUT> many:
+            // case ManyClause<IN, OUT> many:
+            // {
+            //     Type expected = null;
+            //     if (many.Clause is NonTerminalClause<IN, OUT> nt && nt.IsGroup)
+            //     {
+            //         return result;
+            //     }
+            //
+            //     
+            //     if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
+            //     {
+            //         result.AddInitializationError(ErrorLevel.FATAL,
+            //             i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
+            //                 rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
+            //             ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
+            //     }
+            //
+            //     return result;
+            //
+            // }
+            case NonTerminalClause<IN, OUT> nonTerminal:
             {
-                Type expected = null;
-                if (many.Clause is NonTerminalClause<IN, OUT> nt && nt.IsGroup)
+                if (_nonTerminalTypes.TryGetValue(nonTerminal.NonTerminalName, out var expected))
                 {
-                    return result;
+
+                    if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
+                    {
+                        result.AddInitializationError(ErrorLevel.FATAL,
+                            i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
+                                rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
+                            ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
+                    }
                 }
 
-                
-                if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
-                {
-                    result.AddInitializationError(ErrorLevel.FATAL,
-                        i18n.I18N.Instance.GetText(I18N, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
-                            rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
-                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
-                }
-
-                return result;
-
+                break;
             }
         }
 

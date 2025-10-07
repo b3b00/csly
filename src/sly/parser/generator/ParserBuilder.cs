@@ -482,8 +482,8 @@ namespace sly.parser.generator
         {
             if (isRelaxed)
             {
-                RelaxedVisitorTyper<IN, OUT> relaxedTyper = new RelaxedVisitorTyper<IN, OUT>();
-                result = relaxedTyper.CheckRelaxedVisitor(result, configuration, I18N);
+                RelaxedVisitorTyper<IN, OUT> relaxedTyper = new RelaxedVisitorTyper<IN, OUT>(I18N);
+                result = relaxedTyper.CheckRelaxedVisitor(result, configuration);
                 return result;
             }
             
