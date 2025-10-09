@@ -18,6 +18,8 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
     private IDictionary<string, Type> _nonTerminalTypes {get;set;}
     
     private ParserConfiguration<IN,OUT> _parserConfiguration {get;set;}
+    
+    private Type _expressionType {get;set;}
 
     public RelaxedVisitorTyper(string i18n)
     {
@@ -29,6 +31,11 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
         ParserConfiguration<IN, OUT> configuration)
     {
         _parserConfiguration = configuration;
+        
+        var (r,expressionType) = GetExpressionsType(result,configuration);
+        result = r;
+        _expressionType = expressionType;
+        
         result = CheckNonTerminalTypes(result, configuration);
         if (result.IsError)
         {
@@ -41,6 +48,35 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
 
         return result;
     }
+    
+    public (BuildResult<Parser<IN, OUT>> result , Type expressionType) GetExpressionsType(BuildResult<Parser<IN, OUT>> result,
+        ParserConfiguration<IN, OUT> configuration)
+    {
+        if (configuration.UsesOperations)
+        {
+            var expressionTypes = configuration
+                .NonTerminals
+                .Values
+                .SelectMany(x => x.Rules)
+                .Where(x => x.IsExpressionRule)
+                .Select(x => x.GetOperations())
+                .SelectMany(x => x.Select(y => y.VisitorMethod))
+                .Select((x => x.ReturnParameter.ParameterType));
+            var grouped = expressionTypes.GroupBy(x => x.FullName).ToList();
+            if (grouped.Count > 1)
+            {
+                string names = string.Join(", ", grouped.SelectMany(x => x.Select(x => x.Name)));
+                var message = i18n.I18N.Instance.GetText(_i18n,
+                    I18NMessage.ManyTypeForExpressions, names);
+                result.AddError(new InitializationError(ErrorLevel.FATAL,
+                    message,
+                    ErrorCodes.RELAXED_PARSER_EXPRESSIONS_MUST_HAVE_SAME_TYPE));
+                return (result, null);
+            }
+            return (result, expressionTypes.First());
+        }
+        return (result, null);
+    }
 
     private BuildResult<Parser<IN, OUT>> CheckNonTerminalTypes(BuildResult<Parser<IN, OUT>> result,
         ParserConfiguration<IN, OUT> configuration)
@@ -51,12 +87,17 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
             {
                 continue;
             }
+
+            if (nonTerminal.Value.Rules.Any(x => x.IsExpressionRule))
+            {
+                continue; // already checked when searching for expression type
+            }
             var returnTypes = nonTerminal.Value.Rules.Select(x => x.GetVisitorMethod().ReturnParameter).Distinct().ToList();
             var t = nonTerminal.Value.Rules.Select(x => x.GetVisitorMethod().ReturnType);
-            var group = t.GroupBy(x => x.FullName);
+            var group = t.GroupBy(x => x.Name);
             if (group.Count() > 1)
             {
-                string names = string.Join(", ", group.Select(x => x.SelectMany(x => x.Name)));
+                string names = string.Join(", ", group.Select(x => x.Key));
                 var message = i18n.I18N.Instance.GetText(_i18n,
                     I18NMessage.ManyReturnTypeForNonTerminal, nonTerminal.Value.Name, names);
                 result.AddError(new InitializationError(ErrorLevel.FATAL,
@@ -95,7 +136,7 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
     {
         if (rule.IsExpressionRule)
         {
-            return result; // TODO
+            result = CheckExpressionVisitors(result, rule);
         }
         var visitor = rule.GetVisitorMethod();
         var parameters = rule.GetVisitorMethod().GetParameters();
@@ -123,6 +164,73 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
         return result;
     }
 
+    private BuildResult<Parser<IN, OUT>> CheckExpressionVisitors(BuildResult<Parser<IN, OUT>> result, Rule<IN, OUT> rule)
+    {
+        var operations = rule.GetOperations();
+        foreach (var operation in operations)
+        {
+            var operationVisitorvisitor = operation.VisitorMethod;
+            if (operation.IsUnary)
+            {
+                var arg = operation.Affix == Affix.PreFix
+                    ? operationVisitorvisitor.GetParameters()[1]
+                    : operationVisitorvisitor.GetParameters()[0];
+                var operandType = arg.ParameterType;
+                if (operandType != _expressionType) 
+                {
+                    result.AddInitializationError(ErrorLevel.FATAL,
+                        i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, operationVisitorvisitor.Name,
+                            rule.RuleString, arg.Name, _expressionType.Name, arg.ParameterType.Name),
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);   
+                }
+                
+                var oper = operation.Affix == Affix.PreFix
+                    ? operationVisitorvisitor.GetParameters()[0]
+                    : operationVisitorvisitor.GetParameters()[1];
+                var operatorType = oper.ParameterType;
+                if (operatorType != typeof(Token<IN>)) 
+                {
+                    result.AddInitializationError(ErrorLevel.FATAL,
+                        i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, operationVisitorvisitor.Name,
+                            rule.RuleString, oper.Name, typeof(Token<IN>).Name, oper.ParameterType.Name),
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);   
+                }
+            }
+            if (operation.IsBinary)
+            {
+                var arg = operationVisitorvisitor.GetParameters()[0];
+                var operandType = arg.ParameterType;
+                if (operandType != _expressionType) 
+                {
+                    result.AddInitializationError(ErrorLevel.FATAL,
+                        i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, operationVisitorvisitor.Name,
+                            rule.RuleString, arg.Name, _expressionType.Name, arg.ParameterType.Name),
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);   
+                }
+                arg = operationVisitorvisitor.GetParameters()[2];
+                operandType = arg.ParameterType;
+                if (operandType != _expressionType) 
+                {
+                    result.AddInitializationError(ErrorLevel.FATAL,
+                        i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, operationVisitorvisitor.Name,
+                            rule.RuleString, arg.Name, _expressionType.Name, arg.ParameterType.Name),
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);   
+                }
+                var oper = operationVisitorvisitor.GetParameters()[1];
+                var operatorType = oper.ParameterType;
+                if (operatorType != typeof(Token<IN>)) 
+                {
+                    result.AddInitializationError(ErrorLevel.FATAL,
+                        i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, operationVisitorvisitor.Name,
+                            rule.RuleString, oper.Name, typeof(Token<IN>).Name, oper.ParameterType.Name),
+                        ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);   
+                }
+            }
+        }
+
+        return result;
+    }
+
     private BuildResult<Parser<IN, OUT>> CheckVisitorArgument(BuildResult<Parser<IN, OUT>> result, Rule<IN, OUT> rule,
         MethodInfo visitor,
         IClause<IN, OUT> clause, ParameterInfo arg)
@@ -136,7 +244,7 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                 {
                     result.AddInitializationError(ErrorLevel.FATAL,
                         i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
-                            rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
+                            rule.RuleString, arg.Name, expected.Name, arg.ParameterType.Name),
                         ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
                 }
 
@@ -175,7 +283,7 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                 {
                     result.AddInitializationError(ErrorLevel.FATAL,
                         i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
-                            rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
+                            rule.RuleString, arg.Name, expected.Name, arg.ParameterType.Name),
                         ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
                 }
             
@@ -214,7 +322,7 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                 {
                     result.AddInitializationError(ErrorLevel.FATAL,
                         i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
-                            rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
+                            rule.RuleString, arg.Name, expected.Name, arg.ParameterType.Name),
                         ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
                 }
             
@@ -230,7 +338,7 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                     {
                         result.AddInitializationError(ErrorLevel.FATAL,
                             i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
-                                rule.RuleString, arg.Name, expected.FullName, arg.ParameterType.FullName),
+                                rule.RuleString, arg.Name, expected.Name, arg.ParameterType.Name),
                             ErrorCodes.PARSER_INCORRECT_VISITOR_PARAMETER_TYPE);
                     }
                 }
@@ -258,7 +366,7 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
 
                 return null;
             }).ToList();
-        var grouped = groupTypes.GroupBy(x => x.FullName).ToList();
+        var grouped = groupTypes.GroupBy(x => x.Name).ToList();
         if (grouped.Count > 1)
         {
             string names = string.Join(", ", grouped.SelectMany(x => x.Select(x => x.Name)));

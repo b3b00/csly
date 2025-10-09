@@ -27,7 +27,7 @@ namespace sly.parser.generator
         }
 
         [Production("clauses : clause ")]
-        public ClauseSequence<IN,OUT> SingleClause(IClause<IN,OUT> clause)
+        public GrammarNode<IN,OUT> SingleClause(IClause<IN,OUT> clause)
         {
             return new ClauseSequence<IN,OUT>(clause);
         }
@@ -149,7 +149,7 @@ namespace sly.parser.generator
         #region  groups
 
         [Production("clause : LPAREN  groupclauses RPAREN ")]
-        public GroupClause<IN,OUT> Group(Token<EbnfTokenGeneric> discardLeft, GroupClause<IN,OUT> clauses,
+        public IClause<IN,OUT> Group(Token<EbnfTokenGeneric> discardLeft, GroupClause<IN,OUT> clauses,
             Token<EbnfTokenGeneric> discardRight)
         {
             return clauses;

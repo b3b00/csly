@@ -56,4 +56,5 @@ IncorrectVisitorParameterNumber =le visiteur '{0}' de la règle '{1}' a un nombr
 LeftRecursion =recursion ç gauche détectée : {0}
 NonTerminalNeverUsed=le non terminal [{0}] n'est jamais utilisé.
 ManyReturnTypeForNonTerminal=le non terminal [{0}] a plusieurs types : {1}
-ManyTypeInGroup=rule {0} : le group {1} contient plusieurs type de non terminal : {2}
+ManyTypeInGroup=rule {0} : le group {1} contient plusieurs types de non terminal : {2}
+ManyTypeForExpressions=Les règles d'expression ont plusieurs types differents : {0}

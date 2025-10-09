@@ -42,6 +42,7 @@ namespace sly.i18n
         ManyLexemWithSamelabel,
         ManyReturnTypeForNonTerminal,
         ManyTypeInGroup,
+        ManyTypeForExpressions
         
     }
 }

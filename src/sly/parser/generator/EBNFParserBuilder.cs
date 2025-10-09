@@ -75,7 +75,7 @@ namespace sly.parser.generator
             }
             catch (Exception e)
             {
-                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message,
+                result.AddError(new ParserInitializationError(ErrorLevel.ERROR, e.Message+"\n"+e.StackTrace,
                     ErrorCodes.PARSER_UNKNOWN_ERROR));
                 return result;
             }
