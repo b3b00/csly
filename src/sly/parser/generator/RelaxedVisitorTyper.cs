@@ -93,9 +93,15 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
     private BuildResult<Parser<IN, OUT>> CheckVisitorSignature(BuildResult<Parser<IN, OUT>> result,
         Rule<IN, OUT> rule)
     {
+        if (rule.IsExpressionRule)
+        {
+            return result; // TODO
+        }
         var visitor = rule.GetVisitorMethod();
         var parameters = rule.GetVisitorMethod().GetParameters();
-        if (parameters.Length != rule.Clauses.Count)
+        // TODO : exclude discarded terminals !
+        var realClauses = rule.Clauses.Where(x => !(x is TerminalClause<IN,OUT> term && term.Discarded)).ToList();
+        if (parameters.Length != realClauses.Count)
         {
             result.AddError(new InitializationError(ErrorLevel.FATAL, i18n.I18N.Instance.GetText(_i18n,
                 I18NMessage.IncorrectVisitorParameterNumber, visitor.Name,
@@ -104,9 +110,11 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
             return result;
         }
 
-        for (int i = 0; i < rule.Clauses.Count; i++)
+        for (int i = 0; i < realClauses.Count; i++)
         {
-            var clause = rule.Clauses[i];
+            var clause = realClauses[i];
+            
+            
             var arg = parameters[i];
 
             result = CheckVisitorArgument(result, rule, visitor, clause, arg);
