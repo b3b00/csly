@@ -10,8 +10,9 @@ namespace sly.parser.generator.visitor
 {
     public class EBNFSyntaxTreeVisitor<IN, OUT> : SyntaxTreeVisitor<IN, OUT> where IN : struct, Enum
     {
-        public EBNFSyntaxTreeVisitor(ParserConfiguration<IN, OUT> conf, object parserInstance, bool relaxed = false) : base(conf,
-            parserInstance, relaxed)
+        public EBNFSyntaxTreeVisitor(ParserConfiguration<IN, OUT> conf, object parserInstance, bool relaxed = false) :
+            base(conf,
+                parserInstance, relaxed)
         {
         }
 
@@ -53,7 +54,7 @@ namespace sly.parser.generator.visitor
                 }
 
                 var res = SyntaxVisitorResult<IN, OUT>.NewRelaxedGroup(group);
-                    
+
                 return res;
             }
             else
@@ -83,11 +84,15 @@ namespace sly.parser.generator.visitor
             {
                 if (node.IsGroupOption)
                 {
-                 return IsRelaxed ? SyntaxVisitorResult<IN, OUT>.NewOptionGroupNoneRelaxed() : SyntaxVisitorResult<IN, OUT>.NewOptionGroupNone();   
+                    return IsRelaxed
+                        ? SyntaxVisitorResult<IN, OUT>.NewOptionGroupNoneRelaxed()
+                        : SyntaxVisitorResult<IN, OUT>.NewOptionGroupNone();
                 }
                 else
                 {
-                    return IsRelaxed ? SyntaxVisitorResult<IN, OUT>.NewOptionNoneRelaxed(): SyntaxVisitorResult<IN, OUT>.NewOptionNone();
+                    return IsRelaxed
+                        ? SyntaxVisitorResult<IN, OUT>.NewOptionNoneRelaxed()
+                        : SyntaxVisitorResult<IN, OUT>.NewOptionNone();
                 }
             }
 
@@ -96,14 +101,17 @@ namespace sly.parser.generator.visitor
             {
                 case SyntaxLeaf<IN, OUT> leaf:
                     return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
-                case GroupSyntaxNode<IN, OUT> :
-                    return IsRelaxed ? SyntaxVisitorResult<IN,OUT>.NewRelaxedGroupOption(innerResult.RelaxedGroupResult) : (SyntaxVisitorResult<IN, OUT>.NewOptionGroupSome(innerResult.GroupResult))  ;
+                case GroupSyntaxNode<IN, OUT>:
+                    return IsRelaxed
+                        ? SyntaxVisitorResult<IN, OUT>.NewRelaxedGroupOption(innerResult.RelaxedGroupResult)
+                        : (SyntaxVisitorResult<IN, OUT>.NewOptionGroupSome(innerResult.GroupResult));
                 default:
                 {
                     if (IsRelaxed)
                     {
                         return SyntaxVisitorResult<IN, OUT>.NewOptionSomeRelaxed(innerResult.RelaxedValueResult);
                     }
+
                     return SyntaxVisitorResult<IN, OUT>.NewOptionSome(innerResult.ValueResult);
                 }
             }
@@ -113,13 +121,13 @@ namespace sly.parser.generator.visitor
         private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN, OUT> node, object context = null)
         {
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
-            if (!node .IsByPassNode && (node.LambdaVisitor != null || node.Visitor != null ))
+            if (!node.IsByPassNode && (node.LambdaVisitor != null || node.Visitor != null))
             {
-                int parametersArrayLength = node.Children.Count + (context is NoContext ? 0 : 1); 
+                int parametersArrayLength = node.Children.Count + (context is NoContext ? 0 : 1);
                 var parameters = new object[parametersArrayLength];
-                
+
                 int parametersCount = 0;
-                
+
                 foreach (var n in node.Children)
                 {
                     var v = Visit(n, context);
@@ -178,6 +186,7 @@ namespace sly.parser.generator.visitor
                             parameters[parametersCount] = context;
                             parametersCount++;
                         }
+
                         if (node.Visitor != null)
                         {
                             var method = node.Visitor;
@@ -186,7 +195,7 @@ namespace sly.parser.generator.visitor
                             {
                                 parameters = RecastParameters(parameters, method);
                             }
-                            
+
                             var t = method.Invoke(ParserVsisitorInstance, parameters);
                             if (IsRelaxed)
                             {
@@ -194,13 +203,16 @@ namespace sly.parser.generator.visitor
                             }
                             else
                             {
-                                result = IsRelaxed ? SyntaxVisitorResult<IN, OUT>.NewRelaxedValue(t) : SyntaxVisitorResult<IN, OUT>.NewValue((OUT)t) ;
+                                result = IsRelaxed
+                                    ? SyntaxVisitorResult<IN, OUT>.NewRelaxedValue(t)
+                                    : SyntaxVisitorResult<IN, OUT>.NewValue((OUT)t);
                             }
                         }
+
                         if (node.LambdaVisitor != null)
                         {
                             var t = node.LambdaVisitor(parameters.ToArray());
-                            result = SyntaxVisitorResult<IN,OUT>.NewValue(t);
+                            result = SyntaxVisitorResult<IN, OUT>.NewValue(t);
                         }
                     }
                     catch (TargetInvocationException tie)
@@ -241,7 +253,7 @@ namespace sly.parser.generator.visitor
             }
             else if (node.IsManyValues)
             {
-                
+
                 if (!IsRelaxed)
                 {
                     var vals = new List<OUT>();
@@ -261,7 +273,7 @@ namespace sly.parser.generator.visitor
                 {
                     var vals = new List<Group<IN, object>>();
                     values.ForEach(v => vals.Add(v.RelaxedGroupResult));
-                    result = SyntaxVisitorResult<IN, OUT>.NewRelaxedGroupList(vals);   
+                    result = SyntaxVisitorResult<IN, OUT>.NewRelaxedGroupList(vals);
                 }
                 else
                 {
@@ -283,11 +295,16 @@ namespace sly.parser.generator.visitor
 
         private object Recast(object value, Type type)
         {
+            if (value == null) 
+            {
+                return value;
+            }
             if (value.GetType() == type)
             {
                 return value;
             }
-            if (value is List<Group<IN,object>> groupList)
+
+            if (value is List<Group<IN, object>> groupList)
             {
                 var elementType = type.GetGenericArguments()[0];
                 var castMethod = typeof(Enumerable).GetMethod("Cast")!.MakeGenericMethod(elementType);
@@ -296,7 +313,7 @@ namespace sly.parser.generator.visitor
                 var casted = castMethod.Invoke(null, [recastGroups]);
                 return toListMethod.Invoke(null, [casted]);
             }
-            
+
             if (value is List<object> valueList)
             {
                 var elementType = type.GetGenericArguments()[0];
@@ -314,7 +331,7 @@ namespace sly.parser.generator.visitor
                 var option = optionValue.Match((x) =>
                 {
                     var casted = Convert.ChangeType(x, elementType);
-                    var instance = Activator.CreateInstance(valueOptionType,casted);
+                    var instance = Activator.CreateInstance(valueOptionType, casted);
                     return instance;
                 }, () =>
                 {
@@ -328,10 +345,10 @@ namespace sly.parser.generator.visitor
             if (value is Group<IN, object> groupValue)
             {
                 var elementType = type.GetGenericArguments()[1];
-                var valueGroupType = typeof(Group<,>).MakeGenericType(typeof(IN),elementType);
-                var valueGroupItemType = typeof(GroupItem<,>).MakeGenericType(typeof(IN),elementType);
+                var valueGroupType = typeof(Group<,>).MakeGenericType(typeof(IN), elementType);
+                var valueGroupItemType = typeof(GroupItem<,>).MakeGenericType(typeof(IN), elementType);
                 var instance = Activator.CreateInstance(valueGroupType);
-                var addMethod = instance.GetType().GetMethod("Add", [valueGroupItemType ]);
+                var addMethod = instance.GetType().GetMethod("Add", [valueGroupItemType]);
                 if (addMethod != null)
                 {
                     foreach (var item in groupValue.Items)
@@ -340,12 +357,13 @@ namespace sly.parser.generator.visitor
                         addMethod.Invoke(instance, [casted]);
                     }
                 }
+
                 return instance;
             }
 
             if (value is GroupItem<IN, object> groupItemValue)
             {
-                
+
                 var valueGroupItemType = typeof(GroupItem<,>).MakeGenericType(typeof(IN), type);
 
                 var tokenCtor = valueGroupItemType.GetConstructor([typeof(string), typeof(Token<IN>)]);
@@ -359,7 +377,8 @@ namespace sly.parser.generator.visitor
                         return instance;
                     }
                 }
-                else if (groupItemValue.IsValue) {
+                else if (groupItemValue.IsValue)
+                {
                     if (valueCtor != null)
                     {
                         var castValue = Recast(groupItemValue.Value, type);
@@ -376,9 +395,9 @@ namespace sly.parser.generator.visitor
                 var valueOptionType = typeof(ValueOption<>).MakeGenericType(groupType);
                 var option = optionGroupValue.Match((x) =>
                 {
-                    var casted = Recast(x,groupType);
+                    var casted = Recast(x, groupType);
                     //var casted = System.Convert.ChangeType(x, elementType);
-                    var instance = Activator.CreateInstance(valueOptionType,casted);
+                    var instance = Activator.CreateInstance(valueOptionType, casted);
                     return instance;
                 }, () =>
                 {
@@ -387,13 +406,14 @@ namespace sly.parser.generator.visitor
                 });
                 return option;
             }
+
             return value;
         }
 
         private object[] RecastParameters(object[] parameters, MethodInfo method)
         {
             List<object> retypedArgs = [];
-            var parameterDeclarations = method.GetParameters().Select(x =>  x).ToList();
+            var parameterDeclarations = method.GetParameters().Select(x => x).ToList();
             for (int i = 0; i < parameters.Length; i++)
             {
                 try
@@ -404,11 +424,11 @@ namespace sly.parser.generator.visitor
                 catch (Exception e)
                 {
                     throw new ParserConfigurationException(
-                        $"error while calling visitor method {method.Name} on parameter {parameterDeclarations[i].Name}: {e.Message}");
+                        $"error while calling visitor method {method.Name} on parameter {parameterDeclarations[i].Name}: {e.Message}\n{e.StackTrace}");
                 }
             }
-            
+
             return retypedArgs.ToArray();
         }
-    }    
+    }
 }

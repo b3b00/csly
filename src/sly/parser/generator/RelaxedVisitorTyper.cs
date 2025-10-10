@@ -137,10 +137,15 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
         if (rule.IsExpressionRule)
         {
             result = CheckExpressionVisitors(result, rule);
+            return result;
         }
         var visitor = rule.GetVisitorMethod();
-        var parameters = rule.GetVisitorMethod().GetParameters();
-        // TODO : exclude discarded terminals !
+        if (visitor == null) 
+        {
+            ;
+        }
+        var parameters = visitor.GetParameters();
+        //  exclude discarded terminals !
         var realClauses = rule.Clauses.Where(x => !(x is TerminalClause<IN,OUT> term && term.Discarded)).ToList();
         if (parameters.Length != realClauses.Count)
         {
@@ -364,9 +369,21 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                     return type;
                 }
 
+                var rules = _parserConfiguration.GetRulesForNonTerminal(x.NonTerminalName);
+                if (rules != null && rules.Any())
+                {
+                    var first = rules.FirstOrDefault();
+                    if (first != null && first.IsExpressionRule)
+                    {
+                        return _expressionType;
+                    }
+                }
+                
+
                 return null;
             }).ToList();
-        var grouped = groupTypes.GroupBy(x => x.Name).ToList();
+        groupTypes = groupTypes.Where(x => x != null).ToList();
+        var grouped = groupTypes.GroupBy(x => x?.Name).ToList();
         if (grouped.Count > 1)
         {
             string names = string.Join(", ", grouped.SelectMany(x => x.Select(x => x.Name)));
