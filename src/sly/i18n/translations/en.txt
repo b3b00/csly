@@ -56,3 +56,4 @@ NonTerminalNeverUsed=non terminal [{0}] is never used.
 ManyReturnTypeForNonTerminal=non terminal [{0}] has many types : {1}
 ManyTypeInGroup=rule {0} : group {1} contains many non terminal types : {2}
 ManyTypeForExpressions=Expressions rules have many different types : {0}
+ManyTypeInChoice=rule {0} : choices {1} contains many different types : {2}

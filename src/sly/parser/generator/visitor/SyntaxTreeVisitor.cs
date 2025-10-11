@@ -65,7 +65,15 @@ namespace sly.parser.generator.visitor
 
                 if (node.IsByPassNode)
                 {
-                    result = SyntaxVisitorResult<IN, OUT>.NewValue((OUT) args[0]);
+                    var v = args[0];
+                    if (v == null)
+                    {
+                        result = SyntaxVisitorResult<IN, OUT>.NewValue(default(OUT));    
+                    }
+                    else
+                    {
+                        result = SyntaxVisitorResult<IN, OUT>.NewValue((OUT)args[0]);
+                    }
                 }
                 else
                 {

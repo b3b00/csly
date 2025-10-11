@@ -260,9 +260,15 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                 Type expected = null;
                 if (many.Clause is NonTerminalClause<IN, OUT> ntgrp && ntgrp.IsGroup)
                 {
-                    var (res, type) = CheckGroup(result, ntgrp, rule.Dump());
+                    var (res, type) = CheckGroup(result, ntgrp, rule);
                     if (res.IsError)
                     {
+                        return res;
+                    }
+
+                    if (type == null)
+                    {
+                        // gruop only contains terminals => return all is ok
                         return res;
                     }
 
@@ -271,19 +277,30 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
 
                 }
 
-                if (many.Clause is TerminalClause<IN, OUT>)
+                if (many.Clause is TerminalClause<IN, OUT> || many.Clause is ChoiceClause<IN,OUT> terminalChoice && terminalChoice.IsTerminalChoice)
                 {
                     expected = typeof(List<Token<IN>>);
                 }
 
-                if (many.Clause is NonTerminalClause<IN, OUT> nt && !nt.IsGroup)
+                if (many.Clause is NonTerminalClause<IN, OUT> nt && !nt.IsGroup )
                 {
-                    if (_nonTerminalTypes.TryGetValue(nt.NonTerminalName, out var type))
+                    if (nt != null && _nonTerminalTypes.TryGetValue(nt.NonTerminalName, out var type))
                     {
                         expected = typeof(List<>).MakeGenericType(type);
                     }
                 }
-                
+
+                if (many.Clause is ChoiceClause<IN, OUT> nonTerminaleChoice && nonTerminaleChoice.IsNonTerminalChoice)
+                {
+                    var choiceCheck = CheckNonterminalChoices(result, rule, nonTerminaleChoice);
+                    if (choiceCheck.result.IsError)
+                    {
+                        return choiceCheck.result;
+                    }
+                    result =  choiceCheck.result;
+                    expected = choiceCheck.choiceType;
+                }
+
                 if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
                 {
                     result.AddInitializationError(ErrorLevel.FATAL,
@@ -301,7 +318,7 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
 
                 if (option.Clause is NonTerminalClause<IN,OUT> ntgrp && ntgrp.IsGroup)
                 {
-                    var (res, type) = CheckGroup(result, ntgrp, rule.Dump());
+                    var (res, type) = CheckGroup(result, ntgrp, rule);
                     if (res.IsError)
                     {
                         return res;
@@ -321,6 +338,22 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                     {
                         expected = typeof(ValueOption<>).MakeGenericType(type);
                     }
+                }
+
+                if (option.Clause is ChoiceClause<IN, OUT> termChoice && termChoice.IsTerminalChoice)
+                {
+                    expected = typeof(Token<IN>);
+                }
+
+                if (option.Clause is ChoiceClause<IN, OUT> nonTermChoice && nonTermChoice.IsNonTerminalChoice)
+                {
+                    var choiceCheck = CheckNonterminalChoices(result, rule, nonTermChoice);
+                    if (choiceCheck.result.IsError)
+                    {
+                        return choiceCheck.result;
+                    }
+                    result =  choiceCheck.result;
+                    expected = choiceCheck.choiceType;
                 }
                 
                 if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
@@ -355,40 +388,95 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
         return result;
     }
 
-    private (BuildResult<Parser<IN, OUT>> result, Type groupType) CheckGroup(BuildResult<Parser<IN, OUT>> result, NonTerminalClause<IN, OUT> group,
-         string rule)
+    private (BuildResult<Parser<IN, OUT>> result, Type choiceType) CheckNonterminalChoices(BuildResult<Parser<IN, OUT>> result, Rule<IN, OUT> rule,
+        ChoiceClause<IN, OUT> nonTerminaleChoice)
     {
-        var rules = _parserConfiguration.GetRulesForNonTerminal(group.NonTerminalName);
-        var groupTypes = rules[0].Clauses
-            .Where(x => x is NonTerminalClause<IN, OUT>)
-            .Cast<NonTerminalClause<IN, OUT>>()
-            .Select(x =>
+        // TODO check if all types
+        var types = nonTerminaleChoice.Choices.Select<IClause<IN, OUT>, object>(x =>
+        {
+            if (x is NonTerminalClause<IN, OUT> nt)
             {
-                if (_nonTerminalTypes.TryGetValue(x.NonTerminalName, out var type))
+                if (_nonTerminalTypes.TryGetValue(nt.NonTerminalName, out var type))
                 {
                     return type;
                 }
+            }
 
-                var rules = _parserConfiguration.GetRulesForNonTerminal(x.NonTerminalName);
-                if (rules != null && rules.Any())
-                {
-                    var first = rules.FirstOrDefault();
-                    if (first != null && first.IsExpressionRule)
-                    {
-                        return _expressionType;
-                    }
-                }
-                
-
-                return null;
-            }).ToList();
-        groupTypes = groupTypes.Where(x => x != null).ToList();
-        var grouped = groupTypes.GroupBy(x => x?.Name).ToList();
+            return null;
+        }).Cast<Type>().Where(x => x != null).ToList();
+        var grouped = types.GroupBy(x => x?.Name).ToList();
         if (grouped.Count > 1)
         {
             string names = string.Join(", ", grouped.SelectMany(x => x.Select(x => x.Name)));
             var message = i18n.I18N.Instance.GetText(_i18n,
-                I18NMessage.ManyTypeInGroup, rule, group.Dump(), names);
+                I18NMessage.ManyTypeInGroup, rule.Dump(), nonTerminaleChoice.Dump(), names);
+            result.AddError(new InitializationError(ErrorLevel.FATAL,
+                message,
+                ErrorCodes.RELAXED_PARSER_NON_TERMINAL_IN_CHOICE_MUST_HAVE_SAME_TYPE_IN_GROUP));
+            return (result, null);
+        }
+
+        return (result, types[0]);
+    }
+
+    private (BuildResult<Parser<IN, OUT>> result, Type groupType) CheckGroup(BuildResult<Parser<IN, OUT>> result, NonTerminalClause<IN, OUT> group,
+         Rule<IN,OUT> rule)
+    {
+        var rules = _parserConfiguration.GetRulesForNonTerminal(group.NonTerminalName);
+        var groupTypes = rules[0].Clauses
+            .Select<IClause<IN, OUT>, Type>(x =>
+            {
+                if (x is NonTerminalClause<IN, OUT> nt)
+                {
+                    if (_nonTerminalTypes.TryGetValue(nt.NonTerminalName, out var type))
+                    {
+                        return type;
+                    }
+
+
+
+                    if (rule != null && rule.IsExpressionRule)
+                    {
+                        return _expressionType;
+                    }
+                }
+            
+
+                if (x is ChoiceClause<IN, OUT> choice && choice.IsNonTerminalChoice)
+                {
+                    var choiceCheck = CheckNonterminalChoices(result, rule, choice);
+                    if (choiceCheck.result.IsError)
+                    {
+                        return null;
+                    }
+                    result =  choiceCheck.result;
+                    return choiceCheck.choiceType;
+                }
+                if (x is ChoiceClause<IN,OUT> termChoice && termChoice.IsTerminalChoice)
+                {
+                    // ignore terminal clauses
+                    return null;
+                }
+
+                if (x is TerminalClause<IN,OUT>)
+                {
+                    // ignore terminal clauses
+                    return null;
+                }
+
+                return default(Type);
+            }).ToList();
+        if (result.IsError)
+        {
+            return (result, null);
+        }
+        groupTypes = groupTypes.Where(x => x != null).ToList();
+        var grouped = groupTypes.GroupBy(x => x?.Name ?? "").ToList();
+        if (grouped.Count > 1)
+        {
+            string names = string.Join(", ", grouped.SelectMany(x => x.Select(x => x.Name)));
+            var message = i18n.I18N.Instance.GetText(_i18n,
+                I18NMessage.ManyTypeInGroup, rule.Dump(), group.Dump(), names);
             result.AddError(new InitializationError(ErrorLevel.FATAL,
                 message,
                 ErrorCodes.RELAXED_PARSER_NON_TERMINAL_MUST_HAVE_SAME_TYPE_IN_GROUP));
