@@ -323,8 +323,20 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                     {
                         return res;
                     }
-                    expected = typeof(ValueOption<>).MakeGenericType(typeof(Group<,>).MakeGenericType(typeof(IN), type));
-                    
+
+                    if (type != null) 
+                    {
+                        expected = typeof(ValueOption<>).MakeGenericType(
+                            typeof(Group<,>).MakeGenericType(typeof(IN), type));
+                    }
+                    else
+                    {
+                        // this is an optional purely terminal group.
+                        // In this case we can not clearly determinate the expected type so we leave it null 
+                        // and type check will be ignored
+                        expected = null;
+                    }
+
                 }
 
                 if (option.Clause is TerminalClause<IN, OUT>)
@@ -356,7 +368,7 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                     expected = choiceCheck.choiceType;
                 }
                 
-                if (!expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
+                if (expected != null && !expected.IsAssignableFrom(arg.ParameterType) && arg.ParameterType != expected)
                 {
                     result.AddInitializationError(ErrorLevel.FATAL,
                         i18n.I18N.Instance.GetText(_i18n, I18NMessage.IncorrectVisitorParameterType, visitor.Name,
@@ -452,19 +464,13 @@ public class RelaxedVisitorTyper<IN, OUT> where IN : struct, Enum
                     result =  choiceCheck.result;
                     return choiceCheck.choiceType;
                 }
-                if (x is ChoiceClause<IN,OUT> termChoice && termChoice.IsTerminalChoice)
+                if (x is ChoiceClause<IN,OUT> termChoice && termChoice.IsTerminalChoice || x is TerminalClause<IN,OUT>)
                 {
                     // ignore terminal clauses
                     return null;
                 }
 
-                if (x is TerminalClause<IN,OUT>)
-                {
-                    // ignore terminal clauses
-                    return null;
-                }
-
-                return default(Type);
+                return null;
             }).ToList();
         if (result.IsError)
         {
