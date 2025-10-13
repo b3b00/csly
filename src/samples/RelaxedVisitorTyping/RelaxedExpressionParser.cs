@@ -12,20 +12,6 @@ public class RelaxedExpressionParser
         return value;
     }
 
-    [Production("primary: Number")]
-    public Double Primary_Number(Token<RelaxedExpressionToken> numberToken)
-    {
-        var value = numberToken.DoubleValue;
-        return value;
-    }
-
-    [Production("primary: String")]
-    public string Primary_String(Token<RelaxedExpressionToken> stringToken)
-    {
-        var value = stringToken.Value;
-        return value;
-    }
-
     [Production("op: Op_Equal")]
     [Production("op: Op_LowerThan")]
     [Production("op: Op_GreaterThan")]
@@ -37,7 +23,7 @@ public class RelaxedExpressionParser
     }
 
     [Production("compare: Property op primary")]
-    public Clause Compare(Token<RelaxedExpressionToken> property, string op, object primary)
+    public Clause Compare(Token<RelaxedExpressionToken> property, string op, int primary)
     {
         return new Clause()
         {

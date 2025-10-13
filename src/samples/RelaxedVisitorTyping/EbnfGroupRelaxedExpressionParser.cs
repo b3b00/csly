@@ -10,12 +10,20 @@ public class EbnfGroupRelaxedExpressionParser
     [Production("primary: Int")]
     public int primaryInt(Token<RelaxedExpressionToken> integer) => integer.IntValue;
 
-    [Production("primary: String")]
-    public string primaryString(Token<RelaxedExpressionToken> stringLiteral) => stringLiteral.Value;
+    // [Production("primstring: String")]
+    // public string primaryString(Token<RelaxedExpressionToken> stringLiteral) => stringLiteral.Value;
+
+    [Production("manyString: String*")]
+    public string ManyT(List<Token<RelaxedExpressionToken>> l) => string.Join(",",l.Select(x => x.StringWithoutQuotes));
     
-    [Production("group : primary (Property primary)+ (Property Property)?")]
+    [Production("primaryOpt: primary?")]
+    public string ManyNT(ValueOption<int> l) => l.Match(x=> x.ToString(), () => "nothing" );
+    
+    
+    
+    [Production("group : primary (Property primary)+  (Property primary)? primaryOpt manyString")]
     public string group(int first, List<Group<RelaxedExpressionToken, int>> groups,
-        ValueOption<Group<RelaxedExpressionToken, int>> option)
+         ValueOption<Group<RelaxedExpressionToken, int>> optionOk, string primOpt, string manyString)
     {
         StringBuilder builder = new StringBuilder();
         builder.Append(first);
@@ -25,10 +33,13 @@ public class EbnfGroupRelaxedExpressionParser
             var v = group.Value(1);
             builder.Append($" {p}={v}");
         }
+        
 
-        var optionValue = option.Match((x) => { return $"{x.Token(0).Value}={x.Token(1).Value}"; },
+        var optionValue = optionOk.Match((x) => { return $"{x.Token(0).Value}={x.Token(1).Value}"; },
             () => "no option");
         builder.Append(" - ").Append(optionValue);
+        builder.Append(" - ").Append(manyString);
+        builder.Append(" - ").Append(primOpt);
         return builder.ToString();
     }
 }
