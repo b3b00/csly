@@ -8,4 +8,6 @@ namespace ParserTests.lexer
 
         [Lexeme(GenericToken.Double,channel:0)] DOUBLE
     }
+
+    
 }
