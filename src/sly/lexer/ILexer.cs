@@ -11,9 +11,9 @@ namespace sly.lexer
         Dictionary<T, Dictionary<string, string>> LexemeLabels { get; set; }
         
         void AddDefinition(TokenDefinition<T> tokenDefinition);
-        LexerResult<T> Tokenize(string source);
+        LexerResult<T> Tokenize(string source, bool applyPostProcess = false);
         
-        LexerResult<T> Tokenize(ReadOnlyMemory<char> source);
+        LexerResult<T> Tokenize(ReadOnlyMemory<char> source, bool applyPostProcess = false);
         
         string I18n { get; set; }
         

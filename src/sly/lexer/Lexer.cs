@@ -24,7 +24,7 @@ namespace sly.lexer
         }
 
 
-        public LexerResult<T> Tokenize(string source)
+        public LexerResult<T> Tokenize(string source, bool applyPostProcess = false)
         {
             List<Token<T>> tokens = new List<Token<T>>();
             
@@ -92,11 +92,16 @@ namespace sly.lexer
 
             tokens.Add(eos);
             
+            if (applyPostProcess && LexerPostProcess != null)
+            {
+                tokens = LexerPostProcess(tokens);
+            }
+            
             return new LexerResult<T>(tokens);
         }
 
         [ExcludeFromCodeCoverage]
-        public LexerResult<T> Tokenize(ReadOnlyMemory<char> source)
+        public LexerResult<T> Tokenize(ReadOnlyMemory<char> source, bool applyPostProcess = false)
         {
             return Tokenize(source.ToString());
         }

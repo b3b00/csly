@@ -17,12 +17,12 @@ namespace jsonparser
         {
         }
 
-        public LexerResult<JsonToken> Tokenize(string source)
+        public LexerResult<JsonToken> Tokenize(string source, bool applyPostProcess = false)
         {
             return Tokenize(new ReadOnlyMemory<char>(source.ToCharArray()));
         }
 
-        public LexerResult<JsonToken> Tokenize(ReadOnlyMemory<char> source)
+        public LexerResult<JsonToken> Tokenize(ReadOnlyMemory<char> source, bool applyPostProcess = false)
         {
             var tokens = new List<Token<JsonToken>>();
             var position = 0;
