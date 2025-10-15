@@ -101,9 +101,9 @@ namespace sly.lexer
 
         public static BuildResult<ILexer<IN>> BuildLexer<IN>(
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
-            LexerPostProcess<IN> lexerPostProcess = null) where IN : struct, Enum
+            LexerPostProcess<IN> lexerPostProcess = null, string lang=null) where IN : struct, Enum
         {
-            return BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, lexerPostProcess: lexerPostProcess);
+            return BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, lexerPostProcess: lexerPostProcess, lang:lang);
         }
 
         public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result,

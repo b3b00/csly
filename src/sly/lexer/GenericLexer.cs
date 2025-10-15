@@ -143,13 +143,13 @@ namespace sly.lexer
         }
 
 
-        public LexerResult<IN> Tokenize(string source)
+        public LexerResult<IN> Tokenize(string source, bool applyPostProcess = false)
         {
             var memorySource = new ReadOnlyMemory<char>(source.ToCharArray());
-            return Tokenize(memorySource);
+            return Tokenize(memorySource, applyPostProcess);
         }
 
-        public LexerResult<IN> Tokenize(ReadOnlyMemory<char> source)
+        public LexerResult<IN> Tokenize(ReadOnlyMemory<char> source, bool applyPostProcess = false)
         {
             Stack<FSMLexer<GenericToken>> lexersStack = new Stack<FSMLexer<GenericToken>>();
 
@@ -272,6 +272,12 @@ namespace sly.lexer
             }
 
             tokens.Add(eos);
+            
+            if (applyPostProcess && LexerPostProcess != null)
+                        {
+                            tokens = LexerPostProcess(tokens);
+                        }
+            
             return new LexerResult<IN>(tokens);
         }
 

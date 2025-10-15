@@ -24,10 +24,6 @@ namespace ParserTests.lexer
     public class GenericLexerTests
     {
 
-        public GenericLexerTests()
-        {
-        }
-
         [Fact]
         public void TestEmptyInput()
         {
@@ -441,7 +437,20 @@ namespace ParserTests.lexer
                     return x;
                 }).ToList();
             };
+            var source = "01fh 42 identifier abc abch";
 
+            var lexerBuild = LexerBuilder.BuildLexer<PostfixHexa>(lexerPostProcess:postProcess,extensionBuilder:extensionBuilder, lang:"en");
+            Check.That(lexerBuild).IsOk();
+            var lexer = lexerBuild.Result;
+            var lexed = lexer.Tokenize(source, true);
+            Check.That(lexed).IsOkLexing();
+            Check.That(lexed.Tokens.MainTokens().Extracting(x => (x.TokenID, x.Value))).ContainsExactly([
+                (PostfixHexa.Hexa, "01fh"),
+                (PostfixHexa.Int, "42"),
+                (PostfixHexa.Id, "identifier"),
+                (PostfixHexa.Id, "abc"),
+                (PostfixHexa.Hexa, "abch"),
+                (PostfixHexa.EOS,"")]);
 
             var instance = new Parser();
             ParserBuilder<PostfixHexa, string> parserBuilder = new ParserBuilder<PostfixHexa, string>();
@@ -463,7 +472,7 @@ namespace ParserTests.lexer
 
 
 
-            var parsed = parser.Parse("01fh 42 identifier abc abch");
+            var parsed = parser.Parse(source);
             Check.That(parsed).IsOkParsing();
             Check.That(parsed.Result).Contains("Hexa [01fh]");
             Check.That(parsed.Result).Contains("Int [42]");
