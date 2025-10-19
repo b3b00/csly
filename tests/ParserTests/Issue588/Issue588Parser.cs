@@ -16,7 +16,7 @@ public class Parse
     }
 
     [Production("instr : ID SET[d] INT")]
-    public string SetInstr(Token<Issue588Lexer> id, Token<Lex> val)
+    public string SetInstr(Token<Issue588Lexer> id, Token<Issue588Lexer> val)
     {
         return $"{id.Value} = {val.Value}";
     }
