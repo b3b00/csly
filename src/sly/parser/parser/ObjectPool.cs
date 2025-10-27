@@ -9,7 +9,7 @@ namespace sly.parser.parser
     /// <typeparam name="T">Type of objects to pool</typeparam>
     public class ObjectPool<T> where T : class, new()
     {
-        private readonly ConcurrentBag<T> _objects = new ConcurrentBag<T>();
+        private ConcurrentBag<T> _objects = new ConcurrentBag<T>();
         private readonly Func<T> _objectGenerator;
         private readonly Action<T> _resetAction;
         private readonly int _maxSize;
@@ -44,7 +44,7 @@ namespace sly.parser.parser
 
         public void Clear()
         {
-            _objects.Clear();
+            _objects = new ConcurrentBag<T>();
             _currentSize = 0;
         }
     }
