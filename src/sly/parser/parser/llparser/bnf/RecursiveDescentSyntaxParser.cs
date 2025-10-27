@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿﻿using System.Collections.Generic;
 using sly.lexer;
 using sly.parser.generator;
 using sly.parser.syntax.grammar;
@@ -138,12 +138,15 @@ namespace sly.parser.llparser.bnf
             string nonTerminalName, SyntaxParsingContext<IN, OUT> parsingContext)
         {
             var currentPosition = position;
-            var errors = new List<UnexpectedTokenSyntaxError<IN>>();
+            // Optimization: Pre-allocate error list with reasonable capacity
+            var errors = new List<UnexpectedTokenSyntaxError<IN>>(4);
             var isError = false;
-            var children = new List<ISyntaxNode<IN, OUT>>();
+            
+            // Optimization: Pre-allocate children list based on clauses count
+            var children = new List<ISyntaxNode<IN, OUT>>(rule.Clauses?.Count ?? 0);
+            
             if (!tokens[position].IsEOS && rule.Match(tokens, position, Configuration) && rule.Clauses is { Count: > 0 })
             {
-                children = new List<ISyntaxNode<IN, OUT>>();
                 foreach (var clause in rule.Clauses)
                 {
                     switch (clause)
@@ -198,7 +201,7 @@ namespace sly.parser.llparser.bnf
             result.EndingPosition = currentPosition;
             if (!isError)
             {
-                SyntaxNode<IN, OUT> node = null;
+                SyntaxNode<IN, OUT> node;
                 if (rule.IsSubRule)
                     node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, children);
                 else

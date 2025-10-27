@@ -15,17 +15,22 @@ namespace sly.parser.syntax.grammar
         public bool IsIndent { get; set; }
         
         public bool IsUnindent { get; set; }
+        
+        // Optimization: cache the hash code for faster comparisons
+        private int? _cachedHashCode;
 
         public LeadingToken(IN tokenId)
         {
             TokenId = tokenId;
             IsExplicitToken = false;
+            _cachedHashCode = null;
         }
 
         public LeadingToken(bool isIndent, bool isUnindent)
         {
             IsUnindent = isUnindent;
             IsIndent = isIndent;
+            _cachedHashCode = null;
         }
         
         public LeadingToken(IN tokenId, string explicitToken)
@@ -33,6 +38,7 @@ namespace sly.parser.syntax.grammar
             TokenId = tokenId;
             ExplicitToken = explicitToken;
             IsExplicitToken = true;
+            _cachedHashCode = null;
         }
 
         public bool Match(Token<IN> token)
@@ -87,7 +93,11 @@ namespace sly.parser.syntax.grammar
 
         public override int GetHashCode()
         {
-            return IsExplicitToken ? this.ExplicitToken.GetHashCode() : TokenId.GetHashCode();
+            if (!_cachedHashCode.HasValue)
+            {
+                _cachedHashCode = IsExplicitToken ? ExplicitToken.GetHashCode() : TokenId.GetHashCode();
+            }
+            return _cachedHashCode.Value;
         }
     }
 }

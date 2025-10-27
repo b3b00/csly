@@ -29,39 +29,44 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             EndingPosition = currentPosition
         };
 
-        List<SyntaxParseResult<IN, OUT>> alternateResults = new List<SyntaxParseResult<IN, OUT>>();
-
+        List<SyntaxParseResult<IN, OUT>> alternateResults = new List<SyntaxParseResult<IN, OUT>>(clause.Choices.Count);
+        
+        // Optimization: Early exit on first successful match
         foreach (var alternate in clause.Choices)
         {
+            SyntaxParseResult<IN, OUT> currentResult;
+            
             switch (alternate)
             {
                 case TerminalClause<IN, OUT> terminalAlternate:
-                    var rterm = ParseTerminal(tokens, terminalAlternate, currentPosition, parsingContext);
-                    alternateResults.Add(rterm);
+                    currentResult = ParseTerminal(tokens, terminalAlternate, currentPosition, parsingContext);
                     break;
                 case NonTerminalClause<IN, OUT> nonTerminalAlternate:
-                    var rnonterm = ParseNonTerminal(tokens, nonTerminalAlternate, currentPosition, parsingContext);
-                    alternateResults.Add(rnonterm);
+                    currentResult = ParseNonTerminal(tokens, nonTerminalAlternate, currentPosition, parsingContext);
                     break;
                 default:
                     throw new InvalidOperationException("unable to apply repeater inside  " + clause.GetType().Name);
             }
 
-            result = alternateResults.Last();
-            if (result.IsOk)
+            // Optimization: Exit immediately on success
+            if (currentResult.IsOk)
             {
-                if (clause.IsTerminalChoice && clause.IsDiscarded && result.Root is SyntaxLeaf<IN, OUT> leaf)
+                if (clause.IsTerminalChoice && clause.IsDiscarded && currentResult.Root is SyntaxLeaf<IN, OUT> leaf)
                 {
                     var discardedToken = new SyntaxLeaf<IN, OUT>(leaf.Token, true);
-                    result.Root = discardedToken;
+                    currentResult.Root = discardedToken;
                 }
 
-                parsingContext.Memoize(clause, position, result);
-                return result;
+                parsingContext.Memoize(clause, position, currentResult);
+                return currentResult;
             }
+            
+            alternateResults.Add(currentResult);
         }
 
-        // here all alternateResult ar KO 
+        // here all alternateResult are KO - optimization: set result to last attempt
+        result = alternateResults[alternateResults.Count - 1];
+        
         if (clause.IsTerminalChoice)
         {
             var terminalAlternates = clause.Choices.Cast<TerminalClause<IN, OUT>>();
@@ -71,8 +76,25 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         }
         else
         {
-            var greaterPosition = alternateResults.Select(x => x.EndingPosition).Max();
-            var errors=  alternateResults.Where(x => x.EndingPosition == greaterPosition).SelectMany(x => x.GetErrors()).ToList();
+            // Optimization: Use LINQ more efficiently
+            var greaterPosition = alternateResults[0].EndingPosition;
+            for (int i = 1; i < alternateResults.Count; i++)
+            {
+                if (alternateResults[i].EndingPosition > greaterPosition)
+                {
+                    greaterPosition = alternateResults[i].EndingPosition;
+                }
+            }
+            
+            var errors = new List<UnexpectedTokenSyntaxError<IN>>();
+            for (int i = 0; i < alternateResults.Count; i++)
+            {
+                if (alternateResults[i].EndingPosition == greaterPosition)
+                {
+                    errors.AddRange(alternateResults[i].GetErrors());
+                }
+            }
+            
             result.AddErrors(errors);
             result.IsError = true;
         }

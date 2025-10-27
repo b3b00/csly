@@ -28,10 +28,15 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 
         SyntaxParseResult<IN, OUT> lastInnerResult = null;
 
-        var innerErrors = new List<UnexpectedTokenSyntaxError<IN>>();
+        // Optimization: Pre-allocate error list with reasonable capacity
+        var innerErrors = new List<UnexpectedTokenSyntaxError<IN>>(8);
 
         bool hasByPasNodes = false;
-        while (stillOk)
+        
+        // Optimization: Check bounds once before loop
+        var tokensLength = tokens.Length;
+        
+        while (stillOk && currentPosition < tokensLength)
         {
             SyntaxParseResult<IN, OUT> innerResult = null;
             switch (innerClause)
@@ -39,12 +44,12 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 case TerminalClause<IN, OUT> term:
                     manyNode.IsManyTokens = true;
                     innerResult = ParseTerminal(tokens, term, currentPosition, parsingContext);
-                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
+                    hasByPasNodes |= innerResult.HasByPassNodes;
                     break;
                 case NonTerminalClause<IN, OUT> nonTerm:
                 {
                     innerResult = ParseNonTerminal(tokens, nonTerm, currentPosition, parsingContext);
-                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
+                    hasByPasNodes |= innerResult.HasByPassNodes;
                     if (nonTerm.IsGroup)
                         manyNode.IsManyGroups = true;
                     else
@@ -55,7 +60,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                     manyNode.IsManyTokens = choice.IsTerminalChoice;
                     manyNode.IsManyValues = choice.IsNonTerminalChoice;
                     innerResult = ParseChoice(tokens, choice, currentPosition, parsingContext);
-                    hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
+                    hasByPasNodes |= innerResult.HasByPassNodes;
                     break;
                 default:
                     throw new InvalidOperationException("unable to apply repeater to " + innerClause.GetType().Name);
@@ -66,9 +71,9 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 manyNode.Add(innerResult.Root);
                 currentPosition = innerResult.EndingPosition;
                 lastInnerResult = innerResult;
-                hasByPasNodes = hasByPasNodes || innerResult.HasByPassNodes;
+                hasByPasNodes |= innerResult.HasByPassNodes;
                 var lastInnerErrors = lastInnerResult.GetErrors();
-                if (lastInnerErrors != null)
+                if (lastInnerErrors != null && lastInnerErrors.Count > 0)
                 {
                     innerErrors.AddRange(lastInnerErrors);
                 }
@@ -79,9 +84,8 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 {
                     innerErrors.AddRange(innerResult.GetErrors());
                 }
+                stillOk = false;
             }
-
-            stillOk = innerResult != null && !innerResult.IsError && currentPosition < tokens.Length;
         }
 
 

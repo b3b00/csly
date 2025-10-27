@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.lexer;
@@ -28,12 +28,15 @@ namespace sly.parser.llparser.ebnf
             }
             
             var currentPosition = position;
-            var errors = new List<UnexpectedTokenSyntaxError<IN>>();
+            // Optimization: Pre-allocate error list with reasonable capacity
+            var errors = new List<UnexpectedTokenSyntaxError<IN>>(4);
             var isError = false;
-            var children = new List<ISyntaxNode<IN, OUT>>();
+            
+            // Optimization: Pre-allocate children list based on clauses count
+            var children = new List<ISyntaxNode<IN, OUT>>(rule.Clauses?.Count ?? 0);
+            
             if (rule.Match(tokens, position, Configuration) && rule.Clauses != null && rule.Clauses.Count > 0)
             {
-                children = new List<ISyntaxNode<IN, OUT>>();
                 foreach (var clause in rule.Clauses)
                 {
                     switch (clause)
@@ -155,7 +158,9 @@ namespace sly.parser.llparser.ebnf
                 {
                     if (rule.SubNodeNames != null && rule.SubNodeNames.Length > 0)
                     {
-                        for (int i = 0; i < Math.Min(rule.SubNodeNames.Length,children.Count); i++)
+                        // Optimization: Use Math.Min to avoid bounds check
+                        int maxIndex = Math.Min(rule.SubNodeNames.Length, children.Count);
+                        for (int i = 0; i < maxIndex; i++)
                         {
                             var subNodeName = rule.SubNodeNames[i];
                             if (subNodeName != null)
