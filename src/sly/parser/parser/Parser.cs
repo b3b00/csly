@@ -16,6 +16,13 @@ namespace sly.parser
 {
     public class Parser<IN, OUT> where IN : struct, Enum
     {   
+        /// <summary>
+        /// Feature flag to enable/disable TokenArrayPool optimization
+        /// Default: true (pooling enabled for better performance)
+        /// Set to false for legacy behavior (direct ToArray() allocation)
+        /// This is per-instance, allowing different parsers to have different settings
+        /// </summary>
+        public bool UseTokenArrayPool { get; set; } = true;
 
         public Dictionary<IN, Dictionary<string, string>> LexemeLabels => Lexer.LexemeLabels;
 
@@ -112,18 +119,47 @@ namespace sly.parser
             var result = new ParseResult<IN, OUT>();
 
             var cleaner = new SyntaxTreeCleaner<IN, OUT>();
-            var syntaxResult = SyntaxParser.Parse(tokens.ToArray(), startingNonTerminal);
-            syntaxResult.UsesOperations = Configuration.UsesOperations;
-            syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);
-            if (!syntaxResult.IsError && syntaxResult.Root != null)
+            
+            // Feature flag: Use pooled array optimization or legacy mode
+            Token<IN>[] tokenArray = null;
+            bool isPooled = false;
+            
+            try
             {
-              
-                var r = Visitor.VisitSyntaxTree(syntaxResult.Root,parsingContext ?? new NoContext());
-                result.Result = r;
-                result.SyntaxTree = syntaxResult.Root;
-                result.IsError = false;
-            }
-            else
+                // Check if pooling is enabled via feature flag
+                if (UseTokenArrayPool)
+                {
+                    // NEW MODE: Pooled array optimization
+                    // If already an array, use it directly
+                    if (tokens is Token<IN>[] directArray)
+                    {
+                        tokenArray = directArray;
+                    }
+                    else
+                    {
+                        // Use pool for conversion
+                        tokenArray = tokens.ToPooledArray();
+                        isPooled = true;
+                    }
+                }
+                else
+                {
+                    // LEGACY MODE: Direct allocation (original behavior)
+                    tokenArray = tokens.ToArray();
+                }
+                
+                var syntaxResult = SyntaxParser.Parse(tokenArray, startingNonTerminal);
+                syntaxResult.UsesOperations = Configuration.UsesOperations;
+                syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);
+                
+                if (!syntaxResult.IsError && syntaxResult.Root != null)
+                {
+                    var r = Visitor.VisitSyntaxTree(syntaxResult.Root, parsingContext ?? new NoContext());
+                    result.Result = r;
+                    result.SyntaxTree = syntaxResult.Root;
+                    result.IsError = false;
+                }
+                else
             {
                 result.Errors = new List<ParseError>();
                 var unexpectedTokens = syntaxResult.GetErrors();
@@ -148,6 +184,15 @@ namespace sly.parser
                 }
                 result.Errors.AddRange(errors);
                 result.IsError = true;
+            }
+            }
+            finally
+            {
+                // Return pooled array to pool (only if pooling was used)
+                if (UseTokenArrayPool && isPooled && tokenArray != null)
+                {
+                    TokenArrayPool<IN>.Return(tokenArray, clearArray: true);
+                }
             }
 
             return result;

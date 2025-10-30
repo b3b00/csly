@@ -8,16 +8,26 @@ namespace sly.parser
     
     public class SyntaxParsingContext<IN, OUT> where IN : struct, Enum
     {
-        private readonly Dictionary<string, SyntaxParseResult<IN, OUT>> _memoizedNonTerminalResults = new Dictionary<string, SyntaxParseResult<IN, OUT>>();
+        // Optimization: Use LRU cache instead of unlimited Dictionary for better memory management
+        private readonly LruCache<string, SyntaxParseResult<IN, OUT>> _memoizedNonTerminalResults;
         
         // Optimization: Pool for error lists to reduce allocations
         private readonly ObjectPool<List<UnexpectedTokenSyntaxError<IN>>> _errorListPool;
 
-        private readonly bool _useMemoization = false;
+        private readonly bool _useMemoization;
         
-        public SyntaxParsingContext(bool useMemoization)
+        private const int DefaultCacheCapacity = 1000;
+        
+        public SyntaxParsingContext(bool useMemoization, int cacheCapacity = DefaultCacheCapacity)
         {
             _useMemoization = useMemoization;
+            
+            // Initialize LRU cache only if memoization is enabled
+            if (useMemoization)
+            {
+                _memoizedNonTerminalResults = new LruCache<string, SyntaxParseResult<IN, OUT>>(cacheCapacity);
+            }
+            
             _errorListPool = new ObjectPool<List<UnexpectedTokenSyntaxError<IN>>>(
                 () => new List<UnexpectedTokenSyntaxError<IN>>(),
                 list => list.Clear(),
@@ -42,21 +52,40 @@ namespace sly.parser
         
         public void Memoize(IClause<IN, OUT> clause, int position, SyntaxParseResult<IN, OUT> result)
         {
-            if (_useMemoization)
+            if (_useMemoization && _memoizedNonTerminalResults != null)
             {
-                _memoizedNonTerminalResults[GetKey(clause, position)] = result;
+                _memoizedNonTerminalResults.Set(GetKey(clause, position), result);
             }
         }
 
         public bool TryGetParseResult(IClause<IN, OUT> clause, int position, out SyntaxParseResult<IN, OUT> result)
         {
-            if (!_useMemoization)
+            if (!_useMemoization || _memoizedNonTerminalResults == null)
             {
                 result = null;
                 return false;
             }
-            bool found = _memoizedNonTerminalResults.TryGetValue(GetKey(clause, position), out result);
-            return found;
+            
+            return _memoizedNonTerminalResults.TryGetValue(GetKey(clause, position), out result);
+        }
+        
+        /// <summary>
+        /// Clear the memoization cache (useful for freeing memory between large parsing operations)
+        /// </summary>
+        public void ClearCache()
+        {
+            _memoizedNonTerminalResults?.Clear();
+        }
+        
+        /// <summary>
+        /// Get cache statistics
+        /// </summary>
+        public (int count, int capacity) GetCacheStats()
+        {
+            if (_memoizedNonTerminalResults == null)
+                return (0, 0);
+            
+            return (_memoizedNonTerminalResults.Count, _memoizedNonTerminalResults.Capacity);
         }
     }
 }

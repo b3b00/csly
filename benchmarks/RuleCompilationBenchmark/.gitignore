@@ -1,0 +1,29 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# BenchmarkDotNet artifacts
+BenchmarkDotNet.Artifacts/
+*.log
+*.json
+*.html
+*.csv
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio cache/options
+.vs/
+
+# Results (keep structure, not actual result files)
+results/*.html
+results/*.json
+results/*.csv
+!results/.gitkeep
+

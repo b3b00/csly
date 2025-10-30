@@ -45,6 +45,10 @@ namespace sly.parser.generator
             var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN, OUT>>(I18N);
 
             var grammarParser = builder.BuildParser(ruleparser, ParserType.LL_RECURSIVE_DESCENT, "rule").Result;
+            
+            // Force legacy mode (no pooling) for grammar parsing to avoid any potential issues
+            // Grammar parsing is done once at startup, so performance impact is negligible
+            grammarParser.UseTokenArrayPool = false;
 
 
             var result = new BuildResult<Parser<IN, OUT>>();

@@ -1,4 +1,4 @@
-﻿
+﻿﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2005
@@ -40,6 +40,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTemplate", "src/samples/SimpleTemplate/SimpleTemplate.csproj", "{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlowEOS", "src\samples\SlowEOS\SlowEOS.csproj", "{F85C43C2-28EA-4486-9223-5EA3FC42D417}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarks", "benchmarks", "{A8F2C8D1-5E7A-4B9C-9D2F-3A4B5C6D7E8F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RuleCompilationBenchmark", "benchmarks\RuleCompilationBenchmark\RuleCompilationBenchmark.csproj", "{D9E8F7A6-B5C4-4D3E-A2B1-8C7D6E5F4A3B}"
 EndProject
 Global
 	GlobalSection(Performance) = preSolution
@@ -126,6 +130,10 @@ Global
 		{F85C43C2-28EA-4486-9223-5EA3FC42D417}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F85C43C2-28EA-4486-9223-5EA3FC42D417}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F85C43C2-28EA-4486-9223-5EA3FC42D417}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9E8F7A6-B5C4-4D3E-A2B1-8C7D6E5F4A3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9E8F7A6-B5C4-4D3E-A2B1-8C7D6E5F4A3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9E8F7A6-B5C4-4D3E-A2B1-8C7D6E5F4A3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9E8F7A6-B5C4-4D3E-A2B1-8C7D6E5F4A3B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -143,6 +151,7 @@ Global
 		{81E72CFA-A6D6-4DB4-B3B5-E167064E7858} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{F85C43C2-28EA-4486-9223-5EA3FC42D417} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
+		{D9E8F7A6-B5C4-4D3E-A2B1-8C7D6E5F4A3B} = {A8F2C8D1-5E7A-4B9C-9D2F-3A4B5C6D7E8F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43254130-CF3E-480E-952F-E50CA5D2E417}
