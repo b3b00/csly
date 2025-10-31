@@ -123,7 +123,7 @@ namespace RuleCompilationBenchmark
             Console.WriteLine();
 
             // Build parser
-            var parserBuilder = new ParserBuilder<ExpressionToken, ExpressionNode>();
+            var parserBuilder = new ParserBuilder<ExpressionToken, int>();
             var buildResult = parserBuilder.BuildParser(
                 new SimpleExpressionParser(),
                 ParserType.EBNF_LL_RECURSIVE_DESCENT,

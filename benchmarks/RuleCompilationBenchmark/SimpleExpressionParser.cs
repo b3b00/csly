@@ -11,58 +11,98 @@ namespace RuleCompilationBenchmark
     /// </summary>
     public class SimpleExpressionParser
     {
-        // Terminal rules - simple tokens
-        [Production("primary : NUMBER")]
-        public ExpressionNode Number(Token<ExpressionToken> number)
+        [NodeName("integer")]
+        [Production("primary: NUMBER")]
+        public int Primary(Token<ExpressionToken> intToken)
         {
-            return new ExpressionNode(double.Parse(number.Value));
+            return intToken.IntValue;
         }
 
-        [Production("primary : LPAREN expression RPAREN")]
-        public ExpressionNode ParenExpression(
-            Token<ExpressionToken> lparen,
-            ExpressionNode expr,
-            Token<ExpressionToken> rparen)
+        [NodeName("group")]
+        [Production("primary: LPAREN [d] expression RPAREN [d]")]
+        public int Group(int groupValue)
         {
-            return expr;
+            return groupValue;
         }
 
-        // Multiplicative operations
-        [Production("term : primary")]
-        public ExpressionNode PrimaryToTerm(ExpressionNode primary)
-        {
-            return primary;
-        }
 
-        [Production("term : primary MULTIPLY term")]
-        public ExpressionNode Multiply(ExpressionNode left, Token<ExpressionToken> op, ExpressionNode right)
-        {
-            return new ExpressionNode("*", left, right);
-        }
-
-        [Production("term : primary DIVIDE term")]
-        public ExpressionNode Divide(ExpressionNode left, Token<ExpressionToken> op, ExpressionNode right)
-        {
-            return new ExpressionNode("/", left, right);
-        }
-
-        // Additive operations
-        [Production("expression : term")]
-        public ExpressionNode TermToExpression(ExpressionNode term)
-        {
-            return term;
-        }
-
+        [NodeName("addOrSubstract")]
         [Production("expression : term PLUS expression")]
-        public ExpressionNode Add(ExpressionNode left, Token<ExpressionToken> op, ExpressionNode right)
+        [Production("expression : term MINUS expression")]
+        public int Expression(int left, Token<ExpressionToken> operatorToken, int right)
         {
-            return new ExpressionNode("+", left, right);
+            var result = 0;
+
+
+            switch (operatorToken.TokenID)
+            {
+                case ExpressionToken.PLUS:
+                {
+                    result = left + right;
+                    break;
+                }
+                case ExpressionToken.MINUS:
+                {
+                    result = left - right;
+                    break;
+                }
+            }
+
+            return result;
         }
 
-        [Production("expression : term MINUS expression")]
-        public ExpressionNode Subtract(ExpressionNode left, Token<ExpressionToken> op, ExpressionNode right)
+        
+        [NodeName("expression")]
+        [Production("expression : term")]
+        public int Expression_Term(int termValue)
         {
-            return new ExpressionNode("-", left, right);
+            return termValue;
+        }
+
+        [NodeName("multOrDivide")]
+        [Production("term : factor MULTIPLY term")]
+        [Production("term : factor DIVIDE term")]
+        public int Term(int left, Token<ExpressionToken> operatorToken, int right)
+        {
+            var result = 0;
+
+
+            switch (operatorToken.TokenID)
+            {
+                case ExpressionToken.MULTIPLY:
+                {
+                    result = left * right;
+                    break;
+                }
+                case ExpressionToken.DIVIDE:
+                {
+                    result = left / right;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        [Production("term : factor")]
+        [NodeName("term")]
+        public int Term_Factor(int factorValue)
+        {
+            return factorValue;
+        }
+
+        [Production("factor : primary")]
+        [NodeName("primary")]
+        public int primaryFactor(int primValue)
+        {
+            return primValue;
+        }
+
+        [NodeName("negate")]
+        [Production("factor : MINUS factor")]
+        public int Factor(Token<ExpressionToken> discardedMinus, int factorValue)
+        {
+            return -factorValue;
         }
     }
 }

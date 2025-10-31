@@ -17,8 +17,8 @@ namespace RuleCompilationBenchmark
     [RankColumn]
     public class RuleCompilationBenchmarks
     {
-        private Parser<ExpressionToken, ExpressionNode> _parserWithoutCompilation;
-        private Parser<ExpressionToken, ExpressionNode> _parserWithCompilation;
+        private Parser<ExpressionToken, int> _parserWithoutCompilation;
+        private Parser<ExpressionToken, int> _parserWithCompilation;
         
         private List<string> _simpleExpressions;
         private List<string> _mediumExpressions;
@@ -28,7 +28,7 @@ namespace RuleCompilationBenchmark
         public void Setup()
         {
             // Build parser without compilation
-            var parserBuilder = new ParserBuilder<ExpressionToken, ExpressionNode>();
+            var parserBuilder = new ParserBuilder<ExpressionToken, int>();
             var buildResult = parserBuilder.BuildParser(
                 new SimpleExpressionParser(),
                 ParserType.EBNF_LL_RECURSIVE_DESCENT,

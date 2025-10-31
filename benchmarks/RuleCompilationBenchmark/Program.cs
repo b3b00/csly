@@ -14,13 +14,38 @@ namespace RuleCompilationBenchmark
             Console.WriteLine("╚══════════════════════════════════════════════════════════════════╝");
             Console.WriteLine();
             Console.WriteLine("Options:");
+            Console.WriteLine("  0. Simple parser test");
             Console.WriteLine("  1. Comparaison FEATURE FLAG: Legacy vs Pooling (rapide, précis)");
             Console.WriteLine("  2. Mesure TokenArrayPool impact (détaillé)");
             Console.WriteLine("  3. Démo complète (original)");
             Console.WriteLine();
             Console.Write("Choix (1, 2 ou 3, Entrée = 1): ");
             var choice = Console.ReadLine();
-            
+            if (choice == "0")
+            {
+                var parserBuilder = new ParserBuilder<ExpressionToken, int>();
+                var buildResult = parserBuilder.BuildParser(
+                    new SimpleExpressionParser(),
+                    ParserType.EBNF_LL_RECURSIVE_DESCENT,
+                    "expression"
+                );
+                if (buildResult.IsError)
+                {
+                    buildResult.Errors.ToList().ForEach(e => Console.WriteLine(e.Message));
+                    System.Environment.Exit(-1);
+                }
+                else
+                {
+                    var parser = buildResult.Result;
+                    var source = Console.ReadLine();
+                    var result = parser.Parse(source);
+                    if (result.IsError)
+                    {
+                        result.Errors.ToList().ForEach(x => Console.WriteLine(x.ContextualErrorMessage));
+                    }
+                }
+                System.Environment.Exit(0);
+            }
             if (choice == "3")
             {
                 RunOriginalDemo();
