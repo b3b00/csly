@@ -57,7 +57,7 @@ namespace RuleCompilationBenchmark
             _parserWithCompilation = buildResult2.Result;
             
             // Enable rule compilation
-            if (_parserWithCompilation.SyntaxParser is RecursiveDescentSyntaxParser<ExpressionToken, ExpressionNode> rdParser)
+            if (_parserWithCompilation.SyntaxParser is RecursiveDescentSyntaxParser<ExpressionToken, int> rdParser)
             {
                 rdParser.EnableRuleCompilation();
             }

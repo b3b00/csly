@@ -38,14 +38,40 @@ namespace RuleCompilationBenchmark
                 {
                     var parser = buildResult.Result;
                     var source = Console.ReadLine();
+                    parser.UseTokenArrayPool = false;
+                    ;
+                    Console.WriteLine("===================================");
+                    Console.WriteLine("== no pooling");
+                    Console.WriteLine("===================================");
                     var result = parser.Parse(source);
                     if (result.IsError)
                     {
                         result.Errors.ToList().ForEach(x => Console.WriteLine(x.ContextualErrorMessage));
                     }
+                    else
+                    {
+                        Console.WriteLine($"{source} parse OK : {result.Result}");
+                    }
+
+                    Console.WriteLine("===================================");
+                    Console.WriteLine("== pooling");
+                    Console.WriteLine("===================================");
+                    parser.UseTokenArrayPool = true;
+                    result = parser.Parse(source);
+                    if (result.IsError)
+                    {
+                        result.Errors.ToList().ForEach(x =>
+                            Console.WriteLine(x.ContextualErrorMessage));
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{source} parse OK : {result.Result}");
+                    }
                 }
+
                 System.Environment.Exit(0);
             }
+
             if (choice == "3")
             {
                 RunOriginalDemo();
@@ -64,18 +90,16 @@ namespace RuleCompilationBenchmark
                 TokenArrayPoolBenchmark.CompareFeatureFlagModes();
                 Console.WriteLine();
             }
-            
+
             Console.WriteLine();
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
         }
 
-        
-        
+
         static void RunOriginalDemo()
         {
-
-            var parserBuilder = new ParserBuilder<ExpressionToken, ExpressionNode>();
+            var parserBuilder = new ParserBuilder<ExpressionToken, int>();
             var buildResult = parserBuilder.BuildParser(
                 new SimpleExpressionParser(),
                 ParserType.EBNF_LL_RECURSIVE_DESCENT,
@@ -87,17 +111,18 @@ namespace RuleCompilationBenchmark
                 {
                     Console.WriteLine(error.Message);
                 }
+
                 Environment.Exit(1);
             }
 
             // Demonstrate TokenArrayPool usage
             Console.WriteLine("Demonstrating TokenArrayPool optimization...");
             Console.WriteLine();
-            
+
             RuleCompilationBenchmarks b = new RuleCompilationBenchmarks();
             b.Setup();
             b.MediumExpressions_WithCompilation();
-            
+
             Console.WriteLine("╔══════════════════════════════════════════════════════════════════╗");
             Console.WriteLine("║    CSLY Parser - Rule Compilation Performance Benchmark         ║");
             Console.WriteLine("╚══════════════════════════════════════════════════════════════════╝");
@@ -138,8 +163,5 @@ namespace RuleCompilationBenchmark
             Console.WriteLine("  4. Complex expressions benefit from reduced interpretation overhead");
             Console.WriteLine();
         }
-
-        
     }
 }
-
