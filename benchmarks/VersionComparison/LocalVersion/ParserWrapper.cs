@@ -106,7 +106,9 @@ namespace LocalVersion
 
             if (buildResult.IsError)
             {
-                throw new Exception($"Failed to build parser: {string.Join(", ", buildResult.Errors)}");
+                var msg = $"Failed to build parser: {string.Join(", ", buildResult.Errors)}";
+                Console.Error.WriteLine(msg);
+                throw new Exception();
             }
 
             _parser = buildResult.Result;
@@ -117,7 +119,9 @@ namespace LocalVersion
             var result = _parser.Parse(input);
             if (result.IsError)
             {
-                throw new Exception($"Parse error: {string.Join(", ", result.Errors)}");
+                var msg = $"Parse error: {string.Join(", ", result.Errors)}";
+                Console.Error.WriteLine(msg);
+                throw new Exception(msg);
             }
         }
     }
