@@ -223,13 +223,6 @@ public class FluentRuleParser<IN, OUT> where IN : struct, Enum
 
         var parser = builder.BuildParser();
         
-        // Force legacy mode (no pooling) for grammar parsing
-        // Grammar parsing is done once at startup, so performance impact is negligible
-        if (parser.IsOk && parser.Result != null)
-        {
-            parser.Result.UseTokenArrayPool = false;
-        }
-        
         return parser;
     }
 

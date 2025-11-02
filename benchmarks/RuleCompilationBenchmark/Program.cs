@@ -15,8 +15,6 @@ namespace RuleCompilationBenchmark
             Console.WriteLine();
             Console.WriteLine("Options:");
             Console.WriteLine("  0. Simple parser test");
-            Console.WriteLine("  1. Comparaison FEATURE FLAG: Legacy vs Pooling (rapide, précis)");
-            Console.WriteLine("  2. Mesure TokenArrayPool impact (détaillé)");
             Console.WriteLine("  3. Démo complète (original)");
             Console.WriteLine();
             Console.Write("Choix (1, 2 ou 3, Entrée = 1): ");
@@ -38,7 +36,6 @@ namespace RuleCompilationBenchmark
                 {
                     var parser = buildResult.Result;
                     var source = Console.ReadLine();
-                    parser.UseTokenArrayPool = false;
                     ;
                     Console.WriteLine("===================================");
                     Console.WriteLine("== no pooling");
@@ -52,21 +49,7 @@ namespace RuleCompilationBenchmark
                     {
                         Console.WriteLine($"{source} parse OK : {result.Result}");
                     }
-
-                    Console.WriteLine("===================================");
-                    Console.WriteLine("== pooling");
-                    Console.WriteLine("===================================");
-                    parser.UseTokenArrayPool = true;
-                    result = parser.Parse(source);
-                    if (result.IsError)
-                    {
-                        result.Errors.ToList().ForEach(x =>
-                            Console.WriteLine(x.ContextualErrorMessage));
-                    }
-                    else
-                    {
-                        Console.WriteLine($"{source} parse OK : {result.Result}");
-                    }
+                    
                 }
 
                 System.Environment.Exit(0);
@@ -75,20 +58,6 @@ namespace RuleCompilationBenchmark
             if (choice == "3")
             {
                 RunOriginalDemo();
-            }
-            else if (choice == "2")
-            {
-                // Option 2: Mesure détaillée
-                Console.WriteLine();
-                TokenArrayPoolBenchmark.MeasurePoolImpact();
-                Console.WriteLine();
-            }
-            else
-            {
-                // Option 1 (défaut): Comparaison directe des deux modes
-                Console.WriteLine();
-                TokenArrayPoolBenchmark.CompareFeatureFlagModes();
-                Console.WriteLine();
             }
 
             Console.WriteLine();

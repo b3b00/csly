@@ -94,17 +94,7 @@ namespace sly.parser.llparser.bnf
                 }
                 else
                 {
-                    // Correction : calcul du nombre réel de tokens (jusqu'au premier IsEOS)
-                    int realTokenCount = tokens.Length;
-                    for (int i = 0; i < tokens.Length; i++)
-                    {
-                        if (tokens[i].IsEOS)
-                        {
-                            realTokenCount = i + 1;
-                            break;
-                        }
-                    }
-                    if (result.EndingPosition < realTokenCount - 1)
+                    if (result.EndingPosition < tokens.Length - 1)
                     {
                         SyntaxParseResult<IN, OUT> r = new SyntaxParseResult<IN, OUT>()
                         {
