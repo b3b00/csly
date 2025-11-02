@@ -1,0 +1,25 @@
+# Build results
+bin/
+obj/
+
+# BenchmarkDotNet artifacts
+BenchmarkDotNet.Artifacts/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+

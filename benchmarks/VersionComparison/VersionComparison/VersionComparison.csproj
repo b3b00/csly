@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.10" />
+  </ItemGroup>
+
+  <!-- Reference to local development version -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\sly\sly.csproj" />
+  </ItemGroup>
+
+  <!-- Projects for benchmarking each version -->
+  <ItemGroup>
+    <ProjectReference Include="..\LocalVersion\LocalVersion.csproj" />
+    <ProjectReference Include="..\NuGetVersion\NuGetVersion.csproj" />
+  </ItemGroup>
+
+</Project>
+
