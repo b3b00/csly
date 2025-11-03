@@ -4,10 +4,15 @@ using BenchmarkDotNet.Running;
 
 namespace VersionComparison
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
+            // var _nugetParser = new NuGetVersion.ParserWrapper();
+            // _nugetParser.Parse("2+2");
+            // return;
+            
+            
             Console.WriteLine("=".PadRight(80, '='));
             Console.WriteLine("SLY Version Comparison Benchmark");
             Console.WriteLine("Comparing Current Branch vs NuGet 3.7.6");
