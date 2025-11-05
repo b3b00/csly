@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="interactiveCLI" Version="1.0.8" OutputItemType="Analyzer" ReferenceOutputAssembly="true"/>
+    <PackageReference Include="SharpCoreFileSystem" Version="1.1.6"/>
+    <PackageReference Include="Sigil" Version="5.0.0" />
+    <!-- <ProjectReference Include="..\..\src\sly\sly.csproj" OutputItemType="Analyzer" /> -->
+    <PackageReference Include="sly" Version="3.5.0-alpha7"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\while\while.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="samples\counter.while" />
+    <EmbeddedResource Include="samples\counter.while" />
+    <None Remove="samples\factorial.while" />
+    <EmbeddedResource Include="samples\factorial.while" />
+    <None Remove="samples\fibo.while" />
+    <EmbeddedResource Include="samples\fibonacci.while" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="Generated\**\*.cs" />
+    <None Include="Generated\**\*.cs" />
+  </ItemGroup>
+  
+</Project>

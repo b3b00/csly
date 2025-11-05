@@ -2,7 +2,7 @@
 
 namespace csly.whileLang.compiler
 {
-    internal class ExpressionTyper
+    public class ExpressionTyper
     {
         private readonly Signatures signatures;
 

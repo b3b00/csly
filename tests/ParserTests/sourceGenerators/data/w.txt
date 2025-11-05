@@ -1,0 +1,123 @@
+
+[ParserGenerator]
+public partial class VariableExpressionParserGenerator : AbstractParserGenerator<ExpressionToken, VariableExpressionParser, object>
+{
+    
+}
+
+[ParserRoot("expression")]
+public class VariableExpressionParser
+    {
+        [Production("primary: INT")]
+        public object PrimaryNumber(Token<ExpressionToken> intToken)
+        {
+            return null;
+        }
+
+        [Production("primary: IDENTIFIER")]
+        public object PrimaryIdentifier(Token<ExpressionToken> idToken)
+        {
+            return null;
+        }
+
+        [Production("primary: LPAREN expression RPAREN")]
+        public object Group( Token<ExpressionToken> forget, object groupValue, Token<ExpressionToken> ignore)
+        {
+            return null;
+        }
+
+
+        [NodeName("term")]
+        [Production("expression : term PLUS expression")]
+        [Production("expression : term MINUS expression")]
+        public object Expression(object left, Token<ExpressionToken> operatorToken, object right)
+        {
+            return null;
+        }
+
+        [Production("expression : term")]
+        public object Expression_Term(object termValue)
+        {
+            return null;
+        }
+
+        [NodeName("factor")]
+        [Production("term : factor TIMES term")]
+        [Production("term : factor DIVIDE term")]
+        public object Term(object left, Token<ExpressionToken> operatorToken, object right)
+        {
+            return null;
+        }
+
+        [Production("term : factor")]
+        public object Term_Factor(object factorValue)
+        {
+            return null;
+        }
+
+        [Production("factor : primary")]
+        public object primaryFactor(object primValue)
+        {
+            return null;
+        }
+
+        [Production("factor : MINUS factor")]
+        public object Factor(Token<ExpressionToken> minus, object factorValue)
+        {
+            return null;
+        }
+    }
+    
+    
+     public enum ExpressionToken
+        {
+            // float number 
+            [Lexeme("[0-9]+\\.[0-9]+")] DOUBLE = 1,
+    
+            // integer        
+            [Lexeme("[0-9]+")] INT = 3,
+    
+            [Lexeme("[a-zA-Z]+")] IDENTIFIER = 4,
+    
+            // the + operator
+            [LexemeLabel("en","plus sign")]
+            [LexemeLabel("fr","plus")]
+            [Lexeme("\\+")] PLUS = 5,
+    
+            // the - operator
+            [LexemeLabel("en","minus sign")]
+            [LexemeLabel("fr","moins")]
+            [Lexeme("\\-")] MINUS = 6,
+    
+            // the * operator
+            [LexemeLabel("en","times sign")]
+            [LexemeLabel("fr","multiplication")]
+            [Lexeme("\\*")] TIMES = 7,
+    
+            //  the  / operator
+            [LexemeLabel("en","divide sign")]
+            [LexemeLabel("fr","division")]
+            [Lexeme("\\/")] DIVIDE = 8,
+    
+            // a left paranthesis (
+            [LexemeLabel("en","opening parenthesis")]
+            [LexemeLabel("fr","parenthèse ouvrante")]
+            [Lexeme("\\(")] LPAREN = 9,
+    
+            // a right paranthesis )
+            [LexemeLabel("en","closing parenthesis")]
+            [LexemeLabel("fr","parenthèse fermante")]
+            [Lexeme("\\)")] RPAREN = 10,
+    
+            [LexemeLabel("fr","point d'exclamation")]
+            [LexemeLabel("en","exclamation point")]
+            [Lexeme("!")] FACTORIAL = 13,
+    
+    
+            // a whitespace
+            [Lexeme("[ \\t]+", true)] WS = 11,
+    
+            [Lexeme("[\\n\\r]+", true, true)] EOL = 12
+    
+    
+        }

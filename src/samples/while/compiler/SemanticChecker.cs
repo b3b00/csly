@@ -4,7 +4,7 @@ namespace csly.whileLang.compiler
 {
     public class SemanticChecker
     {
-        private ExpressionTyper expressionTyper;
+        public ExpressionTyper expressionTyper;
 
         public CompilerContext SemanticCheck(WhileAST ast, bool isQuiet = false)
         {
