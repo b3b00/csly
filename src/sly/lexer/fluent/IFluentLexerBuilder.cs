@@ -10,36 +10,36 @@ namespace sly.lexer.fluent;
 public interface IFluentLexerBuilder<IN> where IN : struct, Enum
 {
     
-    public IFluentLexemeBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".");
+    public IFluentLexemeBuilder<IN> Double(IN tokenId, string decimalDelimiter = ".", int channel = Channels.Main);
 
-    public IFluentLexemeBuilder<IN> Int(IN tokenId);
+    public IFluentLexemeBuilder<IN> Int(IN tokenId, int channel = Channels.Main);
     
-    public IFluentLexemeBuilder<IN> Integer(IN tokenId);
+    public IFluentLexemeBuilder<IN> Integer(IN tokenId, int channel = Channels.Main);
 
-    public IFluentLexemeBuilder<IN> Sugar(IN tokenId, string token);
+    public IFluentLexemeBuilder<IN> Sugar(IN tokenId, string token, int channel = Channels.Main);
 
-    public IFluentLexemeBuilder<IN> Date(IN tokenId, DateFormat format, char separator);
+    public IFluentLexemeBuilder<IN> Date(IN tokenId, DateFormat format, char separator, int channel = Channels.Main);
 
-    public IFluentLexemeBuilder<IN> Hexa(IN tokenId, string prefix);
+    public IFluentLexemeBuilder<IN> Hexa(IN tokenId, string prefix, int channel = Channels.Main);
     
-    public IFluentLexemeBuilder<IN> Keyword(IN tokenId, string token);
+    public IFluentLexemeBuilder<IN> Keyword(IN tokenId, string token, int channel = Channels.Main);
     
-    public IFluentLexemeBuilder<IN> Keyword(IN tokenId, string[] tokens);
+    public IFluentLexemeBuilder<IN> Keyword(IN tokenId, string[] tokens, int channel = Channels.Main);
 
-    public IFluentLexemeBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\");
+    public IFluentLexemeBuilder<IN> String(IN tokenId, string delimiter ="\"", string escapeChar = "\\", int channel = Channels.Main);
     
-    public IFluentLexemeBuilder<IN> Character(IN tokenId, string delimiter ="'", string escapeChar = "\\");
-    public IFluentLexemeBuilder<IN> AlphaNumId(IN tokenId);
+    public IFluentLexemeBuilder<IN> Character(IN tokenId, string delimiter ="'", string escapeChar = "\\", int channel = Channels.Main);
+    public IFluentLexemeBuilder<IN> AlphaNumId(IN tokenId, int channel = Channels.Main);
     
-    public IFluentLexemeBuilder<IN> AlphaId(IN tokenId);
+    public IFluentLexemeBuilder<IN> AlphaId(IN tokenId, int channel = Channels.Main);
     
-    public IFluentLexemeBuilder<IN> AlphaNumDashId(IN tokenId);
+    public IFluentLexemeBuilder<IN> AlphaNumDashId(IN tokenId, int channel = Channels.Main);
     
-    public IFluentLexemeBuilder<IN> CustomId(IN tokenId, string start, string end);
+    public IFluentLexemeBuilder<IN> CustomId(IN tokenId, string start, string end, int channel = Channels.Main);
 
-    IFluentLexemeBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false);
+    IFluentLexemeBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false, int channel=Channels.Comments);
 
-    public IFluentLexemeBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false);
+    public IFluentLexemeBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false, int channel = Channels.Comments);
 
     public IFluentLexemeBuilder<IN> UpTo(IN tokenId, string pattern);
     
@@ -47,7 +47,7 @@ public interface IFluentLexerBuilder<IN> where IN : struct, Enum
     
     public IFluentLexemeBuilder<IN> Regex(IN tokenId, string regex, bool isSkippable = false, bool isEol = false);
 
-    public IFluentLexemeBuilder<IN> Extension(IN tokenId);
+    public IFluentLexemeBuilder<IN> Extension(IN tokenId, int channel = Channels.Main);
 
     public IFluentLexerBuilder<IN> UseExtensionBuilder(Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder);
 

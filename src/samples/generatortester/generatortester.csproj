@@ -2,27 +2,19 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-<!--    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
-<!--    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>    -->
+    <TargetFramework>net7.0</TargetFramework>    
   </PropertyGroup>
 
   <ItemGroup>    
     <PackageReference Include="SharpCoreFileSystem" Version="1.1.6"/>
     <PackageReference Include="Sigil" Version="5.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.0"/>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.3.0"/>    
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\while\while.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\sly\sly.csproj" OutputItemType="Analyser"  ReferenceOutputAssembly="false"/>
-    <ProjectReference Include="..\..\sly\sly.csproj" />
+    <ProjectReference Include="..\..\sly\sly.csproj" OutputItemType="Analyzer"/>
   </ItemGroup>
 
   <ItemGroup>

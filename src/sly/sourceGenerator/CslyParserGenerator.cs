@@ -163,7 +163,7 @@ public class CslyParserGenerator : IIncrementalGenerator
                     usings.Add($"using {parserDecl.GetNameSpace()};");
                     usings.AddRange(new[]
                     {
-                        "using System;", "using sly.lexer;", "using sly.parser;",
+                        "using System;", "using sly.lexer;", "using  sly.lexer.fluent;", "using sly.parser;",
                         "using sly.buildresult;", "using sly.sourceGenerator;", "using sly.parser.generator;"
                     }); 
                     usings = usings.Distinct().ToList();

@@ -43,6 +43,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlowEOS", "src\samples\Slow
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "generatortester", "src\samples\generatortester\generatortester.csproj", "{236335C5-AB83-4909-9940-6DC0FCBBDB04}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneratedXML", "src\samples\GeneratedXML\GeneratedXML.csproj", "{AD023C28-156C-46DF-8A46-DD1E4E25AD99}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -132,6 +134,10 @@ Global
 		{236335C5-AB83-4909-9940-6DC0FCBBDB04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{236335C5-AB83-4909-9940-6DC0FCBBDB04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{236335C5-AB83-4909-9940-6DC0FCBBDB04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD023C28-156C-46DF-8A46-DD1E4E25AD99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD023C28-156C-46DF-8A46-DD1E4E25AD99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD023C28-156C-46DF-8A46-DD1E4E25AD99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD023C28-156C-46DF-8A46-DD1E4E25AD99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -150,6 +156,7 @@ Global
 		{BC5020CA-6BFC-4895-9A1E-99B4A0AEDB11} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{F85C43C2-28EA-4486-9223-5EA3FC42D417} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 		{236335C5-AB83-4909-9940-6DC0FCBBDB04} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
+		{AD023C28-156C-46DF-8A46-DD1E4E25AD99} = {36ED7F1A-2E81-4A71-81FE-A357E5840A33}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43254130-CF3E-480E-952F-E50CA5D2E417}

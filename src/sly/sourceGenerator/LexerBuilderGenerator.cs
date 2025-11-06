@@ -17,9 +17,9 @@ public class LexerBuilderGenerator
     {
         string name = enumDeclarationSyntax.Identifier.ToString();
         StringBuilder builder = new();
-        builder.AppendLine($"public IAotLexerBuilder<{name}> GetLexer() {{");
+        builder.AppendLine($"public IFluentLexerBuilder<{name}> GetLexer() {{");
 
-        builder.AppendLine($"var builder = AotLexerBuilder<{name}>.NewBuilder()");
+        builder.AppendLine($"var builder = FluentLexerBuilder<{name}>.NewBuilder()");
         
         LexerSyntaxWalker walker = new(builder, name, declarationsByName);
         walker.Visit(enumDeclarationSyntax);

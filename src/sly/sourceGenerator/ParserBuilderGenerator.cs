@@ -35,14 +35,14 @@ public class ParserBuilderGenerator
         }
 
 
-        builder.AppendLine($"private IAotEbnfParserBuilder<{lexerName},{outputType}> GetParserBuilder({(rootRule == null ? "string rootRule": "")}) {{");
+        builder.AppendLine($"private IFluentEbnfParserBuilder<{lexerName},{outputType}> GetParserBuilder({(rootRule == null ? "string rootRule": "")}) {{");
         ParserSyntaxWalker walker = new(builder, name,lexerName, outputType);
         if (rootRule != null)
         {
             builder.AppendLine($"string rootRule = {rootRule};");
         }
         builder.AppendLine($"{name} instance = new {name}();");
-        builder.AppendLine($"var builder = AotEBNFParserBuilder<{lexerName}, {outputType}>");
+        builder.AppendLine($"var builder = FluentEBNFParserBuilder<{lexerName}, {outputType}>");
         builder.AppendLine($@".NewBuilder(instance, rootRule, ""en"");");
         walker.Visit(classDeclarationSyntax);
         builder.AppendLine(";");
