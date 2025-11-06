@@ -3,6 +3,8 @@
 using System;
 using csly.whileLang.interpreter;
 using SharpFileSystem.FileSystems;
+using sly.lexer.fluent;
+using staticParsing;
 
 
 namespace generatortester;
@@ -10,9 +12,53 @@ public partial class Program
 {
     public static void Main(string[] args)
     {
+        GoStatic();
         Run();
     }
 
+
+    private static void GoStatic()
+    {
+        var build = FluentLexerBuilder<Tok>.NewBuilder()
+            .Sugar(Tok.T1, ".")
+            .Keyword(Tok.T2, "left")
+            .Keyword(Tok.T3, "right")
+            .Build("en");
+        if (build.IsOk)
+        {
+            var lexer = build.Result;
+            var tokenized = lexer.Tokenize("left right explicit left right explicit .");
+            if (tokenized.IsOk)
+            {
+                var tokens = tokenized.Tokens;
+                StaticParser parser = new StaticParser();
+                var r = parser.ParseRule_root(tokens.MainTokens(), 0);
+                if (r.IsOk)
+                {
+                    Console.WriteLine("OK !");
+                    var tree = r.Root;
+                    Console.WriteLine(tree.Dump("  "));
+                }
+                else
+                {
+                    foreach (var error in r.Errors)
+                    {
+                        Console.WriteLine(error);
+                    }
+                }
+                
+            }
+            else
+            {
+                Console.WriteLine(tokenized.Error);
+            }
+        }
+        else
+        {
+            build.Errors.ForEach(e => Console.WriteLine(e));
+        }
+    }
+    
     private static void Run()
     {
         while (true)

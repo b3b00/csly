@@ -16,7 +16,7 @@ namespace sly.parser
 
         
         
-        private HashSet<UnexpectedTokenSyntaxError<IN>> Errors { get; set; } 
+        public HashSet<UnexpectedTokenSyntaxError<IN>> Errors { get; set; } 
 
         public int EndingPosition { get; set; }
 
