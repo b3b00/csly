@@ -20,6 +20,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
     <IsRoslynComponent>true</IsRoslynComponent>
+    <!--<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>-->
   </PropertyGroup>
   <PropertyGroup>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
@@ -28,7 +29,7 @@
   <ItemGroup>
     <None Include="../../LICENSE" Pack="true" PackagePath=""/>
     <None Include="../../README.md" Pack="true" PackagePath=""/>    
-  </ItemGroup>
+  </ItemGroup>  
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;1705;1591</NoWarn>
   </PropertyGroup>
@@ -50,6 +51,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0"/>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.3.0"/>
+    
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="i18n\translations\fr.txt"/>

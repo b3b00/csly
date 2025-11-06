@@ -1,0 +1,8 @@
+x := 1
+y := 0
+n := 0;
+while n < 15 do
+    y := x
+    x := x + y
+    print x
+     
