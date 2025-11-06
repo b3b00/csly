@@ -1,0 +1,30 @@
+using aot.lexer;
+using sly.lexer;
+using sly.parser.generator;
+
+namespace TestNamespace;
+
+public enum DuplicateLabels
+{
+    [Sugar("(")]
+    [LexemeLabel("en","left paranthesis")]
+    [LexemeLabel("fr","paranthèse ouvrante")]
+    LeftPar,
+        
+    [Sugar(")")]
+    [LexemeLabel("en","left paranthesis")]
+    [LexemeLabel("fr","paranthèse ouvrante")]
+    RightPar,
+        
+}
+
+public class DuplicateLabelsParser
+{
+    
+}
+
+[ParserGenerator]
+public partial class DuplicateLabelLexerGenerator : AbstractParserGenerator<DuplicateLabels, DuplicateLabelsParser, object>
+{
+    
+}

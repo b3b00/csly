@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0"/>
+    <PackageReference Include="SharpCoreFileSystem" Version="1.1.6" />
     <PackageReference Include="NFluent" Version="3.1.0"/>
     <PackageReference Include="xunit" Version="2.9.3"/>
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
@@ -37,6 +38,40 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}"/>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="sourceGenerators\data\errors\missing_inheritance.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\errors\missing_inheritance.txt" />
+    <None Remove="sourceGenerators\data\errors\missing_inheritance_2.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\errors\missing_inheritance_2.txt" />
+    <None Remove="sourceGenerators\data\errors\missing_lexer.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\errors\missing_lexer.txt" />
+    <None Remove="sourceGenerators\data\errors\missing_parser.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\errors\missing_parser.txt" />
+    <None Remove="sourceGenerators\data\errors\not_partial.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\errors\not_partial.txt" />
+    <None Remove="sourceGenerators\data\aot.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\aot.txt" />
+    <None Remove="sourceGenerators\data\callbacks.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\callbacks.txt" />
+    <None Remove="sourceGenerators\data\explicits.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\explicits.txt" />
+    <None Remove="sourceGenerators\data\expression.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\expression.txt" />
+    <None Remove="sourceGenerators\data\expressioncontext.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\expressioncontext.txt" />
+    <None Remove="sourceGenerators\data\extended.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\extended.txt" />
+    <None Remove="sourceGenerators\data\labels.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\labels.txt" />
+    <None Remove="sourceGenerators\data\simple.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\simple.txt" />
+    <None Remove="sourceGenerators\data\template.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\template.txt" />
+    <None Remove="sourceGenerators\data\variableexpression.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\variableexpression.txt" />
+    <None Remove="sourceGenerators\data\w.txt" />
+    <EmbeddedResource Include="sourceGenerators\data\w.txt" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;1705;1591</NoWarn>

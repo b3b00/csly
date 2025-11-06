@@ -1,0 +1,36 @@
+
+
+[ParserGenerator]
+public partial class SimpleParserGenerator : AbstractParserGenerator<SimpleLexer, SimpleParser, string>
+{
+
+}
+
+public enum SimpleLexer
+{
+    [LexemeLabel("en","kangaroo")]
+    [LexemeLabel("fr","lessive")]
+    [Lexeme(GenericToken.KeyWord, "SKIP")] [Lexeme(GenericToken.KeyWord, "skip")]
+    SKIP = 6,
+    
+    [LexemeLabel("en","identifier")]
+    [LexemeLabel("fr","identifiant")]
+    [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)] IDENTIFIER = 20,
+    EOF = 0
+
+    #endregion
+}
+
+[ParserRoot("root"]
+public class SimpleParser {
+
+    [Production("root: IDENTIFIER skips")]
+    public string Root(Token<SimpleLexer> id, string skips) {
+        return "root";
+    }
+    
+    [Production("skips : SKIP*")]
+    public string Skips(list<Token<SimpleLexer>> skips) {
+        return $"{skips.Count} skips";
+    }
+}

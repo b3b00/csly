@@ -1,0 +1,157 @@
+
+[ParserGenerator]
+public partial class ExpressionParserGenerator : AbstractParserGenerator<ExpressionToken, ExpressionParser, int>
+{
+    
+}
+
+public enum ExpressionToken
+    {
+        // float number 
+        [Lexeme("[0-9]+\\.[0-9]+")] DOUBLE = 1,
+
+        // integer        
+        [Lexeme("[0-9]+")] INT = 3,
+
+        [Lexeme("[a-zA-Z]+")] IDENTIFIER = 4,
+
+        // the + operator
+        [LexemeLabel("en","plus sign")]
+        [LexemeLabel("fr","plus")]
+        [Lexeme("\\+")] PLUS = 5,
+
+        // the - operator
+        [LexemeLabel("en","minus sign")]
+        [LexemeLabel("fr","moins")]
+        [Lexeme("\\-")] MINUS = 6,
+
+        // the * operator
+        [LexemeLabel("en","times sign")]
+        [LexemeLabel("fr","multiplication")]
+        [Lexeme("\\*")] TIMES = 7,
+
+        //  the  / operator
+        [LexemeLabel("en","divide sign")]
+        [LexemeLabel("fr","division")]
+        [Lexeme("\\/")] DIVIDE = 8,
+
+        // a left paranthesis (
+        [LexemeLabel("en","opening parenthesis")]
+        [LexemeLabel("fr","parenthèse ouvrante")]
+        [Lexeme("\\(")] LPAREN = 9,
+
+        // a right paranthesis )
+        [LexemeLabel("en","closing parenthesis")]
+        [LexemeLabel("fr","parenthèse fermante")]
+        [Lexeme("\\)")] RPAREN = 10,
+
+        [LexemeLabel("fr","point d'exclamation")]
+        [LexemeLabel("en","exclamation point")]
+        [Lexeme("!")] FACTORIAL = 13,
+
+
+        // a whitespace
+        [Lexeme("[ \\t]+", true)] WS = 11,
+
+        [Lexeme("[\\n\\r]+", true, true)] EOL = 12
+
+
+    }
+    
+    [ParserRoot("expressionparser")]
+        public class ExpressionParser
+        {
+            [NodeName("integer")]
+            [Production("primary: INT")]
+            public int Primary(Token<ExpressionToken> intToken)
+            {
+                return intToken.IntValue;
+            }
+    
+            [NodeName("group")]
+            [Production("primary: LPAREN [d] expression RPAREN [d]")]
+            public int Group(int groupValue)
+            {
+                return groupValue;
+            }
+    
+    
+            [NodeName("addOrSubstract")]
+            [Production("expression : term PLUS expression")]
+            [Production("expression : term MINUS expression")]
+            public int Expression(int left, Token<ExpressionToken> operatorToken, int right)
+            {
+                var result = 0;
+    
+    
+                switch (operatorToken.TokenID)
+                {
+                    case ExpressionToken.PLUS:
+                    {
+                        result = left + right;
+                        break;
+                    }
+                    case ExpressionToken.MINUS:
+                    {
+                        result = left - right;
+                        break;
+                    }
+                }
+    
+                return result;
+            }
+    
+            
+            [NodeName("expression")]
+            [Production("expression : term")]
+            public int Expression_Term(int termValue)
+            {
+                return termValue;
+            }
+    
+            [NodeName("multOrDivide")]
+            [Production("term : factor TIMES term")]
+            [Production("term : factor DIVIDE term")]
+            public int Term(int left, Token<ExpressionToken> operatorToken, int right)
+            {
+                var result = 0;
+    
+    
+                switch (operatorToken.TokenID)
+                {
+                    case ExpressionToken.TIMES:
+                    {
+                        result = left * right;
+                        break;
+                    }
+                    case ExpressionToken.DIVIDE:
+                    {
+                        result = left / right;
+                        break;
+                    }
+                }
+    
+                return result;
+            }
+    
+            [Production("term : factor")]
+            [NodeName("term")]
+            public int Term_Factor(int factorValue)
+            {
+                return factorValue;
+            }
+    
+            [Production("factor : primary")]
+            [NodeName("primary")]
+            public int primaryFactor(int primValue)
+            {
+                return primValue;
+            }
+    
+            [NodeName("negate")]
+            [Production("factor : MINUS factor")]
+            public int Factor(Token<ExpressionToken> discardedMinus, int factorValue)
+            {
+                return -factorValue;
+            }
+        }
