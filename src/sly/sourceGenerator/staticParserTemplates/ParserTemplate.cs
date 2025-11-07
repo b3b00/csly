@@ -1,0 +1,23 @@
+namespace sly.sourceGenerator.staticParserTemplates;
+
+public class ParserTemplate 
+{
+    public const string Template = @"using System;
+using System.Collections.Generic;
+using System.Linq;
+using sly.lexer;
+using sly.parser;
+using sly.parser.syntax.grammar;
+using sly.parser.syntax.tree;
+
+public class StaticParser 
+{
+    public Dictionary<<#LEXER#>, Dictionary<string, string>> LexemeLabels { get; set; }
+    
+    public string I18n { get; set; }
+
+    <#HELPERS#>
+    
+    <#PARSERS#>
+}";
+}

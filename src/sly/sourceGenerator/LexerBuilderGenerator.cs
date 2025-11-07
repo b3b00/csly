@@ -10,9 +10,9 @@ namespace sly.sourceGenerator;
 public class LexerBuilderGenerator
 {
 
-
+    public List<string> Tokens { get; set; } = new List<string>();
     
-    public static string GenerateLexer(EnumDeclarationSyntax enumDeclarationSyntax, string outputType,
+    public string GenerateLexer(EnumDeclarationSyntax enumDeclarationSyntax, string outputType,
         Dictionary<string, SyntaxNode> declarationsByName)
     {
         string name = enumDeclarationSyntax.Identifier.ToString();
@@ -21,7 +21,7 @@ public class LexerBuilderGenerator
 
         builder.AppendLine($"var builder = FluentLexerBuilder<{name}>.NewBuilder()");
         
-        LexerSyntaxWalker walker = new(builder, name, declarationsByName);
+        LexerSyntaxWalker walker = new(builder, name, declarationsByName, this);
         walker.Visit(enumDeclarationSyntax);
         
 

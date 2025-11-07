@@ -42,6 +42,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="SharpCoreFileSystem" Version="1.1.6" />
     <PackageReference Include="System.Collections.Immutable" Version="9.0.10"/>
     <PackageReference Include="System.ValueTuple" Version="4.6.1"/>   
     <PackageReference Include="System.Text.Json" Version="9.0.10"/>
@@ -55,8 +56,17 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="i18n\translations\fr.txt"/>
+    <EmbeddedResource Include="sourceGenerator\staticParserTemplates\explicitTerminalParser.txt" />
+    <EmbeddedResource Include="sourceGenerator\staticParserTemplates\nonTerminalClause.txt" />
+    <EmbeddedResource Include="sourceGenerator\staticParserTemplates\nonTerminalParser.txt" />
+    <EmbeddedResource Include="sourceGenerator\staticParserTemplates\parser.txt" />
+    <EmbeddedResource Include="sourceGenerator\staticParserTemplates\ruleParser.txt" />
+    <EmbeddedResource Include="sourceGenerator\staticParserTemplates\terminalClause.txt" />
+    <EmbeddedResource Include="sourceGenerator\staticParserTemplates\terminalParser.txt" />
     <None Remove="i18n\translations\fr.txt"/>
     <EmbeddedResource Include="i18n\translations\en.txt"/>
     <EmbeddedResource Include="i18n\translations\zh-Hans.txt"/>
+    <None Remove="sourceGenerator\staticParserTemplates\helpers.txt" />
+    <EmbeddedResource Include="sourceGenerator\staticParserTemplates\helpers.txt" />
   </ItemGroup>
 </Project>

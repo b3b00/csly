@@ -1,0 +1,19 @@
+namespace sly.sourceGenerator.staticParserTemplates;
+
+public class RuleParserTemplate
+{
+    public const string Template =
+        @"public SyntaxParseResult<<#LEXER#>, <#OUTPUT#>> ParseRule_<#HEAD#>_<#INDEX#>(List<Token<<#LEXER#>>> tokens, int position)
+                                         {
+                                             var result = new SyntaxParseResult<<#LEXER#>, <#OUTPUT#>>();
+                                             
+                                             <#CLAUSES#>
+                                             
+                                             var tree = new SyntaxNode<<#LEXER#>, <#OUTPUT#>>(""<#HEAD#>"", new List<ISyntaxNode<<#LEXER#>, <#OUTPUT#>>>() { <#CHILDREN#> },
+                                                 null);
+                                             result.Root = tree;
+                                             result.IsError = false;
+                                             result.EndingPosition = r<#RULE_COUNT#>.EndingPosition;
+                                             return result;
+}";
+}

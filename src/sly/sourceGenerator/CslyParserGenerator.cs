@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using sly.parser.generator;
 
 namespace sly.sourceGenerator;
 
@@ -167,7 +168,12 @@ public class CslyParserGenerator : IIncrementalGenerator
                         "using sly.buildresult;", "using sly.sourceGenerator;", "using sly.parser.generator;"
                     }); 
                     usings = usings.Distinct().ToList();
-                    
+
+                    LexerBuilderGenerator lexerGenerator = new LexerBuilderGenerator();
+                    var lexer = lexerGenerator.GenerateLexer(lexerDecl as EnumDeclarationSyntax, outputType,
+                        declarationsByName);
+                    ParserBuilderGenerator parserBuilderGenerator =
+                        new ParserBuilderGenerator(lexerName, outputType, lexerGenerator.Tokens);
                     string code = $@"
 
 {string.Join(Environment.NewLine, usings)}
@@ -177,9 +183,9 @@ public class CslyParserGenerator : IIncrementalGenerator
 namespace {ns};
 {modifiers} class {className} : AbstractParserGenerator<{lexerName},{parserType}, {outputType}> {{
     
-    {LexerBuilderGenerator.GenerateLexer(lexerDecl as EnumDeclarationSyntax, outputType, declarationsByName)}
+    {lexer}
 
-    {ParserBuilderGenerator.GenerateParser(parserDecl as ClassDeclarationSyntax, lexerName, outputType)}
+    {parserBuilderGenerator.GenerateParser(parserDecl as ClassDeclarationSyntax)}
 
 }}";
 

@@ -17,12 +17,14 @@ public class LexerSyntaxWalker : CslySyntaxWalker
 
     private string _lexerName = "";
     private readonly Dictionary<string, SyntaxNode> _declarationsByName;
+    private readonly LexerBuilderGenerator _generator;
 
-    public LexerSyntaxWalker(StringBuilder builder, string lexerName, Dictionary<string, SyntaxNode> declarationsByName)
+    public LexerSyntaxWalker(StringBuilder builder, string lexerName, Dictionary<string, SyntaxNode> declarationsByName, LexerBuilderGenerator generator)
     {
         _builder = builder;
         _lexerName = lexerName;
         _declarationsByName = declarationsByName;
+        _generator = generator;
     }
 
     protected string GetChannelArg(AttributeSyntax attribute, int skip = 0)
@@ -169,7 +171,7 @@ public class LexerSyntaxWalker : CslySyntaxWalker
     public override void VisitEnumMemberDeclaration(EnumMemberDeclarationSyntax node)
     {
         var name = node.Identifier.ToString();
-
+        _generator.Tokens.Add(name);
         var modes = GetModes(node);
         var labels = GetLabels(node);
         

@@ -8,16 +8,20 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Operations;
 using sly.lexer;
 using sly.parser.generator;
+using sly.sourceGenerator.model;
 
 namespace sly.sourceGenerator;
 
 public class ParserSyntaxWalker : CslySyntaxWalker
 {
-    StringBuilder _builder = new();
+    StringBuilder Builder = new();
+    
+    StaticParserBuilder _staticParserBuilder;
 
-    public ParserSyntaxWalker(StringBuilder builder, string parserName, string lexerName, string outputType)
+    public ParserSyntaxWalker(StringBuilder builder, string parserName, string lexerName, string outputType, StaticParserBuilder staticParserBuilder)
     {
-        _builder = builder;
+        Builder = builder;
+        _staticParserBuilder = staticParserBuilder;
     }
 
 
@@ -33,7 +37,7 @@ public class ParserSyntaxWalker : CslySyntaxWalker
             VisitAttribute(attribute);
         }
 
-        _builder.AppendLine("builder.WithLexerbuilder(GetLexer())");
+        Builder.AppendLine("builder.WithLexerbuilder(GetLexer())");
         var methods = node.Members
             .ToList()
             .Where(x => x is MethodDeclarationSyntax)
@@ -51,17 +55,17 @@ public class ParserSyntaxWalker : CslySyntaxWalker
         {
             case "AutoCloseIndentations":
             {
-                _builder.AppendLine($"builder.UseAutoCloseIndentations({GetAttributeArgs(node,withLeadingComma:false)});");
+                Builder.AppendLine($"builder.UseAutoCloseIndentations({GetAttributeArgs(node,withLeadingComma:false)});");
                 break;
             }
             case "UseMemoization":
             {
-                _builder.AppendLine($"builder.UseMemoization({GetAttributeArgs(node,withLeadingComma:false)});");
+                Builder.AppendLine($"builder.UseMemoization({GetAttributeArgs(node,withLeadingComma:false)});");
                 break;
             }
             case "BroadenTokenWindow":
             {
-                _builder.AppendLine($"builder.UseBroadenTokenWindow({GetAttributeArgs(node,withLeadingComma:false)});");
+                Builder.AppendLine($"builder.UseBroadenTokenWindow({GetAttributeArgs(node,withLeadingComma:false)});");
                 break;
             }
         }
@@ -92,16 +96,20 @@ public class ParserSyntaxWalker : CslySyntaxWalker
                 if (IsOperand(node))
                 {
                     var rule = GetAttributeArgs(attribute, withLeadingComma: false);
-                    _builder.AppendLine($".Operand({rule},");
+                    Builder.AppendLine($".Operand({rule},");
                     AddProductionVisitor(node);
-                    _builder.AppendLine(")");
+                    Builder.AppendLine(")");
                 }
                 else
                 {
-                    var rule = GetAttributeArgs(attribute, withLeadingComma: false);
-                    _builder.AppendLine($".Production({rule},");
+                    var ruleString = GetAttributeArgs(attribute, withLeadingComma: false);
+                    
+                    // STATIC : parse rule 
+                    //var rule = _staticParserBuilder.Parse(ruleString);
+                    
+                    Builder.AppendLine($".Production({ruleString},");
                     AddProductionVisitor(node);
-                    _builder.AppendLine(")");
+                    Builder.AppendLine(")");
                 }
             }
             else if (attribute.Name.ToString() == "Operation")
@@ -119,7 +127,7 @@ public class ParserSyntaxWalker : CslySyntaxWalker
             
             if (!string.IsNullOrEmpty(nodeName))
             {
-                _builder.AppendLine($"    .Named({nodeName})");
+                Builder.AppendLine($"    .Named({nodeName})");
             }
         }
        
@@ -132,13 +140,13 @@ public class ParserSyntaxWalker : CslySyntaxWalker
         if (attribute.ArgumentList.Arguments[0].Expression is CastExpressionSyntax cast)
         {
             var realArg = (attribute.ArgumentList.Arguments[0].Expression as CastExpressionSyntax).Expression.ToString();
-            _builder.AppendLine(
+            Builder.AppendLine(
                 $".Infix({realArg} {GetAttributeArgs(attribute, skip:1)},null)");
         }
 
-        _builder.AppendLine($".Infix({GetAttributeArgs(attribute, withLeadingComma: false)},");
+        Builder.AppendLine($".Infix({GetAttributeArgs(attribute, withLeadingComma: false)},");
         AddProductionVisitor(node);
-        _builder.AppendLine(")");
+        Builder.AppendLine(")");
     }
 
     private void AddPrePostFix(MethodDeclarationSyntax node, AttributeSyntax attribute)
@@ -147,16 +155,16 @@ public class ParserSyntaxWalker : CslySyntaxWalker
         if (attribute.ArgumentList.Arguments[0].Expression is CastExpressionSyntax cast)
         {
             var realArg = (attribute.ArgumentList.Arguments[0].Expression as CastExpressionSyntax).Expression.ToString();
-            _builder.AppendLine($".{attribute.Name.ToString()}({realArg}, {precedence}, ");
+            Builder.AppendLine($".{attribute.Name.ToString()}({realArg}, {precedence}, ");
             AddProductionVisitor(node);
-            _builder.AppendLine(")");
+            Builder.AppendLine(")");
         }
         else
         {
-            _builder.AppendLine(
+            Builder.AppendLine(
                 $".{attribute.Name.ToString()}({attribute.ArgumentList.Arguments[0].Expression.ToString()}, {precedence},");
             AddProductionVisitor(node);
-            _builder.AppendLine(")");
+            Builder.AppendLine(")");
         }
     }
 
@@ -165,17 +173,17 @@ public class ParserSyntaxWalker : CslySyntaxWalker
         if (attribute.ArgumentList.Arguments[0].Expression is CastExpressionSyntax cast)
         {
             var realArg = (attribute.ArgumentList.Arguments[0].Expression as CastExpressionSyntax).Expression.ToString();
-            _builder.AppendLine(
+            Builder.AppendLine(
                 $".Operation({realArg} {GetAttributeArgs(attribute, skip:1)},");
             AddProductionVisitor(node);
-            _builder.AppendLine(")");
+            Builder.AppendLine(")");
         }
         else
         {
-            _builder.AppendLine(
+            Builder.AppendLine(
                 $".Operation({GetAttributeArgs(attribute, withLeadingComma: false)},");
             AddProductionVisitor(node);
-            _builder.AppendLine(")");
+            Builder.AppendLine(")");
         }
     }
 
@@ -184,20 +192,24 @@ public class ParserSyntaxWalker : CslySyntaxWalker
         var parameters = method.ParameterList.Parameters.ToList();
         
         string methodName = method.Identifier.ToString();
-        _builder.AppendLine("(object[] args) => {");
-        _builder.Append($"var result = instance.{methodName}(");
+        Builder.AppendLine("(object[] args) => {");
+        Builder.Append($"var result = instance.{methodName}(");
         for (int i = 0; i < parameters.Count; i++)
         {
             if (i > 0)
             {
-                _builder.Append(", ");
+                Builder.Append(", ");
             }
             var type = parameters[i].Type.ToString();
-            _builder.Append($"({type})args[{i}]");
+            Builder.Append($"({type})args[{i}]");
         }
-        _builder.AppendLine(");");
-        _builder.AppendLine("return result;");
-        _builder.Append("}");
+        Builder.AppendLine(");");
+        Builder.AppendLine("return result;");
+        Builder.Append("}");
     }
+    
+    
+    
+    
     
 }

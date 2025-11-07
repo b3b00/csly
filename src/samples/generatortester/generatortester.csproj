@@ -24,6 +24,10 @@
     <EmbeddedResource Include="samples\factorial.while" />
     <None Remove="samples\fibo.while" />
     <EmbeddedResource Include="samples\fibonacci.while" />
+    <None Remove="samples\simple.gram" />
+    <EmbeddedResource Include="samples\simple.gram" />
+    <None Remove="samples\while.gram" />
+    <EmbeddedResource Include="samples\while.gram" />
   </ItemGroup>
   
   <ItemGroup>
