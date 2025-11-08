@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SharpFileSystem.FileSystems;
 using sly.parser.generator;
@@ -75,8 +76,11 @@ public class ParserBuilderGenerator
 
 
         var staticParser = GenerateStaticParser(staticParserBuilder.Model);
-        //
-        System.IO.File.WriteAllText(System.IO.Path.Combine("c:/tmp/generation/",$"static{name}.cs"),staticParser);
+        
+        var syntaxTree = CSharpSyntaxTree.ParseText(staticParser);
+        var root = syntaxTree.GetRoot();
+        
+        System.IO.File.WriteAllText(System.IO.Path.Combine("c:/tmp/generation/",$"static{name}.cs"),root.ToString());
         
         return builder.ToString();
         
