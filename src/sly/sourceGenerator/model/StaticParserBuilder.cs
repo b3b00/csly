@@ -20,6 +20,7 @@ public class StaticParserBuilder
             (string head, string[] clauses) result = (null,null);
             if (ruleString != null)
             {
+                ruleString = ruleString.Substring(1, ruleString.Length - 2);
                 var i = ruleString.IndexOf(":", StringComparison.Ordinal);
                 if (i <= 0)
                 {

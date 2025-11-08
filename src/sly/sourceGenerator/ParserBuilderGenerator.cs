@@ -18,7 +18,7 @@ public class ParserBuilderGenerator
 
     private Dictionary<string, TerminalClause> _terminalParsers = new Dictionary<string, TerminalClause>();
     private Dictionary<string, NonTerminalClause> _nonTerminalParsers = new Dictionary<string,  NonTerminalClause>();
-    private HashSet<string> _ruleParsers = new HashSet<string>();
+    private Dictionary<string, List<Rule>> _ruleParsers = new Dictionary<string, List<Rule>>();
     
     
     public ParserBuilderGenerator(string lexerName, string outputType, List<string> lexerGeneratorTokens)
@@ -160,12 +160,30 @@ public class ParserBuilderGenerator
     
     private void GenerateNonTerminal(NonTerminalClause nonTerminalClause, StringBuilder builder)
     {
-        string content = _templateEngine.ApplyTemplate("nonTerminalParser.txt",nonTerminalClause.Name);
+        var rules = _ruleParsers[nonTerminalClause.Name];
+        StringBuilder calls = new();
+        for (int i = 0; i < rules.Count(); i++)
+        {
+            string callTemplate = _templateEngine.ApplyTemplate("ruleCall.txt",nonTerminalClause.Name,
+                additional: new Dictionary<string, string>()
+            {
+                {"<#LEADINGS#>",""}, // static : compute leadings for rule
+                {"<#INDEX#>",i.ToString()}
+            });
+            calls.AppendLine(callTemplate);
+        }
+        
+        string content = _templateEngine.ApplyTemplate("nonTerminalParser.txt",nonTerminalClause.Name,
+            additional: new Dictionary<string, string>()
+            {
+                {"<#CALLS#>", calls.ToString()}
+            });
         builder.AppendLine(content);
     }
     
     private void GenerateRule(Rule rule, StringBuilder builder, int index)
     {
+        AddRule(rule);
         StringBuilder clausesBuilder = new StringBuilder();
         string children = "";
         for (int i = 0; i < rule.Clauses.Count; i++)
@@ -209,6 +227,17 @@ public class ParserBuilderGenerator
                 {"<#INDEX#>",index.ToString()},
             }));
     }
+
+    private void AddRule(Rule rule)
+    {
+        List<Rule> parsers =  new List<Rule>();
+        if (_ruleParsers.ContainsKey(rule.Name))
+        {
+            parsers = _ruleParsers[rule.Name];
+        }
+        parsers.Add(rule);
+        _ruleParsers[rule.Name] = parsers;
+    }
     
     private void AddClause(TerminalClause terminalClause)
     {
@@ -220,7 +249,7 @@ public class ParserBuilderGenerator
     
     private void AddClause(NonTerminalClause nonTerminalClause)
     {
-        if (_nonTerminalParsers.ContainsKey(nonTerminalClause.Name))
+        if (!_nonTerminalParsers.ContainsKey(nonTerminalClause.Name))
         {
             _nonTerminalParsers[nonTerminalClause.Name] = nonTerminalClause;
         }

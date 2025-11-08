@@ -105,7 +105,7 @@ public class ParserSyntaxWalker : CslySyntaxWalker
                     var ruleString = GetAttributeArgs(attribute, withLeadingComma: false);
                     
                     // STATIC : parse rule 
-                    //var rule = _staticParserBuilder.Parse(ruleString);
+                    var rule = _staticParserBuilder.Parse(ruleString);
                     
                     Builder.AppendLine($".Production({ruleString},");
                     AddProductionVisitor(node);

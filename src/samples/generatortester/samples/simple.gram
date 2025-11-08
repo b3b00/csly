@@ -14,7 +14,10 @@ public enum SimpleLexer
     [LexemeLabel("en","identifier")]
     [LexemeLabel("fr","identifiant")]
     [Lexeme(GenericToken.Identifier,IdentifierType.Alpha)] IDENTIFIER = 20,
-    EOF = 0
+    IDENTIFIER = 1,
+    
+    [Sugar("_")]
+    PASSE = 2,
 
     #endregion
 }
@@ -27,8 +30,13 @@ public class SimpleParser {
         return "root";
     }
     
-    [Production("skips : SKIP*")]
-    public string Skips(list<Token<SimpleLexer>> skips) {
-        return $"{skips.Count} skips";
+    [Production("skips : SKIP skips")]
+    public string Skips(Token<SimpleLexer> skip , string other) {
+        return $"1 SKIP + {other}";
     }
+    
+    [Production("skips : PASSE skips")]
+        public string Passe(Token<SimpleLexer> passes, string other) {
+            return $"1 passe + {other}";
+        }
 }

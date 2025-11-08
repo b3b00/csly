@@ -16,27 +16,7 @@ public class Rule
     {
         this.Head = head;
         this.Clauses = clauses;
-        _name = $"{head}_";
-        foreach (var clause in clauses)
-        {
-            if (clause is NonTerminalClause)
-            {
-                _name += clause.Name;
-            }
-
-            if (clause is TerminalClause terminal)
-            {
-                if (terminal.IsExplicit)
-                {
-                    // STATIC : convert non letter or digit chars
-                    _name += $"_{terminal.Name}";
-                }
-                else
-                {
-                    _name += $"_{terminal.Name}";
-                }
-            }
-        }
+        _name = head;
     }
     
      
