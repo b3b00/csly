@@ -3,7 +3,11 @@ namespace sly.sourceGenerator.staticParserTemplates;
 public class RuleParserTemplate
 {
     public const string Template =
-        @"public SyntaxParseResult<<#LEXER#>, <#OUTPUT#>> ParseRule_<#HEAD#>_<#INDEX#>(List<Token<<#LEXER#>>> tokens, int position)
+        @"
+///////////////////////////////////////
+// RULE <#RULESTRING#>
+///////////////////////////////////////
+public SyntaxParseResult<<#LEXER#>, <#OUTPUT#>> ParseRule_<#HEAD#>_<#INDEX#>(List<Token<<#LEXER#>>> tokens, int position)
                                          {
                                              var result = new SyntaxParseResult<<#LEXER#>, <#OUTPUT#>>();
                                              

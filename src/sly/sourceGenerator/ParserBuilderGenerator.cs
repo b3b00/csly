@@ -155,7 +155,7 @@ public class ParserBuilderGenerator
             }
         }
     
-        builder.AppendLine(content);
+        builder.AppendLine(content).AppendLine();
     }
     
     private void GenerateNonTerminal(NonTerminalClause nonTerminalClause, StringBuilder builder)
@@ -178,7 +178,7 @@ public class ParserBuilderGenerator
             {
                 {"<#CALLS#>", calls.ToString()}
             });
-        builder.AppendLine(content);
+        builder.AppendLine(content).AppendLine();
     }
     
     private void GenerateRule(Rule rule, StringBuilder builder, int index)
@@ -203,7 +203,10 @@ public class ParserBuilderGenerator
                 {
                     // STATIC : later , manage discarded tokens
                     call = _templateEngine.ApplyTemplate("terminalClause.txt", terminalClause.Name,
-                        additional:new Dictionary<string,string>() {{"<#INDEX#>",i.ToString()}});
+                        additional:new Dictionary<string,string>()
+                        {
+                            {"<#INDEX#>",i.ToString()}
+                        });
                     AddClause(terminalClause);
                 }
     
@@ -213,19 +216,21 @@ public class ParserBuilderGenerator
                         additional:new Dictionary<string,string>() {{"<#INDEX#>",i.ToString()}});
                     AddClause(nonTerminalClause);
                 }
-                clausesBuilder.AppendLine(call);
+                clausesBuilder.AppendLine(call).AppendLine();
             }
         }
-    
-        builder.AppendLine(_templateEngine.ApplyTemplate("ruleParser.txt", rule.Name, 
+
+        var content = _templateEngine.ApplyTemplate("ruleParser.txt", rule.Name,
             additional: new Dictionary<string, string>()
             {
-                {"<#CLAUSES#>",clausesBuilder.ToString()},
-                {"<#RULE_COUNT#>",(rule.Clauses.Count-1).ToString()},
-                {"<#CHILDREN#>",string.Join(", ", children)},
-                {"<#HEAD#>", rule.Head},
-                {"<#INDEX#>",index.ToString()},
-            }));
+                { "<#CLAUSES#>", clausesBuilder.ToString() },
+                { "<#RULE_COUNT#>", (rule.Clauses.Count - 1).ToString() },
+                { "<#CHILDREN#>", string.Join(", ", children) },
+                { "<#HEAD#>", rule.Head },
+                { "<#INDEX#>", index.ToString() },
+                { "<#RULESTRING#>", $"{rule.Head} : {string.Join(" ", rule.Clauses.Select(x => x.Name))}" },
+            });
+        builder.AppendLine(content);
     }
 
     private void AddRule(Rule rule)

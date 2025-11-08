@@ -1,3 +1,5 @@
+
+// <#RULESTRING#>
 public SyntaxParseResult<<#LEXER#>, <#OUTPUT#>> ParseRule_<#HEAD#>_<#INDEX#>(List<Token<<#LEXER#>>> tokens, int position)
     {
         var result = new SyntaxParseResult<<#LEXER#>, <#OUTPUT#>>();

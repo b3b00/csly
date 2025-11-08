@@ -4,7 +4,7 @@ public class NonTerminalParserTemplate
 {
     // STATIC this is not the right template. 
     public const string MainTemplate =
-        @"public SyntaxParseResult<<#LEXER#>, <#OUTPUT#>> ParseNonTerminal_root(List<Token<<#LEXER#>>> tokens, int position)
+        @"public SyntaxParseResult<<#LEXER#>, <#OUTPUT#>> ParseNonTerminal_<#NAME#>(List<Token<<#LEXER#>>> tokens, int position)
     {
         var result = new SyntaxParseResult<<#LEXER#>, <#OUTPUT#>>();
         var token = tokens[position];
