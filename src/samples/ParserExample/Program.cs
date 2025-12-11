@@ -1357,7 +1357,8 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            testIssue516();
+            TestIssue596GettingStartedParser();
+            //testIssue516();
             //TestIssue507();
             //TestFStrings();
             //TestIssue495();
@@ -1848,6 +1849,21 @@ else
               IndentedWhileTests tests = new IndentedWhileTests();
               tests.TestFString();
           }
+
+
+        private static void TestIssue596GettingStartedParser() {             
+            var parserInstance = new GettingStartedParser();
+            var builder = new ParserBuilder<GettingStartedLexer, int>();
+            var buildResult = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression");
+            Assert.True(buildResult.IsOk);
+            var parser = buildResult.Result;
+            var result = parser.Parse("1+2+3");
+            Assert.True(result.IsOk);
+            Assert.Equal(6, result.Result);
+
+            result = parser.Parse("");
+            Assert.True(result.IsError);
+        }
     }
 
     public enum TestGrammarToken

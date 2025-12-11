@@ -47,12 +47,15 @@ namespace sly.parser
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(ErrorMessage);
-            var theLine = fullSource.GetLines()[line];
-            var tab = " ".Multiply(line.ToString().Length);
-            sb.Append(tab).AppendLine(" |");
-            sb.Append(line).Append(" |").AppendLine(theLine);
-            sb.Append($"{tab} |").Append(" ".Multiply(column)).Append("^^^").AppendLine($" {message}");
-            
+            var allLines = fullSource.GetLines();
+            if (line < allLines.Count)
+            {
+                var theLine = fullSource.GetLines()[line];
+                var tab = " ".Multiply(line.ToString().Length);
+                sb.Append(tab).AppendLine(" |");
+                sb.Append(line).Append(" |").AppendLine(theLine);
+                sb.Append($"{tab} |").Append(" ".Multiply(column)).Append("^^^").AppendLine($" {message}");
+            }
             return sb.ToString();
         }
     }
