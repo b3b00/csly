@@ -19,7 +19,18 @@ namespace sly.parser.generator
 
         public bool BroadenTokenWindow { get; set; } = false;
         
-        public bool AutoCloseIndentations { get; set; } 
+        public bool AutoCloseIndentations { get; set; }
+        
+        /// <summary>
+        /// If true, returns all possible derivations in case of ambiguity, otherwise returns the first one (default behavior)
+        /// </summary>
+        public bool CaptureAmbiguities { get; set; } = false;
+        
+        /// <summary>
+        /// Ambiguity resolution strategy to apply when CaptureAmbiguities is false. Default is First.
+        /// </summary>
+        public AmbiguityResolutionStrategy AmbiguityStrategy { get; set; } 
+            = AmbiguityResolutionStrategy.First; 
 
         public void AddNonTerminalIfNotExists(NonTerminal<IN, OUT> nonTerminal)
         {

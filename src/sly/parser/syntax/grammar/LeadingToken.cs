@@ -50,7 +50,7 @@ namespace sly.parser.syntax.grammar
                 return token.IsUnIndent;
             }
 
-            return TokenId.Equals(token.TokenID);
+            return !token.IsEOS && TokenId.Equals(token.TokenID);
         }
 
         [ExcludeFromCodeCoverage]

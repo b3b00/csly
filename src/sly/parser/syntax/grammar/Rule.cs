@@ -212,6 +212,12 @@ namespace sly.parser.syntax.grammar
         
         public bool Match(IList<Token<IN>> tokens, int position, ParserConfiguration<IN,OUT> configuration)
         {
+            // Check if position is within bounds
+            if (position >= tokens.Count)
+            {
+                return MayBeEmpty;
+            }
+            
             bool activateBroadWindow = configuration.BroadenTokenWindow;
             if (activateBroadWindow && Clauses.Count >= 2 && Clauses[0] is TerminalClause<IN,OUT> startingTerminalClause && Clauses[1] is NonTerminalClause<IN,OUT> nTerm)
             {
@@ -223,7 +229,7 @@ namespace sly.parser.syntax.grammar
                 {
                     var secondPossibleLeadings =
                         configuration.NonTerminals[nTerm.NonTerminalName].GetPossibleLeadingTokens();
-                    if (secondPossibleLeadings.Exists(x => x.Match(tokens[position+1])) || nTerm.MayBeEmpty())
+                    if ((position + 1 < tokens.Count && secondPossibleLeadings.Exists(x => x.Match(tokens[position+1]))) || nTerm.MayBeEmpty())
                     {
                         return true;
                     }

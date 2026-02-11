@@ -19,6 +19,20 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct, En
         }
 
         var result = new SyntaxParseResult<IN, OUT>();
+        
+        // Check if position is within bounds
+        if (position >= tokens.Length)
+        {
+            result.IsError = true;
+            result.EndingPosition = position;
+            var eosToken = new Token<IN> { IsEOS = true };
+            result.Root = new SyntaxLeaf<IN, OUT>(eosToken, terminal.Discarded);
+            result.HasByPassNodes = false;
+            result.AddError(new UnexpectedTokenSyntaxError<IN>(eosToken, LexemeLabels, I18n, terminal.ExpectedToken));
+            parsingContext.Memoize(terminal, position, result);
+            return result;
+        }
+        
         result.IsError = !terminal.Check(tokens[position]);
         result.EndingPosition = !result.IsError ? position + 1 : position;
         var token = tokens[position];

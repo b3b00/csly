@@ -4,6 +4,7 @@ using sly.parser.generator;
 namespace ParserExample;
 
 [ParserRoot("root")]
+[FirstDerivation]
 public class ExprParser
 {
     [Production("root : ExprParser_expressions")]

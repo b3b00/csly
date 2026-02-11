@@ -5,6 +5,7 @@ using sly.parser.generator;
 namespace simpleExpressionParser;
 
 [ParserRoot("root")]
+[FirstDerivation]
 //[BroadenTokenWindow]
 public class GenericSimpleExpressionParser
 {

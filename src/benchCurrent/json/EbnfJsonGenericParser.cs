@@ -156,6 +156,7 @@ namespace bench.json
     
      [BroadenTokenWindow]
     [ParserRoot("root")]
+     [FirstDerivation]
     public class EbnfJsonGenericParserStringNotEscaped
     {
         #region root

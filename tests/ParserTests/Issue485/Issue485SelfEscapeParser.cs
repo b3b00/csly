@@ -4,6 +4,7 @@ using sly.parser.generator;
 namespace ParserTests.Issue485;
 
 [ParserRoot("root")]
+[FirstDerivation]
 public class Issue485SelfEscapeParser
 {
     [Production("root : PROPERTY[d] COLON[d] STRING")]

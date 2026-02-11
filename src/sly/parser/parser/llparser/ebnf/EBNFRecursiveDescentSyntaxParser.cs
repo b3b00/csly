@@ -28,9 +28,13 @@ namespace sly.parser.llparser.ebnf
             }
             
             var currentPosition = position;
+            var furthestPosition = position;
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
             var children = new List<ISyntaxNode<IN, OUT>>();
+            List<ISyntaxNode<IN, OUT>> choiceAlternatives = null;
+            int choiceChildIndex = -1;
+            List<AmbiguityInfo<IN, OUT>> choiceAmbiguities = null;
             if (rule.Match(tokens, position, Configuration) && rule.Clauses != null && rule.Clauses.Count > 0)
             {
                 children = new List<ISyntaxNode<IN, OUT>>();
@@ -53,8 +57,8 @@ namespace sly.parser.llparser.ebnf
                                 errors.Add(new UnexpectedTokenSyntaxError<IN>(tok, LexemeLabels, I18n,
                                     termClause.ExpectedToken));
                             }
-
                             isError = isError || termRes.IsError;
+                            furthestPosition = Math.Max(furthestPosition, termRes.EndingPosition);
                             break;
                         }
                         case NonTerminalClause<IN, OUT> nonTerminalClause:
@@ -71,8 +75,8 @@ namespace sly.parser.llparser.ebnf
                             {
                                 errors.AddRange(nonTerminalResult.GetErrors());
                             }
-
                             isError = isError || nonTerminalResult.IsError;
+                            furthestPosition = Math.Max(furthestPosition, nonTerminalResult.EndingPosition);
                             break;
                         }
                         case OneOrMoreClause<IN, OUT> _:
@@ -104,8 +108,8 @@ namespace sly.parser.llparser.ebnf
                                 if (manyResult.GetErrors() != null && manyResult.GetErrors().Count > 0)
                                     errors.AddRange(manyResult.GetErrors());
                             }
-
                             isError = manyResult.IsError;
+                            furthestPosition = Math.Max(furthestPosition, manyResult.EndingPosition);
                             break;
                         }
                         case OptionClause<IN, OUT> option:
@@ -113,6 +117,7 @@ namespace sly.parser.llparser.ebnf
                             var optionResult = ParseOption(tokens, option, rule, currentPosition, parsingContext);
                             currentPosition = optionResult.EndingPosition;
                             children.Add(optionResult.Root);
+                            furthestPosition = Math.Max(furthestPosition, optionResult.EndingPosition);
                             break;
                         }
                         case ChoiceClause<IN, OUT> choice:
@@ -123,10 +128,19 @@ namespace sly.parser.llparser.ebnf
                             {
                                 errors.AddRange(choiceResult.GetErrors());
                             }
-
                             isError = choiceResult.IsError;
-
+                            if (Configuration.CaptureAmbiguities && choiceResult.HasAmbiguity)
+                            {
+                                choiceAlternatives = choiceResult.AlternativeRoots;
+                                choiceChildIndex = children.Count;
+                                if (choiceResult.Ambiguities != null && choiceResult.Ambiguities.Any())
+                                {
+                                    choiceAmbiguities ??= new List<AmbiguityInfo<IN, OUT>>();
+                                    choiceAmbiguities.AddRange(choiceResult.Ambiguities);
+                                }
+                            }
                             children.Add(choiceResult.Root);
+                            furthestPosition = Math.Max(furthestPosition, choiceResult.EndingPosition);
                             break;
                         }
                     }
@@ -138,7 +152,7 @@ namespace sly.parser.llparser.ebnf
             var result = new SyntaxParseResult<IN, OUT>();
             result.IsError = isError;
             result.AddErrors(errors);
-            result.EndingPosition = currentPosition;
+            result.EndingPosition = furthestPosition;
             if (!isError)
             {
                 SyntaxNode<IN, OUT> node = null;
@@ -173,6 +187,39 @@ namespace sly.parser.llparser.ebnf
                     result.Root = node;
                     result.IsEnded = tokens[result.EndingPosition].IsEOS
                                      || node.IsEpsilon && tokens[result.EndingPosition+1].IsEOS;  
+                }
+
+                if (Configuration.CaptureAmbiguities && choiceAlternatives != null && choiceAlternatives.Count > 1)
+                {
+                    var alternatives = new List<ISyntaxNode<IN, OUT>>();
+                    foreach (var alternative in choiceAlternatives)
+                    {
+                        var altChildren = new List<ISyntaxNode<IN, OUT>>(children);
+                        if (choiceChildIndex >= 0 && choiceChildIndex < altChildren.Count)
+                        {
+                            altChildren[choiceChildIndex] = alternative;
+                        }
+
+                        SyntaxNode<IN, OUT> altNode;
+                        if (rule.IsSubRule)
+                        {
+                            altNode = new GroupSyntaxNode<IN, OUT>(nonTerminalName, altChildren);
+                            altNode = ManageExpressionRules(rule, altNode);
+                        }
+                        else
+                        {
+                            altNode = new SyntaxNode<IN, OUT>(nonTerminalName, altChildren);
+                            altNode.ForcedName = rule.ForcedName;
+                            altNode.Name = string.IsNullOrEmpty(rule.NodeName) ? nonTerminalName : rule.NodeName;
+                            altNode.ExpressionAffix = rule.ExpressionAffix;
+                            altNode = ManageExpressionRules(rule, altNode);
+                        }
+
+                        alternatives.Add(altNode);
+                    }
+
+                    result.AlternativeRoots = alternatives;
+                    result.Ambiguities = choiceAmbiguities;
                 }
             }
 

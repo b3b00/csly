@@ -8,6 +8,7 @@ namespace jsonparser
 {
     [BroadenTokenWindow]
     [ParserRoot("root")]
+    [FirstDerivation]
     public class EbnfJsonGenericParser
     {
         #region root
@@ -158,6 +159,7 @@ namespace jsonparser
     
      [BroadenTokenWindow]
     [ParserRoot("root")]
+     [FirstDerivation]
     public class EbnfJsonGenericParserStringNotEscaped
     {
         #region root

@@ -11,6 +11,7 @@ using sly.parser.parser;
 namespace SimpleTemplate
 {
     [ParserRoot("template")]
+    [FirstDerivation]
     public class TemplateParser
     {
         

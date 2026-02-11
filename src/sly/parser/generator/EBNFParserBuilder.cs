@@ -40,6 +40,23 @@ namespace sly.parser.generator
             bool broadenTokenWindow = parserInstance.GetType().GetCustomAttribute<BroadenTokenWindowAttribute>() != null;
 
             bool autoCloseIndentations = parserInstance.GetType().GetCustomAttribute<AutoCloseIndentationsAttribute>() != null;
+            
+            AmbiguityResolutionStrategy ambiguityResolutionStrategy = AmbiguityResolutionStrategy.First;
+
+            if (parserInstance.GetType().GetCustomAttribute<LongestDerivationAttribute>() != null)
+            {
+                ambiguityResolutionStrategy = AmbiguityResolutionStrategy.Longest;
+            }
+            
+            if (parserInstance.GetType().GetCustomAttribute<AllDerivationsAttribute>() != null)
+            {
+                ambiguityResolutionStrategy = AmbiguityResolutionStrategy.All;
+            }
+
+            if (parserInstance.GetType().GetCustomAttribute<ThrowsErrorOnAmbiguityAttribute>() != null)
+            {
+                ambiguityResolutionStrategy = AmbiguityResolutionStrategy.ThrowException;
+            }
 
             var ruleparser = new RuleParser<IN, OUT>();
             var builder = new ParserBuilder<EbnfTokenGeneric, GrammarNode<IN, OUT>>(I18N);
@@ -57,6 +74,8 @@ namespace sly.parser.generator
                 configuration.UseMemoization = useMemoization;
                 configuration.BroadenTokenWindow = broadenTokenWindow;
                 configuration.AutoCloseIndentations = autoCloseIndentations;
+                configuration.AmbiguityStrategy = ambiguityResolutionStrategy;
+                configuration.CaptureAmbiguities = ambiguityResolutionStrategy != AmbiguityResolutionStrategy.First;
                 LeftRecursionChecker<IN, OUT> recursionChecker = new LeftRecursionChecker<IN, OUT>();
 
                 SetEmptyNonTerminals(configuration);
@@ -72,6 +91,7 @@ namespace sly.parser.generator
                 }
 
                 configuration.StartingRule = rootRule;
+                
             }
             catch (Exception e)
             {
