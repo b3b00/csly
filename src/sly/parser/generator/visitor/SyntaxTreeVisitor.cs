@@ -4,6 +4,7 @@ using System.Reflection;
 using sly.lexer;
 using sly.parser.parser;
 using sly.parser.syntax.tree;
+using sly.parser.generator;
 using static sly.parser.parser.ValueOptionConstructors;
 
 namespace sly.parser.generator.visitor
@@ -142,7 +143,7 @@ namespace sly.parser.generator.visitor
 
         public OUT VisitSyntaxTree(ISyntaxNode<IN, OUT> root, object context = null)
         {
-            var result = Visit(root, context);
+            var result = Visit(root, context ?? new NoContext());
             return result.ValueResult;
         }
 
@@ -192,7 +193,7 @@ namespace sly.parser.generator.visitor
                     MethodInfo method = null;
                     try
                     {
-                        if (!(context is NoContext))
+                        if (context != null && !(context is NoContext))
                         {
                             args.Add(context);
                         }

@@ -8,6 +8,7 @@ using sly.parser.generator;
 namespace XML
 {
     [ParserRoot("document")]
+    [FirstDerivation]
     public class MinimalXmlParser2
     {
 

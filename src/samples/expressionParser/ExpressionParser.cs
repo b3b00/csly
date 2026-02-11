@@ -3,6 +3,7 @@ using sly.parser.generator;
 
 namespace expressionparser
 {
+    [FirstDerivation]
     public class ExpressionParser
     {
         [NodeName("integer")]

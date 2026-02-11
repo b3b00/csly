@@ -7,6 +7,7 @@ using sly.parser.generator;
 namespace ParserTests.Issue443;
 
 [ParserRoot("root")]
+[FirstDerivation]
 public class Test443Parser
 {
     [Production("root : a b* a")]

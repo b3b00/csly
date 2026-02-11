@@ -5,6 +5,7 @@ using sly.parser.parser;
 namespace SlowEOS;
 
 [ParserRoot("root")]
+[FirstDerivation]
     public class SlowOnBadParseEosReducedPrecedences
     {
         [Production("root : SlowOnBadParseEosReducedPrecedences_expressions")]

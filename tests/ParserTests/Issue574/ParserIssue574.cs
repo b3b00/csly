@@ -10,6 +10,7 @@ using sly.parser.parser;
 namespace ParserTests.Issue574
 {
     [ParserRoot("Root")]
+    [FirstDerivation]
     public class ParserIssue574
     {
         [Production("root : Item")]

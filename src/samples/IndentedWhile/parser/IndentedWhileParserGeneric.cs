@@ -9,6 +9,7 @@ namespace csly.indentedWhileLang.parser
 {
     [UseMemoization]
     [AutoCloseIndentations]
+    [FirstDerivation]
     [ParserRoot("program")]
     public class IndentedWhileParserGeneric
     {

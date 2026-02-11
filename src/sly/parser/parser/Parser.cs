@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using sly.buildresult;
@@ -112,40 +111,151 @@ namespace sly.parser
             var result = new ParseResult<IN, OUT>();
 
             var cleaner = new SyntaxTreeCleaner<IN, OUT>();
+            if (SyntaxParser is sly.parser.llparser.bnf.RecursiveDescentSyntaxParser<IN, OUT> rdParser)
+            {
+                rdParser.Init(Configuration, startingNonTerminal ?? Configuration?.StartingRule);
+                if (Configuration != null)
+                {
+                    rdParser.Configuration.CaptureAmbiguities = Configuration.CaptureAmbiguities;
+                    rdParser.Configuration.AmbiguityStrategy = Configuration.AmbiguityStrategy;
+                }
+            }
             var syntaxResult = SyntaxParser.Parse(tokens.ToArray(), startingNonTerminal);
+            if (Configuration?.CaptureAmbiguities == true && !syntaxResult.HasAmbiguity
+                && SyntaxParser is sly.parser.llparser.bnf.RecursiveDescentSyntaxParser<IN, OUT> ambiguityParser)
+            {
+                var start = startingNonTerminal ?? ambiguityParser.StartingNonTerminal;
+                if (start != null && Configuration.NonTerminals.TryGetValue(start, out var nonTerminal))
+                {
+                    var ambiguityContext = new SyntaxParsingContext<IN, OUT>(Configuration.UseMemoization);
+                    var alternativeResults = new List<SyntaxParseResult<IN, OUT>>();
+                    foreach (var rule in nonTerminal.Rules)
+                    {
+                        var canStart = tokens.Count == 0
+                            ? rule.MayBeEmpty
+                            : (!tokens[0].IsEOS && rule.Match(tokens, 0, Configuration))
+                              || (tokens[0].IsEOS && rule.MayBeEmpty);
+                        if (!canStart)
+                        {
+                            continue;
+                        }
+
+                        var ruleResult = ambiguityParser.Parse(tokens.ToArray(), rule, 0, start, ambiguityContext);
+                        if (ruleResult.IsEnded && !ruleResult.IsError)
+                        {
+                            alternativeResults.Add(ruleResult);
+                        }
+                    }
+
+                    if (alternativeResults.Count > 1)
+                    {
+                        syntaxResult = new SyntaxParseResult<IN, OUT>
+                        {
+                            AlternativeRoots = alternativeResults.Select(r => r.Root).ToList(),
+                            EndingPosition = alternativeResults[0].EndingPosition,
+                            IsError = false,
+                            IsEnded = true,
+                            HasByPassNodes = alternativeResults.Any(r => r.HasByPassNodes),
+                            Ambiguities = new List<AmbiguityInfo<IN, OUT>>
+                            {
+                                new AmbiguityInfo<IN, OUT>
+                                {
+                                    NonTerminalName = start,
+                                    Position = 0,
+                                    AlternativeCount = alternativeResults.Count
+                                }
+                            }
+                        };
+                    }
+                }
+            }
             syntaxResult.UsesOperations = Configuration.UsesOperations;
             syntaxResult = cleaner.CleanSyntaxTree(syntaxResult);
-            if (!syntaxResult.IsError && syntaxResult.Root != null)
+            if (!syntaxResult.IsError && (syntaxResult.Root != null || syntaxResult.HasAmbiguity))
             {
-              
-                var r = Visitor.VisitSyntaxTree(syntaxResult.Root,parsingContext ?? new NoContext());
-                result.Result = r;
-                result.SyntaxTree = syntaxResult.Root;
+                // if there is ambiguity, we will have multiple roots in AlternativeRoots, and we will decide which one to visit according to the AmbiguityStrategy
+                if (syntaxResult.HasAmbiguity)
+                {
+                    result.Forest = new syntax.tree.ParseForest<IN, OUT>
+                    {
+                        Trees = syntaxResult.AlternativeRoots,
+                        Ambiguities = syntaxResult.Ambiguities
+                    };
+                    
+                    // Visit trees according to ambiguity strategy
+                    switch (Configuration.AmbiguityStrategy)
+                    {
+                        case generator.AmbiguityResolutionStrategy.First:
+                            result.Result = Visitor.VisitSyntaxTree(result.Forest.MainTree, parsingContext ?? new NoContext());
+                            break;
+                            
+                        case generator.AmbiguityResolutionStrategy.ThrowException:
+                            throw new exceptions.AmbiguousGrammarException<IN, OUT>(result.Forest);
+                            
+                        case generator.AmbiguityResolutionStrategy.All:
+                            // Do not set result.Result, let the user handle all alternatives in the forest
+                            result.Result = default(OUT);
+                            break;
+                            
+                        case generator.AmbiguityResolutionStrategy.Longest:
+                            // Visit longest derivation (assuming MainTree is the longest, otherwise we would need to determine it)
+                            result.Result = Visitor.VisitSyntaxTree(result.Forest.MainTree, parsingContext ?? new NoContext());
+                            break;
+                    }
+                }
+                else
+                {
+                    // no ambiguity, visit the single tree
+                    var r = Visitor.VisitSyntaxTree(syntaxResult.Root, parsingContext ?? new NoContext());
+                    result.Result = r;
+                    result.SyntaxTree = syntaxResult.Root;
+                }
+                
                 result.IsError = false;
             }
             else
             {
                 result.Errors = new List<ParseError>();
-                var unexpectedTokens = syntaxResult.GetErrors();
-                var byEnding = unexpectedTokens.GroupBy(x => x.UnexpectedToken.Position).OrderBy(x => x.Key);
-                var errors = new List<ParseError>();  
-                foreach (var expecting in byEnding)
+                var unexpectedTokens = syntaxResult.GetErrors() ?? new List<UnexpectedTokenSyntaxError<IN>>();
+                var errors = new List<ParseError>();
+                if (unexpectedTokens.Any())
                 {
-                    var expectingTokens = expecting.SelectMany(x => x.ExpectedTokens ?? new List<LeadingToken<IN>>()).Distinct();
-                    var expectedTokens =  expectingTokens?.ToArray();
-                    if (expectedTokens != null)
+                    var targetPosition = unexpectedTokens.Max(x => x.UnexpectedToken.PositionInTokenFlow);
+
+                    var eosPositions = unexpectedTokens
+                        .Where(x => x.UnexpectedToken.IsEOS)
+                        .Select(x => x.UnexpectedToken.PositionInTokenFlow)
+                        .ToList();
+                    if (eosPositions.Any())
                     {
-                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, LexemeLabels, I18n,
-                            expectedTokens);
-                        errors.Add(expected);
+                        var maxEosPosition = eosPositions.Max();
+                        if (maxEosPosition >= targetPosition)
+                        {
+                            targetPosition = maxEosPosition;
+                        }
                     }
-                    else
-                    {
-                        var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, LexemeLabels, I18n,
-                            new LeadingToken<IN>[]{});
-                        errors.Add(expected);
-                    }
+
+                    var targetErrors = unexpectedTokens
+                        .Where(x => x.UnexpectedToken.PositionInTokenFlow == targetPosition)
+                        .ToList();
+
+                    var expectingTokens = targetErrors
+                        .SelectMany(x => x.ExpectedTokens ?? new List<LeadingToken<IN>>())
+                        .Distinct()
+                        .ToArray();
+                    var expected = new UnexpectedTokenSyntaxError<IN>(targetErrors.First().UnexpectedToken, LexemeLabels, I18n,
+                        expectingTokens);
+                    errors.Add(expected);
                 }
+                else
+                {
+                    var fallbackToken = tokens != null && tokens.Count > 0
+                        ? tokens[Math.Min(Math.Max(syntaxResult.EndingPosition, 0), tokens.Count - 1)]
+                        : new Token<IN> { IsEOS = true };
+                    errors.Add(new UnexpectedTokenSyntaxError<IN>(fallbackToken, LexemeLabels, I18n,
+                        Array.Empty<LeadingToken<IN>>()));
+                }
+
                 result.Errors.AddRange(errors);
                 result.IsError = true;
             }

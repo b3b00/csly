@@ -3,6 +3,7 @@ using sly.parser.generator;
 
 namespace ParserTests.Issue485;
 
+[FirstDerivation]
 [ParserRoot("root")]
 public class Issue485WithCallbackParser
 {

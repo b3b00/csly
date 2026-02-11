@@ -5,6 +5,7 @@ namespace ParserTests.dateIssue;
 
 
     [ParserRoot("root")]
+[FirstDerivation]
     public class Issue554Parser
     {
         [Production("root : DOUBLE INT DATE")]

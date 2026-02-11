@@ -9,9 +9,11 @@ namespace sly.i18n
     {
         private readonly IDictionary<string, IDictionary<I18NMessage, string>> Translations;
 
-        private static I18N _instance;
+        private static readonly I18N _instance = new I18N();
 
-        public static I18N Instance => _instance ?? (_instance = new I18N());
+        public static I18N Instance => _instance;
+
+        private readonly object _lock = new object();
 
         private I18N()
         {
@@ -21,9 +23,13 @@ namespace sly.i18n
         public string GetText(string lang, I18NMessage key, params string[] args)
         {
             lang = lang ?? CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
-            if (!Translations.TryGetValue(lang, out var translation))
+            IDictionary<I18NMessage, string> translation;
+            lock (_lock)
             {
-                translation = Load(lang);
+                if (!Translations.TryGetValue(lang, out translation))
+                {
+                    translation = Load(lang);
+                }
             }
 
             
@@ -33,6 +39,11 @@ namespace sly.i18n
 
         private IDictionary<I18NMessage,string> Load(string lang)
         {
+            if (Translations.TryGetValue(lang, out var existing))
+            {
+                return existing;
+            }
+
             var translation = new Dictionary<I18NMessage, string>();
             var assembly = GetType().Assembly;
             using (var stream = assembly.GetManifestResourceStream($"sly.i18n.translations.{lang}.txt"))
@@ -60,7 +71,7 @@ namespace sly.i18n
                 }
                 else
                 {
-                    return Load("en");
+                    return lang == "en" ? translation : Load("en");
                 }
             }
 

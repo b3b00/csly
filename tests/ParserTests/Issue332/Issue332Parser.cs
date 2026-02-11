@@ -7,6 +7,7 @@ namespace ParserTests.Issue332;
 
 
 [ParserRoot("root")]
+[FirstDerivation]
 public class Issue332Parser
 {
     [Production("root: statement*")]

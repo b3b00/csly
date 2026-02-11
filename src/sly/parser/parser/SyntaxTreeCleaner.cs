@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using sly.parser.syntax.tree;
 
 namespace sly.parser.parser
@@ -8,11 +9,16 @@ namespace sly.parser.parser
     {
         public SyntaxParseResult<IN, OUT> CleanSyntaxTree(SyntaxParseResult<IN, OUT> result)
         {
-            var tree = result.Root;
-            if (tree != null)
+            if (result.AlternativeRoots != null && result.AlternativeRoots.Any())
             {
-                if (result.UsesOperations) tree = SetAssociativity(tree);
-                result.Root = tree;
+                for (int i = 0; i < result.AlternativeRoots.Count; i++)
+                {
+                    var tree = result.AlternativeRoots[i];
+                    if (tree != null && result.UsesOperations)
+                    {
+                        result.AlternativeRoots[i] = SetAssociativity(tree);
+                    }
+                }
             }
 
             return result;

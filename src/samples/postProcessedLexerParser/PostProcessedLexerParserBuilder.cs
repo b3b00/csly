@@ -35,7 +35,11 @@ namespace postProcessedLexerParser
                 {
                     newTokens.Add(new Token<FormulaToken>()
                     {
-                        TokenID = FormulaToken.TIMES
+                        TokenID = FormulaToken.TIMES,
+                        IsEOS = false,
+                        End = false,
+                        IsExplicit =  false,
+                        SpanValue = "*".ToCharArray(),
                     });
                 }
                 newTokens.Add(tokens[i]);
