@@ -77,7 +77,8 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                     {
                         AlternativeRoots = maxResults.SelectMany(r => r.AlternativeRoots).ToList(),
                         EndingPosition = maxLength,
-                        IsError = false
+                        IsError = false,
+                        AllResults = okResults
                     };
                     
                     // save ambiguity
@@ -101,6 +102,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 else
                 {
                     result = maxResults[0];
+                    result.AllResults = okResults;
                 }
                 
                 if (clause.IsTerminalChoice && clause.IsDiscarded && result.Root is SyntaxLeaf<IN, OUT> leaf)

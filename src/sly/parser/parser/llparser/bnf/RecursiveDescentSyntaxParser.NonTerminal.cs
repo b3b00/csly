@@ -66,7 +66,10 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct, En
         if (Configuration.CaptureAmbiguities)
         {
             // filter only ok results
-            var okResults = rulesResults.Where(r => r.IsOk).ToList();
+            var okResults = rulesResults
+                .SelectMany(r => r.AllResults ?? new List<SyntaxParseResult<IN, OUT>> { r })
+                .Where(r => r.IsOk)
+                .ToList();
             
             if (okResults.Any())
             {
@@ -130,7 +133,6 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct, En
                 foreach(var ko in maxKos) {
                     result.AddErrors(ko.GetErrors().ToArray());
                 }
-                result.AllResults.Add(result);
             }
         }
         else

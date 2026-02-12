@@ -26,6 +26,11 @@ namespace sly.parser.llparser.ebnf
             {
                 return ParseInfixExpressionRule(tokens, rule, position, nonTerminalName, parsingContext);
             }
+
+            if (Configuration.CaptureAmbiguities)
+            {
+                return ParseWithAmbiguities(tokens, rule, position, nonTerminalName, parsingContext);
+            }
             
             var currentPosition = position;
             var furthestPosition = position;
@@ -220,6 +225,215 @@ namespace sly.parser.llparser.ebnf
 
                     result.AlternativeRoots = alternatives;
                     result.Ambiguities = choiceAmbiguities;
+                }
+            }
+
+            return result;
+        }
+
+        private SyntaxParseResult<IN, OUT> ParseWithAmbiguities(Token<IN>[] tokens, Rule<IN, OUT> rule, int position,
+            string nonTerminalName, SyntaxParsingContext<IN, OUT> parsingContext)
+        {
+            var furthestPosition = position;
+            var errors = new List<UnexpectedTokenSyntaxError<IN>>();
+            var isError = false;
+            var ambiguities = new List<AmbiguityInfo<IN, OUT>>();
+            var paths = new List<(List<ISyntaxNode<IN, OUT>> children, int position, bool hasByPassNodes)>
+            {
+                (new List<ISyntaxNode<IN, OUT>>(), position, false)
+            };
+
+            if (rule.Match(tokens, position, Configuration) && rule.Clauses != null && rule.Clauses.Count > 0)
+            {
+                foreach (var clause in rule.Clauses)
+                {
+                    var newPaths = new List<(List<ISyntaxNode<IN, OUT>> children, int position, bool hasByPassNodes)>();
+                    foreach (var path in paths)
+                    {
+                        SyntaxParseResult<IN, OUT> clauseRes = null;
+                        switch (clause)
+                        {
+                            case TerminalClause<IN, OUT> termClause:
+                                clauseRes = ParseTerminal(tokens, termClause, path.position, parsingContext);
+                                break;
+                            case NonTerminalClause<IN, OUT> nonTerminalClause:
+                                clauseRes = ParseNonTerminal(tokens, nonTerminalClause, path.position, parsingContext);
+                                break;
+                            case OneOrMoreClause<IN, OUT> oneOrMore:
+                                clauseRes = ParseOneOrMore(tokens, oneOrMore, path.position, parsingContext);
+                                break;
+                            case ZeroOrMoreClause<IN, OUT> zeroOrMore:
+                                clauseRes = ParseZeroOrMore(tokens, zeroOrMore, path.position, parsingContext);
+                                break;
+                            case RepeatClause<IN, OUT> repeat:
+                                clauseRes = ParseRepeat(tokens, repeat, path.position, parsingContext);
+                                break;
+                            case OptionClause<IN, OUT> option:
+                                clauseRes = ParseOption(tokens, option, rule, path.position, parsingContext);
+                                break;
+                            case ChoiceClause<IN, OUT> choice:
+                                clauseRes = ParseChoice(tokens, choice, path.position, parsingContext);
+                                break;
+                        }
+
+                        if (clauseRes != null && !clauseRes.IsError)
+                        {
+                            if (clauseRes.GetErrors() != null && clauseRes.GetErrors().Count > 0)
+                            {
+                                errors.AddRange(clauseRes.GetErrors());
+                            }
+
+                            var resultsToProcess = new List<SyntaxParseResult<IN, OUT>>();
+                            if (clauseRes.AllResults != null && clauseRes.AllResults.Count > 0)
+                            {
+                                resultsToProcess.AddRange(clauseRes.AllResults);
+                            }
+                            else
+                            {
+                                resultsToProcess.Add(clauseRes);
+                            }
+
+                            foreach (var res in resultsToProcess)
+                            {
+                                var alternatives = res.AlternativeRoots;
+                                if (alternatives == null || alternatives.Count == 0)
+                                {
+                                    alternatives = new List<ISyntaxNode<IN, OUT>> { res.Root };
+                                }
+
+                                foreach (var alt in alternatives)
+                                {
+                                    var newChildren = new List<ISyntaxNode<IN, OUT>>(path.children) { alt };
+                                    var newHasByPassNodes = path.hasByPassNodes || res.HasByPassNodes;
+                                    newPaths.Add((newChildren, res.EndingPosition, newHasByPassNodes));
+                                }
+
+                                if (res.Ambiguities != null)
+                                {
+                                    ambiguities.AddRange(res.Ambiguities);
+                                }
+                            }
+                        }
+                        else if (clauseRes != null)
+                        {
+                            errors.AddRange(clauseRes.GetErrors());
+                        }
+                    }
+
+                    if (newPaths.Any())
+                    {
+                        furthestPosition = Math.Max(furthestPosition, newPaths.Max(p => p.position));
+                    }
+
+                    paths = newPaths;
+                    if (paths.Count == 0)
+                    {
+                        isError = true;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                isError = true;
+            }
+
+            var result = new SyntaxParseResult<IN, OUT>();
+            result.IsError = isError;
+            result.EndingPosition = furthestPosition;
+            result.AddErrors(errors);
+
+            if (!isError)
+            {
+                var resultsByPosition = paths.GroupBy(p => p.position).ToList();
+                var results = new List<SyntaxParseResult<IN, OUT>>();
+
+                foreach (var group in resultsByPosition)
+                {
+                    var pos = group.Key;
+                    var res = new SyntaxParseResult<IN, OUT>
+                    {
+                        EndingPosition = pos,
+                        IsError = false,
+                        Ambiguities = ambiguities,
+                        AlternativeRoots = new List<ISyntaxNode<IN, OUT>>(),
+                        HasByPassNodes = group.Any(p => p.hasByPassNodes)
+                    };
+
+                    foreach (var path in group)
+                    {
+                        var namedChildren = new List<ISyntaxNode<IN, OUT>>(path.children);
+                        if (rule.SubNodeNames != null && rule.SubNodeNames.Length > 0)
+                        {
+                            for (int i = 0; i < Math.Min(rule.SubNodeNames.Length, namedChildren.Count); i++)
+                            {
+                                var subNodeName = rule.SubNodeNames[i];
+                                if (subNodeName != null)
+                                {
+                                    namedChildren[i].ForceName(subNodeName);
+                                }
+                            }
+                        }
+
+                        SyntaxNode<IN, OUT> node;
+                        if (rule.IsSubRule)
+                        {
+                            node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, namedChildren);
+                            node = ManageExpressionRules(rule, node);
+                        }
+                        else
+                        {
+                            node = new SyntaxNode<IN, OUT>(nonTerminalName, namedChildren);
+                            node.ForcedName = rule.ForcedName;
+                            node.Name = string.IsNullOrEmpty(rule.NodeName) ? nonTerminalName : rule.NodeName;
+                            node.ExpressionAffix = rule.ExpressionAffix;
+                            node = ManageExpressionRules(rule, node);
+                        }
+
+                        if (node.IsByPassNode)
+                        {
+                            res.AlternativeRoots.Add(namedChildren[0]);
+                        }
+                        else
+                        {
+                            res.AlternativeRoots.Add(node);
+                        }
+
+                        bool isEnded;
+                        if (pos >= tokens.Length)
+                        {
+                            isEnded = true;
+                        }
+                        else if (rule.IsSubRule)
+                        {
+                            isEnded = pos >= tokens.Length - 1
+                                      || (pos == tokens.Length - 2 && tokens[tokens.Length - 1].IsEOS);
+                        }
+                        else
+                        {
+                            var hasNext = pos + 1 < tokens.Length;
+                            isEnded = tokens[pos].IsEOS || (node.IsEpsilon && hasNext && tokens[pos + 1].IsEOS);
+                        }
+
+                        res.IsEnded = res.IsEnded || isEnded;
+                    }
+
+                    results.Add(res);
+                }
+
+                if (results.Count > 0)
+                {
+                    var best = results.OrderByDescending(r => r.EndingPosition).First();
+                    result.AlternativeRoots = best.AlternativeRoots;
+                    result.EndingPosition = best.EndingPosition;
+                    result.IsEnded = best.IsEnded;
+                    result.HasByPassNodes = best.HasByPassNodes;
+                    result.AllResults = results;
+                    result.Ambiguities = ambiguities;
+                }
+                else
+                {
+                    result.IsError = true;
                 }
             }
 
