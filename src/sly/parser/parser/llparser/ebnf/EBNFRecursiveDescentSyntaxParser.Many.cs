@@ -19,6 +19,143 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             return parseResult;
         }
 
+        if (Configuration.CaptureAmbiguities)
+        {
+            var innerClauseAmbi = clause.Clause;
+            var paths = new List<(List<ISyntaxNode<IN, OUT>> children, int position, bool hasByPassNodes)>
+            {
+                (new List<ISyntaxNode<IN, OUT>>(), position, false)
+            };
+            var innerErrorsAmbi = new List<UnexpectedTokenSyntaxError<IN>>();
+
+            bool isManyTokens = false;
+            bool isManyValues = false;
+            bool isManyGroups = false;
+            if (innerClauseAmbi is TerminalClause<IN, OUT>)
+            {
+                isManyTokens = true;
+            }
+            else if (innerClauseAmbi is NonTerminalClause<IN, OUT> nonTermClause)
+            {
+                isManyGroups = nonTermClause.IsGroup;
+                isManyValues = !nonTermClause.IsGroup;
+            }
+            else if (innerClauseAmbi is ChoiceClause<IN, OUT> choiceClause)
+            {
+                isManyTokens = choiceClause.IsTerminalChoice;
+                isManyValues = choiceClause.IsNonTerminalChoice;
+            }
+
+            while (true)
+            {
+                var newPaths = new List<(List<ISyntaxNode<IN, OUT>> children, int position, bool hasByPassNodes)>();
+                foreach (var path in paths)
+                {
+                    SyntaxParseResult<IN, OUT> innerResult = null;
+                    switch (innerClauseAmbi)
+                    {
+                        case TerminalClause<IN, OUT> term:
+                            innerResult = ParseTerminal(tokens, term, path.position, parsingContext);
+                            break;
+                        case NonTerminalClause<IN, OUT> nonTerm:
+                            innerResult = ParseNonTerminal(tokens, nonTerm, path.position, parsingContext);
+                            break;
+                        case ChoiceClause<IN, OUT> choice:
+                            innerResult = ParseChoice(tokens, choice, path.position, parsingContext);
+                            break;
+                        default:
+                            throw new InvalidOperationException("unable to apply repeater to " + innerClauseAmbi.GetType().Name);
+                    }
+
+                    if (innerResult != null && !innerResult.IsError && innerResult.EndingPosition > path.position)
+                    {
+                        var resultsToProcess = innerResult.AllResults ?? new List<SyntaxParseResult<IN, OUT>> { innerResult };
+                        foreach (var res in resultsToProcess)
+                        {
+                            var alternatives = res.AlternativeRoots;
+                            if (alternatives == null || alternatives.Count == 0)
+                            {
+                                alternatives = new List<ISyntaxNode<IN, OUT>> { res.Root };
+                            }
+
+                            foreach (var alt in alternatives)
+                            {
+                                var newChildren = new List<ISyntaxNode<IN, OUT>>(path.children) { alt };
+                                var newHasByPassNodes = path.hasByPassNodes || res.HasByPassNodes;
+                                newPaths.Add((newChildren, res.EndingPosition, newHasByPassNodes));
+                            }
+
+                            if (res.GetErrors() != null)
+                            {
+                                innerErrorsAmbi.AddRange(res.GetErrors());
+                            }
+                        }
+                    }
+                    else if (innerResult != null)
+                    {
+                        innerErrorsAmbi.AddRange(innerResult.GetErrors());
+                    }
+                }
+
+                if (newPaths.Count == 0)
+                {
+                    break;
+                }
+
+                paths = newPaths;
+            }
+
+            var ambiguousResult = new SyntaxParseResult<IN, OUT>();
+            var resultsByPosition = paths.GroupBy(p => p.position).ToList();
+            var results = new List<SyntaxParseResult<IN, OUT>>();
+
+            foreach (var group in resultsByPosition)
+            {
+                var pos = group.Key;
+                var res = new SyntaxParseResult<IN, OUT>
+                {
+                    EndingPosition = pos,
+                    IsError = false,
+                    AlternativeRoots = new List<ISyntaxNode<IN, OUT>>(),
+                    HasByPassNodes = group.Any(p => p.hasByPassNodes)
+                };
+
+                foreach (var path in group)
+                {
+                    var manyNodeAlt = new ManySyntaxNode<IN, OUT>($"{innerClauseAmbi}*")
+                    {
+                        IsManyTokens = isManyTokens,
+                        IsManyValues = isManyValues,
+                        IsManyGroups = isManyGroups
+                    };
+                    manyNodeAlt.Children.AddRange(path.children);
+                    res.AlternativeRoots.Add(manyNodeAlt);
+                }
+
+                res.IsEnded = pos >= tokens.Length || (pos < tokens.Length && tokens[pos].IsEOS);
+                results.Add(res);
+            }
+
+            if (results.Count > 0)
+            {
+                var best = results.OrderByDescending(r => r.EndingPosition).First();
+                ambiguousResult.AlternativeRoots = best.AlternativeRoots;
+                ambiguousResult.EndingPosition = best.EndingPosition;
+                ambiguousResult.IsEnded = best.IsEnded;
+                ambiguousResult.HasByPassNodes = best.HasByPassNodes;
+                ambiguousResult.AllResults = results;
+            }
+            else
+            {
+                ambiguousResult.IsError = true;
+                ambiguousResult.EndingPosition = position;
+            }
+
+            ambiguousResult.AddErrors(innerErrorsAmbi);
+            parsingContext.Memoize(clause, position, ambiguousResult);
+            return ambiguousResult;
+        }
+
         var result = new SyntaxParseResult<IN, OUT>();
         var manyNode = new ManySyntaxNode<IN, OUT>($"{clause.Clause.ToString()}*");
         var currentPosition = position;
@@ -196,6 +333,170 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
         {
             return parseResult;
+        }
+
+        if (Configuration.CaptureAmbiguities)
+        {
+            var innerClauseAmbi = clause.Clause;
+            var innerErrorsAmbi = new List<UnexpectedTokenSyntaxError<IN>>();
+            var paths = new List<(List<ISyntaxNode<IN, OUT>> children, int position, bool hasByPassNodes)>();
+
+            bool isManyTokens = false;
+            bool isManyValues = false;
+            bool isManyGroups = false;
+            if (innerClauseAmbi is TerminalClause<IN, OUT>)
+            {
+                isManyTokens = true;
+            }
+            else if (innerClauseAmbi is NonTerminalClause<IN, OUT> nonTermClause)
+            {
+                isManyGroups = nonTermClause.IsGroup;
+                isManyValues = !nonTermClause.IsGroup;
+            }
+            else if (innerClauseAmbi is ChoiceClause<IN, OUT> choiceClause)
+            {
+                isManyTokens = choiceClause.IsTerminalChoice;
+                isManyValues = choiceClause.IsNonTerminalChoice;
+            }
+
+            SyntaxParseResult<IN, OUT> firstResult = null;
+            switch (innerClauseAmbi)
+            {
+                case TerminalClause<IN, OUT> terminalClause:
+                    firstResult = ParseTerminal(tokens, terminalClause, position, parsingContext);
+                    break;
+                case NonTerminalClause<IN, OUT> nonTerm:
+                    firstResult = ParseNonTerminal(tokens, nonTerm, position, parsingContext);
+                    break;
+                case ChoiceClause<IN, OUT> choice:
+                    firstResult = ParseChoice(tokens, choice, position, parsingContext);
+                    break;
+                default:
+                    throw new InvalidOperationException("unable to apply repeater to " + innerClauseAmbi.GetType().Name);
+            }
+
+            if (firstResult == null || firstResult.IsError)
+            {
+                var errorResult = new SyntaxParseResult<IN, OUT>
+                {
+                    IsError = true,
+                    EndingPosition = position
+                };
+                if (firstResult != null)
+                {
+                    errorResult.AddErrors(firstResult.GetErrors());
+                }
+                parsingContext.Memoize(clause, position, errorResult);
+                return errorResult;
+            }
+
+            var firstResults = firstResult.AllResults ?? new List<SyntaxParseResult<IN, OUT>> { firstResult };
+            foreach (var res in firstResults)
+            {
+                if (res.GetErrors() != null)
+                {
+                    innerErrorsAmbi.AddRange(res.GetErrors());
+                }
+
+                var alternatives = res.AlternativeRoots;
+                if (alternatives == null || alternatives.Count == 0)
+                {
+                    alternatives = new List<ISyntaxNode<IN, OUT>> { res.Root };
+                }
+
+                foreach (var alt in alternatives)
+                {
+                    var baseChildren = new List<ISyntaxNode<IN, OUT>> { alt };
+                    var more = new ZeroOrMoreClause<IN, OUT>(innerClauseAmbi);
+                    var moreResult = ParseZeroOrMore(tokens, more, res.EndingPosition, parsingContext);
+                    var moreResults = moreResult?.AllResults ?? new List<SyntaxParseResult<IN, OUT>> { moreResult };
+
+                    foreach (var moreRes in moreResults)
+                    {
+                        if (moreRes == null || moreRes.IsError)
+                        {
+                            continue;
+                        }
+
+                        var manyAlternatives = moreRes.AlternativeRoots;
+                        if (manyAlternatives == null || manyAlternatives.Count == 0)
+                        {
+                            manyAlternatives = new List<ISyntaxNode<IN, OUT>> { moreRes.Root };
+                        }
+
+                        foreach (var manyAlt in manyAlternatives)
+                        {
+                            var combinedChildren = new List<ISyntaxNode<IN, OUT>>(baseChildren);
+                            if (manyAlt is ManySyntaxNode<IN, OUT> manyNodeAlt)
+                            {
+                                combinedChildren.AddRange(manyNodeAlt.Children);
+                            }
+                            else
+                            {
+                                combinedChildren.Add(manyAlt);
+                            }
+
+                            var combinedByPass = res.HasByPassNodes || moreRes.HasByPassNodes;
+                            paths.Add((combinedChildren, moreRes.EndingPosition, combinedByPass));
+                        }
+
+                        if (moreRes.GetErrors() != null)
+                        {
+                            innerErrorsAmbi.AddRange(moreRes.GetErrors());
+                        }
+                    }
+                }
+            }
+
+            var ambiguousResult = new SyntaxParseResult<IN, OUT>();
+            var resultsByPosition = paths.GroupBy(p => p.position).ToList();
+            var results = new List<SyntaxParseResult<IN, OUT>>();
+
+            foreach (var group in resultsByPosition)
+            {
+                var pos = group.Key;
+                var res = new SyntaxParseResult<IN, OUT>
+                {
+                    EndingPosition = pos,
+                    IsError = false,
+                    AlternativeRoots = new List<ISyntaxNode<IN, OUT>>(),
+                    HasByPassNodes = group.Any(p => p.hasByPassNodes)
+                };
+
+                foreach (var path in group)
+                {
+                    var manyNodeAlt = new ManySyntaxNode<IN, OUT>($"{innerClauseAmbi}+")
+                    {
+                        IsManyTokens = isManyTokens,
+                        IsManyValues = isManyValues,
+                        IsManyGroups = isManyGroups
+                    };
+                    manyNodeAlt.Children.AddRange(path.children);
+                    res.AlternativeRoots.Add(manyNodeAlt);
+                }
+
+                res.IsEnded = pos >= tokens.Length || (pos < tokens.Length && tokens[pos].IsEOS);
+                results.Add(res);
+            }
+
+            if (results.Count > 0)
+            {
+                var best = results.OrderByDescending(r => r.EndingPosition).First();
+                ambiguousResult.AlternativeRoots = best.AlternativeRoots;
+                ambiguousResult.EndingPosition = best.EndingPosition;
+                ambiguousResult.IsEnded = best.IsEnded;
+                ambiguousResult.HasByPassNodes = best.HasByPassNodes;
+                ambiguousResult.AllResults = results;
+            }
+            else
+            {
+                ambiguousResult.IsError = true;
+                ambiguousResult.EndingPosition = position;
+            }
+
+            ambiguousResult.AddErrors(innerErrorsAmbi);
+            parsingContext.Memoize(clause, position, ambiguousResult);
+            return ambiguousResult;
         }
 
         var result = new SyntaxParseResult<IN, OUT>();

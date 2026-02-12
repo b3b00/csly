@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using sly.lexer;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
@@ -16,6 +17,104 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         if (parsingContext.TryGetParseResult(clause, position, out var parseResult))
         {
             return parseResult;
+        }
+
+        if (Configuration.CaptureAmbiguities)
+        {
+            var innerClauseAmbi = clause.Clause;
+            SyntaxParseResult<IN, OUT> innerResultAmbi = null;
+
+            switch (innerClauseAmbi)
+            {
+                case TerminalClause<IN, OUT> term:
+                    innerResultAmbi = ParseTerminal(tokens, term, position, parsingContext);
+                    break;
+                case NonTerminalClause<IN, OUT> nonTerm:
+                    innerResultAmbi = ParseNonTerminal(tokens, nonTerm, position, parsingContext);
+                    break;
+                case ChoiceClause<IN, OUT> choice:
+                    innerResultAmbi = ParseChoice(tokens, choice, position, parsingContext);
+                    break;
+                default:
+                    throw new InvalidOperationException("unable to apply repeater to " + innerClauseAmbi.GetType().Name);
+            }
+
+            var resultAmbi = new SyntaxParseResult<IN, OUT>
+            {
+                IsError = false,
+                EndingPosition = position,
+                AlternativeRoots = new List<ISyntaxNode<IN, OUT>>(),
+                AllResults = new List<SyntaxParseResult<IN, OUT>>()
+            };
+
+            var emptyNode = new OptionSyntaxNode<IN, OUT>(rule.NonTerminalName, new List<ISyntaxNode<IN, OUT>>(),
+                rule.GetVisitorMethod())
+            {
+                IsGroupOption = clause.IsGroupOption
+            };
+
+            var emptyResult = new SyntaxParseResult<IN, OUT>
+            {
+                IsError = false,
+                Root = emptyNode,
+                EndingPosition = position,
+                IsEnded = position >= tokens.Length || (position < tokens.Length && tokens[position].IsEOS)
+            };
+            resultAmbi.AllResults.Add(emptyResult);
+
+            if (innerResultAmbi != null && !innerResultAmbi.IsError)
+            {
+                var innerResults = innerResultAmbi.AllResults ?? new List<SyntaxParseResult<IN, OUT>> { innerResultAmbi };
+                foreach (var inner in innerResults)
+                {
+                    var alternatives = inner.AlternativeRoots;
+                    if (alternatives == null || alternatives.Count == 0)
+                    {
+                        alternatives = new List<ISyntaxNode<IN, OUT>> { inner.Root };
+                    }
+
+                    foreach (var alt in alternatives)
+                    {
+                        var optionNode = new OptionSyntaxNode<IN, OUT>(rule.NonTerminalName,
+                            new List<ISyntaxNode<IN, OUT>> { alt }, rule.GetVisitorMethod())
+                        {
+                            IsGroupOption = clause.IsGroupOption
+                        };
+
+                        var optionResult = new SyntaxParseResult<IN, OUT>
+                        {
+                            IsError = false,
+                            Root = optionNode,
+                            EndingPosition = inner.EndingPosition,
+                            IsEnded = inner.IsEnded,
+                            HasByPassNodes = inner.HasByPassNodes
+                        };
+                        resultAmbi.AllResults.Add(optionResult);
+                    }
+                }
+
+                if (innerResultAmbi.GetErrors() != null)
+                {
+                    resultAmbi.AddErrors(innerResultAmbi.GetErrors());
+                }
+            }
+            else if (innerResultAmbi != null)
+            {
+                resultAmbi.AddErrors(innerResultAmbi.GetErrors());
+            }
+
+            var best = resultAmbi.AllResults.OrderBy(r => r.EndingPosition).Reverse().FirstOrDefault();
+            if (best != null)
+            {
+                resultAmbi.Root = best.Root;
+                resultAmbi.EndingPosition = best.EndingPosition;
+                resultAmbi.IsEnded = best.IsEnded;
+                resultAmbi.HasByPassNodes = best.HasByPassNodes;
+                resultAmbi.AlternativeRoots = best.AlternativeRoots;
+            }
+
+            parsingContext.Memoize(clause, position, resultAmbi);
+            return resultAmbi;
         }
 
         var result = new SyntaxParseResult<IN, OUT>();
