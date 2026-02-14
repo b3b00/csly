@@ -27,45 +27,14 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 (new List<ISyntaxNode<IN, OUT>>(), position, false)
             };
             var innerErrorsAmbi = new List<UnexpectedTokenSyntaxError<IN>>();
-
-            bool isManyTokens = false;
-            bool isManyValues = false;
-            bool isManyGroups = false;
-            if (innerClauseAmbi is TerminalClause<IN, OUT>)
-            {
-                isManyTokens = true;
-            }
-            else if (innerClauseAmbi is NonTerminalClause<IN, OUT> nonTermClause)
-            {
-                isManyGroups = nonTermClause.IsGroup;
-                isManyValues = !nonTermClause.IsGroup;
-            }
-            else if (innerClauseAmbi is ChoiceClause<IN, OUT> choiceClause)
-            {
-                isManyTokens = choiceClause.IsTerminalChoice;
-                isManyValues = choiceClause.IsNonTerminalChoice;
-            }
+            var (isManyTokens, isManyValues, isManyGroups) = GetManyNodeFlags(innerClauseAmbi);
 
             while (true)
             {
                 var newPaths = new List<(List<ISyntaxNode<IN, OUT>> children, int position, bool hasByPassNodes)>();
                 foreach (var path in paths)
                 {
-                    SyntaxParseResult<IN, OUT> innerResult = null;
-                    switch (innerClauseAmbi)
-                    {
-                        case TerminalClause<IN, OUT> term:
-                            innerResult = ParseTerminal(tokens, term, path.position, parsingContext);
-                            break;
-                        case NonTerminalClause<IN, OUT> nonTerm:
-                            innerResult = ParseNonTerminal(tokens, nonTerm, path.position, parsingContext);
-                            break;
-                        case ChoiceClause<IN, OUT> choice:
-                            innerResult = ParseChoice(tokens, choice, path.position, parsingContext);
-                            break;
-                        default:
-                            throw new InvalidOperationException("unable to apply repeater to " + innerClauseAmbi.GetType().Name);
-                    }
+                    var innerResult = ParseSingleIterationAmbiguous(tokens, innerClauseAmbi, path.position, parsingContext);
 
                     if (innerResult != null && !innerResult.IsError && innerResult.EndingPosition > path.position)
                     {
@@ -105,53 +74,8 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 paths = newPaths;
             }
 
-            var ambiguousResult = new SyntaxParseResult<IN, OUT>();
-            var resultsByPosition = paths.GroupBy(p => p.position).ToList();
-            var results = new List<SyntaxParseResult<IN, OUT>>();
-
-            foreach (var group in resultsByPosition)
-            {
-                var pos = group.Key;
-                var res = new SyntaxParseResult<IN, OUT>
-                {
-                    EndingPosition = pos,
-                    IsError = false,
-                    AlternativeRoots = new List<ISyntaxNode<IN, OUT>>(),
-                    HasByPassNodes = group.Any(p => p.hasByPassNodes)
-                };
-
-                foreach (var path in group)
-                {
-                    var manyNodeAlt = new ManySyntaxNode<IN, OUT>($"{innerClauseAmbi}*")
-                    {
-                        IsManyTokens = isManyTokens,
-                        IsManyValues = isManyValues,
-                        IsManyGroups = isManyGroups
-                    };
-                    manyNodeAlt.Children.AddRange(path.children);
-                    res.AlternativeRoots.Add(manyNodeAlt);
-                }
-
-                res.IsEnded = pos >= tokens.Length || (pos < tokens.Length && tokens[pos].IsEOS);
-                results.Add(res);
-            }
-
-            if (results.Count > 0)
-            {
-                var best = results.OrderByDescending(r => r.EndingPosition).First();
-                ambiguousResult.AlternativeRoots = best.AlternativeRoots;
-                ambiguousResult.EndingPosition = best.EndingPosition;
-                ambiguousResult.IsEnded = best.IsEnded;
-                ambiguousResult.HasByPassNodes = best.HasByPassNodes;
-                ambiguousResult.AllResults = results;
-            }
-            else
-            {
-                ambiguousResult.IsError = true;
-                ambiguousResult.EndingPosition = position;
-            }
-
-            ambiguousResult.AddErrors(innerErrorsAmbi);
+            var ambiguousResult = BuildAmbiguousResult(paths, innerClauseAmbi, isManyTokens, isManyValues, 
+                isManyGroups, "*", tokens, innerErrorsAmbi);
             parsingContext.Memoize(clause, position, ambiguousResult);
             return ambiguousResult;
         }
@@ -340,40 +264,9 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             var innerClauseAmbi = clause.Clause;
             var innerErrorsAmbi = new List<UnexpectedTokenSyntaxError<IN>>();
             var paths = new List<(List<ISyntaxNode<IN, OUT>> children, int position, bool hasByPassNodes)>();
+            var (isManyTokens, isManyValues, isManyGroups) = GetManyNodeFlags(innerClauseAmbi);
 
-            bool isManyTokens = false;
-            bool isManyValues = false;
-            bool isManyGroups = false;
-            if (innerClauseAmbi is TerminalClause<IN, OUT>)
-            {
-                isManyTokens = true;
-            }
-            else if (innerClauseAmbi is NonTerminalClause<IN, OUT> nonTermClause)
-            {
-                isManyGroups = nonTermClause.IsGroup;
-                isManyValues = !nonTermClause.IsGroup;
-            }
-            else if (innerClauseAmbi is ChoiceClause<IN, OUT> choiceClause)
-            {
-                isManyTokens = choiceClause.IsTerminalChoice;
-                isManyValues = choiceClause.IsNonTerminalChoice;
-            }
-
-            SyntaxParseResult<IN, OUT> firstResult = null;
-            switch (innerClauseAmbi)
-            {
-                case TerminalClause<IN, OUT> terminalClause:
-                    firstResult = ParseTerminal(tokens, terminalClause, position, parsingContext);
-                    break;
-                case NonTerminalClause<IN, OUT> nonTerm:
-                    firstResult = ParseNonTerminal(tokens, nonTerm, position, parsingContext);
-                    break;
-                case ChoiceClause<IN, OUT> choice:
-                    firstResult = ParseChoice(tokens, choice, position, parsingContext);
-                    break;
-                default:
-                    throw new InvalidOperationException("unable to apply repeater to " + innerClauseAmbi.GetType().Name);
-            }
+            var firstResult = ParseSingleIterationAmbiguous(tokens, innerClauseAmbi, position, parsingContext);
 
             if (firstResult == null || firstResult.IsError)
             {
@@ -448,53 +341,8 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 }
             }
 
-            var ambiguousResult = new SyntaxParseResult<IN, OUT>();
-            var resultsByPosition = paths.GroupBy(p => p.position).ToList();
-            var results = new List<SyntaxParseResult<IN, OUT>>();
-
-            foreach (var group in resultsByPosition)
-            {
-                var pos = group.Key;
-                var res = new SyntaxParseResult<IN, OUT>
-                {
-                    EndingPosition = pos,
-                    IsError = false,
-                    AlternativeRoots = new List<ISyntaxNode<IN, OUT>>(),
-                    HasByPassNodes = group.Any(p => p.hasByPassNodes)
-                };
-
-                foreach (var path in group)
-                {
-                    var manyNodeAlt = new ManySyntaxNode<IN, OUT>($"{innerClauseAmbi}+")
-                    {
-                        IsManyTokens = isManyTokens,
-                        IsManyValues = isManyValues,
-                        IsManyGroups = isManyGroups
-                    };
-                    manyNodeAlt.Children.AddRange(path.children);
-                    res.AlternativeRoots.Add(manyNodeAlt);
-                }
-
-                res.IsEnded = pos >= tokens.Length || (pos < tokens.Length && tokens[pos].IsEOS);
-                results.Add(res);
-            }
-
-            if (results.Count > 0)
-            {
-                var best = results.OrderByDescending(r => r.EndingPosition).First();
-                ambiguousResult.AlternativeRoots = best.AlternativeRoots;
-                ambiguousResult.EndingPosition = best.EndingPosition;
-                ambiguousResult.IsEnded = best.IsEnded;
-                ambiguousResult.HasByPassNodes = best.HasByPassNodes;
-                ambiguousResult.AllResults = results;
-            }
-            else
-            {
-                ambiguousResult.IsError = true;
-                ambiguousResult.EndingPosition = position;
-            }
-
-            ambiguousResult.AddErrors(innerErrorsAmbi);
+            var ambiguousResult = BuildAmbiguousResult(paths, innerClauseAmbi, isManyTokens, isManyValues, 
+                isManyGroups, "+", tokens, innerErrorsAmbi);
             parsingContext.Memoize(clause, position, ambiguousResult);
             return ambiguousResult;
         }
@@ -573,6 +421,106 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         result.HasByPassNodes = hasByPasNodes;
         parsingContext.Memoize(clause, position, result);
         return result;
+    }
+
+    #endregion
+
+    #region ambiguity helpers
+
+    private (bool isManyTokens, bool isManyValues, bool isManyGroups) GetManyNodeFlags(IClause<IN, OUT> clause)
+    {
+        bool isManyTokens = false;
+        bool isManyValues = false;
+        bool isManyGroups = false;
+
+        if (clause is TerminalClause<IN, OUT>)
+        {
+            isManyTokens = true;
+        }
+        else if (clause is NonTerminalClause<IN, OUT> nonTermClause)
+        {
+            isManyGroups = nonTermClause.IsGroup;
+            isManyValues = !nonTermClause.IsGroup;
+        }
+        else if (clause is ChoiceClause<IN, OUT> choiceClause)
+        {
+            isManyTokens = choiceClause.IsTerminalChoice;
+            isManyValues = choiceClause.IsNonTerminalChoice;
+        }
+
+        return (isManyTokens, isManyValues, isManyGroups);
+    }
+
+    private SyntaxParseResult<IN, OUT> ParseSingleIterationAmbiguous(Token<IN>[] tokens, IClause<IN, OUT> clause, 
+        int position, SyntaxParsingContext<IN, OUT> parsingContext)
+    {
+        return clause switch
+        {
+            TerminalClause<IN, OUT> term => ParseTerminal(tokens, term, position, parsingContext),
+            NonTerminalClause<IN, OUT> nonTerm => ParseNonTerminal(tokens, nonTerm, position, parsingContext),
+            ChoiceClause<IN, OUT> choice => ParseChoice(tokens, choice, position, parsingContext),
+            _ => throw new InvalidOperationException("unable to apply repeater to " + clause.GetType().Name)
+        };
+    }
+
+    private SyntaxParseResult<IN, OUT> BuildAmbiguousResult(
+        List<(List<ISyntaxNode<IN, OUT>> children, int position, bool hasByPassNodes)> paths,
+        IClause<IN, OUT> innerClause,
+        bool isManyTokens,
+        bool isManyValues,
+        bool isManyGroups,
+        string suffix,
+        Token<IN>[] tokens,
+        List<UnexpectedTokenSyntaxError<IN>> errors)
+    {
+        var ambiguousResult = new SyntaxParseResult<IN, OUT>();
+        var resultsByPosition = paths.GroupBy(p => p.position).ToList();
+        var results = new List<SyntaxParseResult<IN, OUT>>();
+
+        foreach (var group in resultsByPosition)
+        {
+            var pos = group.Key;
+            var res = new SyntaxParseResult<IN, OUT>
+            {
+                EndingPosition = pos,
+                IsError = false,
+                AlternativeRoots = new List<ISyntaxNode<IN, OUT>>(),
+                HasByPassNodes = group.Any(p => p.hasByPassNodes)
+            };
+
+            foreach (var path in group)
+            {
+                var manyNodeAlt = new ManySyntaxNode<IN, OUT>($"{innerClause}{suffix}")
+                {
+                    IsManyTokens = isManyTokens,
+                    IsManyValues = isManyValues,
+                    IsManyGroups = isManyGroups
+                };
+                manyNodeAlt.Children.AddRange(path.children);
+                res.AlternativeRoots.Add(manyNodeAlt);
+            }
+
+            res.IsEnded = pos >= tokens.Length || (pos < tokens.Length && tokens[pos].IsEOS);
+            results.Add(res);
+        }
+
+        if (results.Count > 0)
+        {
+            var best = results.OrderByDescending(r => r.EndingPosition).First();
+            ambiguousResult.AlternativeRoots = best.AlternativeRoots;
+            ambiguousResult.EndingPosition = best.EndingPosition;
+            ambiguousResult.IsEnded = best.IsEnded;
+            ambiguousResult.HasByPassNodes = best.HasByPassNodes;
+            ambiguousResult.AllResults = results;
+        }
+        else
+        {
+            ambiguousResult.IsError = true;
+            ambiguousResult.EndingPosition = paths.Count > 0 ? paths[0].position : 0;
+        }
+
+        ambiguousResult.AddErrors(errors);
+        return ambiguousResult;
     }
 
     #endregion
