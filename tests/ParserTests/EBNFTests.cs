@@ -9,6 +9,7 @@ using NFluent;
 using simpleExpressionParser;
 using sly.buildresult;
 using sly.lexer;
+using sly.lexer.fluent;
 using sly.parser;
 using sly.parser.generator;
 using sly.parser.llparser.ebnf;
@@ -1886,5 +1887,51 @@ if truc == 1
             Check.That(error.UnexpectedToken.Value).IsEqualTo("g");
             
         }
+
+        [Fact]
+        public void Test()
+        {
+            var lexerBuilder = FluentLexerBuilder<ABCToken>.NewBuilder();
+            lexerBuilder.Keyword(ABCToken.A,"a");
+            lexerBuilder.Keyword(ABCToken.B,"b");
+            lexerBuilder.Keyword(ABCToken.C,"c");
+            
+            var parserBuilder = FluentEBNFParserBuilder<ABCToken,string>.NewBuilder(new DummyInstance(),"root","en");
+            parserBuilder.Production("root : nullable B? C", args =>
+            {
+                var a = (string)args[0];
+                var b = (Token<ABCToken>)args[1];
+                var c = (Token<ABCToken>)args[2];
+                return $"R({a},{(b.IsEmpty ? "<none>":b.Value)},{c.Value})";
+            });
+            parserBuilder.Production("nullable : A?", args =>
+            {
+                var a = (Token<ABCToken>)args[0];
+                return a.IsEmpty ? "<none>" : a.Value;
+            });
+            parserBuilder.WithLexerbuilder(lexerBuilder);
+            var parser = parserBuilder.BuildParser();
+            Check.That(parser).IsOk();
+            var res = parser.Result.Parse("b c");
+            Check.That(res).IsOkParsing();
+            Check.That(res.Result).IsEqualTo("R(<none>,b,c)");
+
+        }
+    }
+
+
+    public class DummyInstance
+    {
+        
+    }
+    
+    public enum ABCToken
+    {
+        [Keyword("A")]
+        A,
+        [Keyword("B")]
+        B,
+        [Keyword("C")]
+        C,
     }
 }

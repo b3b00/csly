@@ -166,7 +166,7 @@ namespace sly.parser.llparser.bnf
                         break;
                     }
                     default:
-                        InitStartingTokensForRuleExtensions(first, rule, nonTerminals);
+                        InitStartingTokensForRuleExtensions(c, rule, nonTerminals);
                         break;
                 }
             }
