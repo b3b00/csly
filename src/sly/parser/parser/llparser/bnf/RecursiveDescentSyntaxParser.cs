@@ -13,7 +13,7 @@ namespace sly.parser.llparser.bnf
         public RecursiveDescentSyntaxParser(ParserConfiguration<IN, OUT> configuration, string startingNonTerminal,
             string i18n)
         {
-            
+
             I18n = i18n;
             Configuration = configuration;
             StartingNonTerminal = startingNonTerminal;
@@ -27,10 +27,12 @@ namespace sly.parser.llparser.bnf
 
         public SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, string startingNonTerminal = null)
         {
-            return SafeParse(tokens, new SyntaxParsingContext<IN, OUT>(Configuration.UseMemoization), startingNonTerminal);
+            return SafeParse(tokens, new SyntaxParsingContext<IN, OUT>(Configuration.UseMemoization),
+                startingNonTerminal);
         }
-        
-        public SyntaxParseResult<IN, OUT> SafeParse(Token<IN>[] tokens, SyntaxParsingContext<IN, OUT> parsingContext, string startingNonTerminal = null)
+
+        public SyntaxParseResult<IN, OUT> SafeParse(Token<IN>[] tokens, SyntaxParsingContext<IN, OUT> parsingContext,
+            string startingNonTerminal = null)
         {
             var start = startingNonTerminal ?? StartingNonTerminal;
             var NonTerminals = Configuration.NonTerminals;
@@ -41,57 +43,35 @@ namespace sly.parser.llparser.bnf
 
             var matchingRuleCount = 0;
 
-            // Check if tokens array is empty
-            if (tokens.Length == 0)
+            foreach (var rule in nt.Rules)
             {
-                var eosToken = new Token<IN> { IsEOS = true };
-                foreach (var rule in nt.Rules)
+                if (!tokens[0].IsEOS && rule.Match(tokens, 0, Configuration)
+                    || tokens[0].IsEOS && rule.MayBeEmpty)
                 {
-                    if (rule.MayBeEmpty)
-                    {
-                        matchingRuleCount++;
-                        var r = Parse(tokens, rule, 0, start, parsingContext);
-                        rs.Add(r);
-                    }
-                }
-
-                if (matchingRuleCount == 0)
-                {
-                    errors.Add(new UnexpectedTokenSyntaxError<IN>(eosToken, LexemeLabels, I18n,
-                        nt.GetPossibleLeadingTokens().ToArray()));
+                    matchingRuleCount++;
+                    var r = Parse(tokens, rule, 0, start, parsingContext);
+                    rs.Add(r);
                 }
             }
-            else
-            {
-                foreach (var rule in nt.Rules)
-                {
-                    if (!tokens[0].IsEOS && rule.Match(tokens,0,Configuration) 
-                        || tokens[0].IsEOS && rule.MayBeEmpty)
-                    {
-                        matchingRuleCount++;
-                        var r = Parse(tokens, rule, 0, start, parsingContext);
-                        rs.Add(r);
-                    }
-                }
 
-                if (matchingRuleCount == 0)
-                {
-                    errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], LexemeLabels, I18n,
-                        nt.GetPossibleLeadingTokens().ToArray()));
-                }
+            if (matchingRuleCount == 0)
+            {
+                errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[0], LexemeLabels, I18n,
+                    nt.GetPossibleLeadingTokens().ToArray()));
             }
 
             SyntaxParseResult<IN, OUT> result = null;
 
 
-                if (rs.Count > 0)
+            if (rs.Count > 0)
             {
                 // Check for ambiguities at root level
                 var successfulResults = rs.SelectMany(r => r.AllResults ?? new List<SyntaxParseResult<IN, OUT>> { r })
-                                          .Where(r => r.IsEnded && !r.IsError).ToList();
-                
+                    .Where(r => r.IsEnded && !r.IsError).ToList();
 
-                if (Configuration.CaptureAmbiguities && (successfulResults.Count > 1 || successfulResults.Any(r => r.HasAmbiguity)))
+
+                if (Configuration.CaptureAmbiguities &&
+                    (successfulResults.Count > 1 || successfulResults.Any(r => r.HasAmbiguity)))
                 {
                     // Ambiguity detected at root level
                     result = new SyntaxParseResult<IN, OUT>
@@ -102,11 +82,12 @@ namespace sly.parser.llparser.bnf
                         IsEnded = true,
                         HasByPassNodes = successfulResults.Any(r => r.HasByPassNodes)
                     };
-                    
+
                     if (result.Ambiguities == null)
                         result.Ambiguities = new List<AmbiguityInfo<IN, OUT>>();
 
-                    if (successfulResults.Count > 1) {
+                    if (successfulResults.Count > 1)
+                    {
                         result.Ambiguities.Add(new AmbiguityInfo<IN, OUT>
                         {
                             NonTerminalName = start,
@@ -115,8 +96,10 @@ namespace sly.parser.llparser.bnf
                         });
                     }
 
-                    foreach(var success in successfulResults) {
-                        if (success.Ambiguities != null) {
+                    foreach (var success in successfulResults)
+                    {
+                        if (success.Ambiguities != null)
+                        {
                             result.Ambiguities.AddRange(success.Ambiguities);
                         }
                     }
@@ -134,8 +117,8 @@ namespace sly.parser.llparser.bnf
                         result = rs.FirstOrDefault();
                     }
                 }
-                
-                
+
+
                 if (result == null)
                 {
                     int lastPosition = -1;
@@ -164,7 +147,7 @@ namespace sly.parser.llparser.bnf
                 }
                 else
                 {
-                    if (result.EndingPosition < tokens.Length-1)
+                    if (result.EndingPosition < tokens.Length - 1)
                     {
                         SyntaxParseResult<IN, OUT> r = new SyntaxParseResult<IN, OUT>()
                         {
@@ -192,6 +175,7 @@ namespace sly.parser.llparser.bnf
                                     Array.Empty<LeadingToken<IN>>()));
                             }
                         }
+
                         return r;
                     }
                 }
@@ -229,11 +213,13 @@ namespace sly.parser.llparser.bnf
         {
             var errors = new List<UnexpectedTokenSyntaxError<IN>>();
             var isError = false;
-            var paths = new List<(List<ISyntaxNode<IN, OUT>> children, int position)> { (new List<ISyntaxNode<IN, OUT>>(), position) };
+            var paths = new List<(List<ISyntaxNode<IN, OUT>> children, int position)>
+                { (new List<ISyntaxNode<IN, OUT>>(), position) };
             var ambiguities = new List<AmbiguityInfo<IN, OUT>>();
             var furthestPosition = position;
 
-            if (position < tokens.Length && !tokens[position].IsEOS && rule.Match(tokens, position, Configuration) && rule.Clauses is { Count: > 0 })
+            if (position < tokens.Length && !tokens[position].IsEOS && rule.Match(tokens, position, Configuration) &&
+                rule.Clauses is { Count: > 0 })
             {
                 foreach (var clause in rule.Clauses)
                 {
@@ -257,6 +243,7 @@ namespace sly.parser.llparser.bnf
                             {
                                 errors.AddRange(clauseRes.GetErrors());
                             }
+
                             var resultsToProcess = new List<SyntaxParseResult<IN, OUT>>();
                             if (Configuration.CaptureAmbiguities && clauseRes.AllResults != null)
                             {
@@ -275,6 +262,7 @@ namespace sly.parser.llparser.bnf
                                     newCombo.Add(alt);
                                     newPaths.Add((newCombo, res.EndingPosition));
                                 }
+
                                 if (res.Ambiguities != null)
                                 {
                                     ambiguities.AddRange(res.Ambiguities);
@@ -286,10 +274,12 @@ namespace sly.parser.llparser.bnf
                             errors.AddRange(clauseRes.GetErrors());
                         }
                     }
+
                     if (newPaths.Any())
                     {
                         furthestPosition = newPaths.Max(p => p.position);
                     }
+
                     paths = newPaths;
                     if (paths.Count == 0)
                     {
@@ -307,13 +297,14 @@ namespace sly.parser.llparser.bnf
             result.IsError = isError;
             result.EndingPosition = furthestPosition;
             result.AddErrors(errors);
-            
+
             if (!isError)
             {
                 var resultsByPosition = paths.GroupBy(p => p.position).ToList();
                 var results = new List<SyntaxParseResult<IN, OUT>>();
-                
-                foreach (var group in resultsByPosition) {
+
+                foreach (var group in resultsByPosition)
+                {
                     var pos = group.Key;
                     var res = new SyntaxParseResult<IN, OUT>();
                     res.EndingPosition = pos;
@@ -321,7 +312,8 @@ namespace sly.parser.llparser.bnf
                     res.IsEnded = pos >= tokens.Length || tokens[pos].IsEOS;
                     res.Ambiguities = ambiguities;
                     res.AlternativeRoots = new List<ISyntaxNode<IN, OUT>>();
-                    foreach (var path in group) {
+                    foreach (var path in group)
+                    {
                         SyntaxNode<IN, OUT> node = null;
                         if (rule.IsSubRule)
                             node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, path.children);
@@ -337,10 +329,12 @@ namespace sly.parser.llparser.bnf
                             res.AlternativeRoots.Add(node);
                         }
                     }
+
                     results.Add(res);
                 }
-                
-                if (results.Count > 0) {
+
+                if (results.Count > 0)
+                {
                     var best = results.OrderByDescending(r => r.EndingPosition).First();
                     result.AlternativeRoots = best.AlternativeRoots;
                     result.EndingPosition = best.EndingPosition;
@@ -348,11 +342,12 @@ namespace sly.parser.llparser.bnf
                     result.AllResults = results;
                     result.Ambiguities = ambiguities;
                 }
-                else {
+                else
+                {
                     result.IsError = true;
                 }
             }
-            
+
             return result;
         }
 
@@ -387,7 +382,7 @@ namespace sly.parser.llparser.bnf
         }
 
 
-        
+
 
         public virtual void Init(ParserConfiguration<IN, OUT> configuration, string root)
         {
@@ -398,6 +393,7 @@ namespace sly.parser.llparser.bnf
             {
                 nonTerminal?.Rules?.ForEach(x => x?.PossibleLeadingTokens?.Clear());
             }
+
             InitializeStartingTokens(configuration, StartingNonTerminal);
         }
 
