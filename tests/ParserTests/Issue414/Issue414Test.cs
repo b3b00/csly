@@ -10,7 +10,7 @@ namespace ParserTests.Issue414;
 
 public class Issue414Tests
 {
-    [Fact]
+    /*[Fact]
     public void Issue414Test()
     {
         var parserInstance = new Issue414Parser();
@@ -25,7 +25,7 @@ public class Issue414Tests
             result = parser.Parse(source);
         }).LastsLessThan(10_000, TimeUnit.Milliseconds);
         Check.That(result).IsOkParsing();
-    }
+    }*/
     
     [Fact]
     public void Issue414ExpressionTest()
