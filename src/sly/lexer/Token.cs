@@ -132,7 +132,7 @@ namespace sly.lexer
                 if (position >= 0 && position <= channel.Count - 1)
                 {
                     
-                    for (int i = position; position > 0; position--)
+                    for (int i = position; position >= 0; position--)
                     {
                         var token = channel[position];
                         if (token != null)
