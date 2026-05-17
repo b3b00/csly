@@ -9,6 +9,23 @@ namespace sly.parser.syntax.tree
         {
         }
 
+        public ManySyntaxNode()
+        {
+            if (Children == null)
+            {
+                Children = new List<ISyntaxNode<IN, OUT>>();
+            }
+        }
+
+        public void Initialize(string name)
+        {
+            Name = name;
+            if (Children != null)
+                Children.Clear();
+            else
+                Children = new List<ISyntaxNode<IN, OUT>>();
+        }
+
         public bool IsManyTokens { get; set; }
 
         public bool IsManyValues { get; set; }

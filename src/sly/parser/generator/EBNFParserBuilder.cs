@@ -36,6 +36,8 @@ namespace sly.parser.generator
             }
 
             bool useMemoization = parserInstance.GetType().GetCustomAttribute<UseMemoizationAttribute>() != null;
+
+            bool usePool = parserInstance.GetType().GetCustomAttributes<UsePoolAttribute>() != null;
             
             bool broadenTokenWindow = parserInstance.GetType().GetCustomAttribute<BroadenTokenWindowAttribute>() != null;
 

@@ -48,7 +48,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                     // return immediately if we don't care about ambiguities, otherwise keep collecting results for all alternatives
                     if (clause.IsTerminalChoice && clause.IsDiscarded && lastResult.Root is SyntaxLeaf<IN, OUT> leaf)
                     {
-                        var discardedToken = new SyntaxLeaf<IN, OUT>(leaf.Token, true);
+                        var discardedToken = parsingContext.RentLeaf(leaf.Token, true);
                         lastResult.Root = discardedToken;
                     }
                     parsingContext.Memoize(clause, position, lastResult);
@@ -107,7 +107,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 
                 if (clause.IsTerminalChoice && clause.IsDiscarded && result.Root is SyntaxLeaf<IN, OUT> leaf)
                 {
-                    var discardedToken = new SyntaxLeaf<IN, OUT>(leaf.Token, true);
+                    var discardedToken = parsingContext.RentLeaf(leaf.Token, true);
                     result.Root = discardedToken;
                 }
             }

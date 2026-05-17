@@ -16,6 +16,8 @@ namespace sly.parser.generator
         public bool UsesOperations { get; set; }
 
         public bool UseMemoization { get; set; } = false;
+        
+        public bool UsePool { get; set; } = false;
 
         public bool BroadenTokenWindow { get; set; } = false;
         

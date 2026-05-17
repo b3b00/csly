@@ -9,6 +9,11 @@ namespace sly.parser.syntax.tree
         {
         }
 
+        public void Initialize(string name) 
+        {
+            base.Initialize(name);
+        }
+
         public GroupSyntaxNode(string name,  List<ISyntaxNode<IN, OUT>> children) : this(name)
         {
             Children.AddRange(children);

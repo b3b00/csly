@@ -146,7 +146,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                 case TerminalClause<IN, OUT> _:
                     result = new SyntaxParseResult<IN, OUT>();
                     result.IsError = true;
-                    result.Root = new SyntaxLeaf<IN, OUT>(Token<IN>.Empty(), false);
+                    result.Root = parsingContext.RentLeaf(Token<IN>.Empty(), false);
                     result.EndingPosition = position;
                     break;
                 case ChoiceClause<IN, OUT> choiceClause:
@@ -155,7 +155,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
                     {
                         result = new SyntaxParseResult<IN, OUT>();
                         result.IsError = false;
-                        result.Root = new SyntaxLeaf<IN, OUT>(Token<IN>.Empty(), false);
+                        result.Root = parsingContext.RentLeaf(Token<IN>.Empty(), false);
                         result.EndingPosition = position;
                     }
                     else if (choiceClause.IsNonTerminalChoice)

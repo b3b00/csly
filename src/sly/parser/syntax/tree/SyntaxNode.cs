@@ -10,6 +10,11 @@ namespace sly.parser.syntax.tree
 {
     public class SyntaxNode<IN, OUT> : ISyntaxNode<IN, OUT> where IN : struct, Enum
     {
+
+        public SyntaxNode()
+        {
+            Children = new List<ISyntaxNode<IN, OUT>>();
+        }
         
         public SyntaxNode(string name, List<ISyntaxNode<IN, OUT>> children = null, MethodInfo visitor = null)
         {
@@ -19,10 +24,25 @@ namespace sly.parser.syntax.tree
             Visitor = visitor;
         }
 
-        private readonly bool _isEpsilon = false;
+        public void Initialize(string name, List<ISyntaxNode<IN, OUT>> children = null, MethodInfo visitor = null)
+        {
+            _isEpsilon = children == null || !children.Any() || (children.Count == 1 && children[0].IsEpsilon);
+            Name = name;
+            if (children != null)
+            {
+                children.Clear();
+            }
+            else
+            {
+                Children = new List<ISyntaxNode<IN, OUT>>();
+            }
+            Visitor = visitor;
+        }
+
+        private bool _isEpsilon = false;
         public virtual bool IsEpsilon => _isEpsilon;
     
-        public List<ISyntaxNode<IN, OUT>> Children { get; }
+        public List<ISyntaxNode<IN, OUT>> Children { get;  protected set; }
 
         [JsonIgnore]
         public MethodInfo Visitor { get; set; }

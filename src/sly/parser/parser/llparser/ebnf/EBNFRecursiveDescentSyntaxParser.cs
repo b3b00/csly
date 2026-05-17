@@ -184,7 +184,7 @@ namespace sly.parser.llparser.ebnf
                             }
                         }
                     }
-                    node = new SyntaxNode<IN, OUT>( nonTerminalName,  children);
+                    node = parsingContext.RentNode( nonTerminalName,  children);
                     node.ForcedName = rule.ForcedName;
                     node.Name = string.IsNullOrEmpty(rule.NodeName) ? nonTerminalName : rule.NodeName;
                     node.ExpressionAffix = rule.ExpressionAffix;
@@ -213,7 +213,7 @@ namespace sly.parser.llparser.ebnf
                         }
                         else
                         {
-                            altNode = new SyntaxNode<IN, OUT>(nonTerminalName, altChildren);
+                            altNode = parsingContext.RentNode(nonTerminalName, altChildren);
                             altNode.ForcedName = rule.ForcedName;
                             altNode.Name = string.IsNullOrEmpty(rule.NodeName) ? nonTerminalName : rule.NodeName;
                             altNode.ExpressionAffix = rule.ExpressionAffix;
@@ -383,7 +383,7 @@ namespace sly.parser.llparser.ebnf
                         }
                         else
                         {
-                            node = new SyntaxNode<IN, OUT>(nonTerminalName, namedChildren);
+                            node = parsingContext.RentNode(nonTerminalName, namedChildren);
                             node.ForcedName = rule.ForcedName;
                             node.Name = string.IsNullOrEmpty(rule.NodeName) ? nonTerminalName : rule.NodeName;
                             node.ExpressionAffix = rule.ExpressionAffix;

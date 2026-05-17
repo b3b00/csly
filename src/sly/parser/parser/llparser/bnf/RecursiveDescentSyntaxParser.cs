@@ -27,7 +27,7 @@ namespace sly.parser.llparser.bnf
 
         public SyntaxParseResult<IN, OUT> Parse(Token<IN>[] tokens, string startingNonTerminal = null)
         {
-            return SafeParse(tokens, new SyntaxParsingContext<IN, OUT>(Configuration.UseMemoization),
+            return SafeParse(tokens, new SyntaxParsingContext<IN, OUT>(Configuration.UseMemoization, Configuration.UsePool),
                 startingNonTerminal);
         }
 
@@ -318,7 +318,7 @@ namespace sly.parser.llparser.bnf
                         if (rule.IsSubRule)
                             node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, path.children);
                         else
-                            node = new SyntaxNode<IN, OUT>(rule.NodeName ?? nonTerminalName, path.children);
+                            node = parsingContext.RentNode(rule.NodeName ?? nonTerminalName, path.children);
                         node = ManageExpressionRules(rule, node);
                         if (node.IsByPassNode)
                         {

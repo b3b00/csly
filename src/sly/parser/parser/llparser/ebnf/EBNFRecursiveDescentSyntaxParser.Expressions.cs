@@ -92,7 +92,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
                     children.Add(secondResult.Root);
                     children.Add(thirdResult.Root);
                     currentPosition = thirdResult.EndingPosition;
-                    var finalNode = new SyntaxNode<IN, OUT>(rule.NodeName ?? nonTerminalName, children);
+                    var finalNode = parsingContext.RentNode(rule.NodeName ?? nonTerminalName, children);
                     finalNode.ExpressionAffix = rule.ExpressionAffix;
                     finalNode = ManageExpressionRules(rule, finalNode);
                     var finalResult = new SyntaxParseResult<IN, OUT>();
@@ -115,7 +115,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT>
         if (rule.IsSubRule)
             node = new GroupSyntaxNode<IN, OUT>(nonTerminalName, children);
         else
-            node = new SyntaxNode<IN, OUT>(nonTerminalName, children);
+            node = parsingContext.RentNode(nonTerminalName, children);
         node = ManageExpressionRules(rule, node);
         if (node.IsByPassNode) // inutile de créer un niveau supplémentaire
             result.Root = children[0];

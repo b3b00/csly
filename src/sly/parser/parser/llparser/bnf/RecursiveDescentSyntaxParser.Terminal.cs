@@ -26,7 +26,7 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct, En
             result.IsError = true;
             result.EndingPosition = position;
             var eosToken = new Token<IN> { IsEOS = true };
-            result.Root = new SyntaxLeaf<IN, OUT>(eosToken, terminal.Discarded);
+            result.Root = parsingContext.RentLeaf(eosToken, terminal.Discarded);
             result.HasByPassNodes = false;
             result.AddError(new UnexpectedTokenSyntaxError<IN>(eosToken, LexemeLabels, I18n, terminal.ExpectedToken));
             parsingContext.Memoize(terminal, position, result);
@@ -38,7 +38,7 @@ public partial class RecursiveDescentSyntaxParser<IN, OUT> where IN : struct, En
         var token = tokens[position];
         token.Discarded = terminal.Discarded;
         token.IsExplicit = terminal.IsExplicitToken;
-        result.Root = new SyntaxLeaf<IN, OUT>(token, terminal.Discarded);
+        result.Root = parsingContext.RentLeaf(token, terminal.Discarded);
         result.HasByPassNodes = false;
         if (result.IsError)
         {

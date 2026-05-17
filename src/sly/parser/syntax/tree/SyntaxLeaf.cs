@@ -6,7 +6,18 @@ namespace sly.parser.syntax.tree
 {
     public class SyntaxLeaf<IN, OUT> : ISyntaxNode<IN, OUT> where IN : struct, Enum
     {
+        public SyntaxLeaf()
+        {
+            
+        }
+        
         public SyntaxLeaf(Token<IN> token, bool discarded)
+        {
+            Token = token;
+            Discarded = discarded;
+        }
+        
+        public void Initialize(Token<IN> token, bool discarded)
         {
             Token = token;
             Discarded = discarded;
@@ -14,8 +25,8 @@ namespace sly.parser.syntax.tree
         
         public bool IsEpsilon => false;
 
-        public Token<IN> Token { get;  }
-        public bool Discarded { get; }
+        public Token<IN> Token { get; private set; }
+        public bool Discarded { get; private set; }
         public string Name => Token.TokenID.ToString();
         
         public bool HasByPassNodes { get; set; } = false;

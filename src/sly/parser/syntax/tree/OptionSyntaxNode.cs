@@ -8,8 +8,18 @@ namespace sly.parser.syntax.tree
     {
         public bool IsGroupOption { get; set; } = false;
 
+        public OptionSyntaxNode()
+        {
+            
+        }
+        
         public OptionSyntaxNode(string name, List<ISyntaxNode<IN, OUT>> children = null, MethodInfo visitor = null) : base(
             name, children, visitor)
         { }
+
+        public void Initialize(string name, List<ISyntaxNode<IN, OUT>> children = null, MethodInfo visitor = null)
+        {
+            base.Initialize(name, children, visitor);
+        }
     }
 }

@@ -127,7 +127,7 @@ namespace sly.parser
                 var start = startingNonTerminal ?? ambiguityParser.StartingNonTerminal;
                 if (start != null && Configuration.NonTerminals.TryGetValue(start, out var nonTerminal))
                 {
-                    var ambiguityContext = new SyntaxParsingContext<IN, OUT>(Configuration.UseMemoization);
+                    var ambiguityContext = new SyntaxParsingContext<IN, OUT>(Configuration.UseMemoization, Configuration.UsePool);
                     var alternativeResults = new List<SyntaxParseResult<IN, OUT>>();
                     foreach (var rule in nonTerminal.Rules)
                     {

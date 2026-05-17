@@ -75,13 +75,13 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             }
 
             var ambiguousResult = BuildAmbiguousResult(paths, innerClauseAmbi, isManyTokens, isManyValues,
-                isManyGroups, "*", tokens, innerErrorsAmbi, position);
+                isManyGroups, "*", tokens, innerErrorsAmbi, position, parsingContext);
             parsingContext.Memoize(clause, position, ambiguousResult);
             return ambiguousResult;
         }
 
         var result = new SyntaxParseResult<IN, OUT>();
-        var manyNode = new ManySyntaxNode<IN, OUT>($"{clause.Clause.ToString()}*");
+        var manyNode = parsingContext.RentManyNode($"{clause.Clause.ToString()}*");
         var currentPosition = position;
         var innerClause = clause.Clause;
         var stillOk = true;
@@ -164,7 +164,7 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             return parseResult;
         }
         var result = new SyntaxParseResult<IN, OUT>();
-        var manyNode = new ManySyntaxNode<IN, OUT>($"{clause.Clause.ToString()}_{clause.DumpRange().Replace("{","").Replace("}","").Replace("-","_")}");
+        var manyNode = parsingContext.RentManyNode($"{clause.Clause.ToString()}_{clause.DumpRange().Replace("{","").Replace("}","").Replace("-","_")}");
         
         var currentPosition = position;
         var innerClause = clause.Clause;
@@ -342,13 +342,13 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
             }
 
             var ambiguousResult = BuildAmbiguousResult(paths, innerClauseAmbi, isManyTokens, isManyValues,
-                isManyGroups, "+", tokens, innerErrorsAmbi, position);
+                isManyGroups, "+", tokens, innerErrorsAmbi, position, parsingContext);
             parsingContext.Memoize(clause, position, ambiguousResult);
             return ambiguousResult;
         }
 
         var result = new SyntaxParseResult<IN, OUT>();
-        var manyNode = new ManySyntaxNode<IN, OUT>($"{clause.Clause.ToString()}+");
+        var manyNode = parsingContext.RentManyNode($"{clause.Clause.ToString()}+");
         var currentPosition = position;
         var innerClause = clause.Clause;
         bool isError;
@@ -472,7 +472,8 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
         string suffix,
         Token<IN>[] tokens,
         List<UnexpectedTokenSyntaxError<IN>> errors,
-        int fallbackPosition)
+        int fallbackPosition,
+        SyntaxParsingContext<IN, OUT> parsingContext)
     {
         var ambiguousResult = new SyntaxParseResult<IN, OUT>();
         var resultsByPosition = paths.GroupBy(p => p.position).ToList();
@@ -491,12 +492,10 @@ public partial class EBNFRecursiveDescentSyntaxParser<IN, OUT> where IN : struct
 
             foreach (var path in group)
             {
-                var manyNodeAlt = new ManySyntaxNode<IN, OUT>($"{innerClause}{suffix}")
-                {
-                    IsManyTokens = isManyTokens,
-                    IsManyValues = isManyValues,
-                    IsManyGroups = isManyGroups
-                };
+                var manyNodeAlt = parsingContext.RentManyNode($"{innerClause}{suffix}");
+                manyNodeAlt.IsManyTokens = isManyTokens;
+                manyNodeAlt.IsManyValues = isManyValues;
+                manyNodeAlt.IsManyGroups = isManyGroups;
                 manyNodeAlt.Children.AddRange(path.children);
                 res.AlternativeRoots.Add(manyNodeAlt);
             }
