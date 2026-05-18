@@ -42,7 +42,7 @@
     </PackageReference>
     <PackageReference Include="System.Collections.Immutable" Version="10.0.1"/>
     <PackageReference Include="System.ValueTuple" Version="4.6.1"/>   
-    <PackageReference Include="System.Text.Json" Version="10.0.1"/>
+    <PackageReference Include="System.Text.Json" Version="10.0.8"/>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="i18n\translations\fr.txt"/>
