@@ -13,6 +13,7 @@ using sly.parser.generator;
 namespace BenchCslies;
 
 [Config(typeof(ExprBenchCslies.EConfig))]
+[MemoryDiagnoser]
 public class ExprBenchCslies
 {
     private class EConfig : ManualConfig
@@ -134,7 +135,7 @@ public class ExprBenchCslies
         var generatedParserInstance = new GeneratedGenericSimpleExpressionParser();
         _generatedParser = new GeneratedGenericSimpleExpressionParserMain(generatedParserInstance);
 
-        _expression = "1"+("+1".Multiply(100));
+        _expression = "1"+("+1".Multiply(500));
 
 
     }
@@ -190,6 +191,24 @@ public class ExprBenchCslies
     [Benchmark]
     public void TestGenerated()
     {
-        _generatedParser.Parse(_expression);
+        try
+        {
+            Console.WriteLine("generated");
+            var r = _generatedParser.Parse(_expression);
+            if (r.IsOk)
+                Console.WriteLine("parse ok " + r.Result);
+            else
+            {
+                Console.WriteLine("parse fail (generated)");
+                foreach (var error in r.Errors)
+                {
+                        Console.WriteLine(error.ErrorMessage);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            File.WriteAllText("c:/tmp/error.txt", ex.Message+"\n"+ex.StackTrace);
+        }
     }
 }

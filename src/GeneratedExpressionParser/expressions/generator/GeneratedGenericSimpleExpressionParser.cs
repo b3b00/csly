@@ -1,6 +1,7 @@
 using csly.GeneratedExpressionParser.generatedgenericsimpleexpressionparser.models;
 
 
+
 namespace generatedExpressions;
 
 [ParserRoot("root")]
@@ -8,7 +9,7 @@ namespace generatedExpressions;
 public class GeneratedGenericSimpleExpressionParser
 {
 
-    [Production("root : GenericSimpleExpressionParser_expressions")]
+    [Production("root : GeneratedGenericSimpleExpressionParser_expressions")]
         
     public double Root(double value) => value;
         
@@ -37,7 +38,7 @@ public class GeneratedGenericSimpleExpressionParser
 
     [Operation((int) GeneratedGenericExpressionToken.TIMES, Affix.InFix, Associativity.Right, 50)]
     [Operation("DIVIDE", Affix.InFix, Associativity.Left, 50)]
-    [NodeName("multiplication_or_division")]
+    //[NodeName("multiplication_or_division")]
     public double BinaryFactorExpression(double left, Token<GeneratedGenericExpressionToken> operation, double right)
     {
         double result = 0;
@@ -65,7 +66,7 @@ public class GeneratedGenericSimpleExpressionParser
         return -value;
     }
 
-    [Postfix((int) GeneratedGenericExpressionToken.FACTORIAL, Associativity.Right, 100)]
+    [Postfix((int) GeneratedGenericExpressionToken.FACTORIAL, Associativity.Right, 110)]
     public double PostFixExpression(double value, Token<GeneratedGenericExpressionToken> operation)
     {
         var factorial = 1;
@@ -75,7 +76,7 @@ public class GeneratedGenericSimpleExpressionParser
 
     [Operand]
     [Production("operand : primary_value")]
-    [NodeName("double")]
+    // [NodeName("double")]
     public double OperandValue(double value)
     {
         return value;
@@ -83,21 +84,21 @@ public class GeneratedGenericSimpleExpressionParser
 
 
     [Production("primary_value : DOUBLE")]
-    [NodeName("double")]
+    // [NodeName("double")]
     public double OperandDouble(Token<GeneratedGenericExpressionToken> value)
     {
         return value.DoubleValue;
     }
         
     [Production("primary_value : INT")]
-    [NodeName("integer")]
+    // [NodeName("integer")]
     public double OperandInt(Token<GeneratedGenericExpressionToken> value)
     {
         return value.DoubleValue;
     }
 
-    [Production("primary_value : LPAREN GenericSimpleExpressionParser_expressions RPAREN")]
-    [NodeName("group")]
+    [Production("primary_value : LPAREN GeneratedGenericSimpleExpressionParser_expressions RPAREN")]
+    // [NodeName("group")]
     public double OperandParens(Token<GeneratedGenericExpressionToken> lparen, double value, Token<GeneratedGenericExpressionToken> rparen)
     {
         return value;
