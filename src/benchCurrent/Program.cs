@@ -8,14 +8,14 @@ namespace benchCurrent
 
         private static void Bench() {
            
-            // var summary = BenchmarkRunner.Run<JsonParserBench>();
+            //var summary = BenchmarkRunner.Run<JsonParserBench>();
             //
             // var summary2 = BenchmarkRunner.Run<BackTrackBench>();
             
             // var summary3 = BenchmarkRunner.Run<WhileBench>();
-
-            //var summary4 = BenchmarkRunner.Run<SimpleExpressionBench>();
-            var summary5 = BenchmarkRunner.Run<JsonStringEscapingBench>();
+            //
+            // var summary4 = BenchmarkRunner.Run<SimpleExpressionBench>();
+            //  var summary5 = BenchmarkRunner.Run<JsonStringEscapingBench>();
 
         }
         static void Main(string[] args)
@@ -23,7 +23,11 @@ namespace benchCurrent
             try
             {
                 Console.WriteLine("Hello World!");
-                Bench();
+                
+                WhileBench b = new WhileBench();
+                b.Pooled = true;
+                b.TestWhile();
+                // Bench();
             }
             catch (Exception e)
             {

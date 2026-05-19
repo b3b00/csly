@@ -18,14 +18,14 @@ namespace benchCurrent
     public class JsonParserBench
     {
 
-
-        private class Config : ManualConfig
+ private class Config : ManualConfig
         {
             public Config()
             {
                 var baseJob = Job.MediumRun.With(CsProjCoreToolchain.NetCoreApp70);
             }
         }
+       
 
         private Parser<JsonTokenGenericNotEscaped,JSon> BenchedParser;
 
@@ -56,11 +56,14 @@ namespace benchCurrent
             Console.WriteLine($"parser {BenchedParser}");
         }
 
-        [Params(true,false)]
-        public bool Memoize { get; set; }
+        [Params(true, false)]
+        public bool Pooled { get; set; }
         
-        [Params(true,false)]
-        public bool Broaden { get; set; }
+        // [Params(true,false)]
+        // public bool Memoize { get; set; }
+        //
+        // [Params(true,false)]
+        // public bool Broaden { get; set; }
         
         [Benchmark]
         
@@ -74,8 +77,9 @@ namespace benchCurrent
             }
             else
             {
-                BenchedParser.Configuration.UseMemoization = Memoize;
-                BenchedParser.Configuration.BroadenTokenWindow = Broaden;
+                // BenchedParser.Configuration.UseMemoization = Memoize;
+                // BenchedParser.Configuration.BroadenTokenWindow = Broaden;
+                BenchedParser.Configuration.UsePool = Pooled;
                 var ignored = BenchedParser.Parse(content);    
             }
         }
