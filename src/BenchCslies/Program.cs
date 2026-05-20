@@ -9,12 +9,13 @@ public class Program
         // bench.Setup();
         // bench.TestCsly();
         
-        ExprBenchCslies b = new ExprBenchCslies();
-        b.Setup();
-        b.TestCsly();
-        b.TestFluent();
-
-        var summaryJson = BenchmarkRunner.Run<ExprBenchCslies>();
+        // ExprBenchCslies b = new ExprBenchCslies();
+        // b.Setup();
+        // b.TestCsly();
+        // b.TestFluent();
+        // b.TestGenerated();
+        // Console.ReadLine();
+        var summaryJson = BenchmarkRunner.Run<CsliesBench>();
         //BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
     }
 }

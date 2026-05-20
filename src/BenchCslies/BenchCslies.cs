@@ -1,6 +1,4 @@
-﻿
-using System.Diagnostics.CodeAnalysis;
-using BenchCslies.parsers.json.csly;
+﻿using BenchCslies.parsers.json.csly;
 
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
@@ -13,48 +11,22 @@ using sly.parser;
 using sly.parser.generator;
 using generatedJsonParser;
 using generatedJsonParser.generatedebnfjsongenericparser;
+using sly.buildresult;
 
 namespace BenchCslies;
 
-public class JsonBuilder
+public enum J
 {
-    private static readonly Random _random = new();
-
-    public static string BuildJson(int length, int depth, int width)
-    {
-
-        var items = Enumerable.Repeat(1, length)
-            .Select<int, string>(_ => BuildObject(depth, width));
-        return "["+string.Join("," , items)+"]";
-    }
-
-    private static string BuildObject(int depth, int width)
-    {
-        if (depth == 0)
-        {
-            return RandomString(6);
-        }
-        var properties = Enumerable.Repeat(1, width)
-            .Select(_ => $"{RandomString(5)} : {BuildObject(depth - 1, width)}");
-
-        return "{"+string.Join("," + Environment.NewLine, properties)+Environment.NewLine+"}";
-    }
-
-    [SuppressMessage("security", "CA5394:Use cryptographically secure random number generators", Justification = "Test code")]
-    public static string RandomString(int length)
-    {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        return "\""+new string(
-            Enumerable
-                .Repeat(chars, length)
-                .Select(s => s[_random.Next(s.Length)])
-                .ToArray()
-        )+"\"";
-    }
+    Big,
+    Long,
+    Wide,
+    Deep,
 }
 
 [MemoryDiagnoser]
-    
+
+
+
 [Config(typeof(CsliesBench.Config))]
 public class CsliesBench
 {
@@ -71,7 +43,23 @@ public class CsliesBench
 
     GeneratedEbnfJsonGenericParserMain _genParser; 
     string _json = "";
+    private string _bigJson;
+    private string _longJson;
+    private string _wideJson;
+    private string _deepJson;
 
+    public string GetJson(J j)
+    {
+        return j switch
+        {
+            J.Big => _bigJson,
+            J.Long => _longJson,
+            J.Deep => _deepJson,
+            J.Wide => _wideJson
+        };
+    }
+    
+    
     [GlobalSetup]
     public void Setup()
     {
@@ -90,6 +78,27 @@ public class CsliesBench
 
         
 
+        var fluentParserBuild = FluentParserBuild();
+
+        _fluentParser = fluentParserBuild.Result;
+
+        _json = JsonBuilder.BuildJson(4, 4, 3);
+        
+        _bigJson = JsonBuilder.BuildJson(4, 4, 3).ToString()!;
+        _longJson = JsonBuilder.BuildJson(256, 1, 1).ToString()!;
+        _wideJson = JsonBuilder.BuildJson(1, 1, 256).ToString()!;
+        _deepJson = JsonBuilder.BuildJson(1, 256, 1).ToString()!;
+        
+        
+        var instanceGen = new GeneratedEbnfJsonGenericParser();
+        _genParser = new GeneratedEbnfJsonGenericParserMain(instanceGen); 
+    
+
+
+    }
+
+    private static BuildResult<Parser<CslyJsonTokenGeneric, JSon>> FluentParserBuild()
+    {
         var fluentLexerBuilder = FluentLexerBuilder<CslyJsonTokenGeneric>.NewBuilder()
             .Int(CslyJsonTokenGeneric.INT)
             .Double(CslyJsonTokenGeneric.DOUBLE)
@@ -198,36 +207,34 @@ public class CsliesBench
             Environment.Exit(1);
         }
 
-        _fluentParser = fluentParserBuild.Result;
-
-        _json = JsonBuilder.BuildJson(4, 4, 3);
-        File.WriteAllText("./bench.json", _json);
-        
-        var instanceGen = new GeneratedEbnfJsonGenericParser();
-        _genParser = new GeneratedEbnfJsonGenericParserMain(instanceGen); 
-    
-
-
+        return fluentParserBuild;
     }
 
+    [Params(J.Big, J.Deep, J.Long, J.Wide)]
+    public J Type { get; set; }
+    
+    
     [Benchmark]
 
     public void TestCsly()
     {
-        _cslyParser.Parse(_json);
+        var json = GetJson(Type);
+        _cslyParser.Parse(json);
     }
     
     [Benchmark]
 
     public void TestFluent()
     {
-        _fluentParser.Parse(_json);
+        var json = GetJson(Type);
+        _fluentParser.Parse(json);
     }
 
     [Benchmark]
 
     public void TestGenerated()
     {
-        _genParser.Parse(_json);
+        var json = GetJson(Type);
+        _genParser.Parse(json);
     }
 }

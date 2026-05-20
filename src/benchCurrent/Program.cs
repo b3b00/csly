@@ -25,7 +25,6 @@ namespace benchCurrent
                 Console.WriteLine("Hello World!");
                 
                 WhileBench b = new WhileBench();
-                b.Pooled = true;
                 b.TestWhile();
                 // Bench();
             }

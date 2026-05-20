@@ -24,13 +24,13 @@ public class ExprBenchCslies
         }
     }
     
-    private Parser<GenericExpressionToken, double> _cslyParser;
+    private Parser<GenericExpressionToken, double>? _cslyParser = null;
     
-    private Parser<GenericExpressionToken, double> _fluentParser;
+    private Parser<GenericExpressionToken, double>? _fluentParser = null;
 
-    private GeneratedGenericSimpleExpressionParserMain _generatedParser;
+    private GeneratedGenericSimpleExpressionParserMain? _generatedParser = null;
 
-    private string _expression;
+    private string _expression = "";
 
     public void Setup()
     {
@@ -192,8 +192,7 @@ public class ExprBenchCslies
     public void TestGenerated()
     {
         try
-        {
-            Console.WriteLine("generated");
+        {            
             var r = _generatedParser.Parse(_expression);
             if (r.IsOk)
                 Console.WriteLine("parse ok " + r.Result);

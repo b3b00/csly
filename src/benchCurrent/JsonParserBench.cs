@@ -79,7 +79,6 @@ namespace benchCurrent
             {
                 // BenchedParser.Configuration.UseMemoization = Memoize;
                 // BenchedParser.Configuration.BroadenTokenWindow = Broaden;
-                BenchedParser.Configuration.UsePool = Pooled;
                 var ignored = BenchedParser.Parse(content);    
             }
         }
