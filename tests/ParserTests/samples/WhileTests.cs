@@ -17,7 +17,7 @@ namespace ParserTests.samples
         private static BuildResult<Parser<WhileToken, WhileAST>> Parser;
 
 
-        public BuildResult<Parser<WhileToken, WhileAST>> buildParser()
+        public BuildResult<Parser<WhileToken, WhileAST>> BuildParser()
         {
             if (Parser == null)
             {
@@ -29,12 +29,45 @@ namespace ParserTests.samples
 
             return Parser;
         }
+        
+        public BuildResult<Parser<WhileTokenGeneric, WhileAST>> BuildFluentParser()
+        {
+            BuildResult<Parser<WhileTokenGeneric, WhileAST>> parser;
+            
+                var whileParser = new WhileParserGeneric();
+                var builder = new ParserBuilder<WhileTokenGeneric, WhileAST>();
+                parser = builder.BuildParser(whileParser, ParserType.FLUENT_EBNF);
+                Check.That(parser).IsOk();
+            
 
+            return parser;
+        }
+
+        [Fact]
+        public void TestAssignAddFluent()
+        {
+            var buildResult = BuildFluentParser();
+            var parser = buildResult.Result;
+            var result = parser.Parse("(a:=1+1)");
+            Check.That(result).IsOkParsing();
+
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
+            var seq = result.Result as SequenceStatement;
+            Check.That(seq.Get(0)).IsInstanceOf<AssignStatement>();
+            var assign = seq.Get(0) as AssignStatement;
+            Check.That(assign.VariableName).IsEqualTo("a");
+            var val = assign.Value;
+            Check.That(val).IsInstanceOf<BinaryOperation>();
+            var bin = val as BinaryOperation;
+            Check.That(bin.Operator).IsEqualTo(BinaryOperator.ADD);
+            Check.That((bin.Left as IntegerConstant)?.Value).IsEqualTo(1);
+            Check.That((bin.Right as IntegerConstant)?.Value).IsEqualTo(1);
+        }
 
         [Fact]
         public void TestAssignAdd()
         {
-            var buildResult = buildParser();
+            var buildResult = BuildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("(a:=1+1)");
             Check.That(result).IsOkParsing();
@@ -55,14 +88,14 @@ namespace ParserTests.samples
         [Fact]
         public void TestBuildParser()
         {
-            var buildResult = buildParser();
+            var buildResult = BuildParser();
             var parser = buildResult.Result;
         }
 
         [Fact]
         public void TestCounterProgram()
         {
-            var buildResult = buildParser();
+            var buildResult = BuildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("(a:=0; while a < 10 do (print a; a := a +1 ))");
             Check.That(result).IsOkParsing();
@@ -71,7 +104,7 @@ namespace ParserTests.samples
         [Fact]
         public void TestCounterProgramExec()
         {
-            var buildResult = buildParser();
+            var buildResult = BuildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("(a:=0; while a < 10 do (print a; a := a +1 ))");
             Check.That(result).IsOkParsing();
@@ -96,7 +129,7 @@ namespace ParserTests.samples
     print i;
     i := i + 1 )
 )";
-            var buildResult = buildParser();
+            var buildResult = BuildParser();
             var parser = buildResult.Result;
             var result = parser.Parse(program);
             Check.That(result).IsOkParsing();
@@ -134,7 +167,7 @@ return r
         [Fact]
         public void TestIfThenElse()
         {
-            var buildResult = buildParser();
+            var buildResult = BuildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("if true then (a := \"hello\") else (b := \"world\")");
             Check.That(result).IsOkParsing();
@@ -169,7 +202,7 @@ return r
         [Fact]
         public void TestInfiniteWhile()
         {
-            var buildResult = buildParser();
+            var buildResult = BuildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("while true do (skip)");
             Check.That(result).IsOkParsing();
@@ -191,7 +224,7 @@ return r
         [Fact]
         public void TestPrintBoolExpression()
         {
-            var buildResult = buildParser();
+            var buildResult = BuildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("print true and false");
             Check.That(result).IsOkParsing();
@@ -214,7 +247,7 @@ return r
         [Fact]
         public void TestSkip()
         {
-            var buildResult = buildParser();
+            var buildResult = BuildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("skip");
             Check.That(result).IsOkParsing();
@@ -227,7 +260,7 @@ return r
         [Fact]
         public void TestSkipAssignSequence()
         {
-            var buildResult = buildParser();
+            var buildResult = BuildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("(a:=1; b:=2; c:=3)");
             Check.That(result).IsOkParsing();
@@ -244,7 +277,7 @@ return r
         [Fact]
         public void TestSkipSkipSequence()
         {
-            var buildResult = buildParser();
+            var buildResult = BuildParser();
             var parser = buildResult.Result;
             var result = parser.Parse("(skip; skip; skip)");
             Check.That(result).IsOkParsing();

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using sly.buildresult;
 using sly.i18n;
+using sly.lexer.fluent;
 using sly.lexer.fsm;
 
 namespace sly.lexer
@@ -41,6 +42,11 @@ namespace sly.lexer
             var attributes = (T[])valueMembers[0].GetCustomAttributes(typeof(T), false);
             return attributes;
         }
+
+        public static T ParseEnum<T>(string value) where T : struct, Enum
+        {
+            return (T)Enum.Parse(typeof(T), value);
+        }
     }
 
     public delegate (List<string> modes, bool isModePopper, string pushTarget) ModesForLexemeGetter<IN>(
@@ -50,7 +56,7 @@ namespace sly.lexer
     public static class LexerBuilder
     {
         
-        public static Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> GetLexemesWithReflection<IN>(BuildResult<ILexer<IN>> result, string lang)
+        public static Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)> GetLexemesWithReflection<IN>(BuildResult<ILexer<IN>> result = null, string lang = null)
             where IN : struct, Enum
         {
             var attributes = new Dictionary<IN, (List<LexemeAttribute>,List<LexemeLabelAttribute>)>();
@@ -64,11 +70,13 @@ namespace sly.lexer
                 {
                     Enum enumValue = Enum.Parse(typeof(IN), v.ToString()) as Enum;
                     int intValue = Convert.ToInt32(enumValue); // x is the integer value of enum
-
-                    result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
-                        I18N.Instance.GetText(lang, I18NMessage.SameValueUsedManyTime, intValue.ToString(),
-                            group.Count<IN>().ToString(), typeof(IN).FullName),
-                        ErrorCodes.LEXER_SAME_VALUE_USED_MANY_TIME));
+                    if (result != null)
+                    {
+                        result.AddError(new LexerInitializationError(ErrorLevel.FATAL,
+                            I18N.Instance.GetText(lang, I18NMessage.SameValueUsedManyTime, intValue.ToString(),
+                                group.Count<IN>().ToString(), typeof(IN).FullName),
+                            ErrorCodes.LEXER_SAME_VALUE_USED_MANY_TIME));
+                    }
                 }
             }
 
@@ -83,7 +91,7 @@ namespace sly.lexer
                     var multiCommentAttributes = value.GetAttributesOfType<MultiLineCommentAttribute>();
                     var commentAttributes = value.GetAttributesOfType<CommentAttribute>();
                     if (enumAttributes.Length == 0 && singleCommentAttributes.Length == 0 &&
-                        multiCommentAttributes.Length == 0 && commentAttributes.Length == 0)
+                        multiCommentAttributes.Length == 0 && commentAttributes.Length == 0 )
                     {
                         result.AddError(new LexerInitializationError(ErrorLevel.WARN,
                             $"token {tokenID} in lexer definition {typeof(IN).FullName} does not have Lexeme",
@@ -106,6 +114,8 @@ namespace sly.lexer
             return BuildLexer<IN>(new BuildResult<ILexer<IN>>(), extensionBuilder, lexerPostProcess: lexerPostProcess, lang:lang);
         }
 
+        
+        
         public static BuildResult<ILexer<IN>> BuildLexer<IN>(BuildResult<ILexer<IN>> result,
             Action<IN, LexemeAttribute, GenericLexer<IN>> extensionBuilder = null,
             string lang = null, LexerPostProcess<IN> lexerPostProcess = null, 
@@ -772,10 +782,10 @@ namespace sly.lexer
         {
             if (lexeme.HasGenericTokenParameters)
             {
-                delimiter = lexeme.GenericTokenParameters[0];
+                delimiter = lexeme.GenericTokenParameters[0] ?? delimiter;
                 if (lexeme.GenericTokenParameters.Length > 1)
                 {
-                    escape = lexeme.GenericTokenParameters[1];
+                    escape = lexeme.GenericTokenParameters[1] ??  escape;
                 }
                 if (lexeme.GenericTokenParameters.Length > 2)
                 {

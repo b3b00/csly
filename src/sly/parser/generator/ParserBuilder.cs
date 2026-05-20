@@ -59,6 +59,12 @@ namespace sly.parser.generator
             var result = new BuildResult<Parser<IN, OUT>>();
             switch (parserType)
             {
+                case ParserType.FLUENT_EBNF:
+                {
+                    var builder = new FluentParserBuilderFromIntrospection<IN, OUT>();
+                    var fluentResult = builder.BuildParser(parserInstance, parserType, rootRule, extensionBuilder, lexerPostProcess);
+                    return fluentResult;
+                }
                 case ParserType.LL_RECURSIVE_DESCENT:
                 {
                     var configuration = ExtractParserConfiguration(parserInstance.GetType());

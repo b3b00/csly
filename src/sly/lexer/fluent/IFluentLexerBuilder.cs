@@ -18,6 +18,8 @@ public interface IFluentLexerBuilder<IN> where IN : struct, Enum
 
     public IFluentLexemeBuilder<IN> Sugar(IN tokenId, string token);
 
+    public IFluentLexemeBuilder<IN> Date(IN tokenId, DateFormat format, string separator);
+    
     public IFluentLexemeBuilder<IN> Date(IN tokenId, DateFormat format, char separator);
 
     public IFluentLexemeBuilder<IN> Hexa(IN tokenId, string prefix);
@@ -40,6 +42,9 @@ public interface IFluentLexerBuilder<IN> where IN : struct, Enum
     IFluentLexemeBuilder<IN> SingleLineComment(IN tokenId, string start, bool doNotIgnore = false);
 
     public IFluentLexemeBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false);
+
+    public IFluentLexemeBuilder<IN> Comment(IN tokenId, string startSingle, string startMulti, string endMulti,
+        bool doNotIgnore = false);
 
     public IFluentLexemeBuilder<IN> UpTo(IN tokenId, string pattern);
     
