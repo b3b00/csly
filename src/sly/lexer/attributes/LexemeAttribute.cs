@@ -45,6 +45,13 @@ namespace sly.lexer
                 IdentifierRestPattern = restPattern ?? startPattern;
             }
         }
+        
+        public string GetSafeGenericTokenParameter(int i, string defaultValue = null)
+        {
+            if (GenericTokenParameters.Length > i)
+                return GenericTokenParameters[i];
+            return defaultValue;
+        }
 
         public GenericToken GenericToken { get; set; }
 
@@ -72,6 +79,9 @@ namespace sly.lexer
         public bool IsStaticGeneric => !HasGenericTokenParameters &&
                                        GenericToken != GenericToken.String && GenericToken != GenericToken.Extension && GenericToken != GenericToken.Double;
 
+        public bool IsInt => GenericToken == GenericToken.Int;
+        public bool IsInteger => IsInt;
+            
         public bool IsKeyWord => GenericToken == GenericToken.KeyWord;
 
         public bool IsSugar => GenericToken == GenericToken.SugarToken;
@@ -90,5 +100,7 @@ namespace sly.lexer
         public bool IsHexa => GenericToken == GenericToken.Hexa;
         
         public bool IsDate => GenericToken == GenericToken.Date;
+        
+        public bool IsComment =>  GenericToken == GenericToken.Comment;
     }
 }
