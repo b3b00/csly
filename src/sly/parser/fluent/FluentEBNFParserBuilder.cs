@@ -391,13 +391,17 @@ public class FluentEBNFParserBuilder<IN, OUT> : IFluentEbnfRuleBuilder<IN, OUT> 
 
     public IFluentEbnfParserBuilder<IN, OUT> Named(string name)
     {
-        if (_currentOperation != null)
+        if (!string.IsNullOrEmpty(name))
         {
-            _currentOperation.NodeName = name;
-        }
-        if (_currentRule != null)
-        {
-            _currentRule.NodeName = name;
+            if (_currentOperation != null)
+            {
+                _currentOperation.NodeName = name;
+            }
+
+            if (_currentRule != null)
+            {
+                _currentRule.NodeName = name;
+            }
         }
         return this;
     }

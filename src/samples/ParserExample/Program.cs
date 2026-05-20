@@ -131,6 +131,32 @@ namespace ParserExample
             return "_";
         }
 
+        public static void FluentFromReflection()
+        {
+            BuildResult<Parser<WhileTokenGeneric, WhileAST>> parser;
+            
+            var whileParser = new WhileParserGeneric();
+            var builder = new ParserBuilder<WhileTokenGeneric, WhileAST>();
+            parser = builder.BuildParser(whileParser, ParserType.FLUENT_EBNF);
+            Check.That(parser).IsOk();
+
+            var result = parser.Result.Parse("(a:=1+1)");
+            
+            Check.That(result.Result).IsInstanceOf<SequenceStatement>();
+            var seq = result.Result as SequenceStatement;
+            Check.That(seq.Get(0)).IsInstanceOf<AssignStatement>();
+            var assign = seq.Get(0) as AssignStatement;
+            Check.That(assign.VariableName).IsEqualTo("a");
+            var val = assign.Value;
+            Check.That(val).IsInstanceOf<BinaryOperation>();
+            var bin = val as BinaryOperation;
+            Check.That(bin.Operator).IsEqualTo(BinaryOperator.ADD);
+            Check.That((bin.Left as IntegerConstant)?.Value).IsEqualTo(1);
+            Check.That((bin.Right as IntegerConstant)?.Value).IsEqualTo(1);
+
+
+        }
+        
         private static void testIssue516()
         {
             ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();

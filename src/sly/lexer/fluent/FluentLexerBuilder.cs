@@ -246,6 +246,13 @@ public class FluentLexerBuilder<IN> :  IFluentLexemeBuilder<IN> where IN : struc
         return this;
     }
 
+    public IFluentLexemeBuilder<IN> Comment(IN tokenId, string startSingle, string startMulti, string endMulti,
+        bool doNotIgnore = false)
+    {
+        AddComment(tokenId,new CommentAttribute(startSingle, startMulti,  endMulti,doNotIgnore, Channels.Comments));
+        return this;
+    } 
+    
     public IFluentLexemeBuilder<IN> MultiLineComment(IN tokenId, string start, string end, bool doNotIgnore = false)
     {
         AddComment(tokenId, new MultiLineCommentAttribute(start, end, doNotIgnore, Channels.Comments));
@@ -261,6 +268,13 @@ public class FluentLexerBuilder<IN> :  IFluentLexemeBuilder<IN> where IN : struc
     public IFluentLexemeBuilder<IN> UpTo(IN tokenId, params string[] patterns)
     {
         Add(tokenId,new LexemeAttribute(GenericToken.UpTo, patterns),null);
+        return this;
+    }
+
+    public IFluentLexemeBuilder<IN> Date(IN tokenId, DateFormat format, string separator)
+    {
+        var charSeparator = (separator != null && separator.Length > 0) ? separator[0] : '-';
+        Date(tokenId,format,charSeparator);
         return this;
     }
     
