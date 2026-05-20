@@ -118,7 +118,6 @@ internal class FluentParserBuilderFromIntrospection<IN, OUT> : EBNFParserBuilder
     private static IFluentEbnfParserBuilder<IN, OUT> BuildRule(object parserInstance, Rule<IN, OUT> rule, IFluentEbnfParserBuilder<IN, OUT> builder)
     {
         var ruleString = rule.RuleString;
-        Console.WriteLine($"building rule string: >>{ruleString}<<");
         Func<object[], OUT> visitor = null;
         var method = rule.GetVisitorMethod();
         if (method != null)

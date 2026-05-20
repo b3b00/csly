@@ -133,6 +133,9 @@ namespace ParserExample
 
         public static void FluentFromReflection()
         {
+            WhileTests tests = new WhileTests();
+            tests.TestAssignAddFluent();
+            
             BuildResult<Parser<WhileTokenGeneric, WhileAST>> parser;
             
             var whileParser = new WhileParserGeneric();

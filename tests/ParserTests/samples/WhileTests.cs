@@ -30,12 +30,12 @@ namespace ParserTests.samples
             return Parser;
         }
         
-        public BuildResult<Parser<WhileToken, WhileAST>> BuildFluentParser()
+        public BuildResult<Parser<WhileTokenGeneric, WhileAST>> BuildFluentParser()
         {
-            BuildResult<Parser<WhileToken, WhileAST>> parser;
+            BuildResult<Parser<WhileTokenGeneric, WhileAST>> parser;
             
-                var whileParser = new WhileParser();
-                var builder = new ParserBuilder<WhileToken, WhileAST>();
+                var whileParser = new WhileParserGeneric();
+                var builder = new ParserBuilder<WhileTokenGeneric, WhileAST>();
                 parser = builder.BuildParser(whileParser, ParserType.FLUENT_EBNF);
                 Check.That(parser).IsOk();
             
