@@ -222,7 +222,8 @@ public class CsliesBench
         return fluentParserBuild;
     }
 
-    [Params(J.Big, J.Deep, J.Long, J.Wide)]
+    //[Params(J.Big, J.Deep, J.Long, J.Wide)]
+    [Params(J.Big, J.Deep)]
     public J Type { get; set; }
     
     

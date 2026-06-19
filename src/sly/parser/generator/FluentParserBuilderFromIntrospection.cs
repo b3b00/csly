@@ -115,7 +115,7 @@ internal class FluentParserBuilderFromIntrospection<IN, OUT> : EBNFParserBuilder
         }
     }
 
-    private static IFluentEbnfParserBuilder<IN, OUT> BuildRule(object parserInstance, Rule<IN, OUT> rule, IFluentEbnfParserBuilder<IN, OUT> builder)
+    private static IFluentEbnfParserBuilder<IN, OUT> BuildRuleTooCosty(object parserInstance, Rule<IN, OUT> rule, IFluentEbnfParserBuilder<IN, OUT> builder)
     {
         var ruleString = rule.RuleString;
         Func<object[], OUT> visitor = null;
@@ -134,6 +134,47 @@ internal class FluentParserBuilderFromIntrospection<IN, OUT> : EBNFParserBuilder
             var body = Expression.Convert(callExpr, typeof(OUT));
             visitor = Expression.Lambda<Func<object[], OUT>>(body, argsParam).Compile();
         }                
+        builder = builder.Production(ruleString, visitor).Named(rule.NodeName);
+        return builder;
+    }
+    
+    
+    private static IFluentEbnfParserBuilder<IN, OUT> BuildRule(object parserInstance, Rule<IN, OUT> rule, IFluentEbnfParserBuilder<IN, OUT> builder)
+    {
+        var ruleString = rule.RuleString;
+        Func<object[], OUT> visitor = null;
+        var method = rule.GetVisitorMethod();
+
+        if (method != null)
+        {
+            var argsParam = Expression.Parameter(typeof(object[]), "args");
+            var methodParams = method.GetParameters();
+
+            // 1. Build the strongly-typed delegate type for the target method
+            var delegateParamTypes = methodParams.Select(p => p.ParameterType).ToList();
+            delegateParamTypes.Add(typeof(OUT)); // Add return type
+        
+            // Dynamically get the Func<...> type matching the method parameters
+            var genericFuncType = Expression.GetFuncType(delegateParamTypes.ToArray());
+        
+            // 2. Bind the method to the instance *once* at startup
+            var stronglyTypedDelegate = Delegate.CreateDelegate(genericFuncType, parserInstance, method);
+
+            // 3. Cast each argument from the incoming object[]
+            var castArgs = methodParams.Select((p, i) =>
+                (Expression)Expression.Convert(
+                    Expression.ArrayIndex(argsParam, Expression.Constant(i)),
+                    p.ParameterType
+                )).ToArray();
+
+            // 4. INSTEAD OF Expression.Call(method), we invoke the pre-bound delegate!
+            var delegateConstant = Expression.Constant(stronglyTypedDelegate);
+            var invokeExpr = Expression.Invoke(delegateConstant, castArgs);
+        
+            var body = Expression.Convert(invokeExpr, typeof(OUT));
+            visitor = Expression.Lambda<Func<object[], OUT>>(body, argsParam).Compile();
+        }                
+
         builder = builder.Production(ruleString, visitor).Named(rule.NodeName);
         return builder;
     }
