@@ -39,6 +39,7 @@ public class CsliesBench
     }
 
     Parser<CslyJsonTokenGeneric,JSon> _cslyParser;
+    Parser<CslyJsonTokenGeneric,JSon> _introspectiveFluentCslyParser;
     Parser<CslyJsonTokenGeneric,JSon> _fluentParser;
 
     GeneratedEbnfJsonGenericParserMain _genParser; 
@@ -76,6 +77,17 @@ public class CsliesBench
         }
         _cslyParser = r.Result;
 
+        r = builder.BuildParser(new CslyEbnfJsonGenericParser(), ParserType.FLUENT_EBNF, "root");
+        if (r.IsError)
+        {
+            foreach (var error in r.Errors)
+            {
+                Console.Error.WriteLine(error);
+            }
+            Environment.Exit(1);
+        }
+
+        _introspectiveFluentCslyParser = r.Result;
         
 
         var fluentParserBuild = FluentParserBuild();
@@ -216,15 +228,21 @@ public class CsliesBench
     
     [Benchmark]
 
-    public void TestCsly()
+    public void Csly()
     {
         var json = GetJson(Type);
         _cslyParser.Parse(json);
     }
     
     [Benchmark]
-
-    public void TestFluent()
+    public void IntrospectiveCslyFluent()
+    {
+        var json = GetJson(Type);
+        _introspectiveFluentCslyParser.Parse(json);
+    }
+    
+    [Benchmark]
+    public void Fluent()
     {
         var json = GetJson(Type);
         _fluentParser.Parse(json);
@@ -232,7 +250,7 @@ public class CsliesBench
 
     [Benchmark]
 
-    public void TestGenerated()
+    public void Generated()
     {
         var json = GetJson(Type);
         _genParser.Parse(json);
