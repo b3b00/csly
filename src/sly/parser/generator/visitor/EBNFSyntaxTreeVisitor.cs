@@ -96,14 +96,11 @@ namespace sly.parser.generator.visitor
         // Helper method to safely pull the Children list out of any matching concrete variant
         private List<ISyntaxNode<IN, OUT>> GetChildrenSafely(ISyntaxNode<IN, OUT> node)
         {
-            return node switch
-            {
-                SyntaxNode<IN, OUT> sn => sn.Children,
-                GroupSyntaxNode<IN, OUT> gn => gn.Children,
-                ManySyntaxNode<IN, OUT> mn => mn.Children,
-                OptionSyntaxNode<IN, OUT> on => on.Children,
-                _ => null
-            };
+
+            if ( node is SyntaxNode<IN, OUT> sn ) {
+              return sn.Children;
+            }
+            return null;
         }
 
         private SyntaxVisitorResult<IN, OUT> VisitLeaf(SyntaxLeaf<IN, OUT> leaf)
