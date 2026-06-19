@@ -8,14 +8,12 @@ using System;
 
 namespace sly.parser.generator.visitor
 {
-    // A lightweight state enum to keep track of our position in the tree traversal
     internal enum VisitorStep
     {
-        Pending,   // Node encountered for the first time, needs children queued
-        Evaluate   // Children have been processed, parent can now execute its visitor logic
+        Pending,
+        Evaluate
     }
 
-    // A simple structural container to act as our manual stack frame
     internal struct VisitorFrame<IN, OUT> where IN : struct, Enum
     {
         public ISyntaxNode<IN, OUT> Node { get; }
@@ -35,15 +33,11 @@ namespace sly.parser.generator.visitor
         {
         }
 
-        // The new, completely flat, stack-safe entry point
         protected override SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN, OUT> root, object context = null)
         {
             if (root == null) return null;
 
-            // Tracks the final evaluations of completed subtrees
             var results = new Dictionary<ISyntaxNode<IN, OUT>, SyntaxVisitorResult<IN, OUT>>();
-            
-            // Our heap-allocated call stack. Can grow to gigabytes, completely bypassing the 1MB thread limit!
             var stack = new Stack<VisitorFrame<IN, OUT>>();
             
             stack.Push(new VisitorFrame<IN, OUT>(root, VisitorStep.Pending));
@@ -55,31 +49,29 @@ namespace sly.parser.generator.visitor
 
                 if (frame.Step == VisitorStep.Pending)
                 {
-                    // Leaves have no children, we can evaluate them instantly
                     if (node is SyntaxLeaf<IN, OUT> leaf)
                     {
                         results[node] = VisitLeaf(leaf);
                         continue;
                     }
 
-                    // For container nodes, push them back as "Evaluate", then push children as "Pending"
                     stack.Push(new VisitorFrame<IN, OUT>(node, VisitorStep.Evaluate));
 
-                    // Push children in REVERSE order so they are popped and processed in original left-to-right order
-                    if (node.Children != null)
+                    // SAFE CAST FIX: Dynamically retrieve children depending on the node's true concrete type
+                    var children = GetChildrenSafely(node);
+                    if (children != null)
                     {
-                        for (int i = node.Children.Count - 1; i >= 0; i--)
+                        for (int i = children.Count - 1; i >= 0; i--)
                         {
-                            if (node.Children[i] != null)
+                            if (children[i] != null)
                             {
-                                stack.Push(new VisitorFrame<IN, OUT>(node.Children[i], VisitorStep.Pending));
+                                stack.Push(new VisitorFrame<IN, OUT>(children[i], VisitorStep.Pending));
                             }
                         }
                     }
                 }
                 else // VisitorStep.Evaluate
                 {
-                    // All children are guaranteed to be evaluated and waiting in the results dictionary!
                     switch (node)
                     {
                         case GroupSyntaxNode<IN, OUT> groupNode:
@@ -101,6 +93,19 @@ namespace sly.parser.generator.visitor
             return results[root];
         }
 
+        // Helper method to safely pull the Children list out of any matching concrete variant
+        private List<ISyntaxNode<IN, OUT>> GetChildrenSafely(ISyntaxNode<IN, OUT> node)
+        {
+            return node switch
+            {
+                SyntaxNode<IN, OUT> sn => sn.Children,
+                GroupSyntaxNode<IN, OUT> gn => gn.Children,
+                ManySyntaxNode<IN, OUT> mn => mn.Children,
+                OptionSyntaxNode<IN, OUT> on => on.Children,
+                _ => null
+            };
+        }
+
         private SyntaxVisitorResult<IN, OUT> VisitLeaf(SyntaxLeaf<IN, OUT> leaf)
         {
             return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
@@ -109,13 +114,16 @@ namespace sly.parser.generator.visitor
         private SyntaxVisitorResult<IN, OUT> EvaluateGroup(GroupSyntaxNode<IN, OUT> node, Dictionary<ISyntaxNode<IN, OUT>, SyntaxVisitorResult<IN, OUT>> results, object context)
         {
             var group = new Group<IN, OUT>();
-            foreach (var n in node.Children)
+            if (node.Children != null)
             {
-                var v = results[n];
-                if (v.IsValue) group.Add(n.Name, v.ValueResult);
-                if (v.IsToken && !v.Discarded)
+                foreach (var n in node.Children)
                 {
-                    group.Add(n.Name, v.TokenResult);
+                    var v = results[n];
+                    if (v.IsValue) group.Add(n.Name, v.ValueResult);
+                    if (v.IsToken && !v.Discarded)
+                    {
+                        group.Add(n.Name, v.TokenResult);
+                    }
                 }
             }
             return SyntaxVisitorResult<IN, OUT>.NewGroup(group);
@@ -146,9 +154,12 @@ namespace sly.parser.generator.visitor
         private SyntaxVisitorResult<IN, OUT> EvaluateMany(ManySyntaxNode<IN, OUT> node, Dictionary<ISyntaxNode<IN, OUT>, SyntaxVisitorResult<IN, OUT>> results, object context)
         {
             var values = new List<SyntaxVisitorResult<IN, OUT>>();
-            foreach (var n in node.Children)
+            if (node.Children != null)
             {
-                values.Add(results[n]);
+                foreach (var n in node.Children)
+                {
+                    values.Add(results[n]);
+                }
             }
 
             if (node.IsManyTokens)
@@ -176,52 +187,48 @@ namespace sly.parser.generator.visitor
 
             if (!node.IsByPassNode && (node.LambdaVisitor != null || node.Visitor != null))
             {
-                int parametersArrayLength = node.Children.Count + (context is NoContext ? 0 : 1);
+                int childrenCount = node.Children?.Count ?? 0;
+                int parametersArrayLength = childrenCount + (context is NoContext ? 0 : 1);
                 var parameters = new object[parametersArrayLength];
                 int parametersCount = 0;
 
-                foreach (var n in node.Children)
+                if (node.Children != null)
                 {
-                    var v = results[n];
-                    if (v.IsToken && !n.Discarded)
+                    foreach (var n in node.Children)
                     {
-                        parameters[parametersCount] = v.TokenResult;
-                        parametersCount++;
-                    }
-                    else if (v.IsValue)
-                    {
-                        parameters[parametersCount] = v.ValueResult;
-                        parametersCount++;
-                    }
-                    else if (v.IsOption)
-                    {
-                        parameters[parametersCount] = v.OptionResult;
-                        parametersCount++;
-                    }
-                    else if (v.IsOptionGroup)
-                    {
-                        parameters[parametersCount] = v.OptionGroupResult;
-                        parametersCount++;
-                    }
-                    else if (v.IsGroup)
-                    {
-                        parameters[parametersCount] = v.GroupResult;
-                        parametersCount++;
-                    }
-                    else if (v.IsTokenList)
-                    {
-                        parameters[parametersCount] = v.TokenListResult;
-                        parametersCount++;
-                    }
-                    else if (v.IsValueList)
-                    {
-                        parameters[parametersCount] = v.ValueListResult;
-                        parametersCount++;
-                    }
-                    else if (v.IsGroupList)
-                    {
-                        parameters[parametersCount] = v.GroupListResult;
-                        parametersCount++;
+                        var v = results[n];
+                        if (v.IsToken && !n.Discarded)
+                        {
+                            parameters[parametersCount++] = v.TokenResult;
+                        }
+                        else if (v.IsValue)
+                        {
+                            parameters[parametersCount++] = v.ValueResult;
+                        }
+                        else if (v.IsOption)
+                        {
+                            parameters[parametersCount++] = v.OptionResult;
+                        }
+                        else if (v.IsOptionGroup)
+                        {
+                            parameters[parametersCount++] = v.OptionGroupResult;
+                        }
+                        else if (v.IsGroup)
+                        {
+                            parameters[parametersCount++] = v.GroupResult;
+                        }
+                        else if (v.IsTokenList)
+                        {
+                            parameters[parametersCount++] = v.TokenListResult;
+                        }
+                        else if (v.IsValueList)
+                        {
+                            parameters[parametersCount++] = v.ValueListResult;
+                        }
+                        else if (v.IsGroupList)
+                        {
+                            parameters[parametersCount++] = v.GroupListResult;
+                        }
                     }
                 }
 
@@ -235,8 +242,7 @@ namespace sly.parser.generator.visitor
                     {
                         if (!(context is NoContext))
                         {
-                            parameters[parametersCount] = context;
-                            parametersCount++;
+                            parameters[parametersCount++] = context;
                         }
 
                         if (node.Visitor != null)
@@ -248,9 +254,9 @@ namespace sly.parser.generator.visitor
                         }
                         if (node.LambdaVisitor != null)
                         {
-                            // If you want to further optimize allocations later, you can replace parameters.ToArray()
-                            // with an ArrayPool lease, since the array reference stays local to this block!
-                            var t = node.LambdaVisitor(parameters.ToArray());
+                            var exactParams = new object[parametersCount];
+                            Array.Copy(parameters, exactParams, parametersCount);
+                            var t = node.LambdaVisitor(exactParams);
                             result = SyntaxVisitorResult<IN, OUT>.NewValue(t);
                         }
                     }
