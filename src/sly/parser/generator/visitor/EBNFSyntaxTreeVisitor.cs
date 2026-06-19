@@ -8,94 +8,181 @@ using System;
 
 namespace sly.parser.generator.visitor
 {
+    // A lightweight state enum to keep track of our position in the tree traversal
+    internal enum VisitorStep
+    {
+        Pending,   // Node encountered for the first time, needs children queued
+        Evaluate   // Children have been processed, parent can now execute its visitor logic
+    }
+
+    // A simple structural container to act as our manual stack frame
+    internal struct VisitorFrame<IN, OUT> where IN : struct, Enum
+    {
+        public ISyntaxNode<IN, OUT> Node { get; }
+        public VisitorStep Step { get; }
+
+        public VisitorFrame(ISyntaxNode<IN, OUT> node, VisitorStep step)
+        {
+            Node = node;
+            Step = step;
+        }
+    }
+
     public class EBNFSyntaxTreeVisitor<IN, OUT> : SyntaxTreeVisitor<IN, OUT> where IN : struct, Enum
     {
-        public EBNFSyntaxTreeVisitor(ParserConfiguration<IN, OUT> conf, object parserInstance) : base(conf,
-            parserInstance)
+        public EBNFSyntaxTreeVisitor(ParserConfiguration<IN, OUT> conf, object parserInstance) 
+            : base(conf, parserInstance)
         {
         }
 
-
-        protected override SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN, OUT> n, object context = null)
+        // The new, completely flat, stack-safe entry point
+        protected override SyntaxVisitorResult<IN, OUT> Visit(ISyntaxNode<IN, OUT> root, object context = null)
         {
-            switch (n)
+            if (root == null) return null;
+
+            // Tracks the final evaluations of completed subtrees
+            var results = new Dictionary<ISyntaxNode<IN, OUT>, SyntaxVisitorResult<IN, OUT>>();
+            
+            // Our heap-allocated call stack. Can grow to gigabytes, completely bypassing the 1MB thread limit!
+            var stack = new Stack<VisitorFrame<IN, OUT>>();
+            
+            stack.Push(new VisitorFrame<IN, OUT>(root, VisitorStep.Pending));
+
+            while (stack.Count > 0)
             {
-                case SyntaxLeaf<IN, OUT> leaf:
-                    return Visit(leaf);
-                case GroupSyntaxNode<IN, OUT> node:
-                    return Visit(node, context);
-                case ManySyntaxNode<IN, OUT> node:
-                    return Visit(node, context);
-                case OptionSyntaxNode<IN, OUT> node:
-                    return Visit(node, context);
-                case SyntaxNode<IN, OUT> node:
-                    return Visit(node, context);
-                default:
-                    return null;
+                var frame = stack.Pop();
+                var node = frame.Node;
+
+                if (frame.Step == VisitorStep.Pending)
+                {
+                    // Leaves have no children, we can evaluate them instantly
+                    if (node is SyntaxLeaf<IN, OUT> leaf)
+                    {
+                        results[node] = VisitLeaf(leaf);
+                        continue;
+                    }
+
+                    // For container nodes, push them back as "Evaluate", then push children as "Pending"
+                    stack.Push(new VisitorFrame<IN, OUT>(node, VisitorStep.Evaluate));
+
+                    // Push children in REVERSE order so they are popped and processed in original left-to-right order
+                    if (node.Children != null)
+                    {
+                        for (int i = node.Children.Count - 1; i >= 0; i--)
+                        {
+                            if (node.Children[i] != null)
+                            {
+                                stack.Push(new VisitorFrame<IN, OUT>(node.Children[i], VisitorStep.Pending));
+                            }
+                        }
+                    }
+                }
+                else // VisitorStep.Evaluate
+                {
+                    // All children are guaranteed to be evaluated and waiting in the results dictionary!
+                    switch (node)
+                    {
+                        case GroupSyntaxNode<IN, OUT> groupNode:
+                            results[node] = EvaluateGroup(groupNode, results, context);
+                            break;
+                        case ManySyntaxNode<IN, OUT> manyNode:
+                            results[node] = EvaluateMany(manyNode, results, context);
+                            break;
+                        case OptionSyntaxNode<IN, OUT> optionNode:
+                            results[node] = EvaluateOption(optionNode, results, context);
+                            break;
+                        case SyntaxNode<IN, OUT> syntaxNode:
+                            results[node] = EvaluateSyntaxNode(syntaxNode, results, context);
+                            break;
+                    }
+                }
             }
+
+            return results[root];
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(GroupSyntaxNode<IN, OUT> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> VisitLeaf(SyntaxLeaf<IN, OUT> leaf)
+        {
+            return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
+        }
+
+        private SyntaxVisitorResult<IN, OUT> EvaluateGroup(GroupSyntaxNode<IN, OUT> node, Dictionary<ISyntaxNode<IN, OUT>, SyntaxVisitorResult<IN, OUT>> results, object context)
         {
             var group = new Group<IN, OUT>();
-            var values = new List<SyntaxVisitorResult<IN, OUT>>();
             foreach (var n in node.Children)
             {
-                var v = Visit(n, context);
-
+                var v = results[n];
                 if (v.IsValue) group.Add(n.Name, v.ValueResult);
                 if (v.IsToken && !v.Discarded)
                 {
                     group.Add(n.Name, v.TokenResult);
                 }
             }
-
-
-            var res = SyntaxVisitorResult<IN, OUT>.NewGroup(group);
-            return res;
+            return SyntaxVisitorResult<IN, OUT>.NewGroup(group);
         }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(OptionSyntaxNode<IN, OUT> node, object context = null)
+        private SyntaxVisitorResult<IN, OUT> EvaluateOption(OptionSyntaxNode<IN, OUT> node, Dictionary<ISyntaxNode<IN, OUT>, SyntaxVisitorResult<IN, OUT>> results, object context)
         {
-            var child = node.Children != null && node.Children.Any<ISyntaxNode<IN, OUT>>() ? node.Children[0] : null;
+            var child = node.Children != null && node.Children.Any() ? node.Children[0] : null;
             if (child == null || node.IsEmpty)
             {
-                if (node.IsGroupOption)
-                {
-                 return SyntaxVisitorResult<IN, OUT>.NewOptionGroupNone();   
-                }
-                else
-                {
-                    return SyntaxVisitorResult<IN, OUT>.NewOptionNone();
-                }
+                return node.IsGroupOption 
+                    ? SyntaxVisitorResult<IN, OUT>.NewOptionGroupNone() 
+                    : SyntaxVisitorResult<IN, OUT>.NewOptionNone();
             }
 
-            var innerResult = Visit(child, context);
+            var innerResult = results[child];
             switch (child)
             {
                 case SyntaxLeaf<IN, OUT> leaf:
                     return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
-                case GroupSyntaxNode<IN, OUT> group:
+                case GroupSyntaxNode<IN, OUT> _:
                     return SyntaxVisitorResult<IN, OUT>.NewOptionGroupSome(innerResult.GroupResult);
                 default:
                     return SyntaxVisitorResult<IN, OUT>.NewOptionSome(innerResult.ValueResult);
             }
         }
 
+        private SyntaxVisitorResult<IN, OUT> EvaluateMany(ManySyntaxNode<IN, OUT> node, Dictionary<ISyntaxNode<IN, OUT>, SyntaxVisitorResult<IN, OUT>> results, object context)
+        {
+            var values = new List<SyntaxVisitorResult<IN, OUT>>();
+            foreach (var n in node.Children)
+            {
+                values.Add(results[n]);
+            }
 
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxNode<IN, OUT> node, object context = null)
+            if (node.IsManyTokens)
+            {
+                var tokens = values.Select(v => v.TokenResult).ToList();
+                return SyntaxVisitorResult<IN, OUT>.NewTokenList(tokens);
+            }
+            if (node.IsManyValues)
+            {
+                var vals = values.Select(v => v.ValueResult).ToList();
+                return SyntaxVisitorResult<IN, OUT>.NewValueList(vals);
+            }
+            if (node.IsManyGroups)
+            {
+                var vals = values.Select(v => v.GroupResult).ToList();
+                return SyntaxVisitorResult<IN, OUT>.NewGroupList(vals);
+            }
+
+            return null;
+        }
+
+        private SyntaxVisitorResult<IN, OUT> EvaluateSyntaxNode(SyntaxNode<IN, OUT> node, Dictionary<ISyntaxNode<IN, OUT>, SyntaxVisitorResult<IN, OUT>> results, object context)
         {
             var result = SyntaxVisitorResult<IN, OUT>.NoneResult();
-            if (!node .IsByPassNode && (node.LambdaVisitor != null || node.Visitor != null ))
+
+            if (!node.IsByPassNode && (node.LambdaVisitor != null || node.Visitor != null))
             {
-                int parametersArrayLength = node.Children.Count + (context is NoContext ? 0 : 1); 
+                int parametersArrayLength = node.Children.Count + (context is NoContext ? 0 : 1);
                 var parameters = new object[parametersArrayLength];
-                
                 int parametersCount = 0;
 
                 foreach (var n in node.Children)
                 {
-                    var v = Visit(n, context);
+                    var v = results[n];
                     if (v.IsToken && !n.Discarded)
                     {
                         parameters[parametersCount] = v.TokenResult;
@@ -144,7 +231,6 @@ namespace sly.parser.generator.visitor
                 }
                 else
                 {
-                    MethodInfo method = null;
                     try
                     {
                         if (!(context is NoContext))
@@ -155,16 +241,17 @@ namespace sly.parser.generator.visitor
 
                         if (node.Visitor != null)
                         {
-                            method = node.Visitor;
+                            var method = node.Visitor;
                             Array.Resize(ref parameters, parametersCount);
                             var t = method.Invoke(ParserVsisitorInstance, parameters);
-                            var res = (OUT)t;
-                            result = SyntaxVisitorResult<IN, OUT>.NewValue(res);
+                            result = SyntaxVisitorResult<IN, OUT>.NewValue((OUT)t);
                         }
                         if (node.LambdaVisitor != null)
                         {
+                            // If you want to further optimize allocations later, you can replace parameters.ToArray()
+                            // with an ArrayPool lease, since the array reference stays local to this block!
                             var t = node.LambdaVisitor(parameters.ToArray());
-                            result = SyntaxVisitorResult<IN,OUT>.NewValue(t);
+                            result = SyntaxVisitorResult<IN, OUT>.NewValue(t);
                         }
                     }
                     catch (TargetInvocationException tie)
@@ -179,51 +266,10 @@ namespace sly.parser.generator.visitor
             else if (node.IsByPassNode)
             {
                 var child = node.Children[0];
-                var v = Visit(child, context);
-                return v;
+                return results[child];
             }
 
             return result;
-        }
-
-        private SyntaxVisitorResult<IN, OUT> Visit(ManySyntaxNode<IN, OUT> node, object context = null)
-        {
-            SyntaxVisitorResult<IN, OUT> result = null;
-
-            var values = new List<SyntaxVisitorResult<IN, OUT>>();
-            foreach (var n in node.Children)
-            {
-                var v = Visit(n, context);
-                values.Add(v);
-            }
-
-            if (node.IsManyTokens)
-            {
-                var tokens = new List<Token<IN>>();
-                values.ForEach(v => tokens.Add(v.TokenResult));
-                result = SyntaxVisitorResult<IN, OUT>.NewTokenList(tokens);
-            }
-            else if (node.IsManyValues)
-            {
-                var vals = new List<OUT>();
-                values.ForEach(v => vals.Add(v.ValueResult));
-                result = SyntaxVisitorResult<IN, OUT>.NewValueList(vals);
-            }
-            else if (node.IsManyGroups)
-            {
-                var vals = new List<Group<IN, OUT>>();
-                values.ForEach(v => vals.Add(v.GroupResult));
-                result = SyntaxVisitorResult<IN, OUT>.NewGroupList(vals);
-            }
-
-
-            return result;
-        }
-
-
-        private SyntaxVisitorResult<IN, OUT> Visit(SyntaxLeaf<IN, OUT> leaf)
-        {
-            return SyntaxVisitorResult<IN, OUT>.NewToken(leaf.Token);
         }
     }
 }
