@@ -139,7 +139,7 @@ internal class FluentParserBuilderFromIntrospection<IN, OUT> : EBNFParserBuilder
     }
     
     
-    private static IFluentEbnfParserBuilder<IN, OUT> BuildRule(object parserInstance, Rule<IN, OUT> rule, IFluentEbnfParserBuilder<IN, OUT> builder)
+    private static IFluentEbnfParserBuilder<IN, OUT> BuildRuleUsingDelegate(object parserInstance, Rule<IN, OUT> rule, IFluentEbnfParserBuilder<IN, OUT> builder)
     {
         var ruleString = rule.RuleString;
         Func<object[], OUT> visitor = null;
@@ -178,4 +178,46 @@ internal class FluentParserBuilderFromIntrospection<IN, OUT> : EBNFParserBuilder
         builder = builder.Production(ruleString, visitor).Named(rule.NodeName);
         return builder;
     }
+    
+    private static IFluentEbnfParserBuilder<IN, OUT> BuildRule(object parserInstance, Rule<IN, OUT> rule, IFluentEbnfParserBuilder<IN, OUT> builder)
+{
+    var ruleString = rule.RuleString;
+    Func<object[], OUT> visitor = null;
+    var method = rule.GetVisitorMethod();
+
+    if (method != null)
+    {
+        var argsParam = Expression.Parameter(typeof(object[]), "args");
+        var methodParams = method.GetParameters();
+
+        // 1. Dynamically build the exact Func<...> or Action<...> type for this specific method signature
+        var paramTypes = methodParams.Select(p => p.ParameterType).ToList();
+        paramTypes.Add(method.ReturnType); // Handles any return type, including OUT
+        var delegateType = Expression.GetFuncType(paramTypes.ToArray());
+
+        // 2. Create a standard, strongly-typed .NET Delegate bound to your instance.
+        // This works perfectly with generics, overloads, and any number of arguments!
+        Delegate targetDelegate = Delegate.CreateDelegate(delegateType, parserInstance, method);
+
+        // 3. Generate the array-unpacking and casting logic (matches your hand-written code)
+        var castArgs = methodParams.Select((p, i) =>
+            (Expression)Expression.Convert(
+                Expression.ArrayIndex(argsParam, Expression.Constant(i)),
+                p.ParameterType
+            )).ToArray();
+
+        // 4. CRITICAL FIX: Instead of Expression.Call(method), we use Expression.Invoke on the delegate.
+        // This forces the JIT to emit a direct pointer execution rather than a heavy dynamic method block.
+        var delegateConstant = Expression.Constant(targetDelegate, delegateType);
+        var invokeExpr = Expression.Invoke(delegateConstant, castArgs);
+        
+        var body = Expression.Convert(invokeExpr, typeof(OUT));
+        
+        // 5. Compile it. The resulting IL will now have a tight stack footprint.
+        visitor = Expression.Lambda<Func<object[], OUT>>(body, argsParam).Compile();
+    }                
+
+    builder = builder.Production(ruleString, visitor).Named(rule.NodeName);
+    return builder;
+}
 }
