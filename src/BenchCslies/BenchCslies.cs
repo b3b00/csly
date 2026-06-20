@@ -1,4 +1,4 @@
-﻿using BenchCslies.parsers.json.csly;
+using BenchCslies.parsers.json.csly;
 
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
@@ -76,6 +76,8 @@ public class CsliesBench
             Environment.Exit(1);
         }
         _cslyParser = r.Result;
+        
+        File.WriteAllText("c:/tmp/csly.grammar.txt",r.Result.Configuration.Dump());
 
         r = builder.BuildParser(new CslyEbnfJsonGenericParser(), ParserType.FLUENT_EBNF, "root");
         if (r.IsError)
@@ -86,12 +88,15 @@ public class CsliesBench
             }
             Environment.Exit(1);
         }
+        File.WriteAllText("c:/tmp/introspectivefluentcsly.grammar.txt",r.Result.Configuration.Dump());
 
         _introspectiveFluentCslyParser = r.Result;
         
 
         var fluentParserBuild = FluentParserBuild();
 
+        File.WriteAllText("c:/tmp/fluent.grammar.txt",fluentParserBuild.Result.Configuration.Dump());
+        
         _fluentParser = fluentParserBuild.Result;
 
         _json = JsonBuilder.BuildJson(4, 4, 3);
@@ -161,11 +166,11 @@ public class CsliesBench
             })
             
             
-            .Production("object: CROG[d] CROD[d]", (args) =>
+            .Production("object: ACCG[d] ACCD[d]", (args) =>
             {
                 return new JObject();
             })
-            .Production("object: CROG[d] members CROD[d]", (args) =>
+            .Production("object: ACCG[d] members ACCD[d]", (args) =>
             {
                 return args[0] as JSon;
             })

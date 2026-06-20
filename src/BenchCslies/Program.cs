@@ -1,4 +1,5 @@
-﻿using BenchCslies;
+using System.Diagnostics;
+using BenchCslies;
 using BenchmarkDotNet.Running;
 
 public class Program
@@ -7,11 +8,17 @@ public class Program
     {
         // CsliesBench bench = new CsliesBench();
         // bench.Setup();
-        // bench.TestCsly();
+        // bench.Type = J.Deep;
+        // var chrono = new Stopwatch();
+        // chrono.Start();
+        // bench.Csly();
+        // chrono.Stop();
+        // Console.WriteLine(chrono.ElapsedMilliseconds+" ms");
         
-        // ExprBenchCslies b = new ExprBenchCslies();
+        
+         //ExprBenchCslies b = new ExprBenchCslies();
         // b.Setup();
-        // b.TestCsly();
+         //b.TestCsly();
         // b.TestFluent();
         // b.TestGenerated();
         // Console.ReadLine();
