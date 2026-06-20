@@ -45,3 +45,46 @@ thread.Start();
 thread.Join();
 ```
 *Note: This approach will not easily work with BenchmarkDotNet, as it runs benchmarks on ThreadPool threads constrained to the default 1MB limit.*
+
+## 4. Can We Reduce the Generic Parse Method Stack Footprint?
+
+Using pre-allocated data structures on the heap (like an `ObjectPool<List<ISyntaxNode>>`) is excellent for reducing Garbage Collection (GC) pressure and speeding up the parser, but **it will not shrink the call stack footprint significantly**. The stack still has to hold the 8-byte reference/pointer to that heap object, regardless of whether it's newly allocated or pulled from a pool.
+
+If you want to modify `sly`'s dynamic parsers to survive deeper recursion within the 1MB limit, the stack footprint must be reduced architecturally:
+
+### A. Consolidate Method Arguments (Minor Stack Savings)
+Currently, methods like `Parse` pass around ~40 bytes of state per call:
+```csharp
+public override SyntaxParseResult<IN, OUT> Parse(
+    Token<IN>[] tokens, 
+    Rule<IN, OUT> rule, 
+    int position,
+    string nonTerminalName, 
+    SyntaxParsingContext<IN, OUT> parsingContext)
+```
+By wrapping these into a single lightweight struct or class (e.g., `ParseState`), you can reduce the argument footprint to just 8 bytes per recursive call.
+
+### B. Break Up Giant Methods (Major Stack Savings)
+The biggest contributor to the ~4KB per-level stack consumption is likely the giant `switch` statement inside `EBNFRecursiveDescentSyntaxParser.Parse()`. 
+
+Even if code only executes one branch of a `switch`, the .NET JIT compiler often reserves stack slots for **all** local variables declared across all the branches. This causes the method to have a massive stack frame (hundreds of bytes per call).
+* **The Fix:** Extract the logic inside each `switch` case into its own separate method (e.g., `ParseChoiceClause()`, `ParseOptionClause()`). This prevents the JIT from allocating stack space for variables you aren't using in the current execution path.
+
+### C. The Ultimate Fix: Move the Call Stack to the Heap (Iterative Parsing)
+If you truly want to parse infinitely deep JSON (or any grammar) without blowing the 1MB stack, you have to stop using C#'s native method recursion entirely. This is exactly what is meant by "using preallocated data structures in the heap".
+
+You would rewrite the parser loop to use a `Stack<T>` object allocated on the heap (often called "Trampolining" or a "State Machine" parser). Instead of `Parse()` calling `ParseNonTerminal()` which calls `Parse()`, you push state to the heap:
+
+```csharp
+var executionStack = new Stack<ParseTask>(); // Allocated on the HEAP
+executionStack.Push(new ParseTask(rootRule, 0));
+
+while (executionStack.Count > 0) 
+{
+    var task = executionStack.Pop();
+    // Evaluate the clause...
+    // If it requires parsing a sub-rule, push it to the stack instead of calling a method:
+    executionStack.Push(new ParseTask(childRule, task.Position));
+}
+```
+Because the `Stack<T>` grows on the Heap (which has gigabytes of space) rather than the thread's Call Stack (which is strictly 1MB), you completely eliminate the possibility of a `StackOverflowException`, no matter how deep the parsing goes.
