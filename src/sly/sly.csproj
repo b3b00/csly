@@ -36,7 +36,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>    
-    <PackageReference Include="PolySharp" Version="1.15.0" Condition=" $(TargetFramework.StartsWith('netstandard')) OR '$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="PolySharp" Version="1.16.0" Condition=" $(TargetFramework.StartsWith('netstandard')) OR '$(TargetFramework)' == 'net6.0'">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
