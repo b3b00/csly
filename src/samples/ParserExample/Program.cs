@@ -20,6 +20,7 @@ using jsonparser.JsonModel;
 using NFluent;
 using ParserTests;
 using ParserTests.Issue239;
+using ParserTests.Issue259;
 using ParserTests.Issue332;
 using ParserTests.Issue414;
 using ParserTests.Issue495;
@@ -137,7 +138,7 @@ namespace ParserExample
         {
             ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
             var xmlparser = new MinimalXmlParser();
-            var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+            var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_STACK, "document");
             Check.That(r.IsError).IsFalse();
             var parser = r.Result;
             var parsed = parser.Parse(@"
@@ -158,7 +159,7 @@ namespace ParserExample
             
             var jBuilder = new ParserBuilder<JsonTokenGeneric, JSon>();
             var jsonParser = new EbnfJsonGenericParser();
-            var jr = jBuilder.BuildParser(jsonParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var jr = jBuilder.BuildParser(jsonParser, ParserType.EBNF_LL_STACK, "root");
             Check.That(jr).IsOk();
             var jparsed = jr.Result.Parse("{ \"toto\":1");
             if (jparsed.IsError)
@@ -180,7 +181,7 @@ namespace ParserExample
             GenericSimpleExpressionParser p = new GenericSimpleExpressionParser();
             var builder = new ParserBuilder<GenericExpressionToken, double>();
             
-            var Parser = builder.BuildParser(p, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var Parser = builder.BuildParser(p, ParserType.EBNF_LL_STACK, "root");
             if (Parser.IsOk)
             {
                 for (int i = 0; i < 50; i++)
@@ -194,12 +195,49 @@ namespace ParserExample
                 
             }
         }
+        
+        public static void Issue259StackTest()
+        {
+            var expression = "1 < 2 AND 3 <= 4 AND 5 == 6 AND 7 >= 8 AND 9 > 10 AND 11 != 12 AND 13 <> 14";
+
+
+            var startingRule = $"{nameof(Issue259Parser)}_expressions";
+            var parserInstance = new Issue259Parser();
+            var builder = new ParserBuilder<Issue259ExpressionToken, string>("en");
+            var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
+            Check.That(parser.IsOk).IsTrue();
+            Check.That(parser.Result).IsNotNull();
+
+            var parseResult = parser.Result.Parse(expression);
+
+            Check.That(parseResult.IsError).IsTrue();
+            Check.That(parseResult.Errors).CountIs(1);
+
+
+            var error = parseResult.Errors[0];
+
+            var unexpectedTokenError = error as UnexpectedTokenSyntaxError<Issue259ExpressionToken>;
+            Check.That(unexpectedTokenError).IsNotNull();
+            Check.That(unexpectedTokenError.UnexpectedToken.TokenID).IsEqualTo(Issue259ExpressionToken.COMPARISON);
+            Check.That(unexpectedTokenError.UnexpectedToken.Value).IsEqualTo(">");
+            var expectedTokens = unexpectedTokenError.ExpectedTokens.Select(x => x.TokenId);
+            Check.That(expectedTokens).Contains(
+                Issue259ExpressionToken.ON,
+                Issue259ExpressionToken.OFF,
+                Issue259ExpressionToken.MINUS,
+                Issue259ExpressionToken.HEX_NUMBER,
+                Issue259ExpressionToken.DECIMAL_NUMBER,
+                Issue259ExpressionToken.LVAR,
+                Issue259ExpressionToken.SIMVAR,
+                Issue259ExpressionToken.LPAREN);
+
+        }
 
         private static void TestFactorial()
         {
             var whileParser = new WhileParserGeneric();
             var builder = new ParserBuilder<WhileTokenGeneric, WhileAST>();
-            var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
+            var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_STACK, "statement");
 
             var program = @"
 (
@@ -241,7 +279,7 @@ namespace ParserExample
         {
             var whileParser = new IndentedWhileParserGeneric();
             var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
-            var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+            var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_STACK, "program");
 
             if (Parser.IsError)
             {
@@ -311,7 +349,7 @@ return r";
         {
             var whileParser = new WhileParserGeneric();
             var builder = new ParserBuilder<WhileTokenGeneric, WhileAST>();
-            var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
+            var Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_STACK, "statement");
             var program = @"
 (
     r:=1;
@@ -367,7 +405,7 @@ return r";
             sw.Start();
             var wpg = new WhileParserGeneric();
             var wbuilderGen = new ParserBuilder<WhileTokenGeneric, WhileAST>();
-            var buildResultgen = wbuilderGen.BuildParser(wpg, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
+            var buildResultgen = wbuilderGen.BuildParser(wpg, ParserType.EBNF_LL_STACK, "statement");
             var parserGen = buildResultgen.Result;
             var rGen = parserGen.Parse(source);
             sw.Stop();
@@ -393,7 +431,7 @@ return r";
             sw.Reset();
             sw.Start();
             var wbuilder = new ParserBuilder<JsonToken, JSon>();
-            var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_STACK, "root");
             var parser = buildResult.Result;
             var r = parser.Parse(source);
             sw.Stop();
@@ -404,7 +442,7 @@ return r";
             sw.Reset();
             sw.Start();
             wbuilder = new ParserBuilder<JsonToken, JSon>();
-            buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            buildResult = wbuilder.BuildParser(wp, ParserType.EBNF_LL_STACK, "root");
             parser = buildResult.Result;
             parser.Lexer = new JSONLexer();
             r = parser.Parse(source);
@@ -416,7 +454,7 @@ return r";
             sw.Start();
             var wpg = new EbnfJsonGenericParser();
             var wbuilderGen = new ParserBuilder<JsonTokenGeneric, JSon>();
-            var buildResultgen = wbuilderGen.BuildParser(wpg, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var buildResultgen = wbuilderGen.BuildParser(wpg, ParserType.EBNF_LL_STACK, "root");
             var parserGen = buildResultgen.Result;
             var rGen = parserGen.Parse(source);
             sw.Stop();
@@ -427,7 +465,7 @@ return r";
         private static void testJSONLexer()
         {
             var builder = new ParserBuilder<JsonToken, JSon>();
-            var parser = builder.BuildParser(new JSONParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parser = builder.BuildParser(new JSONParser(), ParserType.EBNF_LL_STACK, "root");
 
             var source = "{ \"k\" : 1;\"k2\" : 1.1;\"k3\" : null;\"k4\" : false}";
             //source = File.ReadAllText("test.json");
@@ -544,7 +582,7 @@ return r";
 
                 var instance = new EbnfJsonGenericParser();
             var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
-            var buildResult = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var buildResult = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "root");
             if (buildResult.IsOk)
             {
                 Console.WriteLine("parser built.");
@@ -595,7 +633,7 @@ return r";
 
                     var instance = new EbnfJsonGenericParser();
                     var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
-                    var buildResult = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+                    var buildResult = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "root");
                     if (buildResult.IsOk)
                     {
                         Console.WriteLine("parser built.");
@@ -640,7 +678,7 @@ return r";
             
                 var instanceNot = new EbnfJsonGenericParserStringNotEscaped();
                 var builderNot = new ParserBuilder<JsonTokenGenericStringNotEscaped, JSon>();
-                var buildResultNot = builderNot.BuildParser(instanceNot, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+                var buildResultNot = builderNot.BuildParser(instanceNot, ParserType.EBNF_LL_STACK, "root");
                 if (buildResultNot.IsOk)
                 {
                     Console.WriteLine("parser built.");
@@ -680,7 +718,7 @@ return r";
             
             var instanceNot = new EbnfJsonGenericParserStringNotEscaped();
             var builderNot = new ParserBuilder<JsonTokenGenericStringNotEscaped, JSon>();
-            var buildResultNot = builderNot.BuildParser(instanceNot, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var buildResultNot = builderNot.BuildParser(instanceNot, ParserType.EBNF_LL_STACK, "root");
             if (buildResultNot.IsOk)
             {
                 Console.WriteLine("parser built.");
@@ -780,7 +818,7 @@ return r";
             Console.WriteLine("new instance");
             
             
-            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
+            var Parser = builder.BuildParser(parserInstance,ParserType.EBNF_LL_STACK,"clause");
             Console.WriteLine($"built : {Parser.IsOk}");
             if (Parser.IsError)
             {
@@ -800,7 +838,7 @@ return r";
             Console.WriteLine("new instance");
 
 
-             Parser = builder.BuildParser(parserInstance2,ParserType.EBNF_LL_RECURSIVE_DESCENT,"clause");
+             Parser = builder.BuildParser(parserInstance2,ParserType.EBNF_LL_STACK,"clause");
             Console.WriteLine($"built : {Parser.IsOk}");
             if (Parser.IsError)
             {
@@ -816,7 +854,7 @@ return r";
         {
             var parserInstance = new ScriptParser();
             var builder = new ParserBuilder<ScriptToken, object>();
-            var parserBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "test");
+            var parserBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, "test");
             if (parserBuild.IsOk)
             {
                 var parser = parserBuild.Result;
@@ -868,7 +906,7 @@ return r";
             var StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
-            return builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            return builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, StartingRule);
         }
 
         private static void Schtak()
@@ -1055,7 +1093,7 @@ final = 9999
 
             ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
             var instance = new IndentedParser();
-            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "root");
             if (parserRes.IsOk)
             {
                 var res = parserRes.Result.Parse(source);
@@ -1133,7 +1171,7 @@ id
 
             ParserBuilder<IndentedLangLexer2, Ast> builder = new ParserBuilder<IndentedLangLexer2, Ast>();
             var instance = new IndentedParser2();
-            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "root");
             if (parserRes.IsOk)
             {
                 var res = parserRes.Result.Parse(source);
@@ -1167,7 +1205,7 @@ else
 ";
             ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
             var instance = new IndentedParser();
-            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "root");
             Assert.True(parserRes.IsOk);
             var parser = parserRes.Result;
             Assert.NotNull(parser);
@@ -1214,7 +1252,7 @@ else
 
             var builder = new ParserBuilder<TemplateLexer, string>();
             var instance = new TemplateParser();
-            var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "template");
+            var build = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "template");
             if (build.IsOk)
             {
                 var context = new Dictionary<string, object>()
@@ -1298,7 +1336,7 @@ billy
 
             var builder = new ParserBuilder<TemplateLexer, ITemplate>();
             var instance = new TemplateParser();
-            var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "template");
+            var build = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "template");
             if (build.IsOk)
             {
                 var context = new Dictionary<string, object>()
@@ -1329,7 +1367,7 @@ billy
         {
             var parserInstance = new Issue414Parser();
             var builder = new ParserBuilder<Issue414Token, string>();
-            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "block");//line-based, 1 statement per line.
+            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, "block");//line-based, 1 statement per line.
             var parser = buildResult.Result;
             string source = "funcA(funcC(B==2));";
             Stopwatch chrono = new Stopwatch();
@@ -1343,7 +1381,7 @@ billy
         {
             var parserInstance = new Issue414ExpressionParser();
             var builder = new ParserBuilder<Issue414Token, string>();
-            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "block");//line-based, 1 statement per line.
+            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, "block");//line-based, 1 statement per line.
             var parser = buildResult.Result;
             string source = "funcA(funcC(B==2));";
             Stopwatch chrono = new Stopwatch();
@@ -1359,7 +1397,7 @@ billy
             
             var whileParser = new IndentedWhileParserGeneric();
             var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
-            var buildResult = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+            var buildResult = builder.BuildParser(whileParser, ParserType.EBNF_LL_STACK, "program");
             
             var parser = buildResult.Result;
             string program = @"
@@ -1373,7 +1411,8 @@ while a < 10 do
         }
         private static void Main(string[] args)
         {
-            TestPrefixPostfixStack();
+            Issue259StackTest();
+            //TestPrefixPostfixStack();
             //Schtak();
             //testIssue516();
             //TestIssue507();
@@ -1451,7 +1490,7 @@ while a < 10 do
         {
             ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
             var parser = new MinimalXmlParser();
-            var r = builder.BuildParser(parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+            var r = builder.BuildParser(parser, ParserType.EBNF_LL_STACK, "document");
             if (r.IsError)
             {
                 r.Errors.ForEach(x => Console.WriteLine(x.Message));
@@ -1547,7 +1586,7 @@ while a < 10 do
             var startingRule = $"{nameof(ShortOperationAttributesParser)}_expressions";
             var parserInstance = new ShortOperationAttributesParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
-            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, startingRule);
             Assert.True(buildResult.IsOk);
             var parser = buildResult.Result;
             Assert.NotNull(parser);
@@ -1565,7 +1604,7 @@ while a < 10 do
         {
             ParserBuilder<Issue332Token, object> Parser = new ParserBuilder<Issue332Token, object>();
             Issue332Parser oparser = new Issue332Parser();
-            var r = Parser.BuildParser(oparser,ParserType.EBNF_LL_RECURSIVE_DESCENT);
+            var r = Parser.BuildParser(oparser,ParserType.EBNF_LL_STACK);
             Check.That(r).Not.IsOk();
             foreach (var error in r.Errors)
             {
@@ -1837,7 +1876,7 @@ else
               Parser<Issue495Token, string> parser;
 
               ParserBuilder<Issue495Token, string> builder = new ParserBuilder<Issue495Token, string>("en");
-              var build = builder.BuildParser(new Issue495Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+              var build = builder.BuildParser(new Issue495Parser(), ParserType.EBNF_LL_STACK, "program");
               Check.That(build).IsOk();
               parser = build.Result;
 
