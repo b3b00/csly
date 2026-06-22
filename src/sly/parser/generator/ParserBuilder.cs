@@ -59,6 +59,15 @@ namespace sly.parser.generator
             LexerPostProcess<IN> lexerPostProcess = null)
         {
             Parser<IN, OUT> parser = null;
+            if (string.IsNullOrEmpty(rootRule))
+            {
+                var rootAttribute = parserInstance.GetType().GetCustomAttribute<ParserRootAttribute>();
+                if (rootAttribute != null)
+                {
+                    rootRule = rootAttribute.RootRule;
+                }
+            }
+            
             var result = new BuildResult<Parser<IN, OUT>>();
             switch (parserType)
             {
