@@ -433,7 +433,6 @@ namespace ParserTests
             rule = nt.Rules[0];
             Check.That((rule.Clauses)).CountIs(1);
             Check.That(rule.Clauses[0]).IsInstanceOf<ZeroOrMoreClause<TokenType, string>>();
-            
         }
 
         [Fact]

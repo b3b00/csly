@@ -112,10 +112,7 @@ namespace sly.parser
             var result = new ParseResult<IN, OUT>();
 
             var cleaner = new SyntaxTreeCleaner<IN, OUT>();
-            if (!typeof(IN).Name.Contains("Ebnf"))
-            {
-                ;
-            }
+            
             var syntaxResult = SyntaxParser.Parse(tokens.ToArray(), startingNonTerminal);
             
             syntaxResult.UsesOperations = Configuration.UsesOperations;

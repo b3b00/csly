@@ -341,9 +341,6 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                 node.ExpressionAffix = state.Rule.ExpressionAffix;
                 node = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(state.Rule, node);
                 node.IsByPassNode = state.Rule.IsByPassRule;
-                var op = (state.Operator.Root as SyntaxLeaf<IN, OUT>).Token;
-                var key = op.IsExplicit ? op.Value : op.TokenID.ToString();
-                node.Operation = state.Rule.GetOperation(key);
                 var finalResult = new SyntaxParseResult<IN, OUT>();
                 finalResult.Root = node;
                 finalResult.IsEnded = currentPosition >= state.Tokens.Length - 1
@@ -389,14 +386,6 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             {
                 if (state.ExpressionState == ExpressionRuleState.Operator)
                 {
-                    // return Left (ok)
-                    state.Parent.SetResult(state.Left);
-                    return;
-                }
-                
-                if (state.ExpressionState == ExpressionRuleState.Right)
-                {
-                    // fail on operator parsing => return expression with left operand
                     state.Parent.SetResult(state.Left);
                     return;
                 }
