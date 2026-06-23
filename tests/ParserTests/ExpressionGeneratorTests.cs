@@ -199,18 +199,20 @@ namespace ParserTests
         private string StartingRule = "";
 
 
-        private void BuildParser()
+        private void BuildParser(ParserType parserType)
         {
             StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<simpleExpressionParser.ExpressionToken, double>();
-            Parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            Parser = builder.BuildParser(parserInstance, parserType, StartingRule);
         }
 
-        [Fact]
-        public void TestAssociativityFactor()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAssociativityFactor(ParserType parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("1 / 2 / 3", StartingRule);
             Check.That(r).IsOkParsing();;
             var expected = 1.0 / 2.0 / 3.0;
@@ -232,10 +234,12 @@ namespace ParserTests
             Check.That(r.Result).IsEqualTo(1.0 /2.0 * 3.0);
         }
 
-        [Fact]
-        public void TestAssociativityTerm()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAssociativityTerm(ParserType  parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("1 - 2 - 3", StartingRule);
             Check.That(r).IsOkParsing();;
             Check.That(r.Result).IsEqualTo(1.0-2.0-3.0);
@@ -248,10 +252,12 @@ namespace ParserTests
             Check.That(r.Result).IsEqualTo(1.0-2.0+3.0);
         }
 
-        [Fact]
-        public void TestBuild()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestBuild(ParserType parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             
             Check.That(Parser.Result.Configuration.NonTerminals).CountIs(7);
             var nonterminals = new List<NonTerminal<simpleExpressionParser.ExpressionToken, double>>();
@@ -281,28 +287,34 @@ namespace ParserTests
             Check.That(nt.Rules[0].Clauses).IsSingle();
         }
 
-        [Fact]
-        public void TestFactorDivide()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestFactorDivide(ParserType parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("42/2", StartingRule);
             Check.That(r).IsOkParsing();;
             Check.That(r.Result).IsEqualTo(21);
         }
 
-        [Fact]
-        public void TestFactorTimes()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestFactorTimes(ParserType  parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("2*2", StartingRule);
             Check.That(r).IsOkParsing();
             Check.That(r.Result).IsEqualTo(4.0);
         }
 
-        [Fact]
-        public void TestGroup()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestGroup(ParserType parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("(-1 + 2)  * 3!", StartingRule);
             Check.That(r).IsOkParsing();;
             Check.That(r.Result).IsEqualTo((-1 + 2 ) * 6.0);
@@ -322,78 +334,94 @@ namespace ParserTests
                 .And.DoesNotContain("TIMES_DIVIDE");
         }
 
-        [Fact]
-        public void TestPostFix()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestPostFix(ParserType parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("10!", StartingRule);
             Check.That(r).IsOkParsing();;
             Check.That(r.Result).IsEqualTo(3628800.0);
         }
 
 
-        [Fact]
-        public void TestPrecedence()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestPrecedence(ParserType  parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("-1 + 2  * 3", StartingRule);
             Check.That(r).IsOkParsing();;
             Check.That(r.Result).IsEqualTo(5.0);
         }
 
-        [Fact]
-        public void TestSingleNegativeValue()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestSingleNegativeValue(ParserType  parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("-1", StartingRule);
             Check.That(r).IsOkParsing();;
             Check.That(r.Result).IsEqualTo(-1.0);
         }
 
 
-        [Fact]
-        public void TestSingleValue()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestSingleValue(ParserType  parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("1", StartingRule);
             Check.That(r).IsOkParsing();;
             Check.That(r.Result).IsEqualTo(1.0);
         }
 
-        [Fact]
-        public void TestTermMinus()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestTermMinus(ParserType parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("1 - 1", StartingRule);
             Check.That(r).IsOkParsing();;
             Check.That(r.Result).IsEqualTo(0.0);
         }
 
-        [Fact]
-        public void TestTermPlus()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestTermPlus(ParserType parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("1 + 1", StartingRule);
             Check.That(r).IsOkParsing();
             Check.That(r.Result).IsEqualTo(2.0);
         }
 
-        [Fact]
-        public void TestUnaryPrecedence()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestUnaryPrecedence(ParserType parserType)
         {
-            BuildParser();
+            BuildParser(parserType);
             var r = Parser.Result.Parse("-1 * 2", StartingRule);
             Check.That(r).IsOkParsing();;
             Check.That(r.Result).IsEqualTo(-2.0);
         }
 
-        [Fact]
-        public void TestIssue184()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIssue184(ParserType parserType)
         {
             StartingRule = $"{nameof(Issue184ParserOne)}_expressions";
             var parserInstance = new Issue184ParserOne();
             var builder = new ParserBuilder<Issue184Token, double>();
-            var issue184parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            var issue184parser = builder.BuildParser(parserInstance, parserType, StartingRule);
             Check.That(issue184parser).IsOk();
             var c = issue184parser.Result.Parse(" 2 + 2");
             Check.That(c).IsOkParsing();
@@ -403,7 +431,7 @@ namespace ParserTests
             StartingRule = $"{nameof(Issue184Parser)}_expressions";
             var parserInstance2 = new Issue184Parser();
             var builder2 = new ParserBuilder<Issue184Token, double>();
-            var issue184parser2 = builder.BuildParser(parserInstance2, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            var issue184parser2 = builder.BuildParser(parserInstance2, parserType, StartingRule);
             Check.That(issue184parser2).IsOk();
             var c2 = issue184parser2.Result.Parse(" 2 + 2");
             Check.That(c).IsOkParsing();
@@ -418,24 +446,28 @@ namespace ParserTests
             Check.That(c2.Result).IsEqualTo(2 - 2 * 2);
         }
 
-        [Fact]
-        public void TestBadOperatorString()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestBadOperatorString(ParserType parserType)
         {
             var parserInstance = new ExpressionGeneratorError();
             var builder = new ParserBuilder<ExpressionToken, double>();
             var exception = Check.ThatCode(() =>
-                    builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule))
+                    builder.BuildParser(parserInstance, parserType, StartingRule))
                 .Throws<ParserConfigurationException>().Value;
             Check.That(exception.Message).Contains("bad enum name MINUSCULE");
         }
 
-        [Fact]
-        public void TestShortOperationAttributes()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestShortOperationAttributes(ParserType parserType)
         {
             StartingRule = $"{nameof(ShortOperationAttributesParser)}_expressions";
             var parserInstance = new ShortOperationAttributesParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
-            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            var buildResult = builder.BuildParser(parserInstance, parserType, StartingRule);
             Check.That(buildResult).IsOk();
             var parser = buildResult.Result;
             
@@ -445,13 +477,15 @@ namespace ParserTests
 
         }
         
-        [Fact]
-        public void TestExplicitOperatorAsNames()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestExplicitOperatorAsNames(ParserType parserType)
         {
             StartingRule = $"{nameof(ExpressionGeneratorExplicitOperatorAsNames)}_expressions";
             var parserInstance = new ExpressionGeneratorExplicitOperatorAsNames();
             var builder = new ParserBuilder<SimpleExpressionToken, double>();
-            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            var buildResult = builder.BuildParser(parserInstance, parserType, StartingRule);
             Check.That(buildResult).IsOk();
             var parser = buildResult.Result;
             
@@ -460,13 +494,15 @@ namespace ParserTests
             Check.That(result.Result).IsEqualTo(-1+2*(5+6)-4);
         }
 
-        [Fact]
-        public void TestPrefix()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestPrefix(ParserType parserType)
         {
             StartingRule = $"{nameof(PrefixOperation)}_expressions";
             var parserInstance = new PrefixOperation();
             var builder = new ParserBuilder<SimpleExpressionToken, string>();
-            var buildResult = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            var buildResult = builder.BuildParser(parserInstance, parserType, StartingRule);
             Check.That(buildResult).IsOk();
             var parser = buildResult.Result;
             
