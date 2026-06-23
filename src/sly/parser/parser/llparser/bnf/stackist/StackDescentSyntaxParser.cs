@@ -387,8 +387,10 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     node.LambdaVisitor = state.Rule.getLambdaVisitor(null);
                     node.Visitor = state.Rule.GetVisitorMethod();
                     result.IsEnded = state.Tokens[state.LastResult.EndingPosition].IsEOS;
-                    result.AddErrors(state.Result.GetErrors());
-                    
+                    // EXPLICIT UNEXPECTED GROUP .....
+                    // aggregate errors that may have occured along the rule
+                    result.AddErrors(state.Children.SelectMany(x => x.GetErrors()).ToList());
+                    //result.AddErrors(state.Result.GetErrors());
                     node = ExpressionRuleManager<IN, OUT>.ManageExpressionRules(state.Rule, node);
                     result.Root = node;
                     // send new position upward

@@ -17,7 +17,8 @@ namespace ParserTests
 
     public enum Lex
     {
-        Nop = 0,
+        //Nop = 0,
+        
         [AlphaId]
         Id = 1,
         
@@ -107,29 +108,31 @@ namespace ParserTests
     
     public class ExplicitTokensTests
     {
-        private BuildResult<Parser<ExplicitTokensTokens, double>> BuildParser()
+        private BuildResult<Parser<ExplicitTokensTokens, double>> BuildParser(ParserType parserType)
         {
             var parserInstance = new ExplicitTokensParser();
             var builder = new ParserBuilder<ExplicitTokensTokens, double>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression");
+            var result = builder.BuildParser(parserInstance, parserType, "expression");
 
             
             return result;
         }
         
-        private BuildResult<Parser<ExplicitTokensTokens, double>> BuildExpressionParser()
+        private BuildResult<Parser<ExplicitTokensTokens, double>> BuildExpressionParser(ParserType parserType)
         {
             var parserInstance = new ExplicitTokensExpressionParser();
             var builder = new ParserBuilder<ExplicitTokensTokens, double>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(ExplicitTokensExpressionParser)+"_expressions");
+            var result = builder.BuildParser(parserInstance, parserType, nameof(ExplicitTokensExpressionParser)+"_expressions");
             var dump = result.Result.Configuration.Dump();
             return result;
         }
 
-        [Fact]
-        public void BuildParserTest()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void BuildParserTest(ParserType parserType)
         {
-            var parser = BuildParser();
+            var parser = BuildParser(parserType);
             Check.That(parser.IsOk).IsTrue();
             Check.That(parser.Result).IsNotNull();
             var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
@@ -142,10 +145,12 @@ namespace ParserTests
             Check.That(r.Result).IsEqualTo(-42.0d);
         }
         
-        [Fact]
-        public void BuildExpressionParserTest()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void BuildExpressionParserTest(ParserType parserType)
         {
-            var parser = BuildExpressionParser();
+            var parser = BuildExpressionParser(parserType);
             Check.That(parser.IsOk).IsTrue();
             Check.That(parser.Result).IsNotNull();
             var r = parser.Result.Parse("2.0 - 2.0 + bozzo  + Test");
@@ -165,23 +170,27 @@ namespace ParserTests
             Check.That(r.Result).IsEqualTo(2 - 2 + 42 + 0);
         }
 
-        [Fact]
-        public void TestErrorWhenUsingImplicitTokensAndRegexLexer()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestErrorWhenUsingImplicitTokensAndRegexLexer(ParserType parserType)
         {
             var parserInstance = new RegexLexAndExplicitTokensParser();
             var builder = new ParserBuilder<RegexLexAndExplicitTokensLexer, string>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, nameof(RegexLexAndExplicitTokensParser)+"_expressions");
+            var result = builder.BuildParser(parserInstance, parserType, nameof(RegexLexAndExplicitTokensParser)+"_expressions");
             Check.That(result.IsError).IsTrue();
             Check.That(result.Errors).CountIs(1);
             Check.That(result.Errors.First().Code).IsEqualTo(ErrorCodes.LEXER_CANNOT_USE_IMPLICIT_TOKENS_WITH_REGEX_LEXER);
         }
         
-        [Fact]
-        public void TestNoIdentifierPatternSuppliedWithImplicitTokens()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestNoIdentifierPatternSuppliedWithImplicitTokens(ParserType parserType)
         {
             var parserInstance = new NoIdentifierParser();
             var builder = new ParserBuilder<NoIdentifierLexer, string>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
+            var result = builder.BuildParser(parserInstance, parserType, "main");
             Check.That(result.IsError).IsFalse();
             Check.That(result.Result).IsNotNull();
             var r = result.Result.Parse("test 1 test 2 test 3");
@@ -189,12 +198,14 @@ namespace ParserTests
             Check.That(r.Result).IsEqualTo("test:1,test:2,test:3");
         }
         
-        [Fact]
-        public void Test()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void Test(ParserType parserType)
         {
             var parserInstance = new Parse();
             var builder = new ParserBuilder<Lex, string>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+            var result = builder.BuildParser(parserInstance, parserType, "program");
             Check.That(result).IsOk();
             var r = result.Result.Parse(@"
 if a == 1.0 then
@@ -208,12 +219,14 @@ c = 3.0
             Check.That(r.Result).IsEqualTo("((condition:(a == 1.0,(b = ( 1.0 + ( 2.0 * 3.0 ) )),(b = ( 2.0 + a )))),(c = 3.0))");
         }
 
-        [Fact]
-        public void TestExplicitGroups()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestExplicitGroups(ParserType parserType)
         {
             var instance = new ExplicitTokenGroupParser();
             var builder = new ParserBuilder<Lex, string>();
-            var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var build = builder.BuildParser(instance, parserType, "root");
             Check.That(build).IsOk();
             var parser = build.Result;
             Check.That(parser).IsNotNull();
@@ -224,12 +237,14 @@ c = 3.0
             Check.That(result).IsEqualTo("a-b a-b_cTrue");
         }
         
-        [Fact]
-        public void TestExplicitGroups2()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestExplicitGroups2(ParserType parserType)
         {
             var instance = new ExplicitTokenGroupParser();
             var builder = new ParserBuilder<Lex, string>();
-            var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var build = builder.BuildParser(instance, parserType, "root");
             Check.That(build).IsOk();
             var parser = build.Result;
             Check.That(parser).IsNotNull();
@@ -240,12 +255,14 @@ c = 3.0
             Check.That(result).IsEqualTo("a-b a-b_empty");
         }
         
-        [Fact]
-        public void TestExplicitGroupsUnexpectedToken()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestExplicitGroupsUnexpectedToken(ParserType  parserType)
         {
             var instance = new ExplicitTokenGroupParser();
             var builder = new ParserBuilder<Lex, string>("en");
-            var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var build = builder.BuildParser(instance, parserType, "root");
             Check.That(build).IsOk();
             var parser = build.Result;
             Check.That(parser).IsNotNull();
