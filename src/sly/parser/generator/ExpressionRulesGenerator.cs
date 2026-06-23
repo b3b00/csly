@@ -283,6 +283,7 @@ namespace sly.parser.generator
             rule.IsByPassRule = true;
             rule.IsExpressionRule = true;
             rule.ExpressionAffix = Affix.NotOperator;
+            rule.NonTerminalName = $"{parserClassName}_expressions";
             // BUG ?  : what if a parse context exists ! 
             rule.SetLambdaVisitor((args) =>
             {
