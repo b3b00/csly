@@ -114,6 +114,12 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     break;
                 case StackStateType.Root:
                 {
+                    var errors = current.Result.GetErrors();
+                    if (errors.Count == 0)
+                    {
+                        errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[current.Result.EndingPosition], LexemeLabels, null));
+                        current.Result.AddErrors(errors);
+                    }
                     return current.Result;
                 }
                 default:
