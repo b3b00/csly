@@ -9,6 +9,7 @@ using sly.parser.generator.visitor;
 using sly.parser.llparser.bnf;
 using sly.parser.llparser.ebnf;
 using sly.parser.parser;
+using sly.parser.parser.llparser.ebnf.stackist;
 using sly.parser.syntax.grammar;
 using sly.parser.syntax.tree;
 
@@ -184,7 +185,8 @@ namespace sly.parser
         
         private List<Token<IN>> AutoCloseIndentation(List<Token<IN>> tokens)
         {
-            if (SyntaxParser is EBNFRecursiveDescentSyntaxParser<IN,OUT> ebnf && ebnf.Configuration.AutoCloseIndentations)
+            if ((SyntaxParser is EBNFRecursiveDescentSyntaxParser<IN,OUT> ebnf && ebnf.Configuration.AutoCloseIndentations)
+                || (SyntaxParser is EBNFStackDescentSyntaxParser<IN,OUT> stackEbnf && stackEbnf.Configuration.AutoCloseIndentations))
             {
                 var indents = tokens
                     .Where(x => x.IsIndentation);
