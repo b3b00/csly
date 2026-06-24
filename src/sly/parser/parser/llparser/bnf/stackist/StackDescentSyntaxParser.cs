@@ -387,7 +387,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     node.LambdaVisitor = state.Rule.getLambdaVisitor(null);
                     node.Visitor = state.Rule.GetVisitorMethod();
                     
-                    result.IsEnded = state.Tokens[state.LastResult.EndingPosition].IsEOS;
+                    result.IsEnded = state.LastResult.EndingPosition >= state.Tokens.Length || state.Tokens[state.LastResult.EndingPosition].IsEOS;
                    
                     
                     // EXPLICIT UNEXPECTED GROUP .....

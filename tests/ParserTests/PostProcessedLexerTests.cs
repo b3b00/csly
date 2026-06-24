@@ -9,15 +9,16 @@ namespace ParserTests
 {
     public class PostProcessedLexerTests
     {
-        [Fact]
-        public void TestPostLexerProcessing()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestPostLexerProcessing(ParserType parserType)
         {
-            RuleParserType.ParserType = ParserType.LL_STACK;
-            var Parser = postProcessedLexerParser.PostProcessedLexerParserBuilder.buildPostProcessedLexerParser();
+            var Parser = postProcessedLexerParser.PostProcessedLexerParserBuilder.buildPostProcessedLexerParser(parserType);
             
             var parserInstance = new FormulaParser();
             var builder = new ParserBuilder<FormulaToken, Expression>();
-            var build = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, $"{nameof(FormulaParser)}_expressions",
+            var build = builder.BuildParser(parserInstance, parserType, $"{nameof(FormulaParser)}_expressions",
                 lexerPostProcess: PostProcessedLexerParserBuilder.postProcessFormula);
             Check.That(build).IsOk();
             var r = Parser.Parse("2 * x");

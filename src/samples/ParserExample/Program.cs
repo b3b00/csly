@@ -1749,7 +1749,7 @@ else
         
         private static void TestLexerPostProcess()
         {
-            var Parser = postProcessedLexerParser.PostProcessedLexerParserBuilder.buildPostProcessedLexerParser();
+            var Parser = postProcessedLexerParser.PostProcessedLexerParserBuilder.buildPostProcessedLexerParser(ParserType.LL_RECURSIVE_DESCENT);
             
             var r = Parser.Parse("2 * x");
             if (r.IsError)
@@ -1812,7 +1812,7 @@ else
         
           private static void TestLexerPostProcessEBNF()
         {
-            var Parser = postProcessedLexerParser.PostProcessedLexerParserBuilder.buildPostProcessedLexerParser();
+            var Parser = postProcessedLexerParser.PostProcessedLexerParserBuilder.buildPostProcessedLexerParser(ParserType.EBNF_LL_RECURSIVE_DESCENT);
             
             var r = Parser.Parse("2 * x");
             if (r.IsError)
@@ -1930,7 +1930,7 @@ else
           private static void TestFStrings()
           {
               IndentedWhileTests tests = new IndentedWhileTests();
-              tests.TestFString();
+              tests.TestFString(ParserType.EBNF_LL_RECURSIVE_DESCENT);
           }
 
           public static void TestPrefixPostfixStack()
@@ -1946,6 +1946,12 @@ else
               var res = parser.ParseWithContext("- a !", new Dictionary<string, int> {{"a", 3}});
               Check.That(res.IsOk).IsTrue();
               Check.That(res.Result).IsEqualTo(3*2*1);
+          }
+
+          public static void TestPostProcessedLexer()
+          {
+              PostProcessedLexerTests tests = new PostProcessedLexerTests();
+              tests.TestPostLexerProcessing(ParserType.EBNF_LL_STACK);
           }
     }
 

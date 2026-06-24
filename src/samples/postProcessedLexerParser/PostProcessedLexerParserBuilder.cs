@@ -44,11 +44,11 @@ namespace postProcessedLexerParser
             return newTokens;
         }
 
-        public static Parser<FormulaToken, Expression> buildPostProcessedLexerParser()
+        public static Parser<FormulaToken, Expression> buildPostProcessedLexerParser(ParserType parserType)
         {
             var parserInstance = new FormulaParser();
             var builder = new ParserBuilder<FormulaToken, Expression>();
-            var build = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, $"{nameof(FormulaParser)}_expressions",
+            var build = builder.BuildParser(parserInstance, parserType, $"{nameof(FormulaParser)}_expressions",
                 lexerPostProcess: postProcessFormula);
             
             if (build.IsError)
