@@ -13,7 +13,7 @@ public class Test443
         var test443Parser = new Test443Parser();
         var builder = new ParserBuilder<Test443Lexer, string>();
 
-        var parser = builder.BuildParser(test443Parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+        var parser = builder.BuildParser(test443Parser, ParserType.EBNF_LL_STACK, "root");
 
         Check.That(parser).IsOk();
         var r = parser.Result.Parse("@@");

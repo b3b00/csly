@@ -23,7 +23,7 @@ namespace ParserTests.Issue225_IndexOutOfRangeException
             var builder = new ParserBuilder<IndexOutOfRangeToken, Expression>();
 
             var buildResult =
-                builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression");
+                builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, "expression");
        
             Check.That(buildResult).IsOk();
             var parser = buildResult.Result;

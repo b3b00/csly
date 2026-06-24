@@ -71,7 +71,7 @@ namespace ParserTests
             var StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
             var parserInstance = new SimpleExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, double>();
-            var  Parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            var  Parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, StartingRule);
             var grammar = Parser.Result.Configuration.Dump();
             var result = Parser.Result.Parse("1+1");
             Check.That(result.IsError).IsFalse();

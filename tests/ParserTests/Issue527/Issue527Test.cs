@@ -11,7 +11,7 @@ public class Issue527Test
     private Parser<Issue527Lexer, string> BuildParser()
     {
         var builder = new ParserBuilder<Issue527Lexer, string>("en");
-        var result = builder.BuildParser(new Issue527Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT,"root");
+        var result = builder.BuildParser(new Issue527Parser(), ParserType.EBNF_LL_STACK,"root");
         Check.That(result).IsOk();
         return result.Result;
     }

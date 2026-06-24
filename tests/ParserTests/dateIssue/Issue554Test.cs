@@ -13,7 +13,7 @@ public class Issue554Test
         var builder = new ParserBuilder<Issue554lexer, string>();
         var instance = new Issue554Parser();
 
-        var buildParser = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, null, null);
+        var buildParser = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, null, null);
         Check.That(buildParser).IsOk();
         var result = buildParser.Result.Parse("3.14 42 1977.03.30");
         Check.That(result).IsOkParsing();

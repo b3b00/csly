@@ -64,7 +64,7 @@ namespace ParserTests.Issue302
         [Production("term: ID")]
         public int PrimaryId(Token<Issue302Token> tok)
         {
-            return 0;
+            return (int)tok.Value[0];
         }
 
         [Production("term: PARAMETER")]

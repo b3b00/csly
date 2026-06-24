@@ -13,7 +13,7 @@ namespace ParserTests.Issue239
             var StartingRule = $"statements";
             var parserInstance = new Issue239Parser();
             var builder = new ParserBuilder<Issue239Lexer, object>();
-            var pBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+            var pBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, StartingRule);
             Check.That(pBuild.IsOk).IsTrue();
             Check.That(pBuild.Result).IsNotNull();
             return pBuild.Result;

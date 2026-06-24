@@ -23,7 +23,7 @@ namespace ParserTests.Issue223_EarlyEos
             var builder = new ParserBuilder<EarlyEosToken, Expression>();
 
             var buildResult =
-                builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression");
+                builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, "expression");
             if (buildResult.IsError)
                 throw new AggregateException(
                     buildResult.Errors

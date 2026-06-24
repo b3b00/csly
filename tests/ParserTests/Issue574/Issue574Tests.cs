@@ -13,7 +13,7 @@ public class Issue574Tests
     public void TestIssue574()
     {
         ParserBuilder<TokenIssue574,object> builder = new ParserBuilder<TokenIssue574,object>();
-        var build = builder.BuildParser(new ParserIssue574(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+        var build = builder.BuildParser(new ParserIssue574(), ParserType.EBNF_LL_STACK, "root");
         Check.That(build).IsOk();
         string source = @"type foobar";
         var parsed =  build.Result.Parse(source);

@@ -14,7 +14,7 @@ public class XmlStackTests
     {
         ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
         var xmlparser = new MinimalXmlParser();
-        var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+        var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_STACK, "document");
         Check.That(r.IsError).IsFalse();
         var parser = r.Result;
         var parsed = parser.Parse(@"
@@ -45,7 +45,7 @@ public class XmlStackTests
     {
         ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
         var xmlparser = new MinimalXmlParser();
-        var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+        var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_STACK, "document");
         Check.That(r.IsError).IsFalse();
         var parser = r.Result;
         var parsed = parser.Parse(@"
@@ -68,7 +68,7 @@ public class XmlStackTests
     {
         ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
         var xmlparser = new MinimalXmlParser();
-        var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+        var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_STACK, "document");
         Check.That(r).IsOk();
         var parser = r.Result;
         var parsed = parser.Parse(@"
@@ -93,7 +93,7 @@ data
     {
         ParserBuilder<MinimalXmlLexer2, string> builder = new ParserBuilder<MinimalXmlLexer2, string>();
         var xmlparser = new MinimalXmlParser2();
-        var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+        var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_STACK, "document");
         Check.That(r).IsOk();
         var parser = r.Result;
         var parsed = parser.Parse(@"

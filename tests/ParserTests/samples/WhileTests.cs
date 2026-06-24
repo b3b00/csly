@@ -23,7 +23,7 @@ namespace ParserTests.samples
             {
                 var whileParser = new WhileParser();
                 var builder = new ParserBuilder<WhileToken, WhileAST>();
-                Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT);
+                Parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_STACK);
                 Check.That(Parser).IsOk();
             }
 

@@ -386,6 +386,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                     node.Visitor = state.Rule.GetVisitorMethod();
                     node.LambdaVisitor = state.Rule.getLambdaVisitor(null);
                     node.Visitor = state.Rule.GetVisitorMethod();
+                    
                     result.IsEnded = state.Tokens[state.LastResult.EndingPosition].IsEOS;
                    
                     

@@ -20,20 +20,22 @@ namespace ParserTests.samples
         
 
 
-        public BuildResult<Parser<IndentedWhileTokenGeneric, WhileAST>> buildParser()
+        public BuildResult<Parser<IndentedWhileTokenGeneric, WhileAST>> buildParser(ParserType parserType)
         {
                 var whileParser = new IndentedWhileParserGeneric();
                 var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
-                var parser = builder.BuildParser(whileParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+                var parser = builder.BuildParser(whileParser, parserType, "program");
                 Check.That(parser).IsOk();
                 return parser;
         }
 
 
-        [Fact]
-        public void TestAssignAdd()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAssignAdd(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var result = parser.Parse("a:=1+1");
             Check.That(result).IsOkParsing();
@@ -51,17 +53,21 @@ namespace ParserTests.samples
             Check.That((bin.Right as IntegerConstant)?.Value).IsEqualTo(1);
         }
 
-        [Fact]
-        public void TestBuildParser()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestBuildParser(ParserType parserType)
         {
-            var buildResult = buildParser();            
+            var buildResult = buildParser(parserType);            
             var parser = buildResult.Result;
         }
 
-        [Fact]
-        public void TestCounterProgram()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestCounterProgram(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             string program = @"
 a:=0 
@@ -73,10 +79,12 @@ while a < 10 do
             Check.That(result).IsOkParsing();
         }
 
-        [Fact]
-        public void TestCounterProgramExec()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestCounterProgramExec(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             string program = @"
 a:=0 
@@ -93,8 +101,10 @@ while a < 10 do
             
         }
 
-        [Fact]
-        public void TestFactorialProgramExec()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestFactorialProgramExec(ParserType parserType)
         {
             var program = @"
 # TestFactorialProgramExec
@@ -106,7 +116,7 @@ while i < 11 do
     print i
     i := i + 1 
 ";
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var result = parser.Parse(program);
             Check.That(result).IsOkParsing();
@@ -118,8 +128,10 @@ while i < 11 do
         }
 
 
-        [Fact]
-        public void TestFactorialProgramExecAsIL()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestFactorialProgramExecAsIL(ParserType parserType)
         {
             var program = @"
 # TestFactorialProgramExec
@@ -138,10 +150,12 @@ return r";
             Check.That(f).IsEqualTo(3628800);
         }
 
-        [Fact]
-        public void TestIfThenElse()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIfThenElse(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var program = @"
 # TestIfThenElse
@@ -185,8 +199,10 @@ else
             Check.That(fstring.Value).IsEqualTo("world");
         }
 
-        [Fact]
-        public void TestNestedIfThenElse()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestNestedIfThenElse(ParserType parserType)
         {
             var program = @"
 # TestIfThenElse
@@ -209,10 +225,12 @@ return a
         }
 
 
-        [Fact]
-        public void TestFString()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestFString(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var program = @"
 # fstring
@@ -255,10 +273,12 @@ return 100
             
         }
 
-        [Fact]
-        public void TestInfiniteWhile()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestInfiniteWhile(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var program = @"
 # infinite loop
@@ -282,10 +302,12 @@ while true do
             Check.That(seqBlock.Get(0)).IsInstanceOf<SkipStatement>();
         }
 
-        [Fact]
-        public void TestPrintBoolExpression()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestPrintBoolExpression(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var result = parser.Parse("print true and false");
             Check.That(result).IsOkParsing();
@@ -304,10 +326,12 @@ while true do
         }
 
 
-        [Fact]
-        public void TestSkip()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestSkip(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var result = parser.Parse("skip");
             Check.That(result).IsOkParsing();
@@ -317,10 +341,12 @@ while true do
             Check.That(seq.Get(0)).IsInstanceOf<SkipStatement>();
         }
 
-        [Fact]
-        public void TestSkipAssignSequence()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestSkipAssignSequence(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var program = @"a:=1
 b:=2
@@ -340,10 +366,12 @@ c:=3";
         }
 
 
-        [Fact]
-        public void TestSkipSkipSkipSequence()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestSkipSkipSkipSequence(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var result = parser.Parse(@"
 skip
@@ -359,10 +387,12 @@ skip");
         }
 
 
-        [Fact]
-        public void TestIndentationError()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIndentationError(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var result = parser.Parse(@"
 # infinite loop
@@ -385,10 +415,12 @@ skip");
            // TODO : more tests?
         }
         
-        [Fact]
-        public void TestEmptyLines()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestEmptyLines(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var program = @"
 # infinite loop
@@ -402,10 +434,12 @@ while true do
             Check.That(result).IsOkParsing();
         }
         
-        [Fact]
-        public void TestMissingUIndents()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestMissingUIndents(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var program = @"
 if true then
@@ -421,10 +455,12 @@ if true then
             Check.That(result).IsOkParsing();
         }
         
-        [Fact]
-        public void TestIssue413_incompleteProgram()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIssue413_incompleteProgram(ParserType parserType)
         {
-            var buildResult = buildParser();
+            var buildResult = buildParser(parserType);
             var parser = buildResult.Result;
             var program = @"
 if 
@@ -442,8 +478,10 @@ if
                 IndentedWhileTokenGeneric.INT,IndentedWhileTokenGeneric.FALSE,IndentedWhileTokenGeneric.IDENTIFIER);
         }
         
-        [Fact]
-        public void TestIndentationError_emptyIndentLine()
+                [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIndentationError_emptyIndentLine(ParserType parserType)
         {
             BuildResult<ILexer<IndentedWhileTokenGeneric>> _lexer = LexerBuilder.BuildLexer<IndentedWhileTokenGeneric>();
 

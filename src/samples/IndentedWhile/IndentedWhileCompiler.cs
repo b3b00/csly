@@ -19,7 +19,7 @@ namespace csly.indentedWhileLang.compiler
         {
             var parser = new IndentedWhileParserGeneric();
             var builder = new ParserBuilder<IndentedWhileTokenGeneric, WhileAST>();
-            var whileParserBuildResult = builder.BuildParser(parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+            var whileParserBuildResult = builder.BuildParser(parser, ParserType.EBNF_LL_STACK, "program");
             whileParser = whileParserBuildResult.Result;
         }
 

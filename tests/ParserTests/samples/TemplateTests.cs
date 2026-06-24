@@ -15,7 +15,7 @@ namespace ParserTests.samples
         {
             var builder = new ParserBuilder<TemplateLexer, ITemplate>();
             var instance = new TemplateParser();
-            var build = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "template");
+            var build = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "template");
             Check.That(build.IsError).IsFalse();
             Check.That(build.Result).IsNotNull();
             return build.Result;

@@ -58,7 +58,7 @@ public class TestIssue447
         var issue443Parser = new Issue447ExplicitTokenParser();
         var builder = new ParserBuilder<Issue447ExplicitTokenLexer, string>();
 
-        var parser = builder.BuildParser(issue443Parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+        var parser = builder.BuildParser(issue443Parser, ParserType.EBNF_LL_STACK, "root");
 
         Check.That(parser).IsOk();
         var r = parser.Result.Parse("aa");

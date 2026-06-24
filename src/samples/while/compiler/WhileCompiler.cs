@@ -17,7 +17,7 @@ namespace csly.whileLang.compiler
         {
             var parser = new WhileParser();
             var builder = new ParserBuilder<WhileToken, WhileAST>();
-            var whileParserBuildResult = builder.BuildParser(parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "statement");
+            var whileParserBuildResult = builder.BuildParser(parser, ParserType.EBNF_LL_STACK, "statement");
             whileParser = whileParserBuildResult.Result;
         }
 

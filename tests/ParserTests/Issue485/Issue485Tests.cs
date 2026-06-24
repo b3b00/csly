@@ -10,7 +10,7 @@ public class Issue485Tests
     public void TestIssue485()
     {
         var builder = new ParserBuilder<Issue485Lexer, string>();
-        var build = builder.BuildParser(new Issue485Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT,"root");
+        var build = builder.BuildParser(new Issue485Parser(), ParserType.EBNF_LL_STACK,"root");
         Check.That(build).IsOk();
         var parser = build.Result;
         Check.That(parser).IsNotNull();
@@ -25,7 +25,7 @@ public class Issue485Tests
     public void TestIssue485SelfEscape()
     {
         var builder = new ParserBuilder<Issue485SelfEscapeLexer, string>();
-        var build = builder.BuildParser(new Issue485SelfEscapeParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT,"root");
+        var build = builder.BuildParser(new Issue485SelfEscapeParser(), ParserType.EBNF_LL_STACK,"root");
         Check.That(build).IsOk();
         var parser = build.Result;
         Check.That(parser).IsNotNull();
@@ -41,7 +41,7 @@ public class Issue485Tests
     public void TestIssue485WithCallback()
     {
         var builder = new ParserBuilder<Issue485WithCallbackLexer, string>();
-        var build = builder.BuildParser(new Issue485WithCallbackParser(), ParserType.EBNF_LL_RECURSIVE_DESCENT,"root");
+        var build = builder.BuildParser(new Issue485WithCallbackParser(), ParserType.EBNF_LL_STACK,"root");
         Check.That(build).IsOk();
         var parser = build.Result;
         Check.That(parser).IsNotNull();

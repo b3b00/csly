@@ -34,7 +34,7 @@ public class NodeNamesTests
     {
         var parserInstance = new ExpressionParser();
         var builder = new ParserBuilder<ExpressionToken, int>();
-        var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expression").Result;
+        var parser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_STACK, "expression").Result;
         var r = parser.Parse("1+1");
         Check.That(r).IsOkParsing();
         Check.That(r.SyntaxTree).IsNotNull();

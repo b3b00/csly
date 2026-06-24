@@ -12,7 +12,7 @@ public class Program
     {
         ParserBuilder<SlowOnBadParseEosToken, object> builder = new ParserBuilder<SlowOnBadParseEosToken, object>("en");
         
-        var buildBaseLine = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+        var buildBaseLine = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, "root");
         if (buildBaseLine.IsOk)
         {
             return buildBaseLine.Result;

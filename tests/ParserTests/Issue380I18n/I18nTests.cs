@@ -11,20 +11,22 @@ namespace ParserTests.Issue380I18n;
 
 public class I18nTests
 {
-    private static Parser<ExpressionToken, double> BuildParser(string i18n)
+    private static Parser<ExpressionToken, double> BuildParser(string i18n, ParserType parserType)
     {   
         var StartingRule = $"{nameof(SimpleExpressionParser)}_expressions";
         var parserInstance = new SimpleExpressionParser();
         var builder = new ParserBuilder<ExpressionToken, double>(i18n);
-        var pBuild = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, StartingRule);
+        var pBuild = builder.BuildParser(parserInstance, parserType, StartingRule);
         Check.That(pBuild).IsOk();
         return pBuild.Result;
     }
     
-    [Fact]
-    public static void TestErrorMessage()
+    [Theory]
+    [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+    [InlineData(ParserType.EBNF_LL_STACK)]
+    public static void TestErrorMessage(ParserType parserType)
     {
-        var parser = BuildParser("en");
+        var parser = BuildParser("en", parserType);
         var result = parser.Parse("2 ( 2");
         Check.That(result).Not.IsOkParsing();
         var errors = result.Errors;

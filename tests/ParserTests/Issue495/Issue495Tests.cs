@@ -15,7 +15,7 @@ public class Issue495Tests
         if (_parser == null)
         {
             ParserBuilder<Issue495Token, string> builder = new ParserBuilder<Issue495Token, string>("en");
-            var build = builder.BuildParser(new Issue495Parser(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "program");
+            var build = builder.BuildParser(new Issue495Parser(), ParserType.EBNF_LL_STACK, "program");
             Check.That(build).IsOk();
             _parser = build.Result;
         }

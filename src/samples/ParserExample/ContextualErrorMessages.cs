@@ -114,7 +114,7 @@ public class ContextualErrorMessages
     public static Parser<ContextualErrorToken,string> BuildParser()
     {
         ParserBuilder<ContextualErrorToken, string> builder = new ParserBuilder<ContextualErrorToken, string>();
-        var result = builder.BuildParser(new ContextualErrorParser(),ParserType.EBNF_LL_RECURSIVE_DESCENT,"root");
+        var result = builder.BuildParser(new ContextualErrorParser(),ParserType.EBNF_LL_STACK,"root");
         Check.That(result).IsOk();
         return result.Result;
     }

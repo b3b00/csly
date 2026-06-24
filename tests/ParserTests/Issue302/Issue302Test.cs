@@ -31,5 +31,26 @@ namespace ParserTests.Issue302
             Check.That(error.UnexpectedToken.TokenID).IsEqualTo(Issue302Token.PLUS);
             
         }
+        
+        [Fact]
+        public void Test302Stack()
+        {
+            var parse_inst = new Issue302Parser();
+            var builder = new ParserBuilder<Issue302Token, object>();
+            var parser = builder.BuildParser(parse_inst, ParserType.EBNF_LL_STACK, "expr");
+
+            var r = parser.Result.Parse("ba + bb",nameof(Issue302Parser)+"_expressions");
+
+            Check.That(r.IsOk).IsTrue();
+
+            r = parser.Result.Parse("ba + bb");
+
+            Check.That(r.IsError).IsTrue();
+            Check.That(r.Errors).CountIs(1);
+            var error = r.Errors.First() as UnexpectedTokenSyntaxError<Issue302Token>;
+            Check.That(error).IsNotNull();
+            Check.That(error.UnexpectedToken.TokenID).IsEqualTo(Issue302Token.PLUS);
+            
+        }
     }
 }

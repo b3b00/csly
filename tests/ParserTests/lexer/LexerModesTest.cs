@@ -134,7 +134,7 @@ world");
         {
             ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
             var parser = new MinimalXmlParser();
-            var r = builder.BuildParser(parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "document");
+            var r = builder.BuildParser(parser, ParserType.EBNF_LL_STACK, "document");
             Check.That(r.IsError).IsFalse();
             var pr = r.Result.Parse(@"
 <?xml version=""1.0""?>

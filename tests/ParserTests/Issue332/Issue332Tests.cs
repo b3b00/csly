@@ -18,7 +18,7 @@ public class Issue332Tests
     {
         ParserBuilder<Issue332Token, object> Parser = new ParserBuilder<Issue332Token, object>();
         Issue332Parser oparser = new Issue332Parser();
-        var r = Parser.BuildParser(oparser,ParserType.EBNF_LL_RECURSIVE_DESCENT);
+        var r = Parser.BuildParser(oparser,ParserType.EBNF_LL_STACK);
         Check.That(r).Not.IsOk();
         Check.That(r.Errors).Not.IsEmpty();
         var error = r.Errors.First();

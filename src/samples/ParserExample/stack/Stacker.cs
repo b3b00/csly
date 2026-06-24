@@ -227,7 +227,7 @@ public class Stacker
         string start = "root";
         RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
         
-        var grammarParser = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, start);
+        var grammarParser = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, start);
 
         Check.That(grammarParser).IsOk();
         var parser = grammarParser.Result;
@@ -238,7 +238,7 @@ public class Stacker
 
         RuleParserType.ParserType = ParserType.LL_STACK;
         
-        grammarParser = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, start);
+        grammarParser = builder.BuildParser(instance, ParserType.EBNF_LL_STACK, start);
 
         Check.That(grammarParser).IsOk();
         parser = grammarParser.Result;
@@ -496,7 +496,7 @@ if truc == 1
                     return "ABBA";
                 }
             })           
-            .BuildParser(ParserType.EBNF_LL_RECURSIVE_DESCENT);
+            .BuildParser(ParserType.EBNF_LL_STACK);
 
         Check.That(buildResult).IsOk();
         var parser = buildResult.Result;

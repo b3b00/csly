@@ -57,7 +57,7 @@ namespace ParserExample
         {
             var builder = new ParserBuilder<Tokens, IDumbo>();
 
-            var result = builder.BuildParser(new Grammar(), ParserType.EBNF_LL_RECURSIVE_DESCENT, "block");
+            var result = builder.BuildParser(new Grammar(), ParserType.EBNF_LL_STACK, "block");
             if (!result.IsOk)
                 throw new Exception(result.Errors.First().ToString());
 

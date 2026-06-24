@@ -38,7 +38,7 @@ public class TestIssue443
         var issue443Parser = new Issue443Parser();
         var builder = new ParserBuilder<Issue443Lexer, INode>();
 
-        var parser = builder.BuildParser(issue443Parser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "template");
+        var parser = builder.BuildParser(issue443Parser, ParserType.EBNF_LL_STACK, "template");
 
         Check.That(parser).IsOk();
         var result = parser.Result.Parse(@"

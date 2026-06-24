@@ -16,7 +16,7 @@ namespace ParserTests.Issue263
 
             var commandParser = new Issue263Parser();
             var parserBuilder = new ParserBuilder<Issue263Token, object>();
-            var buildResult = parserBuilder.BuildParser(commandParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "operation");
+            var buildResult = parserBuilder.BuildParser(commandParser, ParserType.EBNF_LL_STACK, "operation");
 
             Check.That(buildResult.IsOk).IsTrue();
 
@@ -33,7 +33,7 @@ namespace ParserTests.Issue263
         {
             var commandParser = new Issue263Parser();
             var parserBuilder = new ParserBuilder<Issue263Token, object>();
-            var buildResult = parserBuilder.BuildParser(commandParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "operation");
+            var buildResult = parserBuilder.BuildParser(commandParser, ParserType.EBNF_LL_STACK, "operation");
 
             Check.That(buildResult.IsOk).IsTrue();
 
