@@ -63,7 +63,6 @@ namespace sly.parser
             {
                 ExpectedTokens = null;
             }
-
         }
 
         public UnexpectedTokenSyntaxError(Token<T> unexpectedToken, string i18n = null, List<LeadingToken<T>> expectedTokens = null) 

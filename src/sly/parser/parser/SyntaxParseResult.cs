@@ -58,6 +58,11 @@ namespace sly.parser
             Errors.Add(error);
         }
 
+        public void ClearErrors()
+        {
+            Errors.Clear();
+        }
+
         public IList<UnexpectedTokenSyntaxError<IN>> GetErrors() =>
             Errors == null ? new List<UnexpectedTokenSyntaxError<IN>>() : Errors?.ToList();
         

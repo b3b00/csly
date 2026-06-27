@@ -11,18 +11,20 @@ namespace ParserTests.Issue302
 {
     public class Issue302Test
     {
-        [Fact]
-        public void Test302()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void Test302(ParserType parserType)
         {
             var parse_inst = new Issue302Parser();
             var builder = new ParserBuilder<Issue302Token, object>();
-            var parser = builder.BuildParser(parse_inst, ParserType.EBNF_LL_RECURSIVE_DESCENT, "expr");
+            var parser = builder.BuildParser(parse_inst, parserType, "expr");
 
             var r = parser.Result.Parse("ba + bb",nameof(Issue302Parser)+"_expressions");
 
             Check.That(r.IsOk).IsTrue();
 
-            r = parser.Result.Parse("ba + bb");
+            r = parser.Result.Parse("ba + bb","expr");
 
             Check.That(r.IsError).IsTrue();
             Check.That(r.Errors).CountIs(1);
@@ -32,25 +34,6 @@ namespace ParserTests.Issue302
             
         }
         
-        [Fact]
-        public void Test302Stack()
-        {
-            var parse_inst = new Issue302Parser();
-            var builder = new ParserBuilder<Issue302Token, object>();
-            var parser = builder.BuildParser(parse_inst, ParserType.EBNF_LL_STACK, "expr");
-
-            var r = parser.Result.Parse("ba + bb",nameof(Issue302Parser)+"_expressions");
-
-            Check.That(r.IsOk).IsTrue();
-
-            r = parser.Result.Parse("ba + bb");
-
-            Check.That(r.IsError).IsTrue();
-            Check.That(r.Errors).CountIs(1);
-            var error = r.Errors.First() as UnexpectedTokenSyntaxError<Issue302Token>;
-            Check.That(error).IsNotNull();
-            Check.That(error.UnexpectedToken.TokenID).IsEqualTo(Issue302Token.PLUS);
-            
-        }
+        
     }
 }

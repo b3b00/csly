@@ -7,6 +7,7 @@ using sly.lexer;
 using sly.parser.generator;
 using sly.parser.generator.visitor;
 using sly.parser.llparser.bnf;
+using sly.parser.llparser.bnf.stackist;
 using sly.parser.llparser.ebnf;
 using sly.parser.parser;
 using sly.parser.parser.llparser.ebnf.stackist;
@@ -125,26 +126,9 @@ namespace sly.parser
                     result.Errors = new List<ParseError>();
                     // TODO something wrong can happen here not ended without error  
                     var unexpectedTokens = syntaxResult.GetErrors();
-                    var byEnding = unexpectedTokens.GroupBy(x => x.UnexpectedToken.Position).OrderBy(x => x.Key);
-                    var errors = new List<ParseError>();  
-                    foreach (var expecting in byEnding)
-                    {
-                        var expectingTokens = expecting.SelectMany(x => x.ExpectedTokens ?? new List<LeadingToken<IN>>()).Distinct();
-                        var expectedTokens =  expectingTokens?.ToArray();
-                        if (expectedTokens != null)
-                        {
-                            var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, LexemeLabels, I18n,
-                                expectedTokens);
-                            errors.Add(expected);
-                        }
-                        else
-                        {
-                            var expected = new UnexpectedTokenSyntaxError<IN>(expecting.First().UnexpectedToken, LexemeLabels, I18n,
-                                new LeadingToken<IN>[]{});
-                            errors.Add(expected);
-                        }
-                    }
-                    result.Errors.AddRange(errors);
+                    var aggregate = ErrorAggregator.Aggregate(unexpectedTokens.ToList())
+                        .Cast<ParseError>().ToList();
+                    result.Errors.AddRange(aggregate);
                     result.IsError = true;
                     return result;
                 }

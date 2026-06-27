@@ -163,6 +163,14 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
         // match has been found return immediatly
         if (state.Result != null && state.Result.IsOk)
         {
+            var errors = state.Children
+                .Where(x => x != null && x.IsError)
+                .SelectMany(x => x.GetErrors())
+                .ToList();
+            if (errors.Count > 0) 
+            {
+                state.Result.AddErrors(errors);
+            }
             state.Parent.SetResult(state.Result);
             state.Index = 0;
             return;
@@ -177,9 +185,11 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
 
             var max = state.Children.Max(x => x.EndingPosition);
             
-            var errors = state.Children.Where(x => x.EndingPosition == max)
+            var errors = state.Children
+                .Where(x => x.EndingPosition == max)
                 .SelectMany(x => x.GetErrors())
-                .DistinctWithPredicate(( x,  y) => x.Line == y.Line && x.Column == y.Column).ToList();
+                .DistinctWithPredicate((x,y) => x.ErrorMessage == y.ErrorMessage)
+                .ToList();
             
             result.AddErrors(errors);
             state.Parent.SetResult(result);
@@ -242,6 +252,11 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
                     {
                         result.EndingPosition = Math.Max(result.EndingPosition, child.EndingPosition);
                         manyNode.Add(child.Root);
+                    }
+                    var childErrors = child.GetErrors();
+                    if (childErrors != null && childErrors.Count > 0)
+                    {
+                        result.AddErrors(childErrors);
                     }
                 }
             }
@@ -386,10 +401,10 @@ public class EBNFStackDescentSyntaxParser<IN, OUT> : StackDescentSyntaxParser<IN
             {
                 if (state.ExpressionState == ExpressionRuleState.Operator)
                 {
+                    state.Left.AddErrors(state.Result.GetErrors());
                     state.Parent.SetResult(state.Left);
                     return;
                 }
-                
                 // fail otherwise => return current result (left if left or right if done)
                 state.Parent.SetResult(state.Result);
                 return;

@@ -115,10 +115,21 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 case StackStateType.Root:
                 {
                     var errors = current.Result.GetErrors();
-                    if (errors.Count == 0)
+                    if (errors.Count == 0 && current.Result.IsError)
                     {
                         errors.Add(new UnexpectedTokenSyntaxError<IN>(tokens[current.Result.EndingPosition], LexemeLabels, null));
                         current.Result.AddErrors(errors);
+                    }
+                    if (current.Result.IsError && errors.Any())
+                    {
+                        var lastErrorPosition = errors
+                            .Select(e => e.UnexpectedToken.PositionInTokenFlow)
+                            .Max();
+                        var lastErrors = errors
+                            .Where(e => e.UnexpectedToken.PositionInTokenFlow == lastErrorPosition)
+                            .ToList();
+                        current.Result.ClearErrors();
+                        current.Result.AddErrors(lastErrors);
                     }
                     return current.Result;
                 }
@@ -166,7 +177,8 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                 {
                     realResult = state.Successes.OrderBy(x => x.EndingPosition).Last();
                 }
-
+                var winingErrors = ErrorAggregator.Aggregate(state.Successes.Concat(state.Errors).SelectMany(x => x.GetErrors()).ToList());
+                realResult.AddErrors(winingErrors);
                 state.Parent.SetResult(realResult);
                
                 return;
@@ -299,7 +311,6 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         result.EndingPosition = !result.IsError ? terminalState.Position + 1 : terminalState.Position;
         if (isError)
         {
-            //Log($"error found {token} expected {terminal.ExpectedToken}",stack,1);
             result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
         }
         
@@ -307,10 +318,7 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
         token.IsExplicit = terminal.IsExplicitToken;
         result.Root = new SyntaxLeaf<IN, OUT>(token, terminal.Discarded);
         result.HasByPassNodes = false;
-        if (result.IsError)
-        {
-            result.AddError(new UnexpectedTokenSyntaxError<IN>(token, LexemeLabels, I18n, terminal.ExpectedToken));
-        }
+        
 
         
         state.Parent.SetResult(result);
@@ -335,28 +343,13 @@ public partial class StackDescentSyntaxParser<IN, OUT> : ISyntaxParser<IN, OUT> 
                         .SelectMany(x => x.GetErrors())
                         .Distinct().ToList();
 
-                    var max = allErrors.Max(x => x.UnexpectedToken.Position.Index);
                     var realResult = new SyntaxParseResult<IN, OUT>()
                     {
                         IsError = true,
-                        EndingPosition = max,
+                        EndingPosition = state.LastResult.EndingPosition,
                     };
 
-                    // if (allErrors.Count == 3)
-                    // {
-                    //     var grouped = allErrors.GroupBy(x => x.Discriminant()
-                    //     ).ToList();
-                    //     var expecting = grouped
-                    //         .Select(x => x
-                    //             .SelectMany(y => y.ExpectedTokens)
-                    //             .DistinctWithPredicate((w,z) => z.TokenId.Equals(w.TokenId)))
-                    //     ;
-                    // }
-                    // TODO aggregate errors
-                    var errors = allErrors.Where(x => x.UnexpectedToken.Position.Index == max)
-                        .ToList();
-                    realResult.AddErrors(errors);
-                    
+                    realResult.AddErrors(allErrors);
                     parentState.SetResult(realResult);   
                 }
                 else

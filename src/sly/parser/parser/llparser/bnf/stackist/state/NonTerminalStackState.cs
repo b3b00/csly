@@ -43,7 +43,7 @@ public class NonTerminalStackState<IN, OUT> : StackState<IN, OUT> where IN : str
         Errors.Add(success);
     }
 
-    public void SetResult(SyntaxParseResult<IN, OUT> result)
+    public override void SetResult(SyntaxParseResult<IN, OUT> result)
     {
         Result = result;
         if (result.IsOk)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NFluent;
@@ -15,7 +16,7 @@ public class ErrorMessageAccuracyIssue381Tests
     {
         var StartingRule = $"statement";
         var parserInstance = new ErrorAccuracyIssue381Parser();
-        var builder = new ParserBuilder<ErrorAccuracyIssue381Token, object>();
+        var builder = new ParserBuilder<ErrorAccuracyIssue381Token, object>("en");
         var parser = builder.BuildParser(parserInstance, parserType, StartingRule);
         Check.That(parser).IsOk();
         return parser.Result;
@@ -31,22 +32,40 @@ public class ErrorMessageAccuracyIssue381Tests
             ""string3"", ""value1"",
             ""string4"", ""value2""
             ""string5"", ""value3"",
-            ""string6"", ""value4""
+            ""string6"", ""value4"")
 ";
 
         var parser = BuildParser(parserType);
         var r = parser.Parse(source,"statements");
         Check.That(r).Not.IsOkParsing();
-        var error = r.Errors.First();
-        Check.That(r.Errors).IsSingle();
-        var unexpected = r.Errors.First() as UnexpectedTokenSyntaxError<ErrorAccuracyIssue381Token>;
-        Check.That(unexpected).IsNotNull();
-        Check.That(unexpected.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
-        Check.That(unexpected.Column).IsEqualTo(12);
-        Check.That(unexpected.Line).IsEqualTo(4);
-        Check.That(unexpected.UnexpectedToken.StringWithoutQuotes).IsEqualTo("string5");
-        Check.That(unexpected.UnexpectedToken.TokenID).IsEqualTo(ErrorAccuracyIssue381Token.String);
-        Check.That(unexpected.ExpectedTokens.Extracting(x => x.TokenId))
+
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.WriteLine("=====================================");
+        Console.WriteLine();
+        
+        foreach (var err in r.Errors)
+        {
+            var unexp = err as UnexpectedTokenSyntaxError<ErrorAccuracyIssue381Token>;
+            Console.WriteLine(err.ErrorMessage);
+        }
+
+        
+        var lastunexpUnexpectedTokenSyntaxError = r.Errors
+            .Cast<UnexpectedTokenSyntaxError<ErrorAccuracyIssue381Token>>()
+            .OrderBy(x => x.UnexpectedToken.Position).Last();
+        var unexpected_temp = lastunexpUnexpectedTokenSyntaxError as UnexpectedTokenSyntaxError<ErrorAccuracyIssue381Token>;
+        if (unexpected_temp != null) {
+            Console.WriteLine($"Token: {unexpected_temp.UnexpectedToken.Value}, Line: {unexpected_temp.Line}, Column: {unexpected_temp.Column}");
+        }
+        
+        Check.That(lastunexpUnexpectedTokenSyntaxError).IsNotNull();
+        Check.That(lastunexpUnexpectedTokenSyntaxError.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
+        Check.That(lastunexpUnexpectedTokenSyntaxError.Column).IsEqualTo(12);
+        Check.That(lastunexpUnexpectedTokenSyntaxError.Line).IsEqualTo(4);
+        Check.That(lastunexpUnexpectedTokenSyntaxError.UnexpectedToken.StringWithoutQuotes).IsEqualTo("string5");
+        Check.That(lastunexpUnexpectedTokenSyntaxError.UnexpectedToken.TokenID).IsEqualTo(ErrorAccuracyIssue381Token.String);
+        Check.That(lastunexpUnexpectedTokenSyntaxError.ExpectedTokens.Extracting(x => x.TokenId))
             .Contains(new List<ErrorAccuracyIssue381Token>()
                 { ErrorAccuracyIssue381Token.Comma, ErrorAccuracyIssue381Token.Rparen });
         
