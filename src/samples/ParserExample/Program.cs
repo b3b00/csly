@@ -23,6 +23,7 @@ using ParserTests.Issue239;
 using ParserTests.Issue259;
 using ParserTests.Issue302;
 using ParserTests.Issue332;
+using ParserTests.Issue381ErrorAccuracy;
 using ParserTests.Issue414;
 using ParserTests.Issue495;
 using ParserTests.lexer;
@@ -1745,7 +1746,18 @@ else
             return newTokens;
         }
 
+
+        public static void TestIssue302()
+        {
+            Issue302Test test = new Issue302Test();
+            test.Test302(ParserType.EBNF_LL_STACK);
+        }
         
+        public static void TestAccuracy381()
+        {
+            var tests = new ErrorMessageAccuracyIssue381Tests();
+            tests.TestAccuracy(ParserType.EBNF_LL_STACK);
+        }
         
         private static void TestLexerPostProcess()
         {

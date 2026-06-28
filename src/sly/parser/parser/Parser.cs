@@ -129,6 +129,11 @@ namespace sly.parser
                     var aggregate = ErrorAggregator.Aggregate(unexpectedTokens.ToList())
                         .Cast<ParseError>().ToList();
                     result.Errors.AddRange(aggregate);
+                    if (result.Errors.Count == 0)
+                    {
+                        var unexpected = tokens[syntaxResult.EndingPosition];
+                        result.Errors.Add(new UnexpectedTokenSyntaxError<IN>(unexpected));
+                    }
                     result.IsError = true;
                     return result;
                 }
