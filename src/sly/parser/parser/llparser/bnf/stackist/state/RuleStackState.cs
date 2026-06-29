@@ -8,36 +8,6 @@ using sly.parser.syntax.grammar;
 
 namespace sly.parser.llparser.bnf.stackist;
 
-public static class RuleExt
-{
-    public static string Progress<IN, OUT>(this RuleStackState<IN, OUT> state) where IN : struct, Enum
-    {
-        StringBuilder b = new StringBuilder();
-        b.Append("<<").Append(state.Id).Append($">>[{state.Index}] @").Append(state.Position).Append(" :: ");
-        b.Append(state.Rule.NonTerminalName).Append(" : ");
-        for (int i = 0; i < state.Rule.Clauses.Count; i++)
-        {
-            if (i == state.Index)
-            {
-                b.Append(">");
-            }
-
-            b.Append(state.Rule.Clauses[i].Dump());
-            b.Append(" ");
-        }
-
-        if (state.Index >= state.Rule.Clauses.Count)
-        {
-            var last = state.Children.FirstOrDefault(x => x != null);
-            
-            var isError = last != null && last.IsError;
-            b.Append(" DONE :").Append(isError ? " KO" : " OK");
-            
-        } 
-        return b.ToString();
-    }
-}
-
 
 [DebuggerDisplay("{DebugString}")]
 public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
@@ -46,7 +16,6 @@ public class RuleStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, Enum
     private static int Counter = 0;
     
     public int Id { get; set; }
-    public override string DebugString => $"Rule <<{Id}>> {Rule.RuleString} [{Index}] @{Position}";
     
     public int Index { get; set; }
 

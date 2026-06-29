@@ -39,25 +39,11 @@ public class ErrorMessageAccuracyIssue381Tests
         var r = parser.Parse(source,"statements");
         Check.That(r).Not.IsOkParsing();
 
-        Console.WriteLine();
-        Console.WriteLine();
-        Console.WriteLine("=====================================");
-        Console.WriteLine();
-        
-        foreach (var err in r.Errors)
-        {
-            var unexp = err as UnexpectedTokenSyntaxError<ErrorAccuracyIssue381Token>;
-            Console.WriteLine(err.ErrorMessage);
-        }
-
         
         var lastunexpUnexpectedTokenSyntaxError = r.Errors
             .Cast<UnexpectedTokenSyntaxError<ErrorAccuracyIssue381Token>>()
             .OrderBy(x => x.UnexpectedToken.Position).Last();
         var unexpected_temp = lastunexpUnexpectedTokenSyntaxError as UnexpectedTokenSyntaxError<ErrorAccuracyIssue381Token>;
-        if (unexpected_temp != null) {
-            Console.WriteLine($"Token: {unexpected_temp.UnexpectedToken.Value}, Line: {unexpected_temp.Line}, Column: {unexpected_temp.Column}");
-        }
         
         Check.That(lastunexpUnexpectedTokenSyntaxError).IsNotNull();
         Check.That(lastunexpUnexpectedTokenSyntaxError.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);

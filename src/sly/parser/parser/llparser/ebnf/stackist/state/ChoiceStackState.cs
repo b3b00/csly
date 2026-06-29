@@ -35,8 +35,6 @@ public class ChoiceStackState<IN,OUT> : EbnfStackState<IN,OUT> where IN : struct
 
     public List<SyntaxParseResult<IN, OUT>> Children => _children;
     
-    public override string DebugString => $"Choice  {Choice.Dump()} [{Index}]  @{Position}";
-    
     public int Index { get; set; }
     
     public ChoiceClause<IN, OUT> Choice { get; set; }

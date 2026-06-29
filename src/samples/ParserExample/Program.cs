@@ -175,7 +175,7 @@ namespace ParserExample
         {
             var tests = new EBNFTests();
             //tests.TestIssue507TransitiveEmptyStarter();
-            tests.TestIssue507MoreTransitiveEmptyStarter();
+            tests.TestIssue507MoreTransitiveEmptyStarter(ParserType.EBNF_LL_RECURSIVE_DESCENT);
         }
         
         private static void BenchSimpleExpression()
@@ -595,7 +595,7 @@ return r";
         public static void test104()
         {
             EBNFTests tests = new EBNFTests();
-            tests.TestGroupSyntaxOptionIsNone();
+            tests.TestGroupSyntaxOptionIsNone(ParserType.EBNF_LL_RECURSIVE_DESCENT);
 
         }
 

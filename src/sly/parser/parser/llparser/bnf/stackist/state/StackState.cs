@@ -6,14 +6,7 @@ namespace sly.parser.llparser.bnf.stackist;
 
 public class StackState<IN, OUT> where IN : struct, Enum
 {
-    
-    public virtual string DebugString
-    {
-        get
-        {
-            return "StackState : " + Type.ToString() + " : " + Position + " : " + (Parent != null ? Parent.Position.ToString() : "null");
-        }
-    }
+   
     public int Position { get; set; }
     
     public Token<IN> CurrentToken => Tokens[Position];

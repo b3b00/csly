@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using sly.parser.syntax.grammar;
 
 namespace sly.parser.llparser.bnf.stackist;
@@ -9,10 +10,6 @@ public class TerminalStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, 
 {
     public TerminalClause<IN,OUT> Terminal { get; set; }
     
-    public override string DebugString => $"Terminal {Terminal.ExpectedToken} @{Position}";
-    
-    public StackState<IN,OUT> Sibling { get; set; }
-    
     public override  StackStateType Type => StackStateType.Terminal;
     public TerminalStackState(StackState<IN, OUT> parent, TerminalClause<IN, OUT> terminal) : base(parent)
     {
@@ -20,6 +17,7 @@ public class TerminalStackState<IN,OUT> : StackState<IN,OUT> where IN : struct, 
         
     }
 
+    [ExcludeFromCodeCoverage]
     public override string ToString()
     {
         return "Terminal: " + Terminal.ExpectedToken.ToString();

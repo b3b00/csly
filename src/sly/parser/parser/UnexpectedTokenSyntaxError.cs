@@ -195,12 +195,5 @@ namespace sly.parser
                 return GetContextualMessage(fullSource,position.Line,position.Column, message);
         }
 
-        // public string Discriminant()
-        // {
-        //     StringBuilder builder = new StringBuilder();
-        //     builder.Append(UnexpectedToken.TokenID.ToString());
-        //     builder.Append(UnexpectedToken.Position.Index);
-        //     return builder.ToString();
-        // }
     }
 }

@@ -31,7 +31,6 @@ namespace ParserTests.Issue302
             var error = r.Errors.First() as UnexpectedTokenSyntaxError<Issue302Token>;
             Check.That(error).IsNotNull();
             Check.That(error.UnexpectedToken.TokenID).IsEqualTo(Issue302Token.PLUS);
-            
         }
         
         

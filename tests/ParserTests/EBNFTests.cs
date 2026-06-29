@@ -13,6 +13,7 @@ using sly.parser;
 using sly.parser.generator;
 using sly.parser.llparser.ebnf;
 using sly.parser.parser;
+using sly.parser.parser.llparser.ebnf.stackist;
 using sly.parser.syntax.grammar;
 using Xunit;
 using ExpressionToken = simpleExpressionParser.ExpressionToken;
@@ -833,70 +834,62 @@ namespace ParserTests
 
         private Parser<TokenType, string> Parser;
 
-        private BuildResult<Parser<TokenType, string>> BuildParser()
+        private BuildResult<Parser<TokenType, string>> BuildParser(ParserType parserType)
         {
             var parserInstance = new EBNFTests();
             var builder = new ParserBuilder<TokenType, string>();
-            var result = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "R");
+            var result = builder.BuildParser(parserInstance, parserType, "R");
             return result;
         }
 
 
-        private BuildResult<Parser<JsonToken, JSon>> BuildEbnfJsonParser()
+        private BuildResult<Parser<JsonToken, JSon>> BuildEbnfJsonParser(ParserType parserType)
         {
             var parserInstance = new EbnfJsonParser();
             var builder = new ParserBuilder<JsonToken, JSon>();
 
             var result =
-                builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+                builder.BuildParser(parserInstance, parserType, "root");
             return result;
         }
 
-        private BuildResult<Parser<OptionTestToken, string>> BuildOptionParser()
+        private BuildResult<Parser<OptionTestToken, string>> BuildOptionParser(ParserType parserType)
         {
             var parserInstance = new OptionTestParser();
             var builder = new ParserBuilder<OptionTestToken, string>();
 
             var result =
-                builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+                builder.BuildParser(parserInstance, parserType, "root");
             return result;
         }
 
-        private BuildResult<Parser<GroupTestToken, string>> BuildGroupParser()
+        private BuildResult<Parser<GroupTestToken, string>> BuildGroupParser(ParserType parserType)
         {
             var parserInstance = new GroupTestParser();
             var builder = new ParserBuilder<GroupTestToken, string>();
 
             var result =
-                builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "rootGroup");
+                builder.BuildParser(parserInstance, parserType, "rootGroup");
             return result;
         }
 
         
 
-        [Fact]
-        public void TestBuildGroupParser()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestBuildGroupParser(ParserType parserType)
         {
-            var buildResult = BuildGroupParser();
+            var buildResult = BuildGroupParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
         }
 
-        [Fact]
-        public void TestEmptyOptionalNonTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestEmptyOptionalNonTerminal(ParserType parserType)
         {
-            var buildResult = BuildOptionParser();
-            Check.That(buildResult.IsError).IsFalse();
-            var optionParser = buildResult.Result;
-
-            var result = optionParser.Parse("a c", "root2");
-            Check.That(result.IsError).IsFalse();
-            Check.That(result.Result).IsEqualTo("R(a,<none>,c)");
-        }
-
-        [Fact]
-        public void TestEmptyOptionTerminalInMiddle()
-        {
-            var buildResult = BuildOptionParser();
+            var buildResult = BuildOptionParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var optionParser = buildResult.Result;
 
@@ -905,11 +898,27 @@ namespace ParserTests
             Check.That(result.Result).IsEqualTo("R(a,<none>,c)");
         }
 
-
-        [Fact]
-        public void TestEmptyTerminalOption()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestEmptyOptionTerminalInMiddle(ParserType parserType)
         {
-            var buildResult = BuildOptionParser();
+            var buildResult = BuildOptionParser(parserType);
+            Check.That(buildResult.IsError).IsFalse();
+            var optionParser = buildResult.Result;
+
+            var result = optionParser.Parse("a c", "root2");
+            Check.That(result.IsError).IsFalse();
+            Check.That(result.Result).IsEqualTo("R(a,<none>,c)");
+        }
+
+
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestEmptyTerminalOption(ParserType parserType)
+        {
+            var buildResult = BuildOptionParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var optionParser = buildResult.Result;
 
@@ -918,12 +927,14 @@ namespace ParserTests
             Check.That(result.Result).IsEqualTo("R(a,B(b),<none>)");
         }
 
-        [Fact]
-        public void TestErrorMissingClosingBracket()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestErrorMissingClosingBracket(ParserType parserType)
         {
             var jsonParser = new EbnfJsonGenericParser();
             var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
-            var build = builder.BuildParser(jsonParser, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var build = builder.BuildParser(jsonParser, parserType, "root");
             var parserTest = build.Result;
             ParseResult<JsonTokenGeneric, JSon> r = null;
             try
@@ -939,10 +950,12 @@ namespace ParserTests
             Check.That(r.IsError).IsTrue();
         }
 
-        [Fact]
-        public void TestGroupSyntaxManyParser()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestGroupSyntaxManyParser(ParserType parserType)
         {
-            var buildResult = BuildGroupParser();
+            var buildResult = BuildGroupParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ,a , a ,a,a", "rootMany");
@@ -950,10 +963,12 @@ namespace ParserTests
             Check.That(res.Result).IsEqualTo("R(a,a,a,a,a)");
         }
         
-        [Fact]
-        public void TestGroupSyntaxChoicesParser()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestGroupSyntaxChoicesParser(ParserType parserType)
         {
-            var buildResult = BuildGroupParser();
+            var buildResult = BuildGroupParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ;a ", "rootGroupChoice");
@@ -967,10 +982,12 @@ namespace ParserTests
             Check.That(res.Result).IsEqualTo("R(a,a)");
         }
         
-        [Fact]
-        public void TestGroupSyntaxChoicesManyParser()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestGroupSyntaxChoicesManyParser(ParserType parserType)
         {
-            var buildResult = BuildGroupParser();
+            var buildResult = BuildGroupParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ;a,a  ; a,a ", "rootGroupChoiceMany");
@@ -978,10 +995,12 @@ namespace ParserTests
             Check.That(res.Result).IsEqualTo("R(a,a,a,a,a)"); // rootMany
         }
 
-        [Fact]
-        public void TestGroupSyntaxOptionIsSome()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestGroupSyntaxOptionIsSome(ParserType parserType)
         {
-            var buildResult = BuildGroupParser();
+            var buildResult = BuildGroupParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ; a ", "rootOption");
@@ -989,10 +1008,12 @@ namespace ParserTests
             Check.That(res.Result).IsEqualTo("R(a;a)");
         }
 
-        [Fact]
-        public void TestGroupSyntaxOptionIsNone()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestGroupSyntaxOptionIsNone(ParserType parserType)
         {
-            var buildResult = BuildGroupParser();
+            var buildResult = BuildGroupParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ", "rootOption");
@@ -1000,10 +1021,12 @@ namespace ParserTests
             Check.That(res.Result).IsEqualTo("R(a;<none>)");
         }
 
-        [Fact]
-        public void TestGroupSyntaxParser()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestGroupSyntaxParser(ParserType parserType)
         {
-            var buildResult = BuildGroupParser();
+            var buildResult = BuildGroupParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var groupParser = buildResult.Result;
             var res = groupParser.Parse("a ,a");
@@ -1013,10 +1036,12 @@ namespace ParserTests
         }
 
 
-        [Fact]
-        public void TestJsonList()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestJsonList(ParserType parserType)
         {
-            var buildResult = BuildEbnfJsonParser();
+            var buildResult = BuildEbnfJsonParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var jsonParser = buildResult.Result;
 
@@ -1033,10 +1058,12 @@ namespace ParserTests
             Check.That(list).HasItem( 3,4);
         }
 
-        [Fact]
-        public void TestJsonObject()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestJsonObject(ParserType parserType)
         {
-            var buildResult = BuildEbnfJsonParser();
+            var buildResult = BuildEbnfJsonParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var jsonParser = buildResult.Result;
             var result = jsonParser.Parse("{\"one\":1,\"two\":2,\"three\":\"trois\" }");
@@ -1051,10 +1078,12 @@ namespace ParserTests
             Check.That(o).HasProperty("three", "trois");
         }
 
-        [Fact]
-        public void TestNonEmptyOptionalNonTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestNonEmptyOptionalNonTerminal(ParserType parserType)
         {
-            var buildResult = BuildOptionParser();
+            var buildResult = BuildOptionParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var optionParser = buildResult.Result;
 
@@ -1064,10 +1093,12 @@ namespace ParserTests
         }
 
 
-        [Fact]
-        public void TestNonEmptyTerminalOption()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestNonEmptyTerminalOption(ParserType parserType)
         {
-            var buildResult = BuildOptionParser();
+            var buildResult = BuildOptionParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             var optionParser = buildResult.Result;
 
@@ -1077,10 +1108,12 @@ namespace ParserTests
         }
 
 
-        [Fact]
-        public void TestOneOrMoreNonTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestOneOrMoreNonTerminal(ParserType parserType)
         {
-            var buildResult = BuildParser();
+            var buildResult = BuildParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             Parser = buildResult.Result;
             var result = Parser.Parse("e f e f");
@@ -1089,10 +1122,12 @@ namespace ParserTests
         }
 
 
-        [Fact]
-        public void TestOneOrMoreWithMany()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestOneOrMoreWithMany(ParserType parserType)
         {
-            var buildResult = BuildParser();
+            var buildResult = BuildParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             Parser = buildResult.Result;
             var result = Parser.Parse("aaa b c");
@@ -1100,10 +1135,12 @@ namespace ParserTests
             Check.That(result.Result).IsEqualTo("R(A(a, a, a),B(b),c)");
         }
 
-        [Fact]
-        public void TestOneOrMoreWithOne()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestOneOrMoreWithOne(ParserType parserType)
         {
-            var buildResult = BuildParser();
+            var buildResult = BuildParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             Parser = buildResult.Result;
             var result = Parser.Parse(" b c");
@@ -1111,13 +1148,18 @@ namespace ParserTests
             
         }
 
-        [Fact]
-        public void TestParseBuild()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestParseBuild(ParserType parserType)
         {
-            var buildResult = BuildParser();
-            Check.That(buildResult.IsError).IsFalse();
+            var buildResult = BuildParser(parserType);
+            Check.That(buildResult).IsOk();
             Parser = buildResult.Result;
-            Check.That(Parser.SyntaxParser).IsInstanceOf<EBNFRecursiveDescentSyntaxParser<TokenType, string>>();
+            if(parserType == ParserType.EBNF_LL_RECURSIVE_DESCENT) 
+                Check.That(Parser.SyntaxParser).IsInstanceOf<EBNFRecursiveDescentSyntaxParser<TokenType, string>>();
+            else if (parserType == ParserType.EBNF_LL_STACK) 
+                Check.That(Parser.SyntaxParser).IsInstanceOf<EBNFStackDescentSyntaxParser<TokenType, string>>();
             Check.That(Parser.Configuration.NonTerminals).CountIs(6);
             
             var nt = Parser.Configuration.NonTerminals["R"];
@@ -1135,10 +1177,12 @@ namespace ParserTests
             
         }
 
-        [Fact]
-        public void TestZeroOrMoreWithMany()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestZeroOrMoreWithMany(ParserType parserType)
         {
-            var buildResult = BuildParser();
+            var buildResult = BuildParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             Parser = buildResult.Result;
             var result = Parser.Parse("a bb c");
@@ -1146,10 +1190,12 @@ namespace ParserTests
             Check.That(result.Result).IsEqualTo("R(A(a),B(b, b),c)");            
         }
         
-        [Fact]
-        public void TestZeroOrMoreStarterFollowedByTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestZeroOrMoreStarterFollowedByTerminal(ParserType parserType)
         {
-            var buildResult = BuildParser();
+            var buildResult = BuildParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             Parser = buildResult.Result;
             var result = Parser.Parse("bbb a","Ba");
@@ -1160,10 +1206,12 @@ namespace ParserTests
             Check.That(result.Result).IsEqualTo("Ba(a)"); 
         }
         
-        [Fact]
-        public void TestZeroOrMoreStarterFollowedByNonTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestZeroOrMoreStarterFollowedByNonTerminal(ParserType parserType)
         {
-            var buildResult = BuildParser();
+            var buildResult = BuildParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             Parser = buildResult.Result;
             var result = Parser.Parse("bbb a","BA");
@@ -1174,10 +1222,12 @@ namespace ParserTests
             Check.That(result.Result).IsEqualTo("BA(A(a))");    
         }
 
-        [Fact]
-        public void TestZeroOrMoreWithNone()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestZeroOrMoreWithNone(ParserType parserType)
         {
-            var buildResult = BuildParser();
+            var buildResult = BuildParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             Parser = buildResult.Result;
             var result = Parser.Parse("a  c");
@@ -1185,10 +1235,12 @@ namespace ParserTests
             Check.That(result.Result).IsEqualTo("R(A(a),B(),c)");
         }
 
-        [Fact]
-        public void TestZeroOrMoreWithOne()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestZeroOrMoreWithOne(ParserType parserType)
         {
-            var buildResult = BuildParser();
+            var buildResult = BuildParser(parserType);
             Check.That(buildResult.IsError).IsFalse();
             Parser = buildResult.Result;
             var result = Parser.Parse("a b c");
@@ -1199,7 +1251,7 @@ namespace ParserTests
 
         #region CONTEXTS
 
-        private BuildResult<Parser<ExpressionToken, int>> buildSimpleExpressionParserWithContext(ParserType parserType = ParserType.EBNF_LL_RECURSIVE_DESCENT)
+        private BuildResult<Parser<ExpressionToken, int>> buildSimpleExpressionParserWithContext(ParserType parserType)
         {
             var startingRule = $"{nameof(SimpleExpressionParserWithContext)}_expressions";
             var parserInstance = new SimpleExpressionParserWithContext();
@@ -1208,10 +1260,12 @@ namespace ParserTests
             return parser;
         }
 
-        [Fact]
-        public void TestContextualParsing()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestContextualParsing(ParserType parserType)
         {
-            var buildResult = buildSimpleExpressionParserWithContext();
+            var buildResult = buildSimpleExpressionParserWithContext(parserType);
 
             Check.That(buildResult.IsError).IsFalse();
             var parser = buildResult.Result;
@@ -1221,10 +1275,12 @@ namespace ParserTests
         }
 
         
-        [Fact]
-        public void TestContextualParsingprefixPostfix()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestContextualParsingprefixPostfix(ParserType parserType)
         {
-            var buildResult = buildSimpleExpressionParserWithContext();
+            var buildResult = buildSimpleExpressionParserWithContext(parserType);
 
             Check.That(buildResult.IsError).IsFalse();
             var parser = buildResult.Result;
@@ -1234,10 +1290,12 @@ namespace ParserTests
         }
 
         
-        [Fact]
-        public void TestContextualParsingPrefixPostfix()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestContextualParsingPrefixPostfix(ParserType parserType)
         {
-            var buildResult = buildSimpleExpressionParserWithContext();
+            var buildResult = buildSimpleExpressionParserWithContext(parserType);
 
             Check.That(buildResult.IsError).IsFalse();
             var parser = buildResult.Result;
@@ -1247,10 +1305,12 @@ namespace ParserTests
         }
 
 
-        [Fact]
-        public void TestContextualParsing2()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestContextualParsing2(ParserType parserType)
         {
-            var buildResult = buildSimpleExpressionParserWithContext();
+            var buildResult = buildSimpleExpressionParserWithContext(parserType);
 
             Check.That(buildResult.IsError).IsFalse();
             var parser = buildResult.Result;
@@ -1259,10 +1319,12 @@ namespace ParserTests
             Check.That(res.Result).IsEqualTo(8);
         }
 
-        [Fact]
-        public void TestContextualParsingWithEbnf()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestContextualParsingWithEbnf(ParserType parserType)
         {
-            var buildResult = buildSimpleExpressionParserWithContext(ParserType.EBNF_LL_RECURSIVE_DESCENT);
+            var buildResult = buildSimpleExpressionParserWithContext(parserType);
 
             Check.That(buildResult.IsError).IsFalse();
             var parser = buildResult.Result;
@@ -1271,13 +1333,15 @@ namespace ParserTests
             Check.That(res.Result).IsEqualTo(8);
         }
 
-        [Fact]
-        public void TestBug100()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestBug100(ParserType parserType)
         {
             var startingRule = $"testNonTerm";
             var parserInstance = new Bugfix100Test();
             var builder = new ParserBuilder<GroupTestToken, int>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Result).IsNotNull();
             var parser = builtParser.Result;
@@ -1297,24 +1361,28 @@ namespace ParserTests
 
         #endregion
 
-        [Fact]
-        public void TestBug104()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestBug104(ParserType parserType)
         {
             var startingRule = $"testNonTerm";
             var parserInstance = new Bugfix104Test();
             var builder = new ParserBuilder<GroupTestToken, int>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Errors).IsEmpty();
         }
 
-        [Fact]
-        public void TestAlternateChoiceTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAlternateChoiceTerminal(ParserType parserType)
         {
             var startingRule = $"choice";
             var parserInstance = new AlternateChoiceTestTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a", "choice");
@@ -1330,13 +1398,15 @@ namespace ParserTests
             Check.That(parseResult.IsOk).IsFalse();
         }
         
-        [Fact]
-        public void TestAlternateChoiceNonTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAlternateChoiceNonTerminal(ParserType parserType)
         {
             var startingRule = $"choice";
             var parserInstance = new AlternateChoiceTestNonTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a", "choice");
@@ -1352,13 +1422,15 @@ namespace ParserTests
             Check.That(parseResult.IsOk).IsFalse();
         }
 
-        [Fact]
-        public void TestAlternateChoiceOneOrMoreNonTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAlternateChoiceOneOrMoreNonTerminal(ParserType parserType)
         {
             var startingRule = $"choice";
             var parserInstance = new AlternateChoiceTestOneOrMoreNonTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b", "choice");
@@ -1375,13 +1447,15 @@ namespace ParserTests
             Check.That(parseResult.IsOk).IsFalse();
         }
 
-        [Fact]
-        public void TestAlternateChoiceZeroOrMoreTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAlternateChoiceZeroOrMoreTerminal(ParserType parserType)
         {
             var startingRule = $"choice";
             var parserInstance = new AlternateChoiceTestZeroOrMoreTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b c", "choice");
@@ -1391,13 +1465,15 @@ namespace ParserTests
             Check.That(parseResult.IsOk).IsTrue();
         }
 
-        [Fact]
-        public void TestAlternateChoiceOneOrMoreTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAlternateChoiceOneOrMoreTerminal(ParserType parserType)
         {
             var startingRule = $"choice";
             var parserInstance = new AlternateChoiceTestOneOrMoreTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b c", "choice");
@@ -1407,13 +1483,15 @@ namespace ParserTests
             Check.That(parseResult.IsOk).IsTrue();
         }
 
-        [Fact]
-        public void TestAlternateChoiceOptionTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAlternateChoiceOptionTerminal(ParserType parserType)
         {
             var startingRule = $"choice";
             var parserInstance = new AlternateChoiceTestOptionTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b", "choice");
@@ -1424,13 +1502,15 @@ namespace ParserTests
             Check.That(parseResult.Result).IsEqualTo("a,<none>");
         }
         
-        [Fact]
-        public void TestAlternateChoiceOptionNonTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAlternateChoiceOptionNonTerminal(ParserType parserType)
         {
             var startingRule = $"choice";
             var parserInstance = new AlternateChoiceTestOptionNonTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b f", "choice");
@@ -1448,13 +1528,15 @@ namespace ParserTests
             
         }
         
-        [Fact]
-        public void TestAlternateChoiceOptionDiscardedTerminal()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAlternateChoiceOptionDiscardedTerminal(ParserType parserType)
         {
             var startingRule = $"choice";
             var parserInstance = new AlternateChoiceTestOptionDiscardedTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Errors).IsEmpty();
             var parseResult = builtParser.Result.Parse("a b", "choice");
@@ -1466,13 +1548,15 @@ namespace ParserTests
             Check.That(parseResult.Errors[0].ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
         }
 
-        [Fact]
-        public void TestAlternateChoiceErrorMixedTerminalAndNonTerminal()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAlternateChoiceErrorMixedTerminalAndNonTerminal(ParserType  parserType)
         {
             var startingRule = $"choice";
             var parserInstance = new AlternateChoiceTestError();
             var builder = new ParserBuilder<OptionTestToken, string>("en");
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsTrue();
             Check.That(builtParser.Errors).CountIs(2);
             Check.That(builtParser.Errors.Select(x => x.Code)).Contains(ErrorCodes.PARSER_MIXED_CHOICES,
@@ -1483,26 +1567,30 @@ namespace ParserTests
         
         
         
-        [Fact]
-        public void TestAlternateChoiceInGroupLeftRecursion()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestAlternateChoiceInGroupLeftRecursion(ParserType parserType)
         {
             var startingRule = $"choiceInGroup";
             var parserInstance = new LeftRecWithChoiceInGroup();
             var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsTrue();
             Check.That(builtParser.Errors).CountIs(1);
             Check.That(builtParser.Errors.First().Code).IsEqualTo(ErrorCodes.PARSER_LEFT_RECURSIVE);
         }
 
 
-        [Fact]
-        public void TestIssue507TransitiveEmptyStarter()
+        [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIssue507TransitiveEmptyStarter(ParserType parserType)
         {
             var startingRule = $"x";
             var parserInstance = new Issue507TransitiveEmptyStarterParser();
             var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser).IsOk();
             var parser = builtParser.Result;
             var parserResultNotEmpty = parser.Parse("a a a");
@@ -1514,13 +1602,15 @@ namespace ParserTests
             Check.That(parserResultEmpty.Result).IsEqualTo("empty");
         }
         
-        [Fact]
-        public void TestIssue507MoreTransitiveEmptyStarter()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIssue507MoreTransitiveEmptyStarter(ParserType parserType)
         {
             var startingRule = $"x";
             var parserInstance = new Issue507MoreTransitiveEmptyStarterParser();
             var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser).IsOk();
             var parser = builtParser.Result;
             var parserResultNotEmpty = parser.Parse("a a a");
@@ -1532,13 +1622,15 @@ namespace ParserTests
             Check.That(parserResultEmpty.Result).IsEqualTo("empty");
         }
 
-        [Fact]
-        public void TestIssue190()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIssue190(ParserType parserType)
         {
             var startingRule = $"root";
             var parserInstance = new Issue190parser();
             var builder = new ParserBuilder<Issue190Token, bool>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, startingRule);
+            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
             Check.That(builtParser.IsError).IsFalse();
             var parser = builtParser.Result;
             var parserResultNotTrue = parser.Parse("not true");
@@ -1549,10 +1641,12 @@ namespace ParserTests
             Check.That(parserResultTrue.Result).IsTrue();
         }
 
-        [Fact]
-        public void TestIssue193()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIssue193(ParserType parserType)
         {
-            var builtParser = BuildParser();
+            var builtParser = BuildParser(parserType);
             Check.That(builtParser.IsError).IsFalse();
             Check.That(builtParser.Result).IsNotNull();
             var parser = builtParser.Result;
@@ -1566,12 +1660,14 @@ namespace ParserTests
             Check.That(error.UnexpectedToken.IsEOS).IsTrue();
         }
         
-        [Fact]
-        public void TestIssue213()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIssue213(ParserType parserType)
         {
             var parserInstance = new DoNotIgnoreCommentsParser();
             var builder = new ParserBuilder<DoNotIgnoreCommentsToken, DoNotIgnore>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
+            var builtParser = builder.BuildParser(parserInstance, parserType, "main");
 
             Check.That(builtParser.IsOk).IsTrue();
             Check.That(builtParser.Result).IsNotNull();
@@ -1593,8 +1689,10 @@ namespace ParserTests
         }
 
 
-        [Fact]
-        public void TestIndentedParser()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIndentedParser(ParserType parserType)
         {
             var source =@"if truc == 1
     un = 1
@@ -1606,7 +1704,7 @@ else
 ";
             ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
             var instance = new IndentedParser();
-            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parserRes = builder.BuildParser(instance, parserType, "root");
             Check.That(parserRes.IsOk).IsTrue();
             
             var parser = parserRes.Result;
@@ -1630,8 +1728,10 @@ else
             Check.That(ifthenelse.Else.Statements).CountIs(2);
         }
         
-        [Fact]
-        public void TestIndentedParserNestedBlocks()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIndentedParserNestedBlocks(ParserType parserType)
         {
 
             var source =@"
@@ -1648,7 +1748,7 @@ final = 9999
 ";
             ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
             var instance = new IndentedParser();
-            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parserRes = builder.BuildParser(instance, parserType, "root");
             Check.That(parserRes.IsOk).IsTrue();
             var parser = parserRes.Result;
             Check.That(parser).IsNotNull();
@@ -1689,8 +1789,10 @@ final = 9999
             
         }
         
-        [Fact]
-        public void TestIndentedParserWithEolAwareness()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIndentedParserWithEolAwareness(ParserType parserType)
         {
             var source =@"// information
 if truc == 1
@@ -1703,7 +1805,7 @@ else
 ";
             ParserBuilder<IndentedLangLexer2, Ast> builder = new ParserBuilder<IndentedLangLexer2, Ast>();
             var instance = new IndentedParser2();
-            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parserRes = builder.BuildParser(instance, parserType, "root");
             Check.That(parserRes.IsOk).IsTrue();
             var parser = parserRes.Result;
             Check.That(parser).IsNotNull();
@@ -1728,8 +1830,10 @@ else
             Check.That(ifthenelse.Else.Statements).CountIs(2);
         }
         
-        [Fact]
-        public void TestIndentedParserWithEolAwareness2()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIndentedParserWithEolAwareness2(ParserType parserType)
         {
             var source =@"// information
 if truc == 1
@@ -1742,7 +1846,7 @@ else
 ";
             ParserBuilder<IndentedLangLexer2, Ast> builder = new ParserBuilder<IndentedLangLexer2, Ast>();
             var instance = new IndentedParser2();
-            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parserRes = builder.BuildParser(instance, parserType, "root");
             Check.That(parserRes.IsOk).IsTrue();
             var parser = parserRes.Result;
             Check.That(parser).IsNotNull();
@@ -1765,12 +1869,14 @@ else
             Check.That(ifthenelse.Else.Statements).CountIs(2);
         }
         
-        [Fact]
-        public void TestIssue213WithChannels()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestIssue213WithChannels(ParserType parserType)
         {
             var parserInstance = new DoNotIgnoreCommentsWithChannelsParser();
             var builder = new ParserBuilder<DoNotIgnoreCommentsTokenWithChannels, DoNotIgnore>();
-            var builtParser = builder.BuildParser(parserInstance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "main");
+            var builtParser = builder.BuildParser(parserInstance, parserType, "main");
             
             Check.That(builtParser.IsOk).IsTrue();
             Check.That(builtParser.Result).IsNotNull();
@@ -1852,8 +1958,10 @@ b");
 
         }
 
-        [Fact]
-        public void TestNotClosingIndents()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        [InlineData(ParserType.EBNF_LL_STACK)]
+        public void TestNotClosingIndents(ParserType parserType)
         {
             var source =@"
 if truc == 1
@@ -1861,7 +1969,7 @@ if truc == 1
     deux = 2";
             ParserBuilder<IndentedLangLexer, Ast> builder = new ParserBuilder<IndentedLangLexer, Ast>();
             var instance = new IndentedParser();
-            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parserRes = builder.BuildParser(instance, parserType, "root");
             Check.That(parserRes.IsOk).IsTrue();
             
             var parser = parserRes.Result;
@@ -1874,12 +1982,14 @@ if truc == 1
         }
 
 
-        [Fact]
-        public void TestRepeat()
+         [Theory]
+        [InlineData(ParserType.EBNF_LL_RECURSIVE_DESCENT)]
+        // [InlineData(ParserType.EBNF_LL_STACK)] -- repeat is not implemented for EBNF stack parser
+        public void TestRepeat(ParserType parserType)
         {
             ParserBuilder<BasicToken, string> builder = new ParserBuilder<BasicToken, string>();
             var instance = new RepeatParser();
-            var parserRes = builder.BuildParser(instance, ParserType.EBNF_LL_RECURSIVE_DESCENT, "root");
+            var parserRes = builder.BuildParser(instance, parserType, "root");
             Check.That(parserRes).IsOk();
             
             var parser = parserRes.Result;

@@ -9,7 +9,6 @@ namespace sly.parser.parser.llparser.ebnf.stackist.state;
 [DebuggerDisplay("{DebugString}")]
 public class InfixExpressionStackState<IN, OUT> : EbnfStackState<IN,OUT> where IN : struct, Enum
 {
-    public override string DebugString => $"expression  {Rule.Dump()} [{ExpressionState}]  @{Position}";
 
     public SyntaxParseResult<IN, OUT> Left;
     public SyntaxParseResult<IN, OUT> Operator;
