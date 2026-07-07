@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="csly.generator" Version="0.9.6" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    </ItemGroup>
+
+    <ItemGroup>
+<!--      <ProjectReference Include="..\samples\jsonparser\jsonparser.csproj" />-->
+      <ProjectReference Include="..\GeneratedExpressionParser\GeneratedExpressionParser.csproj" />
+      <ProjectReference Include="..\GeneratedJsonParser\GeneratedJsonParser.csproj" />
+      <ProjectReference Include="..\sly\sly.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="parsers\json\fluent\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="parsers\json\generator\GeneratedCslyJsonTokenGeneric.cs" />
+      <None Include="parsers\json\generator\GeneratedCslyJsonTokenGeneric.cs" />
+      <Compile Remove="parsers\json\generator\GeneratedEbnfJsonGenericParser.cs" />
+      <None Include="parsers\json\generator\GeneratedEbnfJsonGenericParser.cs" />
+      <Compile Remove="parsers\json\generator\TheJsonParserGenerator.cs" />
+      <None Include="parsers\json\generator\TheJsonParserGenerator.cs" />
+    </ItemGroup>
+
+</Project>
