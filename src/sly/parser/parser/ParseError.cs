@@ -47,7 +47,8 @@ namespace sly.parser
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(ErrorMessage);
-            var theLine = fullSource.GetLines()[line];
+            var lines = (fullSource ?? string.Empty).GetLines();
+            var theLine = line >= 0 && line < lines.Count ? lines[line] : string.Empty;
             var tab = " ".Multiply(line.ToString().Length);
             sb.Append(tab).AppendLine(" |");
             sb.Append(line).Append(" |").AppendLine(theLine);

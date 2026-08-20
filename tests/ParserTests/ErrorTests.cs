@@ -117,6 +117,24 @@ namespace ParserTests
         }
 
         [Fact]
+        public void TestContextualErrorWithEmptySource()
+        {
+            var jsonParser = new JSONParser();
+            var builder = new ParserBuilder<JsonToken, JSon>();
+            var parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
+
+            var exception = Record.Exception(() => parser.Parse(string.Empty));
+            Check.That(exception).IsNull();
+
+            var result = parser.Parse(string.Empty);
+            Check.That(result.IsError).IsTrue();
+            Check.That(result.Errors).IsNotNull();
+            Check.That(result.Errors).CountIs(1);
+            Check.That(result.Errors[0].ContextualErrorMessage).IsNotNull();
+            Check.That(result.Errors[0].ContextualErrorMessage.GetLines()).CountIs(4);
+        }
+
+        [Fact]
         public void TestLexicalError()
         {
             var exprParser = new ExpressionParser();
