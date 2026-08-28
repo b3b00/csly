@@ -131,7 +131,9 @@ namespace ParserTests
             Check.That(result.Errors).IsNotNull();
             Check.That(result.Errors).CountIs(1);
             Check.That(result.Errors[0].ContextualErrorMessage).IsNotNull();
-            Check.That(result.Errors[0].ContextualErrorMessage.GetLines()).CountIs(4);
+            Check.That(result.Errors[0].ContextualErrorMessage.GetLines()).CountIs(1);
+            var error =  result.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
         }
 
         [Fact]

@@ -45,6 +45,10 @@ namespace sly.parser
         
         protected string GetContextualMessage(string fullSource, int line, int column, string message)
         {
+            if (string.IsNullOrEmpty(fullSource))
+            {
+                return ErrorMessage;
+            }
             StringBuilder sb = new StringBuilder();
             sb.AppendLine(ErrorMessage);
             var lines = (fullSource ?? string.Empty).GetLines();
