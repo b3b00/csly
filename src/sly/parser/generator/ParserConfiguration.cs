@@ -23,6 +23,8 @@ namespace sly.parser.generator
 
         public bool BroadenTokenWindow { get; set; } = false;
         
+        public bool UseZeroAllocation { get; set; } = false;
+        
         public bool AutoCloseIndentations { get; set; } 
 
         public void AddNonTerminalIfNotExists(NonTerminal<IN, OUT> nonTerminal)

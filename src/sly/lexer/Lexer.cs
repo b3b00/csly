@@ -42,9 +42,9 @@ namespace sly.lexer
 
                 foreach (var rule in tokenDefinitions)
                 {
-                    var match = rule.Regex.Match(source.Substring(currentIndex));
+                    var match = rule.Regex.Match(source, currentIndex);
 
-                    if (match.Success && match.Index == 0)
+                    if (match.Success && match.Index == currentIndex)
                     {
                         matchedDefinition = rule;
                         matchLength = match.Length;
@@ -59,7 +59,7 @@ namespace sly.lexer
                     return result;
                 }
 
-                var value = source.Substring(currentIndex, matchLength);
+                var value = source.AsMemory(currentIndex, matchLength);
 
                 if (matchedDefinition.IsEndOfLine)
                 {

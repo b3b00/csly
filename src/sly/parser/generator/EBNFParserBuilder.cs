@@ -40,6 +40,8 @@ namespace sly.parser.generator
             
             bool broadenTokenWindow = parserInstance.GetType().GetCustomAttribute<BroadenTokenWindowAttribute>() != null;
 
+            bool useZeroAllocation = parserInstance.GetType().GetCustomAttribute<ZeroAllocationAttribute>() != null;
+
             bool autoCloseIndentations = parserInstance.GetType().GetCustomAttribute<AutoCloseIndentationsAttribute>() != null;
 
             var ruleparser = new RuleParser<IN, OUT>();
@@ -66,6 +68,7 @@ namespace sly.parser.generator
                 }
                 configuration.UseMemoization = useMemoization;
                 configuration.BroadenTokenWindow = broadenTokenWindow;
+                configuration.UseZeroAllocation = useZeroAllocation;
                 configuration.AutoCloseIndentations = autoCloseIndentations;
                 LeftRecursionChecker<IN, OUT> recursionChecker = new LeftRecursionChecker<IN, OUT>();
 

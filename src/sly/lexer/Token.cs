@@ -38,7 +38,7 @@ namespace sly.lexer
 
 
         public Token(T token, string value, LexerPosition position, 
-            CommentType commentType = CommentType.Single, int? channel = null, char decimalSeparator = '.' ) : this(token,new ReadOnlyMemory<char>(value.ToCharArray()),position,commentType,channel, decimalSeparator:decimalSeparator)
+            CommentType commentType = CommentType.Single, int? channel = null, char decimalSeparator = '.' ) : this(token,value.AsMemory(),position,commentType,channel, decimalSeparator:decimalSeparator)
 
 {
         }

@@ -5,7 +5,15 @@ namespace sly.lexer.fsm
 {
     public class FSMMatch<N>  where N : struct, Enum
     {
-        public Dictionary<string, object> Properties { get; }
+        private Dictionary<string, object> _properties;
+        public Dictionary<string, object> Properties => _properties ??= new Dictionary<string, object>();
+
+        private List<Token<N>> _ignoredTokens;
+        public List<Token<N>> IgnoredTokens
+        {
+            get => _ignoredTokens ??= new List<Token<N>>();
+            set => _ignoredTokens = value;
+        }
 
         public char StringDelimiterChar { get; set; }
         
@@ -42,21 +50,16 @@ namespace sly.lexer.fsm
 
         public bool IsIndentationError { get; set; }
         
-        public List<Token<N>> IgnoredTokens { get; set; }
-        
         public DateTime DateTimeValue { get; set; }
         
         public FSMMatch(bool success)
         {
-            IgnoredTokens = new List<Token<N>>();
             IsSuccess = success;
             IsEOS = !success;
         }
 
         protected FSMMatch()
         {
-            Properties = new Dictionary<string, object>();
-            IgnoredTokens = new List<Token<N>>();
         }
 
         public static FSMMatch<N> Indent(int level)
@@ -94,7 +97,6 @@ namespace sly.lexer.fsm
         public FSMMatch(bool success, N result, ReadOnlyMemory<char> value, LexerPosition position, int nodeId,
             LexerPosition newPosition, bool isLineEnding, bool isPop = false, bool isPush = false, string mode = null, char decimalSeparator = '.')
         {
-            Properties = new Dictionary<string, object>();
             IsSuccess = success;
             NodeId = nodeId;
             IsEOS = false;
@@ -110,7 +112,6 @@ namespace sly.lexer.fsm
             NewPosition.IsPop = isPop;
             IsPush = isPush;
             NewPosition.IsPush = isPush;
-            IgnoredTokens = new List<Token<N>>();
         }
         
         
