@@ -1075,11 +1075,7 @@ else
             Check.That(frParser).IsOk();
             var frParseResult = frParser.Result.Parse("1 + + 2");
 
-            Check.That(frParseResult).Not.IsOkParsing();
-            Check.That(frParseResult.Errors).IsSingle();
-            var frError = frParseResult.Errors[0];
-            Check.That(frError).IsNotNull();
-            Check.That(frError.ErrorMessage).Contains("plus inattendu");
+            Check.That(frParseResult).HasError(ErrorType.UnexpectedToken, "plus inattendu");
 
             // en
             var enBuilder = new ParserBuilder<ExpressionToken, int>("en");
@@ -1087,11 +1083,7 @@ else
             Check.That(enParser).IsOk();
             var enParseResult = enParser.Result.Parse("1 + + 2");
 
-            Check.That(enParseResult).Not.IsOkParsing();
-            Check.That(enParseResult.Errors).IsSingle();
-            var enError = enParseResult.Errors[0];
-            Check.That(enError).IsNotNull();
-            Check.That(enError.ErrorMessage).Contains("unexpected plus sign");
+            Check.That(enParseResult).HasError(ErrorType.UnexpectedToken, "unexpected plus sign");
         }
 
         [Fact]
