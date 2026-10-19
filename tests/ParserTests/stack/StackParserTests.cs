@@ -282,6 +282,7 @@ public class StackParserTests
     [Fact]
     public void TestEbnfOneOrMore()
     {
+        System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
         var ebnf = new SimpleEBNFMany();
         RuleParserType.ParserType = ParserType.LL_RECURSIVE_DESCENT;
         var parser = GetParser<L, string>(ebnf, ParserType.EBNF_LL_STACK, "rootplus");
@@ -298,11 +299,9 @@ public class StackParserTests
         result = parseResult.Result;
         Check.That(result).IsEqualTo("A");
         
+        System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
         parseResult = parser.Parse("   ");
-        Check.That(parseResult).Not.IsOkParsing();
-        Check.That(parseResult.Errors).CountIs(1);
-        var error = parseResult.Errors[0];
-        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+        Check.That(parseResult).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
     }
 
     [Fact]

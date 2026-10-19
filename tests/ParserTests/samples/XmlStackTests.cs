@@ -43,6 +43,7 @@ public class XmlStackTests
     [Fact]
     public void TestXmlParserWithLexerModesKo()
     {
+        System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
         ParserBuilder<MinimalXmlLexer, string> builder = new ParserBuilder<MinimalXmlLexer, string>();
         var xmlparser = new MinimalXmlParser();
         var r = builder.BuildParser(xmlparser, ParserType.EBNF_LL_STACK, "document");
@@ -58,9 +59,7 @@ public class XmlStackTests
         <innerinner name=""innerinner"">
             inner inner content        
 ");
-        Check.That(parsed).Not.IsOkParsing();
-        var error = parsed.Errors[0];
-        Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+        Check.That(parsed).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
     }
 
     [Fact]

@@ -57,6 +57,30 @@ namespace ParserTests
             return ExtensibilityHelper.BuildCheckLink(context);
         }
 
+        public static ICheckLink<ICheck<ParseResult<IN, OUT>>> HasError<IN, OUT>(this ICheck<ParseResult<IN, OUT>> context, ErrorType expectedErrorType, string expectedMessageNeedle) where IN : struct, Enum
+        {
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => !sut.IsError, "parse has not failed.")
+                .FailWhen(sut => sut.Errors == null || !sut.Errors.Any(), "parse has no error")
+                .FailWhen(sut => !sut.Errors.Exists(x => x.ErrorType == expectedErrorType && x.ErrorMessage.Contains(expectedMessageNeedle)), "error {expected} not found in {checked}")
+                .DefineExpectedValue($"{expectedErrorType} : >{expectedMessageNeedle}<")
+                .OnNegate("error {expected} found.")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
+
+        public static ICheckLink<ICheck<ParseResult<IN, OUT>>> HasError<IN, OUT>(this ICheck<ParseResult<IN, OUT>> context, int expectedLine, int expectedColumn, ErrorType expectedErrorType, string expectedMessageNeedle) where IN : struct, Enum
+        {
+            ExtensibilityHelper.BeginCheck(context)
+                .FailWhen(sut => !sut.IsError, "parse has not failed.")
+                .FailWhen(sut => sut.Errors == null || !sut.Errors.Any(), "parse has no error")
+                .FailWhen(sut => !sut.Errors.Exists(x => x.Line == expectedLine && x.Column == expectedColumn && x.ErrorType == expectedErrorType && x.ErrorMessage.Contains(expectedMessageNeedle)), "error {expected} not found in {checked}")
+                .DefineExpectedValue($"line {expectedLine}, col {expectedColumn} : {expectedErrorType} : >{expectedMessageNeedle}<")
+                .OnNegate("error {expected} found.")
+                .EndCheck();
+            return ExtensibilityHelper.BuildCheckLink(context);
+        }
+
         public static ICheckLink<ICheck<Token<T>>> IsEqualTo<T>(this ICheck<Token<T>> context, T expectedTokenId, string expectedValue) where T: struct, Enum
         {
             ExtensibilityHelper.BeginCheck(context)

@@ -398,12 +398,7 @@ skip");
 while true do
     skip
   skip");
-            Check.That(result.IsError).IsTrue();
-            Check.That(result.Errors).IsSingle();
-            var error = result.Errors.First();
-            Check.That(error.ErrorType).IsEqualTo(ErrorType.IndentationError);
-            Check.That(error.Line).IsEqualTo(4);
-            Check.That(error.ErrorMessage).Contains("Indentation error");
+            Check.That(result).HasError(ErrorType.IndentationError, "Indentation error");
             
             result = parser.Parse(@"
 # infinite loop
@@ -453,16 +448,15 @@ if true then
         [Fact]
         public void TestIssue413_incompleteProgram()
         {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             var buildResult = buildParser();
             var parser = buildResult.Result;
             var program = @"
 if 
 ";
             var result = parser.Parse(program);
-            Check.That(result).Not.IsOkParsing();
-            Check.That(result.Errors).CountIs(1);
+            Check.That(result).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
             var error = result.Errors.First();
-            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
             var unexpectedEosError = error as UnexpectedTokenSyntaxError<IndentedWhileTokenGeneric>;
             Check.That(unexpectedEosError).IsNotNull();
             Check.That(unexpectedEosError.ExpectedTokens.Extracting(x => x.TokenId)).IsEquivalentTo(
