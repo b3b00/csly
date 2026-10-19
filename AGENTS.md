@@ -137,7 +137,16 @@ CI enforces a **80% coverage threshold** on the main library (see `.github/workf
 - Test project: `tests/ParserTests`.
 - Framework: xUnit (`[Fact]`, `[Theory]`).
 - Assertions: prefer **NFluent** (`Check.That(...).IsEqualTo(...)`).
-- Use the custom check extensions in `tests/ParserTests/NFluentParseExtensions.cs` (`IsOkParsing`, `IsOkLexing`, `IsOk`, `HasError`, `IsEqualTo`, `IsSingle`, …) for legible assertions and better error reporting on parse/lex/build results.
+- Use the custom check extensions in `tests/ParserTests/NFluentParseExtensions.cs` for legible assertions and better error reporting:
+  - `IsOkParsing<IN,OUT>(checkIfResultisNull = true)` — asserts a `ParseResult` has no error and a non-null result (unless it is an epsilon syntax tree).
+  - `IsOkLexing<IN>()` — asserts a `LexerResult` is not null, has no error, and its `Tokens` collection is not null.
+  - `IsOk<T>()` — asserts a `BuildResult<T>` has no error and a non-null result.
+  - `HasError<T>(expectedErrorCode, expectedMessageNeedle)` — asserts a `BuildResult<T>` failed, has at least one error, and contains an error matching the given code and message needle.
+  - `HasError<IN, OUT>(expectedErrorType, expectedMessageNeedle)` — asserts a `ParseResult<IN, OUT>` failed, has at least one error, and contains an error matching the given `ErrorType` and message needle.
+  - `HasError<IN, OUT>(expectedLine, expectedColumn, expectedErrorType, expectedMessageNeedle)` — asserts a `ParseResult<IN, OUT>` failed with an error at the given line/column matching the given `ErrorType` and message needle.
+  - `IsEqualTo<T>(expectedTokenId, expectedValue)` — asserts a `Token<T>` has the given id and value.
+  - `IsEqualTo<T>(expectedTokenId, expectedValue, expectedLine, expectedColumn)` — asserts a `Token<T>` has the given id, value, line, and column.
+  - `IsSingle<T>()` — asserts an `IEnumerable<T>` contains exactly one element.
 - When fixing a bug or reproducing an issue, add a folder `tests/ParserTests/IssueNNN/` with a minimal reproduction and regression test(s), then register the test in the appropriate test class (e.g. `IssuesTests.cs` or a dedicated `*Tests.cs`).
 - Features must come with unit tests (per `CONTRIBUTE.md`).
 - Sample languages under `src/samples/` are referenced by the test project and double as integration tests.
