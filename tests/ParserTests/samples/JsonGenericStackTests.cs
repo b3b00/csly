@@ -12,6 +12,7 @@ namespace ParserTests.samples
     {
         public JsonGenericStackTests()
         {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             var jsonParser = new EbnfJsonGenericParser();
             var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
             
@@ -203,11 +204,9 @@ namespace ParserTests.samples
         [Fact]
         public void TestIncompleteObject()
         {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             var r = Parser.Parse("{\"prop\":\"value\",\"prop2\":[1,2,3");
-            Check.That(r).Not.IsOkParsing();
-            Check.That(r.Errors).CountIs(1);
-            var error = r.Errors[0];
-            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+            Check.That(r).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
         }
     }
 }

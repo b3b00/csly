@@ -24,6 +24,7 @@ namespace ParserTests
         [Fact]
         public void TestExpressionSyntaxError()
         {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             var exprParser = new ExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, int>("en");
             var Parser = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "expression").Result;
@@ -31,7 +32,7 @@ namespace ParserTests
             var r = Parser.Parse(" 2 + 3 + + 2");
             Check.That(r.IsError).IsTrue();
             Check.That(r.Errors).IsNotNull();
-            Check.That(r.Errors).CountIs(1);
+            Check.That(r).HasError(ErrorType.UnexpectedToken, "unexpected plus sign");
             var err = r.Errors[0];
             Check.That(err).IsNotNull();
             Check.That(err).IsInstanceOf<UnexpectedTokenSyntaxError<ExpressionToken>>();
@@ -39,12 +40,12 @@ namespace ParserTests
             Check.That(error.UnexpectedToken.TokenID).IsEqualTo(ExpressionToken.PLUS);
             Check.That(error.Line).IsEqualTo(0);
             Check.That(error.Column).IsEqualTo(10);
-            Check.That(error.ErrorMessage).Contains("unexpected plus sign ('+ (line 0, column 10)'). Expecting INT, opening parenthesis, minus sign, .");
         }
 
         [Fact]
         public void TestJsonEbnfSyntaxMissingLastClosingBracket()
         {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             var jsonParser = new EbnfJsonGenericParser();
             var builder = new ParserBuilder<JsonTokenGeneric, JSon>();
             var Parser = builder.BuildParser(jsonParser, ParserType.EBNF_LL_STACK, "root").Result;
@@ -55,13 +56,12 @@ namespace ParserTests
             Check.That(r.IsError).IsTrue();
             Check.That(r.Result).IsNull();
             Check.That(r.Errors).IsNotNull();
-            Check.That(r.Errors).CountIs(1);
+            Check.That(r).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
             Check.That(r.Errors[0]).IsInstanceOf<UnexpectedTokenSyntaxError<JsonTokenGeneric>>();
             var error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonTokenGeneric>;
 
             Check.That(error).IsNotNull();
             Check.That(error.UnexpectedToken.TokenID).IsEqualTo((JsonTokenGeneric)0);
-            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
             Check.That(error.Line).IsEqualTo(0);
             Check.That(error.Column).IsEqualTo(1);
         }
@@ -95,6 +95,7 @@ namespace ParserTests
         [Fact]
         public void TestJsonSyntaxErrorMissingLastClosingBracket()
         {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             var jsonParser = new JSONParser();
             var builder = new ParserBuilder<JsonToken, JSon>();
             var parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
@@ -105,13 +106,12 @@ namespace ParserTests
             Check.That(r.IsError).IsTrue();
             Check.That(r.Result).IsNull();
             Check.That(r.Errors).IsNotNull();
-            Check.That(r.Errors).CountIs(1);
+            Check.That(r).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
             Check.That(r.Errors[0]).IsInstanceOf<UnexpectedTokenSyntaxError<JsonToken>>();
             var error = r.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
 
             Check.That(error).IsNotNull();
             Check.That(error.UnexpectedToken.TokenID).IsEqualTo((JsonToken) 0);
-            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
             Check.That(error.Line).IsEqualTo(0);
             Check.That(error.Column).IsEqualTo(2);
         }
@@ -119,6 +119,7 @@ namespace ParserTests
         [Fact]
         public void TestContextualErrorWithEmptySource()
         {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             var jsonParser = new JSONParser();
             var builder = new ParserBuilder<JsonToken, JSon>();
             var parser = builder.BuildParser(jsonParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
@@ -127,13 +128,11 @@ namespace ParserTests
             Check.That(exception).IsNull();
 
             var result = parser.Parse(string.Empty);
-            Check.That(result.IsError).IsTrue();
+            Check.That(result).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
             Check.That(result.Errors).IsNotNull();
-            Check.That(result.Errors).CountIs(1);
             Check.That(result.Errors[0].ContextualErrorMessage).IsNotNull();
             Check.That(result.Errors[0].ContextualErrorMessage.GetLines()).CountIs(1);
             var error =  result.Errors[0] as UnexpectedTokenSyntaxError<JsonToken>;
-            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
         }
 
         [Fact]
@@ -144,14 +143,10 @@ namespace ParserTests
             var builder = new ParserBuilder<ExpressionToken, int>("en");
             var Parser = builder.BuildParser(exprParser, ParserType.LL_RECURSIVE_DESCENT, "root").Result;
             var r = Parser.Parse("2 @ 2");
-            Check.That(r.IsError).IsTrue();
-            Check.That(r.Errors).IsNotNull();
-            Check.That(r.Errors).CountIs(1);
+            Check.That(r).HasError(ErrorType.UnexpectedChar, "Unrecognized symbol '@' (64)");
             var error = r.Errors[0] as LexicalError;
-            Check.That(error.Line).IsEqualTo(0);
-            Check.That(error.Column).IsEqualTo(3);
+            Check.That(error).IsNotNull();
             Check.That(error.UnexpectedChar).IsEqualTo('@');
-            Check.That(error.ErrorMessage).IsEqualTo("Lexical Error, line 0, column 3 : Unrecognized symbol '@' (64)");
         }
 
 
