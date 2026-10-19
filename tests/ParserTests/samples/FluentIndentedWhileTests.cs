@@ -398,7 +398,12 @@ skip");
 while true do
     skip
   skip");
-            Check.That(result).HasError(ErrorType.IndentationError, "Indentation error");
+            Check.That(result.IsError).IsTrue();
+            Check.That(result.Errors).IsSingle();
+            var error = result.Errors.First();
+            Check.That(error.ErrorType).IsEqualTo(ErrorType.IndentationError);
+            Check.That(error.Line).IsEqualTo(4);
+            Check.That(error.ErrorMessage).Contains("Indentation error");
             
             result = parser.Parse(@"
 # infinite loop
