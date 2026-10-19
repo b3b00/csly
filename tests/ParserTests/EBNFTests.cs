@@ -1533,18 +1533,26 @@ namespace ParserTests
         [InlineData(ParserType.EBNF_LL_STACK)]
         public void TestAlternateChoiceOptionDiscardedTerminal(ParserType parserType)
         {
-            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
-            var startingRule = $"choice";
-            var parserInstance = new AlternateChoiceTestOptionDiscardedTerminal();
-            var builder = new ParserBuilder<OptionTestToken, string>();
-            var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
-            Check.That(builtParser.IsError).IsFalse();
-            Check.That(builtParser.Errors).IsEmpty();
-            var parseResult = builtParser.Result.Parse("a b", "choice");
-            Check.That(parseResult.IsOk).IsTrue();
-            Check.That(parseResult.Result).IsEqualTo("a");
-            parseResult = builtParser.Result.Parse("a", "choice");
-            Check.That(parseResult).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
+            var originalCulture = System.Globalization.CultureInfo.CurrentCulture;
+            try
+            {
+                System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
+                var startingRule = $"choice";
+                var parserInstance = new AlternateChoiceTestOptionDiscardedTerminal();
+                var builder = new ParserBuilder<OptionTestToken, string>();
+                var builtParser = builder.BuildParser(parserInstance, parserType, startingRule);
+                Check.That(builtParser.IsError).IsFalse();
+                Check.That(builtParser.Errors).IsEmpty();
+                var parseResult = builtParser.Result.Parse("a b", "choice");
+                Check.That(parseResult.IsOk).IsTrue();
+                Check.That(parseResult.Result).IsEqualTo("a");
+                parseResult = builtParser.Result.Parse("a", "choice");
+                Check.That(parseResult).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
+            }
+            finally
+            {
+                System.Globalization.CultureInfo.CurrentCulture = originalCulture;
+            }
         }
 
         [Theory]
