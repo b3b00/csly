@@ -10,6 +10,7 @@ namespace ParserTests
     {
         public ExpressionTests()
         {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             var parserInstance = new ExpressionParser();
             var builder = new ParserBuilder<ExpressionToken, int>();
             RecursiveParser = builder.BuildParser(parserInstance, ParserType.LL_RECURSIVE_DESCENT, "expression").Result;
@@ -174,10 +175,7 @@ namespace ParserTests
             Check.That(r).IsOkParsing();
             
             r = RecursiveParser.Parse("1 + 1 + ");
-            Check.That(r).Not.IsOkParsing();
-            Check.That(r.Errors).CountIs(1);
-            var error = r.Errors[0];
-            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+            Check.That(r).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
         }
         
         [Fact]
@@ -187,10 +185,7 @@ namespace ParserTests
             Check.That(r).IsOkParsing();
             
             r = RecursiveParser.Parse("1 + 1 + ");
-            Check.That(r).Not.IsOkParsing();
-            Check.That(r.Errors).CountIs(1);
-            var error = r.Errors[0];
-            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+            Check.That(r).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
         }
     }
 }

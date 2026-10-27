@@ -1533,6 +1533,7 @@ namespace ParserTests
         [InlineData(ParserType.EBNF_LL_STACK)]
         public void TestAlternateChoiceOptionDiscardedTerminal(ParserType parserType)
         {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             var startingRule = $"choice";
             var parserInstance = new AlternateChoiceTestOptionDiscardedTerminal();
             var builder = new ParserBuilder<OptionTestToken, string>();
@@ -1543,9 +1544,7 @@ namespace ParserTests
             Check.That(parseResult.IsOk).IsTrue();
             Check.That(parseResult.Result).IsEqualTo("a");
             parseResult = builtParser.Result.Parse("a", "choice");
-            Check.That(parseResult.IsError).IsTrue();
-            Check.That(parseResult.Errors).CountIs(1);
-            Check.That(parseResult.Errors[0].ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+            Check.That(parseResult).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
         }
 
         [Theory]
@@ -1963,6 +1962,7 @@ b");
         [InlineData(ParserType.EBNF_LL_STACK)]
         public void TestNotClosingIndents(ParserType parserType)
         {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             var source =@"
 if truc == 1
     un = 1
@@ -1975,10 +1975,7 @@ if truc == 1
             var parser = parserRes.Result;
             Check.That(parser).IsNotNull();
             var parseResult = parser.Parse(source);
-            Check.That(parseResult.IsOk).Not.IsTrue();
-            Check.That(parseResult.Errors).CountIs(1);
-            var error = parseResult.Errors[0];
-            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedEOS);
+            Check.That(parseResult).HasError(ErrorType.UnexpectedEOS, "unexpected end of stream");
         }
 
 
@@ -1987,6 +1984,7 @@ if truc == 1
         // [InlineData(ParserType.EBNF_LL_STACK)] -- repeat is not implemented for EBNF stack parser
         public void TestRepeat(ParserType parserType)
         {
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             ParserBuilder<BasicToken, string> builder = new ParserBuilder<BasicToken, string>();
             var instance = new RepeatParser();
             var parserRes = builder.BuildParser(instance, parserType, "root");
@@ -2000,13 +1998,12 @@ if truc == 1
             parseResult = parser.Parse(".");
             Check.That(parseResult).IsOkParsing();
             Check.That(parseResult.Result).IsEqualTo("");
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("en");
             parseResult = parser.Parse("a1b2c3d4e5f6g7");
-            Check.That(parseResult).Not.IsOkParsing();
-            Check.That(parseResult.Errors).CountIs(1);
+            Check.That(parseResult).HasError(ErrorType.UnexpectedToken, "unexpected ID");
             var error = parseResult.Errors[0] as UnexpectedTokenSyntaxError<BasicToken>;
             Check.That(error).IsNotNull();
-            Check.That(error.ErrorType).IsEqualTo(ErrorType.UnexpectedToken);
-            
+
             Check.That(error.UnexpectedToken.TokenID).IsEqualTo(BasicToken.ID);
             Check.That(error.UnexpectedToken.Value).IsEqualTo("g");
             
