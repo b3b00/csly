@@ -111,21 +111,15 @@ namespace sly.parser.llparser.bnf
             {
                 result = new SyntaxParseResult<IN, OUT>();
 
-                if (errors.Count > 0)
-                {
-                    var lastErrorPosition = errors
-                        .Select(e => e.UnexpectedToken.PositionInTokenFlow)
-                        .Max();
-                    var lastErrors = errors
-                        .Where(e =>
-                            e.UnexpectedToken.PositionInTokenFlow == lastErrorPosition)
-                        .ToList();
-                    result.AddErrors(lastErrors);
-                }
-                else
-                {
-                    result.AddErrors(errors);
-                }
+                var lastErrorPosition = errors
+                    .Select(e => e.UnexpectedToken.PositionInTokenFlow)
+                    .Max();
+                var lastErrors = errors
+                    .Where(e =>
+                        e.UnexpectedToken.PositionInTokenFlow == lastErrorPosition)
+                    .ToList();
+                result.AddErrors(lastErrors);
+
 
                 result.IsError = true;
             }
