@@ -79,34 +79,10 @@ namespace sly.lexer
         }
         
         
-        public List<Token<T>> NextTokens(int channelId)
-        {
-            TokenChannel<T> channel = null;
-            if (TokenChannels.TryGet(channelId, out channel))
-            {
-                var list = new List<Token<T>>();
-                int position = PositionInTokenFlow + 1;
-                if (position >= 0 && position <= channel.Count - 1)
-                {
-                    
-                    for (int i = position; position < channel.Count; position++)
-                    {
-                        var token = channel[position];
-                        if (token != null)
-                        {
-                            list.Add(token);
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                return list;
-            }
-            return new List<Token<T>>();
-        }
+        
+        
+        public List<Token<T>> NextTokens(int channelId) => TokenChannels.GetNext(this, channelId);
+        
         
         public Token<T> Next(int channelId)
         {

@@ -163,5 +163,20 @@ namespace sly.lexer
 
             return null;
         }
+        
+        public List<Token<IN>> GetNext(Token<IN> token, int channelId)
+        {
+            var next = _allTokens
+                .Skip(token.PositionInTokenFlow+1)
+                .Where(x => x.Channel != Channels.WhiteSpaces)
+                .ToList();
+            if (next.Any())
+            {
+                var nexts = next.TakeWhile(x => x.Channel == channelId);
+                return nexts.ToList();
+            }
+
+            return null;
+        }
     }
 }

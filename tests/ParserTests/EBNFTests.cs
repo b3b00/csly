@@ -166,7 +166,7 @@ namespace ParserTests
            
             
             // previous tokens may not be a comment so we have to check if not null
-            if (commentTokens.Any())
+            if (commentTokens != null && commentTokens.Any())
             {
                 var nextComments = commentTokens
                     .Where(x => x.TokenID == DoNotIgnoreCommentsTokenWithChannels.MULTILINECOMMENT ||
@@ -1955,7 +1955,7 @@ b");
             Check.That(test.Result).IsInstanceOf<IdentifierList>();
             list = test.Result as IdentifierList;
             Check.That(list.Ids).CountIs(2);
-            Check.That(list.Ids[0].IsCommented).IsFalse();
+            Check.That(list.Ids[0].IsCommented).IsTrue();
             Check.That(list.Ids[0].Name).IsEqualTo("a");
             Check.That(list.Ids[1].IsCommented).IsTrue();
             Check.That(list.Ids[1].Name).IsEqualTo("b");
