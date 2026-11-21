@@ -39,6 +39,10 @@ namespace sly.lexer
 
         public TokenChannels(List<Token<IN>> allTokens) : this()
         {
+            if (typeof(IN).Name == "RulesToken")
+            {
+                ;
+            }
             _allTokens = allTokens;
             int i = 0;
             foreach (var token in allTokens)
@@ -74,6 +78,10 @@ namespace sly.lexer
 
         public void Add(Token<IN> token)
         {
+            if (typeof(IN).Name == "RulesToken")
+            {
+                ;
+            }
             token.TokenChannels = this;
             TokenChannel<IN> channel = null;
             var mx = _tokenChannels?.Values != null && _tokenChannels.Values.Any() ?  _tokenChannels.Values.Max(x => x.Count) : 0;
@@ -137,6 +145,23 @@ namespace sly.lexer
             {
                 channel.Value.PreCompute();
             }
+        }
+
+        public List<Token<IN>> GetPrevious(Token<IN> token, int channelId)
+        {
+            var previous = _allTokens
+                .Take(token.PositionInTokenFlow)
+                .Where(x => x.Channel != Channels.WhiteSpaces)
+                .ToList();
+            if (previous.Any())
+            {
+                previous.Reverse();
+                var prevs = previous.TakeWhile(x => x.Channel == channelId);
+                prevs = prevs.Reverse().ToList();
+                return prevs.ToList();
+            }
+
+            return null;
         }
     }
 }

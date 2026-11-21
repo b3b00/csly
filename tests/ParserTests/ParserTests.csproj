@@ -33,6 +33,7 @@
     <ProjectReference Include="..\..\src\samples\SlowEOS\SlowEOS.csproj"/>
     <ProjectReference Include="..\..\src\samples\while\while.csproj"/>
     <ProjectReference Include="..\..\src\samples\XML\XML.csproj"/>
+    <ProjectReference Include="..\..\src\samples\rules\rules.csproj"/>
     <ProjectReference Include="..\..\src\sly\sly.csproj"/>
   </ItemGroup>
   <ItemGroup>

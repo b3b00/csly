@@ -149,12 +149,11 @@ namespace ParserTests
             
             string comment = "";
             // previous tokens may not be a comment so we have to check if not null
-            if (commentTokens.Any())
+            if (commentTokens != null && commentTokens.Any())
             {
                 var previousComments = commentTokens
                     .Where(x => x.TokenID == DoNotIgnoreCommentsTokenWithChannels.MULTILINECOMMENT ||
                                 x.TokenID == DoNotIgnoreCommentsTokenWithChannels.SINGLELINECOMMENT)
-                    .Reverse()
                     .Select(x => x.Value.Trim());
                 
                 if (previousComments.Any())

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace sly.lexer
@@ -122,48 +123,17 @@ namespace sly.lexer
             return null;
         }
 
-        public List<Token<T>> PreviousTokens(int channelId)
+        public List<Token<T>> GetPreviousTokens(int channelId)
         {
-            TokenChannel<T> channel = null;
-            if (TokenChannels.TryGet(channelId, out channel))
-            {
-                var list = new List<Token<T>>();
-                int position = PositionInTokenFlow - 1;
-                if (position >= 0 && position <= channel.Count - 1)
-                {
-                    
-                    for (int i = position; position >= 0; position--)
-                    {
-                        var token = channel[position];
-                        if (token != null)
-                        {
-                            list.Add(token);
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                return list;
-            }
-            return new List<Token<T>>();
+             return TokenChannels.GetPrevious(this, channelId);
         }
+
+        public List<Token<T>> PreviousTokens(int channelId) => GetPreviousTokens(channelId);
         
         public Token<T> Previous(int channelId)
         {
-            TokenChannel<T> channel = null;
-             
-            if (TokenChannels.TryGet(channelId, out channel))
-            {
-                int position = PositionInTokenFlow - 1;
-                if (position >= 0 && position <= channel.Count - 1) 
-                {
-                    return channel[position];
-                }
-            }
-            return null;
+            var previousRokens = GetPreviousTokens(channelId);
+            return previousRokens != null && previousRokens.Any() ? previousRokens.Last() : null;
         }
 
         public int Channel {get; set;} = 0;
