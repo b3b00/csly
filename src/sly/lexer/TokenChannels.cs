@@ -39,10 +39,6 @@ namespace sly.lexer
 
         public TokenChannels(List<Token<IN>> allTokens) : this()
         {
-            if (typeof(IN).Name == "RulesToken")
-            {
-                ;
-            }
             _allTokens = allTokens;
             int i = 0;
             foreach (var token in allTokens)
@@ -78,10 +74,6 @@ namespace sly.lexer
 
         public void Add(Token<IN> token)
         {
-            if (typeof(IN).Name == "RulesToken")
-            {
-                ;
-            }
             token.TokenChannels = this;
             TokenChannel<IN> channel = null;
             var mx = _tokenChannels?.Values != null && _tokenChannels.Values.Any() ?  _tokenChannels.Values.Max(x => x.Count) : 0;
