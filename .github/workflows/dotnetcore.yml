@@ -14,6 +14,8 @@ on:
 permissions:
   pull-requests: write
   checks: write
+  contents: read
+  id-token: write
 jobs:
   build:
     env:
