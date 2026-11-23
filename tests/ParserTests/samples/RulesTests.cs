@@ -1,6 +1,4 @@
 ﻿using NFluent;
-using SimpleTemplate;
-using SimpleTemplate.model;
 using sly.parser;
 using sly.parser.generator;
 using Xunit;
