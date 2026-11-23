@@ -109,7 +109,7 @@ namespace sly.lexer
         public Token<T> Previous(int channelId)
         {
             var previousRokens = GetPreviousTokens(channelId);
-            return previousRokens != null && previousRokens.Any() ? previousRokens.Last() : null;
+            return previousRokens != null && previousRokens.Any() ? previousRokens[^1] : null;
         }
 
         public int Channel {get; set;} = 0;
