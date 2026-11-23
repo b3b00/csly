@@ -3,106 +3,115 @@ name: Build
 on:
   workflow_dispatch:
   push:
-    branches: 
+    branches:
       - dev
-      - tech/actions 
+      - tech/actions
       - master
       - feature/implicit-tokens
   pull_request:
-    branches: 
+    branches:
       - dev
 permissions:
   pull-requests: write
   checks: write
-jobs:  
+jobs:
   build:
     env:
-      TESTS_PROJECT: 'tests/ParserTests/ParserTests.csproj' # path to test project or solution
+      TESTS_PROJECT: "tests/ParserTests/ParserTests.csproj" # path to test project or solution
       PUBLISH_NUGET: true # if true a nuget will be published on version change
       RUN_TESTS: true # if true tests are run and coverage data is published to coveralls and a coverage report is produced.
-      MAIN_CSPROJ: 'src/sly/sly.csproj' # main project (for nuget packaging)
+      MAIN_CSPROJ: "src/sly/sly.csproj" # main project (for nuget packaging)
     runs-on: ${{ matrix.os }}
     strategy:
-        matrix:
-          os: [ubuntu-latest]
+      matrix:
+        os: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 8.0.x
-    - name: Clean artifacts and nugets 
-      run: dotnet clean  --configuration Release && dotnet nuget locals all --clear
-    - name: Build with dotnet
-      run: dotnet build --configuration Release
-    - name: Test with dotnet
-      uses: b3b00/coverlet-action@d4de331462c1706fd9f07b4b2a565f256fd95a23
-      id: 'coverlet'
-      if: env.RUN_TESTS
-      with:
-        testProject: ${{env.TESTS_PROJECT}}
-        output: 'lcov.net8.0.info'
-        threshold: 80
-        outputFormat: 'lcov'
-        excludes: '[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*,[postProcessedLexerParser]*,[XML]*,[SimpleTemplate]*,[SlowEOS]*'
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action@3a74b2957438d0b6e2e61d67b05318aa25c9e6c6
-      if: always()
-      with:
-        files: |
-          **/*.trx
-    - name: coveralls
-      uses: coverallsapp/github-action@v1.1.1
-      if: matrix.os == 'ubuntu-latest' && env.RUN_TESTS
-      with:
-        fail-on-error: false
-        github-token: ${{secrets.GITHUB_TOKEN }}
-        path-to-lcov: ${{steps.coverlet.outputs.coverageFile}}
-        #base-path: ${{github.workspace}}
-    - name: publish nuget
-      if:  ${{success() && matrix.os == 'ubuntu-latest' && env.PUBLISH_NUGET}}
-      id: publish_nuget
-      uses: alirezanet/publish-nuget@v3.0.0
-      with:
-          VERSION_REGEX: <version>(.*)<\/version>  
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 8.0.x
+      - name: Clean artifacts and nugets
+        run: dotnet clean  --configuration Release && dotnet nuget locals all --clear
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+      - name: Test with dotnet
+        uses: b3b00/coverlet-action@d4de331462c1706fd9f07b4b2a565f256fd95a23
+        id: "coverlet"
+        if: env.RUN_TESTS
+        with:
+          testProject: ${{env.TESTS_PROJECT}}
+          output: "lcov.net8.0.info"
+          threshold: 80
+          outputFormat: "lcov"
+          excludes: "[program]*,[expressionParser]*,[jsonparser]*,[while]*,[indentedWhile]*,[SimpleExpressionParser]*,[GenericLexerWithCallbacks]*,[indented]*,[postProcessedLexerParser]*,[XML]*,[SimpleTemplate]*,[SlowEOS]*"
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@3a74b2957438d0b6e2e61d67b05318aa25c9e6c6
+        if: always()
+        with:
+          files: |
+            **/*.trx
+      - name: coveralls
+        uses: coverallsapp/github-action@v1.1.1
+        if: matrix.os == 'ubuntu-latest' && env.RUN_TESTS
+        with:
+          fail-on-error: false
+          github-token: ${{secrets.GITHUB_TOKEN }}
+          path-to-lcov: ${{steps.coverlet.outputs.coverageFile}}
+          #base-path: ${{github.workspace}}
+
+        # Get a short-lived NuGet API key
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      # Push the package
+      - name: publish nuget
+        if: ${{success() && matrix.os == 'ubuntu-latest' && env.PUBLISH_NUGET}}
+        id: publish_nuget
+        uses: alirezanet/publish-nuget@v3.0.0
+        with:
+          VERSION_REGEX: <version>(.*)<\/version>
           PROJECT_FILE_PATH: ${{env.MAIN_CSPROJ}}
-          NUGET_KEY: ${{secrets.NUGET_KEY}}
+          NUGET_KEY: ${{steps.login.outputs.NUGET_API_KEY}}
           VERSION_FILE_PATH: ${{env.MAIN_CSPROJ}}
           INCLUDE_SYMBOLS: true
-    - name: Create Release
-      if: ${{ success() && matrix.os == 'ubuntu-latest' && steps.publish_nuget.outputs.VERSION != ''  && steps.publish_nuget.outputs.VERSION != null }}
-      id: create_release
-      uses: b3b00/create-release@1.0.7
-      env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
-      with:
-        tag_name: ${{ steps.publish_nuget.outputs.VERSION }}
-        release_name: Release ${{ steps.publish_nuget.outputs.VERSION }}
-        draft: false
-        prerelease: false
-        failsOnCreationError: false   
-    - name: Upload Release nuget Asset
-      if: ${{ success() && matrix.os == 'ubuntu-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
-      id: upload-release-nuget-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.publish_nuget.outputs.PACKAGE_PATH }}
-        asset_name: ${{ steps.publish_nuget.outputs.PACKAGE_NAME }}
-        asset_content_type: application/zip
-    - name: Upload Release symbols nuget Asset
-      if: ${{ success() && matrix.os == 'ubuntu-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
-      id: upload-release-nuget-symbols-asset 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.publish_nuget.outputs.SYMBOLS_PACKAGE_PATH }}
-        asset_name: ${{ steps.publish_nuget.outputs.SYMBOLS_PACKAGE_NAME }}
-        asset_content_type: application/zip
+      - name: Create Release
+        if: ${{ success() && matrix.os == 'ubuntu-latest' && steps.publish_nuget.outputs.VERSION != ''  && steps.publish_nuget.outputs.VERSION != null }}
+        id: create_release
+        uses: b3b00/create-release@1.0.7
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
+        with:
+          tag_name: ${{ steps.publish_nuget.outputs.VERSION }}
+          release_name: Release ${{ steps.publish_nuget.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          failsOnCreationError: false
+      - name: Upload Release nuget Asset
+        if: ${{ success() && matrix.os == 'ubuntu-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
+        id: upload-release-nuget-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.publish_nuget.outputs.PACKAGE_PATH }}
+          asset_name: ${{ steps.publish_nuget.outputs.PACKAGE_NAME }}
+          asset_content_type: application/zip
+      - name: Upload Release symbols nuget Asset
+        if: ${{ success() && matrix.os == 'ubuntu-latest' && steps.create_release.outputs.upload_url != ''  && steps.create_release.outputs.upload_url != null }}
+        id: upload-release-nuget-symbols-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.publish_nuget.outputs.SYMBOLS_PACKAGE_PATH }}
+          asset_name: ${{ steps.publish_nuget.outputs.SYMBOLS_PACKAGE_NAME }}
+          asset_content_type: application/zip
 #    - name: Invoke refresh readme badges
 #      uses: benc-uk/workflow-dispatch@v1
 #      with:
